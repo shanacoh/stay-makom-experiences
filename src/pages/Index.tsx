@@ -118,7 +118,7 @@ CHOOSE YOUR ESCAPE</h2>
               <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
                 DESERT MADNESS
               </p>
-              <h3 className="font-sans text-4xl md:text-6xl font-bold tracking-[-0.02em]">
+              <h3 className="font-sans text-4xl font-bold tracking-[-0.02em] md:text-3xl">
                 40° of internal peace
               </h3>
               <p className="text-lg text-muted-foreground">
