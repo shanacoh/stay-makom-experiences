@@ -57,17 +57,16 @@ const Header = () => {
           <span className={`font-sans text-2xl font-bold tracking-[-0.04em] uppercase ${logoClasses}`}>STAYMAKOM</span>
         </Link>
         
-        <nav className="hidden md:flex items-center space-x-6">
+        <div className="flex-1"></div>
+
+        <div className="flex items-center space-x-3">
           <Button 
             variant="outline" 
             size="sm" 
-            className={`${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+            className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
           >
             Become a Partner
           </Button>
-        </nav>
-
-        <div className="flex items-center space-x-3">
           <div className="hidden md:flex items-center space-x-2">
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
