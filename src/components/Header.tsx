@@ -38,8 +38,8 @@ const Header = () => {
   }, [isHomePage]);
 
   const headerClasses = isHomePage && !isScrolled
-    ? "sticky top-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200"
-    : "sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200";
+    ? "fixed top-0 left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200"
+    : "fixed top-0 left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200";
 
   const textClasses = isHomePage && !isScrolled
     ? "text-white"
