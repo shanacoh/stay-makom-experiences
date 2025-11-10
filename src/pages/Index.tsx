@@ -43,15 +43,17 @@ const Index = () => {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[600px] md:h-[700px] flex items-center justify-center">
+        <section className="relative h-[600px] md:h-[700px] flex items-end">
           <div className="absolute inset-0 bg-cover bg-center" style={{
           backgroundImage: `url(${heroImage})`
         }} />
           <div className="absolute inset-0 bg-black/30" />
           
-          <div className="relative z-10 container text-center text-white px-4">
-            <h1 className="font-sans text-4xl md:text-6xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              More than a stay, it's a{" "}
+          <div className="relative z-10 container text-left text-white px-4 pb-12 md:pb-16">
+            <h1 className="font-sans text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-3xl">
+              More than a stay,
+              <br />
+              it's a{" "}
               <RotatingText 
                 words={categories?.map(cat => cat.name) || ["Romance", "Adventure", "Family"]} 
                 interval={2500}
