@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Upload, X, Loader2, Pencil, Trash2 } from "lucide-react";
 import { z } from "zod";
 
 const categorySchema = z.object({
@@ -39,6 +39,9 @@ const Admin = () => {
     bullet3: "",
     status: "draft" as "draft" | "published",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["admin-categories"],
@@ -128,6 +131,38 @@ const Admin = () => {
       bullet3: "",
       status: "draft",
     });
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5242880) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('category-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('category-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
   };
 
   const handleEdit = (category: any) => {
@@ -142,14 +177,37 @@ const Admin = () => {
       bullet3: category.bullets?.[2] || "",
       status: category.status,
     });
+    setImagePreview(category.hero_image || null);
+    setImageFile(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingCategory) {
-      updateMutation.mutate({ id: editingCategory.id, data: formData });
-    } else {
-      createMutation.mutate(formData);
+    
+    try {
+      setUploading(true);
+      
+      let heroImageUrl = formData.hero_image;
+      
+      // Upload new image if one was selected
+      if (imageFile) {
+        heroImageUrl = await uploadImage(imageFile);
+      }
+      
+      const dataToSubmit = {
+        ...formData,
+        hero_image: heroImageUrl,
+      };
+      
+      if (editingCategory) {
+        updateMutation.mutate({ id: editingCategory.id, data: dataToSubmit });
+      } else {
+        createMutation.mutate(dataToSubmit);
+      }
+    } catch (error) {
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -212,14 +270,53 @@ const Admin = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="hero">Hero Image URL</Label>
-                    <Input
-                      id="hero"
-                      type="url"
-                      value={formData.hero_image}
-                      onChange={(e) => setFormData({ ...formData, hero_image: e.target.value })}
-                      placeholder="https://..."
-                    />
+                    <Label htmlFor="hero">Hero Image</Label>
+                    <div className="space-y-4">
+                      {imagePreview && (
+                        <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                          <img 
+                            src={imagePreview} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreview(null);
+                              setFormData({ ...formData, hero_image: "" });
+                            }}
+                            className="absolute top-2 right-2 p-1 bg-background/80 rounded-full hover:bg-background"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-4">
+                        <Input
+                          id="hero"
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          onChange={handleImageSelect}
+                          className="hidden"
+                        />
+                        <Label
+                          htmlFor="hero"
+                          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90"
+                        >
+                          <Upload className="h-4 w-4" />
+                          {imageFile ? "Change Image" : "Upload Image"}
+                        </Label>
+                        {imageFile && (
+                          <span className="text-sm text-muted-foreground">
+                            {imageFile.name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Max size: 5MB. Formats: JPG, PNG, WebP
+                      </p>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -258,8 +355,15 @@ const Admin = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button type="submit">
-                      {editingCategory ? "Update" : "Create"} Category
+                    <Button type="submit" disabled={uploading}>
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        `${editingCategory ? "Update" : "Create"} Category`
+                      )}
                     </Button>
                     {editingCategory && (
                       <Button
