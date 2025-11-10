@@ -9,7 +9,10 @@ import { useState, useEffect } from "react";
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return location.pathname !== "/" || window.scrollY > 80;
+  });
   const {
     user,
     role,
