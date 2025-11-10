@@ -23,7 +23,7 @@ const Header = () => {
   return <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-soft">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="font-serif text-2xl text-primary font-bold">STAYMAKOM</span>
+          <span className="font-sans text-2xl text-logo font-bold tracking-[-0.04em]">STAYMAKOM</span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">

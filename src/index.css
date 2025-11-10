@@ -37,6 +37,8 @@ All colors MUST be HSL.
     --input: 32 20% 88%;
     --ring: 186 45% 38%;
 
+    --logo: 0 100% 40%;
+
     --radius: 0.75rem;
 
     /* Custom tokens */
@@ -78,6 +80,8 @@ All colors MUST be HSL.
     --border: 200 15% 20%;
     --input: 200 15% 20%;
     --ring: 186 55% 55%;
+
+    --logo: 0 100% 40%;
 
     --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
     --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
