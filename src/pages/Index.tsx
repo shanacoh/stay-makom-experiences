@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
-import heroImage from "@/assets/hero-image.jpg";
+import heroImage from "@/assets/hero-image-new.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
 import familyImg from "@/assets/family-category.jpg";
 import goldenAgeImg from "@/assets/golden-age-category.jpg";
