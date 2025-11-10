@@ -42,8 +42,8 @@ const Header = () => {
   }, [isHomePage]);
 
   const headerClasses = isHomePage && !isScrolled
-    ? "sticky top-0 z-50 w-full bg-transparent border-b border-transparent transition-all duration-200"
-    : "sticky top-0 z-50 w-full bg-background border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200";
+    ? "sticky top-0 z-50 w-full bg-transparent backdrop-blur-none border-b border-transparent transition-all duration-200"
+    : "sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200";
 
   const textClasses = isHomePage && !isScrolled
     ? "text-white"
