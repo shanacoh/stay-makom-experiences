@@ -35,7 +35,7 @@ const RotatingText = ({ words, interval = 2000 }: RotatingTextProps) => {
         }`}
         style={{
           color: 'transparent',
-          textShadow: '-2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 2px 2px 0 white, -2px 0 0 white, 2px 0 0 white, 0 -2px 0 white, 0 2px 0 white'
+          textShadow: '0 0 3px white, 0 0 3px white, 0 0 3px white, 0 0 3px white, 1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white'
         }}
       >
         {words[currentIndex]}
