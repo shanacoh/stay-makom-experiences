@@ -34,8 +34,9 @@ const RotatingText = ({ words, interval = 2000 }: RotatingTextProps) => {
             : "opacity-100 translate-y-0"
         }`}
         style={{
-          color: 'transparent',
-          textShadow: '-2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 2px 2px 0 white, -2px 0 0 white, 2px 0 0 white, 0 -2px 0 white, 0 2px 0 white'
+          WebkitTextStroke: '2px white',
+          WebkitTextFillColor: 'transparent',
+          paintOrder: 'stroke fill'
         }}
       >
         {words[currentIndex]}
