@@ -54,15 +54,15 @@ const Footer = () => {
             <h4 className="font-semibold mb-4 text-white">Contact</h4>
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-sm text-white">
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4 text-white" />
                 hello@staymakom.com
               </li>
               <li className="flex items-center gap-2 text-sm text-white">
-                <Phone className="h-4 w-4" />
+                <Phone className="h-4 w-4 text-white" />
                 +1 (555) 123-4567
               </li>
               <li className="flex items-center gap-2 text-sm text-white">
-                <Instagram className="h-4 w-4" />
+                <Instagram className="h-4 w-4 text-white" />
                 @staymakom
               </li>
             </ul>
