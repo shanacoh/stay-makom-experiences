@@ -2,11 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Check, Heart, Sparkles, Calendar, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
 import RotatingText from "@/components/RotatingText";
+import ContactDialog from "@/components/ContactDialog";
 import heroImage from "@/assets/hero-image-new.jpg";
+import desertHero from "@/assets/desert-hero.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
 import familyImg from "@/assets/family-category.jpg";
 import goldenAgeImg from "@/assets/golden-age-category.jpg";
@@ -22,6 +25,8 @@ const fallbackImages: Record<string, string> = {
   "active-break": activeImg
 };
 const Index = () => {
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  
   const {
     data: categories,
     isLoading
@@ -76,6 +81,30 @@ CHOOSE YOUR ESCAPE</h2>
             </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {categories?.map(category => <CategoryCard key={category.slug} title={category.name} description={category.intro_rich_text || ""} image={category.hero_image || fallbackImages[category.slug] || ""} slug={category.slug} />)}
             </div>}
+        </section>
+
+        {/* Desert Hero Section */}
+        <section className="relative h-[500px] md:h-[600px] flex items-center justify-center">
+          <div className="absolute inset-0 bg-cover bg-center" style={{
+            backgroundImage: `url(${desertHero})`
+          }} />
+          <div className="absolute inset-0 bg-black/40" />
+          
+          <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+            <p className="text-sm md:text-base font-medium tracking-widest uppercase mb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              A NEW WAY TO EXPLORE ISRAEL
+            </p>
+            <h2 className="font-sans text-5xl md:text-7xl font-bold mb-8 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+              From the desert.
+            </h2>
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
+              onClick={() => setContactDialogOpen(true)}
+            >
+              Register for a chance to win your next trip
+            </Button>
+          </div>
         </section>
 
         {/* How It Works Section */}
@@ -139,6 +168,7 @@ CHOOSE YOUR ESCAPE</h2>
       </main>
 
       <Footer />
+      <ContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
     </div>;
 };
 export default Index;
