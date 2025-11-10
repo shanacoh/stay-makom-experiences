@@ -60,6 +60,16 @@ const Header = () => {
         <div className="flex-1"></div>
 
         <div className="flex items-center space-x-3">
+          <div className="hidden md:flex items-center space-x-2">
+            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
+            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
+            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
+          </div>
+          
+          <Button variant="ghost" size="icon" className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}>
+            <Menu className="h-5 w-5" />
+          </Button>
+          
           <Button 
             variant="outline" 
             size="sm" 
@@ -67,11 +77,6 @@ const Header = () => {
           >
             Become a Partner
           </Button>
-          <div className="hidden md:flex items-center space-x-2">
-            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
-            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
-            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
-          </div>
           
           {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -108,10 +113,6 @@ const Header = () => {
                 <User className="h-5 w-5" />
               </Link>
             </Button>}
-          
-          <Button variant="ghost" size="icon" className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}>
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
       </div>
     </header>;
