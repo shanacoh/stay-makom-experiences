@@ -27,7 +27,6 @@ const fallbackImages: Record<string, string> = {
 };
 const Index = () => {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  
   const {
     data: categories,
     isLoading
@@ -87,8 +86,8 @@ CHOOSE YOUR ESCAPE</h2>
         {/* Desert Hero Section */}
         <section className="relative h-[500px] md:h-[600px] flex items-center justify-center">
           <div className="absolute inset-0 bg-cover bg-center" style={{
-            backgroundImage: `url(${desertHero})`
-          }} />
+          backgroundImage: `url(${desertHero})`
+        }} />
           <div className="absolute inset-0 bg-black/40" />
           
           <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
@@ -98,11 +97,7 @@ CHOOSE YOUR ESCAPE</h2>
             <h2 className="font-sans text-5xl md:text-7xl font-bold mb-8 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
               From the desert.
             </h2>
-            <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
-              onClick={() => setContactDialogOpen(true)}
-            >
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" onClick={() => setContactDialogOpen(true)}>
               Register for a chance to win your next trip
             </Button>
           </div>
@@ -116,11 +111,7 @@ CHOOSE YOUR ESCAPE</h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="rounded-2xl overflow-hidden">
-              <img 
-                src={desertHotelPool} 
-                alt="Desert hotel with pool" 
-                className="w-full h-full object-cover"
-              />
+              <img src={desertHotelPool} alt="Desert hotel with pool" className="w-full h-full object-cover" />
             </div>
             
             <div className="space-y-6 lg:pl-8">
@@ -133,10 +124,7 @@ CHOOSE YOUR ESCAPE</h2>
               <p className="text-lg text-muted-foreground">
                 Check in, drop your bags and let the desert do the rest.
               </p>
-              <Button 
-                size="lg" 
-                className="bg-black hover:bg-black/90 text-white mt-4"
-              >
+              <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4">
                 Let the journey begin
               </Button>
             </div>
@@ -157,30 +145,24 @@ CHOOSE YOUR ESCAPE</h2>
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Heart className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Pick your vibe</h3>
-                <p className="text-muted-foreground">
-                  Browse categories and find experiences that match your style
-                </p>
+                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Craft your stay</h3>
+                <p className="text-muted-foreground">Explore experiences that speak to your mood, from sunrise yoga to desert stargazing.</p>
               </div>
               
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Choose your room & extras</h3>
-                <p className="text-muted-foreground">
-                  Select your accommodation and add premium experiences
-                </p>
+                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Make it yours</h3>
+                <p className="text-muted-foreground">Choose your stay and add the touches that make it unforgettable.</p>
               </div>
               
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Check className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Pay & get confirmation</h3>
-                <p className="text-muted-foreground">
-                  Secure payment and instant confirmation for your extraordinary stay
-                </p>
+                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Book & get ready</h3>
+                <p className="text-muted-foreground">Secure your spot and start dreaming, your STAYMAKOM is waiting.</p>
               </div>
             </div>
           </div>
