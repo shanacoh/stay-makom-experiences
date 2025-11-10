@@ -49,9 +49,7 @@ const Header = () => {
     ? "text-white"
     : "text-foreground";
 
-  const logoClasses = isHomePage && !isScrolled
-    ? "text-white"
-    : "text-logo";
+  const logoClasses = "text-logo";
 
   return <header className={headerClasses}>
       <div className="container flex h-16 items-center justify-between">
