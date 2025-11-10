@@ -66,11 +66,9 @@ const Index = () => {
         {/* Categories Section */}
         <section className="container py-20">
           <div className="text-center mb-12">
-            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-4 md:text-5xl text-left">Don't choose a city. 
+            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-4 md:text-5xl">Don't choose a city. 
 Choose your escape.</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From romantic getaways to family adventures, find the perfect experience for every moment
-            </p>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From desert stillness to coastal rhytm, find the escape that feels like you.</p>
           </div>
 
           {isLoading ? <div className="text-center py-12">
