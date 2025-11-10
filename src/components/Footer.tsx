@@ -1,14 +1,16 @@
 import { Link } from "react-router-dom";
 import { Instagram, Mail, Phone } from "lucide-react";
-
 const Footer = () => {
-  return (
-    <footer className="border-t border-border mt-20" style={{ backgroundColor: '#FAF8F5' }}>
-      <div className="container py-10">
+  return <footer className="border-t border-border mt-20" style={{
+    backgroundColor: '#FAF8F5'
+  }}>
+      <div className="container py-10 bg-slate-950">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-4" style={{ color: '#D72638' }}>STAYMAKOM</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-4" style={{
+            color: '#D72638'
+          }}>STAYMAKOM</h3>
+            <p className="text-sm text-slate-50">
               Book extraordinary stays — beyond the usual.
             </p>
           </div>
@@ -75,8 +77,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
