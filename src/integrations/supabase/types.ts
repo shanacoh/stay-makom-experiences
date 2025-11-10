@@ -157,6 +157,7 @@ export type Database = {
           currency: string | null
           duration: string | null
           duration_he: string | null
+          good_to_know: string[] | null
           hero_image: string | null
           hotel_id: string
           id: string
@@ -190,6 +191,7 @@ export type Database = {
           currency?: string | null
           duration?: string | null
           duration_he?: string | null
+          good_to_know?: string[] | null
           hero_image?: string | null
           hotel_id: string
           id?: string
@@ -223,6 +225,7 @@ export type Database = {
           currency?: string | null
           duration?: string | null
           duration_he?: string | null
+          good_to_know?: string[] | null
           hero_image?: string | null
           hotel_id?: string
           id?: string
@@ -322,6 +325,7 @@ export type Database = {
           contact_phone: string | null
           contact_website: string | null
           created_at: string | null
+          faqs: Json | null
           hero_image: string | null
           highlights: string[] | null
           highlights_he: string[] | null
@@ -351,6 +355,7 @@ export type Database = {
           contact_phone?: string | null
           contact_website?: string | null
           created_at?: string | null
+          faqs?: Json | null
           hero_image?: string | null
           highlights?: string[] | null
           highlights_he?: string[] | null
@@ -380,6 +385,7 @@ export type Database = {
           contact_phone?: string | null
           contact_website?: string | null
           created_at?: string | null
+          faqs?: Json | null
           hero_image?: string | null
           highlights?: string[] | null
           highlights_he?: string[] | null
