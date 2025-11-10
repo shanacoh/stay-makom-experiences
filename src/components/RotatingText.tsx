@@ -26,16 +26,29 @@ const RotatingText = ({ words, interval = 2000 }: RotatingTextProps) => {
   if (words.length === 0) return null;
 
   return (
-    <span className="inline-block min-w-[200px] text-left">
+    <span className="inline-block min-w-[200px] text-left relative">
       <span
-        className={`inline-block transition-all duration-300 uppercase ${
+        className={`inline-block transition-all duration-300 uppercase absolute inset-0 ${
+          isAnimating
+            ? "opacity-0 translate-y-4"
+            : "opacity-100 translate-y-0"
+        }`}
+        style={{
+          color: 'white'
+        }}
+        aria-hidden="true"
+      >
+        {words[currentIndex]}
+      </span>
+      <span
+        className={`inline-block transition-all duration-300 uppercase relative ${
           isAnimating
             ? "opacity-0 translate-y-4"
             : "opacity-100 translate-y-0"
         }`}
         style={{
           color: 'transparent',
-          textShadow: '0 0 3px white, 0 0 3px white, 0 0 3px white, 0 0 3px white, 1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white'
+          WebkitTextStroke: '3px rgba(0,0,0,0.8)'
         }}
       >
         {words[currentIndex]}
