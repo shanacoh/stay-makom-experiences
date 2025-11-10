@@ -50,18 +50,13 @@ const Index = () => {
           <div className="absolute inset-0 bg-black/30" />
           
           <div className="relative z-10 container text-left text-white px-4 pb-12 md:pb-16">
-            <h1 className="font-sans text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-3xl">
+            <h1 className="font-sans text-4xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-3xl text-slate-50 md:text-5xl">
               More than a stay,
               <br />
               it's a{" "}
-              <RotatingText 
-                words={categories?.map(cat => cat.name) || ["Romance", "Adventure", "Family"]} 
-                interval={2500}
-              />
+              <RotatingText words={categories?.map(cat => cat.name) || ["Romance", "Adventure", "Family"]} interval={2500} />
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-              Curated hotel experiences with unique activities, premium amenities, and unforgettable moments
-            </p>
+            
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
               Start Exploring
             </Button>
@@ -85,7 +80,9 @@ const Index = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-16" style={{ backgroundColor: '#FAF8F5' }}>
+        <section className="py-16" style={{
+        backgroundColor: '#FAF8F5'
+      }}>
           <div className="container">
             <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] text-center mb-12">
               How It Works
