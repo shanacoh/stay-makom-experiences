@@ -66,10 +66,6 @@ const Header = () => {
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
           </div>
           
-          <Button variant="ghost" size="icon" className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}>
-            <Menu className="h-5 w-5" />
-          </Button>
-          
           <Button 
             variant="outline" 
             size="sm" 
@@ -113,6 +109,10 @@ const Header = () => {
                 <User className="h-5 w-5" />
               </Link>
             </Button>}
+          
+          <Button variant="ghost" size="icon" className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}>
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </header>;
