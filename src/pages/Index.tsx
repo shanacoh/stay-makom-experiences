@@ -109,12 +109,12 @@ CHOOSE YOUR ESCAPE</h2>
             Hottest of the season
           </h2>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <div className="rounded-2xl overflow-hidden">
               <img src={desertHotelPool} alt="Desert hotel with pool" className="w-full h-full object-cover" />
             </div>
             
-            <div className="space-y-6 lg:pl-8">
+            <div className="space-y-3 lg:pl-8">
               <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
                 DESERT MADNESS
               </p>
