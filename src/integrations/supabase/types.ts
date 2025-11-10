@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       booking_extras: {
         Row: {
           booking_id: string
@@ -146,6 +176,84 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          bullets: string[] | null
+          created_at: string
+          editorial_tiles: Json | null
+          hero_image: string | null
+          id: string
+          intro_rich_text: string | null
+          intro_rich_text_he: string | null
+          name: string
+          name_he: string | null
+          slug: string
+          status: Database["public"]["Enums"]["hotel_status"]
+          updated_at: string
+        }
+        Insert: {
+          bullets?: string[] | null
+          created_at?: string
+          editorial_tiles?: Json | null
+          hero_image?: string | null
+          id?: string
+          intro_rich_text?: string | null
+          intro_rich_text_he?: string | null
+          name: string
+          name_he?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["hotel_status"]
+          updated_at?: string
+        }
+        Update: {
+          bullets?: string[] | null
+          created_at?: string
+          editorial_tiles?: Json | null
+          hero_image?: string | null
+          id?: string
+          intro_rich_text?: string | null
+          intro_rich_text_he?: string | null
+          name?: string
+          name_he?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["hotel_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          address_country: string | null
+          created_at: string
+          default_party_size: number
+          first_name: string
+          last_name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_country?: string | null
+          created_at?: string
+          default_party_size?: number
+          first_name: string
+          last_name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_country?: string | null
+          created_at?: string
+          default_party_size?: number
+          first_name?: string
+          last_name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       experiences: {
         Row: {
           base_price: number
@@ -153,6 +261,7 @@ export type Database = {
           cancellation_policy: string | null
           cancellation_policy_he: string | null
           category: Database["public"]["Enums"]["experience_category"]
+          category_id: string | null
           created_at: string | null
           currency: string | null
           duration: string | null
@@ -187,6 +296,7 @@ export type Database = {
           cancellation_policy?: string | null
           cancellation_policy_he?: string | null
           category: Database["public"]["Enums"]["experience_category"]
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           duration?: string | null
@@ -221,6 +331,7 @@ export type Database = {
           cancellation_policy?: string | null
           cancellation_policy_he?: string | null
           category?: Database["public"]["Enums"]["experience_category"]
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           duration?: string | null
@@ -248,6 +359,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "experiences_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "experiences_hotel_id_fkey"
             columns: ["hotel_id"]
@@ -309,6 +427,44 @@ export type Database = {
             columns: ["experience_id"]
             isOneToOne: false
             referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hotel_admins: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          hotel_id: string
+          job_title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          hotel_id: string
+          job_title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          hotel_id?: string
+          job_title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel_admins_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
             referencedColumns: ["id"]
           },
         ]
@@ -406,6 +562,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          gdpr_consent_at: string | null
+          locale: Database["public"]["Enums"]["locale"]
+          marketing_opt_in: boolean
+          phone: string | null
+          tos_accepted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          gdpr_consent_at?: string | null
+          locale?: Database["public"]["Enums"]["locale"]
+          marketing_opt_in?: boolean
+          phone?: string | null
+          tos_accepted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          gdpr_consent_at?: string | null
+          locale?: Database["public"]["Enums"]["locale"]
+          marketing_opt_in?: boolean
+          phone?: string | null
+          tos_accepted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -435,12 +630,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_hotel_id: { Args: { _user_id: string }; Returns: string }
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      log_audit_event: {
+        Args: {
+          _action: string
+          _entity_id: string
+          _entity_type: string
+          _metadata?: Json
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -462,6 +671,7 @@ export type Database = {
         | "taste_affair"
         | "active_break"
       hotel_status: "draft" | "published"
+      locale: "en" | "he"
       pricing_type: "per_booking" | "per_person" | "per_night"
     }
     CompositeTypes: {
@@ -610,6 +820,7 @@ export const Constants = {
         "active_break",
       ],
       hotel_status: ["draft", "published"],
+      locale: ["en", "he"],
       pricing_type: ["per_booking", "per_person", "per_night"],
     },
   },
