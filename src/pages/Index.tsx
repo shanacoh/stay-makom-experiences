@@ -46,18 +46,18 @@ const Index = () => {
           <div className="absolute inset-0 bg-cover bg-center" style={{
           backgroundImage: `url(${heroImage})`
         }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+          <div className="absolute inset-0 bg-black/30" />
           
           <div className="relative z-10 container text-center text-white px-4">
-            <h1 className="font-serif text-5xl md:text-7xl font-bold mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              Book extraordinary stays
+            <h1 className="font-sans text-5xl md:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              Discover Israel differently —
               <br />
-              <span className="text-primary-glow">beyond the usual</span>
+              <span className="text-white">curated stays, crafted stories.</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
               Curated hotel experiences with unique activities, premium amenities, and unforgettable moments
             </p>
-            <Button size="lg" className="bg-primary hover:bg-primary-glow text-white shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
               Start Exploring
             </Button>
           </div>
@@ -66,7 +66,7 @@ const Index = () => {
         {/* Categories Section */}
         <section className="container py-20">
           <div className="text-center mb-12">
-            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4">Don't chose a city. Choose your escape.</h2>
+            <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] mb-4">Don't choose a city. Choose your escape.</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               From romantic getaways to family adventures, find the perfect experience for every moment
             </p>
@@ -80,38 +80,38 @@ const Index = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="bg-muted py-20">
+        <section className="py-16" style={{ backgroundColor: '#FAF8F5' }}>
           <div className="container">
-            <h2 className="font-serif text-4xl md:text-5xl font-bold text-center mb-16">
+            <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] text-center mb-12">
               How It Works
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <Heart className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Heart className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-3">Pick your vibe</h3>
+                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Pick your vibe</h3>
                 <p className="text-muted-foreground">
                   Browse categories and find experiences that match your style
                 </p>
               </div>
               
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-3">Choose your room & extras</h3>
+                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Choose your room & extras</h3>
                 <p className="text-muted-foreground">
                   Select your accommodation and add premium experiences
                 </p>
               </div>
               
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <Check className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Check className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-3">Pay & get confirmation</h3>
+                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Pay & get confirmation</h3>
                 <p className="text-muted-foreground">
                   Secure payment and instant confirmation for your extraordinary stay
                 </p>

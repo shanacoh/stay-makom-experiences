@@ -3,11 +3,11 @@ import { Instagram, Mail, Phone } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-muted border-t border-border mt-20">
-      <div className="container py-12">
+    <footer className="border-t border-border mt-20" style={{ backgroundColor: '#FAF8F5' }}>
+      <div className="container py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-serif text-xl font-bold text-primary mb-4">STAYMAKOM</h3>
+            <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-4" style={{ color: '#D72638' }}>STAYMAKOM</h3>
             <p className="text-sm text-muted-foreground">
               Book extraordinary stays — beyond the usual.
             </p>
@@ -17,18 +17,18 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Explore</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                  Home
+                <Link to="/partners" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  For Partners
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                  About Us
+                <Link to="/gift-card" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  Gift Card
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                  FAQ
+                <Link to="/journal" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  Journal
                 </Link>
               </li>
             </ul>

@@ -54,22 +54,17 @@ const Header = () => {
   return <header className={headerClasses}>
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <span className={`font-sans text-2xl font-bold tracking-[-0.08em] ${logoClasses}`}>STAYMAKOM</span>
+          <span className={`font-sans text-2xl font-bold tracking-[-0.04em] uppercase ${logoClasses}`}>STAYMAKOM</span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
-            Home
-          </Link>
-          <Link to="/about" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
-            About
-          </Link>
-          <Link to="/faq" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
-            FAQ
-          </Link>
-          <Link to="/contact" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
-            Contact
-          </Link>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className={`${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+          >
+            Become a Partner
+          </Button>
         </nav>
 
         <div className="flex items-center space-x-3">
@@ -78,19 +73,15 @@ const Header = () => {
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
           </div>
-          <Button variant="ghost" size="icon" className={`md:hidden ${textClasses}`}>
-            <Menu className="h-5 w-5" />
-          </Button>
           
           {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+                  variant="ghost" 
+                  size="icon" 
+                  className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
                 >
-                  <User className="h-4 w-4 mr-2" />
-                  Account
+                  <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -109,13 +100,19 @@ const Header = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu> : <Button 
-              variant="outline" 
-              size="sm" 
+              variant="ghost" 
+              size="icon" 
               asChild 
-              className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+              className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
             >
-              <Link to="/auth">Sign In</Link>
+              <Link to="/auth">
+                <User className="h-5 w-5" />
+              </Link>
             </Button>}
+          
+          <Button variant="ghost" size="icon" className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}>
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </header>;
