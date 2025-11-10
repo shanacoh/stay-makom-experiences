@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Check, Heart, Sparkles, Calendar } from "lucide-react";
+import { Check, Heart, Sparkles, Calendar, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
@@ -12,46 +13,30 @@ import natureImg from "@/assets/nature-category.jpg";
 import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 
-const categories = [
-  {
-    title: "Romantic",
-    description: "Intimate moments and unforgettable experiences for couples",
-    image: romanticImg,
-    slug: "romantic",
-  },
-  {
-    title: "Family",
-    description: "Adventures and memories for the whole family",
-    image: familyImg,
-    slug: "family",
-  },
-  {
-    title: "Golden Age",
-    description: "Curated comfort and sophistication for mature travelers",
-    image: goldenAgeImg,
-    slug: "golden-age",
-  },
-  {
-    title: "Beyond Nature",
-    description: "Immersive outdoor experiences in stunning landscapes",
-    image: natureImg,
-    slug: "beyond-nature",
-  },
-  {
-    title: "Taste Affair",
-    description: "Culinary journeys with master chefs and local flavors",
-    image: tasteImg,
-    slug: "taste-affair",
-  },
-  {
-    title: "Active Break",
-    description: "Energizing activities and wellness adventures",
-    image: activeImg,
-    slug: "active-break",
-  },
-];
+const fallbackImages: Record<string, string> = {
+  "romantic": romanticImg,
+  "family": familyImg,
+  "golden-age": goldenAgeImg,
+  "beyond-nature": natureImg,
+  "taste-affair": tasteImg,
+  "active-break": activeImg,
+};
 
 const Index = () => {
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("status", "published")
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -94,11 +79,23 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map((category) => (
-              <CategoryCard key={category.slug} {...category} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {categories?.map((category) => (
+                <CategoryCard 
+                  key={category.slug}
+                  title={category.name}
+                  description={category.intro_rich_text || ""}
+                  image={category.hero_image || fallbackImages[category.slug] || ""}
+                  slug={category.slug}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* How It Works Section */}
