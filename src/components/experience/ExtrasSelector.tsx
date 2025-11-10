@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useEffect } from "react";
 
 interface ExtrasSelectorProps {
   experienceId: string;
@@ -36,19 +35,6 @@ const ExtrasSelector = ({
   if (isLoading || !extras || extras.length === 0) {
     return null;
   }
-
-  // Calculate total whenever extras or data changes
-  useEffect(() => {
-    if (!extras) return;
-    
-    const total = Object.entries(selectedExtras).reduce((sum, [id, qty]) => {
-      const extra = extras.find((e) => e.id === id);
-      if (!extra) return sum;
-      return sum + (extra.price * qty);
-    }, 0);
-    
-    onExtrasChange(selectedExtras, total);
-  }, [selectedExtras, extras]);
 
   const updateQuantity = (extraId: string, delta: number) => {
     const currentQty = selectedExtras[extraId] || 0;

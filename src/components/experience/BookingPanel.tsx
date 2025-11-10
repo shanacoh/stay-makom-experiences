@@ -10,6 +10,7 @@ import PriceBreakdown from "./PriceBreakdown";
 
 interface BookingPanelProps {
   experienceId: string;
+  hotelId: string;
   basePrice: number;
   basePriceType: "fixed" | "per_person";
   currency: string;
@@ -19,6 +20,7 @@ interface BookingPanelProps {
 
 const BookingPanel = ({
   experienceId,
+  hotelId,
   basePrice,
   basePriceType,
   currency,
@@ -36,7 +38,7 @@ const BookingPanel = ({
     ? basePrice * partySize 
     : basePrice;
 
-  const roomPrice = selectedRoom?.price || 0;
+  const roomPrice = selectedRoom?.price_total || 0;
   const totalPrice = experiencePrice + roomPrice + extrasTotal;
 
   const canBook = dateRange.from && dateRange.to && selectedRoom;
@@ -70,7 +72,7 @@ const BookingPanel = ({
         {dateRange.from && dateRange.to && (
           <>
             <RoomOptions
-              hotelId="hotel-id-placeholder"
+              hotelId={hotelId}
               checkin={dateRange.from}
               checkout={dateRange.to}
               guests={partySize}

@@ -88,6 +88,7 @@ const Experience = () => {
             <div className="lg:col-span-1">
               <BookingPanel
                 experienceId={experience.id}
+                hotelId={experience.hotel_id}
                 basePrice={experience.base_price}
                 basePriceType={experience.base_price_type || "per_person"}
                 currency={experience.currency || "USD"}
