@@ -10,6 +10,7 @@ import RotatingText from "@/components/RotatingText";
 import ContactDialog from "@/components/ContactDialog";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
+import desertHotelPool from "@/assets/desert-hotel-pool.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
 import familyImg from "@/assets/family-category.jpg";
 import goldenAgeImg from "@/assets/golden-age-category.jpg";
@@ -104,6 +105,41 @@ CHOOSE YOUR ESCAPE</h2>
             >
               Register for a chance to win your next trip
             </Button>
+          </div>
+        </section>
+
+        {/* Hottest of the Season Section */}
+        <section className="container py-20">
+          <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] mb-12">
+            Hottest of the season
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="rounded-2xl overflow-hidden">
+              <img 
+                src={desertHotelPool} 
+                alt="Desert hotel with pool" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            <div className="space-y-6 lg:pl-8">
+              <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
+                DESERT MADNESS
+              </p>
+              <h3 className="font-sans text-4xl md:text-6xl font-bold tracking-[-0.02em]">
+                40° of internal peace
+              </h3>
+              <p className="text-lg text-muted-foreground">
+                Check in, drop your bags and let the desert do the rest.
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-black hover:bg-black/90 text-white mt-4"
+              >
+                Let the journey begin
+              </Button>
+            </div>
           </div>
         </section>
 
