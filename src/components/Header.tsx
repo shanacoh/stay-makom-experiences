@@ -1,10 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 const Header = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  const [isScrolled, setIsScrolled] = useState(false);
   const {
     user,
     role,
@@ -20,40 +25,72 @@ const Header = () => {
     if (role === "hotel_admin") return "/hotel-admin";
     return "/account";
   };
-  return <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-soft">
+
+  useEffect(() => {
+    if (!isHomePage) {
+      setIsScrolled(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHomePage]);
+
+  const headerClasses = isHomePage && !isScrolled
+    ? "sticky top-0 z-50 w-full bg-transparent border-b border-transparent transition-all duration-200"
+    : "sticky top-0 z-50 w-full bg-background border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200";
+
+  const textClasses = isHomePage && !isScrolled
+    ? "text-white"
+    : "text-foreground";
+
+  const logoClasses = isHomePage && !isScrolled
+    ? "text-white"
+    : "text-logo";
+
+  return <header className={headerClasses}>
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="font-sans text-2xl text-logo font-bold tracking-[-0.08em]">STAYMAKOM</span>
+          <span className={`font-sans text-2xl font-bold tracking-[-0.08em] ${logoClasses}`}>STAYMAKOM</span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-smooth">
+          <Link to="/" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
             Home
           </Link>
-          <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-smooth">
+          <Link to="/about" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
             About
           </Link>
-          <Link to="/faq" className="text-sm font-medium text-foreground hover:text-primary transition-smooth">
+          <Link to="/faq" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
             FAQ
           </Link>
-          <Link to="/contact" className="text-sm font-medium text-foreground hover:text-primary transition-smooth">
+          <Link to="/contact" className={`text-sm font-medium hover:text-primary transition-smooth ${textClasses}`}>
             Contact
           </Link>
         </nav>
 
         <div className="flex items-center space-x-3">
           <div className="hidden md:flex items-center space-x-2">
-            <span className="text-xs text-muted-foreground">EN</span>
-            <span className="text-xs text-muted-foreground/40">|</span>
-            <span className="text-xs text-muted-foreground/40 cursor-not-allowed">HE (soon)</span>
+            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
+            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
+            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
           </div>
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className={`md:hidden ${textClasses}`}>
             <Menu className="h-5 w-5" />
           </Button>
           
           {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="hidden md:flex">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+                >
                   <User className="h-4 w-4 mr-2" />
                   Account
                 </Button>
@@ -73,7 +110,12 @@ const Header = () => {
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu> : <Button variant="outline" size="sm" asChild className="hidden md:flex">
+            </DropdownMenu> : <Button 
+              variant="outline" 
+              size="sm" 
+              asChild 
+              className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+            >
               <Link to="/auth">Sign In</Link>
             </Button>}
         </div>
