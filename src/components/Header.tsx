@@ -1,36 +1,29 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-
 const Header = () => {
-  const { user, role, signOut } = useAuth();
+  const {
+    user,
+    role,
+    signOut
+  } = useAuth();
   const navigate = useNavigate();
-
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
-
   const getDashboardLink = () => {
     if (role === "admin") return "/admin";
     if (role === "hotel_admin") return "/hotel-admin";
     return "/account";
   };
-
-  return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-soft">
+  return <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-soft">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="font-serif text-2xl font-bold text-primary">STAYMAKOM</span>
+          <span className="font-serif text-2xl text-primary font-bold">STAYMAKOM</span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
@@ -58,8 +51,7 @@ const Header = () => {
             <Menu className="h-5 w-5" />
           </Button>
           
-          {user ? (
-            <DropdownMenu>
+          {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="hidden md:flex">
                   <User className="h-4 w-4 mr-2" />
@@ -81,16 +73,11 @@ const Header = () => {
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button variant="outline" size="sm" asChild className="hidden md:flex">
+            </DropdownMenu> : <Button variant="outline" size="sm" asChild className="hidden md:flex">
               <Link to="/auth">Sign In</Link>
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
