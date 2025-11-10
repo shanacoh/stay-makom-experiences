@@ -49,10 +49,12 @@ const Header = () => {
     ? "text-white"
     : "text-foreground";
 
-  const logoClasses = "text-logo";
+  const logoClasses = isHomePage && !isScrolled
+    ? "text-white"
+    : "text-logo";
 
   return <header className={headerClasses}>
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between bg-transparent">
         <Link to="/" className="flex items-center space-x-2">
           <span className={`font-sans text-2xl font-bold tracking-[-0.04em] uppercase ${logoClasses}`}>STAYMAKOM</span>
         </Link>
