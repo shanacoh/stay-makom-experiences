@@ -5,34 +5,30 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Clock } from "lucide-react";
+import { MapPin, Users, Clock, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const categoryNames: Record<string, string> = {
-  romantic: "Romantic",
-  family: "Family",
-  "golden-age": "Golden Age",
-  "beyond-nature": "Beyond Nature",
-  "taste-affair": "Taste Affair",
-  "active-break": "Active Break",
-};
-
-const categoryDescriptions: Record<string, string> = {
-  romantic: "Intimate moments and unforgettable experiences designed for couples",
-  family: "Adventures and memories for the whole family to cherish",
-  "golden-age": "Curated comfort and sophistication for mature travelers",
-  "beyond-nature": "Immersive outdoor experiences in stunning natural landscapes",
-  "taste-affair": "Culinary journeys with master chefs and authentic local flavors",
-  "active-break": "Energizing activities and wellness adventures to revitalize",
-};
 
 const Category = () => {
   const { slug } = useParams<{ slug: string }>();
   
-  const categoryKey = slug?.replace("-", "_") as "romantic" | "family" | "golden_age" | "beyond_nature" | "taste_affair" | "active_break";
+  const { data: category, isLoading: categoryLoading } = useQuery({
+    queryKey: ["category", slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!slug,
+  });
   
-  const { data: experiences, isLoading } = useQuery({
-    queryKey: ["experiences", categoryKey],
+  const { data: experiences, isLoading: experiencesLoading } = useQuery({
+    queryKey: ["category-experiences", category?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
@@ -45,40 +41,90 @@ const Category = () => {
             region
           )
         `)
-        .eq("category", categoryKey)
+        .eq("category_id", category?.id)
         .eq("status", "published");
       
       if (error) throw error;
       return data;
     },
-    enabled: !!categoryKey,
+    enabled: !!category?.id,
   });
 
-  const categoryTitle = categoryNames[slug || ""] || "Experiences";
-  const categoryDescription = categoryDescriptions[slug || ""] || "";
+  if (categoryLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!category) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">Category not found</p>
+            <Button asChild>
+              <Link to="/">Back to Home</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-1">
-        {/* Banner */}
-        <section className="bg-gradient-hero py-20 text-white">
-          <div className="container">
-            <h1 className="font-serif text-5xl md:text-6xl font-bold mb-4">
-              {categoryTitle}
+        {/* Category Hero */}
+        <section className="relative h-[500px] flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${category.hero_image || '/placeholder.svg'})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+          
+          <div className="relative z-10 container text-center text-white px-4">
+            <h1 className="font-serif text-5xl md:text-6xl font-bold mb-6">
+              {category.name}
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl">
-              {categoryDescription}
-            </p>
+            {category.intro_rich_text && (
+              <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto">
+                {category.intro_rich_text}
+              </p>
+            )}
+            
+            {category.bullets && category.bullets.length === 3 && (
+              <div className="flex flex-wrap justify-center gap-8 mt-12">
+                {category.bullets.map((bullet, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <span className="text-primary-glow">•</span>
+                    <span className="text-lg">{bullet}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
         {/* Experiences Grid */}
         <section className="container py-16">
-          {isLoading ? (
+          <div className="mb-8">
+            <h2 className="font-serif text-3xl font-bold mb-2">
+              {experiences?.length || 0} Experience{experiences?.length !== 1 ? 's' : ''} Available
+            </h2>
+            <p className="text-muted-foreground">
+              Discover extraordinary stays in this category
+            </p>
+          </div>
+
+          {experiencesLoading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading experiences...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
           ) : !experiences || experiences.length === 0 ? (
             <div className="text-center py-12">
@@ -91,13 +137,18 @@ const Category = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {experiences.map((experience) => (
                 <Link key={experience.id} to={`/experiences/${experience.slug}`}>
-                  <Card className="overflow-hidden hover:shadow-strong transition-smooth h-full">
-                    <div className="aspect-[4/3] relative">
+                  <Card className="overflow-hidden hover:shadow-strong transition-smooth h-full group">
+                    <div className="aspect-[4/3] relative overflow-hidden">
                       <img
                         src={experience.hero_image || "/placeholder.svg"}
                         alt={experience.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
+                      <div className="absolute top-4 right-4">
+                        <span className="bg-primary/90 text-white text-xs px-3 py-1 rounded-full">
+                          {category.name}
+                        </span>
+                      </div>
                     </div>
                     <CardContent className="p-6">
                       <h3 className="font-serif text-2xl font-bold mb-2">
@@ -109,10 +160,10 @@ const Category = () => {
                         </p>
                       )}
                       
-                      <div className="space-y-2 text-sm text-muted-foreground">
+                      <div className="space-y-2 text-sm text-muted-foreground mb-4">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4" />
-                          <span>{experience.hotels?.city}, {experience.hotels?.region}</span>
+                          <span>{experience.hotels?.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4" />
@@ -124,7 +175,7 @@ const Category = () => {
                         </div>
                       </div>
                       
-                      <div className="mt-4 pt-4 border-t border-border">
+                      <div className="pt-4 border-t border-border">
                         <div className="flex items-baseline justify-between">
                           <span className="text-sm text-muted-foreground">From</span>
                           <span className="font-serif text-2xl font-bold text-primary">
