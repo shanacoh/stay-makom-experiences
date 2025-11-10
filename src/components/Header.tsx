@@ -9,10 +9,7 @@ import { useState, useEffect } from "react";
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
-  const [isScrolled, setIsScrolled] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return location.pathname !== "/" || window.scrollY > 80;
-  });
+  const [isScrolled, setIsScrolled] = useState(false);
   const {
     user,
     role,
@@ -30,13 +27,9 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (!isHomePage) {
-      setIsScrolled(true);
-      return;
-    }
-
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 80);
+      const scrolled = window.scrollY > 80;
+      setIsScrolled(isHomePage ? scrolled : true);
     };
 
     handleScroll();
