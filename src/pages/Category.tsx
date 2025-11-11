@@ -126,7 +126,7 @@ const Category = () => {
                 <p className="text-sm uppercase tracking-widest text-white/90 font-bold">
                   {category.name}
                 </p>
-                <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight uppercase text-white">
+                <h1 className="font-serif text-5xl font-bold leading-tight uppercase text-white md:text-4xl">
                   {category.intro_rich_text?.split('.')[0] || category.name}
                 </h1>
               </div>
