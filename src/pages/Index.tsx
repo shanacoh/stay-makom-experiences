@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Check, Heart, Sparkles, Calendar, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -17,6 +17,9 @@ import goldenAgeImg from "@/assets/golden-age-category.jpg";
 import natureImg from "@/assets/nature-category.jpg";
 import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
+import iconHeart from "@/assets/icon-heart.png";
+import iconSparkles from "@/assets/icon-sparkles.png";
+import iconSuitcase from "@/assets/icon-suitcase.png";
 const fallbackImages: Record<string, string> = {
   "romantic": romanticImg,
   "family": familyImg,
@@ -153,7 +156,7 @@ CHOOSE YOUR ESCAPE</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Heart className="h-10 w-10 text-primary" />
+                  <img src={iconHeart} alt="Heart icon" className="h-10 w-10" />
                 </div>
                 <h3 className="font-sans text-xl font-bold mb-2 text-primary">Craft your stay</h3>
                 <p className="text-muted-foreground">Explore experiences that speak to your mood, from sunrise yoga to desert stargazing.</p>
@@ -161,7 +164,7 @@ CHOOSE YOUR ESCAPE</h2>
               
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-10 w-10 text-primary" />
+                  <img src={iconSparkles} alt="Sparkles icon" className="h-10 w-10" />
                 </div>
                 <h3 className="font-sans text-xl font-bold mb-2 text-primary">Make it yours</h3>
                 <p className="text-muted-foreground">Choose your stay and add the touches that make it unforgettable.</p>
@@ -169,7 +172,7 @@ CHOOSE YOUR ESCAPE</h2>
               
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Check className="h-10 w-10 text-primary" />
+                  <img src={iconSuitcase} alt="Suitcase icon" className="h-10 w-10" />
                 </div>
                 <h3 className="font-sans text-xl font-bold mb-2 text-primary">Book & get ready</h3>
                 <p className="text-muted-foreground">Secure your spot and start dreaming, your STAYMAKOM is waiting.</p>
