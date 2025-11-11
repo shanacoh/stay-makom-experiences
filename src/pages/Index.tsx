@@ -89,7 +89,7 @@ const Index = () => {
         <section className="container py-20">
           <div className="text-center mb-12">
             <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-4 md:text-6xl">DON'T CHOOSE A CITY<br />CHOOSE YOUR ESCAPE</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From desert stillness to coastal rhytm, find the escape that feels like you.</p>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else. </p>
           </div>
 
           {isLoading ? <div className="text-center py-12">
@@ -110,7 +110,7 @@ const Index = () => {
             <p className="text-sm md:text-base font-medium tracking-widest uppercase mb-2 animate-in fade-in slide-in-from-bottom-4 duration-1000">
               A NEW WAY TO EXPLORE ISRAEL
             </p>
-            <h2 className="font-sans mb-4 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 font-bold text-slate-950 md:text-4xl text-2xl">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else.</h2>
+            <h2 className="font-sans mb-4 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 font-bold text-slate-950 md:text-4xl text-2xl">From desert stillness to coastal rhythm, find the escape that feels like you.</h2>
             <Button size="lg" className="bg-white hover:bg-black text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" onClick={() => setContactDialogOpen(true)}>
               Register for a chance to win your next trip
             </Button>
