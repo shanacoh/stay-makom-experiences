@@ -2,8 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Filter, MapPin } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Filter, MapPin, Calendar as CalendarIcon } from "lucide-react";
 import { useState } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
 interface CategoryFiltersProps {
   onFilterChange?: (filters: FilterState) => void;
@@ -16,6 +22,7 @@ export interface FilterState {
   priceRange: [number, number];
   partySize: number;
   region?: string;
+  dateRange?: DateRange;
 }
 
 const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: CategoryFiltersProps) => {
@@ -24,6 +31,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
     priceRange: [0, 1000],
     partySize: 2,
   });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const handleFilterUpdate = (key: keyof FilterState, value: any) => {
     const newFilters = { ...filters, [key]: value };
@@ -31,10 +39,57 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
     onFilterChange?.(newFilters);
   };
 
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    const newFilters = { ...filters, dateRange: range };
+    setFilters(newFilters);
+    onFilterChange?.(newFilters);
+  };
+
   return (
     <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm border-b border-border py-4">
       <div className="container flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4 flex-1">
+        <div className="flex items-center gap-4 flex-1 flex-wrap">
+          {/* Date Range Picker */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal min-w-[280px]",
+                  !dateRange && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange?.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "d MMM", { locale: fr })} -{" "}
+                      {format(dateRange.to, "d MMM yyyy", { locale: fr })}
+                    </>
+                  ) : (
+                    format(dateRange.from, "d MMM yyyy", { locale: fr })
+                  )
+                ) : (
+                  <span>Quand ?</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={handleDateRangeChange}
+                numberOfMonths={2}
+                disabled={(date) => date < new Date()}
+                locale={fr}
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+
           <Select
             value={filters.sortBy}
             onValueChange={(value) => handleFilterUpdate("sortBy", value)}
