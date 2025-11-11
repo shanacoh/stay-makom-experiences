@@ -88,7 +88,7 @@ const Index = () => {
         {/* Categories Section */}
         <section className="container py-20">
           <div className="text-center mb-12">
-            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-4 md:text-6xl">DON'T CHOOSE A CITY 
+            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-4 md:text-6xl">DON'T CHOOSE A CITY
 CHOOSE YOUR ESCAPE</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From desert stillness to coastal rhytm, find the escape that feels like you.</p>
           </div>
