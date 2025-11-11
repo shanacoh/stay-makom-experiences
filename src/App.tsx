@@ -12,7 +12,17 @@ import Hotel from "./pages/Hotel";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Admin from "./pages/Admin";
-import HotelAdmin from "./pages/HotelAdmin";
+import { HotelAdminLayout } from "@/components/hotel-admin/HotelAdminLayout";
+import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
+import HotelProperty from "./pages/hotel-admin/Property";
+import HotelExperiences from "./pages/hotel-admin/Experiences";
+import HotelExtras from "./pages/hotel-admin/Extras";
+import HotelPackages from "./pages/hotel-admin/Packages";
+import HotelCalendar from "./pages/hotel-admin/Calendar";
+import HotelPricing from "./pages/hotel-admin/Pricing";
+import HotelBookings from "./pages/hotel-admin/Bookings";
+import HotelBilling from "./pages/hotel-admin/Billing";
+import HotelSettings from "./pages/hotel-admin/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,10 +60,21 @@ const App = () => (
               path="/hotel-admin"
               element={
                 <ProtectedRoute allowedRoles={["hotel_admin"]}>
-                  <HotelAdmin />
+                  <HotelAdminLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route index element={<HotelAdminDashboard />} />
+              <Route path="property" element={<HotelProperty />} />
+              <Route path="experiences" element={<HotelExperiences />} />
+              <Route path="extras" element={<HotelExtras />} />
+              <Route path="packages" element={<HotelPackages />} />
+              <Route path="calendar" element={<HotelCalendar />} />
+              <Route path="pricing" element={<HotelPricing />} />
+              <Route path="bookings" element={<HotelBookings />} />
+              <Route path="billing" element={<HotelBilling />} />
+              <Route path="settings" element={<HotelSettings />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
