@@ -43,6 +43,26 @@ const Index = () => {
       return data;
     }
   });
+
+  const {
+    data: latestExperiences,
+    isLoading: isLoadingExperiences
+  } = useQuery({
+    queryKey: ["latest-experiences"],
+    queryFn: async () => {
+      const {
+        data,
+        error
+      } = await supabase
+        .from("experiences")
+        .select("*, hotels(name, city, region)")
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (error) throw error;
+      return data;
+    }
+  });
   return <div className="min-h-screen flex flex-col">
       <Header />
       
@@ -166,20 +186,72 @@ CHOOSE YOUR ESCAPE</h2>
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* Latest Experiences Section */}
         <section className="container py-20">
-          <div className="gradient-hero rounded-2xl p-12 text-center text-white">
-            <Calendar className="h-12 w-12 mx-auto mb-6" />
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              Ready for Your Next Adventure?
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em]">
+              Toutes les nouveautés
             </h2>
-            <p className="text-lg mb-8 text-white/90 max-w-2xl mx-auto">
-              Join thousands of travelers discovering extraordinary stays around the world
-            </p>
-            <Button size="lg" variant="secondary" className="shadow-strong">
-              Browse All Experiences
+            <Button variant="link" className="text-foreground underline underline-offset-4 text-base">
+              Voir les expériences →
             </Button>
           </div>
+
+          {isLoadingExperiences ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {latestExperiences?.map((experience) => (
+                <div
+                  key={experience.id}
+                  className="group cursor-pointer"
+                  onClick={() => window.location.href = `/experience/${experience.slug}`}
+                >
+                  <div className="relative h-[400px] rounded-2xl overflow-hidden mb-4">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                      style={{
+                        backgroundImage: `url(${experience.hero_image || desertHotelPool})`
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/30" />
+                    <div className="absolute bottom-0 left-0 p-6">
+                      <h3 className="text-white font-bold text-3xl uppercase tracking-tight">
+                        {experience.title}
+                      </h3>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{experience.hotels?.city}</span>
+                    </div>
+                    
+                    <h4 className="font-bold text-lg">
+                      {experience.hotels?.name}
+                    </h4>
+                    
+                    {experience.subtitle && (
+                      <p className="text-sm text-muted-foreground">
+                        {experience.subtitle}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-bold text-xl">
+                        {experience.base_price}€
+                      </span>
+                      <span className="text-muted-foreground">
+                        / {experience.base_price_type === 'per_person' ? 'personne' : 'séjour'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
