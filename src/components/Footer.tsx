@@ -4,7 +4,7 @@ const Footer = () => {
   return <footer className="border-t border-border mt-20" style={{
     backgroundColor: '#FAF8F5'
   }}>
-      <div className="container py-10 bg-slate-950">
+      <div className="container py-10 bg-neutral-800">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-4 text-white hover:text-primary transition-smooth">STAYMAKOM</h3>
