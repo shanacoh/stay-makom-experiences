@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 
 interface ContactDialogProps {
@@ -11,9 +11,56 @@ interface ContactDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const categories = [
+  "Active",
+  "Family", 
+  "Golden Age",
+  "Nature",
+  "Romantic",
+  "Taste",
+];
+
 const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
   const [loading, setLoading] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherText, setOtherText] = useState("");
   const { toast } = useToast();
+
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      }
+      if (prev.length >= 3) {
+        toast({
+          title: "Maximum atteint",
+          description: "Vous pouvez sélectionner maximum 3 catégories",
+          variant: "destructive",
+        });
+        return prev;
+      }
+      return [...prev, category];
+    });
+  };
+
+  const handleOtherToggle = (checked: boolean) => {
+    setShowOtherInput(checked);
+    if (checked) {
+      if (selectedCategories.length >= 3) {
+        toast({
+          title: "Maximum atteint",
+          description: "Vous pouvez sélectionner maximum 3 catégories",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedCategories(prev => [...prev, "Autres"]);
+    } else {
+      setSelectedCategories(prev => prev.filter(c => c !== "Autres"));
+      setOtherText("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,9 +99,47 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="message">Why do you want to visit Israel?</Label>
-            <Textarea id="message" placeholder="Tell us about your dream trip..." rows={4} />
+          <div className="space-y-3">
+            <Label>Quel type d'escape vous intéresse le plus? (Max 3)</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {categories.map((category) => (
+                <div key={category} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={category}
+                    checked={selectedCategories.includes(category)}
+                    onCheckedChange={() => handleCategoryToggle(category)}
+                  />
+                  <label
+                    htmlFor={category}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {category}
+                  </label>
+                </div>
+              ))}
+              <div className="flex items-center space-x-2 col-span-2">
+                <Checkbox
+                  id="autres"
+                  checked={showOtherInput}
+                  onCheckedChange={handleOtherToggle}
+                />
+                <label
+                  htmlFor="autres"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Autres
+                </label>
+              </div>
+              {showOtherInput && (
+                <div className="col-span-2">
+                  <Input
+                    placeholder="Précisez votre idée..."
+                    value={otherText}
+                    onChange={(e) => setOtherText(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Submitting..." : "Submit Registration"}
