@@ -94,9 +94,7 @@ CHOOSE YOUR ESCAPE</h2>
             <p className="text-sm md:text-base font-medium tracking-widest uppercase mb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
               A NEW WAY TO EXPLORE ISRAEL
             </p>
-            <h2 className="font-sans text-5xl md:text-7xl font-bold mb-8 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-              From the desert.
-            </h2>
+            <h2 className="font-sans md:text-7xl mb-8 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 text-2xl font-bold text-slate-50">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that fl like nowhere else.</h2>
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" onClick={() => setContactDialogOpen(true)}>
               Register for a chance to win your next trip
             </Button>
