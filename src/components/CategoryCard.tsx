@@ -20,7 +20,7 @@ const CategoryCard = ({ title, description, image, slug }: CategoryCardProps) =>
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
         />
-        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-smooth" />
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-smooth" />
         
         <div className="absolute inset-0 flex items-center justify-center p-6">
           <h3 className="font-sans text-3xl md:text-4xl font-bold text-white text-center uppercase tracking-tight">
