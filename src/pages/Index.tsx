@@ -39,7 +39,7 @@ const Index = () => {
       const {
         data,
         error
-      } = await supabase.from("categories").select("*").eq("status", "published").order("created_at", {
+      } = await supabase.from("categories").select("*").eq("status", "published").order("display_order", {
         ascending: true
       });
       if (error) throw error;

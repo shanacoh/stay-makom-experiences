@@ -180,6 +180,7 @@ export type Database = {
         Row: {
           bullets: string[] | null
           created_at: string
+          display_order: number | null
           editorial_tiles: Json | null
           hero_image: string | null
           id: string
@@ -194,6 +195,7 @@ export type Database = {
         Insert: {
           bullets?: string[] | null
           created_at?: string
+          display_order?: number | null
           editorial_tiles?: Json | null
           hero_image?: string | null
           id?: string
@@ -208,6 +210,7 @@ export type Database = {
         Update: {
           bullets?: string[] | null
           created_at?: string
+          display_order?: number | null
           editorial_tiles?: Json | null
           hero_image?: string | null
           id?: string

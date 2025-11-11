@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, X, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Upload, X, Loader2, Pencil, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { z } from "zod";
 
 const categorySchema = z.object({
@@ -49,7 +49,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("display_order", { ascending: true });
       
       if (error) throw error;
       return data;
@@ -119,6 +119,38 @@ const Admin = () => {
       toast.error(error.message);
     },
   });
+
+  const moveCategory = async (categoryId: string, direction: "up" | "down") => {
+    if (!categories) return;
+    
+    const currentIndex = categories.findIndex((c) => c.id === categoryId);
+    if (currentIndex === -1) return;
+    
+    const swapIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (swapIndex < 0 || swapIndex >= categories.length) return;
+    
+    const currentCategory = categories[currentIndex];
+    const swapCategory = categories[swapIndex];
+    
+    // Swap display_order values
+    const { error: error1 } = await supabase
+      .from("categories")
+      .update({ display_order: swapCategory.display_order })
+      .eq("id", currentCategory.id);
+    
+    const { error: error2 } = await supabase
+      .from("categories")
+      .update({ display_order: currentCategory.display_order })
+      .eq("id", swapCategory.id);
+    
+    if (error1 || error2) {
+      toast.error("Failed to reorder categories");
+      return;
+    }
+    
+    queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+    toast.success("Category order updated");
+  };
 
   const resetForm = () => {
     setFormData({
@@ -389,7 +421,7 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {categories?.map((category) => (
+                  {categories?.map((category, index) => (
                     <div
                       key={category.id}
                       className="border rounded-lg p-4 flex justify-between items-start"
@@ -408,6 +440,24 @@ const Admin = () => {
                         </span>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => moveCategory(category.id, "up")}
+                          disabled={index === 0}
+                          title="Move up"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => moveCategory(category.id, "down")}
+                          disabled={index === categories.length - 1}
+                          title="Move down"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="icon"
