@@ -14,7 +14,7 @@ const CategoryCard = ({ title, description, image, slug }: CategoryCardProps) =>
       to={`/categories/${slug}`}
       className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-smooth"
     >
-      <div className="aspect-[4/5] relative">
+      <div className="aspect-[1/1] relative">
         <img 
           src={image} 
           alt={title}
