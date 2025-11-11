@@ -95,7 +95,7 @@ CHOOSE YOUR ESCAPE</h2>
 
           {isLoading ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div> : <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-3">
+            </div> : <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
               {categories?.map(category => <CategoryCard key={category.slug} title={category.name} description={category.intro_rich_text || ""} image={category.hero_image || fallbackImages[category.slug] || ""} slug={category.slug} />)}
             </div>}
         </section>
