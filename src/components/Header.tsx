@@ -41,7 +41,7 @@ const Header = () => {
         // Scrolling down & past threshold - hide
         setIsVisible(false);
       } else if (currentScrollY < lastScrollY) {
-        // Scrolling up - show
+        // Scrolling up - show immediately
         setIsVisible(true);
       }
       
@@ -50,13 +50,13 @@ const Header = () => {
     };
 
     handleScroll();
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHomePage, lastScrollY]);
 
   const headerClasses = isHomePage && !isScrolled
-    ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-300 ${isVisible ? 'top-0' : '-top-full'}`
-    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 ${isVisible ? 'top-0' : '-top-full'}`;
+    ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? 'top-0' : '-top-full'}`
+    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ${isVisible ? 'top-0' : '-top-full'}`;
 
   const textClasses = isHomePage && !isScrolled
     ? "text-white"
