@@ -10,6 +10,8 @@ const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const {
     user,
     role,
@@ -28,18 +30,33 @@ const Header = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.scrollY > 80;
+      const currentScrollY = window.scrollY;
+      const scrolled = currentScrollY > 80;
+      
+      // Show/hide header based on scroll direction
+      if (currentScrollY < 10) {
+        // Always show at top
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past threshold - hide
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+      
       setIsScrolled(isHomePage ? scrolled : true);
+      setLastScrollY(currentScrollY);
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomePage]);
+  }, [isHomePage, lastScrollY]);
 
   const headerClasses = isHomePage && !isScrolled
-    ? "fixed top-0 left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200"
-    : "fixed top-0 left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200";
+    ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-300 ${isVisible ? 'top-0' : '-top-full'}`
+    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 ${isVisible ? 'top-0' : '-top-full'}`;
 
   const textClasses = isHomePage && !isScrolled
     ? "text-white"
