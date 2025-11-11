@@ -10,38 +10,43 @@ import { Link } from "react-router-dom";
 import CategoryFilters, { FilterState } from "@/components/category/CategoryFilters";
 import ExperienceMap from "@/components/category/ExperienceMap";
 import { useState, useMemo } from "react";
-
 const Category = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const {
+    slug
+  } = useParams<{
+    slug: string;
+  }>();
   const [showMap, setShowMap] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "recommended",
     priceRange: [0, 1000],
-    partySize: 2,
+    partySize: 2
   });
-  
-  const { data: category, isLoading: categoryLoading } = useQuery({
+  const {
+    data: category,
+    isLoading: categoryLoading
+  } = useQuery({
     queryKey: ["category", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("slug", slug)
-        .eq("status", "published")
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from("categories").select("*").eq("slug", slug).eq("status", "published").single();
       if (error) throw error;
       return data;
     },
-    enabled: !!slug,
+    enabled: !!slug
   });
-  
-  const { data: experiences, isLoading: experiencesLoading } = useQuery({
+  const {
+    data: experiences,
+    isLoading: experiencesLoading
+  } = useQuery({
     queryKey: ["category-experiences", category?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experiences")
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from("experiences").select(`
           *,
           hotels (
             id,
@@ -51,29 +56,24 @@ const Category = () => {
             latitude,
             longitude
           )
-        `)
-        .eq("category_id", category?.id)
-        .eq("status", "published");
-      
+        `).eq("category_id", category?.id).eq("status", "published");
       if (error) throw error;
       return data;
     },
-    enabled: !!category?.id,
+    enabled: !!category?.id
   });
-
   const filteredExperiences = useMemo(() => {
     if (!experiences) return [];
-
     let filtered = [...experiences];
 
     // Filter by price
-    filtered = filtered.filter((exp) => {
+    filtered = filtered.filter(exp => {
       const price = Number(exp.base_price);
       return price >= filters.priceRange[0] && price <= filters.priceRange[1];
     });
 
     // Filter by party size
-    filtered = filtered.filter((exp) => {
+    filtered = filtered.filter(exp => {
       return exp.min_party <= filters.partySize && exp.max_party >= filters.partySize;
     });
 
@@ -88,21 +88,15 @@ const Category = () => {
       default:
         break;
     }
-
     return filtered;
   }, [experiences, filters]);
-
   if (categoryLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
-
   if (!category) {
-    return (
-      <div className="min-h-screen flex flex-col">
+    return <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -113,30 +107,26 @@ const Category = () => {
           </div>
         </main>
         <Footer />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-1">
         {/* Immersive Hero Section */}
         <section className="relative h-[70vh] min-h-[600px] flex items-center">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${category.hero_image || '/placeholder.svg'})` }}
-          />
+          <div className="absolute inset-0 bg-cover bg-center" style={{
+          backgroundImage: `url(${category.hero_image || '/placeholder.svg'})`
+        }} />
           
           <div className="relative z-10 container text-white px-4 py-12">
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl">
               {/* Left side - Title */}
               <div>
-                <p className="text-sm uppercase tracking-widest mb-4 text-white/90">
+                <p className="text-sm uppercase tracking-widest mb-4 text-white/90 font-bold">
                   {category.name}
                 </p>
-                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold leading-tight uppercase">
+                <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight uppercase lg:text-4xl text-slate-50">
                   {category.intro_rich_text?.split('.')[0] || category.name}
                 </h1>
               </div>
@@ -147,26 +137,18 @@ const Category = () => {
                   {category.intro_rich_text}
                 </p>
                 
-                {category.bullets && category.bullets.length > 0 && (
-                  <div className="space-y-3">
-                    {category.bullets.map((bullet, index) => (
-                      <p key={index} className="text-base md:text-lg">
+                {category.bullets && category.bullets.length > 0 && <div className="space-y-3">
+                    {category.bullets.map((bullet, index) => <p key={index} className="text-base md:text-lg">
                         {bullet}
-                      </p>
-                    ))}
-                  </div>
-                )}
+                      </p>)}
+                  </div>}
               </div>
             </div>
           </div>
         </section>
 
         {/* Filters */}
-        <CategoryFilters
-          onFilterChange={setFilters}
-          onShowMapToggle={setShowMap}
-          showMap={showMap}
-        />
+        <CategoryFilters onFilterChange={setFilters} onShowMapToggle={setShowMap} showMap={showMap} />
 
         {/* Experiences List with Optional Map */}
         <section className="container py-8">
@@ -182,44 +164,32 @@ const Category = () => {
                 </p>
               </div>
 
-              {experiencesLoading ? (
-                <div className="text-center py-12">
+              {experiencesLoading ? <div className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                </div>
-              ) : filteredExperiences.length === 0 ? (
-                <div className="text-center py-12">
+                </div> : filteredExperiences.length === 0 ? <div className="text-center py-12">
                   <p className="text-muted-foreground mb-4">Aucune expérience ne correspond à vos critères.</p>
                   <Button variant="outline" onClick={() => setFilters({
-                    sortBy: "recommended",
-                    priceRange: [0, 1000],
-                    partySize: 2,
-                  })}>
+                sortBy: "recommended",
+                priceRange: [0, 1000],
+                partySize: 2
+              })}>
                     Réinitialiser les filtres
                   </Button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {filteredExperiences.map((experience) => (
-                    <Link key={experience.id} to={`/experiences/${experience.slug}`}>
+                </div> : <div className="space-y-6">
+                  {filteredExperiences.map(experience => <Link key={experience.id} to={`/experiences/${experience.slug}`}>
                       <Card className="overflow-hidden hover:shadow-strong transition-smooth group">
                         <div className="grid md:grid-cols-[300px_1fr] gap-6">
                           <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto">
-                            <img
-                              src={experience.hero_image || "/placeholder.svg"}
-                              alt={experience.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
+                            <img src={experience.hero_image || "/placeholder.svg"} alt={experience.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           </div>
                           <CardContent className="p-6 flex flex-col justify-between">
                             <div>
                               <h3 className="font-serif text-2xl font-bold mb-2">
                                 {experience.title}
                               </h3>
-                              {experience.subtitle && (
-                                <p className="text-muted-foreground mb-4">
+                              {experience.subtitle && <p className="text-muted-foreground mb-4">
                                   {experience.subtitle}
-                                </p>
-                              )}
+                                </p>}
                               
                               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
                                 <div className="flex items-center gap-2">
@@ -252,25 +222,19 @@ const Category = () => {
                           </CardContent>
                         </div>
                       </Card>
-                    </Link>
-                  ))}
-                </div>
-              )}
+                    </Link>)}
+                </div>}
             </div>
 
             {/* Map */}
-            {showMap && (
-              <div className="hidden lg:block">
+            {showMap && <div className="hidden lg:block">
                 <ExperienceMap experiences={filteredExperiences} />
-              </div>
-            )}
+              </div>}
           </div>
         </section>
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Category;
