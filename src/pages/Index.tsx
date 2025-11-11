@@ -155,24 +155,24 @@ CHOOSE YOUR ESCAPE</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <img src={iconHeart} alt="Heart icon" className="h-20 w-20" />
+                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <img src={iconHeart} alt="Heart icon" className="h-28 w-28" />
                 </div>
                 <h3 className="font-sans text-xl font-bold mb-2 text-primary">Craft your stay</h3>
                 <p className="text-muted-foreground">Explore experiences that speak to your mood, from sunrise yoga to desert stargazing.</p>
               </div>
               
               <div className="text-center">
-                <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <img src={iconSparkles} alt="Sparkles icon" className="h-20 w-20" />
+                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <img src={iconSparkles} alt="Sparkles icon" className="h-28 w-28" />
                 </div>
                 <h3 className="font-sans text-xl font-bold mb-2 text-primary">Make it yours</h3>
                 <p className="text-muted-foreground">Choose your stay and add the touches that make it unforgettable.</p>
               </div>
               
               <div className="text-center">
-                <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <img src={iconSuitcase} alt="Suitcase icon" className="h-20 w-20" />
+                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <img src={iconSuitcase} alt="Suitcase icon" className="h-28 w-28" />
                 </div>
                 <h3 className="font-sans text-xl font-bold mb-2 text-primary">Book & get ready</h3>
                 <p className="text-muted-foreground">Secure your spot and start dreaming, your STAYMAKOM is waiting.</p>
