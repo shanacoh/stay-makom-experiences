@@ -43,7 +43,6 @@ const Index = () => {
       return data;
     }
   });
-
   const {
     data: latestExperiences,
     isLoading: isLoadingExperiences
@@ -53,12 +52,9 @@ const Index = () => {
       const {
         data,
         error
-      } = await supabase
-        .from("experiences")
-        .select("*, hotels(name, city, region)")
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(3);
+      } = await supabase.from("experiences").select("*, hotels(name, city, region)").eq("status", "published").order("created_at", {
+        ascending: false
+      }).limit(3);
       if (error) throw error;
       return data;
     }
@@ -154,9 +150,7 @@ CHOOSE YOUR ESCAPE</h2>
         backgroundColor: '#FAF8F5'
       }}>
           <div className="container">
-            <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] text-center mb-12">
-              How It Works
-            </h2>
+            <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] text-center mb-12">Israel... differently</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
@@ -197,25 +191,14 @@ CHOOSE YOUR ESCAPE</h2>
             </Button>
           </div>
 
-          {isLoadingExperiences ? (
-            <div className="text-center py-12">
+          {isLoadingExperiences ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {latestExperiences?.map((experience) => (
-                <div
-                  key={experience.id}
-                  className="group cursor-pointer"
-                  onClick={() => window.location.href = `/experience/${experience.slug}`}
-                >
+            </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {latestExperiences?.map(experience => <div key={experience.id} className="group cursor-pointer" onClick={() => window.location.href = `/experience/${experience.slug}`}>
                   <div className="relative h-[400px] rounded-2xl overflow-hidden mb-4">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                      style={{
-                        backgroundImage: `url(${experience.hero_image || desertHotelPool})`
-                      }}
-                    />
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{
+                backgroundImage: `url(${experience.hero_image || desertHotelPool})`
+              }} />
                     <div className="absolute inset-0 bg-black/30" />
                     <div className="absolute bottom-0 left-0 p-6">
                       <h3 className="text-white font-bold text-3xl uppercase tracking-tight">
@@ -233,11 +216,9 @@ CHOOSE YOUR ESCAPE</h2>
                       {experience.hotels?.name}
                     </h4>
                     
-                    {experience.subtitle && (
-                      <p className="text-sm text-muted-foreground">
+                    {experience.subtitle && <p className="text-sm text-muted-foreground">
                         {experience.subtitle}
-                      </p>
-                    )}
+                      </p>}
                     
                     <div className="flex items-baseline gap-2">
                       <span className="font-bold text-xl">
@@ -248,10 +229,8 @@ CHOOSE YOUR ESCAPE</h2>
                       </span>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </section>
       </main>
 
