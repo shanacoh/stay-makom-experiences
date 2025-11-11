@@ -84,18 +84,18 @@ CHOOSE YOUR ESCAPE</h2>
         </section>
 
         {/* Desert Hero Section */}
-        <section className="relative h-[500px] md:h-[600px] flex items-center justify-center">
+        <section className="relative h-[500px] md:h-[600px] flex items-start justify-start">
           <div className="absolute inset-0 bg-cover bg-center" style={{
           backgroundImage: `url(${desertHero})`
         }} />
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-white/20" />
           
-          <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-            <p className="text-sm md:text-base font-medium tracking-widest uppercase mb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="relative z-10 text-left text-foreground px-4 pt-12 md:pt-16 max-w-4xl ml-2 sm:ml-4 md:ml-8 lg:ml-[1cm]">
+            <p className="text-sm md:text-base font-medium tracking-widest uppercase mb-2 animate-in fade-in slide-in-from-bottom-4 duration-1000">
               A NEW WAY TO EXPLORE ISRAEL
             </p>
-            <h2 className="font-sans md:text-7xl mb-8 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 text-2xl font-bold text-slate-50">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that fl like nowhere else.</h2>
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" onClick={() => setContactDialogOpen(true)}>
+            <h2 className="font-sans md:text-7xl mb-4 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 text-2xl font-bold">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that fl like nowhere else.</h2>
+            <Button size="lg" className="bg-white hover:bg-black text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" onClick={() => setContactDialogOpen(true)}>
               Register for a chance to win your next trip
             </Button>
           </div>
