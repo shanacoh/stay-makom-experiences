@@ -78,9 +78,7 @@ const Index = () => {
               <RotatingText words={categories?.map(cat => cat.name) || ["Romance", "Adventure", "Family"]} interval={2500} />
             </h1>
             
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white uppercase tracking-wide font-medium shadow-strong animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-              Start Exploring
-            </Button>
+            
           </div>
         </section>
 
