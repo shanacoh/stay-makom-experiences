@@ -114,34 +114,28 @@ const Category = () => {
       
       <main className="flex-1">
         {/* Immersive Hero Section */}
-        <section className="relative h-[70vh] min-h-[600px] flex items-center">
+        <section className="relative h-[70vh] min-h-[600px] flex items-end">
           <div className="absolute inset-0 bg-cover bg-center" style={{
           backgroundImage: `url(${category.hero_image || '/placeholder.svg'})`
         }} />
           
           <div className="relative z-10 container text-white px-4 py-12">
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl">
-              {/* Left side - Title */}
-              <div>
-                <p className="text-sm uppercase tracking-widest mb-4 text-white/90 font-bold">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end max-w-7xl mx-auto">
+              {/* Left side - Category name and Title */}
+              <div className="space-y-4">
+                <p className="text-sm uppercase tracking-widest text-white/90 font-bold">
                   {category.name}
                 </p>
-                <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight uppercase lg:text-4xl text-slate-50">
+                <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight uppercase text-white">
                   {category.intro_rich_text?.split('.')[0] || category.name}
                 </h1>
               </div>
               
-              {/* Right side - Description */}
-              <div className="space-y-6">
-                <p className="text-lg md:text-xl leading-relaxed">
+              {/* Right side - Description only */}
+              <div>
+                <p className="text-lg md:text-xl leading-relaxed text-white">
                   {category.intro_rich_text}
                 </p>
-                
-                {category.bullets && category.bullets.length > 0 && <div className="space-y-3">
-                    {category.bullets.map((bullet, index) => <p key={index} className="text-base md:text-lg">
-                        {bullet}
-                      </p>)}
-                  </div>}
               </div>
             </div>
           </div>
