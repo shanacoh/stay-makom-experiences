@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
+import { User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 const Header = () => {
   const location = useLocation();
@@ -125,9 +126,7 @@ const Header = () => {
               </Link>
             </Button>}
           
-          <Button variant="ghost" size="icon" className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}>
-            <Menu className="h-5 w-5" />
-          </Button>
+          <HamburgerMenu isScrolled={isScrolled} />
         </div>
       </div>
     </header>;
