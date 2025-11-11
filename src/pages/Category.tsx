@@ -123,34 +123,41 @@ const Category = () => {
       
       <main className="flex-1">
         {/* Immersive Hero Section */}
-        <section className="relative h-[70vh] min-h-[600px] flex items-center justify-center">
+        <section className="relative h-[70vh] min-h-[600px] flex items-center">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${category.hero_image || '/placeholder.svg'})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
           
-          <div className="relative z-10 container text-white px-4 max-w-4xl">
-            <p className="text-sm uppercase tracking-widest mb-4 text-white/80">
-              {category.name}
-            </p>
-            <h1 className="font-serif text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              {category.intro_rich_text?.split('.')[0] || category.name}
-            </h1>
-            <p className="text-xl md:text-2xl leading-relaxed text-white/90 max-w-2xl">
-              {category.intro_rich_text}
-            </p>
-            
-            {category.bullets && category.bullets.length > 0 && (
-              <div className="flex flex-wrap gap-6 mt-12">
-                {category.bullets.map((bullet, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="text-primary text-xl">•</span>
-                    <span className="text-base">{bullet}</span>
-                  </div>
-                ))}
+          <div className="relative z-10 container text-white px-4 py-12">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl">
+              {/* Left side - Title */}
+              <div>
+                <p className="text-sm uppercase tracking-widest mb-4 text-white/90">
+                  {category.name}
+                </p>
+                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold leading-tight uppercase">
+                  {category.intro_rich_text?.split('.')[0] || category.name}
+                </h1>
               </div>
-            )}
+              
+              {/* Right side - Description */}
+              <div className="space-y-6">
+                <p className="text-lg md:text-xl leading-relaxed">
+                  {category.intro_rich_text}
+                </p>
+                
+                {category.bullets && category.bullets.length > 0 && (
+                  <div className="space-y-3">
+                    {category.bullets.map((bullet, index) => (
+                      <p key={index} className="text-base md:text-lg">
+                        {bullet}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
