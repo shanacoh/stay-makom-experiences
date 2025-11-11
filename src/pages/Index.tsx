@@ -184,10 +184,10 @@ const Index = () => {
         <section className="container py-20">
           <div className="flex justify-between items-center mb-8">
             <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em]">
-              Toutes les nouveautés
+              Latest Experiences
             </h2>
             <Button variant="link" className="text-foreground underline underline-offset-4 text-base">
-              Voir les expériences →
+              View all experiences →
             </Button>
           </div>
 
@@ -220,14 +220,14 @@ const Index = () => {
                         {experience.subtitle}
                       </p>}
                     
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-bold text-xl">
-                        {experience.base_price}€
-                      </span>
-                      <span className="text-muted-foreground">
-                        / {experience.base_price_type === 'per_person' ? 'personne' : 'séjour'}
-                      </span>
-                    </div>
+                     <div className="flex items-baseline gap-2">
+                       <span className="font-bold text-xl">
+                         {experience.base_price}€
+                       </span>
+                       <span className="text-muted-foreground">
+                         / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
+                       </span>
+                     </div>
                   </div>
                 </div>)}
             </div>}

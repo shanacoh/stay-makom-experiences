@@ -151,23 +151,23 @@ const Category = () => {
             <div>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold mb-1">
-                  {filteredExperiences.length} expérience{filteredExperiences.length !== 1 ? 's' : ''} disponible{filteredExperiences.length !== 1 ? 's' : ''}
+                  {filteredExperiences.length} experience{filteredExperiences.length !== 1 ? 's' : ''} available
                 </h2>
                 <p className="text-muted-foreground">
-                  Découvrez des séjours extraordinaires
+                  Discover extraordinary stays
                 </p>
               </div>
 
               {experiencesLoading ? <div className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                 </div> : filteredExperiences.length === 0 ? <div className="text-center py-12">
-                  <p className="text-muted-foreground mb-4">Aucune expérience ne correspond à vos critères.</p>
+                  <p className="text-muted-foreground mb-4">No experiences match your criteria.</p>
                   <Button variant="outline" onClick={() => setFilters({
                 sortBy: "recommended",
                 priceRange: [0, 1000],
                 partySize: 2
               })}>
-                    Réinitialiser les filtres
+                    Reset filters
                   </Button>
                 </div> : <div className="space-y-6">
                   {filteredExperiences.map(experience => <Link key={experience.id} to={`/experiences/${experience.slug}`}>
@@ -196,22 +196,22 @@ const Category = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Users className="h-4 w-4" />
-                                  <span>{experience.min_party}-{experience.max_party} personnes</span>
+                                  <span>{experience.min_party}-{experience.max_party} guests</span>
                                 </div>
                               </div>
                             </div>
                             
                             <div className="flex items-center justify-between pt-4 border-t border-border">
                               <div className="flex items-baseline gap-1">
-                                <span className="text-sm text-muted-foreground">À partir de</span>
+                                <span className="text-sm text-muted-foreground">From</span>
                                 <span className="font-serif text-3xl font-bold text-primary">
                                   ${experience.base_price}
                                 </span>
                                 <span className="text-sm text-muted-foreground">
-                                  {experience.base_price_type === "per_person" ? "/pers" : ""}
+                                  {experience.base_price_type === "per_person" ? "/person" : ""}
                                 </span>
                               </div>
-                              <Button variant="outline">Voir les détails</Button>
+                              <Button variant="outline">View details</Button>
                             </div>
                           </CardContent>
                         </div>

@@ -71,7 +71,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
                     format(dateRange.from, "d MMM yyyy", { locale: fr })
                   )
                 ) : (
-                  <span>Quand ?</span>
+                  <span>When?</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -95,13 +95,13 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
             onValueChange={(value) => handleFilterUpdate("sortBy", value)}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Trier par" />
+              <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recommended">Recommandé</SelectItem>
-              <SelectItem value="price_asc">Prix croissant</SelectItem>
-              <SelectItem value="price_desc">Prix décroissant</SelectItem>
-              <SelectItem value="duration">Durée</SelectItem>
+              <SelectItem value="recommended">Recommended</SelectItem>
+              <SelectItem value="price_asc">Price: Low to High</SelectItem>
+              <SelectItem value="price_desc">Price: High to Low</SelectItem>
+              <SelectItem value="duration">Duration</SelectItem>
             </SelectContent>
           </Select>
 
@@ -109,16 +109,16 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
             <SheetTrigger asChild>
               <Button variant="outline" size="default">
                 <Filter className="h-4 w-4 mr-2" />
-                Filtres
+                Filters
               </Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Filtrer les expériences</SheetTitle>
+                <SheetTitle>Filter experiences</SheetTitle>
               </SheetHeader>
               <div className="space-y-6 mt-6">
                 <div>
-                  <label className="text-sm font-medium mb-3 block">Budget (par personne)</label>
+                  <label className="text-sm font-medium mb-3 block">Budget (per person)</label>
                   <Slider
                     min={0}
                     max={1000}
@@ -134,7 +134,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-3 block">Nombre de personnes</label>
+                  <label className="text-sm font-medium mb-3 block">Number of guests</label>
                   <Select
                     value={filters.partySize.toString()}
                     onValueChange={(value) => handleFilterUpdate("partySize", parseInt(value))}
@@ -145,7 +145,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
                     <SelectContent>
                       {[1, 2, 3, 4, 5, 6].map((size) => (
                         <SelectItem key={size} value={size.toString()}>
-                          {size} {size === 1 ? "personne" : "personnes"}
+                          {size} {size === 1 ? "guest" : "guests"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -161,7 +161,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
           onClick={() => onShowMapToggle?.(!showMap)}
         >
           <MapPin className="h-4 w-4 mr-2" />
-          {showMap ? "Masquer la carte" : "Afficher la carte"}
+          {showMap ? "Hide map" : "Show map"}
         </Button>
       </div>
     </div>

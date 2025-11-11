@@ -34,8 +34,8 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
       }
       if (prev.length >= 3) {
         toast({
-          title: "Maximum atteint",
-          description: "Vous pouvez sélectionner maximum 3 catégories",
+          title: "Maximum reached",
+          description: "You can select up to 3 categories",
           variant: "destructive",
         });
         return prev;
@@ -49,15 +49,15 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
     if (checked) {
       if (selectedCategories.length >= 3) {
         toast({
-          title: "Maximum atteint",
-          description: "Vous pouvez sélectionner maximum 3 catégories",
+          title: "Maximum reached",
+          description: "You can select up to 3 categories",
           variant: "destructive",
         });
         return;
       }
-      setSelectedCategories(prev => [...prev, "Autres"]);
+      setSelectedCategories(prev => [...prev, "Other"]);
     } else {
-      setSelectedCategories(prev => prev.filter(c => c !== "Autres"));
+      setSelectedCategories(prev => prev.filter(c => c !== "Other"));
       setOtherText("");
     }
   };
@@ -100,7 +100,7 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
             <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" />
           </div>
           <div className="space-y-3">
-            <Label>Quel type d'escape vous intéresse le plus? (Max 3)</Label>
+            <Label>What type of escape interests you the most? (Max 3)</Label>
             <div className="grid grid-cols-2 gap-3">
               {categories.map((category) => (
                 <div key={category} className="flex items-center space-x-2">
@@ -127,13 +127,13 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
                   htmlFor="autres"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  Autres
+                  Other
                 </label>
               </div>
               {showOtherInput && (
                 <div className="col-span-2">
                   <Input
-                    placeholder="Précisez votre idée..."
+                    placeholder="Please specify..."
                     value={otherText}
                     onChange={(e) => setOtherText(e.target.value)}
                   />
