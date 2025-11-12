@@ -60,60 +60,58 @@ const ExtrasSelector = ({
     onExtrasChange(newExtras, total);
   };
 
+  const getPricingLabel = (extra: any) => {
+    const typeMap = {
+      per_person: "/ personne",
+      per_night: "/ nuit",
+      per_booking: "/ séjour"
+    };
+    return typeMap[extra.pricing_type as keyof typeof typeMap] || "/ séjour";
+  };
+
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Add-ons (Optional)</label>
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-serif text-3xl font-bold mb-2">Extras</h2>
+        <p className="text-muted-foreground">Vous pourrez ajouter des extras à l'étape suivante</p>
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {extras.map((extra) => {
           const qty = selectedExtras[extra.id] || 0;
           const unitPrice = extra.price;
-          const subtotal = qty * unitPrice;
 
           return (
-            <Card key={extra.id} className="p-4">
-              <div className="flex justify-between items-start gap-4 mb-3">
-                <div className="flex-1">
-                  <p className="font-medium">{extra.name}</p>
-                  {extra.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {extra.description}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground mt-1">
-                    ${unitPrice} {extra.pricing_type === "per_person" && "per person"}
-                    {extra.pricing_type === "per_night" && "per night"}
-                    {extra.pricing_type === "per_booking" && "per booking"}
-                  </p>
-                </div>
-                {qty > 0 && (
-                  <p className="font-bold text-lg whitespace-nowrap">
-                    ${subtotal}
-                  </p>
-                )}
+            <button
+              key={extra.id}
+              onClick={() => updateQuantity(extra.id, qty > 0 ? -qty : 1)}
+              className="text-left p-6 bg-muted rounded-lg hover:bg-muted/80 transition-colors space-y-4"
+            >
+              <div className="w-16 h-16 flex items-center justify-center text-4xl">
+                {extra.name.toLowerCase().includes("champagne") && "🍾"}
+                {extra.name.toLowerCase().includes("rose") && "🌹"}
+                {extra.name.toLowerCase().includes("macaron") && "🤌"}
+                {extra.name.toLowerCase().includes("check-out") && "🏊"}
+                {!["champagne", "rose", "macaron", "check-out"].some(k => extra.name.toLowerCase().includes(k)) && "✨"}
               </div>
               
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => updateQuantity(extra.id, -1)}
-                  disabled={qty === 0}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center font-medium">{qty}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => updateQuantity(extra.id, 1)}
-                  disabled={qty >= (extra.max_qty || 10)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+              <div className="space-y-1">
+                <p className="text-base font-semibold">
+                  +{unitPrice}€ {getPricingLabel(extra)}
+                </p>
+                <p className="text-base">
+                  {extra.name}
+                </p>
               </div>
-            </Card>
+              
+              {qty > 0 && (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-sm font-medium text-primary">
+                    Ajouté ({qty})
+                  </p>
+                </div>
+              )}
+            </button>
           );
         })}
       </div>
