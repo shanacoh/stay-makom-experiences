@@ -10,6 +10,9 @@ import {
   DollarSign,
   FileText,
   CreditCard,
+  Star,
+  Wallet,
+  MessageSquare,
   Settings
 } from "lucide-react";
 
@@ -23,6 +26,9 @@ const navigation = [
   { name: "Pricing", href: "/hotel-admin/pricing", icon: DollarSign },
   { name: "Bookings", href: "/hotel-admin/bookings", icon: FileText },
   { name: "Billing", href: "/hotel-admin/billing", icon: CreditCard },
+  { name: "Reviews", href: "/hotel-admin/reviews", icon: Star },
+  { name: "Payments", href: "/hotel-admin/payments", icon: Wallet },
+  { name: "Contact & Support", href: "/hotel-admin/contact", icon: MessageSquare },
   { name: "Settings", href: "/hotel-admin/settings", icon: Settings },
 ];
 

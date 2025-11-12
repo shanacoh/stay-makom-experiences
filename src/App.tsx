@@ -22,6 +22,9 @@ import HotelCalendar from "./pages/hotel-admin/Calendar";
 import HotelPricing from "./pages/hotel-admin/Pricing";
 import HotelBookings from "./pages/hotel-admin/Bookings";
 import HotelBilling from "./pages/hotel-admin/Billing";
+import HotelReviews from "./pages/hotel-admin/Reviews";
+import HotelPayments from "./pages/hotel-admin/Payments";
+import HotelContact from "./pages/hotel-admin/Contact";
 import HotelSettings from "./pages/hotel-admin/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -71,9 +74,12 @@ const App = () => (
               <Route path="packages" element={<HotelPackages />} />
               <Route path="calendar" element={<HotelCalendar />} />
               <Route path="pricing" element={<HotelPricing />} />
-              <Route path="bookings" element={<HotelBookings />} />
-              <Route path="billing" element={<HotelBilling />} />
-              <Route path="settings" element={<HotelSettings />} />
+            <Route path="bookings" element={<HotelBookings />} />
+            <Route path="billing" element={<HotelBilling />} />
+            <Route path="reviews" element={<HotelReviews />} />
+            <Route path="payments" element={<HotelPayments />} />
+            <Route path="contact" element={<HotelContact />} />
+            <Route path="settings" element={<HotelSettings />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

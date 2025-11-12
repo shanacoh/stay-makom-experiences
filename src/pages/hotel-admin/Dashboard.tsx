@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, DollarSign, FileText } from "lucide-react";
+import { Loader2, Plus, DollarSign, FileText, Building2, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function HotelAdminDashboard() {
@@ -65,34 +65,77 @@ export default function HotelAdminDashboard() {
 
   return (
     <div className="p-8">
+      {/* Hotel Info Card */}
+      <Card className="mb-8">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-6">
+            <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center">
+              {hotelAdmin.hotels?.hero_image ? (
+                <img src={hotelAdmin.hotels.hero_image} alt={hotelAdmin.hotels.name} className="w-full h-full object-cover rounded-lg" />
+              ) : (
+                <Building2 className="h-12 w-12 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="font-serif text-3xl font-bold mb-1">{hotelAdmin.hotels?.name}</h1>
+                  <p className="text-muted-foreground">{hotelAdmin.hotels?.city}, {hotelAdmin.hotels?.region}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    hotelAdmin.hotels?.status === 'published' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {hotelAdmin.hotels?.status === 'published' ? '✅ Publié' : 'Non publié'}
+                  </span>
+                  <Button variant="outline" asChild size="sm">
+                    <Link to="/hotel-admin/property">Modifier</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="mb-8">
-        <h1 className="font-serif text-4xl font-bold mb-2">Dashboard</h1>
-        <p className="text-lg text-muted-foreground">{hotelAdmin.hotels?.name}</p>
+        <h2 className="font-serif text-2xl font-bold mb-2">Vue d'ensemble</h2>
+        <p className="text-muted-foreground">Aperçu de votre activité</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Demandes en attente</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{stats?.pending || 0}</p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold">{stats?.pending || 0}</p>
+              <Button variant="link" size="sm" asChild>
+                <Link to="/hotel-admin/bookings">Voir</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Confirmed Bookings</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Confirmées ce mois</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{stats?.confirmed || 0}</p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold">{stats?.confirmed || 0}</p>
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Total Experiences</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Expériences actives</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats?.experiences || 0}</p>
@@ -100,11 +143,12 @@ export default function HotelAdminDashboard() {
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Revenus générés</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">${stats?.revenue.toFixed(2) || 0}</p>
+            <p className="text-xs text-muted-foreground mt-1">Net après commission</p>
           </CardContent>
         </Card>
       </div>
@@ -112,37 +156,37 @@ export default function HotelAdminDashboard() {
       {/* Quick Actions */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>Actions rapides</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
           <Button asChild>
             <Link to="/hotel-admin/experiences">
               <Plus className="mr-2 h-4 w-4" />
-              Create Experience
+              Créer une expérience
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/hotel-admin/pricing">
+            <Link to="/hotel-admin/calendar">
               <DollarSign className="mr-2 h-4 w-4" />
-              Update Prices
+              Gérer disponibilités & prix
             </Link>
           </Button>
           <Button variant="outline" asChild>
             <Link to="/hotel-admin/bookings">
               <FileText className="mr-2 h-4 w-4" />
-              View Bookings
+              Voir les réservations
             </Link>
           </Button>
         </CardContent>
       </Card>
 
-      {/* Notifications placeholder */}
+      {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>Activité récente</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No recent activity to display.</p>
+          <p className="text-sm text-muted-foreground">Aucune activité récente à afficher.</p>
         </CardContent>
       </Card>
     </div>
