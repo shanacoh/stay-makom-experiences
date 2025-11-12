@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,9 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ExperienceForm } from "@/components/hotel-admin/ExperienceForm";
 
 export default function HotelExperiences() {
   const { user } = useAuth();
+  const [showForm, setShowForm] = useState(false);
+  const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
 
   const { data: hotelAdmin } = useQuery({
     queryKey: ["hotel-admin", user?.id],
@@ -28,6 +32,20 @@ export default function HotelExperiences() {
       return data;
     },
     enabled: !!user?.id,
+  });
+
+  const { data: hotel } = useQuery({
+    queryKey: ["hotel", hotelAdmin?.hotel_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hotels")
+        .select("name")
+        .eq("id", hotelAdmin?.hotel_id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!hotelAdmin?.hotel_id,
   });
 
   const { data: experiences, isLoading } = useQuery({
@@ -44,11 +62,25 @@ export default function HotelExperiences() {
     enabled: !!hotelAdmin?.hotel_id,
   });
 
+  if (showForm && hotelAdmin?.hotel_id && hotel?.name) {
+    return (
+      <ExperienceForm
+        hotelId={hotelAdmin.hotel_id}
+        hotelName={hotel.name}
+        experienceId={editingExperienceId || undefined}
+        onClose={() => {
+          setShowForm(false);
+          setEditingExperienceId(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-serif text-4xl font-bold">Experiences</h1>
-        <Button>
+        <Button onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Create Experience
         </Button>
@@ -102,7 +134,14 @@ export default function HotelExperiences() {
                       {new Date(exp.updated_at!).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingExperienceId(exp.id);
+                          setShowForm(true);
+                        }}
+                      >
                         Edit
                       </Button>
                     </TableCell>
