@@ -89,7 +89,8 @@ const App = () => (
             >
               <Route index element={<AdminDashboard />} />
               <Route path="categories" element={<AdminCategories />} />
-              <Route path="categories/:id" element={<CategoryEditor />} />
+              <Route path="categories/new" element={<CategoryEditor />} />
+              <Route path="categories/edit/:id" element={<CategoryEditor />} />
               <Route path="hotels" element={<AdminHotels />} />
               <Route path="reservations" element={<AdminReservations />} />
               <Route path="users" element={<AdminUsers />} />
