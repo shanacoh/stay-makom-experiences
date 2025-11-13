@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import corporateHero from "@/assets/corporate-hero.jpg";
 
 const formSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
@@ -102,7 +103,7 @@ export default function Companies() {
       {/* Hero Section */}
       <section className="relative h-[70vh] overflow-hidden">
         <img 
-          src="https://images.unsplash.com/photo-1511578314322-379afb476865"
+          src={corporateHero}
           alt="Team retreat moment"
           className="absolute inset-0 w-full h-full object-cover"
         />
