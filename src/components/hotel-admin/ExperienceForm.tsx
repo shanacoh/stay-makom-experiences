@@ -57,11 +57,11 @@ export function ExperienceForm({
   experienceId,
 }: ExperienceFormProps) {
   const [includes, setIncludes] = useState<string[]>([]);
-  const [notIncludes, setNotIncludes] = useState<string[]>([]);
   const [newInclude, setNewInclude] = useState("");
-  const [newNotInclude, setNewNotInclude] = useState("");
-  const [heroImage, setHeroImage] = useState<string | null>(null);
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [heroImage, setHeroImage] = useState<File | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [status, setStatus] = useState<"draft" | "pending" | "published">("draft");
 
   const {
@@ -89,7 +89,7 @@ export function ExperienceForm({
   const canPublish =
     title &&
     description?.length >= 100 &&
-    heroImage &&
+    heroImagePreview &&
     basePrice > 0;
 
   const addIncludeItem = () => {
@@ -99,23 +99,44 @@ export function ExperienceForm({
     }
   };
 
-  const addNotIncludeItem = () => {
-    if (newNotInclude.trim()) {
-      setNotIncludes([...notIncludes, newNotInclude.trim()]);
-      setNewNotInclude("");
-    }
-  };
-
   const removeInclude = (index: number) => {
     setIncludes(includes.filter((_, i) => i !== index));
   };
 
-  const removeNotInclude = (index: number) => {
-    setNotIncludes(notIncludes.filter((_, i) => i !== index));
+  const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setHeroImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setHeroImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setGalleryImages([...galleryImages, ...files]);
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setGalleryPreviews(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryImages(galleryImages.filter((_, i) => i !== index));
+    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
   };
 
   const handleSaveDraft = async (data: ExperienceFormData) => {
-    console.log("Save as draft", { ...data, includes, notIncludes, heroImage, galleryImages });
+    console.log("Save as draft", { ...data, includes, heroImage, galleryImages });
     toast.success("Experience saved as draft");
   };
 
@@ -124,7 +145,7 @@ export function ExperienceForm({
       toast.error("Please fill all required fields before publishing");
       return;
     }
-    console.log("Publish", { ...data, includes, notIncludes, heroImage, galleryImages });
+    console.log("Publish", { ...data, includes, heroImage, galleryImages });
     setStatus("pending");
     toast.success("Experience submitted for approval");
   };
@@ -286,13 +307,120 @@ export function ExperienceForm({
           </CardContent>
         </Card>
 
-        {/* Bloc 2: What's Included */}
+        {/* Bloc 2: Images & Media */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Images & Media</CardTitle>
+            <CardDescription>Upload images to showcase your experience</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Hero Image * (Main image)</Label>
+              <input
+                type="file"
+                id="hero-image-input"
+                accept="image/*"
+                onChange={handleHeroImageChange}
+                className="hidden"
+              />
+              <div 
+                className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer mt-2"
+                onClick={() => document.getElementById('hero-image-input')?.click()}
+              >
+                {heroImagePreview ? (
+                  <div className="relative">
+                    <img 
+                      src={heroImagePreview} 
+                      alt="Hero preview" 
+                      className="max-h-64 mx-auto rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHeroImage(null);
+                        setHeroImagePreview(null);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PNG, JPG up to 10MB
+                    </p>
+                  </>
+                )}
+              </div>
+              {!heroImagePreview && (
+                <p className="text-sm text-destructive mt-1">Hero image is required</p>
+              )}
+            </div>
+
+            <div>
+              <Label>Gallery (6-8 images)</Label>
+              <input
+                type="file"
+                id="gallery-images-input"
+                accept="image/*"
+                multiple
+                onChange={handleGalleryImagesChange}
+                className="hidden"
+              />
+              <div 
+                className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer mt-2"
+                onClick={() => document.getElementById('gallery-images-input')?.click()}
+              >
+                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Click to upload multiple images
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Drag to reorder images
+                </p>
+              </div>
+              
+              {galleryPreviews.length > 0 && (
+                <div className="grid grid-cols-4 gap-4 mt-4">
+                  {galleryPreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={preview} 
+                        alt={`Gallery ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeGalleryImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bloc 3: What's Included */}
         <Card>
           <CardHeader>
             <CardTitle>What's Included</CardTitle>
-            <CardDescription>Define what is and isn't included in the experience</CardDescription>
+            <CardDescription>Define what is included in the experience</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent>
             <div>
               <Label>Includes</Label>
               <div className="flex gap-2 mt-2">
@@ -321,77 +449,29 @@ export function ExperienceForm({
                 ))}
               </div>
             </div>
-
-            <div>
-              <Label>Not Included</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  placeholder="e.g., Transportation"
-                  value={newNotInclude}
-                  onChange={(e) => setNewNotInclude(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addNotIncludeItem())}
-                />
-                <Button type="button" onClick={addNotIncludeItem} size="icon">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {notIncludes.map((item, index) => (
-                  <Badge key={index} variant="outline" className="gap-1">
-                    {item}
-                    <button
-                      type="button"
-                      onClick={() => removeNotInclude(index)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Bloc 3: Images & Media */}
+        {/* Bloc 4: Extras (Add-ons) */}
         <Card>
           <CardHeader>
-            <CardTitle>Images & Media</CardTitle>
-            <CardDescription>Upload images to showcase your experience</CardDescription>
+            <CardTitle>Extras (Add-ons)</CardTitle>
+            <CardDescription>
+              Link optional extras to this experience
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Hero Image * (Main image)</Label>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer mt-2">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  PNG, JPG up to 10MB
-                </p>
-              </div>
-              {!heroImage && (
-                <p className="text-sm text-destructive mt-1">Hero image is required</p>
-              )}
-            </div>
-
-            <div>
-              <Label>Gallery (6-8 images)</Label>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer mt-2">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Click to upload multiple images
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Drag to reorder images
-                </p>
-              </div>
-            </div>
+          <CardContent>
+            <Button type="button" variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Link Existing Extras
+            </Button>
+            <p className="text-sm text-muted-foreground mt-4">
+              You can create and manage extras in the Extras section
+            </p>
           </CardContent>
         </Card>
 
-        {/* Bloc 4: Pricing */}
+        {/* Bloc 5: Pricing */}
         <Card>
           <CardHeader>
             <CardTitle>Pricing</CardTitle>
@@ -456,25 +536,6 @@ export function ExperienceForm({
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Bloc 5: Extras (Add-ons) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Extras (Add-ons)</CardTitle>
-            <CardDescription>
-              Link optional extras to this experience
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button type="button" variant="outline">
-              <Plus className="mr-2 h-4 w-4" />
-              Link Existing Extras
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              You can create and manage extras in the Extras section
-            </p>
           </CardContent>
         </Card>
 
