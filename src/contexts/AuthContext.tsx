@@ -9,6 +9,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: AppRole | null;
+  roles: AppRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }, 0);
         } else {
           setRole(null);
+          setRoles([]);
         }
         
         setLoading(false);
@@ -64,11 +67,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .single();
+      .eq("user_id", userId);
     
-    if (data) {
-      setRole(data.role as AppRole);
+    if (data && data.length > 0) {
+      const userRoles = data.map(r => r.role as AppRole);
+      setRoles(userRoles);
+      
+      // Priority: admin > hotel_admin > customer
+      if (userRoles.includes("admin")) {
+        setRole("admin");
+      } else if (userRoles.includes("hotel_admin")) {
+        setRole("hotel_admin");
+      } else {
+        setRole("customer");
+      }
     }
   };
 
@@ -102,6 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setSession(null);
     setRole(null);
+    setRoles([]);
   };
 
   return (
@@ -110,6 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         session,
         role,
+        roles,
         loading,
         signIn,
         signUp,

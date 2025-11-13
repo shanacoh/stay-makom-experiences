@@ -16,6 +16,7 @@ const Header = () => {
   const {
     user,
     role,
+    roles,
     signOut
   } = useAuth();
   const navigate = useNavigate();
@@ -102,7 +103,16 @@ const Header = () => {
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  {roles.length > 0 && (
+                    <div className="font-medium text-foreground mb-1">
+                      Roles: {roles.join(", ")}
+                    </div>
+                  )}
+                  {user?.email}
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate(getDashboardLink())}>
                   {role === "admin" && <LayoutDashboard className="h-4 w-4 mr-2" />}
                   {role === "hotel_admin" && <Hotel className="h-4 w-4 mr-2" />}
