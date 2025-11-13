@@ -30,7 +30,8 @@ const experienceSchema = z.object({
   subtitle: z.string().optional(),
   category: z.string().min(1, "Category is required"),
   description: z.string().min(100, "Description must be at least 100 characters"),
-  duration: z.string().optional(),
+  min_nights: z.number().min(1).max(8).optional(),
+  max_nights: z.number().min(1).max(8).optional(),
   min_party: z.number().min(1).max(100),
   max_party: z.number().min(1).max(100),
   cancellation_policy: z.string().optional(),
@@ -258,14 +259,14 @@ export function ExperienceForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <Label htmlFor="duration">Duration (nights)</Label>
+                <Label htmlFor="min_nights">Minimum nights</Label>
                 <Select
-                  onValueChange={(value) => setValue("duration", value)}
+                  onValueChange={(value) => setValue("min_nights", parseInt(value))}
                 >
                   <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select number of nights" />
+                    <SelectValue placeholder="Select minimum" />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
                     <SelectItem value="1">1 night</SelectItem>
@@ -280,6 +281,29 @@ export function ExperienceForm({
                 </Select>
               </div>
 
+              <div>
+                <Label htmlFor="max_nights">Maximum nights</Label>
+                <Select
+                  onValueChange={(value) => setValue("max_nights", parseInt(value))}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select maximum" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="1">1 night</SelectItem>
+                    <SelectItem value="2">2 nights</SelectItem>
+                    <SelectItem value="3">3 nights</SelectItem>
+                    <SelectItem value="4">4 nights</SelectItem>
+                    <SelectItem value="5">5 nights</SelectItem>
+                    <SelectItem value="6">6 nights</SelectItem>
+                    <SelectItem value="7">7 nights</SelectItem>
+                    <SelectItem value="8">8 nights</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="min_party">Min participants *</Label>
                 <Input
