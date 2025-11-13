@@ -19,6 +19,7 @@ import Partners from "./pages/Partners";
 import Journal from "./pages/Journal";
 import JournalPost from "./pages/JournalPost";
 import Contact from "./pages/Contact";
+import About from "./pages/About";
 import { HotelAdminLayout } from "@/components/hotel-admin/HotelAdminLayout";
 import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/journal" element={<Journal />} />
             <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/experience/:slug" element={<Experience />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
