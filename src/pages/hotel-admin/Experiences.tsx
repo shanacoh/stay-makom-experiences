@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Copy } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,11 +14,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ExperienceForm } from "@/components/hotel-admin/ExperienceForm";
+import { toast } from "sonner";
 
 export default function HotelExperiences() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   const { data: hotelAdmin } = useQuery({
     queryKey: ["hotel-admin", user?.id],
@@ -61,6 +64,40 @@ export default function HotelExperiences() {
     },
     enabled: !!hotelAdmin?.hotel_id,
   });
+
+  const handleDuplicate = async (experienceId: string) => {
+    setDuplicatingId(experienceId);
+    try {
+      const { data: original, error: fetchError } = await supabase
+        .from("experiences")
+        .select("*")
+        .eq("id", experienceId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const { id, created_at, updated_at, slug, ...experienceData } = original;
+      
+      const { error: insertError } = await supabase
+        .from("experiences")
+        .insert({
+          ...experienceData,
+          title: `Copy of ${original.title}`,
+          slug: `${original.slug}-copy-${Date.now()}`,
+          status: "draft",
+        });
+
+      if (insertError) throw insertError;
+
+      toast.success("Experience duplicated successfully");
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelAdmin?.hotel_id] });
+    } catch (error) {
+      console.error("Error duplicating experience:", error);
+      toast.error("Failed to duplicate experience");
+    } finally {
+      setDuplicatingId(null);
+    }
+  };
 
   if (showForm) {
     if (isLoadingHotel || !hotelAdmin?.hotel_id) {
@@ -142,16 +179,30 @@ export default function HotelExperiences() {
                       {new Date(exp.updated_at!).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingExperienceId(exp.id);
-                          setShowForm(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingExperienceId(exp.id);
+                            setShowForm(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDuplicate(exp.id)}
+                          disabled={duplicatingId === exp.id}
+                        >
+                          {duplicatingId === exp.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
