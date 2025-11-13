@@ -38,6 +38,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminCategories from "./pages/admin/Categories";
 import CategoryEditor from "./pages/admin/CategoryEditor";
 import AdminHotels from "./pages/admin/Hotels";
+import AdminExperiences from "./pages/admin/Experiences";
 import AdminReservations from "./pages/admin/Reservations";
 import AdminUsers from "./pages/admin/Users";
 import AdminCustomers from "./pages/admin/Customers";
@@ -92,6 +93,7 @@ const App = () => (
               <Route path="categories/new" element={<CategoryEditor />} />
               <Route path="categories/edit/:id" element={<CategoryEditor />} />
               <Route path="hotels" element={<AdminHotels />} />
+              <Route path="experiences" element={<AdminExperiences />} />
               <Route path="reservations" element={<AdminReservations />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="customers" element={<AdminCustomers />} />
