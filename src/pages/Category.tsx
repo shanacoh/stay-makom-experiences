@@ -127,7 +127,7 @@ const Category = () => {
                   {category.name}
                 </p>
                 <h1 className="font-sans text-5xl font-bold leading-tight uppercase text-white md:text-4xl">
-                  {category.presentation_title || category.name}
+                  {(category as any).presentation_title || category.name}
                 </h1>
               </div>
               
