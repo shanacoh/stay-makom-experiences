@@ -46,8 +46,10 @@ const App = () => (
             <Route path="/gift-card" element={<GiftCard />} />
             <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
             <Route path="/companies" element={<Companies />} />
-            <Route path="/categories/:slug" element={<Category />} />
-            <Route path="/experiences/:slug" element={<Experience />} />
+            <Route path="/corporate" element={<Companies />} />
+            <Route path="/category/:slug" element={<Category />} />
+            <Route path="/experience/:slug" element={<Experience />} />
+            <Route path="/hotel/:slug" element={<Hotel />} />
             <Route path="/hotels/:slug" element={<Hotel />} />
             <Route
               path="/account"
