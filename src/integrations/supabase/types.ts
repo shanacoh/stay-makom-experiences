@@ -278,7 +278,9 @@ export type Database = {
           lead_time_days: number | null
           long_copy: string | null
           long_copy_he: string | null
+          max_nights: number | null
           max_party: number | null
+          min_nights: number | null
           min_party: number | null
           not_includes: string[] | null
           not_includes_he: string[] | null
@@ -313,7 +315,9 @@ export type Database = {
           lead_time_days?: number | null
           long_copy?: string | null
           long_copy_he?: string | null
+          max_nights?: number | null
           max_party?: number | null
+          min_nights?: number | null
           min_party?: number | null
           not_includes?: string[] | null
           not_includes_he?: string[] | null
@@ -348,7 +352,9 @@ export type Database = {
           lead_time_days?: number | null
           long_copy?: string | null
           long_copy_he?: string | null
+          max_nights?: number | null
           max_party?: number | null
+          min_nights?: number | null
           min_party?: number | null
           not_includes?: string[] | null
           not_includes_he?: string[] | null

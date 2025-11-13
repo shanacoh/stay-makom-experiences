@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 
 const experienceSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -78,6 +79,8 @@ export function ExperienceForm({
   } = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
+      min_nights: 1,
+      max_nights: 4,
       min_party: 2,
       max_party: 4,
       currency: "ILS",
@@ -90,6 +93,8 @@ export function ExperienceForm({
   const basePrice = watch("base_price");
   const title = watch("title");
   const description = watch("description");
+  const minNights = watch("min_nights") || 1;
+  const maxNights = watch("max_nights") || 4;
 
   const canPublish =
     title &&
@@ -410,48 +415,13 @@ export function ExperienceForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <Label htmlFor="min_nights">Minimum nights</Label>
-                <Select
-                  onValueChange={(value) => setValue("min_nights", parseInt(value))}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select minimum" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="1">1 night</SelectItem>
-                    <SelectItem value="2">2 nights</SelectItem>
-                    <SelectItem value="3">3 nights</SelectItem>
-                    <SelectItem value="4">4 nights</SelectItem>
-                    <SelectItem value="5">5 nights</SelectItem>
-                    <SelectItem value="6">6 nights</SelectItem>
-                    <SelectItem value="7">7 nights</SelectItem>
-                    <SelectItem value="8">8 nights</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="max_nights">Maximum nights</Label>
-                <Select
-                  onValueChange={(value) => setValue("max_nights", parseInt(value))}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select maximum" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background z-50">
-                    <SelectItem value="1">1 night</SelectItem>
-                    <SelectItem value="2">2 nights</SelectItem>
-                    <SelectItem value="3">3 nights</SelectItem>
-                    <SelectItem value="4">4 nights</SelectItem>
-                    <SelectItem value="5">5 nights</SelectItem>
-                    <SelectItem value="6">6 nights</SelectItem>
-                    <SelectItem value="7">7 nights</SelectItem>
-                    <SelectItem value="8">8 nights</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="mb-4">
+              <NightsRangeSelector
+                minValue={minNights}
+                maxValue={maxNights}
+                onMinChange={(value) => setValue("min_nights", value)}
+                onMaxChange={(value) => setValue("max_nights", value)}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
