@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +24,7 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Save, Rocket, Plus, X, Upload, GripVertical } from "lucide-react";
+import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const experienceSchema = z.object({
@@ -57,6 +59,7 @@ export function ExperienceForm({
   onClose,
   experienceId,
 }: ExperienceFormProps) {
+  const queryClient = useQueryClient();
   const [includes, setIncludes] = useState<string[]>([]);
   const [newInclude, setNewInclude] = useState("");
   const [heroImage, setHeroImage] = useState<File | null>(null);
@@ -64,6 +67,7 @@ export function ExperienceForm({
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [status, setStatus] = useState<"draft" | "pending" | "published">("draft");
+  const [isSaving, setIsSaving] = useState(false);
 
   const {
     register,
@@ -136,9 +140,93 @@ export function ExperienceForm({
     setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
   };
 
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+
+  const uploadImage = async (file: File, path: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${path}-${Date.now()}.${fileExt}`;
+      const filePath = `${hotelId}/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from("experience-images")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("experience-images")
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
+  };
+
   const handleSaveDraft = async (data: ExperienceFormData) => {
-    console.log("Save as draft", { ...data, includes, heroImage, galleryImages });
-    toast.success("Experience saved as draft");
+    setIsSaving(true);
+    try {
+      // Upload hero image
+      let heroImageUrl = null;
+      if (heroImage) {
+        heroImageUrl = await uploadImage(heroImage, "hero");
+        if (!heroImageUrl) {
+          toast.error("Failed to upload hero image");
+          return;
+        }
+      }
+
+      // Upload gallery images
+      const galleryUrls: string[] = [];
+      for (const image of galleryImages) {
+        const url = await uploadImage(image, "gallery");
+        if (url) galleryUrls.push(url);
+      }
+
+      // Create experience record
+      const slug = generateSlug(data.title);
+      const experienceData = {
+        hotel_id: hotelId,
+        title: data.title,
+        subtitle: data.subtitle || null,
+        category: data.category,
+        long_copy: data.description,
+        min_nights: data.min_nights,
+        max_nights: data.max_nights,
+        min_party: data.min_party,
+        max_party: data.max_party,
+        cancellation_policy: data.cancellation_policy || null,
+        base_price: data.base_price,
+        currency: data.currency,
+        base_price_type: data.base_price_type,
+        hero_image: heroImageUrl,
+        photos: galleryUrls.length > 0 ? galleryUrls : null,
+        includes: includes.length > 0 ? includes : null,
+        slug: `${slug}-${Date.now()}`,
+        status: "draft" as const,
+      };
+
+      const { error } = await supabase.from("experiences").insert(experienceData as any);
+
+      if (error) throw error;
+
+      toast.success("Experience saved as draft");
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelId] });
+      
+      if (onClose) onClose();
+    } catch (error) {
+      console.error("Error saving experience:", error);
+      toast.error("Failed to save experience");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handlePublish = async (data: ExperienceFormData) => {
@@ -146,9 +234,63 @@ export function ExperienceForm({
       toast.error("Please fill all required fields before publishing");
       return;
     }
-    console.log("Publish", { ...data, includes, heroImage, galleryImages });
-    setStatus("pending");
-    toast.success("Experience submitted for approval");
+    setIsSaving(true);
+    try {
+      // Upload hero image
+      let heroImageUrl = null;
+      if (heroImage) {
+        heroImageUrl = await uploadImage(heroImage, "hero");
+        if (!heroImageUrl) {
+          toast.error("Failed to upload hero image");
+          return;
+        }
+      }
+
+      // Upload gallery images
+      const galleryUrls: string[] = [];
+      for (const image of galleryImages) {
+        const url = await uploadImage(image, "gallery");
+        if (url) galleryUrls.push(url);
+      }
+
+      // Create experience record
+      const slug = generateSlug(data.title);
+      const experienceData = {
+        hotel_id: hotelId,
+        title: data.title,
+        subtitle: data.subtitle || null,
+        category: data.category,
+        long_copy: data.description,
+        min_nights: data.min_nights,
+        max_nights: data.max_nights,
+        min_party: data.min_party,
+        max_party: data.max_party,
+        cancellation_policy: data.cancellation_policy || null,
+        base_price: data.base_price,
+        currency: data.currency,
+        base_price_type: data.base_price_type,
+        hero_image: heroImageUrl,
+        photos: galleryUrls.length > 0 ? galleryUrls : null,
+        includes: includes.length > 0 ? includes : null,
+        slug: `${slug}-${Date.now()}`,
+        status: "pending" as const,
+      };
+
+      const { error } = await supabase.from("experiences").insert(experienceData as any);
+
+      if (error) throw error;
+
+      setStatus("pending");
+      toast.success("Experience submitted for approval");
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelId] });
+      
+      if (onClose) onClose();
+    } catch (error) {
+      console.error("Error publishing experience:", error);
+      toast.error("Failed to publish experience");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -167,15 +309,24 @@ export function ExperienceForm({
           <Button
             variant="outline"
             onClick={handleSubmit(handleSaveDraft)}
+            disabled={isSaving}
           >
-            <Save className="mr-2 h-4 w-4" />
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
             Save as Draft
           </Button>
           <Button
             onClick={handleSubmit(handlePublish)}
-            disabled={!canPublish}
+            disabled={!canPublish || isSaving}
           >
-            <Rocket className="mr-2 h-4 w-4" />
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Rocket className="mr-2 h-4 w-4" />
+            )}
             Publish
           </Button>
         </div>
