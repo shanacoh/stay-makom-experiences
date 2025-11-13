@@ -34,7 +34,7 @@ export default function HotelExperiences() {
     enabled: !!user?.id,
   });
 
-  const { data: hotel } = useQuery({
+  const { data: hotel, isLoading: isLoadingHotel } = useQuery({
     queryKey: ["hotel", hotelAdmin?.hotel_id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -62,11 +62,19 @@ export default function HotelExperiences() {
     enabled: !!hotelAdmin?.hotel_id,
   });
 
-  if (showForm && hotelAdmin?.hotel_id && hotel?.name) {
+  if (showForm) {
+    if (isLoadingHotel || !hotelAdmin?.hotel_id) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+
     return (
       <ExperienceForm
         hotelId={hotelAdmin.hotel_id}
-        hotelName={hotel.name}
+        hotelName={hotel?.name || ""}
         experienceId={editingExperienceId || undefined}
         onClose={() => {
           setShowForm(false);
