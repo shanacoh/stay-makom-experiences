@@ -34,8 +34,17 @@ import HotelReviews from "./pages/hotel-admin/Reviews";
 import HotelPayments from "./pages/hotel-admin/Payments";
 import HotelContact from "./pages/hotel-admin/Contact";
 import HotelSettings from "./pages/hotel-admin/Settings";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminCategories from "./pages/admin/Categories";
+import CategoryEditor from "./pages/admin/CategoryEditor";
+import AdminHotels from "./pages/admin/Hotels";
+import AdminReservations from "./pages/admin/Reservations";
+import AdminUsers from "./pages/admin/Users";
+import AdminCustomers from "./pages/admin/Customers";
 import AdminJournal from "./pages/admin/Journal";
 import JournalEditor from "./pages/admin/JournalEditor";
+import AdminSettings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,26 +84,21 @@ const App = () => (
               path="/admin"
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
-                  <Admin />
+                  <AdminLayout />
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="/admin/journal"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminJournal />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/journal/:id"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <JournalEditor />
-                </ProtectedRoute>
-              }
-            />
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="categories/:id" element={<CategoryEditor />} />
+              <Route path="hotels" element={<AdminHotels />} />
+              <Route path="reservations" element={<AdminReservations />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="customers" element={<AdminCustomers />} />
+              <Route path="journal" element={<AdminJournal />} />
+              <Route path="journal/:id" element={<JournalEditor />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
             <Route
               path="/hotel-admin"
               element={
