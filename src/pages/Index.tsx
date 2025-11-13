@@ -17,9 +17,6 @@ import goldenAgeImg from "@/assets/golden-age-category.jpg";
 import natureImg from "@/assets/nature-category.jpg";
 import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
-import iconHeart from "@/assets/icon-heart.png";
-import iconSparkles from "@/assets/icon-sparkles.png";
-import iconSuitcase from "@/assets/icon-suitcase.png";
 const fallbackImages: Record<string, string> = {
   "romantic": romanticImg,
   "family": familyImg,
@@ -146,35 +143,41 @@ const Index = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-16" style={{
-        backgroundColor: '#FAF8F5'
-      }}>
-          <div className="container">
-            <h2 className="font-sans text-4xl md:text-5xl font-bold tracking-[-0.02em] text-center mb-12">Israel... differently</h2>
+        <section className="py-24 bg-white">
+          <div className="container max-w-6xl">
+            <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-center mb-20 text-foreground">
+              Israel... differently
+            </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                  <img src={iconHeart} alt="Heart icon" className="h-36 w-36 object-cover" />
-                </div>
-                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Craft your stay</h3>
-                <p className="text-muted-foreground">Explore experiences that speak to your mood, from sunrise yoga to desert stargazing.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12">
+              {/* Block 1 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                <h3 className="font-serif text-2xl md:text-3xl font-medium text-foreground">
+                  Follow what moves you
+                </h3>
+                <p className="text-base leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                  Explore experiences that speak to your mood — slow mornings in the desert, sunrise yoga, a hidden vineyard at dusk, or simply a moment to breathe.
+                </p>
               </div>
               
-              <div className="text-center">
-                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                  <img src={iconSparkles} alt="Sparkles icon" className="h-36 w-36 object-cover" />
-                </div>
-                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Make it yours</h3>
-                <p className="text-muted-foreground">Choose your stay and add the touches that make it unforgettable.</p>
+              {/* Block 2 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                <h3 className="font-serif text-2xl md:text-3xl font-medium text-foreground">
+                  Shape your own moment
+                </h3>
+                <p className="text-base leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                  Choose your stay, then add the touches that make it uniquely yours — a private ritual, a tasting under the stars, or something beautifully unexpected.
+                </p>
               </div>
               
-              <div className="text-center">
-                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                  <img src={iconSuitcase} alt="Suitcase icon" className="h-36 w-36 object-cover" />
-                </div>
-                <h3 className="font-sans text-xl font-bold mb-2 text-primary">Book & get ready</h3>
-                <p className="text-muted-foreground">Secure your spot and start dreaming, your STAYMAKOM is waiting.</p>
+              {/* Block 3 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+                <h3 className="font-serif text-2xl md:text-3xl font-medium text-foreground">
+                  Book, unwind, begin
+                </h3>
+                <p className="text-base leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                  Secure your date and let the anticipation start. Your STAYMAKOM is waiting — quietly, gently, beautifully.
+                </p>
               </div>
             </div>
           </div>
