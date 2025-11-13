@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Eye } from "lucide-react";
 
 const CategoryEditor = () => {
   const { id } = useParams();
@@ -190,6 +190,16 @@ const CategoryEditor = () => {
           </div>
         </div>
         <div className="flex gap-2">
+          {formData.slug && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.open(`/category/${formData.slug}`, '_blank')}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview
+            </Button>
+          )}
           <Button variant="outline" onClick={handleSubmit} disabled={saveMutation.isPending}>
             Save Draft
           </Button>
