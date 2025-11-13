@@ -260,12 +260,24 @@ export function ExperienceForm({
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="duration">Duration</Label>
-                <Input
-                  id="duration"
-                  placeholder="e.g., 2h, 1 night, 3 days"
-                  {...register("duration")}
-                />
+                <Label htmlFor="duration">Duration (nights)</Label>
+                <Select
+                  onValueChange={(value) => setValue("duration", value)}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select number of nights" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="1">1 night</SelectItem>
+                    <SelectItem value="2">2 nights</SelectItem>
+                    <SelectItem value="3">3 nights</SelectItem>
+                    <SelectItem value="4">4 nights</SelectItem>
+                    <SelectItem value="5">5 nights</SelectItem>
+                    <SelectItem value="6">6 nights</SelectItem>
+                    <SelectItem value="7">7 nights</SelectItem>
+                    <SelectItem value="8">8 nights</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
