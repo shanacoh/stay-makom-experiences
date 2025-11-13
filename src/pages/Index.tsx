@@ -11,6 +11,7 @@ import ContactDialog from "@/components/ContactDialog";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertHotelPool from "@/assets/desert-hotel-pool.jpg";
+import desertJourney from "@/assets/desert-journey.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
 import familyImg from "@/assets/family-category.jpg";
 import goldenAgeImg from "@/assets/golden-age-category.jpg";
@@ -143,39 +144,49 @@ const Index = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-24 bg-white">
-          <div className="container max-w-6xl">
-            <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-center mb-20 text-foreground">
+        <section className="relative py-32 overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <img 
+              src={desertJourney} 
+              alt="Desert journey" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
+          </div>
+          
+          <div className="container max-w-6xl relative z-10">
+            <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-center mb-20 text-white">
               Israel... differently
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12">
               {/* Block 1 */}
               <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <h3 className="font-serif text-2xl md:text-3xl font-medium text-foreground">
+                <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
                   Follow what moves you
                 </h3>
-                <p className="text-base leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                <p className="text-base leading-relaxed text-white/90 max-w-sm mx-auto">
                   Explore experiences that speak to your mood — slow mornings in the desert, sunrise yoga, a hidden vineyard at dusk, or simply a moment to breathe.
                 </p>
               </div>
               
               {/* Block 2 */}
               <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <h3 className="font-serif text-2xl md:text-3xl font-medium text-foreground">
+                <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
                   Shape your own moment
                 </h3>
-                <p className="text-base leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                <p className="text-base leading-relaxed text-white/90 max-w-sm mx-auto">
                   Choose your stay, then add the touches that make it uniquely yours — a private ritual, a tasting under the stars, or something beautifully unexpected.
                 </p>
               </div>
               
               {/* Block 3 */}
               <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                <h3 className="font-serif text-2xl md:text-3xl font-medium text-foreground">
+                <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
                   Book, unwind, begin
                 </h3>
-                <p className="text-base leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                <p className="text-base leading-relaxed text-white/90 max-w-sm mx-auto">
                   Secure your date and let the anticipation start. Your STAYMAKOM is waiting — quietly, gently, beautifully.
                 </p>
               </div>
