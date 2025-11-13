@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Gift, Heart, Sparkles } from "lucide-react";
+import { CalendarIcon, Gift } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +18,6 @@ import Footer from "@/components/Footer";
 
 export default function GiftCard() {
   const navigate = useNavigate();
-  const [selectedOption, setSelectedOption] = useState<"amount" | "experience" | null>(null);
   
   // Gift by Amount state
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
@@ -31,36 +28,6 @@ export default function GiftCard() {
   const [amountSenderEmail, setAmountSenderEmail] = useState("");
   const [amountDeliveryDate, setAmountDeliveryDate] = useState<Date>();
   const [amountDeliveryType, setAmountDeliveryType] = useState<"now" | "scheduled">("now");
-  
-  // Gift by Experience state
-  const [selectedExperienceId, setSelectedExperienceId] = useState<string>("");
-  const [experienceMessage, setExperienceMessage] = useState("");
-  const [experienceRecipientEmail, setExperienceRecipientEmail] = useState("");
-  const [experienceSenderName, setExperienceSenderName] = useState("");
-  const [experienceSenderEmail, setExperienceSenderEmail] = useState("");
-
-  // Fetch published experiences
-  const { data: experiences, isLoading } = useQuery({
-    queryKey: ["experiences-for-gifts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experiences")
-        .select("id, title, subtitle, hero_image, base_price, currency, slug")
-        .eq("status", "published")
-        .order("title");
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const selectedExperience = experiences?.find(exp => exp.id === selectedExperienceId);
-
-  const scrollToSection = (section: "amount" | "experience") => {
-    setSelectedOption(section);
-    const element = document.getElementById(section === "amount" ? "gift-by-amount" : "gift-by-experience");
-    element?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   const handleAmountSubmit = async () => {
     const amount = selectedAmount || parseFloat(customAmount);
@@ -104,43 +71,6 @@ export default function GiftCard() {
     }
   };
 
-  const handleExperienceSubmit = async () => {
-    if (!selectedExperienceId) {
-      toast.error("Please select an experience");
-      return;
-    }
-    
-    if (!experienceRecipientEmail || !experienceSenderName || !experienceSenderEmail) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    // Generate unique gift code
-    const code = `STAY-EXP-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
-
-    try {
-      const { error } = await supabase.from("gift_cards").insert({
-        code,
-        type: "experience",
-        experience_id: selectedExperienceId,
-        currency: selectedExperience?.currency || "ILS",
-        sender_name: experienceSenderName,
-        sender_email: experienceSenderEmail,
-        recipient_email: experienceRecipientEmail,
-        message: experienceMessage || null,
-      });
-
-      if (error) throw error;
-
-      // Navigate to confirmation page
-      navigate(`/gift-card/confirmation?code=${code}&type=experience`);
-      toast.success("Gift card created successfully!");
-    } catch (error) {
-      console.error("Error creating gift card:", error);
-      toast.error("Failed to create gift card. Please try again.");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -163,21 +93,16 @@ export default function GiftCard() {
               Curated stays, crafted stories, meaningful gifts.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+            <div className="flex justify-center pt-8">
               <Button 
                 size="lg"
-                onClick={() => scrollToSection("amount")}
+                onClick={() => {
+                  const element = document.getElementById("gift-by-amount");
+                  element?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
                 className="bg-white text-foreground hover:bg-white/90 font-medium"
               >
-                Gift by Amount
-              </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => scrollToSection("experience")}
-                className="border-white text-white hover:bg-white hover:text-foreground"
-              >
-                Gift an Experience
+                Gift a Staymakom Moment
               </Button>
             </div>
           </div>
@@ -340,152 +265,6 @@ export default function GiftCard() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </section>
-
-        {/* Gift by Experience Section */}
-        <section id="gift-by-experience" className="scroll-mt-24">
-          <div className="grid md:grid-cols-2 gap-12 items-start">
-            <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle>Select Experience</CardTitle>
-                <CardDescription>Because some memories are worth planning.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="experience-select">Choose an Experience</Label>
-                  <Select value={selectedExperienceId} onValueChange={setSelectedExperienceId}>
-                    <SelectTrigger id="experience-select">
-                      <SelectValue placeholder="Select an experience..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isLoading ? (
-                        <SelectItem value="loading" disabled>Loading...</SelectItem>
-                      ) : experiences?.length === 0 ? (
-                        <SelectItem value="none" disabled>No experiences available</SelectItem>
-                      ) : (
-                        experiences?.map((exp) => (
-                          <SelectItem key={exp.id} value={exp.id}>
-                            {exp.title}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {selectedExperience && (
-                  <div className="border rounded-lg overflow-hidden">
-                    <img 
-                      src={selectedExperience.hero_image || "https://images.unsplash.com/photo-1566073771259-6a8506099945"}
-                      alt={selectedExperience.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4 space-y-2">
-                      <h3 className="font-semibold text-lg">{selectedExperience.title}</h3>
-                      {selectedExperience.subtitle && (
-                        <p className="text-sm text-muted-foreground">{selectedExperience.subtitle}</p>
-                      )}
-                      <p className="text-lg font-bold text-primary">
-                        {selectedExperience.currency === "USD" ? "$" : "₪"}
-                        {selectedExperience.base_price}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="experience-message">Add a message (optional)</Label>
-                  <Textarea
-                    id="experience-message"
-                    placeholder="Write a personal message..."
-                    maxLength={200}
-                    value={experienceMessage}
-                    onChange={(e) => setExperienceMessage(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <p className="text-xs text-muted-foreground">{experienceMessage.length}/200</p>
-                </div>
-
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="experience-recipient-email">Recipient Email *</Label>
-                    <Input
-                      id="experience-recipient-email"
-                      type="email"
-                      required
-                      value={experienceRecipientEmail}
-                      onChange={(e) => setExperienceRecipientEmail(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="experience-sender-name">Your Name *</Label>
-                    <Input
-                      id="experience-sender-name"
-                      required
-                      value={experienceSenderName}
-                      onChange={(e) => setExperienceSenderName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="experience-sender-email">Your Email *</Label>
-                    <Input
-                      id="experience-sender-email"
-                      type="email"
-                      required
-                      value={experienceSenderEmail}
-                      onChange={(e) => setExperienceSenderEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={handleExperienceSubmit}
-                  disabled={!selectedExperienceId}
-                >
-                  Gift this Experience
-                </Button>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full">
-                <Heart className="h-4 w-4" />
-                <span className="text-sm font-medium">Gift by Experience</span>
-              </div>
-              <h2 className="font-sans text-4xl font-bold">Gift a curated experience.</h2>
-              <p className="text-lg text-muted-foreground">
-                Choose one of our handpicked experiences and share it with someone special.
-              </p>
-              
-              <div className="space-y-3 pt-4">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Carefully Curated</p>
-                    <p className="text-sm text-muted-foreground">Each experience is handpicked for quality and authenticity</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Gift className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Flexible Booking</p>
-                    <p className="text-sm text-muted-foreground">Recipients can schedule their stay when it suits them</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Heart className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Memorable Moments</p>
-                    <p className="text-sm text-muted-foreground">Give the gift of unforgettable experiences</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
