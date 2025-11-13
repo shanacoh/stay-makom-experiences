@@ -663,7 +663,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "hotel_admin" | "customer"
-      base_price_type: "fixed" | "per_person"
+      base_price_type: "fixed" | "per_person" | "per_booking"
       booking_status:
         | "pending"
         | "hold"
@@ -810,7 +810,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "hotel_admin", "customer"],
-      base_price_type: ["fixed", "per_person"],
+      base_price_type: ["fixed", "per_person", "per_booking"],
       booking_status: [
         "pending",
         "hold",
