@@ -78,6 +78,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "booking_extras_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "booking_extras_extra_id_fkey"
             columns: ["extra_id"]
             isOneToOne: false
@@ -636,7 +643,90 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      bookings_safe: {
+        Row: {
+          checkin: string | null
+          checkout: string | null
+          created_at: string | null
+          currency: string | null
+          customer_id: string | null
+          experience_id: string | null
+          experience_price_subtotal: number | null
+          extras_subtotal: number | null
+          hotel_id: string | null
+          id: string | null
+          notes: string | null
+          party_size: number | null
+          room_price_subtotal: number | null
+          selected_room_code: string | null
+          selected_room_name: string | null
+          selected_room_policy: string | null
+          selected_room_rate: string | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          total_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          checkin?: string | null
+          checkout?: string | null
+          created_at?: string | null
+          currency?: string | null
+          customer_id?: string | null
+          experience_id?: string | null
+          experience_price_subtotal?: number | null
+          extras_subtotal?: number | null
+          hotel_id?: string | null
+          id?: string | null
+          notes?: string | null
+          party_size?: number | null
+          room_price_subtotal?: number | null
+          selected_room_code?: string | null
+          selected_room_name?: string | null
+          selected_room_policy?: string | null
+          selected_room_rate?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          checkin?: string | null
+          checkout?: string | null
+          created_at?: string | null
+          currency?: string | null
+          customer_id?: string | null
+          experience_id?: string | null
+          experience_price_subtotal?: number | null
+          extras_subtotal?: number | null
+          hotel_id?: string | null
+          id?: string | null
+          notes?: string | null
+          party_size?: number | null
+          room_price_subtotal?: number | null
+          selected_room_code?: string | null
+          selected_room_name?: string | null
+          selected_room_policy?: string | null
+          selected_room_rate?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_user_hotel_id: { Args: { _user_id: string }; Returns: string }

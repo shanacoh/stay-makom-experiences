@@ -34,7 +34,7 @@ export default function HotelBookings() {
     queryKey: ["hotel-bookings", hotelAdmin?.hotel_id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("bookings")
+        .from("bookings_safe")
         .select("*, experiences(title)")
         .eq("hotel_id", hotelAdmin?.hotel_id)
         .order("created_at", { ascending: false });
