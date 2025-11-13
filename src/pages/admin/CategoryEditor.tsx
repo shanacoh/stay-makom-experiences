@@ -20,6 +20,8 @@ const CategoryEditor = () => {
     name_he: "",
     slug: "",
     hero_image: "",
+    presentation_title: "",
+    presentation_title_he: "",
     intro_rich_text: "",
     intro_rich_text_he: "",
     bullets: ["", "", ""],
@@ -51,6 +53,8 @@ const CategoryEditor = () => {
         name_he: category.name_he || "",
         slug: category.slug || "",
         hero_image: category.hero_image || "",
+        presentation_title: category.presentation_title || "",
+        presentation_title_he: category.presentation_title_he || "",
         intro_rich_text: category.intro_rich_text || "",
         intro_rich_text_he: category.intro_rich_text_he || "",
         bullets: category.bullets || ["", "", ""],
@@ -290,14 +294,32 @@ const CategoryEditor = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="intro">Introduction Text (English)</Label>
+              <Label htmlFor="presentation_title">Presentation Title *</Label>
+              <Input
+                id="presentation_title"
+                value={formData.presentation_title}
+                onChange={(e) => setFormData({ ...formData, presentation_title: e.target.value })}
+                placeholder="e.g., Your Perfect Romantic Escape Awaits"
+                required
+              />
+              <p className="text-sm text-muted-foreground">
+                Large title displayed on the left side of the category page
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="intro">Introduction Text (English) *</Label>
               <Textarea
                 id="intro"
                 value={formData.intro_rich_text}
                 onChange={(e) => setFormData({ ...formData, intro_rich_text: e.target.value })}
                 placeholder="A captivating description of this category..."
                 rows={4}
+                required
               />
+              <p className="text-sm text-muted-foreground">
+                Description displayed on the right side of the category page
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -333,6 +355,20 @@ const CategoryEditor = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="presentation_title_he">Presentation Title (Hebrew)</Label>
+              <Input
+                id="presentation_title_he"
+                value={formData.presentation_title_he}
+                onChange={(e) => setFormData({ ...formData, presentation_title_he: e.target.value })}
+                placeholder="כותרת גדולה של הקטגוריה"
+                dir="rtl"
+              />
+              <p className="text-sm text-muted-foreground">
+                Large title for Hebrew version
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="intro_he">Introduction Text (Hebrew)</Label>
               <Textarea
                 id="intro_he"
@@ -342,6 +378,9 @@ const CategoryEditor = () => {
                 rows={4}
                 dir="rtl"
               />
+              <p className="text-sm text-muted-foreground">
+                Description for Hebrew version
+              </p>
             </div>
           </CardContent>
         </Card>
