@@ -17,10 +17,13 @@ const CategoryEditor = () => {
 
   const [formData, setFormData] = useState({
     name: "",
+    name_he: "",
     slug: "",
     hero_image: "",
     intro_rich_text: "",
+    intro_rich_text_he: "",
     bullets: ["", "", ""],
+    display_order: 0,
     status: "draft" as "draft" | "published",
   });
 
@@ -43,10 +46,13 @@ const CategoryEditor = () => {
     if (category) {
       setFormData({
         name: category.name || "",
+        name_he: category.name_he || "",
         slug: category.slug || "",
         hero_image: category.hero_image || "",
         intro_rich_text: category.intro_rich_text || "",
+        intro_rich_text_he: category.intro_rich_text_he || "",
         bullets: category.bullets || ["", "", ""],
+        display_order: category.display_order || 0,
         status: category.status || "draft",
       });
     }
@@ -188,13 +194,57 @@ const CategoryEditor = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="intro">Introduction Text</Label>
+              <Label htmlFor="intro">Introduction Text (English)</Label>
               <Textarea
                 id="intro"
                 value={formData.intro_rich_text}
                 onChange={(e) => setFormData({ ...formData, intro_rich_text: e.target.value })}
                 placeholder="A captivating description of this category..."
                 rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="display_order">Display Order</Label>
+              <Input
+                id="display_order"
+                type="number"
+                value={formData.display_order}
+                onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                placeholder="0"
+              />
+              <p className="text-sm text-muted-foreground">
+                Lower numbers appear first
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Hebrew Translation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name_he">Category Name (Hebrew)</Label>
+              <Input
+                id="name_he"
+                value={formData.name_he}
+                onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
+                placeholder="שם הקטגוריה בעברית"
+                dir="rtl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="intro_he">Introduction Text (Hebrew)</Label>
+              <Textarea
+                id="intro_he"
+                value={formData.intro_rich_text_he}
+                onChange={(e) => setFormData({ ...formData, intro_rich_text_he: e.target.value })}
+                placeholder="תיאור מרתק של הקטגוריה..."
+                rows={4}
+                dir="rtl"
               />
             </div>
           </CardContent>
@@ -206,20 +256,43 @@ const CategoryEditor = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {formData.bullets.map((bullet, index) => (
-              <div key={index} className="space-y-2">
-                <Label htmlFor={`bullet-${index}`}>Feature {index + 1}</Label>
-                <Input
-                  id={`bullet-${index}`}
-                  value={bullet}
-                  onChange={(e) => {
-                    const newBullets = [...formData.bullets];
-                    newBullets[index] = e.target.value;
-                    setFormData({ ...formData, bullets: newBullets });
-                  }}
-                  placeholder="e.g., Stunning desert landscapes"
-                />
+              <div key={index} className="flex gap-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor={`bullet-${index}`}>Feature {index + 1}</Label>
+                  <Input
+                    id={`bullet-${index}`}
+                    value={bullet}
+                    onChange={(e) => {
+                      const newBullets = [...formData.bullets];
+                      newBullets[index] = e.target.value;
+                      setFormData({ ...formData, bullets: newBullets });
+                    }}
+                    placeholder="e.g., Stunning desert landscapes"
+                  />
+                </div>
+                {formData.bullets.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="mt-8"
+                    onClick={() => {
+                      const newBullets = formData.bullets.filter((_, i) => i !== index);
+                      setFormData({ ...formData, bullets: newBullets });
+                    }}
+                  >
+                    ×
+                  </Button>
+                )}
               </div>
             ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setFormData({ ...formData, bullets: [...formData.bullets, ""] })}
+            >
+              Add Feature
+            </Button>
           </CardContent>
         </Card>
       </form>
