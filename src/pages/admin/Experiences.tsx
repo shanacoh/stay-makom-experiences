@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Check, X, ExternalLink } from "lucide-react";
+import { Eye, Check, X, ExternalLink, Plus, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -102,6 +102,12 @@ const AdminExperiences = () => {
           <h2 className="text-3xl font-bold">Experiences</h2>
           <p className="text-muted-foreground">Gérer toutes les expériences et valider les soumissions</p>
         </div>
+        <Link to="/admin/experiences/new">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Créer une expérience
+          </Button>
+        </Link>
       </div>
 
       {isLoading ? (
@@ -138,6 +144,12 @@ const AdminExperiences = () => {
                     {getStatusBadge(experience.status)}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
+                    <Link to={`/admin/experiences/edit/${experience.id}`}>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </Link>
                     <Link 
                       to={`/experience/${experience.slug}`}
                       target="_blank"
