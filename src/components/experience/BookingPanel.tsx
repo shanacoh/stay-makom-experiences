@@ -12,7 +12,7 @@ interface BookingPanelProps {
   experienceId: string;
   hotelId: string;
   basePrice: number;
-  basePriceType: "fixed" | "per_person";
+  basePriceType: "fixed" | "per_person" | "per_booking";
   currency: string;
   minParty: number;
   maxParty: number;
@@ -34,9 +34,12 @@ const BookingPanel = ({
   const [extrasTotal, setExtrasTotal] = useState(0);
 
   // Calculate experience price
-  const experiencePrice = basePriceType === "per_person" 
-    ? basePrice * partySize 
-    : basePrice;
+  const experiencePrice = 
+    basePriceType === "per_person" 
+      ? basePrice * partySize 
+      : basePriceType === "per_booking"
+      ? basePrice
+      : basePrice;
 
   const roomPrice = selectedRoom?.price_total || 0;
   const totalPrice = experiencePrice + roomPrice + extrasTotal;
@@ -52,7 +55,11 @@ const BookingPanel = ({
               ${basePrice}
             </span>
             <span className="text-muted-foreground">
-              {basePriceType === "per_person" ? "per person" : "per stay"}
+              {basePriceType === "per_person" 
+                ? "per person" 
+                : basePriceType === "per_booking" 
+                ? "per booking"
+                : "per stay"}
             </span>
           </div>
         </div>
