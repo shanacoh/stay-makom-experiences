@@ -33,7 +33,6 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
     { label: "Company reward", to: "/corporate" },
     { label: "Hotel partnership", to: "/partners" },
     { label: "Journal blogging", to: "/journal" },
-    ...(user ? [{ label: "My account", to: "/account" }] : []),
     { label: "About staymakom", to: "/about" },
     { label: "Contact us", to: "/contact" },
   ];
