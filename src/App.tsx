@@ -11,7 +11,6 @@ import Experience from "./pages/Experience";
 import Hotel from "./pages/Hotel";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
-import Admin from "./pages/Admin";
 import GiftCard from "./pages/GiftCard";
 import GiftCardConfirmation from "./pages/GiftCardConfirmation";
 import Companies from "./pages/Companies";
