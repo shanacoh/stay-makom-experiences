@@ -43,7 +43,7 @@ const AdminJournal = () => {
   const { data: posts, isLoading } = useQuery({
     queryKey: ["admin-journal-posts", categoryFilter, statusFilter],
     queryFn: async () => {
-      let query = supabase.from("journal_posts").select("*").order("created_at", { ascending: false });
+      let query = supabase.from("journal_posts" as any).select("*").order("created_at", { ascending: false });
 
       if (categoryFilter !== "all") {
         query = query.eq("category", categoryFilter as any);
@@ -54,13 +54,13 @@ const AdminJournal = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("journal_posts").delete().eq("id", id);
+      const { error } = await supabase.from("journal_posts" as any).delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ const AdminJournal = () => {
       const publishedAt = newStatus === "published" ? new Date().toISOString() : null;
 
       const { error } = await supabase
-        .from("journal_posts")
+        .from("journal_posts" as any)
         .update({ status: newStatus, published_at: publishedAt })
         .eq("id", id);
 

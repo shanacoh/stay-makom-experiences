@@ -13,14 +13,14 @@ const Journal = () => {
     queryKey: ["journal-posts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("journal_posts")
+        .from("journal_posts" as any)
         .select("*")
         .eq("status", "published")
         .not("published_at", "is", null)
         .order("published_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 

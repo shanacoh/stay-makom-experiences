@@ -39,12 +39,12 @@ const JournalEditor = () => {
     queryFn: async () => {
       if (!isEdit) return null;
       const { data, error } = await supabase
-        .from("journal_posts")
+        .from("journal_posts" as any)
         .select("*")
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: isEdit,
   });
@@ -83,12 +83,12 @@ const JournalEditor = () => {
     mutationFn: async (data: typeof formData) => {
       if (isEdit) {
         const { error } = await supabase
-          .from("journal_posts")
+          .from("journal_posts" as any)
           .update(data as any)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("journal_posts").insert([data as any]);
+        const { error } = await supabase.from("journal_posts" as any).insert([data as any]);
         if (error) throw error;
       }
     },
@@ -112,12 +112,12 @@ const JournalEditor = () => {
 
       if (isEdit) {
         const { error } = await supabase
-          .from("journal_posts")
+          .from("journal_posts" as any)
           .update(dataToSave as any)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("journal_posts").insert([dataToSave as any]);
+        const { error } = await supabase.from("journal_posts" as any).insert([dataToSave as any]);
         if (error) throw error;
       }
     },

@@ -16,7 +16,7 @@ const JournalPost = () => {
     queryKey: ["journal-post", slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("journal_posts")
+        .from("journal_posts" as any)
         .select("*")
         .eq("slug", slug)
         .eq("status", "published")
@@ -24,7 +24,7 @@ const JournalPost = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 
