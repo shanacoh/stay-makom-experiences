@@ -51,7 +51,7 @@ const BookingPanel = ({
       <div className="space-y-6">
         <div>
           <div className="flex items-baseline gap-2 mb-4">
-            <span className="font-serif text-3xl font-bold">
+            <span className="font-sans text-3xl font-bold">
               ${basePrice}
             </span>
             <span className="text-muted-foreground">

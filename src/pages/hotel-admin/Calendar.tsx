@@ -65,7 +65,7 @@ export default function HotelCalendar() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="font-serif text-4xl font-bold">Calendrier & Disponibilités</h1>
+        <h1 className="font-sans text-4xl font-bold">Calendrier & Disponibilités</h1>
         <p className="text-muted-foreground mt-2">
           Vue des réservations à venir pour les 30 prochains jours
         </p>

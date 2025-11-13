@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function HotelSettings() {
   return (
     <div className="p-8 max-w-3xl">
-      <h1 className="font-serif text-4xl font-bold mb-8">Settings</h1>
+      <h1 className="font-sans text-4xl font-bold mb-8">Settings</h1>
 
       <div className="space-y-6">
         <Card>

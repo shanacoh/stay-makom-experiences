@@ -126,7 +126,7 @@ const Category = () => {
                 <p className="text-sm uppercase tracking-widest text-white/90 font-bold">
                   {category.name}
                 </p>
-                <h1 className="font-serif text-5xl font-bold leading-tight uppercase text-white md:text-4xl">
+                <h1 className="font-sans text-5xl font-bold leading-tight uppercase text-white md:text-4xl">
                   {category.intro_rich_text?.split('.')[0] || category.name}
                 </h1>
               </div>
@@ -178,7 +178,7 @@ const Category = () => {
                           </div>
                           <CardContent className="p-6 flex flex-col justify-between">
                             <div>
-                              <h3 className="font-serif text-2xl font-bold mb-2">
+                              <h3 className="font-sans text-2xl font-bold mb-2">
                                 {experience.title}
                               </h3>
                               {experience.subtitle && <p className="text-muted-foreground mb-4">
@@ -204,7 +204,7 @@ const Category = () => {
                             <div className="flex items-center justify-between pt-4 border-t border-border">
                               <div className="flex items-baseline gap-1">
                                 <span className="text-sm text-muted-foreground">From</span>
-                                <span className="font-serif text-3xl font-bold text-primary">
+                                <span className="font-sans text-3xl font-bold text-primary">
                                   ${experience.base_price}
                                 </span>
                                 <span className="text-sm text-muted-foreground">

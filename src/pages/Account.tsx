@@ -72,7 +72,7 @@ const Account = () => {
       <Header />
       
       <main className="flex-1 container pt-24 pb-16">
-        <h1 className="font-serif text-4xl font-bold mb-8">My Account</h1>
+        <h1 className="font-sans text-4xl font-bold mb-8">My Account</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Profile Section */}

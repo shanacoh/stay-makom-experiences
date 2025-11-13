@@ -78,7 +78,7 @@ export default function HotelPricing() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="font-serif text-4xl font-bold">Règles de Tarification</h1>
+          <h1 className="font-sans text-4xl font-bold">Règles de Tarification</h1>
           <p className="text-muted-foreground mt-2">
             Gérez les majorations et réductions saisonnières
           </p>

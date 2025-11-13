@@ -72,7 +72,7 @@ const ExtrasSelector = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-serif text-3xl font-bold mb-2">Extras</h2>
+        <h2 className="font-sans text-3xl font-bold mb-2">Extras</h2>
         <p className="text-muted-foreground">Vous pourrez ajouter des extras à l'étape suivante</p>
       </div>
       

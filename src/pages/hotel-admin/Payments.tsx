@@ -7,7 +7,7 @@ export default function HotelPayments() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="font-serif text-4xl font-bold mb-2">Paiements</h1>
+        <h1 className="font-sans text-4xl font-bold mb-2">Paiements</h1>
         <p className="text-muted-foreground">Gérez votre compte Stripe et suivez vos transferts</p>
       </div>
 

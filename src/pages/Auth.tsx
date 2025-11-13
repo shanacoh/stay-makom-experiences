@@ -129,7 +129,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="font-serif text-3xl">STAYMAKOM</CardTitle>
+          <CardTitle className="font-sans text-3xl">STAYMAKOM</CardTitle>
           <CardDescription>Sign in to book extraordinary stays</CardDescription>
         </CardHeader>
         <CardContent>

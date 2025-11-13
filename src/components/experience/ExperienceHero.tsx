@@ -24,7 +24,7 @@ const ExperienceHero = ({ title, subtitle, photos }: ExperienceHeroProps) => {
   return (
     <div className="container pt-24 pb-8">
       <div className="mb-6">
-        <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">{title}</h1>
+        <h1 className="font-sans text-4xl md:text-5xl font-bold mb-3">{title}</h1>
         {subtitle && <p className="text-xl text-muted-foreground">{subtitle}</p>}
       </div>
 

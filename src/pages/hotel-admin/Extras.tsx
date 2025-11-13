@@ -67,7 +67,7 @@ export default function HotelExtras() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="font-serif text-4xl font-bold">Extras & Add-ons</h1>
+          <h1 className="font-sans text-4xl font-bold">Extras & Add-ons</h1>
           <p className="text-muted-foreground mt-2">
             Gérez les options supplémentaires pour vos expériences
           </p>

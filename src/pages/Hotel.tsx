@@ -79,7 +79,7 @@ const Hotel = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
           <div className="absolute bottom-0 left-0 right-0 container pb-12">
-            <h1 className="font-serif text-5xl font-bold text-white mb-3">
+            <h1 className="font-sans text-5xl font-bold text-white mb-3">
               {hotel.name}
             </h1>
             {(hotel.city || hotel.region) && (
@@ -99,7 +99,7 @@ const Hotel = () => {
               {/* Story */}
               {hotel.story && (
                 <div>
-                  <h2 className="font-serif text-3xl font-bold mb-6">Our Story</h2>
+                  <h2 className="font-sans text-3xl font-bold mb-6">Our Story</h2>
                   <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
                     {hotel.story}
                   </p>
@@ -109,7 +109,7 @@ const Hotel = () => {
               {/* Highlights */}
               {hotel.highlights && hotel.highlights.length > 0 && (
                 <div>
-                  <h2 className="font-serif text-3xl font-bold mb-6">Highlights</h2>
+                  <h2 className="font-sans text-3xl font-bold mb-6">Highlights</h2>
                   <ul className="space-y-3">
                     {hotel.highlights.map((highlight, index) => (
                       <li key={index} className="flex items-start gap-3">
@@ -124,7 +124,7 @@ const Hotel = () => {
               {/* Amenities */}
               {hotel.amenities && hotel.amenities.length > 0 && (
                 <div>
-                  <h2 className="font-serif text-3xl font-bold mb-6">Amenities</h2>
+                  <h2 className="font-sans text-3xl font-bold mb-6">Amenities</h2>
                   <div className="grid grid-cols-2 gap-4">
                     {hotel.amenities.map((amenity, index) => (
                       <div key={index} className="flex items-center gap-2">
@@ -139,7 +139,7 @@ const Hotel = () => {
               {/* Photo Gallery */}
               {displayPhotos.length > 0 && (
                 <div>
-                  <h2 className="font-serif text-3xl font-bold mb-6">Gallery</h2>
+                  <h2 className="font-sans text-3xl font-bold mb-6">Gallery</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {displayPhotos.map((photo, index) => (
                       <div key={index} className="aspect-square rounded-lg overflow-hidden">
@@ -160,7 +160,7 @@ const Hotel = () => {
               {/* Contact Card */}
               <Card>
                 <CardContent className="p-6 space-y-4">
-                  <h3 className="font-serif text-xl font-bold">Contact</h3>
+                  <h3 className="font-sans text-xl font-bold">Contact</h3>
                   {hotel.contact_email && (
                     <p className="text-sm">
                       <span className="text-muted-foreground">Email:</span>{" "}
@@ -200,7 +200,7 @@ const Hotel = () => {
               {!experiencesLoading && experiences && experiences.length > 0 && (
                 <Card>
                   <CardContent className="p-6">
-                    <h3 className="font-serif text-xl font-bold mb-4">Experiences</h3>
+                    <h3 className="font-sans text-xl font-bold mb-4">Experiences</h3>
                     <div className="space-y-3">
                       {experiences.map((exp) => (
                         <Link 

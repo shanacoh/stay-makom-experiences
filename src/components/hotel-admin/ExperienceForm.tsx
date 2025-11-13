@@ -303,7 +303,7 @@ export function ExperienceForm({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-serif text-4xl font-bold mb-2">
+          <h1 className="font-sans text-4xl font-bold mb-2">
             {experienceId ? "Edit Experience" : "Create a new experience"}
           </h1>
           <p className="text-muted-foreground">

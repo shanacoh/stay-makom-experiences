@@ -41,7 +41,7 @@ export const HotelAdminLayout = () => {
       <aside className="w-64 border-r bg-card">
         <div className="sticky top-0 flex h-full flex-col">
           <div className="p-6 border-b">
-            <h2 className="font-serif text-2xl font-bold">Hotel Admin</h2>
+            <h2 className="font-sans text-2xl font-bold">Hotel Admin</h2>
           </div>
           
           <nav className="flex-1 space-y-1 p-4">

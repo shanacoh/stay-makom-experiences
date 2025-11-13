@@ -165,7 +165,7 @@ export default function HotelExperiences() {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="font-serif text-4xl font-bold">Experiences</h1>
+        <h1 className="font-sans text-4xl font-bold">Experiences</h1>
         <Button onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Create Experience

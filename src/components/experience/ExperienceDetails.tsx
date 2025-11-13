@@ -17,7 +17,7 @@ const ExperienceDetails = ({
     <div className="space-y-12">
       {longCopy && (
         <div>
-          <h2 className="font-serif text-3xl font-bold mb-4">What you'll do</h2>
+          <h2 className="font-sans text-3xl font-bold mb-4">What you'll do</h2>
           <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
             {longCopy}
           </p>
@@ -26,7 +26,7 @@ const ExperienceDetails = ({
 
       {includes && includes.length > 0 && (
         <div>
-          <h2 className="font-serif text-3xl font-bold mb-6">L'expérience Staycation</h2>
+          <h2 className="font-sans text-3xl font-bold mb-6">L'expérience Staycation</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {includes.map((item, index) => (
               <div key={index} className="space-y-3">
@@ -48,7 +48,7 @@ const ExperienceDetails = ({
 
       {notIncludes && notIncludes.length > 0 && (
         <div>
-          <h3 className="font-serif text-xl font-bold mb-4">Not included</h3>
+          <h3 className="font-sans text-xl font-bold mb-4">Not included</h3>
           <ul className="space-y-3">
             {notIncludes.map((item, index) => (
               <li key={index} className="flex items-start gap-3">
@@ -62,7 +62,7 @@ const ExperienceDetails = ({
 
       {goodToKnow && goodToKnow.length > 0 && (
         <div>
-          <h3 className="font-serif text-xl font-bold mb-4">Good to know</h3>
+          <h3 className="font-sans text-xl font-bold mb-4">Good to know</h3>
           <ul className="space-y-2">
             {goodToKnow.map((item, index) => (
               <li key={index} className="flex items-start gap-2">

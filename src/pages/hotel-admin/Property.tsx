@@ -37,7 +37,7 @@ export default function HotelProperty() {
 
   return (
     <div className="p-8 max-w-5xl">
-      <h1 className="font-serif text-4xl font-bold mb-8">My Property</h1>
+      <h1 className="font-sans text-4xl font-bold mb-8">My Property</h1>
 
       <Card>
         <CardHeader>

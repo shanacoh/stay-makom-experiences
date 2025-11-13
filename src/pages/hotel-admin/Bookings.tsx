@@ -46,7 +46,7 @@ export default function HotelBookings() {
 
   return (
     <div className="p-8">
-      <h1 className="font-serif text-4xl font-bold mb-8">Bookings</h1>
+      <h1 className="font-sans text-4xl font-bold mb-8">Bookings</h1>
 
       <Card>
         <CardHeader>

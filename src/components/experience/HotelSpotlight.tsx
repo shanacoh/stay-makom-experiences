@@ -25,7 +25,7 @@ const HotelSpotlight = ({ hotel }: HotelSpotlightProps) => {
     <div className="bg-muted/30 rounded-xl p-8 border border-border">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="font-serif text-2xl font-bold mb-2">{hotel.name}</h3>
+          <h3 className="font-sans text-2xl font-bold mb-2">{hotel.name}</h3>
           {(hotel.city || hotel.region) && (
             <p className="text-muted-foreground flex items-center gap-2">
               <MapPin className="h-4 w-4" />

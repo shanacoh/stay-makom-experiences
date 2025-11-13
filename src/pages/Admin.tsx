@@ -248,7 +248,7 @@ const Admin = () => {
       <Header />
       
       <main className="flex-1 container pt-24 pb-16">
-        <h1 className="font-serif text-4xl font-bold mb-8">Admin Dashboard</h1>
+        <h1 className="font-sans text-4xl font-bold mb-8">Admin Dashboard</h1>
 
         <Tabs defaultValue="categories" className="w-full">
           <TabsList>

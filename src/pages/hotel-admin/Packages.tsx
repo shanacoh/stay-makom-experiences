@@ -71,7 +71,7 @@ export default function HotelPackages() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="font-serif text-4xl font-bold">Packages & Offres Spéciales</h1>
+          <h1 className="font-sans text-4xl font-bold">Packages & Offres Spéciales</h1>
           <p className="text-muted-foreground mt-2">
             Créez des offres groupées attractives pour vos clients
           </p>
