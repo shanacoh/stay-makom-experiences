@@ -11,7 +11,7 @@ interface CategoryCardProps {
 const CategoryCard = ({ title, description, image, slug }: CategoryCardProps) => {
   return (
     <Link 
-      to={`/categories/${slug}`}
+      to={`/category/${slug}`}
       className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-smooth"
     >
       <div className="aspect-[1/1] relative">
