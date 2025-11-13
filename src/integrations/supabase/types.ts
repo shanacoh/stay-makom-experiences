@@ -447,6 +447,91 @@ export type Database = {
           },
         ]
       }
+      gift_cards: {
+        Row: {
+          amount: number | null
+          booking_id: string | null
+          code: string
+          created_at: string
+          currency: string | null
+          delivery_date: string
+          experience_id: string | null
+          expires_at: string
+          id: string
+          message: string | null
+          recipient_email: string
+          redeemed_at: string | null
+          sender_email: string
+          sender_name: string
+          status: string
+          stripe_payment_intent_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          booking_id?: string | null
+          code: string
+          created_at?: string
+          currency?: string | null
+          delivery_date?: string
+          experience_id?: string | null
+          expires_at?: string
+          id?: string
+          message?: string | null
+          recipient_email: string
+          redeemed_at?: string | null
+          sender_email: string
+          sender_name: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          booking_id?: string | null
+          code?: string
+          created_at?: string
+          currency?: string | null
+          delivery_date?: string
+          experience_id?: string | null
+          expires_at?: string
+          id?: string
+          message?: string | null
+          recipient_email?: string
+          redeemed_at?: string | null
+          sender_email?: string
+          sender_name?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_cards_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_cards_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_cards_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotel_admins: {
         Row: {
           contact_email: string | null

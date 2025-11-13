@@ -12,6 +12,8 @@ import Hotel from "./pages/Hotel";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Admin from "./pages/Admin";
+import GiftCard from "./pages/GiftCard";
+import GiftCardConfirmation from "./pages/GiftCardConfirmation";
 import { HotelAdminLayout } from "@/components/hotel-admin/HotelAdminLayout";
 import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
@@ -40,6 +42,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/gift-card" element={<GiftCard />} />
+            <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
             <Route path="/categories/:slug" element={<Category />} />
             <Route path="/experiences/:slug" element={<Experience />} />
             <Route path="/hotels/:slug" element={<Hotel />} />
