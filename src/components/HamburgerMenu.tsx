@@ -67,14 +67,7 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
             </Link>
           ))}
           
-          {user ? (
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors text-left"
-            >
-              Sign out
-            </button>
-          ) : (
+          {!user && (
             <Link
               to="/auth"
               onClick={handleNavClick}
