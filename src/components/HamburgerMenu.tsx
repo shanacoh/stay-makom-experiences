@@ -29,11 +29,13 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
   };
 
   const menuItems = [
-    { label: "Gift Card", to: "/gift-card" },
-    { label: "Referral", to: "/referral" },
-    { label: "For Companies", to: "/corporate" },
-    { label: "Blog", to: "/journal" },
-    { label: "I'm a Hotel / Become a Partner", to: "/partners" },
+    { label: "Gift card", to: "/gift-card" },
+    { label: "Company reward", to: "/corporate" },
+    { label: "Hotel partnership", to: "/partners" },
+    { label: "Journal blogging", to: "/journal" },
+    ...(user ? [{ label: "My account", to: "/account" }] : []),
+    { label: "About staymakom", to: "/about" },
+    { label: "Contact us", to: "/contact" },
   ];
 
   return (
@@ -66,21 +68,12 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
           ))}
           
           {user ? (
-            <>
-              <Link
-                to="/account"
-                onClick={handleNavClick}
-                className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors"
-              >
-                Account
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors text-left"
-              >
-                Sign out
-              </button>
-            </>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors text-left"
+            >
+              Sign out
+            </button>
           ) : (
             <Link
               to="/auth"
