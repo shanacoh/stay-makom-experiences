@@ -82,13 +82,15 @@ const Header = () => {
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
           </div>
           
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
-          >
-            Become a Partner
-          </Button>
+          <Link to="/companies">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+            >
+              For Companies
+            </Button>
+          </Link>
           
           {user ? <DropdownMenu>
               <DropdownMenuTrigger asChild>
