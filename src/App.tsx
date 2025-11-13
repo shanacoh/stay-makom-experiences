@@ -16,6 +16,8 @@ import GiftCard from "./pages/GiftCard";
 import GiftCardConfirmation from "./pages/GiftCardConfirmation";
 import Companies from "./pages/Companies";
 import Partners from "./pages/Partners";
+import Journal from "./pages/Journal";
+import JournalPost from "./pages/JournalPost";
 import { HotelAdminLayout } from "@/components/hotel-admin/HotelAdminLayout";
 import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
@@ -30,6 +32,8 @@ import HotelReviews from "./pages/hotel-admin/Reviews";
 import HotelPayments from "./pages/hotel-admin/Payments";
 import HotelContact from "./pages/hotel-admin/Contact";
 import HotelSettings from "./pages/hotel-admin/Settings";
+import AdminJournal from "./pages/admin/Journal";
+import JournalEditor from "./pages/admin/JournalEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +53,8 @@ const App = () => (
             <Route path="/companies" element={<Companies />} />
             <Route path="/corporate" element={<Companies />} />
             <Route path="/partners" element={<Partners />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/experience/:slug" element={<Experience />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
@@ -66,6 +72,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/journal"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminJournal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/journal/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <JournalEditor />
                 </ProtectedRoute>
               }
             />
