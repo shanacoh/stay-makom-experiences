@@ -147,22 +147,18 @@ const Index = () => {
         <section className="relative py-32 overflow-hidden">
           {/* Background Image */}
           <div className="absolute inset-0">
-            <img 
-              src={desertJourney} 
-              alt="Desert journey" 
-              className="w-full h-full object-cover"
-            />
+            <img src={desertJourney} alt="Desert journey" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
           </div>
           
           <div className="container max-w-6xl relative z-10">
-            <h2 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-center mb-20 text-white">
-              Israel... differently
-            </h2>
+            
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12">
               {/* Block 1 */}
-              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{
+              animationDelay: '0.1s'
+            }}>
                 <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
                   Follow what moves you
                 </h3>
@@ -172,7 +168,9 @@ const Index = () => {
               </div>
               
               {/* Block 2 */}
-              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{
+              animationDelay: '0.3s'
+            }}>
                 <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
                   Shape your own moment
                 </h3>
@@ -182,7 +180,9 @@ const Index = () => {
               </div>
               
               {/* Block 3 */}
-              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{
+              animationDelay: '0.5s'
+            }}>
                 <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
                   Book, unwind, begin
                 </h3>
