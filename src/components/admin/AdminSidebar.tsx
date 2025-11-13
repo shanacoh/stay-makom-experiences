@@ -8,6 +8,7 @@ import {
   UserCircle,
   BookOpen,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +26,7 @@ const menuItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "Categories", url: "/admin/categories", icon: FolderKanban },
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
+  { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
   { title: "Reservations", url: "/admin/reservations", icon: Calendar },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Customers", url: "/admin/customers", icon: UserCircle },
