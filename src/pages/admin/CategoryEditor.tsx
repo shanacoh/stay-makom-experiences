@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Upload, X } from "lucide-react";
 
 const CategoryEditor = () => {
   const { id } = useParams();
@@ -26,6 +26,8 @@ const CategoryEditor = () => {
     display_order: 0,
     status: "draft" as "draft" | "published",
   });
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const { data: category } = useQuery({
     queryKey: ["category", id],
@@ -55,6 +57,7 @@ const CategoryEditor = () => {
         display_order: category.display_order || 0,
         status: category.status || "draft",
       });
+      setImagePreview(category.hero_image || "");
     }
   }, [category]);
 
@@ -71,6 +74,53 @@ const CategoryEditor = () => {
       name,
       slug: generateSlug(name),
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from("category-images")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("category-images")
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, hero_image: publicUrl });
+      setImagePreview(publicUrl);
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, hero_image: "" });
+    setImagePreview("");
   };
 
   const saveMutation = useMutation({
@@ -184,13 +234,49 @@ const CategoryEditor = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="hero_image">Hero Image URL</Label>
-              <Input
-                id="hero_image"
-                value={formData.hero_image}
-                onChange={(e) => setFormData({ ...formData, hero_image: e.target.value })}
-                placeholder="https://..."
-              />
+              <Label htmlFor="hero_image">Hero Image</Label>
+              <div className="space-y-4">
+                {imagePreview && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input
+                    type="file"
+                    id="hero_image"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploading}
+                    onClick={() => document.getElementById("hero_image")?.click()}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploading ? "Uploading..." : "Upload"}
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Recommended: 1920x1080px, max 5MB
+                </p>
+              </div>
             </div>
 
             <div className="space-y-2">
