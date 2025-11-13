@@ -3,8 +3,25 @@ import { Instagram, Mail, Phone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 const Footer = () => {
   const [email, setEmail] = useState("");
+  
+  const { data: categories } = useQuery({
+    queryKey: ["categories-footer"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, slug")
+        .eq("status", "published")
+        .order("display_order", { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+  
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement newsletter subscription
@@ -72,39 +89,21 @@ const Footer = () => {
               EXPERIENCES
             </h4>
             <ul className="space-y-2">
-              <li>
-                <Link to="/category/romantic" className="text-sm text-white hover:text-primary transition-smooth">
-                  Romantic escapes
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/family" className="text-sm text-white hover:text-primary transition-smooth">
-                  Family fun
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/golden-age" className="text-sm text-white hover:text-primary transition-smooth">
-                  Golden age
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/active" className="text-sm text-white hover:text-primary transition-smooth">
-                  Active break
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/nature" className="text-sm text-white hover:text-primary transition-smooth">
-                  Beyond nature
-                </Link>
-              </li>
-              <li>
-                <Link to="/category/taste" className="text-sm text-white hover:text-primary transition-smooth">
-                  Taste affair
-                </Link>
-              </li>
-              <li>
-                <span className="text-sm text-white/50">More to come</span>
-              </li>
+              {categories?.map((category) => (
+                <li key={category.id}>
+                  <Link 
+                    to={`/category/${category.slug}`} 
+                    className="text-sm text-white hover:text-primary transition-smooth"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+              {(!categories || categories.length === 0) && (
+                <li>
+                  <span className="text-sm text-white/50">More to come</span>
+                </li>
+              )}
             </ul>
           </div>
 
