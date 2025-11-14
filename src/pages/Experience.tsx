@@ -54,7 +54,9 @@ const Experience = () => {
   const photos = experience.photos && experience.photos.length > 0 
     ? experience.photos 
     : experience.hero_image 
-    ? [experience.hero_image] 
+    ? [experience.hero_image]
+    : experience.hotels?.hero_image
+    ? [experience.hotels.hero_image]
     : [];
 
   return (

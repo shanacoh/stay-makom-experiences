@@ -54,7 +54,8 @@ const Category = () => {
             city,
             region,
             latitude,
-            longitude
+            longitude,
+            hero_image
           )
         `).eq("category_id", category?.id).eq("status", "published");
       if (error) throw error;
@@ -174,7 +175,7 @@ const Category = () => {
                       <Card className="overflow-hidden hover:shadow-strong transition-smooth group">
                         <div className="grid md:grid-cols-[300px_1fr] gap-6">
                           <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto">
-                            <img src={experience.hero_image || "/placeholder.svg"} alt={experience.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <img src={experience.hero_image || experience.hotels?.hero_image || "/placeholder.svg"} alt={experience.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           </div>
                           <CardContent className="p-6 flex flex-col justify-between">
                             <div>
