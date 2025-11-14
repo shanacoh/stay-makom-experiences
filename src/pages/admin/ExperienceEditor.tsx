@@ -142,18 +142,29 @@ const AdminExperienceEditor = () => {
 
     setIsUploadingImage(true);
     try {
+      // Debug: Check user session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('User session:', session?.user?.id);
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      console.log('Attempting to upload to:', filePath);
+
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('experience-images')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful:', uploadData);
 
       const { data: { publicUrl } } = supabase.storage
         .from('experience-images')
