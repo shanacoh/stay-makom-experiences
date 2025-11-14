@@ -5,14 +5,14 @@ interface ExperienceHeroProps {
   title: string;
   subtitle?: string | null;
   hotelName?: string | null;
-  introCopy?: string | null;
+  shortDescription?: string | null;
   photos: string[];
 }
 const ExperienceHero = ({
   title,
   subtitle,
   hotelName,
-  introCopy,
+  shortDescription,
   photos
 }: ExperienceHeroProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,11 +66,11 @@ const ExperienceHero = ({
             </div>
 
             {/* Right Column */}
-            {introCopy && <div className="flex items-end">
+            {shortDescription && <div className="flex items-end">
                 <p className="text-lg xl:text-xl leading-relaxed text-white opacity-95 max-w-xl" style={{
               textShadow: '0 2px 8px rgba(0,0,0,0.4)'
             }}>
-                  {introCopy.slice(0, 200)}{introCopy.length > 200 ? '...' : ''}
+                  {shortDescription}
                 </p>
               </div>}
           </div>
@@ -85,8 +85,10 @@ const ExperienceHero = ({
       </div>
 
       {/* Mobile intro below hero on small screens */}
-      {introCopy && <div className="lg:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent z-10 p-6 pb-8">
-          
+      {shortDescription && <div className="lg:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent z-10 p-6 pb-8">
+          <p className="text-base text-white opacity-95">
+            {shortDescription}
+          </p>
         </div>}
     </div>;
 };
