@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import giftCardHero from "@/assets/gift-card-hero.jpg";
 
 export default function GiftCard() {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ export default function GiftCard() {
       {/* Hero Section */}
       <section className="relative h-[70vh] overflow-hidden">
         <img 
-          src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb"
+          src={giftCardHero}
           alt="Gift a Staymakom moment"
           className="absolute inset-0 w-full h-full object-cover"
         />
