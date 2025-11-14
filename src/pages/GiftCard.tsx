@@ -110,21 +110,19 @@ export default function GiftCard() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 py-20 space-y-32">
+      <div className="max-w-7xl mx-auto px-4 py-20 space-y-32">
         {/* Gift by Amount Section */}
         <section id="gift-by-amount" className="scroll-mt-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full">
-                <Gift className="h-4 w-4" />
-                <span className="text-sm font-medium">Gift by Amount</span>
-              </div>
-              <h2 className="font-sans text-4xl font-bold">Gift a stay, your way.</h2>
-              <p className="text-lg text-muted-foreground">
-                Choose an amount, and let them explore Israel's most inspiring hotels and experiences.
+          <div className="max-w-2xl mx-auto">
+            {/* Centered Intro */}
+            <div className="text-center space-y-4 mb-12">
+              <h2 className="font-sans text-4xl md:text-5xl font-bold">Gift a stay, your way.</h2>
+              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+                Choose an amount and let them explore Israel's most inspiring hotels and experiences.
               </p>
             </div>
 
+            {/* Centered Form Card */}
             <Card className="shadow-medium">
               <CardHeader>
                 <CardTitle>Select Amount</CardTitle>
