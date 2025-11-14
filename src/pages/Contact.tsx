@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Mail, Instagram } from "lucide-react";
-import contactHero from "@/assets/contact-hero.jpg";
+import contactHero from "@/assets/contact-hero-new.jpg";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
