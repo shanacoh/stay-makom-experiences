@@ -17,6 +17,7 @@ const AdminExperienceEditor = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const isEditing = !!id;
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     hotel_id: "",
@@ -133,6 +134,39 @@ const AdminExperienceEditor = () => {
       title: value,
       slug: prev.slug || value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     }));
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('experience-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('experience-images')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, hero_image: publicUrl }));
+      toast.success("Image uploadée avec succès");
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error("Erreur lors de l'upload de l'image");
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const saveMutation = useMutation({
@@ -269,6 +303,37 @@ const AdminExperienceEditor = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="hero_image">Photo principale</Label>
+              <div className="space-y-3">
+                {formData.hero_image && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                    <img 
+                      src={formData.hero_image} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input
+                    id="hero_image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={isUploadingImage}
+                    className="flex-1"
+                  />
+                  {isUploadingImage && (
+                    <span className="text-sm text-muted-foreground">Upload en cours...</span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Si aucune photo n'est ajoutée, la photo principale de l'hôtel sera affichée
+                </p>
               </div>
             </div>
 
