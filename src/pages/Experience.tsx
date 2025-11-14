@@ -86,7 +86,7 @@ const Experience = () => {
           title={experience.title} 
           subtitle={experience.subtitle} 
           hotelName={experience.hotels?.name}
-          introCopy={experience.long_copy}
+          shortDescription={experience.subtitle}
           photos={photos} 
         />
 
