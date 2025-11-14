@@ -51,7 +51,7 @@ const ExperienceHero = ({
               {hotelName && <p className="text-sm uppercase tracking-wider font-medium opacity-90">
                   {hotelName}
                 </p>}
-              <h1 className="font-serif text-5xl xl:text-6xl leading-tight" style={{
+              <h1 className="font-serif text-5xl xl:text-6xl leading-tight text-white" style={{
               textShadow: '0 2px 12px rgba(0,0,0,0.4)'
             }}>
                 {title}
