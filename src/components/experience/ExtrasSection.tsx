@@ -1,6 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Sparkles } from "lucide-react";
 
 interface Extra {
   id: string;
@@ -37,72 +36,75 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-sans text-3xl font-bold mb-2">Add extras</h2>
-        <p className="text-muted-foreground">Enhance your experience with these optional add-ons</p>
+        <h2 className="font-sans text-3xl font-bold mb-2">Spice it up</h2>
+        <p className="text-muted-foreground italic">Enhance your stay with optional extras you can add to your booking on the right.</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {extras.map((extra) => {
           const quantity = selectedExtras[extra.id] || 0;
           
           return (
-            <Card key={extra.id} className="overflow-hidden">
-              {extra.image_url && (
-                <div className="aspect-video w-full overflow-hidden">
-                  <img
-                    src={extra.image_url}
-                    alt={extra.name}
-                    className="w-full h-full object-cover"
-                  />
+            <div
+              key={extra.id}
+              className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow"
+            >
+              <div className="shrink-0">
+                {extra.image_url ? (
+                  <img src={extra.image_url} alt="" className="w-12 h-12 object-contain" />
+                ) : (
+                  <Sparkles className="w-12 h-12 text-primary" />
+                )}
+              </div>
+              
+              <div className="space-y-1 flex-1">
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Extra
                 </div>
-              )}
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="font-semibold text-lg">{extra.name}</h3>
-                    {extra.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {extra.description}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="text-lg font-bold">
-                      ${extra.price} <span className="text-sm font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
-                    </div>
-                    
-                    {quantity === 0 ? (
-                      <Button
-                        size="sm"
-                        onClick={() => onUpdateQuantity(extra.id, 1)}
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Add
-                      </Button>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => onUpdateQuantity(extra.id, quantity - 1)}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="w-8 text-center font-medium">{quantity}</span>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => onUpdateQuantity(extra.id, quantity + 1)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                <h3 className="font-semibold text-sm leading-tight">{extra.name}</h3>
+                {extra.description && (
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {extra.description}
+                  </p>
+                )}
+                <div className="text-sm font-bold pt-1">
+                  ${extra.price} <span className="text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                {quantity === 0 ? (
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => onUpdateQuantity(extra.id, 1)}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2 w-full justify-center">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-8 w-8"
+                      onClick={() => onUpdateQuantity(extra.id, quantity - 1)}
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <span className="w-8 text-center font-medium text-sm">{quantity}</span>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-8 w-8"
+                      onClick={() => onUpdateQuantity(extra.id, quantity + 1)}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           );
         })}
       </div>

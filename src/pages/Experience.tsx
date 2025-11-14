@@ -10,6 +10,7 @@ import BookingPanel from "@/components/experience/BookingPanel";
 import ExperienceDetails from "@/components/experience/ExperienceDetails";
 import IncludesSection from "@/components/experience/IncludesSection";
 import ExtrasSection from "@/components/experience/ExtrasSection";
+import GoodToKnow from "@/components/experience/GoodToKnow";
 import ReviewsSection from "@/components/experience/ReviewsSection";
 import ImportantInformation from "@/components/experience/ImportantInformation";
 import { Loader2 } from "lucide-react";
@@ -95,7 +96,7 @@ const Experience = () => {
             <div className="lg:col-span-2 space-y-12">
               {experience.hotels && <HotelSpotlight hotel={experience.hotels} />}
 
-              <ExperienceDetails longCopy={experience.long_copy} includes={experience.includes} notIncludes={experience.not_includes} goodToKnow={experience.good_to_know} />
+              <ExperienceDetails longCopy={experience.long_copy} />
 
               {includes && includes.length > 0 && <IncludesSection includes={includes} />}
 
@@ -111,6 +112,8 @@ const Experience = () => {
                   }}
                 />
               )}
+
+              <GoodToKnow items={experience.good_to_know} />
 
               <ReviewsSection experienceId={experience.id} />
 
