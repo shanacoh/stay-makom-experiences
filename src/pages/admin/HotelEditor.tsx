@@ -55,7 +55,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
         hero_image: hotel.hero_image || "",
         contact_email: hotel.contact_email || "",
         contact_phone: hotel.contact_phone || "",
-        status: hotel.status || "draft",
+        status: (hotel.status === "pending" ? "draft" : hotel.status) || "draft",
       });
     }
   }, [hotel]);
