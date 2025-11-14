@@ -8,6 +8,7 @@ import ExperienceHero from "@/components/experience/ExperienceHero";
 import HotelSpotlight from "@/components/experience/HotelSpotlight";
 import BookingPanel from "@/components/experience/BookingPanel";
 import ExperienceDetails from "@/components/experience/ExperienceDetails";
+import WhatsIncludedPhotos from "@/components/experience/WhatsIncludedPhotos";
 import IncludesSection from "@/components/experience/IncludesSection";
 import ExtrasSection from "@/components/experience/ExtrasSection";
 import GoodToKnow from "@/components/experience/GoodToKnow";
@@ -97,6 +98,8 @@ const Experience = () => {
               {experience.hotels && <HotelSpotlight hotel={experience.hotels} />}
 
               <ExperienceDetails longCopy={experience.long_copy} />
+
+              <WhatsIncludedPhotos includes={experience.includes} />
 
               {includes && includes.length > 0 && <IncludesSection includes={includes} />}
 
