@@ -10,7 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Eye } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import IncludesManager from "@/components/admin/IncludesManager";
+import ExtrasManager from "@/components/admin/ExtrasManager";
+import ReviewsManager from "@/components/admin/ReviewsManager";
 
 const AdminExperienceEditor = () => {
   const navigate = useNavigate();
@@ -49,6 +51,15 @@ const AdminExperienceEditor = () => {
     cancellation_policy_he: "",
     lead_time_days: 3,
     status: "draft" as any,
+    checkin_time: "",
+    checkout_time: "",
+    address: "",
+    address_he: "",
+    google_maps_link: "",
+    accessibility_info: "",
+    accessibility_info_he: "",
+    services: [] as string[],
+    services_he: [] as string[],
   });
 
   const { data: hotels } = useQuery({
@@ -124,6 +135,15 @@ const AdminExperienceEditor = () => {
         cancellation_policy_he: exp.cancellation_policy_he || "",
         lead_time_days: exp.lead_time_days || 3,
         status: exp.status || "draft",
+        checkin_time: exp.checkin_time || "",
+        checkout_time: exp.checkout_time || "",
+        address: exp.address || "",
+        address_he: exp.address_he || "",
+        google_maps_link: exp.google_maps_link || "",
+        accessibility_info: exp.accessibility_info || "",
+        accessibility_info_he: exp.accessibility_info_he || "",
+        services: exp.services || [],
+        services_he: exp.services_he || [],
       });
     }
   }, [experience]);
@@ -456,6 +476,96 @@ const AdminExperienceEditor = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Important Information</CardTitle>
+            <CardDescription>Hours, address, accessibility, and services</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="checkin_time">Check-in time</Label>
+                <Input
+                  id="checkin_time"
+                  placeholder="e.g., 3:00 PM"
+                  value={formData.checkin_time}
+                  onChange={(e) => setFormData(prev => ({ ...prev, checkin_time: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="checkout_time">Check-out time</Label>
+                <Input
+                  id="checkout_time"
+                  placeholder="e.g., 11:00 AM"
+                  value={formData.checkout_time}
+                  onChange={(e) => setFormData(prev => ({ ...prev, checkout_time: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="address">Address (EN)</Label>
+                <Textarea
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address_he">Address (HE)</Label>
+                <Textarea
+                  id="address_he"
+                  value={formData.address_he}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address_he: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="google_maps_link">Google Maps link</Label>
+              <Input
+                id="google_maps_link"
+                type="url"
+                placeholder="https://maps.google.com/..."
+                value={formData.google_maps_link}
+                onChange={(e) => setFormData(prev => ({ ...prev, google_maps_link: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="accessibility_info">Accessibility (EN)</Label>
+                <Textarea
+                  id="accessibility_info"
+                  value={formData.accessibility_info}
+                  onChange={(e) => setFormData(prev => ({ ...prev, accessibility_info: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="accessibility_info_he">Accessibility (HE)</Label>
+                <Textarea
+                  id="accessibility_info_he"
+                  value={formData.accessibility_info_he}
+                  onChange={(e) => setFormData(prev => ({ ...prev, accessibility_info_he: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {isEditing && id && (
+          <>
+            <IncludesManager experienceId={id} />
+            <ExtrasManager experienceId={id} />
+            <ReviewsManager experienceId={id} />
+          </>
+        )}
 
         <div className="flex gap-3 justify-end">
           <Button
