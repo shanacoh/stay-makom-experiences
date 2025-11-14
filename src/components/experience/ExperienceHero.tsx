@@ -69,16 +69,16 @@ const ExperienceHero = ({
       {/* Content Overlay - Mobile/Tablet */}
       <div className="lg:hidden absolute inset-0 z-10">
         <div className="container h-full flex items-end pb-12">
-          <div className="space-y-3 text-white">
-            {hotelName && <p className="text-xs uppercase tracking-wider font-medium opacity-90">
+          <div className="space-y-3">
+            {hotelName && <p className="text-xs uppercase tracking-wider font-medium text-white opacity-90">
                 {hotelName}
               </p>}
-            <h1 className="font-serif text-3xl sm:text-4xl leading-tight" style={{
+            <h1 className="font-serif text-3xl sm:text-4xl leading-tight text-white" style={{
               textShadow: '0 2px 12px rgba(0,0,0,0.4)'
             }}>
               {title}
             </h1>
-            {subtitle && <p className="text-lg sm:text-xl font-light opacity-95" style={{
+            {subtitle && <p className="text-lg sm:text-xl font-light text-white opacity-95" style={{
               textShadow: '0 2px 8px rgba(0,0,0,0.4)'
             }}>
                 {subtitle}
