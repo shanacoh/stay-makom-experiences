@@ -47,62 +47,64 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
           return (
             <div
               key={extra.id}
-              className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow"
+              className="group space-y-3"
             >
-              <div className="shrink-0">
+              <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                 {extra.image_url ? (
-                  <img src={extra.image_url} alt="" className="w-12 h-12 object-contain" />
+                  <img src={extra.image_url} alt={extra.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                 ) : (
                   <Sparkles className="w-12 h-12 text-primary" />
                 )}
               </div>
               
-              <div className="space-y-1 flex-1">
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Extra
-                </div>
-                <h3 className="font-semibold text-sm leading-tight">{extra.name}</h3>
-                {extra.description && (
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {extra.description}
-                  </p>
-                )}
-                <div className="text-sm font-bold pt-1">
-                  ${extra.price} <span className="text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center">
-                {quantity === 0 ? (
-                  <Button
-                    size="sm"
-                    className="w-full"
-                    onClick={() => onUpdateQuantity(extra.id, 1)}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add
-                  </Button>
-                ) : (
-                  <div className="flex items-center gap-2 w-full justify-center">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8"
-                      onClick={() => onUpdateQuantity(extra.id, quantity - 1)}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <span className="w-8 text-center font-medium text-sm">{quantity}</span>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8"
-                      onClick={() => onUpdateQuantity(extra.id, quantity + 1)}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Extra
                   </div>
-                )}
+                  <h3 className="font-semibold text-sm leading-tight">{extra.name}</h3>
+                  {extra.description && (
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                      {extra.description}
+                    </p>
+                  )}
+                  <div className="text-sm font-bold pt-1">
+                    ${extra.price} <span className="text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-center pt-1">
+                  {quantity === 0 ? (
+                    <Button
+                      size="sm"
+                      className="w-full h-8 text-xs"
+                      onClick={() => onUpdateQuantity(extra.id, 1)}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2 w-full justify-center">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-7 w-7"
+                        onClick={() => onUpdateQuantity(extra.id, quantity - 1)}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <span className="w-6 text-center font-medium text-sm">{quantity}</span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-7 w-7"
+                        onClick={() => onUpdateQuantity(extra.id, quantity + 1)}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           );
