@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -105,18 +104,16 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
             </SelectContent>
           </Select>
 
-          <Sheet>
-            <SheetTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <Button variant="outline" size="default">
                 <Filter className="h-4 w-4 mr-2" />
                 Filters
               </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Filter experiences</SheetTitle>
-              </SheetHeader>
-              <div className="space-y-6 mt-6">
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="start">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Filter experiences</h3>
                 <div>
                   <label className="text-sm font-medium mb-3 block">Budget (per person)</label>
                   <Slider
@@ -152,8 +149,8 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
                   </Select>
                 </div>
               </div>
-            </SheetContent>
-          </Sheet>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <Button
