@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -24,9 +24,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { HotelEditor } from "./HotelEditor";
+import { formatDistanceToNow } from "date-fns";
 
 const AdminHotels = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [regionFilter, setRegionFilter] = useState<string>("all");
   const queryClient = useQueryClient();
 
   const { data: hotels, isLoading } = useQuery({
@@ -38,12 +45,51 @@ const AdminHotels = () => {
           *,
           hotel_admins:hotel_admins(user_id, user_profiles:user_profiles(display_name))
         `)
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
 
       if (error) throw error;
       return data as any[];
     },
   });
+
+  const { data: experienceStats } = useQuery({
+    queryKey: ["hotel-experience-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experiences")
+        .select("hotel_id, status");
+
+      if (error) throw error;
+
+      const stats: Record<string, { published: number; draft: number; pending: number }> = {};
+      data.forEach((exp) => {
+        if (!stats[exp.hotel_id]) {
+          stats[exp.hotel_id] = { published: 0, draft: 0, pending: 0 };
+        }
+        if (exp.status === "published") stats[exp.hotel_id].published += 1;
+        else if (exp.status === "pending") stats[exp.hotel_id].pending += 1;
+        else stats[exp.hotel_id].draft += 1;
+      });
+
+      return stats;
+    },
+  });
+
+  const filteredHotels = useMemo(() => {
+    if (!hotels) return [];
+    
+    return hotels.filter((hotel) => {
+      const matchesStatus = statusFilter === "all" || hotel.status === statusFilter;
+      const matchesRegion = regionFilter === "all" || hotel.region === regionFilter;
+      return matchesStatus && matchesRegion;
+    });
+  }, [hotels, statusFilter, regionFilter]);
+
+  const regions = useMemo(() => {
+    if (!hotels) return [];
+    const uniqueRegions = [...new Set(hotels.map((h) => h.region).filter(Boolean))];
+    return uniqueRegions;
+  }, [hotels]);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -73,6 +119,18 @@ const AdminHotels = () => {
     },
   });
 
+  if (showForm || editingId) {
+    return (
+      <HotelEditor
+        hotelId={editingId || undefined}
+        onClose={() => {
+          setShowForm(false);
+          setEditingId(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -80,89 +138,182 @@ const AdminHotels = () => {
           <h2 className="text-3xl font-bold">Hotels</h2>
           <p className="text-muted-foreground">Manage hotel properties</p>
         </div>
-        <Link to="/admin/hotels/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Hotel
-          </Button>
-        </Link>
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Hotel
+        </Button>
+      </div>
+
+      <div className="flex gap-4">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={regionFilter} onValueChange={setRegionFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by region" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Regions</SelectItem>
+            {regions.map((region) => (
+              <SelectItem key={region} value={region}>
+                {region}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
-      ) : hotels && hotels.length > 0 ? (
-        <div className="border rounded-lg bg-white">
+      ) : filteredHotels && filteredHotels.length > 0 ? (
+        <div className="border rounded-lg bg-card">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Region</TableHead>
-                <TableHead>City</TableHead>
+                <TableHead>Hotel</TableHead>
+                <TableHead className="text-center">Experiences Live</TableHead>
+                <TableHead className="text-center">Experiences Draft / Pending</TableHead>
+                <TableHead>Hotel Admin</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Admin</TableHead>
+                <TableHead>Last Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {hotels.map((hotel) => (
-                <TableRow key={hotel.id}>
-                  <TableCell className="font-medium">{hotel.name}</TableCell>
-                  <TableCell>{hotel.region || "-"}</TableCell>
-                  <TableCell>{hotel.city || "-"}</TableCell>
-                  <TableCell>
-                    <Badge variant={hotel.status === "published" ? "default" : "secondary"}>
-                      {hotel.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {hotel.hotel_admins?.[0]?.user_profiles?.display_name || "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          togglePublishMutation.mutate({
-                            id: hotel.id,
-                            currentStatus: hotel.status,
-                          })
+              {filteredHotels.map((hotel) => {
+                const stats = experienceStats?.[hotel.id] || { published: 0, draft: 0, pending: 0 };
+                const draftPending = stats.draft + stats.pending;
+                
+                return (
+                  <TableRow key={hotel.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {hotel.hero_image ? (
+                          <img
+                            src={hotel.hero_image}
+                            alt={hotel.name}
+                            className="w-10 h-10 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-muted" />
+                        )}
+                        <div>
+                          <p className="font-medium">{hotel.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {hotel.region && hotel.city ? `${hotel.city}, ${hotel.region}` : hotel.region || hotel.city || "-"}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-semibold text-lg">{stats.published}</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-semibold text-lg text-muted-foreground">{draftPending}</span>
+                    </TableCell>
+                    <TableCell>
+                      {hotel.hotel_admins?.[0]?.user_profiles?.display_name || (
+                        <span className="text-muted-foreground">None</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          hotel.status === "published"
+                            ? "default"
+                            : hotel.status === "pending"
+                            ? "outline"
+                            : "secondary"
+                        }
+                        className={
+                          hotel.status === "published"
+                            ? "bg-green-500 hover:bg-green-600"
+                            : hotel.status === "pending"
+                            ? "border-orange-500 text-orange-500"
+                            : ""
                         }
                       >
-                        {hotel.status === "published" ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </Button>
-                      <Link to={`/admin/hotels/edit/${hotel.id}`}>
-                        <Button variant="ghost" size="sm">
+                        {hotel.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {hotel.updated_at
+                        ? formatDistanceToNow(new Date(hotel.updated_at), { addSuffix: true })
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingId(hotel.id)}
+                          title="Edit Hotel"
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteId(hotel.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        <Link to={`/admin/experiences?hotel=${hotel.id}`}>
+                          <Button variant="ghost" size="sm" title="Edit Experiences">
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Link to={`/hotel/${hotel.slug}`} target="_blank">
+                          <Button variant="ghost" size="sm" title="Preview">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            togglePublishMutation.mutate({
+                              id: hotel.id,
+                              currentStatus: hotel.status,
+                            })
+                          }
+                          title={hotel.status === "published" ? "Unpublish" : "Publish"}
+                        >
+                          {hotel.status === "published" ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4 text-green-600" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteId(hotel.id)}
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
       ) : (
-        <div className="text-center py-12 border rounded-lg bg-white">
-          <p className="text-muted-foreground mb-4">No hotels yet</p>
-          <Link to="/admin/hotels/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add your first hotel
-            </Button>
-          </Link>
+        <div className="text-center py-12 border rounded-lg bg-card">
+          <p className="text-muted-foreground mb-4">
+            {statusFilter !== "all" || regionFilter !== "all"
+              ? "No hotels match the selected filters"
+              : "No hotels yet"}
+          </p>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add your first hotel
+          </Button>
         </div>
       )}
 
