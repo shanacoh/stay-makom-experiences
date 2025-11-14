@@ -16,7 +16,7 @@ const ReviewsManager = ({ experienceId }: ReviewsManagerProps) => {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["admin-reviews", experienceId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("experience_reviews")
         .select("*")
         .eq("experience_id", experienceId)
@@ -29,7 +29,7 @@ const ReviewsManager = ({ experienceId }: ReviewsManagerProps) => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("experience_reviews")
         .delete()
         .eq("id", id);
@@ -44,7 +44,7 @@ const ReviewsManager = ({ experienceId }: ReviewsManagerProps) => {
 
   const togglePublishedMutation = useMutation({
     mutationFn: async ({ id, published }: { id: string; published: boolean }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("experience_reviews")
         .update({ published })
         .eq("id", id);
@@ -69,7 +69,7 @@ const ReviewsManager = ({ experienceId }: ReviewsManagerProps) => {
           <p className="text-muted-foreground text-center py-4">No reviews yet</p>
         ) : (
           <div className="space-y-3">
-            {reviews.map((review) => (
+            {reviews.map((review: any) => (
               <div
                 key={review.id}
                 className="flex gap-3 p-4 border border-border rounded-lg"

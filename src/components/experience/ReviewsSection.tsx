@@ -15,7 +15,7 @@ const ReviewsSection = ({ experienceId }: ReviewsSectionProps) => {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["experience-reviews", experienceId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("experience_reviews")
         .select("*")
         .eq("experience_id", experienceId)

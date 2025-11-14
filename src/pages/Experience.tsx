@@ -9,9 +9,9 @@ import HotelSpotlight from "@/components/experience/HotelSpotlight";
 import BookingPanel from "@/components/experience/BookingPanel";
 import ExperienceDetails from "@/components/experience/ExperienceDetails";
 import IncludesSection from "@/components/experience/IncludesSection";
+import ExtrasSection from "@/components/experience/ExtrasSection";
 import ReviewsSection from "@/components/experience/ReviewsSection";
 import ImportantInformation from "@/components/experience/ImportantInformation";
-import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 const Experience = () => {
   const {
@@ -40,15 +40,10 @@ const Experience = () => {
     },
     enabled: !!slug
   });
-  const {
-    data: includes
-  } = useQuery({
+  const { data: includes, isLoading: includesLoading } = useQuery({
     queryKey: ["experience-includes", experience?.id],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("experience_includes").select("*").eq("experience_id", experience?.id).eq("published", true).order("order_index");
+      const { data, error } = await (supabase as any).from("experience_includes").select("*").eq("experience_id", experience?.id).eq("published", true).order("order_index");
       if (error) throw error;
       return data;
     },
@@ -99,37 +94,29 @@ const Experience = () => {
 
               {includes && includes.length > 0 && <IncludesSection includes={includes} />}
 
-              {extras && extras.length > 0 && <div className="space-y-6">
-                  <div>
-                    <h2 className="font-sans text-3xl font-bold mb-2">Spice it up      </h2>
-                    <p className="text-muted-foreground">
-                      These optional add-ons can be selected in the booking panel on the right
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {extras.map(extra => <Card key={extra.id} className="overflow-hidden">
-                        {extra.image_url && <div className="aspect-video w-full overflow-hidden">
-                            <img src={extra.image_url} alt={extra.name} className="w-full h-full object-cover" />
-                          </div>}
-                        <div className="p-4">
-                          <h3 className="font-semibold text-lg">{extra.name}</h3>
-                          {extra.description && <p className="text-sm text-muted-foreground mt-1">
-                              {extra.description}
-                            </p>}
-                          <div className="text-lg font-bold mt-2">
-                            ${extra.price}{" "}
-                            <span className="text-sm font-normal text-muted-foreground">
-                              / {extra.pricing_type.replace("_", " ")}
-                            </span>
-                          </div>
-                        </div>
-                      </Card>)}
-                  </div>
-                </div>}
+              {extras && extras.length > 0 && (
+                <ExtrasSection 
+                  extras={extras} 
+                  selectedExtras={selectedExtras}
+                  onUpdateQuantity={(extraId, quantity) => {
+                    setSelectedExtras(prev => ({
+                      ...prev,
+                      [extraId]: quantity
+                    }));
+                  }}
+                />
+              )}
 
               <ReviewsSection experienceId={experience.id} />
 
-              <ImportantInformation checkinTime={experience.checkin_time} checkoutTime={experience.checkout_time} address={experience.address} googleMapsLink={experience.google_maps_link} accessibilityInfo={experience.accessibility_info} services={experience.services} />
+              <ImportantInformation 
+                checkinTime={(experience as any).checkin_time}
+                checkoutTime={(experience as any).checkout_time}
+                address={(experience as any).address}
+                googleMapsLink={(experience as any).google_maps_link}
+                accessibilityInfo={(experience as any).accessibility_info}
+                services={(experience as any).services}
+              />
             </div>
 
             {/* Right Column - Booking Panel */}

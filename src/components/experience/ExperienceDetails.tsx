@@ -36,9 +36,14 @@ const ExperienceDetails = ({
       {notIncludes && notIncludes.length > 0}
 
       {goodToKnow && goodToKnow.length > 0 && <div>
-          
+          <h2 className="font-sans text-3xl font-bold mb-4">Good to know</h2>
           <ul className="space-y-2">
-            {goodToKnow.map((item, index) => {})}
+            {goodToKnow.map((item, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                <span className="text-muted-foreground">{item}</span>
+              </li>
+            ))}
           </ul>
         </div>}
     </div>;
