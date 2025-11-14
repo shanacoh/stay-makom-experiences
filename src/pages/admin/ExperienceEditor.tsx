@@ -25,7 +25,6 @@ const AdminExperienceEditor = () => {
     subtitle: "",
     subtitle_he: "",
     slug: "",
-    category: "romantic" as any,
     category_id: "",
     long_copy: "",
     long_copy_he: "",
@@ -101,7 +100,6 @@ const AdminExperienceEditor = () => {
         subtitle: exp.subtitle || "",
         subtitle_he: exp.subtitle_he || "",
         slug: exp.slug || "",
-        category: exp.category || "romantic",
         category_id: exp.category_id || "",
         long_copy: exp.long_copy || "",
         long_copy_he: exp.long_copy_he || "",
@@ -253,29 +251,9 @@ const AdminExperienceEditor = () => {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Catégorie (ancienne)</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="romantic">Romantic</SelectItem>
-                    <SelectItem value="family">Family</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="golden_age">Golden Age</SelectItem>
-                    <SelectItem value="taste">Taste</SelectItem>
-                    <SelectItem value="nature">Nature</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category_id">Catégorie (nouvelle)</Label>
+                <Label htmlFor="category_id">Catégorie *</Label>
                 <Select
                   value={formData.category_id}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}

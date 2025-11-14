@@ -57,7 +57,7 @@ export default function HotelExperiences() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("*")
+        .select("*, categories(name)")
         .eq("hotel_id", hotelAdmin?.hotel_id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -221,7 +221,7 @@ export default function HotelExperiences() {
                 <CardHeader>
                   <div className="space-y-2">
                     <CardTitle className="text-xl line-clamp-2">{exp.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground capitalize">{exp.category}</p>
+                    <p className="text-sm text-muted-foreground capitalize">{exp.categories?.name || 'Sans catégorie'}</p>
                   </div>
                 </CardHeader>
 

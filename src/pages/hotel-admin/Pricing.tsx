@@ -28,7 +28,7 @@ export default function HotelPricing() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("*")
+        .select("*, categories(name)")
         .eq("hotel_id", hotelAdmin?.hotel_id)
         .order("title", { ascending: true });
       
@@ -160,7 +160,7 @@ export default function HotelPricing() {
                       <div>
                         <p className="font-semibold">{exp.title}</p>
                         <p className="text-sm text-muted-foreground capitalize">
-                          {exp.category}
+                          {exp.categories?.name || 'Sans catégorie'}
                         </p>
                       </div>
                       <Badge variant={exp.status === "published" ? "default" : "secondary"}>
