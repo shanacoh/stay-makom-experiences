@@ -37,7 +37,8 @@ const AdminExperiences = () => {
         .from("experiences" as any)
         .select(`
           *,
-          hotels:hotel_id(name, slug)
+          hotels:hotel_id(name, slug),
+          categories(name)
         `)
         .order("created_at", { ascending: false });
 
@@ -135,7 +136,7 @@ const AdminExperiences = () => {
                     {experience.hotels?.name || "-"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{experience.category}</Badge>
+                    <Badge variant="outline">{experience.categories?.name || 'Sans catégorie'}</Badge>
                   </TableCell>
                   <TableCell>
                     {experience.base_price} {experience.currency}

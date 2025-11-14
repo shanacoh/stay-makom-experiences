@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 const experienceSchema = z.object({
   title: z.string().min(1, "Title is required"),
   subtitle: z.string().optional(),
-  category: z.string().min(1, "Category is required"),
+  category_id: z.string().min(1, "Category is required"),
   description: z.string().min(100, "Description must be at least 100 characters"),
   min_nights: z.number().min(1).max(8).optional(),
   max_nights: z.number().min(1).max(8).optional(),
@@ -69,6 +69,20 @@ export function ExperienceForm({
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [status, setStatus] = useState<"draft" | "pending" | "published">("draft");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Load categories
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("status", "published")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const {
     register,
@@ -201,7 +215,7 @@ export function ExperienceForm({
         hotel_id: hotelId,
         title: data.title,
         subtitle: data.subtitle || null,
-        category: data.category,
+        category_id: data.category_id,
         long_copy: data.description,
         min_nights: data.min_nights,
         max_nights: data.max_nights,
@@ -264,7 +278,7 @@ export function ExperienceForm({
         hotel_id: hotelId,
         title: data.title,
         subtitle: data.subtitle || null,
-        category: data.category,
+        category_id: data.category_id,
         long_copy: data.description,
         min_nights: data.min_nights,
         max_nights: data.max_nights,
@@ -370,24 +384,23 @@ export function ExperienceForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category_id">Category *</Label>
                 <Select
-                  onValueChange={(value) => setValue("category", value)}
+                  onValueChange={(value) => setValue("category_id", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="romantic">Romantic</SelectItem>
-                    <SelectItem value="family">Family</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="nature">Nature</SelectItem>
-                    <SelectItem value="culinary">Culinary</SelectItem>
-                    <SelectItem value="wellness">Wellness</SelectItem>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                {errors.category && (
-                  <p className="text-sm text-destructive mt-1">{errors.category.message}</p>
+                {errors.category_id && (
+                  <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>
                 )}
               </div>
 
