@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 const Partners = () => {
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const form = useForm<FormData>({
@@ -67,7 +69,7 @@ const Partners = () => {
           <p className="text-xl md:text-2xl mb-10 text-white/90">
             Join a curated network of Israel's most inspiring hotels and experiences.
           </p>
-          <Button onClick={scrollToForm} size="lg" className="bg-[#D72638] hover:bg-[#D72638]/90 text-white">
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-[#D72638] hover:bg-[#D72638]/90 text-white">
             Log in to your hotel account
           </Button>
         </div>
