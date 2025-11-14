@@ -5,14 +5,12 @@ interface ExperienceHeroProps {
   title: string;
   subtitle?: string | null;
   hotelName?: string | null;
-  shortDescription?: string | null;
   photos: string[];
 }
 const ExperienceHero = ({
   title,
   subtitle,
   hotelName,
-  shortDescription,
   photos
 }: ExperienceHeroProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,8 +45,8 @@ const ExperienceHero = ({
       {/* Content Overlay - Desktop */}
       <div className="hidden lg:block absolute inset-0 z-10">
         <div className="container h-full flex items-end pb-20">
-          <div className="grid grid-cols-2 gap-16 w-full">
-            {/* Left Column */}
+          <div className="max-w-2xl">
+            {/* Content */}
             <div className="space-y-4 text-white">
               {hotelName && <p className="text-sm uppercase tracking-wider font-medium opacity-90">
                   {hotelName}
@@ -64,15 +62,6 @@ const ExperienceHero = ({
                   {subtitle}
                 </p>}
             </div>
-
-            {/* Right Column */}
-            {shortDescription && <div className="flex items-end">
-                <p className="text-lg xl:text-xl leading-relaxed text-white opacity-95 max-w-xl" style={{
-              textShadow: '0 2px 8px rgba(0,0,0,0.4)'
-            }}>
-                  {shortDescription}
-                </p>
-              </div>}
           </div>
         </div>
       </div>
@@ -80,16 +69,23 @@ const ExperienceHero = ({
       {/* Content Overlay - Mobile/Tablet */}
       <div className="lg:hidden absolute inset-0 z-10">
         <div className="container h-full flex items-end pb-12">
-          
+          <div className="space-y-3 text-white">
+            {hotelName && <p className="text-xs uppercase tracking-wider font-medium opacity-90">
+                {hotelName}
+              </p>}
+            <h1 className="font-serif text-3xl sm:text-4xl leading-tight" style={{
+              textShadow: '0 2px 12px rgba(0,0,0,0.4)'
+            }}>
+              {title}
+            </h1>
+            {subtitle && <p className="text-lg sm:text-xl font-light opacity-95" style={{
+              textShadow: '0 2px 8px rgba(0,0,0,0.4)'
+            }}>
+                {subtitle}
+              </p>}
+          </div>
         </div>
       </div>
-
-      {/* Mobile intro below hero on small screens */}
-      {shortDescription && <div className="lg:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent z-10 p-6 pb-8">
-          <p className="text-base text-white opacity-95">
-            {shortDescription}
-          </p>
-        </div>}
     </div>;
 };
 export default ExperienceHero;
