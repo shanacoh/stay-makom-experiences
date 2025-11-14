@@ -83,13 +83,13 @@ const Header = () => {
             <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
           </div>
           
-          <Link to="/companies">
+          <Link to="/partners">
             <Button 
               variant="outline" 
               size="sm" 
               className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
             >
-              For Companies
+              Hotel partnership
             </Button>
           </Link>
           
