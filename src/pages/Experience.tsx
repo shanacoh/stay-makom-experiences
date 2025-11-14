@@ -82,7 +82,13 @@ const Experience = () => {
       <Header />
 
       <main className="flex-1">
-        <ExperienceHero title={experience.title} subtitle={experience.subtitle} photos={photos} />
+        <ExperienceHero 
+          title={experience.title} 
+          subtitle={experience.subtitle} 
+          hotelName={experience.hotels?.name}
+          introCopy={experience.long_copy}
+          photos={photos} 
+        />
 
         <div className="container pb-16">
           <div className="grid lg:grid-cols-3 gap-12">
