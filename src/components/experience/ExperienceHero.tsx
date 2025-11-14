@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import HeroActionBar from "./HeroActionBar";
+import GalleryModal from "./GalleryModal";
+
 interface ExperienceHeroProps {
   title: string;
   subtitle?: string | null;
@@ -14,6 +17,7 @@ const ExperienceHero = ({
   photos
 }: ExperienceHeroProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const displayPhotos = photos.length > 0 ? photos : ["/placeholder.svg"];
   const goToPrevious = () => {
     setCurrentIndex(prev => prev === 0 ? displayPhotos.length - 1 : prev - 1);
@@ -21,12 +25,19 @@ const ExperienceHero = ({
   const goToNext = () => {
     setCurrentIndex(prev => prev === displayPhotos.length - 1 ? 0 : prev + 1);
   };
-  return <div className="relative w-full h-screen min-h-[600px] bg-black">
+  return <>
+    <div className="relative w-full h-screen min-h-[600px] bg-black">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img src={displayPhotos[currentIndex]} alt={title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/30" />
       </div>
+
+      {/* Hero Action Bar */}
+      <HeroActionBar 
+        onOpenGallery={() => setGalleryOpen(true)}
+        experienceTitle={title}
+      />
 
       {/* Image Navigation */}
       {displayPhotos.length > 1 && <>
@@ -86,6 +97,15 @@ const ExperienceHero = ({
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+
+    {/* Gallery Modal */}
+    <GalleryModal 
+      open={galleryOpen}
+      onOpenChange={setGalleryOpen}
+      photos={displayPhotos}
+      title={title}
+    />
+  </>;
 };
 export default ExperienceHero;
