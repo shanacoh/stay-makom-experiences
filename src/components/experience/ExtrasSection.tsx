@@ -63,11 +63,9 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                     Extra
                   </div>
                   <h3 className="font-semibold text-sm leading-tight">{extra.name}</h3>
-                  {extra.description && (
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                      {extra.description}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground leading-relaxed h-8 line-clamp-2">
+                    {extra.description || '\u00A0'}
+                  </p>
                   <div className="text-sm font-bold pt-1">
                     ${extra.price} <span className="text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
                   </div>
