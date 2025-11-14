@@ -171,7 +171,7 @@ const AdminExperienceEditor = () => {
         .getPublicUrl(filePath);
 
       setFormData(prev => ({ ...prev, hero_image: publicUrl }));
-      toast.success("Image uploadée avec succès");
+      toast.success("Cover image uploaded successfully! Don't forget to save your changes.");
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error("Erreur lors de l'upload de l'image");
@@ -318,15 +318,30 @@ const AdminExperienceEditor = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="hero_image">Photo principale</Label>
+              <Label htmlFor="hero_image">Cover Image (Main Photo) *</Label>
               <div className="space-y-3">
                 {formData.hero_image && (
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden border">
-                    <img 
-                      src={formData.hero_image} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="space-y-2">
+                    <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-primary/20">
+                      <img 
+                        src={formData.hero_image} 
+                        alt="Cover Image Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setFormData(prev => ({ ...prev, hero_image: "" }))}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-primary">
+                      ✓ Cover image uploaded - Don't forget to save!
+                    </p>
                   </div>
                 )}
                 <div className="flex gap-2">
@@ -339,11 +354,11 @@ const AdminExperienceEditor = () => {
                     className="flex-1"
                   />
                   {isUploadingImage && (
-                    <span className="text-sm text-muted-foreground">Upload en cours...</span>
+                    <span className="text-sm text-muted-foreground">Uploading...</span>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Si aucune photo n'est ajoutée, la photo principale de l'hôtel sera affichée
+                  This image will be displayed on the experience detail page and in category listings. JPG, PNG, or WEBP format recommended.
                 </p>
               </div>
             </div>

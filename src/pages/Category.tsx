@@ -19,8 +19,8 @@ const Category = () => {
   const [showMap, setShowMap] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "recommended",
-    priceRange: [0, 1000],
-    partySize: 2
+    priceRange: [0, 10000],
+    partySize: 1
   });
   const {
     data: category,
@@ -67,16 +67,20 @@ const Category = () => {
     if (!experiences) return [];
     let filtered = [...experiences];
 
-    // Filter by price
-    filtered = filtered.filter(exp => {
-      const price = Number(exp.base_price);
-      return price >= filters.priceRange[0] && price <= filters.priceRange[1];
-    });
+    // Filter by price only if not at max range
+    if (filters.priceRange[1] < 10000) {
+      filtered = filtered.filter(exp => {
+        const price = Number(exp.base_price);
+        return price >= filters.priceRange[0] && price <= filters.priceRange[1];
+      });
+    }
 
-    // Filter by party size
-    filtered = filtered.filter(exp => {
-      return exp.min_party <= filters.partySize && exp.max_party >= filters.partySize;
-    });
+    // Filter by party size only if greater than 1
+    if (filters.partySize > 1) {
+      filtered = filtered.filter(exp => {
+        return exp.min_party <= filters.partySize && exp.max_party >= filters.partySize;
+      });
+    }
 
     // Sort
     switch (filters.sortBy) {
@@ -165,8 +169,8 @@ const Category = () => {
                   <p className="text-muted-foreground mb-4">No experiences match your criteria.</p>
                   <Button variant="outline" onClick={() => setFilters({
                 sortBy: "recommended",
-                priceRange: [0, 1000],
-                partySize: 2
+                priceRange: [0, 10000],
+                partySize: 1
               })}>
                     Reset filters
                   </Button>
