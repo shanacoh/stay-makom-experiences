@@ -170,7 +170,7 @@ const Category = () => {
                     Reset filters
                   </Button>
                 </div> : <div className="space-y-6">
-                  {filteredExperiences.map(experience => <Link key={experience.id} to={`/experiences/${experience.slug}`}>
+                  {filteredExperiences.map(experience => <Link key={experience.id} to={`/experience/${experience.slug}`}>
                       <Card className="overflow-hidden hover:shadow-strong transition-smooth group">
                         <div className="grid md:grid-cols-[300px_1fr] gap-6">
                           <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto">

@@ -26,7 +26,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
     hero_image: "",
     contact_email: "",
     contact_phone: "",
-    status: "draft" as "draft" | "published" | "pending",
+    status: "draft" as "draft" | "published",
   });
 
   const { data: hotel, isLoading } = useQuery({
@@ -159,7 +159,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                 <Label htmlFor="status">Status *</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value: "draft" | "published" | "pending") =>
+                  onValueChange={(value: "draft" | "published") =>
                     setFormData({ ...formData, status: value })
                   }
                 >
@@ -168,7 +168,6 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="published">Published</SelectItem>
                   </SelectContent>
                 </Select>

@@ -61,13 +61,12 @@ const AdminHotels = () => {
 
       if (error) throw error;
 
-      const stats: Record<string, { published: number; draft: number; pending: number }> = {};
+      const stats: Record<string, { published: number; draft: number }> = {};
       data.forEach((exp) => {
         if (!stats[exp.hotel_id]) {
-          stats[exp.hotel_id] = { published: 0, draft: 0, pending: 0 };
+          stats[exp.hotel_id] = { published: 0, draft: 0 };
         }
         if (exp.status === "published") stats[exp.hotel_id].published += 1;
-        else if (exp.status === "pending") stats[exp.hotel_id].pending += 1;
         else stats[exp.hotel_id].draft += 1;
       });
 
@@ -190,8 +189,8 @@ const AdminHotels = () => {
             </TableHeader>
             <TableBody>
               {filteredHotels.map((hotel) => {
-                const stats = experienceStats?.[hotel.id] || { published: 0, draft: 0, pending: 0 };
-                const draftPending = stats.draft + stats.pending;
+                const stats = experienceStats?.[hotel.id] || { published: 0, draft: 0 };
+                const draftPending = stats.draft;
                 
                 return (
                   <TableRow key={hotel.id}>
