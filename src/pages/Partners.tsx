@@ -83,7 +83,7 @@ const Partners = () => {
             size="lg"
             className="bg-[#D72638] hover:bg-[#D72638]/90 text-white"
           >
-            Become a Partner
+            Log in to your hotel account
           </Button>
         </div>
       </section>
