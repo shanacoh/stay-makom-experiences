@@ -3,27 +3,21 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, MapPin, Sparkles } from "lucide-react";
 import aboutHero from "@/assets/about-hero-road.jpg";
-
 const About = () => {
-  return (
-    <div className="min-h-screen bg-[#FAF8F5]">
+  return <div className="min-h-screen bg-[#FAF8F5]">
       <Header />
 
       {/* Hero Section */}
       <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
-          <img
-            src={aboutHero}
-            alt="About STAYMAKOM"
-            className="w-full h-full object-cover"
-          />
+          <img src={aboutHero} alt="About STAYMAKOM" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
         <div className="relative z-10 text-center text-white px-6 animate-fade-in">
-          <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl mb-6">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl mb-6 font-sans text-slate-50">
             Israel… differently.
           </h1>
-          <p className="text-2xl md:text-3xl font-light">
+          <p className="text-2xl md:text-3xl text-slate-50 font-sans font-medium">
             A curated way to explore, feel, and belong.
           </p>
         </div>
@@ -31,7 +25,9 @@ const About = () => {
 
       <main className="max-w-5xl mx-auto px-6">
         {/* Our Philosophy */}
-        <section className="py-24 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <section className="py-24 animate-fade-in" style={{
+        animationDelay: "0.2s"
+      }}>
           <h2 className="font-serif text-4xl md:text-5xl text-center mb-12">
             Our Philosophy
           </h2>
@@ -43,7 +39,9 @@ const About = () => {
         </section>
 
         {/* What We Do */}
-        <section className="py-24 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <section className="py-24 animate-fade-in" style={{
+        animationDelay: "0.4s"
+      }}>
           <h2 className="font-serif text-4xl md:text-5xl text-center mb-16">
             What We Do
           </h2>
@@ -93,7 +91,9 @@ const About = () => {
         </section>
 
         {/* Why We Exist */}
-        <section className="py-24 animate-fade-in" style={{ animationDelay: "0.6s" }}>
+        <section className="py-24 animate-fade-in" style={{
+        animationDelay: "0.6s"
+      }}>
           <h2 className="font-serif text-4xl md:text-5xl text-center mb-12">
             Why We Exist
           </h2>
@@ -105,25 +105,19 @@ const About = () => {
         </section>
 
         {/* Who We Are */}
-        <section className="py-24 animate-fade-in" style={{ animationDelay: "0.8s" }}>
+        <section className="py-24 animate-fade-in" style={{
+        animationDelay: "0.8s"
+      }}>
           <h2 className="font-serif text-4xl md:text-5xl text-center mb-12">
             Who We Are
           </h2>
           <div className="max-w-3xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8 mb-12">
               <div className="aspect-[4/5] rounded-lg overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2"
-                  alt="Team member"
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-                />
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2" alt="Team member" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
               </div>
               <div className="aspect-[4/5] rounded-lg overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
-                  alt="Team member"
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-                />
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" alt="Team member" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
               </div>
             </div>
             <p className="text-lg leading-relaxed text-muted-foreground text-center">
@@ -134,7 +128,9 @@ const About = () => {
         </section>
 
         {/* Final Touch */}
-        <section className="py-24 text-center animate-fade-in" style={{ animationDelay: "1s" }}>
+        <section className="py-24 text-center animate-fade-in" style={{
+        animationDelay: "1s"
+      }}>
           <div className="max-w-2xl mx-auto">
             <p className="font-serif text-3xl md:text-4xl text-muted-foreground italic">
               "The art of travel is the art of seeing with new eyes."
@@ -144,8 +140,6 @@ const About = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
