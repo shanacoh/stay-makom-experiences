@@ -195,6 +195,8 @@ export type Database = {
           intro_rich_text_he: string | null
           name: string
           name_he: string | null
+          presentation_title: string | null
+          presentation_title_he: string | null
           slug: string
           status: Database["public"]["Enums"]["hotel_status"]
           updated_at: string
@@ -210,6 +212,8 @@ export type Database = {
           intro_rich_text_he?: string | null
           name: string
           name_he?: string | null
+          presentation_title?: string | null
+          presentation_title_he?: string | null
           slug: string
           status?: Database["public"]["Enums"]["hotel_status"]
           updated_at?: string
@@ -225,6 +229,8 @@ export type Database = {
           intro_rich_text_he?: string | null
           name?: string
           name_he?: string | null
+          presentation_title?: string | null
+          presentation_title_he?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["hotel_status"]
           updated_at?: string
@@ -264,19 +270,116 @@ export type Database = {
         }
         Relationships: []
       }
+      experience_includes: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_he: string | null
+          experience_id: string
+          icon_url: string | null
+          id: string
+          order_index: number
+          published: boolean
+          title: string
+          title_he: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_he?: string | null
+          experience_id: string
+          icon_url?: string | null
+          id?: string
+          order_index?: number
+          published?: boolean
+          title: string
+          title_he?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_he?: string | null
+          experience_id?: string
+          icon_url?: string | null
+          id?: string
+          order_index?: number
+          published?: boolean
+          title?: string
+          title_he?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_includes_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experience_reviews: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          experience_id: string
+          id: string
+          published: boolean
+          rating: number
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          experience_id: string
+          id?: string
+          published?: boolean
+          rating: number
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          experience_id?: string
+          id?: string
+          published?: boolean
+          rating?: number
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_reviews_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
+          accessibility_info: string | null
+          accessibility_info_he: string | null
+          address: string | null
+          address_he: string | null
           base_price: number
           base_price_type: Database["public"]["Enums"]["base_price_type"] | null
           cancellation_policy: string | null
           cancellation_policy_he: string | null
-          category: Database["public"]["Enums"]["experience_category"]
           category_id: string | null
+          checkin_time: string | null
+          checkout_time: string | null
           created_at: string | null
           currency: string | null
           duration: string | null
           duration_he: string | null
           good_to_know: string[] | null
+          google_maps_link: string | null
           hero_image: string | null
           hotel_id: string
           id: string
@@ -292,6 +395,8 @@ export type Database = {
           not_includes: string[] | null
           not_includes_he: string[] | null
           photos: string[] | null
+          services: string[] | null
+          services_he: string[] | null
           slug: string
           status: Database["public"]["Enums"]["hotel_status"] | null
           subtitle: string | null
@@ -301,19 +406,25 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          accessibility_info?: string | null
+          accessibility_info_he?: string | null
+          address?: string | null
+          address_he?: string | null
           base_price: number
           base_price_type?:
             | Database["public"]["Enums"]["base_price_type"]
             | null
           cancellation_policy?: string | null
           cancellation_policy_he?: string | null
-          category: Database["public"]["Enums"]["experience_category"]
           category_id?: string | null
+          checkin_time?: string | null
+          checkout_time?: string | null
           created_at?: string | null
           currency?: string | null
           duration?: string | null
           duration_he?: string | null
           good_to_know?: string[] | null
+          google_maps_link?: string | null
           hero_image?: string | null
           hotel_id: string
           id?: string
@@ -329,6 +440,8 @@ export type Database = {
           not_includes?: string[] | null
           not_includes_he?: string[] | null
           photos?: string[] | null
+          services?: string[] | null
+          services_he?: string[] | null
           slug: string
           status?: Database["public"]["Enums"]["hotel_status"] | null
           subtitle?: string | null
@@ -338,19 +451,25 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          accessibility_info?: string | null
+          accessibility_info_he?: string | null
+          address?: string | null
+          address_he?: string | null
           base_price?: number
           base_price_type?:
             | Database["public"]["Enums"]["base_price_type"]
             | null
           cancellation_policy?: string | null
           cancellation_policy_he?: string | null
-          category?: Database["public"]["Enums"]["experience_category"]
           category_id?: string | null
+          checkin_time?: string | null
+          checkout_time?: string | null
           created_at?: string | null
           currency?: string | null
           duration?: string | null
           duration_he?: string | null
           good_to_know?: string[] | null
+          google_maps_link?: string | null
           hero_image?: string | null
           hotel_id?: string
           id?: string
@@ -366,6 +485,8 @@ export type Database = {
           not_includes?: string[] | null
           not_includes_he?: string[] | null
           photos?: string[] | null
+          services?: string[] | null
+          services_he?: string[] | null
           slug?: string
           status?: Database["public"]["Enums"]["hotel_status"] | null
           subtitle?: string | null
@@ -399,6 +520,7 @@ export type Database = {
           description_he: string | null
           experience_id: string
           id: string
+          image_url: string | null
           is_available: boolean | null
           max_qty: number | null
           name: string
@@ -414,6 +536,7 @@ export type Database = {
           description_he?: string | null
           experience_id: string
           id?: string
+          image_url?: string | null
           is_available?: boolean | null
           max_qty?: number | null
           name: string
@@ -429,6 +552,7 @@ export type Database = {
           description_he?: string | null
           experience_id?: string
           id?: string
+          image_url?: string | null
           is_available?: boolean | null
           max_qty?: number | null
           name?: string
@@ -663,6 +787,51 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_posts: {
+        Row: {
+          author_name: string
+          category: Database["public"]["Enums"]["journal_category"]
+          content: string
+          cover_image: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          published_at: string | null
+          slug: string
+          status: Database["public"]["Enums"]["hotel_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string
+          category: Database["public"]["Enums"]["journal_category"]
+          content: string
+          cover_image?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["hotel_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          category?: Database["public"]["Enums"]["journal_category"]
+          content?: string
+          cover_image?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["hotel_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -847,14 +1016,8 @@ export type Database = {
         | "confirmed"
         | "failed"
         | "cancelled"
-      experience_category:
-        | "romantic"
-        | "family"
-        | "golden_age"
-        | "beyond_nature"
-        | "taste_affair"
-        | "active_break"
-      hotel_status: "draft" | "published"
+      hotel_status: "draft" | "published" | "pending"
+      journal_category: "Stories" | "Places" | "Guides" | "People"
       locale: "en" | "he"
       pricing_type: "per_booking" | "per_person" | "per_night"
     }
@@ -995,15 +1158,8 @@ export const Constants = {
         "failed",
         "cancelled",
       ],
-      experience_category: [
-        "romantic",
-        "family",
-        "golden_age",
-        "beyond_nature",
-        "taste_affair",
-        "active_break",
-      ],
-      hotel_status: ["draft", "published"],
+      hotel_status: ["draft", "published", "pending"],
+      journal_category: ["Stories", "Places", "Guides", "People"],
       locale: ["en", "he"],
       pricing_type: ["per_booking", "per_person", "per_night"],
     },

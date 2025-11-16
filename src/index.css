@@ -10,80 +10,80 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
+    --background: 40 33% 93%;
+    --foreground: 23 10% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card: 40 33% 96%;
+    --card-foreground: 23 10% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover: 40 33% 93%;
+    --popover-foreground: 23 10% 15%;
 
-    --primary: 0 100% 39.6%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 0 100% 45%;
+    --primary: 207 62% 15%;
+    --primary-foreground: 40 33% 93%;
+    --primary-glow: 208 61% 20%;
 
-    --secondary: 32 35% 92%;
-    --secondary-foreground: 0 0% 7%;
+    --secondary: 36 38% 78%;
+    --secondary-foreground: 23 10% 15%;
 
-    --muted: 33 43% 96%;
-    --muted-foreground: 0 0% 27%;
+    --muted: 36 38% 78%;
+    --muted-foreground: 23 10% 15%;
 
-    --accent: 0 100% 39.6%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 29 48% 55%;
+    --accent-foreground: 40 33% 93%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 40 33% 93%;
 
-    --border: 32 20% 88%;
-    --input: 32 20% 88%;
-    --ring: 0 100% 39.6%;
+    --border: 23 10% 15% / 0.12;
+    --input: 23 10% 15% / 0.25;
+    --ring: 207 62% 15%;
 
-    --logo: 0 100% 39.6%;
+    --logo: 207 62% 15%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(0 100% 39.6%), hsl(0 100% 45%));
-    --gradient-warm: linear-gradient(180deg, hsl(32 35% 98%), hsl(32 25% 94%));
-    --gradient-hero: linear-gradient(135deg, hsl(0 100% 39.6%) 0%, hsl(0 100% 45%) 50%, hsl(28 75% 52%) 100%);
-    --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.06);
-    --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.08);
-    --shadow-strong: 0 8px 32px -8px hsl(0 0% 0% / 0.12);
+    --gradient-primary: linear-gradient(135deg, hsl(207 62% 15%), hsl(208 61% 20%));
+    --gradient-warm: linear-gradient(180deg, hsl(40 33% 93%), hsl(36 38% 78%));
+    --gradient-hero: linear-gradient(135deg, hsl(207 62% 15%) 0%, hsl(208 61% 20%) 50%, hsl(29 48% 55%) 100%);
+    --shadow-soft: 0 2px 8px -2px hsl(23 10% 15% / 0.06);
+    --shadow-medium: 0 4px 16px -4px hsl(23 10% 15% / 0.08);
+    --shadow-strong: 0 8px 32px -8px hsl(23 10% 15% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 200 20% 10%;
-    --foreground: 32 20% 95%;
+    --background: 207 62% 15%;
+    --foreground: 40 33% 93%;
 
-    --card: 200 18% 12%;
-    --card-foreground: 32 20% 95%;
+    --card: 207 62% 15%;
+    --card-foreground: 40 33% 93%;
 
-    --popover: 200 18% 12%;
-    --popover-foreground: 32 20% 95%;
+    --popover: 207 62% 15%;
+    --popover-foreground: 40 33% 93%;
 
-    --primary: 186 55% 55%;
-    --primary-foreground: 200 20% 10%;
-    --primary-glow: 186 70% 65%;
+    --primary: 207 62% 15%;
+    --primary-foreground: 40 33% 93%;
+    --primary-glow: 208 61% 20%;
 
-    --secondary: 200 15% 18%;
-    --secondary-foreground: 32 20% 95%;
+    --secondary: 36 38% 78%;
+    --secondary-foreground: 23 10% 15%;
 
-    --muted: 200 15% 16%;
-    --muted-foreground: 32 15% 60%;
+    --muted: 208 61% 20%;
+    --muted-foreground: 40 33% 93%;
 
-    --accent: 28 85% 55%;
-    --accent-foreground: 200 20% 10%;
+    --accent: 29 48% 55%;
+    --accent-foreground: 40 33% 93%;
 
     --destructive: 0 62.8% 50%;
-    --destructive-foreground: 32 20% 95%;
+    --destructive-foreground: 40 33% 93%;
 
-    --border: 200 15% 20%;
-    --input: 200 15% 20%;
-    --ring: 186 55% 55%;
+    --border: 40 33% 93% / 0.12;
+    --input: 40 33% 93% / 0.25;
+    --ring: 207 62% 15%;
 
-    --logo: 0 100% 40%;
+    --logo: 207 62% 15%;
 
     --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
     --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
@@ -100,14 +100,12 @@ All colors MUST be HSL.
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
-    color: hsl(0 0% 27%);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans tracking-tight;
+    @apply font-sans tracking-tight text-foreground;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: hsl(0 0% 7%);
   }
 }
 

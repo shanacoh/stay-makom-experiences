@@ -26,7 +26,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
     hero_image: "",
     contact_email: "",
     contact_phone: "",
-    status: "draft" as "draft" | "published",
+    status: "draft" as "draft" | "published" | "pending",
   });
 
   const { data: hotel, isLoading } = useQuery({
