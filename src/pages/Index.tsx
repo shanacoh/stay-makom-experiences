@@ -65,7 +65,7 @@ const Index = () => {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[700px] md:h-[850px] flex items-end">
+        <section className="relative h-[800px] md:h-[950px] flex items-end">
           <div className="absolute inset-0 bg-cover bg-center" style={{
           backgroundImage: `url(${heroImage})`
         }} />
