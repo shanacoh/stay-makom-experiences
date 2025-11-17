@@ -100,10 +100,10 @@ const RoomOptions = ({
   if (loading) {
     return (
       <div className="space-y-2">
-        <label className="text-sm font-medium">Room Options</label>
-        <Card className="p-6 flex items-center justify-center">
+        <label className="text-sm font-medium">Upgrade de chambre</label>
+        <div className="p-6 flex items-center justify-center border-2 border-border rounded-lg">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </Card>
+        </div>
       </div>
     );
   }
@@ -111,51 +111,55 @@ const RoomOptions = ({
   if (error) {
     return (
       <div className="space-y-2">
-        <label className="text-sm font-medium">Room Options</label>
-        <Card className="p-6">
+        <label className="text-sm font-medium">Upgrade de chambre</label>
+        <div className="p-6 border-2 border-border rounded-lg">
           <p className="text-sm text-destructive">{error}</p>
-        </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">Room Options</label>
-      <RadioGroup
-        value={selectedRoom?.code}
-        onValueChange={(code) => {
-          const room = rooms.find((r) => r.code === code);
-          if (room) onSelectRoom(room);
-        }}
-      >
-        <div className="space-y-3">
-          {rooms.map((room) => (
-            <Card key={room.code} className="p-4 hover:border-primary transition-colors">
-              <div className="flex items-start gap-4">
-                <RadioGroupItem value={room.code} id={room.code} className="mt-1" />
-                <Label htmlFor={room.code} className="flex-1 cursor-pointer">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1">
-                      <p className="font-medium">{room.name}</p>
-                      <p className="text-sm text-muted-foreground">{room.board}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {room.cancellable ? "Free cancellation" : "Non-refundable"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-lg">
-                        ${room.price_total}
-                      </p>
-                      <p className="text-xs text-muted-foreground">total</p>
-                    </div>
-                  </div>
-                </Label>
+      <label className="text-sm font-medium">Upgrade de chambre</label>
+      <div className="space-y-2">
+        {rooms.map((room) => (
+          <label
+            key={room.code}
+            htmlFor={room.code}
+            className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all hover:border-primary/50 ${
+              selectedRoom?.code === room.code
+                ? "border-primary bg-primary/5"
+                : "border-border"
+            }`}
+          >
+            <RadioGroupItem 
+              value={room.code} 
+              id={room.code} 
+              checked={selectedRoom?.code === room.code}
+              onClick={() => {
+                const selectedRm = rooms.find((r) => r.code === room.code);
+                if (selectedRm) onSelectRoom(selectedRm);
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="font-medium text-sm">{room.name}</div>
+                  <div className="text-xs text-muted-foreground">{room.board}</div>
+                  {room.cancellable && (
+                    <div className="text-xs text-green-600 mt-0.5">Annulation gratuite</div>
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="font-bold">{room.price_total} {room.currency}</div>
+                  <div className="text-xs text-muted-foreground">total</div>
+                </div>
               </div>
-            </Card>
-          ))}
-        </div>
-      </RadioGroup>
+            </div>
+          </label>
+        ))}
+      </div>
     </div>
   );
 };
