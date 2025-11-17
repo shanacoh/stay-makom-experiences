@@ -176,22 +176,18 @@ const BookingPanel = ({
                 >
                   <RadioGroupItem value={option.id} id={option.id} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="font-medium text-sm">
-                        {format(option.checkin, "EEE. dd MMM", { locale: fr })}
-                        {" → "}
-                        {format(option.checkout, "EEE. dd MMM", { locale: fr })}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-bold text-base">
-                          {option.price}€
-                        </span>
-                        <span className="text-sm text-muted-foreground line-through">
-                          {option.originalPrice}€
-                        </span>
-                      </div>
+                    <div className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                      {format(option.checkin, "EEE. dd MMM", { locale: fr })}
+                      {" → "}
+                      {format(option.checkout, "EEE. dd MMM", { locale: fr })}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
+                      <span className="font-bold text-base">
+                        {option.price}€
+                      </span>
+                      <span className="text-sm text-muted-foreground line-through">
+                        {option.originalPrice}€
+                      </span>
                       <span className="text-xs font-medium text-primary">
                         -{option.discount}%
                       </span>
