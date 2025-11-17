@@ -42,10 +42,16 @@ const Experience = () => {
     },
     enabled: !!slug
   });
-  const { data: includes, isLoading: includesLoading } = useQuery({
+  const {
+    data: includes,
+    isLoading: includesLoading
+  } = useQuery({
     queryKey: ["experience-includes", experience?.id],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("experience_includes").select("*").eq("experience_id", experience?.id).eq("published", true).order("order_index");
+      const {
+        data,
+        error
+      } = await (supabase as any).from("experience_includes").select("*").eq("experience_id", experience?.id).eq("published", true).order("order_index");
       if (error) throw error;
       return data;
     },
@@ -84,14 +90,9 @@ const Experience = () => {
       <Header />
 
       <main className="flex-1">
-        <ExperienceHero 
-          title={experience.title} 
-          subtitle={experience.subtitle} 
-          hotelName={experience.hotels?.name}
-          photos={photos} 
-        />
+        <ExperienceHero title={experience.title} subtitle={experience.subtitle} hotelName={experience.hotels?.name} photos={photos} />
 
-        <div className="container pb-16">
+        <div className="container pb-16 my-[26px]">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Left Column - Details */}
             <div className="lg:col-span-2 space-y-12">
@@ -103,31 +104,18 @@ const Experience = () => {
 
               {includes && includes.length > 0 && <IncludesSection includes={includes} />}
 
-              {extras && extras.length > 0 && (
-                <ExtrasSection 
-                  extras={extras} 
-                  selectedExtras={selectedExtras}
-                  onUpdateQuantity={(extraId, quantity) => {
-                    setSelectedExtras(prev => ({
-                      ...prev,
-                      [extraId]: quantity
-                    }));
-                  }}
-                />
-              )}
+              {extras && extras.length > 0 && <ExtrasSection extras={extras} selectedExtras={selectedExtras} onUpdateQuantity={(extraId, quantity) => {
+              setSelectedExtras(prev => ({
+                ...prev,
+                [extraId]: quantity
+              }));
+            }} />}
 
               <GoodToKnow items={experience.good_to_know} />
 
               <ReviewsSection experienceId={experience.id} />
 
-              <ImportantInformation 
-                checkinTime={(experience as any).checkin_time}
-                checkoutTime={(experience as any).checkout_time}
-                address={(experience as any).address}
-                googleMapsLink={(experience as any).google_maps_link}
-                accessibilityInfo={(experience as any).accessibility_info}
-                services={(experience as any).services}
-              />
+              <ImportantInformation checkinTime={(experience as any).checkin_time} checkoutTime={(experience as any).checkout_time} address={(experience as any).address} googleMapsLink={(experience as any).google_maps_link} accessibilityInfo={(experience as any).accessibility_info} services={(experience as any).services} />
             </div>
 
             {/* Right Column - Booking Panel */}
