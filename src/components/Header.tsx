@@ -10,6 +10,8 @@ import HamburgerMenu from "@/components/HamburgerMenu";
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const isExperiencePage = location.pathname.startsWith("/experience/");
+  const isTransparentPage = isHomePage || isExperiencePage;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -47,24 +49,24 @@ const Header = () => {
         setIsVisible(true);
       }
       
-      setIsScrolled(isHomePage ? scrolled : true);
+      setIsScrolled(isTransparentPage ? scrolled : true);
       setLastScrollY(currentScrollY);
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomePage, lastScrollY]);
+  }, [isTransparentPage, lastScrollY]);
 
-  const headerClasses = isHomePage && !isScrolled
+  const headerClasses = isTransparentPage && !isScrolled
     ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? 'top-0' : '-top-full'}`
     : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ${isVisible ? 'top-0' : '-top-full'}`;
 
-  const textClasses = isHomePage && !isScrolled
+  const textClasses = isTransparentPage && !isScrolled
     ? "text-white"
     : "text-foreground";
 
-  const logoClasses = isHomePage && !isScrolled
+  const logoClasses = isTransparentPage && !isScrolled
     ? "text-white"
     : "text-logo";
 
@@ -78,16 +80,16 @@ const Header = () => {
 
         <div className="flex items-center space-x-3">
           <div className="hidden md:flex items-center space-x-2">
-            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
-            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
-            <span className={`text-xs ${isHomePage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
+            <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
+            <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
+            <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
           </div>
           
           <Link to="/partners">
             <Button 
               variant="outline" 
               size="sm" 
-              className={`hidden md:flex ${isHomePage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+              className={`hidden md:flex ${isTransparentPage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
             >
               Hotel partnership
             </Button>
@@ -98,7 +100,7 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
+                  className={`${isTransparentPage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
                 >
                   <User className="h-5 w-5" />
                 </Button>
@@ -131,7 +133,7 @@ const Header = () => {
               variant="ghost" 
               size="icon" 
               asChild 
-              className={`${isHomePage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
+              className={`${isTransparentPage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
             >
               <Link to="/auth">
                 <User className="h-5 w-5" />
