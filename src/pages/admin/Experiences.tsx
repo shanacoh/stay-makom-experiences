@@ -165,9 +165,8 @@ const AdminExperiences = () => {
                         Voir
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(experience.id)} className="text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Supprimer
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(experience.id)} className="text-red-600 hover:text-red-700 h-9 w-9">
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                     {experience.status === "pending" && <>
                         <Button variant="ghost" size="sm" onClick={() => handleApprove(experience.id)} className="text-green-600 hover:text-green-700">
