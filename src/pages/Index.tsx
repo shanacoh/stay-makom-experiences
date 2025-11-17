@@ -207,50 +207,50 @@ const Index = () => {
         </section>
 
         {/* Latest Experiences Section */}
-        <section className="container py-12 sm:py-16 md:py-20 px-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em]">
+        <section className="container py-8 sm:py-12 md:py-16 lg:py-20 px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold tracking-[-0.02em]">
               Latest Experiences
             </h2>
-            <Button variant="link" className="text-foreground underline underline-offset-4 text-sm sm:text-base p-0 h-auto">
+            <Button variant="link" className="text-foreground underline underline-offset-4 text-xs sm:text-sm md:text-base p-0 h-auto">
               View all experiences →
             </Button>
           </div>
 
           {isLoadingExperiences ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {latestExperiences?.map(experience => <div key={experience.id} className="group cursor-pointer" onClick={() => window.location.href = `/experience/${experience.slug}`}>
-                  <div className="relative h-[400px] rounded-2xl overflow-hidden mb-4">
+                  <div className="relative h-[280px] sm:h-[320px] md:h-[360px] lg:h-[400px] rounded-xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4">
                     <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{
                 backgroundImage: `url(${experience.hero_image || desertHotelPool})`
               }} />
                     <div className="absolute inset-0 bg-black/30" />
-                    <div className="absolute bottom-0 left-0 p-6">
-                      <h3 className="text-white font-bold text-3xl uppercase tracking-tight">
+                    <div className="absolute bottom-0 left-0 p-4 sm:p-6">
+                      <h3 className="text-white font-bold text-xl sm:text-2xl md:text-3xl uppercase tracking-tight leading-tight">
                         {experience.title}
                       </h3>
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                       <span>{experience.hotels?.city}</span>
                     </div>
                     
-                    <h4 className="font-bold text-lg">
+                    <h4 className="font-bold text-base sm:text-lg">
                       {experience.hotels?.name}
                     </h4>
                     
-                    {experience.subtitle && <p className="text-sm text-muted-foreground">
+                    {experience.subtitle && <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                         {experience.subtitle}
                       </p>}
                     
-                     <div className="flex items-baseline gap-2">
-                       <span className="font-bold text-xl">
+                     <div className="flex items-baseline gap-2 pt-1">
+                       <span className="font-bold text-lg sm:text-xl">
                          {experience.base_price}€
                        </span>
-                       <span className="text-muted-foreground">
+                       <span className="text-sm sm:text-base text-muted-foreground">
                          / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
                        </span>
                      </div>
