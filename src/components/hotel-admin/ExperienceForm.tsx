@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
+import IncludesManager from "@/components/admin/IncludesManager";
 
 const experienceSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -61,8 +62,6 @@ export function ExperienceForm({
   experienceId,
 }: ExperienceFormProps) {
   const queryClient = useQueryClient();
-  const [includes, setIncludes] = useState<string[]>([]);
-  const [newInclude, setNewInclude] = useState("");
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
@@ -115,17 +114,6 @@ export function ExperienceForm({
     description?.length >= 100 &&
     heroImagePreview &&
     basePrice > 0;
-
-  const addIncludeItem = () => {
-    if (newInclude.trim()) {
-      setIncludes([...includes, newInclude.trim()]);
-      setNewInclude("");
-    }
-  };
-
-  const removeInclude = (index: number) => {
-    setIncludes(includes.filter((_, i) => i !== index));
-  };
 
   const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -227,7 +215,6 @@ export function ExperienceForm({
         base_price_type: data.base_price_type,
         hero_image: heroImageUrl,
         photos: galleryUrls.length > 0 ? galleryUrls : null,
-        includes: includes.length > 0 ? includes : null,
         slug: `${slug}-${Date.now()}`,
         status: "draft" as const,
       };
@@ -290,7 +277,6 @@ export function ExperienceForm({
         base_price_type: data.base_price_type,
         hero_image: heroImageUrl,
         photos: galleryUrls.length > 0 ? galleryUrls : null,
-        includes: includes.length > 0 ? includes : null,
         slug: `${slug}-${Date.now()}`,
         status: "pending" as const,
       };
@@ -585,42 +571,23 @@ export function ExperienceForm({
         </Card>
 
         {/* Bloc 3: What's Included */}
-        <Card>
-          <CardHeader>
-            <CardTitle>What's Included</CardTitle>
-            <CardDescription>Define what is included in the experience</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <Label>Includes</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  placeholder="e.g., Private yoga class"
-                  value={newInclude}
-                  onChange={(e) => setNewInclude(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addIncludeItem())}
-                />
-                <Button type="button" onClick={addIncludeItem} size="icon">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {includes.map((item, index) => (
-                  <Badge key={index} variant="secondary" className="gap-1">
-                    {item}
-                    <button
-                      type="button"
-                      onClick={() => removeInclude(index)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {experienceId ? (
+          <IncludesManager experienceId={experienceId} />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>What's Included</CardTitle>
+              <CardDescription>
+                Save the experience first to manage what's included with images
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Once you save this experience as a draft, you'll be able to add items with photos that will be displayed on the experience page.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Bloc 4: Extras (Add-ons) */}
         <Card>
