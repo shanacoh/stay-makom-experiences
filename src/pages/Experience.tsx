@@ -96,8 +96,6 @@ const Experience = () => {
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Left Column - Details */}
             <div className="lg:col-span-2 space-y-12">
-              {experience.hotels && <HotelSpotlight hotel={experience.hotels} />}
-
               <ExperienceDetails longCopy={experience.long_copy} />
 
               <WhatsIncludedPhotos includes={experience.includes} />
@@ -112,6 +110,8 @@ const Experience = () => {
             }} />}
 
               <GoodToKnow items={experience.good_to_know} />
+
+              {experience.hotels && <HotelSpotlight hotel={experience.hotels} />}
 
               <ReviewsSection experienceId={experience.id} />
 
