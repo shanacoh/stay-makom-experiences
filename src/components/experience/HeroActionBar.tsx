@@ -85,8 +85,8 @@ const HeroActionBar = ({ onOpenGallery, experienceTitle }: HeroActionBarProps) =
           onClick={onOpenGallery}
         >
           <Camera className="h-5 w-5 text-primary" />
-          <span className="hidden sm:inline text-sm font-medium">See pictures</span>
-          <span className="sm:hidden text-sm font-medium">Photos</span>
+          <span className="hidden sm:inline text-sm font-medium text-primary">See pictures</span>
+          <span className="sm:hidden text-sm font-medium text-primary">Photos</span>
         </Button>
       </TooltipProvider>
     </div>
