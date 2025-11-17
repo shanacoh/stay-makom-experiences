@@ -53,7 +53,7 @@ const HeroActionBar = ({ onOpenGallery, experienceTitle }: HeroActionBarProps) =
               className="rounded-full h-11 w-11 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
               onClick={handleShare}
             >
-              <Share2 className="h-5 w-5" />
+              <Share2 className="h-5 w-5 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -70,7 +70,7 @@ const HeroActionBar = ({ onOpenGallery, experienceTitle }: HeroActionBarProps) =
               className="rounded-full h-11 w-11 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
               onClick={handleFavorite}
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -84,7 +84,7 @@ const HeroActionBar = ({ onOpenGallery, experienceTitle }: HeroActionBarProps) =
           className="rounded-full h-11 px-4 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm gap-2"
           onClick={onOpenGallery}
         >
-          <Camera className="h-5 w-5" />
+          <Camera className="h-5 w-5 text-primary" />
           <span className="hidden sm:inline text-sm font-medium">See pictures</span>
           <span className="sm:hidden text-sm font-medium">Photos</span>
         </Button>
