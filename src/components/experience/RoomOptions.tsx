@@ -122,44 +122,47 @@ const RoomOptions = ({
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Upgrade de chambre</label>
-      <div className="space-y-2">
-        {rooms.map((room) => (
-          <label
-            key={room.code}
-            htmlFor={room.code}
-            className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all hover:border-primary/50 ${
-              selectedRoom?.code === room.code
-                ? "border-primary bg-primary/5"
-                : "border-border"
-            }`}
-          >
-            <RadioGroupItem 
-              value={room.code} 
-              id={room.code} 
-              checked={selectedRoom?.code === room.code}
-              onClick={() => {
-                const selectedRm = rooms.find((r) => r.code === room.code);
-                if (selectedRm) onSelectRoom(selectedRm);
-              }}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <div className="font-medium text-sm">{room.name}</div>
-                  <div className="text-xs text-muted-foreground">{room.board}</div>
-                  {room.cancellable && (
-                    <div className="text-xs text-green-600 mt-0.5">Annulation gratuite</div>
-                  )}
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-bold">{room.price_total} {room.currency}</div>
-                  <div className="text-xs text-muted-foreground">total</div>
+      <RadioGroup
+        value={selectedRoom?.code || ""}
+        onValueChange={(code) => {
+          const room = rooms.find((r) => r.code === code);
+          if (room) onSelectRoom(room);
+        }}
+      >
+        <div className="space-y-2">
+          {rooms.map((room) => (
+            <label
+              key={room.code}
+              htmlFor={room.code}
+              className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all hover:border-primary/50 ${
+                selectedRoom?.code === room.code
+                  ? "border-primary bg-primary/5"
+                  : "border-border"
+              }`}
+            >
+              <RadioGroupItem 
+                value={room.code} 
+                id={room.code}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="font-medium text-sm">{room.name}</div>
+                    <div className="text-xs text-muted-foreground">{room.board}</div>
+                    {room.cancellable && (
+                      <div className="text-xs text-green-600 mt-0.5">Annulation gratuite</div>
+                    )}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-bold">{room.price_total} {room.currency}</div>
+                    <div className="text-xs text-muted-foreground">total</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </label>
-        ))}
-      </div>
+            </label>
+          ))}
+        </div>
+      </RadioGroup>
     </div>
   );
 };
