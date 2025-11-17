@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Plus, Trash2, GripVertical, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,9 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     description: "",
     icon_url: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const { data: includes, isLoading } = useQuery({
     queryKey: ["experience-includes", experienceId],
@@ -36,10 +39,47 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     },
   });
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('experience-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('experience-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!newInclude.title.trim()) {
         throw new Error("Title is required");
+      }
+
+      setIsUploading(true);
+      let imageUrl = newInclude.icon_url;
+
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
       }
 
       const maxOrder = includes?.length ? Math.max(...includes.map((i: any) => i.order_index)) : -1;
@@ -50,19 +90,23 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
           experience_id: experienceId,
           title: newInclude.title,
           description: newInclude.description || null,
-          icon_url: newInclude.icon_url || null,
+          icon_url: imageUrl || null,
           order_index: maxOrder + 1,
           published: true,
         }]);
 
       if (error) throw error;
+      setIsUploading(false);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience-includes", experienceId] });
       setNewInclude({ title: "", description: "", icon_url: "" });
+      setImageFile(null);
+      setImagePreview(null);
       toast.success("Include added successfully");
     },
     onError: (error: Error) => {
+      setIsUploading(false);
       toast.error(error.message);
     },
   });
@@ -118,17 +162,45 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
             onChange={(e) => setNewInclude({ ...newInclude, description: e.target.value })}
             rows={2}
           />
-          <Input
-            placeholder="Icon URL (optional)"
-            value={newInclude.icon_url}
-            onChange={(e) => setNewInclude({ ...newInclude, icon_url: e.target.value })}
-          />
+          
+          <div className="space-y-2">
+            <Label>Image</Label>
+            <div className="flex gap-2 items-start">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(null);
+                }}
+                disabled={!imageFile}
+              >
+                Clear
+              </Button>
+            </div>
+            {imagePreview && (
+              <div className="mt-2">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="w-32 h-24 object-cover rounded-lg border"
+                />
+              </div>
+            )}
+          </div>
+
           <Button
             onClick={() => createMutation.mutate()}
-            disabled={createMutation.isPending}
+            disabled={createMutation.isPending || isUploading}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Item
+            {isUploading ? "Uploading..." : "Add Item"}
           </Button>
         </div>
 
@@ -139,9 +211,16 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
             {includes.map((include: any) => (
               <div
                 key={include.id}
-                className="flex items-center gap-3 p-3 border border-border rounded-lg"
+                className="flex items-start gap-3 p-3 border border-border rounded-lg"
               >
-                <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
+                <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1" />
+                {include.icon_url && (
+                  <img 
+                    src={include.icon_url} 
+                    alt={include.title} 
+                    className="w-20 h-16 object-cover rounded-lg"
+                  />
+                )}
                 <div className="flex-1">
                   <div className="font-medium">{include.title}</div>
                   {include.description && (

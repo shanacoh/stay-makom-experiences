@@ -9,7 +9,6 @@ import HotelSpotlight from "@/components/experience/HotelSpotlight";
 import BookingPanel from "@/components/experience/BookingPanel";
 import ExperienceDetails from "@/components/experience/ExperienceDetails";
 import WhatsIncludedPhotos from "@/components/experience/WhatsIncludedPhotos";
-import IncludesSection from "@/components/experience/IncludesSection";
 import ExtrasSection from "@/components/experience/ExtrasSection";
 import GoodToKnow from "@/components/experience/GoodToKnow";
 import ReviewsSection from "@/components/experience/ReviewsSection";
@@ -98,9 +97,7 @@ const Experience = () => {
             <div className="lg:col-span-2 space-y-12">
               <ExperienceDetails longCopy={experience.long_copy} />
 
-              <WhatsIncludedPhotos includes={experience.includes} />
-
-              {includes && includes.length > 0 && <IncludesSection includes={includes} />}
+              {includes && includes.length > 0 && <WhatsIncludedPhotos includes={includes} />}
 
               {extras && extras.length > 0 && <ExtrasSection extras={extras} selectedExtras={selectedExtras} onUpdateQuantity={(extraId, quantity) => {
               setSelectedExtras(prev => ({
