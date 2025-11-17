@@ -112,6 +112,9 @@ const Footer = () => {
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4">
               Get on the list
             </h4>
+            <p className="text-sm text-white/80 mb-4">
+              Be the first to know about new gems, seasonal collections and limited-time offers across Israel.
+            </p>
             <form onSubmit={handleNewsletterSubmit} className="mb-6">
               <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary" required />
               <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full">
@@ -151,8 +154,11 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-6 border-t border-white/20 text-center">
-          <p className="text-sm text-white">
+        <div className="mt-8 pt-6 border-t border-white/20">
+          <p className="text-sm text-white/70 mb-4 text-center">
+            STAYMAKOM curates hotel + experience escapes across Israel: Tel Aviv, Jerusalem, the Negev, the Galilee and Golan, the Dead Sea, Eilat and the coastline.
+          </p>
+          <p className="text-sm text-white text-center">
             © 2025 STAYMAKOM. All rights reserved.
           </p>
         </div>

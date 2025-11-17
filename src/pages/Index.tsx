@@ -99,6 +99,58 @@ const Index = () => {
             </div>}
         </section>
 
+        {/* A New Way to Explore Israel Section */}
+        <section className="container py-20">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-6 md:text-6xl text-center">A NEW WAY TO EXPLORE ISRAEL</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Israel is small, diverse and easy to explore. In 2 to 3 hours you can move from Tel Aviv's beaches to the Negev desert, from Galilee vineyards to Jerusalem's hills. With STAYMAKOM, you do not choose a city. You choose a hotel + experience escape that matches your mood. If you do not want to drive, many escapes let you add a private driver or transfer as an optional extra.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+              <div className="space-y-3">
+                <h3 className="font-bold text-lg">All across the country</h3>
+                <p className="text-sm text-muted-foreground">Sea, desert, cities, kibbutzim, vineyards and forest retreats.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-lg">Hotel + Experience only</h3>
+                <p className="text-sm text-muted-foreground">Every escape is a curated package, not just a room.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-lg">For locals and travelers</h3>
+                <p className="text-sm text-muted-foreground">Perfect for yom kef, weekends, staycations or longer holidays.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Discover Israel's Hidden Gems Section */}
+        <section className="container py-20 bg-gradient-subtle">
+          <div className="text-center mb-12">
+            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-4 md:text-6xl">DISCOVER ISRAEL'S HIDDEN GEMS</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Go beyond the classic Tel Aviv and Jerusalem route. Discover intimate and unique places across the country.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="space-y-3">
+              <h3 className="font-bold text-xl">Desert and Arava</h3>
+              <p className="text-sm text-muted-foreground">Silent nights, starry skies, sunrise hikes and slow living.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-bold text-xl">Galilee and Golan</h3>
+              <p className="text-sm text-muted-foreground">Vineyards, rivers, forests and farm-to-table moments.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-bold text-xl">Jerusalem and the Hills</h3>
+              <p className="text-sm text-muted-foreground">History, views, spa retreats and boutique stays.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-bold text-xl">Tel Aviv and the Coast</h3>
+              <p className="text-sm text-muted-foreground">Beachfront hotels, rooftops, urban energy and sea breeze.</p>
+            </div>
+          </div>
+        </section>
+
         {/* Desert Hero Section */}
         <section className="relative h-[500px] md:h-[600px] flex items-start justify-start">
           <div className="absolute inset-0 bg-cover bg-center" style={{
@@ -108,7 +160,7 @@ const Index = () => {
           
           <div className="relative z-10 text-left text-foreground px-4 pt-12 md:pt-16 max-w-4xl ml-2 sm:ml-4 md:ml-8 lg:ml-[1cm]">
             <p className="text-sm md:text-base font-medium tracking-widest uppercase mb-2 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              A NEW WAY TO EXPLORE ISRAEL
+              WIN YOUR NEXT TRIP
             </p>
             <h2 className="font-sans mb-4 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 font-bold text-slate-950 md:text-4xl text-2xl">From desert stillness to coastal rhythm, find the escape that feels like you.</h2>
             <Button size="lg" className="bg-white hover:bg-black text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300" onClick={() => setContactDialogOpen(true)}>
@@ -155,7 +207,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* How It Works Section */}
+        {/* How STAYMAKOM Works Section */}
         <section className="relative py-32 overflow-hidden">
           {/* Background Image */}
           <div className="absolute inset-0">
@@ -164,43 +216,87 @@ const Index = () => {
           </div>
           
           <div className="container max-w-6xl relative z-10">
-            
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12">
-              {/* Block 1 */}
-              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{
-              animationDelay: '0.1s'
-            }}>
-                <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
-                  Follow what moves you
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+              {/* Step 1 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white font-bold text-xl">1</span>
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white">
+                  Choose your mood
                 </h3>
-                <p className="text-base leading-relaxed text-white/90 max-w-sm mx-auto">
-                  Explore experiences that speak to your mood — slow mornings in the desert, sunrise yoga, a hidden vineyard at dusk, or simply a moment to breathe.
+                <p className="text-sm leading-relaxed text-white/90 max-w-sm mx-auto">
+                  Romantic, active, family, nature, food and more.
                 </p>
               </div>
               
-              {/* Block 2 */}
-              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{
-              animationDelay: '0.3s'
-            }}>
-                <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
-                  Shape your own moment
+              {/* Step 2 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white font-bold text-xl">2</span>
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white">
+                  Pick your hotel + experience
                 </h3>
-                <p className="text-base leading-relaxed text-white/90 max-w-sm mx-auto">
-                  Choose your stay, then add the touches that make it uniquely yours — a private ritual, a tasting under the stars, or something beautifully unexpected.
+                <p className="text-sm leading-relaxed text-white/90 max-w-sm mx-auto">
+                  Each package bundles a stay with a signature experience such as spa, dinner, wine, cooking class, yoga or desert tour.
                 </p>
               </div>
               
-              {/* Block 3 */}
-              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{
-              animationDelay: '0.5s'
-            }}>
-                <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
-                  Book, unwind, begin
+              {/* Step 3 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white font-bold text-xl">3</span>
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white">
+                  Add your extras
                 </h3>
-                <p className="text-base leading-relaxed text-white/90 max-w-sm mx-auto">
-                  Secure your date and let the anticipation start. Your STAYMAKOM is waiting — quietly, gently, beautifully.
+                <p className="text-sm leading-relaxed text-white/90 max-w-sm mx-auto">
+                  Depending on the escape, you can add upgrades like spa rituals, dinner, wine tasting or a private driver.
                 </p>
+              </div>
+              
+              {/* Step 4 */}
+              <div className="text-center space-y-4 opacity-0 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white font-bold text-xl">4</span>
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white">
+                  Book and enjoy
+                </h3>
+                <p className="text-sm leading-relaxed text-white/90 max-w-sm mx-auto">
+                  Secure your dates in a few clicks. Everything is ready when you arrive.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Travelers Choose STAYMAKOM Section */}
+        <section className="container py-20">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="font-sans text-4xl font-bold tracking-[-0.02em] mb-12 md:text-6xl text-center">WHY TRAVELERS CHOOSE STAYMAKOM</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <h3 className="font-bold text-xl">Curated selection</h3>
+                <p className="text-sm text-muted-foreground">We handpick hotels and experiences for their vibe, not just their stars.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-xl">Hotel + Experience packages</h3>
+                <p className="text-sm text-muted-foreground">Each escape is already designed and easy to book.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-xl">Israel-wide</h3>
+                <p className="text-sm text-muted-foreground">From Eilat to the Galilee, Tel Aviv, Jerusalem, the Negev and the Dead Sea.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-xl">For locals and visitors</h3>
+                <p className="text-sm text-muted-foreground">Discover a new side of Israel, whether you live here or visit.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-xl">Clear and human</h3>
+                <p className="text-sm text-muted-foreground">Real descriptions and a small, curated selection.</p>
               </div>
             </div>
           </div>
