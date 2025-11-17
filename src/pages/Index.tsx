@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
@@ -27,6 +28,7 @@ const fallbackImages: Record<string, string> = {
   "active-break": activeImg
 };
 const Index = () => {
+  const navigate = useNavigate();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const {
     data: categories,
@@ -136,7 +138,17 @@ const Index = () => {
               <p className="text-lg text-muted-foreground">
                 Check in, drop your bags and let the desert do the rest.
               </p>
-              <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4">
+              <Button 
+                size="lg" 
+                className="bg-black hover:bg-black/90 text-white mt-4"
+                onClick={() => {
+                  if (latestExperiences && latestExperiences.length > 0) {
+                    navigate(`/experience/${latestExperiences[0].slug}`);
+                  } else {
+                    navigate('/category/beyond-nature');
+                  }
+                }}
+              >
                 Let the journey begin
               </Button>
             </div>
