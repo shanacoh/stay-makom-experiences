@@ -4,13 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Check, X, ExternalLink, Plus, Edit } from "lucide-react";
+import { Eye, Check, X, ExternalLink, Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 const AdminExperiences = () => {
   const [actionId, setActionId] = useState<string | null>(null);
-  const [action, setAction] = useState<"approve" | "reject" | null>(null);
+  const [action, setAction] = useState<"approve" | "reject" | "delete" | null>(null);
   const queryClient = useQueryClient();
   const {
     data: experiences,
@@ -56,6 +56,21 @@ const AdminExperiences = () => {
       setAction(null);
     }
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("experiences" as any).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin-experiences"]
+      });
+      toast.success("Expérience supprimée");
+      setActionId(null);
+      setAction(null);
+    }
+  });
   const handleApprove = (id: string) => {
     setActionId(id);
     setAction("approve");
@@ -64,12 +79,22 @@ const AdminExperiences = () => {
     setActionId(id);
     setAction("reject");
   };
+
+  const handleDelete = (id: string) => {
+    setActionId(id);
+    setAction("delete");
+  };
+
   const confirmAction = () => {
     if (actionId && action) {
-      updateStatusMutation.mutate({
-        id: actionId,
-        status: action === "approve" ? "published" : "draft"
-      });
+      if (action === "delete") {
+        deleteMutation.mutate(actionId);
+      } else {
+        updateStatusMutation.mutate({
+          id: actionId,
+          status: action === "approve" ? "published" : "draft"
+        });
+      }
     }
   };
   const getStatusBadge = (status: string) => {
@@ -140,6 +165,10 @@ const AdminExperiences = () => {
                         Voir
                       </Button>
                     </Link>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(experience.id)} className="text-red-600 hover:text-red-700">
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Supprimer
+                    </Button>
                     {experience.status === "pending" && <>
                         <Button variant="ghost" size="sm" onClick={() => handleApprove(experience.id)} className="text-green-600 hover:text-green-700">
                           <Check className="w-4 h-4 mr-1" />
@@ -150,9 +179,6 @@ const AdminExperiences = () => {
                           Rejeter
                         </Button>
                       </>}
-                    {experience.status === "published" && <Link to={`/hotel-admin/experiences`} target="_blank">
-                        
-                      </Link>}
                   </TableCell>
                 </TableRow>)}
             </TableBody>
@@ -165,10 +191,14 @@ const AdminExperiences = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {action === "approve" ? "Valider cette expérience ?" : "Rejeter cette expérience ?"}
+              {action === "approve" ? "Valider cette expérience ?" : action === "reject" ? "Rejeter cette expérience ?" : "Supprimer cette expérience ?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {action === "approve" ? "Cette expérience sera publiée et visible sur le site public." : "Cette expérience sera renvoyée en brouillon. L'hôtel pourra la modifier et la soumettre à nouveau."}
+              {action === "approve" 
+                ? "Cette expérience sera publiée et visible sur le site public." 
+                : action === "reject" 
+                ? "Cette expérience sera renvoyée en brouillon. L'hôtel pourra la modifier et la soumettre à nouveau."
+                : "Cette action est irréversible. L'expérience sera définitivement supprimée."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
