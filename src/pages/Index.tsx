@@ -121,17 +121,13 @@ const Index = () => {
               <p className="text-base sm:text-lg text-muted-foreground">
                 Check in, drop your bags and let the desert do the rest.
               </p>
-              <Button 
-                size="lg" 
-                className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto"
-                onClick={() => {
-                  if (latestExperiences && latestExperiences.length > 0) {
-                    navigate(`/experience/${latestExperiences[0].slug}`);
-                  } else {
-                    navigate('/category/beyond-nature');
-                  }
-                }}
-              >
+              <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto" onClick={() => {
+              if (latestExperiences && latestExperiences.length > 0) {
+                navigate(`/experience/${latestExperiences[0].slug}`);
+              } else {
+                navigate('/category/beyond-nature');
+              }
+            }}>
                 Let the journey begin
               </Button>
             </div>
@@ -250,19 +246,13 @@ const Index = () => {
           <div className="absolute inset-0 bg-black/30" />
           
           <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase">
-              Beyond the ordinary
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase text-slate-50 lg:text-5xl">
+              BECOME A PARTNER                                                                                
             </h2>
             <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-2xl mx-auto">
-              Discover hidden gems where silence speaks louder than words
+              If you want to be part of Staymakom’s curated selection, leave your info and we’ll get back to you shortly.
             </p>
-            <Button 
-              size="lg" 
-              className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-6 sm:px-8"
-              onClick={() => navigate('/category/beyond-nature')}
-            >
-              Explore Experiences
-            </Button>
+            <Button size="lg" className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-6 sm:px-8" onClick={() => navigate('/category/beyond-nature')}>it's time to join the club</Button>
           </div>
         </section>
       </main>
