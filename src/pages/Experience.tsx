@@ -14,6 +14,9 @@ import GoodToKnow from "@/components/experience/GoodToKnow";
 import ReviewsSection from "@/components/experience/ReviewsSection";
 import ImportantInformation from "@/components/experience/ImportantInformation";
 import { Loader2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 const Experience = () => {
   const {
     slug
@@ -23,6 +26,8 @@ const Experience = () => {
   const [selectedExtras, setSelectedExtras] = useState<{
     [key: string]: number;
   }>({});
+  const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
+  const isMobile = useIsMobile();
   const {
     data: experience,
     isLoading
@@ -92,7 +97,7 @@ const Experience = () => {
         <ExperienceHero title={experience.title} subtitle={experience.subtitle} hotelName={experience.hotels?.name} photos={photos} />
 
         <div className="container pb-16 my-[26px]">
-          <div className="grid lg:grid-cols-3 gap-12">
+          <div className={`grid lg:grid-cols-3 gap-12 ${isMobile ? 'pb-24' : ''}`}>
             {/* Left Column - Details */}
             <div className="lg:col-span-2 space-y-12">
               <ExperienceDetails longCopy={experience.long_copy} />
@@ -116,11 +121,44 @@ const Experience = () => {
             </div>
 
             {/* Right Column - Booking Panel */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 hidden lg:block">
               <BookingPanel experienceId={experience.id} hotelId={experience.hotel_id} basePrice={experience.base_price} basePriceType={experience.base_price_type || "per_person"} currency={experience.currency || "USD"} minParty={experience.min_party || 2} maxParty={experience.max_party || 4} />
             </div>
           </div>
         </div>
+
+        {/* Mobile Sticky Bottom Bar */}
+        {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
+            <Sheet open={isBookingSheetOpen} onOpenChange={setIsBookingSheetOpen}>
+              <SheetTrigger asChild>
+                <button className="w-full p-4 flex items-center justify-between">
+                  <div className="flex flex-col items-start">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-bold text-2xl text-foreground">
+                        {experience.base_price}€
+                      </span>
+                      <span className="text-sm line-through text-muted-foreground">
+                        {Math.round(experience.base_price * 1.26)}€
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      / {experience.base_price_type === 'per_person' ? 'personne' : 'séjour'} · -26%
+                    </span>
+                  </div>
+                  <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
+                    Book it now
+                  </Button>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
+                <div className="p-6">
+                  <BookingPanel experienceId={experience.id} hotelId={experience.hotel_id} basePrice={experience.base_price} basePriceType={experience.base_price_type || "per_person"} currency={experience.currency || "USD"} minParty={experience.min_party || 2} maxParty={experience.max_party || 4} />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        )}
       </main>
 
       <Footer />
