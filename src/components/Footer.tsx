@@ -30,7 +30,7 @@ const Footer = () => {
   };
   return <footer className="bg-[#1a1a1a] text-white mt-20">
       <div className="container py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-6">
           {/* Column 1: Brand */}
           <div>
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
