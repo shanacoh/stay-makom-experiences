@@ -147,7 +147,7 @@ const Category = () => {
         </section>
 
         {/* Filters */}
-        <CategoryFilters onFilterChange={setFilters} onShowMapToggle={setShowMap} showMap={showMap} />
+        <CategoryFilters onFilterChange={setFilters} onShowMapToggle={setShowMap} showMap={showMap} className="my-0" />
 
         {/* Experiences List with Optional Map */}
         <section className="container py-8">
@@ -181,16 +181,11 @@ const Category = () => {
                 const discountedPrice = Math.floor(originalPrice * (1 - discountPercent / 100));
                 const rating = (Math.random() * 0.5 + 8.5).toFixed(1); // 8.5-9.0
                 const reviewCount = Math.floor(Math.random() * 1000) + 50;
-                
                 return <Link key={experience.id} to={`/experience/${experience.slug}`} className="group">
                         <Card className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-all">
                           {/* Image with overlay title and heart */}
                           <div className="relative aspect-[4/3] overflow-hidden">
-                            <img 
-                              src={experience.hero_image || experience.hotels?.hero_image || "/placeholder.svg"} 
-                              alt={experience.title} 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                            />
+                            <img src={experience.hero_image || experience.hotels?.hero_image || "/placeholder.svg"} alt={experience.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                             {/* Title overlay */}
                             <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent">
                               <h3 className="font-sans text-2xl font-bold text-white uppercase tracking-tight">
@@ -198,13 +193,10 @@ const Category = () => {
                               </h3>
                             </div>
                             {/* Heart icon */}
-                            <button 
-                              className="absolute top-4 right-4 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                            >
+                            <button className="absolute top-4 right-4 p-2 rounded-full bg-background/80 hover:bg-background transition-colors" onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}>
                               <Heart className="h-5 w-5" />
                             </button>
                           </div>
@@ -230,10 +222,7 @@ const Category = () => {
 
                             {/* Amenities/includes */}
                             <p className="text-sm text-muted-foreground line-clamp-1">
-                              {experience.includes && experience.includes.length > 0 
-                                ? experience.includes.slice(0, 3).join(' • ')
-                                : `${experience.min_nights}-${experience.max_nights} nights • ${experience.min_party}-${experience.max_party} guests`
-                              }
+                              {experience.includes && experience.includes.length > 0 ? experience.includes.slice(0, 3).join(' • ') : `${experience.min_nights}-${experience.max_nights} nights • ${experience.min_party}-${experience.max_party} guests`}
                             </p>
 
                             {/* Price */}
