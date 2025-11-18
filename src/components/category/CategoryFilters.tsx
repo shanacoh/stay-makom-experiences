@@ -46,7 +46,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
   };
 
   return (
-    <div className="sticky top-16 z-10 bg-background/95 backdrop-blur-sm border-b border-border py-3 sm:py-4">
+    <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border py-3 sm:py-4 mt-16">
       <div className="container flex items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-4 flex-1">
           {/* Date Range Picker */}
