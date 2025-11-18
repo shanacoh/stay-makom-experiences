@@ -23,19 +23,19 @@ const ImportantInformation = ({
   if (!hasAnyInfo) return null;
 
   return (
-    <div className="space-y-6">
-      <h2 className="font-sans text-3xl font-bold">Important information</h2>
+    <div className="space-y-4 sm:space-y-6">
+      <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold">Important information</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {(checkinTime || checkoutTime) && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Clock className="w-5 h-5 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Hours
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 text-sm">
               {checkinTime && (
                 <div>
                   <span className="font-medium">Check-in:</span> {checkinTime}
@@ -52,20 +52,20 @@ const ImportantInformation = ({
 
         {address && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MapPin className="w-5 h-5 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Address
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p>{address}</p>
+              <p className="text-sm">{address}</p>
               {googleMapsLink && (
                 <a
                   href={googleMapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline text-sm"
+                  className="text-primary hover:underline text-xs sm:text-sm inline-block"
                 >
                   View on Google Maps →
                 </a>
@@ -76,30 +76,30 @@ const ImportantInformation = ({
 
         {accessibilityInfo && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Accessibility className="w-5 h-5 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Accessibility className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Accessibility
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">{accessibilityInfo}</p>
+              <p className="text-xs sm:text-sm">{accessibilityInfo}</p>
             </CardContent>
           </Card>
         )}
 
         {services && services.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Wifi className="w-5 h-5 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Wifi className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Services & amenities
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-1">
                 {services.map((service, index) => (
-                  <li key={index} className="text-sm flex items-start gap-2">
+                  <li key={index} className="text-xs sm:text-sm flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
                     <span>{service}</span>
                   </li>

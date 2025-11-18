@@ -22,29 +22,29 @@ const HotelSpotlight = ({ hotel }: HotelSpotlightProps) => {
   const highlights = hotel.highlights?.slice(0, 3) || [];
 
   return (
-    <div className="bg-muted/30 rounded-xl p-8 border border-border">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h3 className="font-sans text-2xl font-bold mb-2">{hotel.name}</h3>
+    <div className="bg-muted/30 rounded-xl p-4 sm:p-6 md:p-8 border border-border">
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4 sm:mb-6">
+        <div className="flex-1">
+          <h3 className="font-sans text-lg sm:text-xl md:text-2xl font-bold mb-2">{hotel.name}</h3>
           {(hotel.city || hotel.region) && (
-            <p className="text-muted-foreground flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
               {hotel.city}, {hotel.region}
             </p>
           )}
         </div>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" asChild className="w-full sm:w-auto text-xs sm:text-sm">
           <Link to={`/hotels/${hotel.slug}`}>
             About the hotel
-            <ExternalLink className="ml-2 h-4 w-4" />
+            <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
           </Link>
         </Button>
       </div>
 
       {highlights.length > 0 && (
-        <ul className="space-y-2 mb-6">
+        <ul className="space-y-2 mb-4 sm:mb-6">
           {highlights.map((highlight, index) => (
-            <li key={index} className="flex items-start gap-2">
+            <li key={index} className="flex items-start gap-2 text-sm sm:text-base">
               <span className="text-primary mt-1">•</span>
               <span>{highlight}</span>
             </li>
@@ -53,7 +53,7 @@ const HotelSpotlight = ({ hotel }: HotelSpotlightProps) => {
       )}
 
       {displayPhotos.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {displayPhotos.map((photo, index) => (
             <div key={index} className="aspect-square rounded-lg overflow-hidden">
               <img
