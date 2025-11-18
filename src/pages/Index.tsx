@@ -11,6 +11,7 @@ import RotatingText from "@/components/RotatingText";
 import ContactDialog from "@/components/ContactDialog";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
+import desertKioskHero from "@/assets/desert-kiosk-hero.png";
 import desertHotelPool from "@/assets/desert-hotel-pool.jpg";
 import desertJourney from "@/assets/desert-journey.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
@@ -99,20 +100,26 @@ const Index = () => {
             </div>}
         </section>
 
-        {/* Desert Hero Section */}
-        <section className="relative min-h-[400px] sm:h-[500px] md:h-[600px] flex items-start justify-start">
+        {/* Desert Kiosk Hero Section */}
+        <section className="relative min-h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center">
           <div className="absolute inset-0 bg-cover bg-center" style={{
-          backgroundImage: `url(${desertHero})`
+          backgroundImage: `url(${desertKioskHero})`
         }} />
-          <div className="absolute inset-0 bg-white/20" />
+          <div className="absolute inset-0 bg-black/30" />
           
-          <div className="relative z-10 text-left text-foreground px-4 sm:px-6 pt-8 sm:pt-12 md:pt-16 max-w-4xl ml-0 sm:ml-4 md:ml-8 lg:ml-[1cm] pb-8">
-            <p className="text-xs sm:text-sm md:text-base font-medium tracking-widest uppercase mb-2 sm:mb-3 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              A NEW WAY TO EXPLORE ISRAEL
+          <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase">
+              Beyond the ordinary
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-2xl mx-auto">
+              Discover hidden gems where silence speaks louder than words
             </p>
-            <h2 className="font-sans mb-4 sm:mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 font-bold text-slate-950 text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-tight">From desert stillness to coastal rhythm, find the escape that feels like you.</h2>
-            <Button size="lg" className="bg-white hover:bg-black text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-4 sm:px-6" onClick={() => setContactDialogOpen(true)}>
-              <span className="leading-tight">Register for a chance to win your next trip</span>
+            <Button 
+              size="lg" 
+              className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-6 sm:px-8"
+              onClick={() => navigate('/category/beyond-nature')}
+            >
+              Explore Experiences
             </Button>
           </div>
         </section>
