@@ -96,10 +96,10 @@ const Experience = () => {
       <main className="flex-1">
         <ExperienceHero title={experience.title} subtitle={experience.subtitle} hotelName={experience.hotels?.name} photos={photos} />
 
-        <div className="container pb-16 my-[26px]">
-          <div className={`grid lg:grid-cols-3 gap-12 ${isMobile ? 'pb-24' : ''}`}>
+        <div className="container pb-16 px-4 sm:px-6 my-[26px]">
+          <div className={`grid lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 ${isMobile ? 'pb-24' : ''}`}>
             {/* Left Column - Details */}
-            <div className="lg:col-span-2 space-y-12">
+            <div className="lg:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
               <ExperienceDetails longCopy={experience.long_copy} />
 
               {includes && includes.length > 0 && <WhatsIncludedPhotos includes={includes} />}

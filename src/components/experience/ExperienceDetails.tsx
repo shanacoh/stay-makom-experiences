@@ -7,8 +7,8 @@ const ExperienceDetails = ({ longCopy }: ExperienceDetailsProps) => {
 
   return (
     <div>
-      <h2 className="font-sans text-3xl font-bold mb-4">What you'll do</h2>
-      <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+      <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">What you'll do</h2>
+      <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
         {longCopy}
       </p>
     </div>
