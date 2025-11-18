@@ -134,6 +134,97 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Category Experiences Section */}
+        <section className="container py-12 sm:py-16 md:py-20 px-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <p className="text-xs sm:text-sm font-medium tracking-widest uppercase text-muted-foreground mb-2">
+              YOUR STAYMAKOM EXPERIENCES
+            </p>
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium mb-8 sm:mb-12">
+              Follow your heart's desire
+            </h2>
+            
+            {/* Category Tabs */}
+            {!isLoading && categories && (
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
+                {categories.map((category) => (
+                  <button
+                    key={category.slug}
+                    onClick={() => {
+                      navigate(`/category/${category.slug}`);
+                    }}
+                    className="flex flex-col items-center gap-2 group cursor-pointer"
+                  >
+                    <div className="text-2xl sm:text-3xl transition-transform group-hover:scale-110">
+                      {category.slug === 'romantic' && '❤️'}
+                      {category.slug === 'family' && '👨‍👩‍👧‍👦'}
+                      {category.slug === 'golden-age' && '✨'}
+                      {category.slug === 'beyond-nature' && '🌿'}
+                      {category.slug === 'taste-affair' && '🍷'}
+                      {category.slug === 'active-break' && '⚡'}
+                    </div>
+                    <span className="text-xs sm:text-sm font-medium uppercase tracking-wider group-hover:text-primary transition-colors">
+                      {category.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Experiences Grid */}
+          {isLoadingExperiences ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+              {latestExperiences?.slice(0, 8).map((experience) => (
+                <div 
+                  key={experience.id} 
+                  className="group cursor-pointer"
+                  onClick={() => navigate(`/experience/${experience.slug}`)}
+                >
+                  <div className="relative h-[280px] sm:h-[320px] rounded-xl overflow-hidden mb-3">
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                      style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
+                    />
+                    <div className="absolute inset-0 bg-black/20" />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <h4 className="font-bold text-sm sm:text-base line-clamp-1">
+                      {experience.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {experience.hotels?.name} • {experience.hotels?.city}
+                    </p>
+                    <div className="flex items-baseline gap-2 pt-1">
+                      <span className="font-bold text-base sm:text-lg">
+                        {experience.base_price}€
+                      </span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center">
+            <Button 
+              size="lg" 
+              className="bg-black hover:bg-black/90 text-white rounded-full px-8"
+              onClick={() => navigate('/category/romantic')}
+            >
+              VIEW ALL EXPERIENCES
+            </Button>
+          </div>
+        </section>
+
         {/* How It Works Section */}
         <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
           {/* Background Image */}
