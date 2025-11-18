@@ -100,30 +100,6 @@ const Index = () => {
             </div>}
         </section>
 
-        {/* Desert Kiosk Hero Section */}
-        <section className="relative min-h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center">
-          <div className="absolute inset-0 bg-cover bg-center" style={{
-          backgroundImage: `url(${desertKioskHero})`
-        }} />
-          <div className="absolute inset-0 bg-black/30" />
-          
-          <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase">
-              Beyond the ordinary
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-2xl mx-auto">
-              Discover hidden gems where silence speaks louder than words
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-6 sm:px-8"
-              onClick={() => navigate('/category/beyond-nature')}
-            >
-              Explore Experiences
-            </Button>
-          </div>
-        </section>
-
         {/* Hottest of the Season Section */}
         <section className="container py-12 sm:py-16 md:py-20 px-4">
           <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em] mb-8 sm:mb-12">
@@ -264,6 +240,30 @@ const Index = () => {
                   </div>
                 </div>)}
             </div>}
+        </section>
+
+        {/* Desert Kiosk Hero Section */}
+        <section className="relative min-h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center">
+          <div className="absolute inset-0 bg-cover bg-center" style={{
+          backgroundImage: `url(${desertKioskHero})`
+        }} />
+          <div className="absolute inset-0 bg-black/30" />
+          
+          <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase">
+              Beyond the ordinary
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-2xl mx-auto">
+              Discover hidden gems where silence speaks louder than words
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-6 sm:px-8"
+              onClick={() => navigate('/category/beyond-nature')}
+            >
+              Explore Experiences
+            </Button>
+          </div>
         </section>
       </main>
 
