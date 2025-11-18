@@ -14,6 +14,7 @@ interface CategoryFiltersProps {
   onFilterChange?: (filters: FilterState) => void;
   onShowMapToggle?: (show: boolean) => void;
   showMap?: boolean;
+  className?: string;
 }
 
 export interface FilterState {
@@ -24,7 +25,7 @@ export interface FilterState {
   dateRange?: DateRange;
 }
 
-const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: CategoryFiltersProps) => {
+const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false, className }: CategoryFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "recommended",
     priceRange: [0, 1000],
@@ -46,7 +47,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false }: C
   };
 
   return (
-    <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border py-3 sm:py-4 mt-16">
+    <div className={cn("sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border py-3 sm:py-4 mt-16", className)}>
       <div className="container flex items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-4 flex-1">
           {/* Date Range Picker */}
