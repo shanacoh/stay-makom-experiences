@@ -30,9 +30,19 @@ const Footer = () => {
   };
   return <footer className="bg-[#1a1a1a] text-white mt-20">
       <div className="container py-10">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-6">
-          {/* Column 1: Brand */}
-          <div>
+        {/* Brand - Full Width on Mobile */}
+        <div className="mb-6 lg:hidden">
+          <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
+            STAYMAKOM
+          </h3>
+          <p className="text-sm text-white leading-relaxed">
+            Book extraordinary stays — beyond the usual.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-6">
+          {/* Column 1: Brand - Hidden on Mobile */}
+          <div className="hidden lg:block">
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
               STAYMAKOM
             </h3>
@@ -107,8 +117,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 4: Newsletter */}
-          <div>
+          {/* Column 4: Newsletter - Full Width on Mobile Below */}
+          <div className="col-span-2 lg:col-span-1">
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4">
               Get on the list
             </h4>
