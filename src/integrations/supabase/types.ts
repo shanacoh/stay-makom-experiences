@@ -395,6 +395,7 @@ export type Database = {
           not_includes: string[] | null
           not_includes_he: string[] | null
           photos: string[] | null
+          region_type: string | null
           services: string[] | null
           services_he: string[] | null
           slug: string
@@ -440,6 +441,7 @@ export type Database = {
           not_includes?: string[] | null
           not_includes_he?: string[] | null
           photos?: string[] | null
+          region_type?: string | null
           services?: string[] | null
           services_he?: string[] | null
           slug: string
@@ -485,6 +487,7 @@ export type Database = {
           not_includes?: string[] | null
           not_includes_he?: string[] | null
           photos?: string[] | null
+          region_type?: string | null
           services?: string[] | null
           services_he?: string[] | null
           slug?: string
