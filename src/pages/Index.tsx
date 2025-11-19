@@ -366,7 +366,7 @@ const Index = () => {
           
           <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
             <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase text-slate-50 lg:text-5xl">
-              BECOME A PARTNER                                                                                
+              BECOME A PARTNER
             </h2>
             <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-2xl mx-auto">
               If you want to be part of Staymakom’s curated selection, leave your info and we’ll get back to you shortly.
