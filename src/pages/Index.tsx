@@ -20,6 +20,7 @@ import goldenAgeImg from "@/assets/golden-age-category.jpg";
 import natureImg from "@/assets/nature-category.jpg";
 import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
+import handpickedHero from "@/assets/handpicked-hero.jpg";
 const fallbackImages: Record<string, string> = {
   "romantic": romanticImg,
   "family": familyImg,
@@ -98,6 +99,33 @@ const Index = () => {
             </div> : <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
               {categories?.map(category => <CategoryCard key={category.slug} title={category.name} description={category.intro_rich_text || ""} image={category.hero_image || fallbackImages[category.slug] || ""} slug={category.slug} />)}
             </div>}
+        </section>
+
+        {/* Handpicked Hotels Hero Section */}
+        <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
+          <div className="absolute inset-0">
+            <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
+          
+          <div className="container max-w-4xl relative z-10 px-4 text-center">
+            <h2 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.02em] mb-6 text-white">
+              Handpicked Hotels. Unforgettable Experiences.
+            </h2>
+            <div className="text-base sm:text-lg md:text-xl leading-relaxed text-white/95 max-w-3xl mx-auto space-y-4">
+              <p>
+                Today, we don't just book a room anymore, we look for something to feel.
+                Staymakom curates the best hotels in the country and pairs them with immersive experiences that turn a simple stay into something unforgettable: farm-to-table workshops in a kibbutz, desert escapes, wellness retreats, local encounters, cultural discoveries…
+              </p>
+              <p>
+                It's about going beyond Tel Aviv, Jerusalem or Eilat, and uncovering a more intimate, vibrant, authentic Israel.
+              </p>
+              <p className="font-medium">
+                Your trip isn't just "beautiful" anymore, it becomes meaningful.
+                And that's where the magic happens.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Hottest of the Season Section */}
