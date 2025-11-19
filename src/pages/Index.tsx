@@ -76,7 +76,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-black/30" />
           
           <div className="relative z-10 container text-left text-white px-4 sm:px-6 pb-8 sm:pb-12 md:pb-16 ml-0 sm:ml-4 md:ml-8 lg:ml-[1cm]">
-            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-5xl text-slate-50 pt-6">
+            <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-5xl text-slate-50 pt-6">
               More than a stay,
               <br />
               it's a{" "}
