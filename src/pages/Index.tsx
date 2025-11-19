@@ -200,46 +200,87 @@ const Index = () => {
             )}
           </div>
 
-          {/* Experiences Grid */}
+          {/* Experiences Grid/Carousel */}
           {isLoadingExperiences ? (
             <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-              {latestExperiences?.slice(0, 8).map((experience) => (
-                <div 
-                  key={experience.id} 
-                  className="group cursor-pointer"
-                  onClick={() => navigate(`/experience/${experience.slug}`)}
-                >
-                  <div className="relative h-[280px] sm:h-[320px] rounded-xl overflow-hidden mb-3">
+            <>
+              {/* Mobile Carousel */}
+              <div className="md:hidden overflow-x-auto mb-8 -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
+                <div className="flex gap-4 pb-4">
+                  {latestExperiences?.slice(0, 8).map((experience, index) => (
                     <div 
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                      style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
-                    />
-                    <div className="absolute inset-0 bg-black/20" />
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <h4 className="font-bold text-sm sm:text-base line-clamp-1">
-                      {experience.title}
-                    </h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      {experience.hotels?.name} • {experience.hotels?.city}
-                    </p>
-                    <div className="flex items-baseline gap-2 pt-1">
-                      <span className="font-bold text-base sm:text-lg">
-                        {experience.base_price}€
-                      </span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">
-                        / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
-                      </span>
+                      key={experience.id} 
+                      className="flex-shrink-0 w-[85vw] snap-center group cursor-pointer"
+                      onClick={() => navigate(`/experience/${experience.slug}`)}
+                    >
+                      <div className="relative h-[320px] rounded-xl overflow-hidden mb-3 shadow-lg">
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-active:scale-105"
+                          style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
+                        />
+                        <div className="absolute inset-0 bg-black/20" />
+                      </div>
+                      
+                      <div className="space-y-1.5 px-1">
+                        <h4 className="font-bold text-base line-clamp-1">
+                          {experience.title}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {experience.hotels?.name} • {experience.hotels?.city}
+                        </p>
+                        <div className="flex items-baseline gap-2 pt-1">
+                          <span className="font-bold text-lg">
+                            {experience.base_price}€
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop Grid */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                {latestExperiences?.slice(0, 8).map((experience) => (
+                  <div 
+                    key={experience.id} 
+                    className="group cursor-pointer"
+                    onClick={() => navigate(`/experience/${experience.slug}`)}
+                  >
+                    <div className="relative h-[320px] rounded-xl overflow-hidden mb-3">
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                        style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
+                      />
+                      <div className="absolute inset-0 bg-black/20" />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <h4 className="font-bold text-base line-clamp-1">
+                        {experience.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {experience.hotels?.name} • {experience.hotels?.city}
+                      </p>
+                      <div className="flex items-baseline gap-2 pt-1">
+                        <span className="font-bold text-lg">
+                          {experience.base_price}€
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           )}
 
           <div className="text-center">
