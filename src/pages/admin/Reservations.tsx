@@ -21,7 +21,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-const AdminReservations = () => {
+const AdminBookings = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [hotelFilter, setHotelFilter] = useState<string>("all");
   const queryClient = useQueryClient();
@@ -35,7 +35,8 @@ const AdminReservations = () => {
           *,
           hotels:hotel_id(name),
           experiences:experience_id(title),
-          customers:customer_id(first_name, last_name)
+          customers:customer_id(first_name, last_name),
+          packages:package_id(name)
         `)
         .order("created_at", { ascending: false });
 
@@ -92,7 +93,7 @@ const AdminReservations = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold">Reservations</h2>
+        <h2 className="text-3xl font-bold">Bookings</h2>
         <p className="text-muted-foreground">Manage all bookings</p>
       </div>
 
@@ -201,4 +202,4 @@ const AdminReservations = () => {
   );
 };
 
-export default AdminReservations;
+export default AdminBookings;
