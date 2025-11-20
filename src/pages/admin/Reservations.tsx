@@ -82,12 +82,18 @@ const AdminBookings = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       pending: "bg-yellow-100 text-yellow-800",
+      hold: "bg-orange-100 text-orange-800",
       accepted: "bg-blue-100 text-blue-800",
       paid: "bg-green-100 text-green-800",
-      confirmed: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
+      confirmed: "bg-emerald-100 text-emerald-800",
+      failed: "bg-red-100 text-red-800",
+      cancelled: "bg-gray-100 text-gray-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
+  };
+
+  const getCurrencySymbol = (currency: string) => {
+    return currency === "ILS" ? "₪" : "$";
   };
 
   return (
@@ -138,10 +144,12 @@ const AdminBookings = () => {
                 <TableHead>Customer</TableHead>
                 <TableHead>Hotel</TableHead>
                 <TableHead>Experience</TableHead>
+                <TableHead>Package</TableHead>
                 <TableHead>Dates</TableHead>
                 <TableHead>Guests</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -156,18 +164,25 @@ const AdminBookings = () => {
                   </TableCell>
                   <TableCell>{booking.hotels?.name}</TableCell>
                   <TableCell>{booking.experiences?.title}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {booking.packages?.name || "—"}
+                  </TableCell>
                   <TableCell className="text-sm">
                     {format(new Date(booking.checkin), "MMM d")} -{" "}
                     {format(new Date(booking.checkout), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>{booking.party_size}</TableCell>
                   <TableCell className="font-medium">
-                    ${booking.total_price}
+                    {getCurrencySymbol(booking.currency || "USD")}
+                    {booking.total_price}
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(booking.status)}>
                       {booking.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {format(new Date(booking.created_at), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
                     <Select
@@ -181,9 +196,11 @@ const AdminBookings = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="hold">Hold</SelectItem>
                         <SelectItem value="accepted">Accepted</SelectItem>
                         <SelectItem value="paid">Paid</SelectItem>
                         <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
                         <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
