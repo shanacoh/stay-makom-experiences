@@ -27,7 +27,7 @@ const menuItems = [
   { title: "Categories", url: "/admin/categories", icon: FolderKanban },
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
   { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
-  { title: "Reservations", url: "/admin/reservations", icon: Calendar },
+  { title: "Bookings", url: "/admin/bookings", icon: Calendar },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Customers", url: "/admin/customers", icon: UserCircle },
   { title: "Journal", url: "/admin/journal", icon: BookOpen },
