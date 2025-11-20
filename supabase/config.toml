@@ -1,1 +1,7 @@
 project_id = "fduagvpolipfvnrhtkxz"
+
+[functions.send-corporate-request]
+verify_jwt = false
+
+[functions.collect-lead]
+verify_jwt = false

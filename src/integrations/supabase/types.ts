@@ -838,15 +838,19 @@ export type Database = {
       leads: {
         Row: {
           assigned_to: string | null
+          city: string | null
           company_name: string | null
           country: string | null
           created_at: string
           cta_id: string | null
           email: string
+          first_name: string | null
           group_size: string | null
           id: string
           interests: string[] | null
           is_b2b: boolean | null
+          last_name: string | null
+          marketing_opt_in: boolean | null
           message: string | null
           metadata: Json | null
           name: string | null
@@ -863,15 +867,19 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          city?: string | null
           company_name?: string | null
           country?: string | null
           created_at?: string
           cta_id?: string | null
           email: string
+          first_name?: string | null
           group_size?: string | null
           id?: string
           interests?: string[] | null
           is_b2b?: boolean | null
+          last_name?: string | null
+          marketing_opt_in?: boolean | null
           message?: string | null
           metadata?: Json | null
           name?: string | null
@@ -888,15 +896,19 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          city?: string | null
           company_name?: string | null
           country?: string | null
           created_at?: string
           cta_id?: string | null
           email?: string
+          first_name?: string | null
           group_size?: string | null
           id?: string
           interests?: string[] | null
           is_b2b?: boolean | null
+          last_name?: string | null
+          marketing_opt_in?: boolean | null
           message?: string | null
           metadata?: Json | null
           name?: string | null
