@@ -835,6 +835,84 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string
+          cta_id: string | null
+          email: string
+          group_size: string | null
+          id: string
+          interests: string[] | null
+          is_b2b: boolean | null
+          message: string | null
+          metadata: Json | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          preferred_dates: string | null
+          property_name: string | null
+          property_type: string | null
+          request_type: string | null
+          source: string
+          status: string | null
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          cta_id?: string | null
+          email: string
+          group_size?: string | null
+          id?: string
+          interests?: string[] | null
+          is_b2b?: boolean | null
+          message?: string | null
+          metadata?: Json | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          preferred_dates?: string | null
+          property_name?: string | null
+          property_type?: string | null
+          request_type?: string | null
+          source: string
+          status?: string | null
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          cta_id?: string | null
+          email?: string
+          group_size?: string | null
+          id?: string
+          interests?: string[] | null
+          is_b2b?: boolean | null
+          message?: string | null
+          metadata?: Json | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          preferred_dates?: string | null
+          property_name?: string | null
+          property_type?: string | null
+          request_type?: string | null
+          source?: string
+          status?: string | null
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null

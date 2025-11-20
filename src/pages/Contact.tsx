@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Mail, Instagram } from "lucide-react";
 import contactHero from "@/assets/contact-hero-new.jpg";
+import { supabase } from "@/integrations/supabase/client";
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   email: z.string().trim().email("Invalid email address").max(255),
@@ -34,9 +35,18 @@ const Contact = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // For now, just show success without sending email
-      // TODO: Add email sending functionality when API key is available
-      console.log("Contact form data:", data);
+      const { error } = await supabase
+        .from("leads")
+        .insert({
+          source: "contact",
+          name: data.name,
+          email: data.email,
+          subject: data.subject,
+          message: data.message,
+        });
+
+      if (error) throw error;
+
       setShowSuccess(true);
       form.reset();
       toast.success("Message sent successfully!");
