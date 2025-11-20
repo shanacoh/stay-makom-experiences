@@ -106,6 +106,7 @@ export type Database = {
           hotel_id: string
           id: string
           notes: string | null
+          package_id: string | null
           party_size: number
           payment_status: string | null
           room_price_subtotal: number | null
@@ -130,6 +131,7 @@ export type Database = {
           hotel_id: string
           id?: string
           notes?: string | null
+          package_id?: string | null
           party_size: number
           payment_status?: string | null
           room_price_subtotal?: number | null
@@ -154,6 +156,7 @@ export type Database = {
           hotel_id?: string
           id?: string
           notes?: string | null
+          package_id?: string | null
           party_size?: number
           payment_status?: string | null
           room_price_subtotal?: number | null
@@ -168,6 +171,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_experience_id_fkey"
             columns: ["experience_id"]
             isOneToOne: false
@@ -179,6 +189,13 @@ export type Database = {
             columns: ["hotel_id"]
             isOneToOne: false
             referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
             referencedColumns: ["id"]
           },
         ]
@@ -243,6 +260,7 @@ export type Database = {
           created_at: string
           default_party_size: number
           first_name: string
+          id: string
           last_name: string
           notes: string | null
           updated_at: string
@@ -253,6 +271,7 @@ export type Database = {
           created_at?: string
           default_party_size?: number
           first_name: string
+          id?: string
           last_name: string
           notes?: string | null
           updated_at?: string
@@ -263,6 +282,7 @@ export type Database = {
           created_at?: string
           default_party_size?: number
           first_name?: string
+          id?: string
           last_name?: string
           notes?: string | null
           updated_at?: string
@@ -925,6 +945,66 @@ export type Database = {
         }
         Relationships: []
       }
+      packages: {
+        Row: {
+          created_at: string
+          description_short: string | null
+          discount_type: string
+          discount_value: number
+          experience_id: string
+          hotel_id: string
+          id: string
+          min_nights: number | null
+          name: string
+          status: string
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          description_short?: string | null
+          discount_type: string
+          discount_value: number
+          experience_id: string
+          hotel_id: string
+          id?: string
+          min_nights?: number | null
+          name: string
+          status?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          description_short?: string | null
+          discount_type?: string
+          discount_value?: number
+          experience_id?: string
+          hotel_id?: string
+          id?: string
+          min_nights?: number | null
+          name?: string
+          status?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packages_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packages_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -1058,6 +1138,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_experience_id_fkey"
             columns: ["experience_id"]
