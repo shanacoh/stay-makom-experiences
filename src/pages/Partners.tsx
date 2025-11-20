@@ -69,7 +69,7 @@ const Partners = () => {
           <p className="text-xl md:text-2xl mb-10 text-white/90">
             Join a curated network of Israel's most inspiring hotels and experiences.
           </p>
-          <Button onClick={() => navigate("/auth")} size="lg" className="bg-[#D72638] hover:bg-[#D72638]/90 text-white">
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-slate-50 text-slate-950">
             Log in to your hotel account
           </Button>
         </div>
