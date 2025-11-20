@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import partnersHero from "@/assets/partners-hero.jpg";
+import { supabase } from "@/integrations/supabase/client";
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   hotel_name: z.string().trim().min(1, "Hotel name is required").max(200),
@@ -41,8 +42,20 @@ const Partners = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // For now, just show success without sending email
-      console.log("Partner form data:", data);
+      const { error } = await supabase
+        .from("leads")
+        .insert({
+          source: "partners",
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          property_name: data.hotel_name,
+          message: data.message,
+          is_b2b: true,
+        });
+
+      if (error) throw error;
+
       setShowSuccess(true);
       form.reset();
       toast.success("Thank you for your interest!");

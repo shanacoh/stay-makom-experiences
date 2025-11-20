@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 const Footer = () => {
   const [email, setEmail] = useState("");
   
@@ -22,11 +23,25 @@ const Footer = () => {
     },
   });
   
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement newsletter subscription
-    console.log("Newsletter signup:", email);
-    setEmail("");
+    
+    try {
+      const { error } = await supabase
+        .from("leads")
+        .insert({
+          source: "newsletter",
+          email: email.trim(),
+        });
+
+      if (error) throw error;
+
+      toast.success("Thank you for subscribing!");
+      setEmail("");
+    } catch (error) {
+      console.error("Error subscribing:", error);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
   return <footer className="bg-[#1a1a1a] text-white mt-20">
       <div className="container py-10">

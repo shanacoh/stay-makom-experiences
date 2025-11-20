@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContactDialogProps {
   open: boolean;
@@ -66,15 +67,40 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate form submission
-    setTimeout(() => {
+    const formData = new FormData(e.currentTarget);
+    const interests = [...selectedCategories];
+    if (showOtherInput && otherText) {
+      interests[interests.indexOf("Other")] = `Other: ${otherText}`;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("leads")
+        .insert({
+          source: "win_trip",
+          name: formData.get("name") as string,
+          email: formData.get("email") as string,
+          phone: formData.get("phone") as string || null,
+          interests: interests,
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Registration submitted!",
         description: "We'll contact you soon about your chance to win.",
       });
-      setLoading(false);
       onOpenChange(false);
-    }, 1000);
+    } catch (error) {
+      console.error("Error submitting:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

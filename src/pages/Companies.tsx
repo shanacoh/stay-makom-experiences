@@ -67,11 +67,28 @@ export default function Companies() {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.functions.invoke("send-corporate-request", {
+      // Save to leads table
+      const { error: leadsError } = await supabase
+        .from("leads")
+        .insert({
+          source: "corporate",
+          name: data.fullName,
+          email: data.email,
+          phone: data.phone || null,
+          company_name: data.companyName || null,
+          request_type: data.requestType,
+          group_size: data.groupSize || null,
+          preferred_dates: data.preferredDates || null,
+          message: data.message || null,
+          is_b2b: true,
+        });
+
+      if (leadsError) throw leadsError;
+
+      // Also send email notification via edge function
+      await supabase.functions.invoke("send-corporate-request", {
         body: data,
       });
-
-      if (error) throw error;
 
       setShowSuccess(true);
       reset();
