@@ -32,10 +32,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch user role after state is set (deferred)
+        // Provision and fetch user role after state is set (deferred)
         if (session?.user) {
           setTimeout(() => {
-            fetchUserRole(session.user.id);
+            fetchUserRole(session.user.id, session.user.email || "");
           }, 0);
         } else {
           setRole(null);
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (session?.user) {
         setTimeout(() => {
-          fetchUserRole(session.user.id);
+          fetchUserRole(session.user.id, session.user.email || "");
         }, 0);
       }
       
@@ -63,24 +63,92 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserRole = async (userId: string) => {
+  const provisionUser = async (userId: string, userEmail: string) => {
+    try {
+      // 1. Ensure user_profiles exists
+      const { data: existingProfile } = await supabase
+        .from("user_profiles")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        await supabase.from("user_profiles").insert({
+          user_id: userId,
+          display_name: userEmail,
+          phone: null,
+          locale: "en",
+          marketing_opt_in: false,
+          gdpr_consent_at: null,
+          tos_accepted_at: new Date().toISOString(),
+        });
+      }
+
+      // 2. Ensure user_roles exists
+      const { data: existingRole } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      let userRole: AppRole = "customer";
+      
+      if (!existingRole) {
+        // Create default customer role
+        await supabase.from("user_roles").insert({
+          user_id: userId,
+          role: "customer",
+        });
+      } else {
+        userRole = existingRole.role as AppRole;
+      }
+
+      // 3. Ensure customers exists (only for customer role)
+      if (userRole === "customer") {
+        const { data: existingCustomer } = await supabase
+          .from("customers")
+          .select("user_id")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (!existingCustomer) {
+          await supabase.from("customers").insert({
+            user_id: userId,
+            first_name: "",
+            last_name: "",
+            default_party_size: 2,
+            address_country: null,
+            notes: null,
+          });
+        }
+      }
+
+      return userRole;
+    } catch (error) {
+      console.error("Error provisioning user:", error);
+      return "customer";
+    }
+  };
+
+  const fetchUserRole = async (userId: string, userEmail: string) => {
+    // First provision the user (idempotent - creates missing records)
+    const provisionedRole = await provisionUser(userId, userEmail);
+    
+    // Then fetch the role
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .maybeSingle();
     
-    if (data && data.length > 0) {
-      const userRoles = data.map(r => r.role as AppRole);
-      setRoles(userRoles);
-      
-      // Priority: admin > hotel_admin > customer
-      if (userRoles.includes("admin")) {
-        setRole("admin");
-      } else if (userRoles.includes("hotel_admin")) {
-        setRole("hotel_admin");
-      } else {
-        setRole("customer");
-      }
+    if (data) {
+      const userRole = data.role as AppRole;
+      setRole(userRole);
+      setRoles([userRole]); // Single role now due to UNIQUE constraint
+    } else {
+      // Fallback to provisioned role
+      setRole(provisionedRole);
+      setRoles([provisionedRole]);
     }
   };
 
