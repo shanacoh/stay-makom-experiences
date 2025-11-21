@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,6 +73,7 @@ export function ExperienceForm({
   experienceId,
 }: ExperienceFormProps) {
   const queryClient = useQueryClient();
+  const { role } = useAuth();
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
@@ -362,6 +364,9 @@ export function ExperienceForm({
       }
 
       // Prepare experience data
+      // Admin publishes directly, Hotel Admin submits for approval
+      const publishStatus: "published" | "pending" = role === "admin" ? "published" : "pending";
+      
       const experienceData = {
         hotel_id: hotelId,
         title: data.title,
@@ -378,7 +383,7 @@ export function ExperienceForm({
         base_price_type: data.base_price_type,
         hero_image: heroImageUrl,
         photos: galleryUrls.length > 0 ? galleryUrls : null,
-        status: "pending" as const,
+        status: publishStatus,
       };
 
       if (experienceId) {
@@ -389,8 +394,12 @@ export function ExperienceForm({
           .eq("id", experienceId);
         
         if (error) throw error;
-        setStatus("pending");
-        toast.success("Experience updated and submitted for approval");
+        setStatus(publishStatus);
+        toast.success(
+          role === "admin" 
+            ? "Experience published successfully" 
+            : "Experience submitted for approval"
+        );
       } else {
         // INSERT new experience
         const slug = generateSlug(data.title);
@@ -399,8 +408,12 @@ export function ExperienceForm({
           .insert({ ...experienceData, slug: `${slug}-${Date.now()}` } as any);
         
         if (error) throw error;
-        setStatus("pending");
-        toast.success("Experience submitted for approval");
+        setStatus(publishStatus);
+        toast.success(
+          role === "admin" 
+            ? "Experience published successfully" 
+            : "Experience submitted for approval"
+        );
       }
 
       queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelId] });
