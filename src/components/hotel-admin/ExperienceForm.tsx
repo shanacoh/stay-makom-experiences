@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -41,7 +41,7 @@ const experienceSchema = z.object({
   cancellation_policy: z.string().optional(),
   base_price: z.number().min(0.01, "Price must be greater than 0"),
   currency: z.string(),
-  base_price_type: z.enum(["per_booking", "per_person"]),
+  base_price_type: z.enum(["fixed", "per_booking", "per_person"]),
   always_available: z.boolean(),
   internal_notes: z.string().optional(),
 });
@@ -83,6 +83,22 @@ export function ExperienceForm({
     },
   });
 
+  // Load existing experience data when editing
+  const { data: existingExperience, isLoading: isLoadingExperience } = useQuery({
+    queryKey: ["experience", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return null;
+      const { data, error } = await supabase
+        .from("experiences")
+        .select("*")
+        .eq("id", experienceId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!experienceId,
+  });
+
   const {
     register,
     handleSubmit,
@@ -108,6 +124,36 @@ export function ExperienceForm({
   const description = watch("description");
   const minNights = watch("min_nights") || 1;
   const maxNights = watch("max_nights") || 4;
+
+  // Pre-fill form when editing existing experience
+  useEffect(() => {
+    if (existingExperience) {
+      setValue("title", existingExperience.title);
+      setValue("subtitle", existingExperience.subtitle || "");
+      setValue("category_id", existingExperience.category_id || "");
+      setValue("description", existingExperience.long_copy || "");
+      setValue("min_nights", existingExperience.min_nights || 1);
+      setValue("max_nights", existingExperience.max_nights || 4);
+      setValue("min_party", existingExperience.min_party || 2);
+      setValue("max_party", existingExperience.max_party || 4);
+      setValue("cancellation_policy", existingExperience.cancellation_policy || "");
+      setValue("base_price", existingExperience.base_price);
+      setValue("currency", existingExperience.currency || "ILS");
+      setValue("base_price_type", existingExperience.base_price_type || "per_person");
+      setValue("always_available", true);
+      
+      // Set images
+      if (existingExperience.hero_image) {
+        setHeroImagePreview(existingExperience.hero_image);
+      }
+      if (existingExperience.photos && Array.isArray(existingExperience.photos)) {
+        setGalleryPreviews(existingExperience.photos);
+      }
+      if (existingExperience.status) {
+        setStatus(existingExperience.status as "draft" | "pending" | "published");
+      }
+    }
+  }, [existingExperience, setValue]);
 
   const canPublish =
     title &&
@@ -180,25 +226,25 @@ export function ExperienceForm({
   const handleSaveDraft = async (data: ExperienceFormData) => {
     setIsSaving(true);
     try {
-      // Upload hero image
-      let heroImageUrl = null;
+      // Upload hero image (only if new image provided)
+      let heroImageUrl = heroImagePreview; // Keep existing by default
       if (heroImage) {
-        heroImageUrl = await uploadImage(heroImage, "hero");
-        if (!heroImageUrl) {
+        const uploadedUrl = await uploadImage(heroImage, "hero");
+        if (!uploadedUrl) {
           toast.error("Failed to upload hero image");
           return;
         }
+        heroImageUrl = uploadedUrl;
       }
 
-      // Upload gallery images
-      const galleryUrls: string[] = [];
+      // Upload gallery images (combine existing + new)
+      const galleryUrls: string[] = [...galleryPreviews]; // Keep existing previews
       for (const image of galleryImages) {
         const url = await uploadImage(image, "gallery");
         if (url) galleryUrls.push(url);
       }
 
-      // Create experience record
-      const slug = generateSlug(data.title);
+      // Prepare experience data
       const experienceData = {
         hotel_id: hotelId,
         title: data.title,
@@ -215,15 +261,29 @@ export function ExperienceForm({
         base_price_type: data.base_price_type,
         hero_image: heroImageUrl,
         photos: galleryUrls.length > 0 ? galleryUrls : null,
-        slug: `${slug}-${Date.now()}`,
         status: "draft" as const,
       };
 
-      const { error } = await supabase.from("experiences").insert(experienceData as any);
+      if (experienceId) {
+        // UPDATE existing experience
+        const { error } = await supabase
+          .from("experiences")
+          .update(experienceData as any)
+          .eq("id", experienceId);
+        
+        if (error) throw error;
+        toast.success("Experience updated");
+      } else {
+        // INSERT new experience
+        const slug = generateSlug(data.title);
+        const { error } = await supabase
+          .from("experiences")
+          .insert({ ...experienceData, slug: `${slug}-${Date.now()}` } as any);
+        
+        if (error) throw error;
+        toast.success("Experience saved as draft");
+      }
 
-      if (error) throw error;
-
-      toast.success("Experience saved as draft");
       queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelId] });
       
       if (onClose) onClose();
@@ -242,25 +302,25 @@ export function ExperienceForm({
     }
     setIsSaving(true);
     try {
-      // Upload hero image
-      let heroImageUrl = null;
+      // Upload hero image (only if new image provided)
+      let heroImageUrl = heroImagePreview; // Keep existing by default
       if (heroImage) {
-        heroImageUrl = await uploadImage(heroImage, "hero");
-        if (!heroImageUrl) {
+        const uploadedUrl = await uploadImage(heroImage, "hero");
+        if (!uploadedUrl) {
           toast.error("Failed to upload hero image");
           return;
         }
+        heroImageUrl = uploadedUrl;
       }
 
-      // Upload gallery images
-      const galleryUrls: string[] = [];
+      // Upload gallery images (combine existing + new)
+      const galleryUrls: string[] = [...galleryPreviews]; // Keep existing previews
       for (const image of galleryImages) {
         const url = await uploadImage(image, "gallery");
         if (url) galleryUrls.push(url);
       }
 
-      // Create experience record
-      const slug = generateSlug(data.title);
+      // Prepare experience data
       const experienceData = {
         hotel_id: hotelId,
         title: data.title,
@@ -277,16 +337,31 @@ export function ExperienceForm({
         base_price_type: data.base_price_type,
         hero_image: heroImageUrl,
         photos: galleryUrls.length > 0 ? galleryUrls : null,
-        slug: `${slug}-${Date.now()}`,
         status: "pending" as const,
       };
 
-      const { error } = await supabase.from("experiences").insert(experienceData as any);
+      if (experienceId) {
+        // UPDATE existing experience
+        const { error } = await supabase
+          .from("experiences")
+          .update(experienceData as any)
+          .eq("id", experienceId);
+        
+        if (error) throw error;
+        setStatus("pending");
+        toast.success("Experience updated and submitted for approval");
+      } else {
+        // INSERT new experience
+        const slug = generateSlug(data.title);
+        const { error } = await supabase
+          .from("experiences")
+          .insert({ ...experienceData, slug: `${slug}-${Date.now()}` } as any);
+        
+        if (error) throw error;
+        setStatus("pending");
+        toast.success("Experience submitted for approval");
+      }
 
-      if (error) throw error;
-
-      setStatus("pending");
-      toast.success("Experience submitted for approval");
       queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelId] });
       
       if (onClose) onClose();
@@ -297,6 +372,14 @@ export function ExperienceForm({
       setIsSaving(false);
     }
   };
+
+  if (isLoadingExperience) {
+    return (
+      <div className="max-w-5xl mx-auto p-8 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-8 space-y-8">
@@ -321,7 +404,7 @@ export function ExperienceForm({
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Save as Draft
+            {experienceId ? "Update Draft" : "Save as Draft"}
           </Button>
           <Button
             onClick={handleSubmit(handlePublish)}
@@ -332,7 +415,7 @@ export function ExperienceForm({
             ) : (
               <Rocket className="mr-2 h-4 w-4" />
             )}
-            Publish
+            {experienceId ? "Update & Publish" : "Publish"}
           </Button>
         </div>
       </div>
