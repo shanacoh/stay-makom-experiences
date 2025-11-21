@@ -110,7 +110,11 @@ const AdminCategories = () => {
                       {category.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{format(new Date(category.updated_at), "MMM d, yyyy")}</TableCell>
+                  <TableCell>
+                    {category.updated_at 
+                      ? format(new Date(category.updated_at), "MMM d, yyyy")
+                      : "N/A"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button
