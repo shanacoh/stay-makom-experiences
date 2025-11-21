@@ -116,7 +116,7 @@ export default function HotelBookingDetails() {
 
   return (
     <div className="p-8 space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
@@ -124,6 +124,12 @@ export default function HotelBookingDetails() {
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Bookings
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate(`/hotel-admin/bookings/edit/${bookingId}`)}
+        >
+          Modifier une réservation
         </Button>
       </div>
 
