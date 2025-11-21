@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
@@ -173,15 +174,13 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="hero_image">Hero Image URL</Label>
-                <Input
-                  id="hero_image"
-                  value={formData.hero_image}
-                  onChange={(e) => setFormData({ ...formData, hero_image: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUpload
+                label="Hero Image"
+                bucket="hotel-images"
+                value={formData.hero_image}
+                onChange={(url) => setFormData({ ...formData, hero_image: url })}
+                description="Main image for the hotel page"
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="contact_email">Contact Email</Label>

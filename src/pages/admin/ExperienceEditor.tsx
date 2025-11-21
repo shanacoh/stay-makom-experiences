@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Eye } from "lucide-react";
 import IncludesManager from "@/components/admin/IncludesManager";
@@ -19,7 +20,6 @@ const AdminExperienceEditor = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const isEditing = !!id;
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     hotel_id: "",
@@ -154,50 +154,6 @@ const AdminExperienceEditor = () => {
       title: value,
       slug: prev.slug || value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     }));
-  };
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingImage(true);
-    try {
-      // Debug: Check user session
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('User session:', session?.user?.id);
-      
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      console.log('Attempting to upload to:', filePath);
-
-      const { error: uploadError, data: uploadData } = await supabase.storage
-        .from('experience-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Upload error details:', uploadError);
-        throw uploadError;
-      }
-
-      console.log('Upload successful:', uploadData);
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('experience-images')
-        .getPublicUrl(filePath);
-
-      setFormData(prev => ({ ...prev, hero_image: publicUrl }));
-      toast.success("Cover image uploaded successfully! Don't forget to save your changes.");
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error("Erreur lors de l'upload de l'image");
-    } finally {
-      setIsUploadingImage(false);
-    }
   };
 
   const saveMutation = useMutation({
@@ -337,51 +293,14 @@ const AdminExperienceEditor = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="hero_image">Cover Image (Main Photo) *</Label>
-              <div className="space-y-3">
-                {formData.hero_image && (
-                  <div className="space-y-2">
-                    <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-primary/20">
-                      <img 
-                        src={formData.hero_image} 
-                        alt="Cover Image Preview" 
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-2 right-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setFormData(prev => ({ ...prev, hero_image: "" }))}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                    <p className="text-sm font-medium text-primary">
-                      ✓ Cover image uploaded - Don't forget to save!
-                    </p>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <Input
-                    id="hero_image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={isUploadingImage}
-                    className="flex-1"
-                  />
-                  {isUploadingImage && (
-                    <span className="text-sm text-muted-foreground">Uploading...</span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  This image will be displayed on the experience detail page and in category listings. JPG, PNG, or WEBP format recommended.
-                </p>
-              </div>
-            </div>
+            <ImageUpload
+              label="Cover Image (Main Photo)"
+              bucket="experience-images"
+              value={formData.hero_image}
+              onChange={(url) => setFormData(prev => ({ ...prev, hero_image: url }))}
+              required
+              description="This image will be displayed on the experience detail page and in category listings."
+            />
 
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
