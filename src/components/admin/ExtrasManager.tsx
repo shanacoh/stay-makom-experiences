@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
@@ -149,10 +150,12 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
               </Select>
             </div>
           </div>
-          <Input
-            placeholder="Image URL (optional)"
+          <ImageUpload
+            label="Extra Image (optional)"
+            bucket="experience-images"
             value={newExtra.image_url}
-            onChange={(e) => setNewExtra({ ...newExtra, image_url: e.target.value })}
+            onChange={(url) => setNewExtra({ ...newExtra, image_url: url })}
+            description="Image for this add-on"
           />
           <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
             <Plus className="w-4 h-4 mr-2" />

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Eye } from "lucide-react";
 
@@ -219,23 +220,13 @@ const JournalEditor = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cover_image">Cover Image URL</Label>
-              <Input
-                id="cover_image"
-                type="url"
-                value={formData.cover_image}
-                onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
-                placeholder="https://..."
-              />
-              {formData.cover_image && (
-                <img
-                  src={formData.cover_image}
-                  alt="Cover preview"
-                  className="mt-2 rounded-lg max-h-48 object-cover"
-                />
-              )}
-            </div>
+            <ImageUpload
+              label="Cover Image"
+              bucket="journal-images"
+              value={formData.cover_image}
+              onChange={(url) => setFormData({ ...formData, cover_image: url })}
+              description="Main image for the article (appears in list and at the top of the post)"
+            />
 
             <div className="space-y-2">
               <Label htmlFor="excerpt">Excerpt</Label>
