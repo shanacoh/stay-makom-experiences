@@ -66,7 +66,7 @@ const AdminExperiences = () => {
       queryClient.invalidateQueries({
         queryKey: ["admin-experiences"]
       });
-      toast.success("Expérience supprimée");
+      toast.success("Experience deleted");
       setActionId(null);
       setAction(null);
     }
@@ -104,7 +104,7 @@ const AdminExperiences = () => {
       case "pending":
         return <Badge variant="secondary" className="bg-yellow-600 text-white">Pending</Badge>;
       case "draft":
-        return <Badge variant="outline">Brouillon</Badge>;
+        return <Badge variant="outline">Draft</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -113,7 +113,7 @@ const AdminExperiences = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold">Experiences</h2>
-          <p className="text-muted-foreground">Gérer toutes les expériences et valider les soumissions</p>
+          <p className="text-muted-foreground">Manage all experiences and validate submissions</p>
         </div>
         <Link to="/admin/experiences/new">
           <Button>
@@ -127,8 +127,8 @@ const AdminExperiences = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Hôtel</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Hotel</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Base Price</TableHead>
                 <TableHead>Status</TableHead>
@@ -144,7 +144,7 @@ const AdminExperiences = () => {
                     {experience.hotels?.name || "-"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{experience.categories?.name || 'Sans catégorie'}</Badge>
+                    <Badge variant="outline">{experience.categories?.name || 'No category'}</Badge>
                   </TableCell>
                   <TableCell>
                     {experience.base_price} {experience.currency}
@@ -171,11 +171,11 @@ const AdminExperiences = () => {
                     {experience.status === "pending" && <>
                         <Button variant="ghost" size="sm" onClick={() => handleApprove(experience.id)} className="text-green-600 hover:text-green-700">
                           <Check className="w-4 h-4 mr-1" />
-                          Valider
+                          Approve
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleReject(experience.id)} className="text-red-600 hover:text-red-700">
                           <X className="w-4 h-4 mr-1" />
-                          Rejeter
+                          Reject
                         </Button>
                       </>}
                   </TableCell>
@@ -183,7 +183,7 @@ const AdminExperiences = () => {
             </TableBody>
           </Table>
         </div> : <div className="text-center py-12 border rounded-lg">
-          <p className="text-muted-foreground">Aucune expérience trouvée</p>
+          <p className="text-muted-foreground">No experiences found</p>
         </div>}
 
       <AlertDialog open={actionId !== null} onOpenChange={() => setActionId(null)}>

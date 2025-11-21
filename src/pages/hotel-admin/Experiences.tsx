@@ -221,8 +221,8 @@ export default function HotelExperiences() {
                 <CardHeader>
                   <div className="space-y-2">
                     <CardTitle className="text-xl line-clamp-2">{exp.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground capitalize">{exp.categories?.name || 'Sans catégorie'}</p>
-                  </div>
+                <p className="text-sm text-muted-foreground capitalize">{exp.categories?.name || 'No category'}</p>
+              </div>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
