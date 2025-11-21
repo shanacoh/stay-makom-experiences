@@ -62,7 +62,7 @@ const Hotel = () => {
   }
 
   const displayPhotos = hotel.photos && hotel.photos.length > 0 
-    ? hotel.photos.slice(0, 6) 
+    ? hotel.photos.slice(0, 8) 
     : [];
 
   return (
