@@ -129,7 +129,7 @@ export default function HotelBookingDetails() {
           variant="outline"
           onClick={() => navigate(`/hotel-admin/bookings/edit/${bookingId}`)}
         >
-          Modifier une réservation
+          Edit Booking
         </Button>
       </div>
 

@@ -230,12 +230,12 @@ export default function HotelExperiences() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Réservations</span>
+                        <span>Bookings</span>
                       </div>
                       <p className="text-2xl font-bold">{stats.totalBookings}</p>
                       {stats.recentBookings > 0 && (
                         <p className="text-xs text-muted-foreground">
-                          +{stats.recentBookings} ce mois
+                          +{stats.recentBookings} this month
                         </p>
                       )}
                     </div>
@@ -243,7 +243,7 @@ export default function HotelExperiences() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <DollarSign className="h-4 w-4" />
-                        <span>Revenu</span>
+                        <span>Revenue</span>
                       </div>
                       <p className="text-2xl font-bold">
                         ${Math.round(stats.totalRevenue)}
@@ -256,7 +256,7 @@ export default function HotelExperiences() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Users className="h-4 w-4" />
-                        <span>Confirmées</span>
+                        <span>Confirmed</span>
                       </div>
                       <p className="text-lg font-semibold">{stats.confirmedBookings}</p>
                     </div>
@@ -264,7 +264,7 @@ export default function HotelExperiences() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <TrendingUp className="h-4 w-4" />
-                        <span>Prix de base</span>
+                        <span>Base Price</span>
                       </div>
                       <p className="text-lg font-semibold">
                         ${exp.base_price}
@@ -282,7 +282,7 @@ export default function HotelExperiences() {
                       }}
                     >
                       <Edit className="mr-2 h-4 w-4" />
-                      Modifier
+                      Edit
                     </Button>
                     <Button
                       variant="ghost"

@@ -32,17 +32,17 @@ export default function HotelReviews() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Nouveaux avis</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">New Reviews</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">3</p>
-            <p className="text-sm text-muted-foreground mt-1">Cette semaine</p>
+            <p className="text-sm text-muted-foreground mt-1">This week</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Taux de réponse</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Response Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">92%</p>

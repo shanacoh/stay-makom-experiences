@@ -102,7 +102,7 @@ const AdminExperiences = () => {
       case "published":
         return <Badge variant="default" className="bg-green-600">Live</Badge>;
       case "pending":
-        return <Badge variant="secondary" className="bg-yellow-600 text-white">En attente</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-600 text-white">Pending</Badge>;
       case "draft":
         return <Badge variant="outline">Brouillon</Badge>;
       default:
@@ -118,7 +118,7 @@ const AdminExperiences = () => {
         <Link to="/admin/experiences/new">
           <Button>
             <Plus className="w-4 h-4 mr-2" />
-            Créer une expérience
+            Create Experience
           </Button>
         </Link>
       </div>
@@ -129,9 +129,9 @@ const AdminExperiences = () => {
               <TableRow>
                 <TableHead>Titre</TableHead>
                 <TableHead>Hôtel</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Prix de base</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Base Price</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -156,13 +156,13 @@ const AdminExperiences = () => {
                     <Link to={`/admin/experiences/edit/${experience.id}`}>
                       <Button variant="ghost" size="sm">
                         <Edit className="w-4 h-4 mr-1" />
-                        Modifier
+                        Edit
                       </Button>
                     </Link>
                     <Link to={`/experience/${experience.slug}`} target="_blank">
                       <Button variant="ghost" size="sm">
                         <Eye className="w-4 h-4 mr-1" />
-                        Voir
+                        View
                       </Button>
                     </Link>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(experience.id)} className="text-red-600 hover:text-red-700 h-9 w-9">
@@ -190,20 +190,20 @@ const AdminExperiences = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {action === "approve" ? "Valider cette expérience ?" : action === "reject" ? "Rejeter cette expérience ?" : "Supprimer cette expérience ?"}
+              {action === "approve" ? "Approve this experience?" : action === "reject" ? "Reject this experience?" : "Delete this experience?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {action === "approve" 
-                ? "Cette expérience sera publiée et visible sur le site public." 
+                ? "This experience will be published and visible on the public site." 
                 : action === "reject" 
-                ? "Cette expérience sera renvoyée en brouillon. L'hôtel pourra la modifier et la soumettre à nouveau."
-                : "Cette action est irréversible. L'expérience sera définitivement supprimée."}
+                ? "This experience will be returned to draft. The hotel will be able to edit it and resubmit."
+                : "This action is irreversible. The experience will be permanently deleted."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmAction}>
-              Confirmer
+              Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

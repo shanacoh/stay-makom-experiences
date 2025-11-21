@@ -67,9 +67,9 @@ export default function HotelCalendar() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="font-sans text-4xl font-bold">Calendrier & Disponibilités</h1>
+        <h1 className="font-sans text-4xl font-bold">Calendar & Availability</h1>
         <p className="text-muted-foreground mt-2">
-          Vue des réservations à venir pour les 30 prochains jours
+          Upcoming bookings for the next 30 days
         </p>
       </div>
 
@@ -81,7 +81,7 @@ export default function HotelCalendar() {
         <Card>
           <CardContent className="py-16">
             <p className="text-muted-foreground text-center">
-              Aucune réservation à venir dans les 30 prochains jours.
+              No upcoming bookings in the next 30 days.
             </p>
           </CardContent>
         </Card>
@@ -94,7 +94,7 @@ export default function HotelCalendar() {
                   <CalendarIcon className="h-5 w-5" />
                   {date}
                   <Badge variant="secondary" className="ml-auto">
-                    {dateBookings.length} arrivée{dateBookings.length > 1 ? "s" : ""}
+                    {dateBookings.length} arrival{dateBookings.length > 1 ? "s" : ""}
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -109,7 +109,7 @@ export default function HotelCalendar() {
                       <div className="space-y-1">
                         <p className="font-semibold">{booking.experiences?.title}</p>
                         <p className="text-sm text-muted-foreground">
-                          {booking.selected_room_name || "Chambre non spécifiée"}
+                          {booking.selected_room_name || "Room not specified"}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Check-out: {new Date(booking.checkout).toLocaleDateString()}

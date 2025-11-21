@@ -47,9 +47,9 @@ export default function HotelContact() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="font-medium text-sm mb-1">Comment modifier mes prix ?</p>
+                <p className="font-medium text-sm mb-1">How do I edit my prices?</p>
                 <p className="text-sm text-muted-foreground">
-                  Allez dans "Calendar" pour ajuster les prix par période.
+                  Go to "Calendar" to adjust prices by period.
                 </p>
               </div>
               <div>
@@ -59,9 +59,9 @@ export default function HotelContact() {
                 </p>
               </div>
               <div>
-                <p className="font-medium text-sm mb-1">Commission Staymakom</p>
+                <p className="font-medium text-sm mb-1">Staymakom Commission</p>
                 <p className="text-sm text-muted-foreground">
-                  18% sur chaque réservation confirmée.
+                  18% on each confirmed booking.
                 </p>
               </div>
             </CardContent>
