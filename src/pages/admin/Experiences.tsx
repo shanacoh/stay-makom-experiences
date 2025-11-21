@@ -1,213 +1,285 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Edit, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Check, X, ExternalLink, Plus, Edit, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ExperienceForm } from "@/components/hotel-admin/ExperienceForm";
 const AdminExperiences = () => {
-  const [actionId, setActionId] = useState<string | null>(null);
-  const [action, setAction] = useState<"approve" | "reject" | "delete" | null>(null);
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const {
-    data: experiences,
-    isLoading
-  } = useQuery({
+  const [showForm, setShowForm] = useState(false);
+  const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
+  const [selectedHotelId, setSelectedHotelId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [hotelFilter, setHotelFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  // Fetch all hotels for dropdown
+  const { data: hotels } = useQuery({
+    queryKey: ["admin-hotels"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hotels")
+        .select("id, name")
+        .order("name");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch all categories for filter
+  const { data: categories } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name")
+        .order("name");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch all experiences with hotel and category info
+  const { data: experiences, isLoading } = useQuery({
     queryKey: ["admin-experiences"],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("experiences" as any).select(`
+      const { data, error } = await supabase
+        .from("experiences")
+        .select(`
           *,
-          hotels:hotel_id(name, slug),
-          categories(name)
-        `).order("created_at", {
-        ascending: false
-      });
+          hotels (id, name),
+          categories (id, name)
+        `)
+        .order("updated_at", { ascending: false });
+      
       if (error) throw error;
-      return data as any[];
-    }
-  });
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({
-      id,
-      status
-    }: {
-      id: string;
-      status: string;
-    }) => {
-      const {
-        error
-      } = await supabase.from("experiences" as any).update({
-        status
-      }).eq("id", id);
-      if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["admin-experiences"]
-      });
-      toast.success(action === "approve" ? "Experience approved and published" : "Experience rejected");
-      setActionId(null);
-      setAction(null);
-    }
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("experiences" as any).delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["admin-experiences"]
-      });
-      toast.success("Experience deleted");
-      setActionId(null);
-      setAction(null);
-    }
+  // Filter experiences
+  const filteredExperiences = experiences?.filter((exp) => {
+    const matchesSearch = exp.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || exp.status === statusFilter;
+    const matchesHotel = hotelFilter === "all" || exp.hotel_id === hotelFilter;
+    const matchesCategory = categoryFilter === "all" || exp.category_id === categoryFilter;
+    return matchesSearch && matchesStatus && matchesHotel && matchesCategory;
   });
-  const handleApprove = (id: string) => {
-    setActionId(id);
-    setAction("approve");
-  };
-  const handleReject = (id: string) => {
-    setActionId(id);
-    setAction("reject");
+
+  const handleCreateNew = () => {
+    setEditingExperienceId(null);
+    setSelectedHotelId("");
+    setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    setActionId(id);
-    setAction("delete");
+  const handleEdit = (experienceId: string, hotelId: string) => {
+    setEditingExperienceId(experienceId);
+    setSelectedHotelId(hotelId);
+    setShowForm(true);
   };
 
-  const confirmAction = () => {
-    if (actionId && action) {
-      if (action === "delete") {
-        deleteMutation.mutate(actionId);
-      } else {
-        updateStatusMutation.mutate({
-          id: actionId,
-          status: action === "approve" ? "published" : "draft"
-        });
-      }
-    }
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingExperienceId(null);
+    setSelectedHotelId("");
+    queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
   };
+
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "published":
-        return <Badge variant="default" className="bg-green-600">Live</Badge>;
-      case "pending":
-        return <Badge variant="secondary" className="bg-yellow-600 text-white">Pending</Badge>;
-      case "draft":
-        return <Badge variant="outline">Draft</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      draft: "outline",
+      pending: "secondary",
+      published: "default",
+    };
+    return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
   };
-  return <div className="space-y-6">
-      <div className="flex items-center justify-between">
+  // Hotel selector dialog for creating new experience
+  if (showForm && !selectedHotelId && !editingExperienceId) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Hotel for New Experience</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Select value={selectedHotelId} onValueChange={setSelectedHotelId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a hotel..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {hotels?.map((hotel) => (
+                    <SelectItem key={hotel.id} value={hotel.id}>
+                      {hotel.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => selectedHotelId && setShowForm(true)} 
+                  disabled={!selectedHotelId}
+                >
+                  Continue
+                </Button>
+                <Button variant="outline" onClick={() => setShowForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (showForm && selectedHotelId) {
+    const hotelName = hotels?.find(h => h.id === selectedHotelId)?.name || "";
+    return (
+      <div className="container mx-auto p-6">
+        <ExperienceForm
+          hotelId={selectedHotelId}
+          hotelName={hotelName}
+          experienceId={editingExperienceId || undefined}
+          onClose={handleCloseForm}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Experiences</h2>
-          <p className="text-muted-foreground">Manage all experiences and validate submissions</p>
+          <h1 className="text-3xl font-bold">Experiences</h1>
+          <p className="text-muted-foreground">Manage all hotel experiences</p>
         </div>
-        <Link to="/admin/experiences/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Experience
-          </Button>
-        </Link>
+        <Button onClick={handleCreateNew}>
+          <Plus className="w-4 h-4 mr-2" />
+          Create Experience
+        </Button>
       </div>
 
-      {isLoading ? <div className="text-center py-12">Loading...</div> : experiences && experiences.length > 0 ? <div className="border rounded-lg bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Hotel</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Base Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {experiences.map(experience => <TableRow key={experience.id}>
-                  <TableCell className="font-medium max-w-xs truncate">
-                    {experience.title}
-                  </TableCell>
-                  <TableCell>
-                    {experience.hotels?.name || "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{experience.categories?.name || 'No category'}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {experience.base_price} {experience.currency}
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(experience.status)}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Link to={`/admin/experiences/edit/${experience.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                    </Link>
-                    <Link to={`/experience/${experience.slug}`} target="_blank">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                    </Link>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(experience.id)} className="text-red-600 hover:text-red-700 h-9 w-9">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                    {experience.status === "pending" && <>
-                        <Button variant="ghost" size="sm" onClick={() => handleApprove(experience.id)} className="text-green-600 hover:text-green-700">
-                          <Check className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleReject(experience.id)} className="text-red-600 hover:text-red-700">
-                          <X className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                      </>}
-                  </TableCell>
-                </TableRow>)}
-            </TableBody>
-          </Table>
-        </div> : <div className="text-center py-12 border rounded-lg">
-          <p className="text-muted-foreground">No experiences found</p>
-        </div>}
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Input
+              placeholder="Search experiences..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={hotelFilter} onValueChange={setHotelFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All hotels" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All hotels</SelectItem>
+                {hotels?.map((hotel) => (
+                  <SelectItem key={hotel.id} value={hotel.id}>
+                    {hotel.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All categories</SelectItem>
+                {categories?.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
-      <AlertDialog open={actionId !== null} onOpenChange={() => setActionId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {action === "approve" ? "Approve this experience?" : action === "reject" ? "Reject this experience?" : "Delete this experience?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {action === "approve" 
-                ? "This experience will be published and visible on the public site." 
-                : action === "reject" 
-                ? "This experience will be returned to draft. The hotel will be able to edit it and resubmit."
-                : "This action is irreversible. The experience will be permanently deleted."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmAction}>
-              Confirm
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>;
+      {/* Experiences List */}
+      {isLoading ? (
+        <div className="text-center py-12">Loading experiences...</div>
+      ) : !filteredExperiences?.length ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            No experiences found
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {filteredExperiences.map((experience) => (
+            <Card key={experience.id}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-semibold">{experience.title}</h3>
+                      {getStatusBadge(experience.status || "draft")}
+                    </div>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <p>
+                        <strong>Hotel:</strong> {experience.hotels?.name || "Unknown"}
+                      </p>
+                      <p>
+                        <strong>Category:</strong> {experience.categories?.name || "No category"}
+                      </p>
+                      <p>
+                        <strong>Price:</strong> {experience.currency} {experience.base_price}
+                      </p>
+                      <p>
+                        <strong>Last updated:</strong>{" "}
+                        {new Date(experience.updated_at || "").toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(experience.id, experience.hotel_id)}
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/experience/${experience.slug}`)}
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 export default AdminExperiences;
