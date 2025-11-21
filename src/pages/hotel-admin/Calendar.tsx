@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarIcon, Loader2, Users } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function HotelCalendar() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedMonth] = useState(new Date());
 
   const { data: hotelAdmin } = useQuery({
@@ -101,7 +103,8 @@ export default function HotelCalendar() {
                   {dateBookings.map((booking: any) => (
                     <div
                       key={booking.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/hotel-admin/bookings/${booking.id}`)}
                     >
                       <div className="space-y-1">
                         <p className="font-semibold">{booking.experiences?.title}</p>
