@@ -43,6 +43,7 @@ import AdminHotels from "./pages/admin/Hotels";
 import AdminExperiences from "./pages/admin/Experiences";
 import AdminExperienceEditor from "./pages/admin/ExperienceEditor";
 import AdminBookings from "./pages/admin/Reservations";
+import AdminReservationDetails from "./pages/admin/ReservationDetails";
 import AdminUsers from "./pages/admin/Users";
 import AdminCustomers from "./pages/admin/Customers";
 import AdminJournal from "./pages/admin/Journal";
@@ -101,6 +102,8 @@ const App = () => (
               <Route path="experiences/new" element={<AdminExperienceEditor />} />
               <Route path="experiences/edit/:id" element={<AdminExperienceEditor />} />
               <Route path="bookings" element={<AdminBookings />} />
+              <Route path="reservations" element={<AdminBookings />} />
+              <Route path="reservations/:bookingId" element={<AdminReservationDetails />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="journal" element={<AdminJournal />} />
