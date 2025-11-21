@@ -33,9 +33,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import IncludesManager from "@/components/admin/IncludesManager";
@@ -81,6 +90,8 @@ export function ExperienceForm({
   const [status, setStatus] = useState<"draft" | "pending" | "published">("draft");
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showExtrasDialog, setShowExtrasDialog] = useState(false);
+  const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
 
   // Load categories
   const { data: categories } = useQuery({
@@ -108,6 +119,60 @@ export function ExperienceForm({
         .single();
       if (error) throw error;
       return data;
+    },
+    enabled: !!experienceId,
+  });
+
+  // Load hotel's extras for selection (from all hotel experiences)
+  const { data: hotelExtras } = useQuery({
+    queryKey: ["hotel-extras", hotelId],
+    queryFn: async () => {
+      // First get all experience IDs for this hotel
+      const { data: hotelExperiences, error: expError } = await supabase
+        .from("experiences")
+        .select("id")
+        .eq("hotel_id", hotelId);
+      
+      if (expError) throw expError;
+      if (!hotelExperiences || hotelExperiences.length === 0) return [];
+      
+      const experienceIds = hotelExperiences.map(exp => exp.id);
+      
+      // Then get all extras for these experiences
+      const { data, error } = await supabase
+        .from("extras")
+        .select("*")
+        .in("experience_id", experienceIds)
+        .eq("is_available", true)
+        .order("sort_order");
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Load linked extras for this experience
+  const { data: linkedExtras, refetch: refetchLinkedExtras } = useQuery({
+    queryKey: ["experience-extras", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return [];
+      const { data, error } = await supabase
+        .from("experience_extras")
+        .select(`
+          id,
+          extra_id,
+          extras (
+            id,
+            name,
+            price,
+            currency,
+            description,
+            pricing_type
+          )
+        `)
+        .eq("experience_id", experienceId);
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!experienceId,
   });
@@ -336,6 +401,88 @@ export function ExperienceForm({
   const confirmDelete = () => {
     deleteMutation.mutate();
     setShowDeleteDialog(false);
+  };
+
+  // Link extras mutation
+  const linkExtrasMutation = useMutation({
+    mutationFn: async (extraIds: string[]) => {
+      if (!experienceId) throw new Error("Experience must be saved first");
+      
+      // Insert new links
+      const linksToInsert = extraIds.map(extraId => ({
+        experience_id: experienceId,
+        extra_id: extraId,
+      }));
+
+      const { error } = await supabase
+        .from("experience_extras")
+        .insert(linksToInsert);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchLinkedExtras();
+      toast.success("Extras linked successfully");
+      setShowExtrasDialog(false);
+      setSelectedExtraIds([]);
+    },
+    onError: (error) => {
+      console.error("Error linking extras:", error);
+      toast.error("Failed to link extras");
+    },
+  });
+
+  // Unlink extra mutation
+  const unlinkExtraMutation = useMutation({
+    mutationFn: async (linkId: string) => {
+      const { error } = await supabase
+        .from("experience_extras")
+        .delete()
+        .eq("id", linkId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refetchLinkedExtras();
+      toast.success("Extra removed successfully");
+    },
+    onError: (error) => {
+      console.error("Error unlinking extra:", error);
+      toast.error("Failed to remove extra");
+    },
+  });
+
+  const handleLinkExtras = () => {
+    if (!experienceId) {
+      toast.error("Please save the experience first before linking extras");
+      return;
+    }
+    setShowExtrasDialog(true);
+  };
+
+  const handleConfirmLinkExtras = () => {
+    if (selectedExtraIds.length === 0) {
+      toast.error("Please select at least one extra");
+      return;
+    }
+    linkExtrasMutation.mutate(selectedExtraIds);
+  };
+
+  const toggleExtraSelection = (extraId: string) => {
+    setSelectedExtraIds(prev => 
+      prev.includes(extraId) 
+        ? prev.filter(id => id !== extraId)
+        : [...prev, extraId]
+    );
+  };
+
+  const getPricingTypeLabel = (type: string) => {
+    switch (type) {
+      case "per_person": return "per person";
+      case "per_night": return "per night";
+      case "per_booking": return "per booking";
+      default: return "";
+    }
   };
 
   const handlePublish = async (data: ExperienceFormData) => {
@@ -734,14 +881,64 @@ export function ExperienceForm({
               Link optional extras to this experience
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button type="button" variant="outline">
+          <CardContent className="space-y-4">
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={handleLinkExtras}
+              disabled={!experienceId}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Link Existing Extras
             </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              You can create and manage extras in the Extras section
-            </p>
+            
+            {!experienceId && (
+              <p className="text-sm text-muted-foreground">
+                Save the experience first to link extras
+              </p>
+            )}
+
+            {linkedExtras && linkedExtras.length > 0 && (
+              <div className="mt-6 space-y-3">
+                <h4 className="text-sm font-medium">Linked Extras</h4>
+                {linkedExtras.map((link: any) => {
+                  const extra = link.extras;
+                  return (
+                    <div 
+                      key={link.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{extra.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {extra.price} {extra.currency} {getPricingTypeLabel(extra.pricing_type)}
+                        </p>
+                        {extra.description && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {extra.description}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => unlinkExtraMutation.mutate(link.id)}
+                        disabled={unlinkExtraMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {experienceId && linkedExtras && linkedExtras.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No extras linked yet. Click "Link Existing Extras" to add some.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -952,6 +1149,90 @@ export function ExperienceForm({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Link Extras Dialog */}
+      <Dialog open={showExtrasDialog} onOpenChange={setShowExtrasDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Link Existing Extras</DialogTitle>
+            <DialogDescription>
+              Select extras from your hotel to link to this experience
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 py-4">
+            {hotelExtras && hotelExtras.length > 0 ? (
+              hotelExtras
+                .filter(extra => 
+                  !linkedExtras?.some((link: any) => link.extra_id === extra.id)
+                )
+                .map((extra) => (
+                  <div 
+                    key={extra.id}
+                    className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => toggleExtraSelection(extra.id)}
+                  >
+                    <Checkbox
+                      checked={selectedExtraIds.includes(extra.id)}
+                      onCheckedChange={() => toggleExtraSelection(extra.id)}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium">{extra.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {extra.price} {extra.currency} {getPricingTypeLabel(extra.pricing_type)}
+                      </p>
+                      {extra.description && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {extra.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No extras available. Create extras in the Extras section first.
+              </p>
+            )}
+            
+            {hotelExtras && hotelExtras.length > 0 && 
+             hotelExtras.every(extra => 
+               linkedExtras?.some((link: any) => link.extra_id === extra.id)
+             ) && (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                All available extras are already linked to this experience.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setShowExtrasDialog(false);
+                setSelectedExtraIds([]);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              onClick={handleConfirmLinkExtras}
+              disabled={selectedExtraIds.length === 0 || linkExtrasMutation.isPending}
+            >
+              {linkExtrasMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Linking...
+                </>
+              ) : (
+                `Link ${selectedExtraIds.length} Extra${selectedExtraIds.length !== 1 ? 's' : ''}`
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
