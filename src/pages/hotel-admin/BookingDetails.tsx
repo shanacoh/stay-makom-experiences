@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useState } from "react";
+import { Progress } from "@/components/ui/progress";
 
 export default function HotelBookingDetails() {
   const { bookingId } = useParams();
@@ -107,12 +108,11 @@ export default function HotelBookingDetails() {
     );
   }
 
-  const extrasProgress = booking.booking_extras
-    ? {
-        done: booking.booking_extras.filter((e: any) => e.status === "done").length,
-        total: booking.booking_extras.length,
-      }
-    : { done: 0, total: 0 };
+  const totalExtras = booking?.booking_extras?.length || 0;
+  const doneExtras = booking?.booking_extras?.filter((e: any) => e.status === 'done').length || 0;
+  const pendingExtras = booking?.booking_extras?.filter((e: any) => e.status === 'pending').length || 0;
+  const unavailableExtras = booking?.booking_extras?.filter((e: any) => e.status === 'unavailable').length || 0;
+  const progressPercentage = totalExtras > 0 ? (doneExtras / totalExtras) * 100 : 0;
 
   return (
     <div className="p-8 space-y-6">
@@ -190,18 +190,27 @@ export default function HotelBookingDetails() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Extras & Tasks</CardTitle>
-            {extrasProgress.total > 0 && (
-              <Badge variant="secondary">
-                {extrasProgress.done}/{extrasProgress.total} completed
-              </Badge>
+            <CardTitle>Extras / Tasks</CardTitle>
+            {totalExtras > 0 && (
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-muted-foreground">
+                  {doneExtras} / {totalExtras} completed ({Math.round(progressPercentage)}%)
+                </div>
+                <div className="flex gap-2 text-xs">
+                  {pendingExtras > 0 && <Badge variant="outline">{pendingExtras} pending</Badge>}
+                  {unavailableExtras > 0 && <Badge variant="secondary">{unavailableExtras} unavailable</Badge>}
+                </div>
+              </div>
             )}
           </div>
+          {totalExtras > 0 && (
+            <Progress value={progressPercentage} className="mt-4" />
+          )}
         </CardHeader>
         <CardContent>
           {!booking.booking_extras || booking.booking_extras.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              No extras for this booking
+              No extras for this booking.
             </p>
           ) : (
             <div className="space-y-4">

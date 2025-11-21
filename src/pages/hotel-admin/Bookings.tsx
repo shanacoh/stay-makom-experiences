@@ -101,19 +101,52 @@ export default function HotelBookings() {
   };
 
   const getExtrasStatus = (bookingExtras: any[]) => {
-    if (!bookingExtras || bookingExtras.length === 0) return null;
+    if (!bookingExtras || bookingExtras.length === 0) {
+      return <Badge variant="outline" className="text-xs">No extras</Badge>;
+    }
     
+    const total = bookingExtras.length;
     const pending = bookingExtras.filter(e => e.status === 'pending').length;
     const done = bookingExtras.filter(e => e.status === 'done').length;
-    const total = bookingExtras.length;
+    const unavailable = bookingExtras.filter(e => e.status === 'unavailable').length;
 
-    if (done === total) {
-      return <Badge variant="default" className="text-xs">✓ {total} extras</Badge>;
-    } else if (done > 0) {
-      return <Badge variant="secondary" className="text-xs">{done}/{total} done</Badge>;
-    } else {
-      return <Badge variant="outline" className="text-xs">{pending} pending</Badge>;
+    // Determine color: GREEN (all done), RED (nothing handled), YELLOW (partial)
+    let variant: "default" | "destructive" | "secondary" = "secondary";
+    if (total > 0 && pending === 0 && done > 0) {
+      variant = "default"; // GREEN - all done
+    } else if (total > 0 && done === 0 && pending > 0) {
+      variant = "destructive"; // RED - nothing handled
+    } else if (total > 0 && done > 0 && pending > 0) {
+      variant = "secondary"; // YELLOW - partially handled
     }
+
+    return (
+      <div className="flex items-center gap-1">
+        <Badge variant={variant} className="text-xs">
+          {done}/{total} done
+        </Badge>
+        {pending > 0 && <span className="text-xs text-muted-foreground">· {pending} pending</span>}
+      </div>
+    );
+  };
+
+  const getPriorityBadge = (checkin: string) => {
+    const checkinDate = new Date(checkin);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    checkinDate.setHours(0, 0, 0, 0);
+    
+    const diffTime = checkinDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return <Badge variant="destructive" className="text-xs">Arriving Today</Badge>;
+    } else if (diffDays === 1) {
+      return <Badge variant="secondary" className="text-xs">Arriving Tomorrow</Badge>;
+    } else if (diffDays > 1 && diffDays <= 3) {
+      return <Badge variant="outline" className="text-xs">Upcoming</Badge>;
+    }
+    return null;
   };
 
   return (
@@ -144,6 +177,7 @@ export default function HotelBookings() {
                   <TableHead>Guests</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Priority</TableHead>
                   <TableHead>Extras</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -167,6 +201,9 @@ export default function HotelBookings() {
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(booking.status || "pending")}
+                    </TableCell>
+                    <TableCell>
+                      {getPriorityBadge(booking.checkin)}
                     </TableCell>
                     <TableCell>
                       {getExtrasStatus(booking.booking_extras)}

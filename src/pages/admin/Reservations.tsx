@@ -20,8 +20,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const AdminBookings = () => {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [hotelFilter, setHotelFilter] = useState<string>("all");
   const queryClient = useQueryClient();
@@ -99,16 +101,29 @@ const AdminBookings = () => {
   };
 
   const getExtrasProgress = (bookingExtras: any[]) => {
-    if (!bookingExtras || bookingExtras.length === 0) return "—";
-    
-    const done = bookingExtras.filter(e => e.status === 'done').length;
-    const total = bookingExtras.length;
-
-    if (done === total) {
-      return <Badge variant="default" className="text-xs">✓ {total}</Badge>;
-    } else {
-      return <Badge variant="outline" className="text-xs">{done}/{total}</Badge>;
+    if (!bookingExtras || bookingExtras.length === 0) {
+      return <Badge variant="outline" className="text-xs">No extras</Badge>;
     }
+    
+    const total = bookingExtras.length;
+    const pending = bookingExtras.filter((e: any) => e.status === 'pending').length;
+    const done = bookingExtras.filter((e: any) => e.status === 'done').length;
+
+    // Determine color: GREEN (all done), RED (nothing handled), YELLOW (partial)
+    let variant: "default" | "destructive" | "secondary" = "secondary";
+    if (total > 0 && pending === 0 && done > 0) {
+      variant = "default"; // GREEN - all done
+    } else if (total > 0 && done === 0 && pending > 0) {
+      variant = "destructive"; // RED - nothing handled
+    } else if (total > 0 && done > 0 && pending > 0) {
+      variant = "secondary"; // YELLOW - partially handled
+    }
+
+    return (
+      <Badge variant={variant} className="text-xs">
+        {done}/{total} completed
+      </Badge>
+    );
   };
 
   const getCurrencySymbol = (currency: string) => {
@@ -170,7 +185,7 @@ const AdminBookings = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Extras</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -202,29 +217,17 @@ const AdminBookings = () => {
                   <TableCell>
                     {getExtrasProgress(booking.booking_extras)}
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
+                  <TableCell>
                     {format(new Date(booking.created_at), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell>
-                    <Select
-                      value={booking.status}
-                      onValueChange={(status: "pending" | "hold" | "accepted" | "paid" | "confirmed" | "failed" | "cancelled") =>
-                        updateStatusMutation.mutate({ id: booking.id, status })
-                      }
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/admin/reservations/${booking.id}`)}
                     >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="hold">Hold</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="paid">Paid</SelectItem>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="failed">Failed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      View Details
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
