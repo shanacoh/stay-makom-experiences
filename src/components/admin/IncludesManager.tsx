@@ -275,6 +275,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
           </div>
 
           <Button
+            type="button"
             onClick={() => createMutation.mutate()}
             disabled={createMutation.isPending || isUploading || !newInclude.title.trim()}
             className="w-full"
@@ -331,6 +332,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                     </div>
                     <div className="flex gap-2">
                       <Button
+                        type="button"
                         size="sm"
                         onClick={() => saveEdit(include)}
                         disabled={updateMutation.isPending}
@@ -339,6 +341,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         Save
                       </Button>
                       <Button
+                        type="button"
                         size="sm"
                         variant="ghost"
                         onClick={cancelEditing}
@@ -375,6 +378,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         </Label>
                       </div>
                       <Button
+                        type="button"
                         size="icon"
                         variant="ghost"
                         onClick={() => startEditing(include)}
@@ -382,6 +386,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         <Edit2 className="w-4 h-4" />
                       </Button>
                       <Button
+                        type="button"
                         size="icon"
                         variant="ghost"
                         onClick={() => deleteMutation.mutate(include.id)}
