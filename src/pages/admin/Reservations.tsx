@@ -36,7 +36,8 @@ const AdminBookings = () => {
           hotels:hotel_id(name),
           experiences:experience_id(title),
           customers:customer_id(first_name, last_name),
-          packages:package_id(name)
+          packages:package_id(name),
+          booking_extras(*)
         `)
         .order("created_at", { ascending: false });
 
@@ -97,6 +98,19 @@ const AdminBookings = () => {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  const getExtrasProgress = (bookingExtras: any[]) => {
+    if (!bookingExtras || bookingExtras.length === 0) return "—";
+    
+    const done = bookingExtras.filter(e => e.status === 'done').length;
+    const total = bookingExtras.length;
+
+    if (done === total) {
+      return <Badge variant="default" className="text-xs">✓ {total}</Badge>;
+    } else {
+      return <Badge variant="outline" className="text-xs">{done}/{total}</Badge>;
+    }
+  };
+
   const getCurrencySymbol = (currency: string) => {
     return currency === "ILS" ? "₪" : "$";
   };
@@ -154,6 +168,7 @@ const AdminBookings = () => {
                 <TableHead>Guests</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Extras</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -183,6 +198,9 @@ const AdminBookings = () => {
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(booking.status)}
+                  </TableCell>
+                  <TableCell>
+                    {getExtrasProgress(booking.booking_extras)}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {format(new Date(booking.created_at), "MMM d, yyyy")}

@@ -29,6 +29,7 @@ import HotelPackages from "./pages/hotel-admin/Packages";
 import HotelCalendar from "./pages/hotel-admin/Calendar";
 import HotelPricing from "./pages/hotel-admin/Pricing";
 import HotelBookings from "./pages/hotel-admin/Bookings";
+import HotelBookingDetails from "./pages/hotel-admin/BookingDetails";
 import HotelBilling from "./pages/hotel-admin/Billing";
 import HotelReviews from "./pages/hotel-admin/Reviews";
 import HotelPayments from "./pages/hotel-admin/Payments";
@@ -122,6 +123,7 @@ const App = () => (
               <Route path="calendar" element={<HotelCalendar />} />
               <Route path="pricing" element={<HotelPricing />} />
             <Route path="bookings" element={<HotelBookings />} />
+            <Route path="bookings/:bookingId" element={<HotelBookingDetails />} />
             <Route path="billing" element={<HotelBilling />} />
             <Route path="reviews" element={<HotelReviews />} />
             <Route path="payments" element={<HotelPayments />} />
