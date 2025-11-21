@@ -6,9 +6,25 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const Account = () => {
   const { user } = useAuth();
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+      pending: { variant: "outline", label: "Pending Hotel Review" },
+      confirmed: { variant: "default", label: "Confirmed" },
+      cancelled: { variant: "destructive", label: "Cancelled" },
+      paid: { variant: "default", label: "Paid" },
+      hold: { variant: "secondary", label: "On Hold" },
+      accepted: { variant: "default", label: "Accepted" },
+      failed: { variant: "destructive", label: "Failed" },
+    };
+
+    const config = statusConfig[status] || { variant: "outline" as const, label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile", user?.id],
@@ -149,17 +165,7 @@ const Account = () => {
                               {booking.hotels?.name} • {booking.hotels?.city}
                             </p>
                           </div>
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              booking.status === "confirmed"
-                                ? "bg-green-100 text-green-800"
-                                : booking.status === "pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {booking.status}
-                          </span>
+                          {getStatusBadge(booking.status || "pending")}
                         </div>
                         <div className="text-sm space-y-1">
                           <p>
