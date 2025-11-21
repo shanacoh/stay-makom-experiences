@@ -189,17 +189,34 @@ const BookingPanel = ({
 
       // Step 4: Create booking extras if any
       if (Object.keys(selectedExtras).length > 0 && extrasTotal > 0) {
-        const extrasToInsert = Object.entries(selectedExtras)
-          .filter(([_, quantity]) => quantity > 0)
-          .map(([extraId, quantity]) => ({
-            booking_id: booking.id,
-            extra_id: extraId,
-            quantity,
-            unit_price: 0, // Will need to fetch from extras table in real implementation
-          }));
+        // Fetch extras details to get names and types
+        const extraIds = Object.keys(selectedExtras).filter(id => selectedExtras[id] > 0);
+        
+        if (extraIds.length > 0) {
+          const { data: extrasDetails } = await supabase
+            .from("extras")
+            .select("*")
+            .in("id", extraIds);
 
-        if (extrasToInsert.length > 0) {
-          await supabase.from("booking_extras").insert(extrasToInsert);
+          const extrasToInsert = Object.entries(selectedExtras)
+            .filter(([_, quantity]) => quantity > 0)
+            .map(([extraId, quantity]) => {
+              const extraDetail = extrasDetails?.find((e) => e.id === extraId);
+              return {
+                booking_id: booking.id,
+                extra_id: extraId,
+                extra_name: extraDetail?.name || "Unknown",
+                extra_type: extraDetail?.pricing_type || "per_booking",
+                quantity,
+                unit_price: extraDetail?.price || 0,
+                price: (extraDetail?.price || 0) * quantity,
+                status: "pending" as const,
+              };
+            });
+
+          if (extrasToInsert.length > 0) {
+            await supabase.from("booking_extras").insert(extrasToInsert);
+          }
         }
       }
 

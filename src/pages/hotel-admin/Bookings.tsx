@@ -2,7 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -18,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 export default function HotelBookings() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: hotelAdmin } = useQuery({
     queryKey: ["hotel-admin", user?.id],
@@ -38,7 +40,7 @@ export default function HotelBookings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bookings_safe")
-        .select("*, experiences(title)")
+        .select("*, experiences(title), booking_extras(*)")
         .eq("hotel_id", hotelAdmin?.hotel_id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -98,6 +100,22 @@ export default function HotelBookings() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  const getExtrasStatus = (bookingExtras: any[]) => {
+    if (!bookingExtras || bookingExtras.length === 0) return null;
+    
+    const pending = bookingExtras.filter(e => e.status === 'pending').length;
+    const done = bookingExtras.filter(e => e.status === 'done').length;
+    const total = bookingExtras.length;
+
+    if (done === total) {
+      return <Badge variant="default" className="text-xs">✓ {total} extras</Badge>;
+    } else if (done > 0) {
+      return <Badge variant="secondary" className="text-xs">{done}/{total} done</Badge>;
+    } else {
+      return <Badge variant="outline" className="text-xs">{pending} pending</Badge>;
+    }
+  };
+
   return (
     <div className="p-8">
       <h1 className="font-sans text-4xl font-bold mb-8">Bookings</h1>
@@ -126,6 +144,7 @@ export default function HotelBookings() {
                   <TableHead>Guests</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Extras</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -148,6 +167,9 @@ export default function HotelBookings() {
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(booking.status || "pending")}
+                    </TableCell>
+                    <TableCell>
+                      {getExtrasStatus(booking.booking_extras)}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -173,11 +195,14 @@ export default function HotelBookings() {
                             </Button>
                           </>
                         )}
-                        {booking.status !== "pending" && (
-                          <Button variant="ghost" size="sm">
-                            View
-                          </Button>
-                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/hotel-admin/bookings/${booking.id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>

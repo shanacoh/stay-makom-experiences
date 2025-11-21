@@ -49,25 +49,43 @@ export type Database = {
           booking_id: string
           created_at: string | null
           extra_id: string
+          extra_name: string | null
+          extra_type: string | null
           id: string
+          notes: string | null
+          price: number | null
           quantity: number
+          status: Database["public"]["Enums"]["booking_extra_status"] | null
           unit_price: number
+          updated_at: string | null
         }
         Insert: {
           booking_id: string
           created_at?: string | null
           extra_id: string
+          extra_name?: string | null
+          extra_type?: string | null
           id?: string
+          notes?: string | null
+          price?: number | null
           quantity?: number
+          status?: Database["public"]["Enums"]["booking_extra_status"] | null
           unit_price: number
+          updated_at?: string | null
         }
         Update: {
           booking_id?: string
           created_at?: string | null
           extra_id?: string
+          extra_name?: string | null
+          extra_type?: string | null
           id?: string
+          notes?: string | null
+          price?: number | null
           quantity?: number
+          status?: Database["public"]["Enums"]["booking_extra_status"] | null
           unit_price?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1203,6 +1221,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "hotel_admin" | "customer"
       base_price_type: "fixed" | "per_person" | "per_booking"
+      booking_extra_status: "pending" | "done" | "unavailable"
       booking_status:
         | "pending"
         | "hold"
@@ -1344,6 +1363,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "hotel_admin", "customer"],
       base_price_type: ["fixed", "per_person", "per_booking"],
+      booking_extra_status: ["pending", "done", "unavailable"],
       booking_status: [
         "pending",
         "hold",
