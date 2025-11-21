@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,9 +12,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export default function HotelBookings() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: hotelAdmin } = useQuery({
     queryKey: ["hotel-admin", user?.id],
@@ -43,6 +46,57 @@ export default function HotelBookings() {
     },
     enabled: !!hotelAdmin?.hotel_id,
   });
+
+  // Mutation for updating booking status
+  const updateBookingStatusMutation = useMutation({
+    mutationFn: async ({ bookingId, status }: { 
+      bookingId: string; 
+      status: "pending" | "hold" | "accepted" | "paid" | "confirmed" | "failed" | "cancelled" 
+    }) => {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", bookingId);
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["hotel-bookings"] });
+      
+      const action = variables.status === "confirmed" ? "accepted" : "declined";
+      toast.success(`Booking ${action}`, {
+        description: `The booking has been ${action} successfully.`,
+      });
+    },
+    onError: (error: any) => {
+      toast.error("Failed to update booking", {
+        description: error.message || "Unable to update booking status.",
+      });
+    },
+  });
+
+  const handleAcceptBooking = (bookingId: string) => {
+    updateBookingStatusMutation.mutate({ bookingId, status: "confirmed" });
+  };
+
+  const handleDeclineBooking = (bookingId: string) => {
+    updateBookingStatusMutation.mutate({ bookingId, status: "cancelled" });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+      pending: { variant: "outline", label: "Pending" },
+      confirmed: { variant: "default", label: "Confirmed" },
+      cancelled: { variant: "destructive", label: "Cancelled" },
+      paid: { variant: "default", label: "Paid" },
+      hold: { variant: "secondary", label: "On Hold" },
+      accepted: { variant: "default", label: "Accepted" },
+      failed: { variant: "destructive", label: "Failed" },
+    };
+
+    const config = statusConfig[status] || { variant: "outline" as const, label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
 
   return (
     <div className="p-8">
@@ -93,22 +147,38 @@ export default function HotelBookings() {
                       ${booking.total_price} {booking.currency}
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          booking.status === "confirmed"
-                            ? "bg-green-100 text-green-800"
-                            : booking.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {booking.status}
-                      </span>
+                      {getStatusBadge(booking.status || "pending")}
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
-                        View
-                      </Button>
+                      <div className="flex gap-2">
+                        {booking.status === "pending" && (
+                          <>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => handleAcceptBooking(booking.id)}
+                              disabled={updateBookingStatusMutation.isPending}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Accept
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeclineBooking(booking.id)}
+                              disabled={updateBookingStatusMutation.isPending}
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Decline
+                            </Button>
+                          </>
+                        )}
+                        {booking.status !== "pending" && (
+                          <Button variant="ghost" size="sm">
+                            View
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

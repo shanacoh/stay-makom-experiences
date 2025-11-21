@@ -66,7 +66,10 @@ const AdminBookings = () => {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status }: { 
+      id: string; 
+      status: "pending" | "hold" | "accepted" | "paid" | "confirmed" | "failed" | "cancelled" 
+    }) => {
       const { error } = await supabase
         .from("bookings" as any)
         .update({ status })
@@ -79,17 +82,19 @@ const AdminBookings = () => {
     },
   });
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      hold: "bg-orange-100 text-orange-800",
-      accepted: "bg-blue-100 text-blue-800",
-      paid: "bg-green-100 text-green-800",
-      confirmed: "bg-emerald-100 text-emerald-800",
-      failed: "bg-red-100 text-red-800",
-      cancelled: "bg-gray-100 text-gray-800",
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+      pending: { variant: "outline", label: "Pending" },
+      confirmed: { variant: "default", label: "Confirmed" },
+      cancelled: { variant: "destructive", label: "Cancelled" },
+      paid: { variant: "default", label: "Paid" },
+      hold: { variant: "secondary", label: "On Hold" },
+      accepted: { variant: "default", label: "Accepted" },
+      failed: { variant: "destructive", label: "Failed" },
     };
-    return colors[status] || "bg-gray-100 text-gray-800";
+
+    const config = statusConfig[status] || { variant: "outline" as const, label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const getCurrencySymbol = (currency: string) => {
@@ -177,9 +182,7 @@ const AdminBookings = () => {
                     {booking.total_price}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(booking.status)}>
-                      {booking.status}
-                    </Badge>
+                    {getStatusBadge(booking.status)}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {format(new Date(booking.created_at), "MMM d, yyyy")}
@@ -187,7 +190,7 @@ const AdminBookings = () => {
                   <TableCell>
                     <Select
                       value={booking.status}
-                      onValueChange={(status) =>
+                      onValueChange={(status: "pending" | "hold" | "accepted" | "paid" | "confirmed" | "failed" | "cancelled") =>
                         updateStatusMutation.mutate({ id: booking.id, status })
                       }
                     >
