@@ -41,8 +41,12 @@ const Account = () => {
   });
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
-    queryKey: ["my-bookings", user?.id],
+    queryKey: ["my-bookings", customer?.id],
     queryFn: async () => {
+      if (!customer?.id) return [];
+      
+      console.log("Fetching bookings for customer_id:", customer.id);
+      
       const { data, error } = await supabase
         .from("bookings")
         .select(`
@@ -50,13 +54,18 @@ const Account = () => {
           hotels (name, city),
           experiences (title)
         `)
-        .eq("customer_id", user?.id)
+        .eq("customer_id", customer.id)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Bookings fetch error:", error);
+        throw error;
+      }
+      
+      console.log("Bookings fetched:", data?.length || 0, "bookings");
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!customer?.id,
   });
 
   if (profileLoading || customerLoading || bookingsLoading) {
