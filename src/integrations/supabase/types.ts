@@ -1163,6 +1163,21 @@ export type Database = {
       }
     }
     Functions: {
+      get_customers_with_emails: {
+        Args: never
+        Returns: {
+          address_country: string
+          created_at: string
+          default_party_size: number
+          first_name: string
+          id: string
+          last_name: string
+          notes: string
+          updated_at: string
+          user_email: string
+          user_id: string
+        }[]
+      }
       get_user_hotel_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }

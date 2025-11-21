@@ -37,27 +37,31 @@ const AdminCustomers = () => {
   const { data: customers, isLoading } = useQuery({
     queryKey: ["admin-customers", searchTerm, roleFilter, countryFilter],
     queryFn: async () => {
-      // Fetch all customers
-      let query = supabase
-        .from("customers")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Fetch customers with emails using the secure function
+      const { data: customersWithEmails, error: emailError } = await supabase
+        .rpc("get_customers_with_emails");
 
+      if (emailError) throw emailError;
+      if (!customersWithEmails) return [];
+
+      // Apply search filter
+      let filteredBySearch = customersWithEmails;
       if (searchTerm) {
-        query = query.or(
-          `first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`
+        const searchLower = searchTerm.toLowerCase();
+        filteredBySearch = customersWithEmails.filter(c => 
+          c.first_name?.toLowerCase().includes(searchLower) ||
+          c.last_name?.toLowerCase().includes(searchLower) ||
+          c.user_email?.toLowerCase().includes(searchLower)
         );
       }
 
+      // Apply country filter
+      let filteredByCountry = filteredBySearch;
       if (countryFilter !== "all") {
-        query = query.eq("address_country", countryFilter);
+        filteredByCountry = filteredBySearch.filter(c => c.address_country === countryFilter);
       }
 
-      const { data: customersData, error } = await query;
-      if (error) throw error;
-      if (!customersData) return [];
-
-      const userIds = customersData.map((c) => c.user_id);
+      const userIds = filteredByCountry.map((c) => c.user_id);
 
       // Fetch user profiles
       const { data: profiles } = await supabase
@@ -72,10 +76,10 @@ const AdminCustomers = () => {
         .in("user_id", userIds);
 
       // Apply role filter
-      let filteredCustomers = customersData;
+      let filteredCustomers = filteredByCountry;
       if (roleFilter !== "all") {
         const filteredUserIds = roles?.filter(r => r.role === roleFilter).map(r => r.user_id) || [];
-        filteredCustomers = customersData.filter(c => filteredUserIds.includes(c.user_id));
+        filteredCustomers = filteredByCountry.filter(c => filteredUserIds.includes(c.user_id));
       }
 
       // Fetch booking stats
@@ -216,6 +220,7 @@ const AdminCustomers = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Country</TableHead>
@@ -226,7 +231,7 @@ const AdminCustomers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer) => (
+              {customers.map((customer: any) => (
                 <TableRow key={customer.user_id}>
                   <TableCell className="font-medium">
                     {customer.first_name} {customer.last_name}
@@ -236,6 +241,7 @@ const AdminCustomers = () => {
                       </div>
                     )}
                   </TableCell>
+                  <TableCell className="text-sm">{customer.user_email || "-"}</TableCell>
                   <TableCell>{customer.user_profiles?.phone || "-"}</TableCell>
                   <TableCell>
                     <Badge variant={customer.user_roles?.role === "admin" ? "default" : "secondary"}>
