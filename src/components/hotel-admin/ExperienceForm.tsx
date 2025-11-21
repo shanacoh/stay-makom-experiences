@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2 } from "lucide-react";
@@ -68,6 +78,7 @@ export function ExperienceForm({
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [status, setStatus] = useState<"draft" | "pending" | "published">("draft");
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Load categories
   const { data: categories } = useQuery({
@@ -293,6 +304,36 @@ export function ExperienceForm({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!experienceId) throw new Error("No experience ID");
+      const { error } = await supabase
+        .from("experiences")
+        .delete()
+        .eq("id", experienceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences", hotelId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
+      toast.success("Experience deleted successfully");
+      if (onClose) onClose();
+    },
+    onError: (error) => {
+      console.error("Error deleting experience:", error);
+      toast.error("Failed to delete experience");
+    },
+  });
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate();
+    setShowDeleteDialog(false);
   };
 
   const handlePublish = async (data: ExperienceFormData) => {
@@ -854,20 +895,50 @@ export function ExperienceForm({
               />
             </div>
 
-            <div className="flex gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="button" variant="outline">
-                Archive
-              </Button>
-              <Button type="button" variant="destructive">
-                Delete
-              </Button>
-            </div>
+            {experienceId && (
+              <div className="flex gap-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete Experience"
+                  )}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </form>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this experience?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action is irreversible. The experience will be permanently deleted from all lists and the database.
+              All related bookings, reviews, and data will remain but will no longer be associated with this experience.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
