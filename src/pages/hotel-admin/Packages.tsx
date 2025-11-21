@@ -27,43 +27,43 @@ export default function HotelPackages() {
   const packages = [
     {
       id: 1,
-      name: "Escapade Romantique",
-      description: "2 nuits + champagne + spa pour couples",
+      name: "Romantic Getaway",
+      description: "2 nights + champagne + spa for couples",
       discount: 15,
       validUntil: "2025-12-31",
       status: "active",
       minNights: 2,
-      includes: ["Champagne à l'arrivée", "2 massages spa", "Petit-déjeuner inclus", "Surclassement chambre"],
+      includes: ["Welcome champagne", "2 spa massages", "Breakfast included", "Room upgrade"],
     },
     {
       id: 2,
-      name: "Famille Premium",
-      description: "Séjour famille avec activités",
+      name: "Premium Family",
+      description: "Family stay with activities",
       discount: 20,
       validUntil: "2025-08-31",
       status: "active",
       minNights: 3,
-      includes: ["Activités enfants", "Repas famille", "Suite familiale", "Guide local"],
+      includes: ["Kids activities", "Family meals", "Family suite", "Local guide"],
     },
     {
       id: 3,
-      name: "Week-end Découverte",
-      description: "Court séjour avec expériences locales",
+      name: "Discovery Weekend",
+      description: "Short stay with local experiences",
       discount: 10,
       validUntil: "2025-11-30",
       status: "active",
       minNights: 2,
-      includes: ["Visite guidée", "Dégustation locale", "Transport inclus"],
+      includes: ["Guided tour", "Local tasting", "Transport included"],
     },
     {
       id: 4,
-      name: "Semaine Wellness",
-      description: "Retraite bien-être d'une semaine",
+      name: "Wellness Week",
+      description: "Week-long wellness retreat",
       discount: 25,
       validUntil: "2025-06-30",
       status: "inactive",
       minNights: 7,
-      includes: ["Yoga quotidien", "Soins spa", "Nutrition coaching", "Méditation guidée"],
+      includes: ["Daily yoga", "Spa treatments", "Nutrition coaching", "Guided meditation"],
     },
   ];
 
@@ -78,7 +78,7 @@ export default function HotelPackages() {
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Créer un Package
+          Create Package
         </Button>
       </div>
 
@@ -131,13 +131,13 @@ export default function HotelPackages() {
                         <Package className="h-4 w-4" />
                         <span>Minimum</span>
                       </div>
-                      <p className="font-semibold">{pkg.minNights} nuits</p>
+                      <p className="font-semibold">{pkg.minNights} nights</p>
                     </div>
                   </div>
 
                   <div className="border-t pt-4">
                     <p className="font-semibold mb-3 text-sm text-muted-foreground">
-                      Inclus dans le package :
+                      Included in package:
                     </p>
                     <ul className="space-y-2">
                       {pkg.includes.map((item, idx) => (
@@ -151,10 +151,10 @@ export default function HotelPackages() {
 
                   <div className="flex gap-2 pt-4">
                     <Button variant="outline" className="flex-1">
-                      Modifier
+                      Edit
                     </Button>
                     <Button variant="outline" className="flex-1">
-                      Statistiques
+                      Statistics
                     </Button>
                   </div>
                 </div>

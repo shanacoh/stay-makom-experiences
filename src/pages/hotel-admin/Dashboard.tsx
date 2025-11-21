@@ -91,7 +91,7 @@ export default function HotelAdminDashboard() {
                     {hotelAdmin.hotels?.status === 'published' ? '✅ Publié' : 'Non publié'}
                   </span>
                   <Button variant="outline" asChild size="sm">
-                    <Link to="/hotel-admin/property">Modifier</Link>
+                    <Link to="/hotel-admin/property">Edit</Link>
                   </Button>
                 </div>
               </div>
@@ -109,13 +109,13 @@ export default function HotelAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Demandes en attente</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Requests</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between">
               <p className="text-3xl font-bold">{stats?.pending || 0}</p>
               <Button variant="link" size="sm" asChild>
-                <Link to="/hotel-admin/bookings">Voir</Link>
+                <Link to="/hotel-admin/bookings">View</Link>
               </Button>
             </div>
           </CardContent>
@@ -123,7 +123,7 @@ export default function HotelAdminDashboard() {
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Confirmées ce mois</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Confirmed This Month</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between">
@@ -162,7 +162,7 @@ export default function HotelAdminDashboard() {
           <Button asChild>
             <Link to="/hotel-admin/experiences">
               <Plus className="mr-2 h-4 w-4" />
-              Créer une expérience
+              Create Experience
             </Link>
           </Button>
           <Button variant="outline" asChild>
@@ -174,7 +174,7 @@ export default function HotelAdminDashboard() {
           <Button variant="outline" asChild>
             <Link to="/hotel-admin/bookings">
               <FileText className="mr-2 h-4 w-4" />
-              Voir les réservations
+              View Bookings
             </Link>
           </Button>
         </CardContent>

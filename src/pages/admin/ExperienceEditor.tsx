@@ -210,10 +210,10 @@ const AdminExperienceEditor = () => {
         </Button>
         <div>
           <h2 className="text-3xl font-bold">
-            {isEditing ? "Modifier l'expérience" : "Nouvelle expérience"}
+            {isEditing ? "Edit Experience" : "New Experience"}
           </h2>
           <p className="text-muted-foreground">
-            {isEditing ? "Modifiez les détails de l'expérience" : "Créez une nouvelle expérience et attribuez-la à un hôtel"}
+            {isEditing ? "Edit the experience details" : "Create a new experience and assign it to a hotel"}
           </p>
         </div>
       </div>
@@ -304,7 +304,7 @@ const AdminExperienceEditor = () => {
 
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="base_price">Prix de base *</Label>
+                <Label htmlFor="base_price">Base Price *</Label>
                 <Input
                   id="base_price"
                   type="number"
@@ -338,8 +338,8 @@ const AdminExperienceEditor = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="per_person">Par personne</SelectItem>
-                    <SelectItem value="per_booking">Par réservation</SelectItem>
+                    <SelectItem value="per_person">Per Person</SelectItem>
+                    <SelectItem value="per_booking">Per Booking</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -493,14 +493,14 @@ const AdminExperienceEditor = () => {
             disabled={saveMutation.isPending}
           >
             <Save className="w-4 h-4 mr-2" />
-            Sauvegarder brouillon
+            Save Draft
           </Button>
           <Button
             onClick={() => saveMutation.mutate("published")}
             disabled={saveMutation.isPending}
           >
             <Eye className="w-4 h-4 mr-2" />
-            Publier
+            Publish
           </Button>
         </div>
       </div>

@@ -56,20 +56,20 @@ export default function HotelPricing() {
       period: "Juillet - Août",
       status: "active",
     },
-    {
+      {
       id: 3,
-      name: "Réservation Anticipée",
-      type: "Réduction",
+      name: "Early Booking",
+      type: "Discount",
       value: "-10%",
-      period: "30+ jours à l'avance",
+      period: "30+ days in advance",
       status: "active",
     },
     {
       id: 4,
-      name: "Basse Saison",
-      type: "Réduction",
+      name: "Low Season",
+      type: "Discount",
       value: "-20%",
-      period: "Janvier - Mars",
+      period: "January - March",
       status: "inactive",
     },
   ];
@@ -85,7 +85,7 @@ export default function HotelPricing() {
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Ajouter une Règle
+          Add Rule
         </Button>
       </div>
 
@@ -146,7 +146,7 @@ export default function HotelPricing() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
-                Prix de Base des Expériences
+                Experience Base Prices
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -169,7 +169,7 @@ export default function HotelPricing() {
                     </div>
                     <div className="flex items-center justify-between mt-4 pt-4 border-t">
                       <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground">Prix de base</p>
+                        <p className="text-xs text-muted-foreground">Base price</p>
                         <p className="text-2xl font-bold">
                           ${exp.base_price}
                         </p>

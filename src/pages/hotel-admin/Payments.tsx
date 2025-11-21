@@ -14,7 +14,7 @@ export default function HotelPayments() {
       <Alert className="mb-8">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Connectez votre compte Stripe pour recevoir automatiquement vos paiements après chaque réservation.
+          Connect your Stripe account to automatically receive your payments after each booking.
         </AlertDescription>
       </Alert>
 
@@ -27,11 +27,11 @@ export default function HotelPayments() {
             <div className="flex items-center gap-4">
               <CreditCard className="h-8 w-8 text-muted-foreground" />
               <div>
-                <p className="font-medium">Compte non connecté</p>
-                <p className="text-sm text-muted-foreground">Connectez Stripe pour recevoir vos paiements</p>
+                <p className="font-medium">Account not connected</p>
+                <p className="text-sm text-muted-foreground">Connect Stripe to receive your payments</p>
               </div>
             </div>
-            <Button>Connecter Stripe</Button>
+            <Button>Connect Stripe</Button>
           </div>
         </CardContent>
       </Card>

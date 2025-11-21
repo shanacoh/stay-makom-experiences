@@ -98,7 +98,7 @@ export default function HotelBilling() {
               <CardContent>
                 <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">
-                  {bookings?.length || 0} réservations
+                  {bookings?.length || 0} bookings
                 </p>
               </CardContent>
             </Card>
@@ -126,20 +126,20 @@ export default function HotelBilling() {
                   ${netRevenue.toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Après commission
+                  After commission
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Ce Mois</CardTitle>
+                <CardTitle className="text-sm font-medium">This Month</CardTitle>
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${monthNet.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">
-                  {thisMonth.length} réservations
+                  {thisMonth.length} bookings
                 </p>
               </CardContent>
             </Card>
@@ -153,9 +153,9 @@ export default function HotelBilling() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <p className="font-semibold">Revenu Total Brut</p>
+                    <p className="font-semibold">Total Gross Revenue</p>
                     <p className="text-sm text-muted-foreground">
-                      Total de toutes les réservations confirmées
+                      Total from all confirmed bookings
                     </p>
                   </div>
                   <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
@@ -175,9 +175,9 @@ export default function HotelBilling() {
 
                 <div className="flex items-center justify-between p-4 border-2 rounded-lg bg-green-50 dark:bg-green-950/20">
                   <div>
-                    <p className="font-bold text-lg">Revenu Net à Percevoir</p>
+                    <p className="font-bold text-lg">Net Revenue to Receive</p>
                     <p className="text-sm text-muted-foreground">
-                      Montant total après commission
+                      Total amount after commission
                     </p>
                   </div>
                   <p className="text-3xl font-bold text-green-600">
