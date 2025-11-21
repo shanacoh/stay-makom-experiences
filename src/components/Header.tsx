@@ -116,12 +116,22 @@ const Header = () => {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate(getDashboardLink())}>
-                  {role === "admin" && <LayoutDashboard className="h-4 w-4 mr-2" />}
-                  {role === "hotel_admin" && <Hotel className="h-4 w-4 mr-2" />}
-                  {role === "customer" && <UserCircle className="h-4 w-4 mr-2" />}
-                  {role === "admin" && "Admin Dashboard"}
-                  {role === "hotel_admin" && "Hotel Dashboard"}
-                  {role === "customer" && "My Account"}
+                  {role === "admin" ? (
+                    <>
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Admin Dashboard
+                    </>
+                  ) : role === "hotel_admin" ? (
+                    <>
+                      <Hotel className="h-4 w-4 mr-2" />
+                      Hotel Dashboard
+                    </>
+                  ) : (
+                    <>
+                      <UserCircle className="h-4 w-4 mr-2" />
+                      My Account
+                    </>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
