@@ -128,17 +128,17 @@ const Category = () => {
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end max-w-7xl mx-auto">
               {/* Left side - Category name and Title */}
               <div className="space-y-4">
-                <p className="text-sm uppercase tracking-widest text-white/90 font-bold">
+                <p className="text-xs sm:text-sm uppercase tracking-widest text-white/90 font-bold">
                   {category.name}
                 </p>
-                <h1 className="font-sans text-5xl font-bold leading-tight uppercase text-white md:text-4xl">
+                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl font-bold leading-tight uppercase text-white">
                   {(category as any).presentation_title || category.name}
                 </h1>
               </div>
               
               {/* Right side - Description only */}
               <div>
-                <p className="text-lg md:text-xl leading-relaxed text-white">
+                <p className="text-sm sm:text-base md:text-lg leading-relaxed text-white">
                   {category.intro_rich_text}
                 </p>
               </div>
