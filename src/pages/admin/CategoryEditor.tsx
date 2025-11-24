@@ -25,6 +25,7 @@ const CategoryEditor = () => {
     intro_rich_text: "",
     intro_rich_text_he: "",
     bullets: ["", "", ""],
+    bullets_he: ["", "", ""],
     display_order: 0,
     status: "draft" as "draft" | "published",
   });
@@ -58,6 +59,7 @@ const CategoryEditor = () => {
         intro_rich_text: category.intro_rich_text || "",
         intro_rich_text_he: category.intro_rich_text_he || "",
         bullets: category.bullets || ["", "", ""],
+        bullets_he: category.bullets_he || ["", "", ""],
         display_order: category.display_order || 0,
         status: category.status || "draft",
       });
@@ -84,13 +86,11 @@ const CategoryEditor = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Image size must be less than 5MB");
       return;
@@ -219,20 +219,9 @@ const CategoryEditor = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>Basic Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Category Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g., Desert Escapes"
-                required
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="slug">Slug *</Label>
               <Input
@@ -294,35 +283,6 @@ const CategoryEditor = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="presentation_title">Presentation Title *</Label>
-              <Input
-                id="presentation_title"
-                value={formData.presentation_title}
-                onChange={(e) => setFormData({ ...formData, presentation_title: e.target.value })}
-                placeholder="e.g., Your Perfect Romantic Escape Awaits"
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                Large title displayed on the left side of the category page
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="intro">Introduction Text (English) *</Label>
-              <Textarea
-                id="intro"
-                value={formData.intro_rich_text}
-                onChange={(e) => setFormData({ ...formData, intro_rich_text: e.target.value })}
-                placeholder="A captivating description of this category..."
-                rows={4}
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                Description displayed on the right side of the category page
-              </p>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="display_order">Display Order</Label>
               <Input
                 id="display_order"
@@ -340,94 +300,147 @@ const CategoryEditor = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Hebrew Translation</CardTitle>
+            <CardTitle>Bilingual Content</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name_he">Category Name (Hebrew)</Label>
-              <Input
-                id="name_he"
-                value={formData.name_he}
-                onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
-                placeholder="שם הקטגוריה בעברית"
-                dir="rtl"
-              />
-            </div>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-6">
+              {/* English Column */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">English Version</h4>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="presentation_title_he">Presentation Title (Hebrew)</Label>
-              <Input
-                id="presentation_title_he"
-                value={formData.presentation_title_he}
-                onChange={(e) => setFormData({ ...formData, presentation_title_he: e.target.value })}
-                placeholder="כותרת גדולה של הקטגוריה"
-                dir="rtl"
-              />
-              <p className="text-sm text-muted-foreground">
-                Large title for Hebrew version
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="intro_he">Introduction Text (Hebrew)</Label>
-              <Textarea
-                id="intro_he"
-                value={formData.intro_rich_text_he}
-                onChange={(e) => setFormData({ ...formData, intro_rich_text_he: e.target.value })}
-                placeholder="תיאור מרתק של הקטגוריה..."
-                rows={4}
-                dir="rtl"
-              />
-              <p className="text-sm text-muted-foreground">
-                Description for Hebrew version
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Key Features</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {formData.bullets.map((bullet, index) => (
-              <div key={index} className="flex gap-2">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor={`bullet-${index}`}>Feature {index + 1}</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Category Name *</Label>
                   <Input
-                    id={`bullet-${index}`}
-                    value={bullet}
-                    onChange={(e) => {
-                      const newBullets = [...formData.bullets];
-                      newBullets[index] = e.target.value;
-                      setFormData({ ...formData, bullets: newBullets });
-                    }}
-                    placeholder="e.g., Stunning desert landscapes"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    placeholder="e.g., Desert Escapes"
+                    required
                   />
                 </div>
-                {formData.bullets.length > 1 && (
+
+                <div className="space-y-2">
+                  <Label htmlFor="presentation_title">Presentation Title *</Label>
+                  <Input
+                    id="presentation_title"
+                    value={formData.presentation_title}
+                    onChange={(e) => setFormData({ ...formData, presentation_title: e.target.value })}
+                    placeholder="e.g., Your Perfect Romantic Escape Awaits"
+                    required
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Large title displayed on the category page
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="intro">Introduction Text *</Label>
+                  <Textarea
+                    id="intro"
+                    value={formData.intro_rich_text}
+                    onChange={(e) => setFormData({ ...formData, intro_rich_text: e.target.value })}
+                    placeholder="A captivating description of this category..."
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Key Features</Label>
+                  {formData.bullets.map((bullet, index) => (
+                    <Input
+                      key={index}
+                      value={bullet}
+                      onChange={(e) => {
+                        const newBullets = [...formData.bullets];
+                        newBullets[index] = e.target.value;
+                        setFormData({ ...formData, bullets: newBullets });
+                      }}
+                      placeholder={`Feature ${index + 1}`}
+                    />
+                  ))}
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="mt-8"
-                    onClick={() => {
-                      const newBullets = formData.bullets.filter((_, i) => i !== index);
-                      setFormData({ ...formData, bullets: newBullets });
-                    }}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, bullets: [...formData.bullets, ""] })}
                   >
-                    ×
+                    Add Feature
                   </Button>
-                )}
+                </div>
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setFormData({ ...formData, bullets: [...formData.bullets, ""] })}
-            >
-              Add Feature
-            </Button>
+
+              {/* Hebrew Column */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name_he">שם הקטגוריה</Label>
+                  <Input
+                    id="name_he"
+                    value={formData.name_he}
+                    onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
+                    placeholder="שם הקטגוריה בעברית"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="presentation_title_he">כותרת גדולה</Label>
+                  <Input
+                    id="presentation_title_he"
+                    value={formData.presentation_title_he}
+                    onChange={(e) => setFormData({ ...formData, presentation_title_he: e.target.value })}
+                    placeholder="כותרת גדולה של הקטגוריה"
+                    dir="rtl"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Large title for Hebrew version
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="intro_he">טקסט הקדמה</Label>
+                  <Textarea
+                    id="intro_he"
+                    value={formData.intro_rich_text_he}
+                    onChange={(e) => setFormData({ ...formData, intro_rich_text_he: e.target.value })}
+                    placeholder="תיאור מרתק של הקטגוריה..."
+                    rows={4}
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>תכונות מרכזיות</Label>
+                  {formData.bullets_he.map((bullet, index) => (
+                    <Input
+                      key={index}
+                      value={bullet}
+                      onChange={(e) => {
+                        const newBullets = [...formData.bullets_he];
+                        newBullets[index] = e.target.value;
+                        setFormData({ ...formData, bullets_he: newBullets });
+                      }}
+                      placeholder={`תכונה ${index + 1}`}
+                      dir="rtl"
+                    />
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, bullets_he: [...formData.bullets_he, ""] })}
+                  >
+                    הוסף תכונה
+                  </Button>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </form>

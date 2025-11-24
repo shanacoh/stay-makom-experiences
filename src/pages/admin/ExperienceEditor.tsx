@@ -47,6 +47,7 @@ const AdminExperienceEditor = () => {
     not_includes: [] as string[],
     not_includes_he: [] as string[],
     good_to_know: [] as string[],
+    good_to_know_he: [] as string[],
     cancellation_policy: "",
     cancellation_policy_he: "",
     lead_time_days: 3,
@@ -131,6 +132,7 @@ const AdminExperienceEditor = () => {
         not_includes: exp.not_includes || [],
         not_includes_he: exp.not_includes_he || [],
         good_to_know: exp.good_to_know || [],
+        good_to_know_he: exp.good_to_know_he || [],
         cancellation_policy: exp.cancellation_policy || "",
         cancellation_policy_he: exp.cancellation_policy_he || "",
         lead_time_days: exp.lead_time_days || 3,
@@ -161,7 +163,7 @@ const AdminExperienceEditor = () => {
       const payload = { ...formData, status };
 
       if (!payload.hotel_id) {
-        throw new Error("Vous devez sélectionner un hôtel");
+        throw new Error("You must select a hotel");
       }
 
       if (isEditing) {
@@ -179,28 +181,13 @@ const AdminExperienceEditor = () => {
     },
     onSuccess: (_, status) => {
       queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
-      toast.success(status === "published" ? "Expérience publiée" : "Brouillon enregistré");
+      toast.success(status === "published" ? "Experience published" : "Draft saved");
       navigate("/admin/experiences");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Erreur lors de l'enregistrement");
+      toast.error(error.message || "Error saving experience");
     },
   });
-
-  const addArrayItem = (field: string, value: string) => {
-    if (!value.trim()) return;
-    setFormData(prev => ({
-      ...prev,
-      [field]: [...(prev[field as keyof typeof prev] as string[]), value.trim()]
-    }));
-  };
-
-  const removeArrayItem = (field: string, index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: (prev[field as keyof typeof prev] as string[]).filter((_, i) => i !== index)
-    }));
-  };
 
   return (
     <div className="space-y-6">
@@ -221,18 +208,18 @@ const AdminExperienceEditor = () => {
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Informations de base</CardTitle>
-            <CardDescription>Attribution et détails principaux</CardDescription>
+            <CardTitle>Basic Information</CardTitle>
+            <CardDescription>Hotel assignment and main details</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="hotel_id">Hôtel * (Attribution)</Label>
+              <Label htmlFor="hotel_id">Hotel * (Assignment)</Label>
               <Select
                 value={formData.hotel_id}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, hotel_id: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un hôtel" />
+                  <SelectValue placeholder="Select a hotel" />
                 </SelectTrigger>
                 <SelectContent>
                   {hotels?.map((hotel: any) => (
@@ -244,27 +231,8 @@ const AdminExperienceEditor = () => {
               </Select>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titre (EN) *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="title_he">Titre (HE)</Label>
-                <Input
-                  id="title_he"
-                  value={formData.title_he}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title_he: e.target.value }))}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug URL *</Label>
+              <Label htmlFor="slug">URL Slug *</Label>
               <Input
                 id="slug"
                 value={formData.slug}
@@ -272,34 +240,32 @@ const AdminExperienceEditor = () => {
               />
             </div>
 
-            <div className="grid md:grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category_id">Catégorie *</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
+            <div className="space-y-2">
+              <Label htmlFor="category_id">Category *</Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
                   {categories?.map((cat: any) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <ImageUpload
-              label="Cover Image (Main Photo)"
+              label="Hero Image *"
               bucket="experience-images"
               value={formData.hero_image}
               onChange={(url) => setFormData(prev => ({ ...prev, hero_image: url }))}
               required
-              description="This image will be displayed on the experience detail page and in category listings."
+              description="Main image displayed on the experience page"
             />
 
             <div className="grid md:grid-cols-3 gap-4">
@@ -313,7 +279,7 @@ const AdminExperienceEditor = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="currency">Devise</Label>
+                <Label htmlFor="currency">Currency</Label>
                 <Select
                   value={formData.currency}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
@@ -329,7 +295,7 @@ const AdminExperienceEditor = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="base_price_type">Type de prix</Label>
+                <Label htmlFor="base_price_type">Price Type</Label>
                 <Select
                   value={formData.base_price_type}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, base_price_type: value }))}
@@ -349,48 +315,125 @@ const AdminExperienceEditor = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Descriptions</CardTitle>
+            <CardTitle>Bilingual Content - Titles & Descriptions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="subtitle">Sous-titre (EN)</Label>
-                <Textarea
-                  id="subtitle"
-                  value={formData.subtitle}
-                  onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="subtitle_he">Sous-titre (HE)</Label>
-                <Textarea
-                  id="subtitle_he"
-                  value={formData.subtitle_he}
-                  onChange={(e) => setFormData(prev => ({ ...prev, subtitle_he: e.target.value }))}
-                  rows={2}
-                />
-              </div>
-            </div>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-6">
+              {/* English Column */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">English Version</h4>
+                </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="long_copy">Description longue (EN)</Label>
-                <Textarea
-                  id="long_copy"
-                  value={formData.long_copy}
-                  onChange={(e) => setFormData(prev => ({ ...prev, long_copy: e.target.value }))}
-                  rows={5}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subtitle">Subtitle</Label>
+                  <Textarea
+                    id="subtitle"
+                    value={formData.subtitle}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="long_copy">Long Description</Label>
+                  <Textarea
+                    id="long_copy"
+                    value={formData.long_copy}
+                    onChange={(e) => setFormData(prev => ({ ...prev, long_copy: e.target.value }))}
+                    rows={5}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration</Label>
+                  <Input
+                    id="duration"
+                    value={formData.duration}
+                    onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+                    placeholder="e.g., 2 nights, 3 days"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
+                  <Textarea
+                    id="cancellation_policy"
+                    value={formData.cancellation_policy}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cancellation_policy: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="long_copy_he">Description longue (HE)</Label>
-                <Textarea
-                  id="long_copy_he"
-                  value={formData.long_copy_he}
-                  onChange={(e) => setFormData(prev => ({ ...prev, long_copy_he: e.target.value }))}
-                  rows={5}
-                />
+
+              {/* Hebrew Column */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_he">כותרת</Label>
+                  <Input
+                    id="title_he"
+                    value={formData.title_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_he: e.target.value }))}
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subtitle_he">כותרת משנה</Label>
+                  <Textarea
+                    id="subtitle_he"
+                    value={formData.subtitle_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subtitle_he: e.target.value }))}
+                    rows={2}
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="long_copy_he">תיאור מלא</Label>
+                  <Textarea
+                    id="long_copy_he"
+                    value={formData.long_copy_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, long_copy_he: e.target.value }))}
+                    rows={5}
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="duration_he">משך</Label>
+                  <Input
+                    id="duration_he"
+                    value={formData.duration_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, duration_he: e.target.value }))}
+                    placeholder="למשל: 2 לילות, 3 ימים"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cancellation_policy_he">מדיניות ביטול</Label>
+                  <Textarea
+                    id="cancellation_policy_he"
+                    value={formData.cancellation_policy_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cancellation_policy_he: e.target.value }))}
+                    rows={3}
+                    dir="rtl"
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
@@ -398,13 +441,12 @@ const AdminExperienceEditor = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Important Information</CardTitle>
-            <CardDescription>Hours, address, accessibility, and services</CardDescription>
+            <CardTitle>Location & Access Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="checkin_time">Check-in time</Label>
+                <Label htmlFor="checkin_time">Check-in Time</Label>
                 <Input
                   id="checkin_time"
                   placeholder="e.g., 3:00 PM"
@@ -413,7 +455,7 @@ const AdminExperienceEditor = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="checkout_time">Check-out time</Label>
+                <Label htmlFor="checkout_time">Check-out Time</Label>
                 <Input
                   id="checkout_time"
                   placeholder="e.g., 11:00 AM"
@@ -423,29 +465,8 @@ const AdminExperienceEditor = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="address">Address (EN)</Label>
-                <Textarea
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address_he">Address (HE)</Label>
-                <Textarea
-                  id="address_he"
-                  value={formData.address_he}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address_he: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="google_maps_link">Google Maps link</Label>
+              <Label htmlFor="google_maps_link">Google Maps Link</Label>
               <Input
                 id="google_maps_link"
                 type="url"
@@ -455,24 +476,61 @@ const AdminExperienceEditor = () => {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="accessibility_info">Accessibility (EN)</Label>
-                <Textarea
-                  id="accessibility_info"
-                  value={formData.accessibility_info}
-                  onChange={(e) => setFormData(prev => ({ ...prev, accessibility_info: e.target.value }))}
-                  rows={3}
-                />
+            <div className="grid grid-cols-2 gap-6">
+              {/* English Column */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">English Version</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="accessibility_info">Accessibility Information</Label>
+                  <Textarea
+                    id="accessibility_info"
+                    value={formData.accessibility_info}
+                    onChange={(e) => setFormData(prev => ({ ...prev, accessibility_info: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="accessibility_info_he">Accessibility (HE)</Label>
-                <Textarea
-                  id="accessibility_info_he"
-                  value={formData.accessibility_info_he}
-                  onChange={(e) => setFormData(prev => ({ ...prev, accessibility_info_he: e.target.value }))}
-                  rows={3}
-                />
+
+              {/* Hebrew Column */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address_he">כתובת</Label>
+                  <Textarea
+                    id="address_he"
+                    value={formData.address_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address_he: e.target.value }))}
+                    rows={3}
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="accessibility_info_he">מידע נגישות</Label>
+                  <Textarea
+                    id="accessibility_info_he"
+                    value={formData.accessibility_info_he}
+                    onChange={(e) => setFormData(prev => ({ ...prev, accessibility_info_he: e.target.value }))}
+                    rows={3}
+                    dir="rtl"
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
