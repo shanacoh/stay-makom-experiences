@@ -8,6 +8,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML escaping function to prevent injection attacks
+const escapeHTML = (str: string): string => {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 interface CorporateRequest {
   fullName: string;
   companyName?: string;
@@ -61,51 +71,51 @@ const handler = async (req: Request): Promise<Response> => {
             <div class="content">
               <div class="field">
                 <div class="label">Contact Person</div>
-                <div class="value">${data.fullName}</div>
+                <div class="value">${escapeHTML(data.fullName)}</div>
               </div>
               
               ${data.companyName ? `
               <div class="field">
                 <div class="label">Company Name</div>
-                <div class="value">${data.companyName}</div>
+                <div class="value">${escapeHTML(data.companyName)}</div>
               </div>
               ` : ''}
               
               <div class="field">
                 <div class="label">Email</div>
-                <div class="value"><a href="mailto:${data.email}">${data.email}</a></div>
+                <div class="value"><a href="mailto:${escapeHTML(data.email)}">${escapeHTML(data.email)}</a></div>
               </div>
               
               ${data.phone ? `
               <div class="field">
                 <div class="label">Phone</div>
-                <div class="value">${data.phone}</div>
+                <div class="value">${escapeHTML(data.phone)}</div>
               </div>
               ` : ''}
               
               <div class="field">
                 <div class="label">Type of Request</div>
-                <div class="value">${requestTypeLabels[data.requestType] || data.requestType}</div>
+                <div class="value">${escapeHTML(requestTypeLabels[data.requestType] || data.requestType)}</div>
               </div>
               
               ${data.groupSize ? `
               <div class="field">
                 <div class="label">Estimated Group Size</div>
-                <div class="value">${data.groupSize}</div>
+                <div class="value">${escapeHTML(data.groupSize)}</div>
               </div>
               ` : ''}
               
               ${data.preferredDates ? `
               <div class="field">
                 <div class="label">Preferred Dates</div>
-                <div class="value">${data.preferredDates}</div>
+                <div class="value">${escapeHTML(data.preferredDates)}</div>
               </div>
               ` : ''}
               
               ${data.message ? `
               <div class="field">
                 <div class="label">Message</div>
-                <div class="value">${data.message.replace(/\n/g, '<br>')}</div>
+                <div class="value">${escapeHTML(data.message).replace(/\n/g, '<br>')}</div>
               </div>
               ` : ''}
             </div>
@@ -127,7 +137,7 @@ const handler = async (req: Request): Promise<Response> => {
         from: "Staymakom <onboarding@resend.dev>",
         to: ["hello@staymakom.com"],
         reply_to: data.email,
-        subject: `New Corporate Request: ${requestTypeLabels[data.requestType] || data.requestType}${data.companyName ? ` - ${data.companyName}` : ''}`,
+        subject: `New Corporate Request: ${escapeHTML(requestTypeLabels[data.requestType] || data.requestType)}${data.companyName ? ` - ${escapeHTML(data.companyName)}` : ''}`,
         html: emailHtml,
       }),
     });
