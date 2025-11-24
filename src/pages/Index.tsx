@@ -245,11 +245,11 @@ const Index = () => {
             </div>
           ) : (
             <>
-              {/* Mobile Carousel */}
+               {/* Mobile Carousel */}
               <div className="md:hidden overflow-x-auto mb-8 -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
-                <div className="flex gap-4 pb-4">
+                <div className="flex gap-3 pb-4">
                   {filteredExperiences?.map((experience) => (
-                    <div key={experience.id} className="flex-shrink-0 w-[85vw] snap-center">
+                    <div key={experience.id} className="flex-shrink-0 w-[70vw] snap-center">
                       <ExperienceCard
                         experience={experience}
                         rating={8.5 + Math.random() * 0.5}
@@ -260,14 +260,14 @@ const Index = () => {
                   {/* Empty spaces if less than 4 in selected category */}
                   {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
                     Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                      <div key={`empty-${idx}`} className="flex-shrink-0 w-[85vw] snap-center invisible"></div>
+                      <div key={`empty-${idx}`} className="flex-shrink-0 w-[70vw] snap-center invisible"></div>
                     ))
                   )}
                 </div>
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+              <div className="hidden md:grid md:grid-cols-4 gap-3 mb-8">
                 {filteredExperiences?.map((experience) => (
                   <ExperienceCard
                     key={experience.id}
@@ -378,9 +378,9 @@ const Index = () => {
             <>
               {/* Mobile Carousel */}
               <div className="md:hidden overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
-                <div className="flex gap-4 pb-4">
+                <div className="flex gap-3 pb-4">
                   {latestExperiences?.map((experience) => (
-                    <div key={experience.id} className="flex-shrink-0 w-[85vw] snap-center">
+                    <div key={experience.id} className="flex-shrink-0 w-[70vw] snap-center">
                       <ExperienceCard
                         experience={experience}
                         badge="NEW"
@@ -393,7 +393,7 @@ const Index = () => {
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="hidden md:grid md:grid-cols-4 gap-3">
                 {latestExperiences?.map((experience) => (
                   <ExperienceCard
                     key={experience.id}

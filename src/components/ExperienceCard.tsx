@@ -139,7 +139,7 @@ export default function ExperienceCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Photo section */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-3">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-xl mb-2">
         {/* Image with zoom on hover */}
         <img
           src={experience.hero_image || '/placeholder.svg'}
@@ -151,16 +151,16 @@ export default function ExperienceCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         
         {/* Experience name - bottom left */}
-        <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="font-sans text-2xl md:text-3xl font-bold text-white uppercase tracking-tight leading-tight">
+        <div className="absolute bottom-3 left-3 right-3">
+          <h3 className="font-sans text-sm sm:text-base lg:text-lg font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
             {title}
           </h3>
         </div>
         
         {/* Optional badge - top left */}
         {badge && (
-          <div className="absolute top-4 left-4">
-            <span className="inline-block px-3 py-1 bg-black rounded-md text-white text-xs font-semibold uppercase tracking-wider">
+          <div className="absolute top-2 left-2">
+            <span className="inline-block px-2 py-0.5 bg-black rounded-md text-white text-[10px] font-semibold uppercase tracking-wider">
               {badge}
             </span>
           </div>
@@ -170,13 +170,13 @@ export default function ExperienceCard({
         <button
           onClick={handleHeartClick}
           disabled={wishlistMutation.isPending}
-          className={`absolute top-4 right-4 p-2 rounded-full bg-white/90 backdrop-blur-sm transition-opacity duration-300 hover:bg-white ${
+          className={`absolute top-2 right-2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm transition-opacity duration-300 hover:bg-white ${
             isHovered || isInWishlist ? 'opacity-100' : 'opacity-0'
           }`}
           aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
-            className={`h-5 w-5 transition-colors ${
+            className={`h-4 w-4 transition-colors ${
               isInWishlist ? 'fill-primary text-primary' : 'text-foreground'
             }`}
           />
@@ -184,16 +184,16 @@ export default function ExperienceCard({
       </div>
 
       {/* Content under image */}
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {/* Line 1: Location and Rating */}
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex items-center justify-between gap-1">
+          <p className="text-xs text-muted-foreground truncate">
             {distance && userCity
               ? `${city} · ${distance} km`
               : city}
           </p>
           {rating && (
-            <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+            <div className="flex items-center gap-0.5 text-xs whitespace-nowrap flex-shrink-0">
               <span className="text-foreground">★</span>
               <span className="font-semibold">{rating.toFixed(1)}</span>
               {reviewCount && (
@@ -204,32 +204,32 @@ export default function ExperienceCard({
         </div>
 
         {/* Line 2: Hotel name */}
-        <h4 className="font-semibold text-base text-foreground leading-tight line-clamp-1">
+        <h4 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
           {hotelName}
         </h4>
 
         {/* Line 3: Highlights */}
         {highlights && (
-          <p className="text-sm text-muted-foreground line-clamp-1">
+          <p className="text-xs text-muted-foreground line-clamp-1">
             {highlights}
           </p>
         )}
 
         {/* Line 4: Price */}
-        <div className="flex items-baseline gap-2 pt-1">
-          <span className="font-bold text-lg">
+        <div className="flex items-baseline gap-1.5 pt-0.5">
+          <span className="font-bold text-base">
             {currencySymbol}{displayPrice}
           </span>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             / {lang === 'he' ? 'לילה' : 'nuit'}
           </span>
           {originalPrice && originalPrice > displayPrice && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-xs text-muted-foreground line-through">
               {currencySymbol}{originalPrice}
             </span>
           )}
           {discountPercent && (
-            <span className="inline-block px-2 py-0.5 bg-black text-white text-xs font-semibold rounded">
+            <span className="inline-block px-1.5 py-0.5 bg-black text-white text-[10px] font-semibold rounded">
               -{discountPercent} %
             </span>
           )}
