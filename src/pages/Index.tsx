@@ -3,7 +3,7 @@ import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
@@ -34,6 +34,7 @@ const fallbackImages: Record<string, string> = {
 const Index = () => {
   const navigate = useNavigate();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const { lang } = useLanguage();
   const {
     data: categories,
@@ -67,6 +68,37 @@ const Index = () => {
       return data;
     }
   });
+
+  const {
+    data: allExperiences,
+    isLoading: isLoadingAllExperiences
+  } = useQuery({
+    queryKey: ["all-experiences"],
+    queryFn: async () => {
+      const {
+        data,
+        error
+      } = await supabase.from("experiences").select("*, hotels(name, city, region), experience_reviews(rating)").eq("status", "published");
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const filteredExperiences = selectedCategoryId
+    ? allExperiences?.filter(exp => exp.category_id === selectedCategoryId)
+        .sort((a, b) => {
+          const avgRatingA = a.experience_reviews?.length 
+            ? a.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / a.experience_reviews.length 
+            : 0;
+          const avgRatingB = b.experience_reviews?.length 
+            ? b.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / b.experience_reviews.length 
+            : 0;
+          return avgRatingB - avgRatingA;
+        })
+        .slice(0, 4)
+    : latestExperiences?.slice(0, 8);
+
+  const selectedCategory = categories?.find(cat => cat.id === selectedCategoryId);
   return <div className="min-h-screen flex flex-col">
       <Header />
       
@@ -185,7 +217,7 @@ const Index = () => {
                   <button
                     key={category.slug}
                     onClick={() => {
-                      navigate(`/category/${category.slug}`);
+                      setSelectedCategoryId(category.id);
                     }}
                     className="flex flex-col items-center gap-2 group cursor-pointer"
                   >
@@ -207,7 +239,7 @@ const Index = () => {
           </div>
 
           {/* Experiences Grid/Carousel */}
-          {isLoadingExperiences ? (
+          {isLoadingExperiences || isLoadingAllExperiences ? (
             <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
@@ -216,7 +248,7 @@ const Index = () => {
               {/* Mobile Carousel */}
               <div className="md:hidden overflow-x-auto mb-8 -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
                 <div className="flex gap-4 pb-4">
-                  {latestExperiences?.slice(0, 8).map((experience) => (
+                  {filteredExperiences?.map((experience) => (
                     <div key={experience.id} className="flex-shrink-0 w-[85vw] snap-center">
                       <ExperienceCard
                         experience={experience}
@@ -225,12 +257,18 @@ const Index = () => {
                       />
                     </div>
                   ))}
+                  {/* Empty spaces if less than 4 in selected category */}
+                  {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
+                    Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
+                      <div key={`empty-${idx}`} className="flex-shrink-0 w-[85vw] snap-center invisible"></div>
+                    ))
+                  )}
                 </div>
               </div>
 
               {/* Desktop Grid */}
               <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                {latestExperiences?.slice(0, 8).map((experience) => (
+                {filteredExperiences?.map((experience) => (
                   <ExperienceCard
                     key={experience.id}
                     experience={experience}
@@ -238,7 +276,24 @@ const Index = () => {
                     reviewCount={50 + Math.floor(Math.random() * 950)}
                   />
                 ))}
+                {/* Empty spaces if less than 4 in selected category */}
+                {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
+                  Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
+                    <div key={`empty-${idx}`} className="invisible"></div>
+                  ))
+                )}
               </div>
+
+              {/* View More Button for Selected Category */}
+              {selectedCategoryId && selectedCategory && (
+                <div className="text-center mt-8">
+                  <Button asChild variant="outline" size="lg" className="rounded-full">
+                    <Link to={`/category/${selectedCategory.slug}${lang === 'he' ? '?lang=he' : ''}`}>
+                      View more of {getLocalizedField(selectedCategory, 'name', lang)}
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </>
           )}
 
