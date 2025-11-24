@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import NotFound from "./NotFound";
+import DOMPurify from "dompurify";
 
 const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -121,7 +122,12 @@ const JournalPost = () => {
             }}
           >
             <div
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ 
+                __html: DOMPurify.sanitize(post.content, {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'img', 'pre', 'code'],
+                  ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'class']
+                })
+              }}
               className="whitespace-pre-wrap"
             />
           </div>
