@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -36,6 +36,9 @@ const Index = () => {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const { lang } = useLanguage();
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const latestCarouselRef = useRef<HTMLDivElement>(null);
+
   const {
     data: categories,
     isLoading
@@ -99,6 +102,45 @@ const Index = () => {
     : latestExperiences?.slice(0, 8);
 
   const selectedCategory = categories?.find(cat => cat.id === selectedCategoryId);
+
+  // Auto-scroll for carousel
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel || !filteredExperiences || filteredExperiences.length === 0) return;
+
+    const scrollInterval = setInterval(() => {
+      const scrollAmount = carousel.scrollLeft + (carousel.offsetWidth * 0.75 + 12); // 75vw + gap
+      const maxScroll = carousel.scrollWidth - carousel.offsetWidth;
+      
+      if (scrollAmount >= maxScroll - 10) {
+        // Reset to beginning for infinite loop
+        carousel.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        carousel.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }, 3000); // Scroll every 3 seconds
+
+    return () => clearInterval(scrollInterval);
+  }, [filteredExperiences]);
+
+  // Auto-scroll for latest experiences carousel
+  useEffect(() => {
+    const carousel = latestCarouselRef.current;
+    if (!carousel || !latestExperiences || latestExperiences.length === 0) return;
+
+    const scrollInterval = setInterval(() => {
+      const scrollAmount = carousel.scrollLeft + (carousel.offsetWidth * 0.75 + 12);
+      const maxScroll = carousel.scrollWidth - carousel.offsetWidth;
+      
+      if (scrollAmount >= maxScroll - 10) {
+        carousel.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        carousel.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }, 3000);
+
+    return () => clearInterval(scrollInterval);
+  }, [latestExperiences]);
   return <div className="min-h-screen flex flex-col">
       <Header />
       
@@ -245,24 +287,37 @@ const Index = () => {
             </div>
           ) : (
             <>
-               {/* Mobile Carousel */}
-              <div className="md:hidden overflow-x-auto mb-8 -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
-                <div className="flex gap-3 pb-4">
-                  {filteredExperiences?.map((experience) => (
-                    <div key={experience.id} className="flex-shrink-0 w-[70vw] snap-center">
-                      <ExperienceCard
-                        experience={experience}
-                        rating={8.5 + Math.random() * 0.5}
-                        reviewCount={50 + Math.floor(Math.random() * 950)}
-                      />
-                    </div>
-                  ))}
-                  {/* Empty spaces if less than 4 in selected category */}
-                  {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
-                    Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                      <div key={`empty-${idx}`} className="flex-shrink-0 w-[70vw] snap-center invisible"></div>
-                    ))
-                  )}
+              {/* Mobile Carousel */}
+              <div className="md:hidden relative mb-8">
+                {/* Fade masks on sides */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                
+                <div 
+                  ref={carouselRef}
+                  className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
+                >
+                  <div className="flex gap-3 pb-4">
+                    {/* Duplicate experiences for infinite loop effect */}
+                    {[...(filteredExperiences || []), ...(filteredExperiences || [])].map((experience, index) => (
+                      <div 
+                        key={`${experience.id}-${index}`} 
+                        className="flex-shrink-0 w-[75vw] snap-center"
+                      >
+                        <ExperienceCard
+                          experience={experience}
+                          rating={8.5 + Math.random() * 0.5}
+                          reviewCount={50 + Math.floor(Math.random() * 950)}
+                        />
+                      </div>
+                    ))}
+                    {/* Empty spaces if less than 4 in selected category */}
+                    {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
+                      Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
+                        <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] snap-center invisible"></div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -377,18 +432,31 @@ const Index = () => {
           ) : (
             <>
               {/* Mobile Carousel */}
-              <div className="md:hidden overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
-                <div className="flex gap-3 pb-4">
-                  {latestExperiences?.map((experience) => (
-                    <div key={experience.id} className="flex-shrink-0 w-[70vw] snap-center">
-                      <ExperienceCard
-                        experience={experience}
-                        badge="NEW"
-                        rating={8.5 + Math.random() * 0.5}
-                        reviewCount={50 + Math.floor(Math.random() * 950)}
-                      />
-                    </div>
-                  ))}
+              <div className="md:hidden relative">
+                {/* Fade masks on sides */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                
+                <div 
+                  ref={latestCarouselRef}
+                  className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
+                >
+                  <div className="flex gap-3 pb-4">
+                    {/* Duplicate experiences for infinite loop effect */}
+                    {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
+                      <div 
+                        key={`${experience.id}-${index}`} 
+                        className="flex-shrink-0 w-[75vw] snap-center"
+                      >
+                        <ExperienceCard
+                          experience={experience}
+                          badge="NEW"
+                          rating={8.5 + Math.random() * 0.5}
+                          reviewCount={50 + Math.floor(Math.random() * 950)}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
