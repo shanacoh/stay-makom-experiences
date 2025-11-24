@@ -275,34 +275,43 @@ export type Database = {
       customers: {
         Row: {
           address_country: string | null
+          birthdate: string | null
+          city: string | null
           created_at: string
           default_party_size: number
           first_name: string
           id: string
           last_name: string
           notes: string | null
+          phone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           address_country?: string | null
+          birthdate?: string | null
+          city?: string | null
           created_at?: string
           default_party_size?: number
           first_name: string
           id?: string
           last_name: string
           notes?: string | null
+          phone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           address_country?: string | null
+          birthdate?: string | null
+          city?: string | null
           created_at?: string
           default_party_size?: number
           first_name?: string
           id?: string
           last_name?: string
           notes?: string | null
+          phone?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1124,6 +1133,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wishlist: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          experience_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          experience_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          experience_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
