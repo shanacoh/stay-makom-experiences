@@ -19,7 +19,9 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
   const queryClient = useQueryClient();
   const [newExtra, setNewExtra] = useState({
     name: "",
+    name_he: "",
     description: "",
+    description_he: "",
     price: "",
     pricing_type: "per_booking" as "per_booking" | "per_night" | "per_person",
     image_url: "",
@@ -45,14 +47,16 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
         throw new Error("Name and price are required");
       }
 
-      const maxOrder = extras?.length ? Math.max(...extras.map(e => e.sort_order)) : -1;
+      const maxOrder = extras?.length ? Math.max(...extras.map(e => e.sort_order || 0)) : -1;
       
       const { error } = await supabase
         .from("extras")
         .insert([{
           experience_id: experienceId,
           name: newExtra.name,
+          name_he: newExtra.name_he || null,
           description: newExtra.description || null,
+          description_he: newExtra.description_he || null,
           price: parseFloat(newExtra.price),
           pricing_type: newExtra.pricing_type,
           image_url: newExtra.image_url || null,
@@ -64,7 +68,15 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience-extras", experienceId] });
-      setNewExtra({ name: "", description: "", price: "", pricing_type: "per_booking", image_url: "" });
+      setNewExtra({ 
+        name: "", 
+        name_he: "",
+        description: "", 
+        description_he: "",
+        price: "", 
+        pricing_type: "per_booking", 
+        image_url: "" 
+      });
       toast.success("Extra added successfully");
     },
     onError: (error: Error) => {
@@ -110,19 +122,71 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
         <CardTitle>Extras / Add-ons</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3 p-4 border border-border rounded-lg">
+        <div className="space-y-4 p-4 border border-border rounded-lg">
           <h4 className="font-medium">Add new extra</h4>
-          <Input
-            placeholder="Name *"
-            value={newExtra.name}
-            onChange={(e) => setNewExtra({ ...newExtra, name: e.target.value })}
-          />
-          <Textarea
-            placeholder="Description (optional)"
-            value={newExtra.description}
-            onChange={(e) => setNewExtra({ ...newExtra, description: e.target.value })}
-            rows={2}
-          />
+          
+          {/* Bilingual Name & Description - Side by Side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* English Column */}
+            <div className="space-y-3">
+              <div className="bg-muted/30 p-2 rounded">
+                <h5 className="text-sm font-medium">English Version</h5>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Airport Transfer"
+                  value={newExtra.name}
+                  onChange={(e) => setNewExtra({ ...newExtra, name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe this extra..."
+                  value={newExtra.description}
+                  onChange={(e) => setNewExtra({ ...newExtra, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Hebrew Column */}
+            <div className="space-y-3">
+              <div className="bg-muted/30 p-2 rounded">
+                <h5 className="text-sm font-medium">Hebrew Version (עברית)</h5>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="name_he">שם</Label>
+                <Input
+                  id="name_he"
+                  placeholder="למשל: הסעה מהשדה"
+                  value={newExtra.name_he}
+                  onChange={(e) => setNewExtra({ ...newExtra, name_he: e.target.value })}
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description_he">תיאור</Label>
+                <Textarea
+                  id="description_he"
+                  placeholder="תאר את התוספת..."
+                  value={newExtra.description_he}
+                  onChange={(e) => setNewExtra({ ...newExtra, description_he: e.target.value })}
+                  rows={3}
+                  dir="rtl"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Price & Settings */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Price *</Label>
@@ -134,7 +198,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Pricing type</Label>
+              <Label>Pricing Type</Label>
               <Select
                 value={newExtra.pricing_type}
                 onValueChange={(value) => setNewExtra({ ...newExtra, pricing_type: value as "per_booking" | "per_night" | "per_person" })}
@@ -143,13 +207,14 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="per_booking">Per booking</SelectItem>
-                  <SelectItem value="per_person">Per person</SelectItem>
-                  <SelectItem value="per_night">Per night</SelectItem>
+                  <SelectItem value="per_booking">Per Booking</SelectItem>
+                  <SelectItem value="per_person">Per Person</SelectItem>
+                  <SelectItem value="per_night">Per Night</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
           <ImageUpload
             label="Extra Image (optional)"
             bucket="experience-images"
@@ -157,6 +222,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
             onChange={(url) => setNewExtra({ ...newExtra, image_url: url })}
             description="Image for this add-on"
           />
+
           <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
             <Plus className="w-4 h-4 mr-2" />
             Add Extra
@@ -168,15 +234,25 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
             {extras.map((extra) => (
               <div
                 key={extra.id}
-                className="flex items-center gap-3 p-3 border border-border rounded-lg"
+                className="flex items-start gap-3 p-3 border border-border rounded-lg"
               >
                 <div className="flex-1">
-                  <div className="font-medium">{extra.name}</div>
+                  <div className="font-medium">
+                    {extra.name}
+                    {extra.name_he && (
+                      <span className="text-muted-foreground mr-2 text-sm" dir="rtl"> / {extra.name_he}</span>
+                    )}
+                  </div>
                   <div className="text-sm text-muted-foreground">
                     ${extra.price} / {extra.pricing_type.replace("_", " ")}
                   </div>
-                  {extra.description && (
-                    <div className="text-sm text-muted-foreground mt-1">{extra.description}</div>
+                  {(extra.description || extra.description_he) && (
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {extra.description}
+                      {extra.description_he && (
+                        <span className="block mt-1" dir="rtl">{extra.description_he}</span>
+                      )}
+                    </div>
                   )}
                 </div>
                 <Button
