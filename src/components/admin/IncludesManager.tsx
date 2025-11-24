@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, Upload, Edit2, Save, X, ImageIcon } from "lucide-react";
+import { Plus, Trash2, GripVertical, Edit2, Save, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -17,13 +18,21 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
   const queryClient = useQueryClient();
   const [newInclude, setNewInclude] = useState({
     title: "",
+    title_he: "",
+    description: "",
+    description_he: "",
     icon_url: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
+  const [editData, setEditData] = useState({
+    title: "",
+    title_he: "",
+    description: "",
+    description_he: "",
+  });
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
@@ -103,6 +112,9 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
         .insert([{
           experience_id: experienceId,
           title: newInclude.title,
+          title_he: newInclude.title_he || null,
+          description: newInclude.description || null,
+          description_he: newInclude.description_he || null,
           icon_url: imageUrl || null,
           order_index: maxOrder + 1,
           published: true,
@@ -113,7 +125,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience-includes", experienceId] });
-      setNewInclude({ title: "", icon_url: "" });
+      setNewInclude({ title: "", title_he: "", description: "", description_he: "", icon_url: "" });
       setImageFile(null);
       setImagePreview(null);
       toast.success("Item added successfully");
@@ -125,7 +137,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, title, icon_url }: { id: string; title: string; icon_url: string | null }) => {
+    mutationFn: async ({ id, icon_url }: { id: string; icon_url: string | null }) => {
       let finalIconUrl = icon_url;
 
       if (editImageFile) {
@@ -135,7 +147,10 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
       const { error } = await (supabase as any)
         .from("experience_includes")
         .update({ 
-          title,
+          title: editData.title,
+          title_he: editData.title_he || null,
+          description: editData.description || null,
+          description_he: editData.description_he || null,
           icon_url: finalIconUrl 
         })
         .eq("id", id);
@@ -145,7 +160,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience-includes", experienceId] });
       setEditingId(null);
-      setEditTitle("");
+      setEditData({ title: "", title_he: "", description: "", description_he: "" });
       setEditImageFile(null);
       setEditImagePreview(null);
       toast.success("Item updated successfully");
@@ -190,26 +205,30 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
 
   const startEditing = (include: any) => {
     setEditingId(include.id);
-    setEditTitle(include.title);
+    setEditData({
+      title: include.title || "",
+      title_he: include.title_he || "",
+      description: include.description || "",
+      description_he: include.description_he || "",
+    });
     setEditImagePreview(include.icon_url);
     setEditImageFile(null);
   };
 
   const cancelEditing = () => {
     setEditingId(null);
-    setEditTitle("");
+    setEditData({ title: "", title_he: "", description: "", description_he: "" });
     setEditImageFile(null);
     setEditImagePreview(null);
   };
 
   const saveEdit = (include: any) => {
-    if (!editTitle.trim()) {
+    if (!editData.title.trim()) {
       toast.error("Title is required");
       return;
     }
     updateMutation.mutate({
       id: include.id,
-      title: editTitle,
       icon_url: include.icon_url,
     });
   };
@@ -222,16 +241,73 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
         <CardTitle>What's Included</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/30">
+        <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
           <h4 className="font-medium">Add new item</h4>
-          <Input
-            placeholder="Title *"
-            value={newInclude.title}
-            onChange={(e) => setNewInclude({ ...newInclude, title: e.target.value })}
-          />
           
+          {/* Bilingual Title & Description - Side by Side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* English Column */}
+            <div className="space-y-3">
+              <div className="bg-muted/30 p-2 rounded">
+                <h5 className="text-sm font-medium">English Version</h5>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g., Breakfast Included"
+                  value={newInclude.title}
+                  onChange={(e) => setNewInclude({ ...newInclude, title: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Additional details..."
+                  value={newInclude.description}
+                  onChange={(e) => setNewInclude({ ...newInclude, description: e.target.value })}
+                  rows={2}
+                />
+              </div>
+            </div>
+
+            {/* Hebrew Column */}
+            <div className="space-y-3">
+              <div className="bg-muted/30 p-2 rounded">
+                <h5 className="text-sm font-medium">Hebrew Version (עברית)</h5>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="title_he">כותרת</Label>
+                <Input
+                  id="title_he"
+                  placeholder="למשל: ארוחת בוקר כלולה"
+                  value={newInclude.title_he}
+                  onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })}
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description_he">תיאור</Label>
+                <Textarea
+                  id="description_he"
+                  placeholder="פרטים נוספים..."
+                  value={newInclude.description_he}
+                  onChange={(e) => setNewInclude({ ...newInclude, description_he: e.target.value })}
+                  rows={2}
+                  dir="rtl"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Image Upload */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Image *</Label>
+            <Label className="text-sm font-medium">Icon Image *</Label>
             <div className="flex gap-2 items-center">
               <Button
                 type="button"
@@ -299,11 +375,42 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                 {editingId === include.id ? (
                   // Edit mode
                   <div className="flex-1 space-y-3">
-                    <Input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      placeholder="Title"
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* English Edit */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">English</Label>
+                        <Input
+                          value={editData.title}
+                          onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                          placeholder="Title"
+                        />
+                        <Textarea
+                          value={editData.description}
+                          onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                          placeholder="Description"
+                          rows={2}
+                        />
+                      </div>
+                      
+                      {/* Hebrew Edit */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">עברית</Label>
+                        <Input
+                          value={editData.title_he}
+                          onChange={(e) => setEditData({ ...editData, title_he: e.target.value })}
+                          placeholder="כותרת"
+                          dir="rtl"
+                        />
+                        <Textarea
+                          value={editData.description_he}
+                          onChange={(e) => setEditData({ ...editData, description_he: e.target.value })}
+                          placeholder="תיאור"
+                          rows={2}
+                          dir="rtl"
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Button
                         type="button"
@@ -330,6 +437,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         />
                       )}
                     </div>
+                    
                     <div className="flex gap-2">
                       <Button
                         type="button"
@@ -363,7 +471,20 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium">{include.title}</div>
+                      <div className="font-medium">
+                        {include.title}
+                        {include.title_he && (
+                          <span className="text-muted-foreground mr-2 text-sm block" dir="rtl">{include.title_he}</span>
+                        )}
+                      </div>
+                      {(include.description || include.description_he) && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {include.description}
+                          {include.description_he && (
+                            <span className="block" dir="rtl">{include.description_he}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <div className="flex items-center gap-2">
