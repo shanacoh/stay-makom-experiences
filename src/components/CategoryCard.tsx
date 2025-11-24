@@ -1,17 +1,26 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 
 interface CategoryCardProps {
-  title: string;
-  description: string;
-  image: string;
-  slug: string;
+  category: {
+    name: string;
+    name_he: string | null;
+    intro_rich_text: string | null;
+    intro_rich_text_he: string | null;
+    hero_image: string | null;
+    slug: string;
+  };
 }
 
-const CategoryCard = ({ title, description, image, slug }: CategoryCardProps) => {
+const CategoryCard = ({ category }: CategoryCardProps) => {
+  const { lang } = useLanguage();
+  const title = getLocalizedField(category, 'name', lang) as string;
+  const image = category.hero_image || '';
+  
   return (
     <Link 
-      to={`/category/${slug}`}
+      to={`/category/${category.slug}?lang=${lang}`}
       className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-smooth"
     >
       <div className="aspect-[1/1] relative">

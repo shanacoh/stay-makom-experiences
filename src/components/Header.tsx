@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const Header = () => {
   const location = useLocation();
@@ -22,6 +23,8 @@ const Header = () => {
     signOut
   } = useAuth();
   const navigate = useNavigate();
+  const { lang, setLanguage } = useLanguage();
+  
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -80,9 +83,27 @@ const Header = () => {
 
         <div className="flex items-center space-x-3">
           <div className="hidden md:flex items-center space-x-2">
-            <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/80' : 'text-muted-foreground'}`}>EN</span>
+            <button
+              onClick={() => setLanguage("en")}
+              className={`text-xs transition-colors ${
+                lang === "en"
+                  ? isTransparentPage && !isScrolled ? 'text-white font-semibold' : 'text-foreground font-semibold'
+                  : isTransparentPage && !isScrolled ? 'text-white/60 hover:text-white/80' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              EN
+            </button>
             <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
-            <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'} cursor-not-allowed`}>HE (soon)</span>
+            <button
+              onClick={() => setLanguage("he")}
+              className={`text-xs transition-colors ${
+                lang === "he"
+                  ? isTransparentPage && !isScrolled ? 'text-white font-semibold' : 'text-foreground font-semibold'
+                  : isTransparentPage && !isScrolled ? 'text-white/60 hover:text-white/80' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              עברית
+            </button>
           </div>
           
           <Link to="/partners">

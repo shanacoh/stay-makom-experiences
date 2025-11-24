@@ -20,10 +20,14 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: "",
+    name_he: "",
     slug: "",
     region: "",
+    region_he: "",
     city: "",
+    city_he: "",
     story: "",
+    story_he: "",
     hero_image: "",
     contact_email: "",
     contact_phone: "",
@@ -49,10 +53,14 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
     if (hotel) {
       setFormData({
         name: hotel.name || "",
+        name_he: hotel.name_he || "",
         slug: hotel.slug || "",
         region: hotel.region || "",
+        region_he: hotel.region_he || "",
         city: hotel.city || "",
+        city_he: hotel.city_he || "",
         story: hotel.story || "",
+        story_he: hotel.story_he || "",
         hero_image: hotel.hero_image || "",
         contact_email: hotel.contact_email || "",
         contact_phone: hotel.contact_phone || "",
@@ -114,74 +122,47 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Hotel Details</CardTitle>
+            <CardTitle>Hotel Details - Bilingual</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Hotel Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug *</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="region">Region</Label>
-                <Input
-                  id="region"
-                  value={formData.region}
-                  onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status *</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: "draft" | "published") =>
-                    setFormData({ ...formData, status: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <ImageUpload
-                label="Hero Image"
-                bucket="hotel-images"
-                value={formData.hero_image}
-                onChange={(url) => setFormData({ ...formData, hero_image: url })}
-                description="Main image for the hotel page"
+            {/* Basic Fields */}
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug *</Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                required
               />
+            </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="status">Status *</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value: "draft" | "published") =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <ImageUpload
+              label="Hero Image"
+              bucket="hotel-images"
+              value={formData.hero_image}
+              onChange={(url) => setFormData({ ...formData, hero_image: url })}
+              description="Main image for the hotel page"
+            />
+
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="contact_email">Contact Email</Label>
                 <Input
@@ -202,14 +183,104 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="story">Story</Label>
-              <Textarea
-                id="story"
-                value={formData.story}
-                onChange={(e) => setFormData({ ...formData, story: e.target.value })}
-                rows={6}
-              />
+            {/* Bilingual Content - Side by Side */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Bilingual Content</h3>
+              
+              <div className="grid grid-cols-2 gap-6">
+                {/* English Column */}
+                <div className="space-y-4">
+                  <div className="bg-muted/30 p-2 rounded">
+                    <h4 className="font-medium text-sm">English Version</h4>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Hotel Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="region">Region</Label>
+                    <Input
+                      id="region"
+                      value={formData.region}
+                      onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="story">Story</Label>
+                    <Textarea
+                      id="story"
+                      value={formData.story}
+                      onChange={(e) => setFormData({ ...formData, story: e.target.value })}
+                      rows={6}
+                    />
+                  </div>
+                </div>
+
+                {/* Hebrew Column */}
+                <div className="space-y-4">
+                  <div className="bg-muted/30 p-2 rounded">
+                    <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="name_he">שם המלון</Label>
+                    <Input
+                      id="name_he"
+                      value={formData.name_he}
+                      onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
+                      dir="rtl"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="region_he">אזור</Label>
+                    <Input
+                      id="region_he"
+                      value={formData.region_he}
+                      onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
+                      dir="rtl"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="city_he">עיר</Label>
+                    <Input
+                      id="city_he"
+                      value={formData.city_he}
+                      onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
+                      dir="rtl"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="story_he">סיפור</Label>
+                    <Textarea
+                      id="story_he"
+                      value={formData.story_he}
+                      onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
+                      rows={6}
+                      dir="rtl"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-2 justify-end">
