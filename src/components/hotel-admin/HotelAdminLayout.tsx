@@ -18,18 +18,14 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/hotel-admin", icon: LayoutDashboard, end: true },
-  { name: "My Property", href: "/hotel-admin/property", icon: Hotel },
+  { name: "Property", href: "/hotel-admin/property", icon: Hotel },
   { name: "Experiences", href: "/hotel-admin/experiences", icon: Ticket },
-  { name: "Extras", href: "/hotel-admin/extras", icon: Plus },
-  { name: "Packages", href: "/hotel-admin/packages", icon: Package },
-  { name: "Calendar", href: "/hotel-admin/calendar", icon: Calendar },
-  { name: "Pricing", href: "/hotel-admin/pricing", icon: DollarSign },
   { name: "Bookings", href: "/hotel-admin/bookings", icon: FileText },
+  { name: "Extras", href: "/hotel-admin/extras", icon: Plus },
   { name: "Billing", href: "/hotel-admin/billing", icon: CreditCard },
   { name: "Reviews", href: "/hotel-admin/reviews", icon: Star },
-  { name: "Payments", href: "/hotel-admin/payments", icon: Wallet },
-  { name: "Contact & Support", href: "/hotel-admin/contact", icon: MessageSquare },
-  { name: "Settings", href: "/hotel-admin/settings", icon: Settings },
+  { name: "Payment Info", href: "/hotel-admin/payment-info", icon: Wallet },
+  { name: "Support", href: "/hotel-admin/contact", icon: MessageSquare },
 ];
 
 export const HotelAdminLayout = () => {
