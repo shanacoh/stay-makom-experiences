@@ -226,7 +226,7 @@ const Index = () => {
               <h3 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em]">
                 40° of internal peace
               </h3>
-              <p className="text-base sm:text-lg text-muted-foreground">
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                 Check in, drop your bags and let the desert do the rest.
               </p>
               <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto" onClick={() => {
@@ -416,7 +416,7 @@ const Index = () => {
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold tracking-[-0.02em]">
               Latest Experiences
             </h2>
-            <Button variant="link" className="text-foreground underline underline-offset-4 text-xs sm:text-sm md:text-base p-0 h-auto">
+            <Button variant="link" className="text-foreground underline underline-offset-4 text-xs sm:text-sm p-0 h-auto">
               View all experiences →
             </Button>
           </div>
