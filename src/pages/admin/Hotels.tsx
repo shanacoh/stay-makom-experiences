@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -30,6 +30,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const AdminHotels = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [archiveId, setArchiveId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -92,6 +93,17 @@ const AdminHotels = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Check for bookings first
+      const { count } = await supabase
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("hotel_id", id);
+      
+      if (count && count > 0) {
+        throw new Error(`BOOKINGS_EXIST:${count}`);
+      }
+      
+      // No bookings, proceed with deletion
       const { error } = await supabase.from("hotels" as any).delete().eq("id", id);
       if (error) throw error;
     },
@@ -100,6 +112,36 @@ const AdminHotels = () => {
       toast.success("Hotel deleted successfully");
       setDeleteId(null);
     },
+    onError: (error: Error) => {
+      if (error.message.startsWith("BOOKINGS_EXIST:")) {
+        const count = error.message.split(":")[1];
+        toast.error(
+          `Cannot delete: This hotel has ${count} existing booking(s). Archive it instead.`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error("Failed to delete hotel");
+      }
+    }
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("hotels" as any)
+        .update({ status: 'archived' })
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-hotels"] });
+      toast.success("Hotel archived successfully");
+      setArchiveId(null);
+    },
+    onError: () => {
+      toast.error("Failed to archive hotel");
+    }
   });
 
   const togglePublishMutation = useMutation({
@@ -153,6 +195,7 @@ const AdminHotels = () => {
             <SelectItem value="published">Published</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
 
@@ -229,6 +272,8 @@ const AdminHotels = () => {
                         variant={
                           hotel.status === "published"
                             ? "default"
+                            : hotel.status === "archived"
+                            ? "destructive"
                             : hotel.status === "pending"
                             ? "outline"
                             : "secondary"
@@ -236,6 +281,8 @@ const AdminHotels = () => {
                         className={
                           hotel.status === "published"
                             ? "bg-green-500 hover:bg-green-600"
+                            : hotel.status === "archived"
+                            ? "bg-gray-500 hover:bg-gray-600"
                             : hotel.status === "pending"
                             ? "border-orange-500 text-orange-500"
                             : ""
@@ -286,6 +333,16 @@ const AdminHotels = () => {
                             <Eye className="w-4 h-4 text-green-600" />
                           )}
                         </Button>
+                        {hotel.status !== 'archived' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setArchiveId(hotel.id)}
+                            title="Archive Hotel"
+                          >
+                            <Archive className="w-4 h-4 text-orange-600" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -331,6 +388,27 @@ const AdminHotels = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!archiveId} onOpenChange={() => setArchiveId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive Hotel</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will hide the hotel from public view and prevent new bookings.
+              Existing bookings will remain intact. You can unarchive it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => archiveId && archiveMutation.mutate(archiveId)}
+              className="bg-orange-600 text-white hover:bg-orange-700"
+            >
+              Archive
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

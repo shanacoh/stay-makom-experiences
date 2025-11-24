@@ -44,7 +44,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2, Trash2 } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import IncludesManager from "@/components/admin/IncludesManager";
@@ -92,6 +93,23 @@ export function ExperienceForm({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showExtrasDialog, setShowExtrasDialog] = useState(false);
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
+
+  // Check hotel status
+  const { data: hotel } = useQuery({
+    queryKey: ["hotel-status", hotelId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hotels")
+        .select("status")
+        .eq("id", hotelId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!hotelId
+  });
+
+  const isArchived = hotel?.status === 'archived';
 
   // Load categories
   const { data: categories } = useQuery({
@@ -584,6 +602,17 @@ export function ExperienceForm({
 
   return (
     <div className="max-w-5xl mx-auto p-8 space-y-8">
+      {/* Archived hotel warning */}
+      {isArchived && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Hotel Archived</AlertTitle>
+          <AlertDescription>
+            This hotel is archived and cannot accept new experiences or bookings.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -598,7 +627,7 @@ export function ExperienceForm({
           <Button
             variant="outline"
             onClick={handleSubmit(handleSaveDraft)}
-            disabled={isSaving}
+            disabled={isSaving || isArchived}
           >
             {isSaving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -609,7 +638,7 @@ export function ExperienceForm({
           </Button>
           <Button
             onClick={handleSubmit(handlePublish)}
-            disabled={!canPublish || isSaving}
+            disabled={!canPublish || isSaving || isArchived}
           >
             {isSaving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
