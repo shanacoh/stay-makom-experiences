@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface BookingPanelProps {
   experienceId: string;
@@ -56,6 +57,7 @@ const BookingPanel = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { lang } = useLanguage();
   
   const [partySize, setPartySize] = useState(minParty);
   const [selectedNights, setSelectedNights] = useState<1 | 2 | 3>(1);
@@ -266,11 +268,13 @@ const BookingPanel = ({
   );
 
   return (
-    <Card className="p-6 sticky top-24 shadow-strong">
+    <Card className="p-6 sticky top-20 shadow-strong">
       <div className="space-y-6">
         {/* Party Size Selector */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Nombre de personnes</Label>
+          <Label className="text-sm font-medium">
+            {lang === 'he' ? 'מספר אנשים' : lang === 'en' ? 'Number of guests' : 'Nombre de personnes'}
+          </Label>
           <Select
             value={partySize.toString()}
             onValueChange={(value) => setPartySize(parseInt(value))}
@@ -284,7 +288,10 @@ const BookingPanel = ({
             <SelectContent>
               {partySizeOptions.map((size) => (
                 <SelectItem key={size} value={size.toString()}>
-                  {size} {size === 1 ? "adulte" : "adultes"}
+                  {size} {size === 1 
+                    ? (lang === 'he' ? 'מבוגר' : lang === 'en' ? 'adult' : 'adulte')
+                    : (lang === 'he' ? 'מבוגרים' : lang === 'en' ? 'adults' : 'adultes')
+                  }
                 </SelectItem>
               ))}
             </SelectContent>
@@ -293,7 +300,9 @@ const BookingPanel = ({
 
         {/* Nights Selector */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Durée du séjour</Label>
+          <Label className="text-sm font-medium">
+            {lang === 'he' ? 'משך השהייה' : lang === 'en' ? 'Stay duration' : 'Durée du séjour'}
+          </Label>
           <div className="flex gap-2">
             {([1, 2, 3] as const).map((nights) => (
               <button
@@ -304,14 +313,17 @@ const BookingPanel = ({
                   setSelectedDateId(null); // Reset selection when changing nights
                 }}
                 className={cn(
-                  "flex-1 px-4 py-2 rounded-lg border-2 transition-all",
-                  "hover:border-primary/50",
+                  "flex-1 px-2 py-2 rounded-lg border-2 transition-all",
+                  "hover:border-primary/50 text-xs sm:text-sm whitespace-nowrap",
                   selectedNights === nights
                     ? "border-primary bg-primary/5 font-medium"
                     : "border-border"
                 )}
               >
-                {nights} {nights === 1 ? "nuit" : "nuits"}
+                {nights} {nights === 1 
+                  ? (lang === 'he' ? 'לילה' : lang === 'en' ? 'night' : 'nuit')
+                  : (lang === 'he' ? 'לילות' : lang === 'en' ? 'nights' : 'nuits')
+                }
               </button>
             ))}
           </div>
@@ -319,7 +331,9 @@ const BookingPanel = ({
 
         {/* Date Options */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Sélectionnez vos dates</Label>
+          <Label className="text-sm font-medium">
+            {lang === 'he' ? 'בחרו תאריכים' : lang === 'en' ? 'Select your dates' : 'Sélectionnez vos dates'}
+          </Label>
           <RadioGroup
             value={selectedDateId || ""}
             onValueChange={setSelectedDateId}
@@ -356,7 +370,7 @@ const BookingPanel = ({
                       </span>
                       {option.featured && (
                         <span className="text-xs font-medium bg-foreground text-background px-2 py-0.5 rounded">
-                          Plus que 2 restantes
+                          {lang === 'he' ? 'רק 2 נותרו' : lang === 'en' ? 'Only 2 left' : 'Plus que 2 restantes'}
                         </span>
                       )}
                     </div>
@@ -370,7 +384,7 @@ const BookingPanel = ({
         {/* Show booking button if no date selected */}
         {!selectedDateId && (
           <Button size="lg" className="w-full" disabled>
-            Choisissez une date
+            {lang === 'he' ? 'בחרו תאריך' : lang === 'en' ? 'Choose a date' : 'Choisissez une date'}
           </Button>
         )}
 
@@ -418,12 +432,12 @@ const BookingPanel = ({
               {createBookingMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Creating booking...
+                  {lang === 'he' ? 'יוצר הזמנה...' : lang === 'en' ? 'Creating booking...' : 'Création de la réservation...'}
                 </>
               ) : (
                 <>
                   <Calendar className="mr-2 h-5 w-5" />
-                  Réserver & Payer
+                  {lang === 'he' ? 'הזמן ושלם' : lang === 'en' ? 'Book & Pay' : 'Réserver & Payer'}
                 </>
               )}
             </Button>
@@ -432,7 +446,7 @@ const BookingPanel = ({
 
         {selectedDateId && !selectedRoom && (
           <p className="text-sm text-muted-foreground text-center">
-            Sélectionnez une chambre pour continuer
+            {lang === 'he' ? 'בחרו חדר להמשך' : lang === 'en' ? 'Select a room to continue' : 'Sélectionnez une chambre pour continuer'}
           </p>
         )}
       </div>
