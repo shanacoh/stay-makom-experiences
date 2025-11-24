@@ -147,29 +147,4 @@ All colors MUST be HSL.
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
-  /* Carousel card fade effect for side cards */
-  .carousel-card-fade {
-    position: relative;
-  }
-
-  .carousel-card-fade > * {
-    position: relative;
-  }
-
-  .carousel-card-fade::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.5);
-    opacity: 1;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: 1;
-    border-radius: 0.5rem;
-  }
-
-  .carousel-card-fade:hover::after {
-    opacity: 0;
-  }
 }

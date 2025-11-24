@@ -289,6 +289,10 @@ const Index = () => {
             <>
               {/* Mobile Carousel */}
               <div className="md:hidden relative mb-8">
+                {/* Fade masks on sides */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                
                 <div 
                   ref={carouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -298,7 +302,7 @@ const Index = () => {
                     {[...(filteredExperiences || []), ...(filteredExperiences || [])].map((experience, index) => (
                       <div 
                         key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] snap-center carousel-card-fade"
+                        className="flex-shrink-0 w-[75vw] snap-center"
                       >
                         <ExperienceCard
                           experience={experience}
@@ -429,6 +433,10 @@ const Index = () => {
             <>
               {/* Mobile Carousel */}
               <div className="md:hidden relative">
+                {/* Fade masks on sides */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                
                 <div 
                   ref={latestCarouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -438,7 +446,7 @@ const Index = () => {
                     {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
                       <div 
                         key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] snap-center carousel-card-fade"
+                        className="flex-shrink-0 w-[75vw] snap-center"
                       >
                         <ExperienceCard
                           experience={experience}
