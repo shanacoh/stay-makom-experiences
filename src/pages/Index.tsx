@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -189,13 +189,13 @@ const Index = () => {
                     }}
                     className="flex flex-col items-center gap-2 group cursor-pointer"
                   >
-                    <div className="text-2xl sm:text-3xl transition-transform group-hover:scale-110">
-                      {category.slug === 'romantic' && '❤️'}
-                      {category.slug === 'family' && '👨‍👩‍👧‍👦'}
-                      {category.slug === 'golden-age' && '✨'}
-                      {category.slug === 'beyond-nature' && '🌿'}
-                      {category.slug === 'taste-affair' && '🍷'}
-                      {category.slug === 'active-break' && '⚡'}
+                    <div className="transition-transform group-hover:scale-110">
+                      {category.slug === 'romantic' && <Heart className="w-8 h-8 text-foreground" />}
+                      {category.slug === 'family' && <Users className="w-8 h-8 text-foreground" />}
+                      {category.slug === 'golden-age' && <Sparkles className="w-8 h-8 text-foreground" />}
+                      {category.slug === 'beyond-nature' && <Leaf className="w-8 h-8 text-foreground" />}
+                      {category.slug === 'taste-affair' && <Wine className="w-8 h-8 text-foreground" />}
+                      {category.slug === 'active-break' && <Zap className="w-8 h-8 text-foreground" />}
                     </div>
                     <span className="text-xs sm:text-sm font-medium uppercase tracking-wider group-hover:text-primary transition-colors">
                       {category.name}
