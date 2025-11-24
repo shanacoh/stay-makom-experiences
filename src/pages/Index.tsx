@@ -288,7 +288,7 @@ const Index = () => {
           ) : (
             <>
               {/* Mobile Carousel */}
-              <div className="md:hidden relative mb-8">
+              <div className="lg:hidden relative mb-8">
                 <div
                   ref={carouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -318,7 +318,7 @@ const Index = () => {
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid md:grid-cols-4 gap-3 mb-8">
+              <div className="hidden lg:grid lg:grid-cols-4 gap-2 md:gap-3 mb-8">
                 {filteredExperiences?.map((experience) => (
                   <ExperienceCard
                     key={experience.id}
@@ -428,7 +428,7 @@ const Index = () => {
           ) : (
             <>
               {/* Mobile Carousel */}
-              <div className="md:hidden relative">
+              <div className="lg:hidden relative">
                 <div
                   ref={latestCarouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -453,7 +453,7 @@ const Index = () => {
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid md:grid-cols-4 gap-3">
+              <div className="hidden lg:grid lg:grid-cols-4 gap-2 md:gap-3">
                 {latestExperiences?.map((experience) => (
                   <ExperienceCard
                     key={experience.id}
