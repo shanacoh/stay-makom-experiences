@@ -221,6 +221,7 @@ export type Database = {
       categories: {
         Row: {
           bullets: string[] | null
+          bullets_he: string[] | null
           created_at: string
           display_order: number | null
           editorial_tiles: Json | null
@@ -238,6 +239,7 @@ export type Database = {
         }
         Insert: {
           bullets?: string[] | null
+          bullets_he?: string[] | null
           created_at?: string
           display_order?: number | null
           editorial_tiles?: Json | null
@@ -255,6 +257,7 @@ export type Database = {
         }
         Update: {
           bullets?: string[] | null
+          bullets_he?: string[] | null
           created_at?: string
           display_order?: number | null
           editorial_tiles?: Json | null
@@ -465,6 +468,7 @@ export type Database = {
           duration: string | null
           duration_he: string | null
           good_to_know: string[] | null
+          good_to_know_he: string[] | null
           google_maps_link: string | null
           hero_image: string | null
           hotel_id: string
@@ -511,6 +515,7 @@ export type Database = {
           duration?: string | null
           duration_he?: string | null
           good_to_know?: string[] | null
+          good_to_know_he?: string[] | null
           google_maps_link?: string | null
           hero_image?: string | null
           hotel_id: string
@@ -557,6 +562,7 @@ export type Database = {
           duration?: string | null
           duration_he?: string | null
           good_to_know?: string[] | null
+          good_to_know_he?: string[] | null
           google_maps_link?: string | null
           hero_image?: string | null
           hotel_id?: string

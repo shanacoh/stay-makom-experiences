@@ -100,7 +100,7 @@ const Experience = () => {
           <div className={`grid lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 ${isMobile ? 'pb-24' : ''}`}>
             {/* Left Column - Details */}
             <div className="lg:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
-              <ExperienceDetails longCopy={experience.long_copy} />
+              <ExperienceDetails experience={experience} />
 
               {includes && includes.length > 0 && <WhatsIncludedPhotos includes={includes} />}
 

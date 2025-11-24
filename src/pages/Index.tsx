@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
 import RotatingText from "@/components/RotatingText";
 import ContactDialog from "@/components/ContactDialog";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertKioskHero from "@/assets/desert-kiosk-hero.png";
@@ -32,6 +33,7 @@ const fallbackImages: Record<string, string> = {
 const Index = () => {
   const navigate = useNavigate();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const { lang } = useLanguage();
   const {
     data: categories,
     isLoading
@@ -80,7 +82,10 @@ const Index = () => {
               More than a stay,
               <br />
               it's a{" "}
-              <RotatingText words={categories?.map(cat => cat.name) || ["Romance", "Adventure", "Family"]} interval={2500} />
+              <RotatingText 
+                words={categories?.map(cat => getLocalizedField(cat, 'name', lang) as string) || ["Romance", "Adventure", "Family"]} 
+                interval={2500} 
+              />
             </h1>
             
             
@@ -97,7 +102,7 @@ const Index = () => {
           {isLoading ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div> : <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
-              {categories?.map(category => <CategoryCard key={category.slug} title={category.name} description={category.intro_rich_text || ""} image={category.hero_image || fallbackImages[category.slug] || ""} slug={category.slug} />)}
+              {categories?.map(category => <CategoryCard key={category.slug} category={category} />)}
             </div>}
         </section>
 
