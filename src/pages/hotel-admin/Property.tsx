@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { Loader2, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function HotelProperty() {
   const { user } = useAuth();
@@ -33,39 +33,21 @@ export default function HotelProperty() {
 
   const hotel = hotelAdmin?.hotels;
 
-  // Form state
+  // Form state - only editable fields
   const [formData, setFormData] = useState({
-    name: "",
-    story: "",
-    city: "",
-    region: "",
-    contact_email: "",
     contact_phone: "",
     contact_website: "",
-    highlights: "",
-    amenities: "",
-    hero_image: "",
-    photos: [] as string[],
   });
 
   // Update form when hotel data loads
   useEffect(() => {
     if (hotel) {
       setFormData({
-        name: hotel.name || "",
-        story: hotel.story || "",
-        city: hotel.city || "",
-        region: hotel.region || "",
-        contact_email: user?.email || "",
         contact_phone: hotel.contact_phone || "",
         contact_website: hotel.contact_website || "",
-        highlights: hotel.highlights?.join(", ") || "",
-        amenities: hotel.amenities?.join(", ") || "",
-        hero_image: hotel.hero_image || "",
-        photos: hotel.photos || [],
       });
     }
-  }, [hotel, user]);
+  }, [hotel]);
 
   // Save mutation
   const saveMutation = useMutation({
@@ -75,28 +57,19 @@ export default function HotelProperty() {
       const { error } = await supabase
         .from("hotels")
         .update({
-          name: formData.name,
-          story: formData.story,
-          city: formData.city,
-          region: formData.region,
-          contact_email: formData.contact_email,
           contact_phone: formData.contact_phone,
           contact_website: formData.contact_website,
-          highlights: formData.highlights.split(",").map(h => h.trim()).filter(Boolean),
-          amenities: formData.amenities.split(",").map(a => a.trim()).filter(Boolean),
-          hero_image: formData.hero_image,
-          photos: formData.photos,
         })
         .eq("id", hotel.id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Hotel information updated successfully");
+      toast.success("Contact information updated successfully");
       queryClient.invalidateQueries({ queryKey: ["hotel-admin", user?.id] });
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to update hotel information");
+      toast.error(error.message || "Failed to update contact information");
     },
   });
 
@@ -108,16 +81,6 @@ export default function HotelProperty() {
     if (hotel?.slug) {
       navigate(`/hotels/${hotel.slug}`);
     }
-  };
-
-  const updatePhoto = (index: number, url: string) => {
-    const newPhotos = [...formData.photos];
-    if (url) {
-      newPhotos[index] = url;
-    } else {
-      newPhotos.splice(index, 1);
-    }
-    setFormData({ ...formData, photos: newPhotos });
   };
 
   if (isLoading) {
@@ -138,68 +101,113 @@ export default function HotelProperty() {
 
   return (
     <div className="p-8 max-w-5xl">
-      <h1 className="font-sans text-4xl font-bold mb-8">My Property</h1>
+      <div className="mb-8">
+        <h1 className="font-sans text-4xl font-bold">Property Information</h1>
+        <p className="text-muted-foreground mt-2">
+          View your property details and manage operational contact information
+        </p>
+      </div>
+
+      <Alert className="mb-6">
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          Marketing content (name, descriptions, photos, amenities) is managed by STAYMAKOM Admin. 
+          You can only update operational contact information here.
+        </AlertDescription>
+      </Alert>
 
       <Card>
         <CardHeader>
           <CardTitle>Hotel Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Read-only Marketing Content */}
+          <div className="space-y-6 pb-6 border-b">
+            <h3 className="font-semibold text-lg">Marketing Content (Read-Only)</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label>Hotel Name</Label>
+                <Input value={hotel.name} disabled />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Input value={hotel?.status} disabled className="capitalize" />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="name">Hotel Name</Label>
-              <Input 
-                id="name" 
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              <Label>Description</Label>
+              <Textarea 
+                rows={4} 
+                value={hotel.story || "No description"} 
+                disabled 
               />
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label>City</Label>
+                <Input value={hotel.city || "—"} disabled />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Region</Label>
+                <Input value={hotel.region || "—"} disabled />
+              </div>
+            </div>
+
+            {hotel.highlights && hotel.highlights.length > 0 && (
+              <div className="space-y-2">
+                <Label>Highlights</Label>
+                <Textarea 
+                  rows={2} 
+                  value={hotel.highlights.join(", ")}
+                  disabled 
+                />
+              </div>
+            )}
+
+            {hotel.amenities && hotel.amenities.length > 0 && (
+              <div className="space-y-2">
+                <Label>Amenities</Label>
+                <Textarea 
+                  rows={2} 
+                  value={hotel.amenities.join(", ")}
+                  disabled 
+                />
+              </div>
+            )}
+
+            {hotel.hero_image && (
+              <div className="space-y-2">
+                <Label>Main Cover Image</Label>
+                <div className="relative h-48 bg-muted rounded-lg overflow-hidden">
+                  <img
+                    src={hotel.hero_image}
+                    alt={hotel.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Editable Operational Contact */}
+          <div className="space-y-6">
+            <h3 className="font-semibold text-lg">Operational Contact (Editable)</h3>
             
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Input id="status" value={hotel?.status} disabled />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="story">Description</Label>
-            <Textarea 
-              id="story" 
-              rows={4} 
-              value={formData.story}
-              onChange={(e) => setFormData({ ...formData, story: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
+              <Label>Contact Email (From your account)</Label>
               <Input 
-                id="city" 
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="region">Region</Label>
-              <Input 
-                id="region" 
-                value={formData.region}
-                onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Contact Email (Auto-filled)</Label>
-              <Input 
-                id="email" 
                 type="email" 
-                value={formData.contact_email}
+                value={user?.email || ""}
                 disabled
               />
+              <p className="text-xs text-muted-foreground">
+                This email is used for booking notifications
+              </p>
             </div>
             
             <div className="space-y-2">
@@ -208,80 +216,34 @@ export default function HotelProperty() {
                 id="phone" 
                 value={formData.contact_phone}
                 onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+                placeholder="Enter contact phone"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="website">Website</Label>
+              <Input 
+                id="website" 
+                value={formData.contact_website}
+                onChange={(e) => setFormData({ ...formData, contact_website: e.target.value })}
+                placeholder="https://example.com"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
-            <Input 
-              id="website" 
-              value={formData.contact_website}
-              onChange={(e) => setFormData({ ...formData, contact_website: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Highlights (comma-separated)</Label>
-            <Textarea 
-              rows={3} 
-              value={formData.highlights}
-              onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Amenities (comma-separated)</Label>
-            <Textarea 
-              rows={3} 
-              value={formData.amenities}
-              onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
-            />
-          </div>
-
-          {/* Hero Image */}
-          <div className="space-y-2">
-            <ImageUpload
-              label="Main Cover Image"
-              bucket="hotel-images"
-              value={formData.hero_image}
-              onChange={(url) => setFormData({ ...formData, hero_image: url })}
-              description="This will be the main image displayed on your hotel page"
-            />
-          </div>
-
-          {/* Gallery Images */}
-          <div className="space-y-4">
-            <Label>Gallery Images (Up to 8)</Label>
-            <p className="text-sm text-muted-foreground">
-              Upload up to 8 additional photos to showcase your property
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => (
-                <ImageUpload
-                  key={index}
-                  label={`Gallery Image ${index + 1}`}
-                  bucket="hotel-images"
-                  value={formData.photos[index] || ""}
-                  onChange={(url) => updatePhoto(index, url)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex gap-4">
+          <div className="flex gap-4 pt-4">
             <Button 
               onClick={handleSave}
               disabled={saveMutation.isPending}
             >
               {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              Save Contact Info
             </Button>
             <Button 
               variant="outline"
               onClick={handlePreview}
             >
-              Preview
+              Preview Public Page
             </Button>
           </div>
         </CardContent>

@@ -25,17 +25,13 @@ import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
 import HotelExperiences from "./pages/hotel-admin/Experiences";
 import HotelExtras from "./pages/hotel-admin/Extras";
-import HotelPackages from "./pages/hotel-admin/Packages";
-import HotelCalendar from "./pages/hotel-admin/Calendar";
-import HotelPricing from "./pages/hotel-admin/Pricing";
 import HotelBookings from "./pages/hotel-admin/Bookings";
 import HotelBookingDetails from "./pages/hotel-admin/BookingDetails";
 import HotelBookingEdit from "./pages/hotel-admin/BookingEdit";
 import HotelBilling from "./pages/hotel-admin/Billing";
 import HotelReviews from "./pages/hotel-admin/Reviews";
-import HotelPayments from "./pages/hotel-admin/Payments";
+import HotelPaymentInfo from "./pages/hotel-admin/PaymentInfo";
 import HotelContact from "./pages/hotel-admin/Contact";
-import HotelSettings from "./pages/hotel-admin/Settings";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminCategories from "./pages/admin/Categories";
@@ -122,18 +118,14 @@ const App = () => (
               <Route index element={<HotelAdminDashboard />} />
               <Route path="property" element={<HotelProperty />} />
               <Route path="experiences" element={<HotelExperiences />} />
+              <Route path="bookings" element={<HotelBookings />} />
+              <Route path="bookings/:bookingId" element={<HotelBookingDetails />} />
+              <Route path="bookings/edit/:bookingId" element={<HotelBookingEdit />} />
               <Route path="extras" element={<HotelExtras />} />
-              <Route path="packages" element={<HotelPackages />} />
-              <Route path="calendar" element={<HotelCalendar />} />
-              <Route path="pricing" element={<HotelPricing />} />
-            <Route path="bookings" element={<HotelBookings />} />
-            <Route path="bookings/:bookingId" element={<HotelBookingDetails />} />
-            <Route path="bookings/edit/:bookingId" element={<HotelBookingEdit />} />
-            <Route path="billing" element={<HotelBilling />} />
-            <Route path="reviews" element={<HotelReviews />} />
-            <Route path="payments" element={<HotelPayments />} />
-            <Route path="contact" element={<HotelContact />} />
-            <Route path="settings" element={<HotelSettings />} />
+              <Route path="billing" element={<HotelBilling />} />
+              <Route path="reviews" element={<HotelReviews />} />
+              <Route path="payment-info" element={<HotelPaymentInfo />} />
+              <Route path="contact" element={<HotelContact />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

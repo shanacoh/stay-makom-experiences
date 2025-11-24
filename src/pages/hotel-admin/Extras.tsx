@@ -1,10 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, DollarSign, Package, Users, Loader2 } from "lucide-react";
+import { DollarSign, Package, Users, Loader2, Info } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function HotelExtras() {
   const { user } = useAuth();
@@ -65,18 +65,20 @@ export default function HotelExtras() {
 
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="font-sans text-4xl font-bold">Extras & Add-ons</h1>
-          <p className="text-muted-foreground mt-2">
-            Gérez les options supplémentaires pour vos expériences
-          </p>
-        </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Extra
-        </Button>
+      <div className="mb-8">
+        <h1 className="font-sans text-4xl font-bold">Extras & Add-ons</h1>
+        <p className="text-muted-foreground mt-2">
+          Overview of all extras available for your experiences
+        </p>
       </div>
+
+      <Alert className="mb-6">
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          Extras content and pricing are managed by STAYMAKOM Admin. 
+          To activate or deactivate extras, go to the Experiences page.
+        </AlertDescription>
+      </Alert>
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -86,7 +88,7 @@ export default function HotelExtras() {
         <Card>
           <CardContent className="py-16">
             <p className="text-muted-foreground text-center">
-              Aucun extra créé pour le moment.
+              No extras available yet. Contact STAYMAKOM Admin to add extras to your experiences.
             </p>
           </CardContent>
         </Card>
@@ -107,12 +109,12 @@ export default function HotelExtras() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nom</TableHead>
+                      <TableHead>Name</TableHead>
                       <TableHead>Description</TableHead>
-                      <TableHead>Prix</TableHead>
+                      <TableHead>Price</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Stock Max</TableHead>
-                      <TableHead>Statut</TableHead>
+                      <TableHead>Max Quantity</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -120,7 +122,7 @@ export default function HotelExtras() {
                       <TableRow key={extra.id}>
                         <TableCell className="font-medium">{extra.name}</TableCell>
                         <TableCell className="max-w-xs truncate text-muted-foreground">
-                          {extra.description}
+                          {extra.description || "—"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
@@ -131,16 +133,18 @@ export default function HotelExtras() {
                         <TableCell>
                           <Badge variant="outline">
                             {extra.pricing_type === "per_person" ? (
-                              <><Users className="h-3 w-3 mr-1" /> Par personne</>
+                              <><Users className="h-3 w-3 mr-1" /> Per person</>
+                            ) : extra.pricing_type === "per_night" ? (
+                              <><Package className="h-3 w-3 mr-1" /> Per night</>
                             ) : (
-                              <><Package className="h-3 w-3 mr-1" /> Par réservation</>
+                              <><Package className="h-3 w-3 mr-1" /> Per booking</>
                             )}
                           </Badge>
                         </TableCell>
                         <TableCell>{extra.max_qty}</TableCell>
                         <TableCell>
                           <Badge variant={extra.is_available ? "default" : "secondary"}>
-                            {extra.is_available ? "Disponible" : "Indisponible"}
+                            {extra.is_available ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
                       </TableRow>
