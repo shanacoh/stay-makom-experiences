@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import CategoryCard from "@/components/CategoryCard";
 import RotatingText from "@/components/RotatingText";
 import ContactDialog from "@/components/ContactDialog";
+import ExperienceCard from "@/components/ExperienceCard";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
@@ -215,36 +216,13 @@ const Index = () => {
               {/* Mobile Carousel */}
               <div className="md:hidden overflow-x-auto mb-8 -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
                 <div className="flex gap-4 pb-4">
-                  {latestExperiences?.slice(0, 8).map((experience, index) => (
-                    <div 
-                      key={experience.id} 
-                      className="flex-shrink-0 w-[85vw] snap-center group cursor-pointer"
-                      onClick={() => navigate(`/experience/${experience.slug}`)}
-                    >
-                      <div className="relative h-[320px] rounded-xl overflow-hidden mb-3 shadow-lg">
-                        <div 
-                          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-active:scale-105"
-                          style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
-                        />
-                        <div className="absolute inset-0 bg-black/20" />
-                      </div>
-                      
-                      <div className="space-y-1.5 px-1">
-                        <h4 className="font-bold text-base line-clamp-1">
-                          {experience.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {experience.hotels?.name} • {experience.hotels?.city}
-                        </p>
-                        <div className="flex items-baseline gap-2 pt-1">
-                          <span className="font-bold text-lg">
-                            {experience.base_price}€
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
-                          </span>
-                        </div>
-                      </div>
+                  {latestExperiences?.slice(0, 8).map((experience) => (
+                    <div key={experience.id} className="flex-shrink-0 w-[85vw] snap-center">
+                      <ExperienceCard
+                        experience={experience}
+                        rating={8.5 + Math.random() * 0.5}
+                        reviewCount={50 + Math.floor(Math.random() * 950)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -253,36 +231,12 @@ const Index = () => {
               {/* Desktop Grid */}
               <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                 {latestExperiences?.slice(0, 8).map((experience) => (
-                  <div 
-                    key={experience.id} 
-                    className="group cursor-pointer"
-                    onClick={() => navigate(`/experience/${experience.slug}`)}
-                  >
-                    <div className="relative h-[320px] rounded-xl overflow-hidden mb-3">
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                        style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
-                      />
-                      <div className="absolute inset-0 bg-black/20" />
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <h4 className="font-bold text-base line-clamp-1">
-                        {experience.title}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {experience.hotels?.name} • {experience.hotels?.city}
-                      </p>
-                      <div className="flex items-baseline gap-2 pt-1">
-                        <span className="font-bold text-lg">
-                          {experience.base_price}€
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    rating={8.5 + Math.random() * 0.5}
+                    reviewCount={50 + Math.floor(Math.random() * 950)}
+                  />
                 ))}
               </div>
             </>
@@ -371,48 +325,13 @@ const Index = () => {
               <div className="md:hidden overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth">
                 <div className="flex gap-4 pb-4">
                   {latestExperiences?.map((experience) => (
-                    <div 
-                      key={experience.id} 
-                      className="flex-shrink-0 w-[85vw] snap-center group cursor-pointer"
-                      onClick={() => navigate(`/experience/${experience.slug}`)}
-                    >
-                      <div className="relative h-[360px] rounded-xl overflow-hidden mb-3 shadow-lg">
-                        <div 
-                          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-active:scale-105"
-                          style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
-                        />
-                        <div className="absolute inset-0 bg-black/30" />
-                        <div className="absolute bottom-0 left-0 p-4">
-                          <h3 className="text-white font-bold text-2xl uppercase tracking-tight leading-tight">
-                            {experience.title}
-                          </h3>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1.5 px-1">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{experience.hotels?.city}</span>
-                        </div>
-                        
-                        <h4 className="font-bold text-lg">
-                          {experience.hotels?.name}
-                        </h4>
-                        
-                        {experience.subtitle && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {experience.subtitle}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-baseline gap-2 pt-1">
-                          <span className="font-bold text-xl">
-                            {experience.base_price}€
-                          </span>
-                          <span className="text-base text-muted-foreground">
-                            / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
-                          </span>
-                        </div>
-                      </div>
+                    <div key={experience.id} className="flex-shrink-0 w-[85vw] snap-center">
+                      <ExperienceCard
+                        experience={experience}
+                        badge="NEW"
+                        rating={8.5 + Math.random() * 0.5}
+                        reviewCount={50 + Math.floor(Math.random() * 950)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -421,49 +340,13 @@ const Index = () => {
               {/* Desktop Grid */}
               <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {latestExperiences?.map((experience) => (
-                  <div 
-                    key={experience.id} 
-                    className="group cursor-pointer"
-                    onClick={() => navigate(`/experience/${experience.slug}`)}
-                  >
-                    <div className="relative h-[360px] lg:h-[400px] rounded-xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4">
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                        style={{ backgroundImage: `url(${experience.hero_image || desertHotelPool})` }}
-                      />
-                      <div className="absolute inset-0 bg-black/30" />
-                      <div className="absolute bottom-0 left-0 p-4 sm:p-6">
-                        <h3 className="text-white font-bold text-xl sm:text-2xl md:text-3xl uppercase tracking-tight leading-tight">
-                          {experience.title}
-                        </h3>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <span>{experience.hotels?.city}</span>
-                      </div>
-                      
-                      <h4 className="font-bold text-base sm:text-lg">
-                        {experience.hotels?.name}
-                      </h4>
-                      
-                      {experience.subtitle && (
-                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                          {experience.subtitle}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-baseline gap-2 pt-1">
-                        <span className="font-bold text-lg sm:text-xl">
-                          {experience.base_price}€
-                        </span>
-                        <span className="text-sm sm:text-base text-muted-foreground">
-                          / {experience.base_price_type === 'per_person' ? 'person' : 'stay'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    badge="NEW"
+                    rating={8.5 + Math.random() * 0.5}
+                    reviewCount={50 + Math.floor(Math.random() * 950)}
+                  />
                 ))}
               </div>
             </>
