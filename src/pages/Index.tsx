@@ -66,7 +66,7 @@ const Index = () => {
         error
       } = await supabase.from("experiences").select("*, hotels(name, city, region)").eq("status", "published").order("created_at", {
         ascending: false
-      }).limit(3);
+      }).limit(4);
       if (error) throw error;
       return data;
     }
