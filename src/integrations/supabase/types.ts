@@ -1269,7 +1269,7 @@ export type Database = {
         | "confirmed"
         | "failed"
         | "cancelled"
-      hotel_status: "draft" | "published" | "pending"
+      hotel_status: "draft" | "published" | "pending" | "archived"
       journal_category: "Stories" | "Places" | "Guides" | "People"
       locale: "en" | "he"
       pricing_type: "per_booking" | "per_person" | "per_night"
@@ -1412,7 +1412,7 @@ export const Constants = {
         "failed",
         "cancelled",
       ],
-      hotel_status: ["draft", "published", "pending"],
+      hotel_status: ["draft", "published", "pending", "archived"],
       journal_category: ["Stories", "Places", "Guides", "People"],
       locale: ["en", "he"],
       pricing_type: ["per_booking", "per_person", "per_night"],
