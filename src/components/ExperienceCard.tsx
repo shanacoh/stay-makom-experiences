@@ -228,8 +228,8 @@ export default function ExperienceCard({
 
           {/* Right: Rating block */}
           {rating && (
-            <div className="flex items-center gap-1 text-sm">
-              <Star className="h-4 w-4 fill-current text-foreground" />
+            <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+              <span className="text-yellow-500">★</span>
               <span className="font-semibold">{rating.toFixed(1)}</span>
               {reviewCount && (
                 <span className="text-muted-foreground">({reviewCount})</span>
