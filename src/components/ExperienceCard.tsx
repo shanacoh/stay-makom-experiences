@@ -185,12 +185,23 @@ export default function ExperienceCard({
 
       {/* Content under image */}
       <div className="space-y-1">
-        {/* Line 1: Location with optional distance */}
-        <p className="text-sm text-muted-foreground">
-          {distance && userCity
-            ? `${city} · ${distance} km`
-            : city}
-        </p>
+        {/* Line 1: Location and Rating */}
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
+            {distance && userCity
+              ? `${city} · ${distance} km`
+              : city}
+          </p>
+          {rating && (
+            <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+              <span className="text-foreground">★</span>
+              <span className="font-semibold">{rating.toFixed(1)}</span>
+              {reviewCount && (
+                <span className="text-muted-foreground">({reviewCount})</span>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Line 2: Hotel name */}
         <h4 className="font-semibold text-base text-foreground leading-tight line-clamp-1">
@@ -204,37 +215,23 @@ export default function ExperienceCard({
           </p>
         )}
 
-        {/* Line 4: Price + Rating */}
-        <div className="flex items-center justify-between pt-1">
-          {/* Left: Price block */}
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold text-lg">
-              {currencySymbol}{displayPrice}
+        {/* Line 4: Price */}
+        <div className="flex items-baseline gap-2 pt-1">
+          <span className="font-bold text-lg">
+            {currencySymbol}{displayPrice}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            / {lang === 'he' ? 'לילה' : 'nuit'}
+          </span>
+          {originalPrice && originalPrice > displayPrice && (
+            <span className="text-sm text-muted-foreground line-through">
+              {currencySymbol}{originalPrice}
             </span>
-            <span className="text-sm text-muted-foreground">
-              / {lang === 'he' ? 'לילה' : 'nuit'}
+          )}
+          {discountPercent && (
+            <span className="inline-block px-2 py-0.5 bg-black text-white text-xs font-semibold rounded">
+              -{discountPercent} %
             </span>
-            {originalPrice && originalPrice > displayPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                {currencySymbol}{originalPrice}
-              </span>
-            )}
-            {discountPercent && (
-              <span className="inline-block px-2 py-0.5 bg-black text-white text-xs font-semibold rounded">
-                -{discountPercent} %
-              </span>
-            )}
-          </div>
-
-          {/* Right: Rating block */}
-          {rating && (
-            <div className="flex items-center gap-1 text-sm whitespace-nowrap">
-              <span className="text-yellow-500">★</span>
-              <span className="font-semibold">{rating.toFixed(1)}</span>
-              {reviewCount && (
-                <span className="text-muted-foreground">({reviewCount})</span>
-              )}
-            </div>
           )}
         </div>
       </div>
