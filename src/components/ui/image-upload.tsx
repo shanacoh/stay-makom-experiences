@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Upload, X, Loader2 } from "lucide-react";
+import { ImagePlus, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ImageUploadProps {
@@ -83,41 +81,55 @@ export const ImageUpload = ({
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
       
-      {value && (
-        <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-primary/20">
-          <img
-            src={value}
-            alt="Preview"
-            className="w-full h-full object-cover"
+      {value ? (
+        <div className="relative w-full max-w-md">
+          <div className="relative aspect-video rounded-lg overflow-hidden border border-border shadow-sm group">
+            <img
+              src={value}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="absolute top-2 right-2 w-7 h-7 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-destructive/90"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative w-full max-w-md">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleUpload}
+            disabled={uploading}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            id={`upload-${label}`}
           />
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            className="absolute top-2 right-2"
-            onClick={handleRemove}
+          <label
+            htmlFor={`upload-${label}`}
+            className={cn(
+              "aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 hover:bg-muted/70 hover:border-muted-foreground/40 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer",
+              uploading && "pointer-events-none opacity-60"
+            )}
           >
-            <X className="w-4 h-4 mr-1" />
-            Remove
-          </Button>
+            {uploading ? (
+              <>
+                <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
+                <p className="text-sm text-muted-foreground">Uploading...</p>
+              </>
+            ) : (
+              <>
+                <ImagePlus className="w-8 h-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground font-medium">Click to upload image</p>
+                <p className="text-xs text-muted-foreground">or drag and drop</p>
+              </>
+            )}
+          </label>
         </div>
       )}
-
-      <div className="flex gap-2">
-        <Input
-          type="file"
-          accept="image/*"
-          onChange={handleUpload}
-          disabled={uploading}
-          className="flex-1"
-        />
-        {uploading && (
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Uploading...
-          </div>
-        )}
-      </div>
 
       {description && (
         <p className="text-sm text-muted-foreground">{description}</p>
