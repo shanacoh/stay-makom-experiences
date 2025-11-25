@@ -24,7 +24,7 @@ const JournalEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isEdit = id && id !== "new";
+  const isEdit = !!id;
 
   const [formData, setFormData] = useState({
     title_en: "",

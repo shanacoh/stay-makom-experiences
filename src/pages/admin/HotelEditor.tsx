@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
+import { Link } from "react-router-dom";
 
 interface HotelEditorProps {
   hotelId?: string;
@@ -142,9 +143,12 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        <Link to="/admin/hotels">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Hotels
+          </Button>
+        </Link>
         <h2 className="text-3xl font-bold">
           {hotelId ? "Edit Hotel" : "New Hotel"}
         </h2>

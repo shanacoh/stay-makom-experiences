@@ -481,8 +481,9 @@ export function UnifiedExperienceForm({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {onClose && (
-              <Button type="button" variant="ghost" size="icon" onClick={onClose}>
-                <ArrowLeft className="h-4 w-4" />
+              <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Experiences
               </Button>
             )}
             <div>
