@@ -64,7 +64,13 @@ serve(async (req) => {
           }
         });
 
-        if (createError) throw createError;
+        if (createError) {
+          // Make error message more user-friendly
+          if (createError.message?.includes('already been registered') || createError.code === 'email_exists') {
+            throw new Error('This email address is already registered');
+          }
+          throw createError;
+        }
 
         // Create user profile
         const { error: profileError } = await supabaseAdmin
