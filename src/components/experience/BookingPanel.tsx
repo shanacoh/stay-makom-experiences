@@ -268,7 +268,7 @@ const BookingPanel = ({
   );
 
   return (
-    <Card className="p-6 sticky top-20 shadow-strong">
+    <Card className="p-6 sticky top-4 shadow-strong">
       <div className="space-y-6">
         {/* Party Size Selector */}
         <div className="space-y-2">
