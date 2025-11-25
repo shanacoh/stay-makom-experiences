@@ -229,10 +229,19 @@ export type Database = {
           id: string
           intro_rich_text: string | null
           intro_rich_text_he: string | null
+          meta_description_en: string | null
+          meta_description_he: string | null
           name: string
           name_he: string | null
+          og_description_en: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_he: string | null
           presentation_title: string | null
           presentation_title_he: string | null
+          seo_title_en: string | null
+          seo_title_he: string | null
           slug: string
           status: Database["public"]["Enums"]["hotel_status"]
           updated_at: string
@@ -247,10 +256,19 @@ export type Database = {
           id?: string
           intro_rich_text?: string | null
           intro_rich_text_he?: string | null
+          meta_description_en?: string | null
+          meta_description_he?: string | null
           name: string
           name_he?: string | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
           presentation_title?: string | null
           presentation_title_he?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
           slug: string
           status?: Database["public"]["Enums"]["hotel_status"]
           updated_at?: string
@@ -265,10 +283,19 @@ export type Database = {
           id?: string
           intro_rich_text?: string | null
           intro_rich_text_he?: string | null
+          meta_description_en?: string | null
+          meta_description_he?: string | null
           name?: string
           name_he?: string | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
           presentation_title?: string | null
           presentation_title_he?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["hotel_status"]
           updated_at?: string
@@ -480,12 +507,21 @@ export type Database = {
           long_copy_he: string | null
           max_nights: number | null
           max_party: number | null
+          meta_description_en: string | null
+          meta_description_he: string | null
           min_nights: number | null
           min_party: number | null
           not_includes: string[] | null
           not_includes_he: string[] | null
+          og_description_en: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_he: string | null
           photos: string[] | null
           region_type: string | null
+          seo_title_en: string | null
+          seo_title_he: string | null
           services: string[] | null
           services_he: string[] | null
           slug: string
@@ -527,12 +563,21 @@ export type Database = {
           long_copy_he?: string | null
           max_nights?: number | null
           max_party?: number | null
+          meta_description_en?: string | null
+          meta_description_he?: string | null
           min_nights?: number | null
           min_party?: number | null
           not_includes?: string[] | null
           not_includes_he?: string[] | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
           photos?: string[] | null
           region_type?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
           services?: string[] | null
           services_he?: string[] | null
           slug: string
@@ -574,12 +619,21 @@ export type Database = {
           long_copy_he?: string | null
           max_nights?: number | null
           max_party?: number | null
+          meta_description_en?: string | null
+          meta_description_he?: string | null
           min_nights?: number | null
           min_party?: number | null
           not_includes?: string[] | null
           not_includes_he?: string[] | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
           photos?: string[] | null
           region_type?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
           services?: string[] | null
           services_he?: string[] | null
           slug?: string
@@ -751,6 +805,54 @@ export type Database = {
           },
         ]
       }
+      global_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          key: string
+          meta_description_en: string | null
+          meta_description_he: string | null
+          og_description_en: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_he: string | null
+          seo_title_en: string | null
+          seo_title_he: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key: string
+          meta_description_en?: string | null
+          meta_description_he?: string | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key?: string
+          meta_description_en?: string | null
+          meta_description_he?: string | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       hotel_admins: {
         Row: {
           contact_email: string | null
@@ -808,11 +910,20 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          meta_description_en: string | null
+          meta_description_he: string | null
           name: string
           name_he: string | null
+          og_description_en: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_he: string | null
           photos: string[] | null
           region: string | null
           region_he: string | null
+          seo_title_en: string | null
+          seo_title_he: string | null
           slug: string
           status: Database["public"]["Enums"]["hotel_status"] | null
           story: string | null
@@ -838,11 +949,20 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          meta_description_en?: string | null
+          meta_description_he?: string | null
           name: string
           name_he?: string | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
           photos?: string[] | null
           region?: string | null
           region_he?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
           slug: string
           status?: Database["public"]["Enums"]["hotel_status"] | null
           story?: string | null
@@ -868,11 +988,20 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          meta_description_en?: string | null
+          meta_description_he?: string | null
           name?: string
           name_he?: string | null
+          og_description_en?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_he?: string | null
           photos?: string[] | null
           region?: string | null
           region_he?: string | null
+          seo_title_en?: string | null
+          seo_title_he?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["hotel_status"] | null
           story?: string | null

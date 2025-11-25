@@ -11,6 +11,7 @@ import RotatingText from "@/components/RotatingText";
 import ContactDialog from "@/components/ContactDialog";
 import ExperienceCard from "@/components/ExperienceCard";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { SEOHead } from "@/components/SEOHead";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertKioskHero from "@/assets/desert-kiosk-hero.png";
@@ -87,6 +88,20 @@ const Index = () => {
     }
   });
 
+  // Fetch homepage SEO settings
+  const { data: homepageSEO } = useQuery({
+    queryKey: ["homepage-seo"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("*")
+        .eq("key", "homepage")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const filteredExperiences = selectedCategoryId
     ? allExperiences?.filter(exp => exp.category_id === selectedCategoryId)
         .sort((a, b) => {
@@ -142,6 +157,17 @@ const Index = () => {
     return () => clearInterval(scrollInterval);
   }, [latestExperiences]);
   return <div className="min-h-screen flex flex-col">
+      <SEOHead
+        titleEn={homepageSEO?.seo_title_en}
+        titleHe={homepageSEO?.seo_title_he}
+        descriptionEn={homepageSEO?.meta_description_en}
+        descriptionHe={homepageSEO?.meta_description_he}
+        ogTitleEn={homepageSEO?.og_title_en}
+        ogTitleHe={homepageSEO?.og_title_he}
+        ogDescriptionEn={homepageSEO?.og_description_en}
+        ogDescriptionHe={homepageSEO?.og_description_he}
+        ogImage={homepageSEO?.og_image}
+      />
       <Header />
       
       <main className="flex-1">

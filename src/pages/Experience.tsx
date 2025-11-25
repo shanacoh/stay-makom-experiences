@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { SEOHead } from "@/components/SEOHead";
 const Experience = () => {
   const {
     slug
@@ -104,6 +105,19 @@ const Experience = () => {
   }
   const photos = experience.photos && experience.photos.length > 0 ? experience.photos : experience.hero_image ? [experience.hero_image] : experience.hotels?.hero_image ? [experience.hotels.hero_image] : [];
   return <div className="min-h-screen flex flex-col">
+      <SEOHead
+        titleEn={experience.seo_title_en}
+        titleHe={experience.seo_title_he}
+        descriptionEn={experience.meta_description_en}
+        descriptionHe={experience.meta_description_he}
+        ogTitleEn={experience.og_title_en}
+        ogTitleHe={experience.og_title_he}
+        ogDescriptionEn={experience.og_description_en}
+        ogDescriptionHe={experience.og_description_he}
+        ogImage={experience.og_image || experience.hero_image}
+        fallbackTitle={`${experience.title} - ${experience.hotels?.name || ''} - StayMakom`}
+        fallbackDescription={experience.subtitle || experience.long_copy?.substring(0, 155) || ""}
+      />
       <Header />
 
       <main className="flex-1">
