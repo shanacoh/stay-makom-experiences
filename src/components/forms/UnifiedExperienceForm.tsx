@@ -808,41 +808,53 @@ export function UnifiedExperienceForm({
         </Card>
 
         {/* What's Included */}
+        <Card>
+          <CardHeader>
+            <CardTitle>What's Included</CardTitle>
+            <CardDescription>Manage the items included in this experience</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {experienceId ? (
+              <IncludesManager experienceId={experienceId} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Save this experience as a draft first to manage What's Included items.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Spice It Up (Extras) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Spice It Up (Extras)</CardTitle>
+            <CardDescription>Select extras from your hotel that guests can add to this experience</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {experienceId && watch("hotel_id") ? (
+              <ExperienceExtrasSelector 
+                experienceId={experienceId} 
+                hotelId={watch("hotel_id")}
+              />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Save this experience as a draft first to manage extras.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Reviews */}
         {experienceId && (
-          <>
-            <Card>
-              <CardHeader>
-                <CardTitle>What's Included</CardTitle>
-                <CardDescription>Manage the items included in this experience</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <IncludesManager experienceId={experienceId} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Spice It Up (Extras)</CardTitle>
-                <CardDescription>Select extras from your hotel that guests can add to this experience</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ExperienceExtrasSelector 
-                  experienceId={experienceId} 
-                  hotelId={watch("hotel_id")}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Reviews</CardTitle>
-                <CardDescription>Manage customer reviews</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ReviewsManager experienceId={experienceId} />
-              </CardContent>
-            </Card>
-          </>
+          <Card>
+            <CardHeader>
+              <CardTitle>Reviews</CardTitle>
+              <CardDescription>Manage customer reviews</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ReviewsManager experienceId={experienceId} />
+            </CardContent>
+          </Card>
         )}
 
         {/* Internal Notes */}
