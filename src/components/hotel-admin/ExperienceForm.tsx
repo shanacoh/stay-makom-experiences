@@ -930,36 +930,38 @@ export function ExperienceForm({
             {linkedExtras && linkedExtras.length > 0 && (
               <div className="mt-6 space-y-3">
                 <h4 className="text-sm font-medium">Linked Extras</h4>
-                {linkedExtras.map((link: any) => {
-                  const extra = link.extras;
-                  return (
-                    <div 
-                      key={link.id} 
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium">{extra.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {extra.price} {extra.currency} {getPricingTypeLabel(extra.pricing_type)}
-                        </p>
-                        {extra.description && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {extra.description}
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => unlinkExtraMutation.mutate(link.id)}
-                        disabled={unlinkExtraMutation.isPending}
+                {linkedExtras
+                  .filter((link: any) => link.extras) // Filter out any links where extras is null/undefined
+                  .map((link: any) => {
+                    const extra = link.extras;
+                    return (
+                      <div 
+                        key={link.id} 
+                        className="flex items-center justify-between p-4 border rounded-lg"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  );
-                })}
+                        <div className="flex-1">
+                          <p className="font-medium">{extra.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {extra.price} {extra.currency} {getPricingTypeLabel(extra.pricing_type)}
+                          </p>
+                          {extra.description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {extra.description}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => unlinkExtraMutation.mutate(link.id)}
+                          disabled={unlinkExtraMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    );
+                  })}
               </div>
             )}
 
