@@ -1,14 +1,26 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Eye } from "lucide-react";
+import { Plus, Edit, Eye, EyeOff, Copy, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnifiedExperienceForm } from "@/components/forms/UnifiedExperienceForm";
+import { toast } from "sonner";
+import { generateSlug } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminExperiences = () => {
   const navigate = useNavigate();
@@ -20,6 +32,8 @@ const AdminExperiences = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [hotelFilter, setHotelFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [experienceToDelete, setExperienceToDelete] = useState<string | null>(null);
 
   // Fetch all hotels for dropdown
   const { data: hotels } = useQuery({
@@ -93,6 +107,93 @@ const AdminExperiences = () => {
     setEditingExperienceId(null);
     setSelectedHotelId("");
     queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
+  };
+
+  // Toggle visibility mutation
+  const toggleVisibilityMutation = useMutation({
+    mutationFn: async ({ id, currentStatus }: { id: string; currentStatus: string }) => {
+      const newStatus = currentStatus === "published" ? "draft" : "published";
+      const { error } = await supabase
+        .from("experiences")
+        .update({ status: newStatus })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
+      toast.success("Experience visibility updated");
+    },
+    onError: () => {
+      toast.error("Error updating visibility");
+    },
+  });
+
+  // Duplicate mutation
+  const duplicateMutation = useMutation({
+    mutationFn: async (experienceId: string) => {
+      const { data: original, error: fetchError } = await supabase
+        .from("experiences")
+        .select("*")
+        .eq("id", experienceId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+
+      const newExperience = {
+        ...original,
+        id: undefined,
+        title: `${original.title} (Copy)`,
+        title_he: original.title_he ? `${original.title_he} (עותק)` : null,
+        slug: generateSlug(`${original.title}-copy-${Date.now()}`),
+        status: "draft" as const,
+        created_at: undefined,
+        updated_at: undefined,
+      };
+
+      const { error: insertError } = await supabase
+        .from("experiences")
+        .insert([newExperience]);
+      
+      if (insertError) throw insertError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
+      toast.success("Experience duplicated successfully");
+    },
+    onError: () => {
+      toast.error("Error duplicating experience");
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (experienceId: string) => {
+      const { error } = await supabase
+        .from("experiences")
+        .delete()
+        .eq("id", experienceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
+      toast.success("Experience deleted");
+      setDeleteDialogOpen(false);
+      setExperienceToDelete(null);
+    },
+    onError: () => {
+      toast.error("Error deleting experience");
+    },
+  });
+
+  const handleDeleteClick = (experienceId: string) => {
+    setExperienceToDelete(experienceId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (experienceToDelete) {
+      deleteMutation.mutate(experienceToDelete);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -274,6 +375,44 @@ const AdminExperiences = () => {
                       <Eye className="w-4 h-4 mr-1" />
                       View
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toggleVisibilityMutation.mutate({
+                        id: experience.id,
+                        currentStatus: experience.status || "draft"
+                      })}
+                      disabled={toggleVisibilityMutation.isPending}
+                    >
+                      {experience.status === "published" ? (
+                        <>
+                          <EyeOff className="w-4 h-4 mr-1" />
+                          Hide
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-4 h-4 mr-1" />
+                          Show
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => duplicateMutation.mutate(experience.id)}
+                      disabled={duplicateMutation.isPending}
+                    >
+                      <Copy className="w-4 h-4 mr-1" />
+                      Duplicate
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteClick(experience.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -281,6 +420,28 @@ const AdminExperiences = () => {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Experience</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this experience? This action cannot be undone.
+              All associated data including bookings may be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
