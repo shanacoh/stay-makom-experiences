@@ -331,8 +331,17 @@ const AdminCustomers = () => {
           hotelId: userData.hotelId || null
         }
       });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'Failed to create user');
+      
+      // Handle edge function errors
+      if (error) {
+        const errorMessage = error.message || JSON.stringify(error);
+        throw new Error(errorMessage);
+      }
+      
+      // Handle business logic errors from the function
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to create user');
+      }
     },
     onSuccess: () => {
       toast.success("User created successfully");
@@ -348,8 +357,24 @@ const AdminCustomers = () => {
       });
       refetch();
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create user");
+    onError: (error: any) => {
+      // Extract error message from various error formats
+      let errorMessage = "Failed to create user";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.error) {
+        errorMessage = error.error;
+      }
+      
+      // Make email already exists error more user-friendly
+      if (errorMessage.includes("already been registered") || errorMessage.includes("email_exists")) {
+        errorMessage = "This email address is already registered. Please use a different email.";
+      }
+      
+      toast.error(errorMessage);
     },
   });
 
