@@ -45,17 +45,21 @@ export default function HotelExperiences() {
     enabled: !!hotelAdmin?.hotel_id,
   });
 
-  // Fetch extras with experience relation
+  // Fetch extras through experience_extras join
   const { data: experienceExtras } = useQuery({
-    queryKey: ["experience-extras", hotelAdmin?.hotel_id],
+    queryKey: ["experience-extras-links", hotelAdmin?.hotel_id],
     queryFn: async () => {
       if (!experiences) return [];
       
       const experienceIds = experiences.map(e => e.id);
       
       const { data, error } = await supabase
-        .from("extras")
-        .select("*")
+        .from("experience_extras")
+        .select(`
+          experience_id,
+          extra_id,
+          extras (*)
+        `)
         .in("experience_id", experienceIds);
       
       if (error) throw error;
@@ -166,7 +170,7 @@ export default function HotelExperiences() {
               recentBookings: 0,
             };
 
-            const expExtras = experienceExtras?.filter(e => e.experience_id === exp.id) || [];
+            const expExtras = experienceExtras?.filter(link => link.experience_id === exp.id).map(link => link.extras) || [];
 
             return (
               <Card key={exp.id} className="overflow-hidden">

@@ -80,12 +80,22 @@ const Experience = () => {
   } = useQuery({
     queryKey: ["experience-extras", experience?.id],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("extras").select("*").eq("experience_id", experience?.id).eq("is_available", true).order("sort_order");
+      // Fetch extras through the experience_extras join table
+      const { data, error } = await supabase
+        .from("experience_extras")
+        .select(`
+          extra_id,
+          extras (*)
+        `)
+        .eq("experience_id", experience?.id);
+
       if (error) throw error;
-      return data;
+      
+      // Filter to only available extras and flatten the structure
+      return data
+        ?.map((item: any) => item.extras)
+        .filter((extra: any) => extra && extra.is_available)
+        .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0)) || [];
     },
     enabled: !!experience?.id
   });

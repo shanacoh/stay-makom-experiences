@@ -25,6 +25,7 @@ import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
 import HotelExperiences from "./pages/hotel-admin/Experiences";
 import HotelExtras from "./pages/hotel-admin/Extras";
+import HotelExtrasManagement from "./pages/hotel-admin/ExtrasManagement";
 import HotelBookings from "./pages/hotel-admin/Bookings";
 import HotelBookingDetails from "./pages/hotel-admin/BookingDetails";
 import HotelBookingEdit from "./pages/hotel-admin/BookingEdit";
@@ -119,6 +120,7 @@ const App = () => (
               <Route path="bookings/:bookingId" element={<HotelBookingDetails />} />
               <Route path="bookings/edit/:bookingId" element={<HotelBookingEdit />} />
               <Route path="extras" element={<HotelExtras />} />
+              <Route path="extras-management" element={<HotelExtrasManagement />} />
               <Route path="billing" element={<HotelBilling />} />
               <Route path="reviews" element={<HotelReviews />} />
               <Route path="payment-info" element={<HotelPaymentInfo />} />
