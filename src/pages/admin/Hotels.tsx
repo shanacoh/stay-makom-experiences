@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink, Archive } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,13 +29,15 @@ import { HotelEditor } from "./HotelEditor";
 import { formatDistanceToNow } from "date-fns";
 
 const AdminHotels = () => {
+  const { hotelId } = useParams();
+  const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [archiveId, setArchiveId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const queryClient = useQueryClient();
+  
+  const isFormView = window.location.pathname.includes("/new") || window.location.pathname.includes("/edit");
 
   const { data: hotels, isLoading } = useQuery({
     queryKey: ["admin-hotels"],
@@ -185,14 +187,11 @@ const AdminHotels = () => {
     },
   });
 
-  if (showForm || editingId) {
+  if (isFormView) {
     return (
       <HotelEditor
-        hotelId={editingId || undefined}
-        onClose={() => {
-          setShowForm(false);
-          setEditingId(null);
-        }}
+        hotelId={hotelId}
+        onClose={() => navigate("/admin/hotels")}
       />
     );
   }
@@ -204,7 +203,7 @@ const AdminHotels = () => {
           <h2 className="text-3xl font-bold">Hotels</h2>
           <p className="text-muted-foreground">Manage hotel properties</p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
+        <Button onClick={() => navigate("/admin/hotels/new")}>
           <Plus className="w-4 h-4 mr-2" />
           Add Hotel
         </Button>
@@ -326,7 +325,7 @@ const AdminHotels = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setEditingId(hotel.id)}
+                          onClick={() => navigate(`/admin/hotels/edit/${hotel.id}`)}
                           title="Edit Hotel"
                         >
                           <Edit className="w-4 h-4" />
@@ -391,7 +390,7 @@ const AdminHotels = () => {
               ? "No hotels match the selected filters"
               : "No hotels yet"}
           </p>
-          <Button onClick={() => setShowForm(true)}>
+          <Button onClick={() => navigate("/admin/hotels/new")}>
             <Plus className="w-4 h-4 mr-2" />
             Add your first hotel
           </Button>

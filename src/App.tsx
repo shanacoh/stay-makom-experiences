@@ -95,14 +95,19 @@ const App = () => (
               <Route path="categories/new" element={<CategoryEditor />} />
               <Route path="categories/edit/:id" element={<CategoryEditor />} />
               <Route path="hotels" element={<AdminHotels />} />
+              <Route path="hotels/new" element={<AdminHotels key="new" />} />
+              <Route path="hotels/edit/:hotelId" element={<AdminHotels key="edit" />} />
               <Route path="experiences" element={<AdminExperiences />} />
+              <Route path="experiences/new" element={<AdminExperiences key="new" />} />
+              <Route path="experiences/edit/:experienceId" element={<AdminExperiences key="edit" />} />
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="reservations" element={<AdminBookings />} />
               <Route path="reservations/:bookingId" element={<AdminReservationDetails />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="journal" element={<AdminJournal />} />
-              <Route path="journal/:id" element={<JournalEditor />} />
+              <Route path="journal/new" element={<JournalEditor />} />
+              <Route path="journal/edit/:id" element={<JournalEditor />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
             <Route

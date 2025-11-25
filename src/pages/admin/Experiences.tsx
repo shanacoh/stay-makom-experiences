@@ -3,7 +3,7 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Eye, EyeOff, Copy, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -24,9 +24,8 @@ import {
 
 const AdminExperiences = () => {
   const navigate = useNavigate();
+  const { experienceId } = useParams();
   const queryClient = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
-  const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
   const [selectedHotelId, setSelectedHotelId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -34,6 +33,8 @@ const AdminExperiences = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [experienceToDelete, setExperienceToDelete] = useState<string | null>(null);
+  
+  const isFormView = window.location.pathname.includes("/new") || window.location.pathname.includes("/edit");
 
   // Fetch all hotels for dropdown
   const { data: hotels } = useQuery({
@@ -91,21 +92,11 @@ const AdminExperiences = () => {
   });
 
   const handleCreateNew = () => {
-    setEditingExperienceId(null);
-    setSelectedHotelId("");
-    setShowForm(true);
-  };
-
-  const handleEdit = (experienceId: string, hotelId: string) => {
-    setEditingExperienceId(experienceId);
-    setSelectedHotelId(hotelId);
-    setShowForm(true);
+    navigate("/admin/experiences/new");
   };
 
   const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingExperienceId(null);
-    setSelectedHotelId("");
+    navigate("/admin/experiences");
     queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
   };
 
@@ -204,8 +195,24 @@ const AdminExperiences = () => {
     };
     return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
   };
+  // Get experience data for form view
+  const { data: experienceData } = useQuery({
+    queryKey: ["experience", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return null;
+      const { data, error } = await supabase
+        .from("experiences")
+        .select("hotel_id")
+        .eq("id", experienceId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!experienceId && isFormView,
+  });
+
   // Hotel selector dialog for creating new experience
-  if (showForm && !selectedHotelId && !editingExperienceId) {
+  if (isFormView && !selectedHotelId && !experienceId) {
     return (
       <div className="container mx-auto p-6">
         <Card>
@@ -228,12 +235,12 @@ const AdminExperiences = () => {
               </Select>
               <div className="flex gap-2">
                 <Button 
-                  onClick={() => selectedHotelId && setShowForm(true)} 
+                  onClick={() => {}} 
                   disabled={!selectedHotelId}
                 >
                   Continue
                 </Button>
-                <Button variant="outline" onClick={() => setShowForm(false)}>
+                <Button variant="outline" onClick={() => navigate("/admin/experiences")}>
                   Cancel
                 </Button>
               </div>
@@ -244,14 +251,15 @@ const AdminExperiences = () => {
     );
   }
 
-  if (showForm && selectedHotelId) {
-    const hotelName = hotels?.find(h => h.id === selectedHotelId)?.name || "";
+  if (isFormView && (selectedHotelId || experienceData)) {
+    const hotelIdToUse = selectedHotelId || experienceData?.hotel_id || "";
+    const hotelName = hotels?.find(h => h.id === hotelIdToUse)?.name || "";
     return (
       <div className="container mx-auto p-6">
         <UnifiedExperienceForm
-          hotelId={selectedHotelId}
+          hotelId={hotelIdToUse}
           hotelName={hotelName}
-          experienceId={editingExperienceId || undefined}
+          experienceId={experienceId}
           onClose={handleCloseForm}
           mode="admin"
         />
@@ -362,7 +370,7 @@ const AdminExperiences = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleEdit(experience.id, experience.hotel_id)}
+                      onClick={() => navigate(`/admin/experiences/edit/${experience.id}`)}
                     >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
