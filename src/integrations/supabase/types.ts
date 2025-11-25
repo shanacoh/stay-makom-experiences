@@ -1063,43 +1063,91 @@ export type Database = {
         Row: {
           author_name: string
           category: Database["public"]["Enums"]["journal_category"]
-          content: string
+          content_en: string
+          content_he: string | null
           cover_image: string | null
           created_at: string
-          excerpt: string | null
+          excerpt_en: string | null
+          excerpt_he: string | null
           id: string
+          meta_description_en: string | null
+          meta_description_fr: string | null
+          meta_description_he: string | null
+          og_description_en: string | null
+          og_description_fr: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_fr: string | null
+          og_title_he: string | null
           published_at: string | null
+          seo_title_en: string | null
+          seo_title_fr: string | null
+          seo_title_he: string | null
           slug: string
           status: Database["public"]["Enums"]["hotel_status"]
-          title: string
+          title_en: string
+          title_he: string | null
           updated_at: string
         }
         Insert: {
           author_name?: string
           category: Database["public"]["Enums"]["journal_category"]
-          content: string
+          content_en: string
+          content_he?: string | null
           cover_image?: string | null
           created_at?: string
-          excerpt?: string | null
+          excerpt_en?: string | null
+          excerpt_he?: string | null
           id?: string
+          meta_description_en?: string | null
+          meta_description_fr?: string | null
+          meta_description_he?: string | null
+          og_description_en?: string | null
+          og_description_fr?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_fr?: string | null
+          og_title_he?: string | null
           published_at?: string | null
+          seo_title_en?: string | null
+          seo_title_fr?: string | null
+          seo_title_he?: string | null
           slug: string
           status?: Database["public"]["Enums"]["hotel_status"]
-          title: string
+          title_en: string
+          title_he?: string | null
           updated_at?: string
         }
         Update: {
           author_name?: string
           category?: Database["public"]["Enums"]["journal_category"]
-          content?: string
+          content_en?: string
+          content_he?: string | null
           cover_image?: string | null
           created_at?: string
-          excerpt?: string | null
+          excerpt_en?: string | null
+          excerpt_he?: string | null
           id?: string
+          meta_description_en?: string | null
+          meta_description_fr?: string | null
+          meta_description_he?: string | null
+          og_description_en?: string | null
+          og_description_fr?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_fr?: string | null
+          og_title_he?: string | null
           published_at?: string | null
+          seo_title_en?: string | null
+          seo_title_fr?: string | null
+          seo_title_he?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["hotel_status"]
-          title?: string
+          title_en?: string
+          title_he?: string | null
           updated_at?: string
         }
         Relationships: []

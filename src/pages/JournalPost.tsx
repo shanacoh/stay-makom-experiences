@@ -3,15 +3,18 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { SEOHead } from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import NotFound from "./NotFound";
 import DOMPurify from "dompurify";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 
 const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { lang } = useLanguage();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["journal-post", slug],
@@ -63,8 +66,27 @@ const JournalPost = () => {
     return <NotFound />;
   }
 
+  const title = getLocalizedField(post, "title", lang) || post.title_en;
+  const excerpt = getLocalizedField(post, "excerpt", lang) || post.excerpt_en;
+  const content = getLocalizedField(post, "content", lang) || post.content_en;
+
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
+      <SEOHead
+        titleEn={post.seo_title_en || post.title_en}
+        titleHe={post.seo_title_he || post.title_he}
+        titleFr={post.seo_title_fr}
+        descriptionEn={post.meta_description_en || post.excerpt_en}
+        descriptionHe={post.meta_description_he || post.excerpt_he}
+        descriptionFr={post.meta_description_fr}
+        ogTitleEn={post.og_title_en || post.seo_title_en || post.title_en}
+        ogTitleHe={post.og_title_he || post.seo_title_he || post.title_he}
+        ogTitleFr={post.og_title_fr || post.seo_title_fr}
+        ogDescriptionEn={post.og_description_en || post.meta_description_en || post.excerpt_en}
+        ogDescriptionHe={post.og_description_he || post.meta_description_he || post.excerpt_he}
+        ogDescriptionFr={post.og_description_fr || post.meta_description_fr}
+        ogImage={post.og_image || post.cover_image}
+      />
       <Header />
 
       <main className="max-w-4xl mx-auto px-6 py-20">
@@ -89,7 +111,7 @@ const JournalPost = () => {
           </div>
 
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-6">
-            {post.title}
+            {title}
           </h1>
 
           {post.author_name && (
@@ -102,15 +124,15 @@ const JournalPost = () => {
             <div className="aspect-[16/9] rounded-lg overflow-hidden mb-12">
               <img
                 src={post.cover_image}
-                alt={post.title}
+                alt={title}
                 className="w-full h-full object-cover"
               />
             </div>
           )}
 
-          {post.excerpt && (
+          {excerpt && (
             <div className="text-xl leading-relaxed mb-8 text-muted-foreground font-serif">
-              {post.excerpt}
+              {excerpt}
             </div>
           )}
 
@@ -123,9 +145,9 @@ const JournalPost = () => {
           >
             <div
               dangerouslySetInnerHTML={{ 
-                __html: DOMPurify.sanitize(post.content, {
-                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'img', 'pre', 'code'],
-                  ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'class']
+                __html: DOMPurify.sanitize(content, {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'img', 'pre', 'code', 'span', 'div'],
+                  ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'style']
                 })
               }}
               className="whitespace-pre-wrap"

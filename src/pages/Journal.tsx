@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 
 const Journal = () => {
+  const { lang } = useLanguage();
   const { data: posts, isLoading } = useQuery({
     queryKey: ["journal-posts"],
     queryFn: async () => {
@@ -85,12 +87,12 @@ const Journal = () => {
                         </div>
                       )}
                     </div>
-                    <h3 className="font-serif text-2xl mb-2 line-clamp-2">
-                      {post.title}
+                   <h3 className="font-serif text-2xl mb-2 line-clamp-2">
+                      {getLocalizedField(post, "title", lang) || post.title_en}
                     </h3>
-                    {post.excerpt && (
+                    {(getLocalizedField(post, "excerpt", lang) || post.excerpt_en) && (
                       <p className="text-muted-foreground line-clamp-3">
-                        {post.excerpt}
+                        {getLocalizedField(post, "excerpt", lang) || post.excerpt_en}
                       </p>
                     )}
                   </CardContent>
