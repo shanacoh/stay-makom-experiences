@@ -14,6 +14,7 @@ import { ArrowLeft, Save, Eye } from "lucide-react";
 import IncludesManager from "@/components/admin/IncludesManager";
 import ExtrasManager from "@/components/admin/ExtrasManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 
 const AdminExperienceEditor = () => {
   const navigate = useNavigate();
@@ -346,11 +347,10 @@ const AdminExperienceEditor = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="long_copy">Long Description</Label>
-                  <Textarea
-                    id="long_copy"
-                    value={formData.long_copy}
-                    onChange={(e) => setFormData(prev => ({ ...prev, long_copy: e.target.value }))}
-                    rows={5}
+                  <RichTextEditor
+                    content={formData.long_copy || ''}
+                    onChange={(content) => setFormData(prev => ({ ...prev, long_copy: content }))}
+                    placeholder="Enter detailed description with formatting..."
                   />
                 </div>
 
@@ -404,11 +404,10 @@ const AdminExperienceEditor = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="long_copy_he">תיאור מלא</Label>
-                  <Textarea
-                    id="long_copy_he"
-                    value={formData.long_copy_he}
-                    onChange={(e) => setFormData(prev => ({ ...prev, long_copy_he: e.target.value }))}
-                    rows={5}
+                  <RichTextEditor
+                    content={formData.long_copy_he || ''}
+                    onChange={(content) => setFormData(prev => ({ ...prev, long_copy_he: content }))}
+                    placeholder="הכנס תיאור מפורט עם עיצוב..."
                     dir="rtl"
                   />
                 </div>
