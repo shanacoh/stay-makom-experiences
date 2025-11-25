@@ -576,6 +576,61 @@ const CategoryEditor = () => {
                   />
                 </div>
               </div>
+
+              {/* French Column */}
+              <div className="space-y-4">
+                <div className="bg-background p-2 rounded">
+                  <h4 className="font-medium text-sm">French SEO (Français)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo_title_fr">Titre SEO</Label>
+                  <Input
+                    id="seo_title_fr"
+                    value={formData.seo_title_fr}
+                    onChange={(e) => setFormData({ ...formData, seo_title_fr: e.target.value })}
+                    placeholder="Titre pour Google et l'onglet"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~60 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meta_description_fr">Description Meta</Label>
+                  <Textarea
+                    id="meta_description_fr"
+                    value={formData.meta_description_fr}
+                    onChange={(e) => setFormData({ ...formData, meta_description_fr: e.target.value })}
+                    placeholder="Description pour les résultats Google"
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~155 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_title_fr">Titre Open Graph</Label>
+                  <Input
+                    id="og_title_fr"
+                    value={formData.og_title_fr}
+                    onChange={(e) => setFormData({ ...formData, og_title_fr: e.target.value })}
+                    placeholder="Titre pour les réseaux sociaux"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_description_fr">Description Open Graph</Label>
+                  <Textarea
+                    id="og_description_fr"
+                    value={formData.og_description_fr}
+                    onChange={(e) => setFormData({ ...formData, og_description_fr: e.target.value })}
+                    placeholder="Description pour les réseaux sociaux"
+                    rows={3}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* OG Image - Shared */}
