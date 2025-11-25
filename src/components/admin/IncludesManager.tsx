@@ -508,41 +508,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                     </div>
                   </>
                 )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={include.published}
-                          onCheckedChange={(checked) => 
-                            togglePublishedMutation.mutate({ id: include.id, published: checked })
-                          }
-                        />
-                        <Label className="text-sm whitespace-nowrap">
-                          {include.published ? "Published" : "Draft"}
-                        </Label>
-                      </div>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => startEditing(include)}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => deleteMutation.mutate(include.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </>
-                )}
               </div>
             ))}
           </div>
