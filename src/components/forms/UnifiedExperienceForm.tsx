@@ -1,0 +1,841 @@
+import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Save, Rocket, Plus, X, Upload, Loader2, Trash2, AlertCircle, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { ImageUpload } from "@/components/ui/image-upload";
+import RichTextEditor from "@/components/ui/rich-text-editor";
+import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
+import IncludesManager from "@/components/admin/IncludesManager";
+import ExtrasManager from "@/components/admin/ExtrasManager";
+import ReviewsManager from "@/components/admin/ReviewsManager";
+
+const experienceSchema = z.object({
+  title: z.string().min(1, "English title is required"),
+  title_he: z.string().optional(),
+  subtitle: z.string().optional(),
+  subtitle_he: z.string().optional(),
+  category_id: z.string().min(1, "Category is required"),
+  long_copy: z.string().min(100, "English description must be at least 100 characters"),
+  long_copy_he: z.string().optional(),
+  min_nights: z.number().min(1).max(8).optional(),
+  max_nights: z.number().min(1).max(8).optional(),
+  min_party: z.number().min(1).max(100),
+  max_party: z.number().min(1).max(100),
+  cancellation_policy: z.string().optional(),
+  cancellation_policy_he: z.string().optional(),
+  base_price: z.number().min(0.01, "Price must be greater than 0"),
+  currency: z.string(),
+  base_price_type: z.enum(["fixed", "per_booking", "per_person"]),
+  hotel_id: z.string().min(1, "Hotel is required"),
+  internal_notes: z.string().optional(),
+});
+
+type ExperienceFormData = z.infer<typeof experienceSchema>;
+
+interface UnifiedExperienceFormProps {
+  hotelId?: string;
+  hotelName?: string;
+  onClose?: () => void;
+  experienceId?: string;
+  mode: "admin" | "hotel_admin";
+}
+
+export function UnifiedExperienceForm({
+  hotelId: propHotelId,
+  hotelName,
+  onClose,
+  experienceId,
+  mode,
+}: UnifiedExperienceFormProps) {
+  const queryClient = useQueryClient();
+  const { role } = useAuth();
+  const [heroImage, setHeroImage] = useState<File | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [status, setStatus] = useState<"draft" | "pending" | "published">("draft");
+  const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showExtrasDialog, setShowExtrasDialog] = useState(false);
+  const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([]);
+
+  // Fetch hotels (for admin only)
+  const { data: hotels } = useQuery({
+    queryKey: ["admin-hotels"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hotels")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: mode === "admin",
+  });
+
+  // Fetch categories
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("status", "published")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch existing experience
+  const { data: existingExperience, isLoading: isLoadingExperience } = useQuery({
+    queryKey: ["experience", experienceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experiences")
+        .select("*")
+        .eq("id", experienceId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!experienceId,
+  });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<ExperienceFormData>({
+    resolver: zodResolver(experienceSchema),
+    defaultValues: {
+      hotel_id: propHotelId || "",
+      min_nights: 1,
+      max_nights: 4,
+      min_party: 2,
+      max_party: 4,
+      base_price: 0,
+      currency: "ILS",
+      base_price_type: "per_person",
+    },
+  });
+
+  const longCopy = watch("long_copy");
+  const longCopyHe = watch("long_copy_he");
+  const minNights = watch("min_nights");
+  const maxNights = watch("max_nights");
+  const basePrice = watch("base_price");
+  const title = watch("title");
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (title && !experienceId) {
+      const slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      setValue("slug" as any, slug);
+    }
+  }, [title, experienceId, setValue]);
+
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (existingExperience) {
+      setValue("title", existingExperience.title || "");
+      setValue("title_he", existingExperience.title_he || "");
+      setValue("subtitle", existingExperience.subtitle || "");
+      setValue("subtitle_he", existingExperience.subtitle_he || "");
+      setValue("category_id", existingExperience.category_id || "");
+      setValue("long_copy", existingExperience.long_copy || "");
+      setValue("long_copy_he", existingExperience.long_copy_he || "");
+      setValue("min_nights", existingExperience.min_nights || 1);
+      setValue("max_nights", existingExperience.max_nights || 4);
+      setValue("min_party", existingExperience.min_party || 2);
+      setValue("max_party", existingExperience.max_party || 4);
+      setValue("base_price", Number(existingExperience.base_price) || 0);
+      setValue("currency", existingExperience.currency || "ILS");
+      setValue("base_price_type", existingExperience.base_price_type || "per_person");
+      setValue("hotel_id", existingExperience.hotel_id || propHotelId || "");
+      setValue("cancellation_policy", existingExperience.cancellation_policy || "");
+      setValue("cancellation_policy_he", existingExperience.cancellation_policy_he || "");
+      
+      if (existingExperience.hero_image) {
+        setHeroImagePreview(existingExperience.hero_image);
+      }
+      if (existingExperience.photos && Array.isArray(existingExperience.photos)) {
+        setGalleryPreviews(existingExperience.photos);
+      }
+      const expStatus = existingExperience.status as "draft" | "pending" | "published";
+      if (expStatus === "draft" || expStatus === "pending" || expStatus === "published") {
+        setStatus(expStatus);
+      }
+    }
+  }, [existingExperience, setValue, propHotelId]);
+
+  // Image upload handlers
+  const handleHeroImageChange = (file: File | null) => {
+    setHeroImage(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setHeroImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setHeroImagePreview(null);
+    }
+  };
+
+  const handleGalleryImagesChange = (files: FileList | null) => {
+    if (!files) return;
+    
+    const newFiles = Array.from(files).slice(0, 8 - galleryImages.length);
+    setGalleryImages((prev) => [...prev, ...newFiles]);
+
+    newFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGalleryPreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryImages((prev) => prev.filter((_, i) => i !== index));
+    setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadImage = async (file: File, path: string): Promise<string> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("experiences")
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from("experiences").getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const handleSaveDraft = async (data: ExperienceFormData) => {
+    setIsSaving(true);
+    try {
+      let heroImageUrl = existingExperience?.hero_image || "";
+      if (heroImage) {
+        heroImageUrl = await uploadImage(heroImage, "hero");
+      }
+
+      const photoUrls = existingExperience?.photos || [];
+      for (const img of galleryImages) {
+        const url = await uploadImage(img, "gallery");
+        photoUrls.push(url);
+      }
+
+      const experienceData: any = {
+        title: data.title,
+        title_he: data.title_he,
+        subtitle: data.subtitle,
+        subtitle_he: data.subtitle_he,
+        category_id: data.category_id,
+        long_copy: data.long_copy,
+        long_copy_he: data.long_copy_he,
+        min_nights: data.min_nights,
+        max_nights: data.max_nights,
+        min_party: data.min_party,
+        max_party: data.max_party,
+        base_price: data.base_price,
+        currency: data.currency,
+        base_price_type: data.base_price_type,
+        hotel_id: data.hotel_id,
+        cancellation_policy: data.cancellation_policy,
+        cancellation_policy_he: data.cancellation_policy_he,
+        hero_image: heroImageUrl,
+        photos: photoUrls,
+        status: "draft" as const,
+        slug: experienceId ? existingExperience?.slug : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+      };
+
+      if (experienceId) {
+        const { error } = await supabase
+          .from("experiences")
+          .update(experienceData)
+          .eq("id", experienceId);
+        if (error) throw error;
+        toast.success("Draft saved successfully");
+      } else {
+        const { error } = await supabase
+          .from("experiences")
+          .insert([experienceData]);
+        if (error) throw error;
+        toast.success("Draft created successfully");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["experiences"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences"] });
+      onClose?.();
+    } catch (error: any) {
+      console.error("Save error:", error);
+      toast.error(error.message || "Failed to save draft");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePublish = async (data: ExperienceFormData) => {
+    setIsSaving(true);
+    try {
+      let heroImageUrl = existingExperience?.hero_image || "";
+      if (heroImage) {
+        heroImageUrl = await uploadImage(heroImage, "hero");
+      }
+
+      const photoUrls = existingExperience?.photos || [];
+      for (const img of galleryImages) {
+        const url = await uploadImage(img, "gallery");
+        photoUrls.push(url);
+      }
+
+      const publishStatus = mode === "hotel_admin" ? ("pending" as const) : ("published" as const);
+
+      const experienceData: any = {
+        title: data.title,
+        title_he: data.title_he,
+        subtitle: data.subtitle,
+        subtitle_he: data.subtitle_he,
+        category_id: data.category_id,
+        long_copy: data.long_copy,
+        long_copy_he: data.long_copy_he,
+        min_nights: data.min_nights,
+        max_nights: data.max_nights,
+        min_party: data.min_party,
+        max_party: data.max_party,
+        base_price: data.base_price,
+        currency: data.currency,
+        base_price_type: data.base_price_type,
+        hotel_id: data.hotel_id,
+        cancellation_policy: data.cancellation_policy,
+        cancellation_policy_he: data.cancellation_policy_he,
+        hero_image: heroImageUrl,
+        photos: photoUrls,
+        status: publishStatus,
+        slug: experienceId ? existingExperience?.slug : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+      };
+
+      if (experienceId) {
+        const { error } = await supabase
+          .from("experiences")
+          .update(experienceData)
+          .eq("id", experienceId);
+        if (error) throw error;
+        toast.success(mode === "hotel_admin" ? "Sent for approval" : "Published successfully");
+      } else {
+        const { error } = await supabase
+          .from("experiences")
+          .insert([experienceData]);
+        if (error) throw error;
+        toast.success(mode === "hotel_admin" ? "Sent for approval" : "Published successfully");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["experiences"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences"] });
+      onClose?.();
+    } catch (error: any) {
+      console.error("Publish error:", error);
+      toast.error(error.message || "Failed to publish");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!experienceId) throw new Error("No experience ID");
+      const { error } = await supabase
+        .from("experiences")
+        .delete()
+        .eq("id", experienceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Experience deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["experiences"] });
+      queryClient.invalidateQueries({ queryKey: ["hotel-experiences"] });
+      onClose?.();
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete experience");
+    },
+  });
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate();
+    setShowDeleteDialog(false);
+  };
+
+  const canPublish = title && longCopy && basePrice > 0 && longCopy.length >= 100;
+
+  if (isLoadingExperience) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit(handlePublish)} className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {onClose && (
+              <Button type="button" variant="ghost" size="icon" onClick={onClose}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold">
+                {experienceId ? "Edit Experience" : "Create New Experience"}
+              </h1>
+              {hotelName && <p className="text-sm text-muted-foreground">Hotel: {hotelName}</p>}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={handleSubmit(handleSaveDraft)} disabled={isSaving}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Draft
+            </Button>
+            <Button type="submit" disabled={!canPublish || isSaving}>
+              <Rocket className="h-4 w-4 mr-2" />
+              {mode === "hotel_admin" ? "Submit for Approval" : "Publish"}
+            </Button>
+            {experienceId && (
+              <Button type="button" variant="destructive" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Basic Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+            <CardDescription>Core details in English and Hebrew</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* English Column */}
+              <div className="space-y-4">
+                <div className="font-medium text-sm text-muted-foreground">English Version</div>
+                
+                <div>
+                  <Label htmlFor="title">Title (EN) *</Label>
+                  <Input id="title" {...register("title")} />
+                  {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
+                </div>
+
+                <div>
+                  <Label htmlFor="subtitle">Subtitle (EN)</Label>
+                  <Input id="subtitle" {...register("subtitle")} />
+                </div>
+
+                <div>
+                  <Label htmlFor="long_copy">Description (EN) * (min 100 characters)</Label>
+                  <Controller
+                    name="long_copy"
+                    control={control}
+                    render={({ field }) => (
+                      <RichTextEditor
+                        content={field.value || ''}
+                        onChange={field.onChange}
+                        placeholder="Describe the experience in English..."
+                      />
+                    )}
+                  />
+                  <div className="flex justify-between mt-1">
+                    {errors.long_copy && (
+                      <p className="text-sm text-destructive">{errors.long_copy.message}</p>
+                    )}
+                    <p className="text-sm text-muted-foreground ml-auto">
+                      {longCopy?.length || 0} / 100 characters minimum
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="cancellation_policy">Cancellation Policy (EN)</Label>
+                  <Input id="cancellation_policy" {...register("cancellation_policy")} />
+                </div>
+              </div>
+
+              {/* Hebrew Column */}
+              <div className="space-y-4">
+                <div className="font-medium text-sm text-muted-foreground">Hebrew Version (עברית)</div>
+                
+                <div>
+                  <Label htmlFor="title_he">Title (HE)</Label>
+                  <Input id="title_he" {...register("title_he")} dir="rtl" />
+                </div>
+
+                <div>
+                  <Label htmlFor="subtitle_he">Subtitle (HE)</Label>
+                  <Input id="subtitle_he" {...register("subtitle_he")} dir="rtl" />
+                </div>
+
+                <div>
+                  <Label htmlFor="long_copy_he">Description (HE)</Label>
+                  <Controller
+                    name="long_copy_he"
+                    control={control}
+                    render={({ field }) => (
+                      <RichTextEditor
+                        content={field.value || ''}
+                        onChange={field.onChange}
+                        placeholder="תאר את החוויה בעברית..."
+                        dir="rtl"
+                      />
+                    )}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {longCopyHe?.length || 0} characters
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="cancellation_policy_he">Cancellation Policy (HE)</Label>
+                  <Input id="cancellation_policy_he" {...register("cancellation_policy_he")} dir="rtl" />
+                </div>
+              </div>
+            </div>
+
+            {/* Hotel & Category */}
+            <div className="grid grid-cols-2 gap-4">
+              {mode === "admin" ? (
+                <div>
+                  <Label htmlFor="hotel_id">Hotel *</Label>
+                  <Select
+                    value={watch("hotel_id")}
+                    onValueChange={(value) => setValue("hotel_id", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select hotel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hotels?.map((hotel) => (
+                        <SelectItem key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.hotel_id && (
+                    <p className="text-sm text-destructive mt-1">{errors.hotel_id.message}</p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <Label>Linked Hotel</Label>
+                  <Input value={hotelName} disabled />
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="category_id">Category *</Label>
+                <Select
+                  value={watch("category_id")}
+                  onValueChange={(value) => setValue("category_id", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories?.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.category_id && (
+                  <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Images */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Images & Media</CardTitle>
+            <CardDescription>Upload hero image and gallery photos</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Hero Image</Label>
+              <div className="border-2 border-dashed rounded-lg p-4">
+                {heroImagePreview && (
+                  <img src={heroImagePreview} alt="Hero preview" className="w-full h-64 object-cover rounded-lg mb-2" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleHeroImageChange(e.target.files?.[0] || null)}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Gallery Images (up to 8)</Label>
+              <div className="grid grid-cols-4 gap-4">
+                {galleryPreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Gallery ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(index)}
+                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                {galleryPreviews.length < 8 && (
+                  <label className="border-2 border-dashed rounded-lg h-32 flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleGalleryImagesChange(e.target.files)}
+                    />
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                  </label>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pricing */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pricing</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="base_price">Base Price *</Label>
+                <Input
+                  id="base_price"
+                  type="number"
+                  step="0.01"
+                  {...register("base_price", { valueAsNumber: true })}
+                />
+                {errors.base_price && (
+                  <p className="text-sm text-destructive mt-1">{errors.base_price.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="currency">Currency</Label>
+                <Select value={watch("currency")} onValueChange={(value) => setValue("currency", value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ILS">ILS</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="base_price_type">Pricing Type</Label>
+                <Select
+                  value={watch("base_price_type")}
+                  onValueChange={(value: any) => setValue("base_price_type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="per_person">Per Person</SelectItem>
+                    <SelectItem value="per_booking">Per Booking</SelectItem>
+                    <SelectItem value="fixed">Fixed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Capacity */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Capacity & Availability</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <NightsRangeSelector
+                minValue={minNights}
+                maxValue={maxNights}
+                onMinChange={(value) => setValue("min_nights", value)}
+                onMaxChange={(value) => setValue("max_nights", value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="min_party">Min Participants *</Label>
+                <Input
+                  id="min_party"
+                  type="number"
+                  min="1"
+                  {...register("min_party", { valueAsNumber: true })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="max_party">Max Participants *</Label>
+                <Input
+                  id="max_party"
+                  type="number"
+                  min="1"
+                  {...register("max_party", { valueAsNumber: true })}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* What's Included */}
+        {experienceId && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>What's Included</CardTitle>
+                <CardDescription>Manage the items included in this experience</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <IncludesManager experienceId={experienceId} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Extras (Add-ons)</CardTitle>
+                <CardDescription>Manage optional extras for this experience</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ExtrasManager experienceId={experienceId} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Reviews</CardTitle>
+                <CardDescription>Manage customer reviews</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ReviewsManager experienceId={experienceId} />
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* Internal Notes */}
+        {mode === "admin" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Internal Notes</CardTitle>
+              <CardDescription>Private notes for admin use only</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Input {...register("internal_notes")} placeholder="Add internal notes..." />
+            </CardContent>
+          </Card>
+        )}
+      </form>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the experience.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
