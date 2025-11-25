@@ -259,12 +259,12 @@ export function UnifiedExperienceForm({
     const filePath = `${path}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("experiences")
+      .from("experience-images")
       .upload(filePath, file);
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from("experiences").getPublicUrl(filePath);
+    const { data } = supabase.storage.from("experience-images").getPublicUrl(filePath);
     return data.publicUrl;
   };
 
