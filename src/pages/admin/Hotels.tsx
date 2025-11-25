@@ -41,14 +41,39 @@ const AdminHotels = () => {
     queryKey: ["admin-hotels"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("hotels" as any)
+        .from("hotels")
         .select(`
           *,
-          hotel_admins:hotel_admins(user_id, user_profiles:user_profiles(display_name))
+          hotel_admins(user_id)
         `)
         .order("updated_at", { ascending: false });
 
       if (error) throw error;
+
+      // Fetch user profiles for hotel admins
+      if (data && data.length > 0) {
+        const userIds = data
+          .flatMap((hotel: any) => hotel.hotel_admins || [])
+          .map((admin: any) => admin.user_id)
+          .filter(Boolean);
+
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from("user_profiles")
+            .select("user_id, display_name")
+            .in("user_id", userIds);
+
+          // Map profiles to hotels
+          return data.map((hotel: any) => ({
+            ...hotel,
+            hotel_admins: hotel.hotel_admins?.map((admin: any) => ({
+              ...admin,
+              user_profiles: profiles?.find((p) => p.user_id === admin.user_id),
+            })),
+          }));
+        }
+      }
+
       return data as any[];
     },
   });
