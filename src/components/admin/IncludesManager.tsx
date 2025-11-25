@@ -244,9 +244,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
         <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
           <h4 className="font-medium">Add new item</h4>
           
-          {/* Bilingual Title & Description - Side by Side */}
           <div className="grid grid-cols-2 gap-4">
-            {/* English Column */}
             <div className="space-y-3">
               <div className="bg-muted/30 p-2 rounded">
                 <h5 className="text-sm font-medium">English Version</h5>
@@ -274,7 +272,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
               </div>
             </div>
 
-            {/* Hebrew Column */}
             <div className="space-y-3">
               <div className="bg-muted/30 p-2 rounded">
                 <h5 className="text-sm font-medium">Hebrew Version (עברית)</h5>
@@ -307,7 +304,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
             </div>
           </div>
 
-          {/* Image Upload */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Icon Image *</Label>
             <div className="flex gap-2 items-center">
@@ -375,10 +371,8 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                 <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1 flex-shrink-0" />
                 
                 {editingId === include.id ? (
-                  // Edit mode
                   <div className="flex-1 space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      {/* English Edit */}
                       <div className="space-y-2">
                         <Label className="text-xs">English</Label>
                         <Input
@@ -394,7 +388,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         />
                       </div>
                       
-                      {/* Hebrew Edit */}
                       <div className="space-y-2">
                         <Label className="text-xs">עברית</Label>
                         <Input
@@ -464,8 +457,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                       </Button>
                     </div>
                   </div>
-                 ) : (
-                  // View mode - Compact display with only image + title
+                ) : (
                   <>
                     {include.icon_url && (
                       <img 
