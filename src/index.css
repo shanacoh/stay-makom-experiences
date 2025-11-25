@@ -51,6 +51,9 @@ All colors MUST be HSL.
     --shadow-medium: 0 4px 16px -4px hsl(23 10% 15% / 0.08);
     --shadow-strong: 0 8px 32px -8px hsl(23 10% 15% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Hebrew input background */
+    --input-hebrew-bg: 211 100% 96%;
   }
 
   .dark {
@@ -88,6 +91,9 @@ All colors MUST be HSL.
     --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
     --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
     --shadow-strong: 0 8px 32px -8px hsl(0 0% 0% / 0.5);
+    
+    /* Hebrew input background */
+    --input-hebrew-bg: 211 100% 96%;
   }
 }
 
@@ -136,6 +142,11 @@ All colors MUST be HSL.
   
   .transition-smooth {
     transition: var(--transition-smooth);
+  }
+  
+  /* Hebrew input background utility */
+  .hebrew-input {
+    background-color: hsl(var(--input-hebrew-bg));
   }
   
   /* Hide scrollbar for carousel */

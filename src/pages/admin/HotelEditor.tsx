@@ -246,6 +246,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                       value={formData.name_he}
                       onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
                       dir="rtl"
+                      className="bg-hebrew-input"
                     />
                   </div>
 
@@ -256,6 +257,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                       value={formData.region_he}
                       onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
                       dir="rtl"
+                      className="bg-hebrew-input"
                     />
                   </div>
 
@@ -266,6 +268,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                       value={formData.city_he}
                       onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
                       dir="rtl"
+                      className="bg-hebrew-input"
                     />
                   </div>
 
@@ -277,6 +280,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                       onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
                       rows={6}
                       dir="rtl"
+                      className="bg-hebrew-input"
                     />
                   </div>
                 </div>

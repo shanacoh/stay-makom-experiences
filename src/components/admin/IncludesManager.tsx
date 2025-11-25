@@ -288,6 +288,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                   value={newInclude.title_he}
                   onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })}
                   dir="rtl"
+                  className="bg-hebrew-input"
                 />
               </div>
 
@@ -300,6 +301,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                   onChange={(e) => setNewInclude({ ...newInclude, description_he: e.target.value })}
                   rows={2}
                   dir="rtl"
+                  className="bg-hebrew-input"
                 />
               </div>
             </div>
@@ -400,6 +402,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                           onChange={(e) => setEditData({ ...editData, title_he: e.target.value })}
                           placeholder="כותרת"
                           dir="rtl"
+                          className="bg-hebrew-input"
                         />
                         <Textarea
                           value={editData.description_he}
@@ -407,6 +410,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                           placeholder="תיאור"
                           rows={2}
                           dir="rtl"
+                          className="bg-hebrew-input"
                         />
                       </div>
                     </div>
