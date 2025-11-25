@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Eye } from "lucide-react";
+import { generateSlug } from "@/lib/utils";
 
 const JournalEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,7 +27,6 @@ const JournalEditor = () => {
 
   const [formData, setFormData] = useState({
     title: "",
-    slug: "",
     cover_image: "",
     category: "Stories",
     excerpt: "",
@@ -54,7 +54,6 @@ const JournalEditor = () => {
     if (post) {
       setFormData({
         title: post.title,
-        slug: post.slug,
         cover_image: post.cover_image || "",
         category: post.category,
         excerpt: post.excerpt || "",
@@ -65,31 +64,21 @@ const JournalEditor = () => {
     }
   }, [post]);
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  };
-
-  const handleTitleChange = (title: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      title,
-      slug: isEdit ? prev.slug : generateSlug(title),
-    }));
-  };
-
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const dataWithSlug = {
+        ...data,
+        slug: isEdit ? post?.slug : generateSlug(data.title),
+      };
+      
       if (isEdit) {
         const { error } = await supabase
           .from("journal_posts" as any)
-          .update(data as any)
+          .update(dataWithSlug as any)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("journal_posts" as any).insert([data as any]);
+        const { error } = await supabase.from("journal_posts" as any).insert([dataWithSlug as any]);
         if (error) throw error;
       }
     },
@@ -107,6 +96,7 @@ const JournalEditor = () => {
     mutationFn: async () => {
       const dataToSave = {
         ...formData,
+        slug: isEdit ? post?.slug : generateSlug(formData.title),
         status: "published" as const,
         published_at: new Date().toISOString(),
       };
@@ -184,22 +174,9 @@ const JournalEditor = () => {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => handleTitleChange(e.target.value)}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                URL: /journal/{formData.slug || "your-slug"}
-              </p>
             </div>
 
             <div className="space-y-2">

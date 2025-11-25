@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Eye } from "lucide-react";
+import { generateSlug } from "@/lib/utils";
 
 const CategoryEditor = () => {
   const { id } = useParams();
@@ -18,7 +19,6 @@ const CategoryEditor = () => {
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
-    slug: "",
     hero_image: "",
     presentation_title: "",
     presentation_title_he: "",
@@ -52,7 +52,6 @@ const CategoryEditor = () => {
       setFormData({
         name: category.name || "",
         name_he: category.name_he || "",
-        slug: category.slug || "",
         hero_image: category.hero_image || "",
         presentation_title: category.presentation_title || "",
         presentation_title_he: category.presentation_title_he || "",
@@ -66,21 +65,6 @@ const CategoryEditor = () => {
       setImagePreview(category.hero_image || "");
     }
   }, [category]);
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  };
-
-  const handleNameChange = (name: string) => {
-    setFormData({
-      ...formData,
-      name,
-      slug: generateSlug(name),
-    });
-  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,14 +113,19 @@ const CategoryEditor = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const dataWithSlug = {
+        ...data,
+        slug: isEditing ? category?.slug : generateSlug(data.name),
+      };
+      
       if (isEditing) {
         const { error } = await supabase
           .from("categories" as any)
-          .update(data)
+          .update(dataWithSlug)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("categories" as any).insert([data]);
+        const { error } = await supabase.from("categories" as any).insert([dataWithSlug]);
         if (error) throw error;
       }
     },
@@ -194,11 +183,11 @@ const CategoryEditor = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          {formData.slug && (
+          {isEditing && category?.slug && (
             <Button
               type="button"
               variant="outline"
-              onClick={() => window.open(`/category/${formData.slug}`, '_blank')}
+              onClick={() => window.open(`/category/${category.slug}`, '_blank')}
             >
               <Eye className="w-4 h-4 mr-2" />
               Preview
@@ -222,20 +211,6 @@ const CategoryEditor = () => {
             <CardTitle>Basic Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="desert-escapes"
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                URL-friendly version of the name
-              </p>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="hero_image">Hero Image</Label>
               <div className="space-y-4">
@@ -315,7 +290,7 @@ const CategoryEditor = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Desert Escapes"
                     required
                   />

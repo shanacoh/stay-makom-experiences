@@ -52,6 +52,7 @@ import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import IncludesManager from "@/components/admin/IncludesManager";
 import ExtrasManager from "@/components/admin/ExtrasManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import { generateSlug } from "@/lib/utils";
 
 const experienceSchema = z.object({
   title: z.string().min(1, "English title is required"),
@@ -174,17 +175,6 @@ export function UnifiedExperienceForm({
   const basePrice = watch("base_price");
   const title = watch("title");
 
-  // Auto-generate slug from title
-  useEffect(() => {
-    if (title && !experienceId) {
-      const slug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      setValue("slug" as any, slug);
-    }
-  }, [title, experienceId, setValue]);
-
   // Pre-fill form when editing
   useEffect(() => {
     if (existingExperience) {
@@ -303,7 +293,7 @@ export function UnifiedExperienceForm({
         hero_image: heroImageUrl,
         photos: photoUrls,
         status: "draft" as const,
-        slug: experienceId ? existingExperience?.slug : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+        slug: experienceId ? existingExperience?.slug : generateSlug(title),
       };
 
       if (experienceId) {
@@ -369,7 +359,7 @@ export function UnifiedExperienceForm({
         hero_image: heroImageUrl,
         photos: photoUrls,
         status: publishStatus,
-        slug: experienceId ? existingExperience?.slug : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+        slug: experienceId ? existingExperience?.slug : generateSlug(title),
       };
 
       if (experienceId) {
