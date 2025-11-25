@@ -10,6 +10,7 @@ import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilters, { FilterState } from "@/components/category/CategoryFilters";
 import ExperienceMap from "@/components/category/ExperienceMap";
 import { useState, useMemo } from "react";
+import { SEOHead } from "@/components/SEOHead";
 const Category = () => {
   const {
     slug
@@ -115,6 +116,19 @@ const Category = () => {
       </div>;
   }
   return <div className="min-h-screen flex flex-col">
+      <SEOHead
+        titleEn={category.seo_title_en}
+        titleHe={category.seo_title_he}
+        descriptionEn={category.meta_description_en}
+        descriptionHe={category.meta_description_he}
+        ogTitleEn={category.og_title_en}
+        ogTitleHe={category.og_title_he}
+        ogDescriptionEn={category.og_description_en}
+        ogDescriptionHe={category.og_description_he}
+        ogImage={category.og_image || category.hero_image}
+        fallbackTitle={`${category.name} - StayMakom`}
+        fallbackDescription={category.intro_rich_text || ""}
+      />
       <Header />
       
       <main className="flex-1">

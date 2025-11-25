@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SEOHead } from "@/components/SEOHead";
 
 const Hotel = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -67,6 +68,19 @@ const Hotel = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        titleEn={hotel.seo_title_en}
+        titleHe={hotel.seo_title_he}
+        descriptionEn={hotel.meta_description_en}
+        descriptionHe={hotel.meta_description_he}
+        ogTitleEn={hotel.og_title_en}
+        ogTitleHe={hotel.og_title_he}
+        ogDescriptionEn={hotel.og_description_en}
+        ogDescriptionHe={hotel.og_description_he}
+        ogImage={hotel.og_image || hotel.hero_image}
+        fallbackTitle={`${hotel.name} - ${hotel.city || ''} - StayMakom`}
+        fallbackDescription={hotel.story?.substring(0, 155) || ""}
+      />
       <Header />
 
       <main className="flex-1">

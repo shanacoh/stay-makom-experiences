@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -73,6 +74,15 @@ const experienceSchema = z.object({
   base_price_type: z.enum(["fixed", "per_booking", "per_person"]),
   hotel_id: z.string().min(1, "Hotel is required"),
   internal_notes: z.string().optional(),
+  seo_title_en: z.string().optional(),
+  seo_title_he: z.string().optional(),
+  meta_description_en: z.string().optional(),
+  meta_description_he: z.string().optional(),
+  og_title_en: z.string().optional(),
+  og_title_he: z.string().optional(),
+  og_description_en: z.string().optional(),
+  og_description_he: z.string().optional(),
+  og_image: z.string().optional(),
 });
 
 type ExperienceFormData = z.infer<typeof experienceSchema>;
@@ -195,6 +205,15 @@ export function UnifiedExperienceForm({
       setValue("hotel_id", existingExperience.hotel_id || propHotelId || "");
       setValue("cancellation_policy", existingExperience.cancellation_policy || "");
       setValue("cancellation_policy_he", existingExperience.cancellation_policy_he || "");
+      setValue("seo_title_en", existingExperience.seo_title_en || "");
+      setValue("seo_title_he", existingExperience.seo_title_he || "");
+      setValue("meta_description_en", existingExperience.meta_description_en || "");
+      setValue("meta_description_he", existingExperience.meta_description_he || "");
+      setValue("og_title_en", existingExperience.og_title_en || "");
+      setValue("og_title_he", existingExperience.og_title_he || "");
+      setValue("og_description_en", existingExperience.og_description_en || "");
+      setValue("og_description_he", existingExperience.og_description_he || "");
+      setValue("og_image", existingExperience.og_image || "");
       
       if (existingExperience.hero_image) {
         setHeroImagePreview(existingExperience.hero_image);
@@ -294,6 +313,15 @@ export function UnifiedExperienceForm({
         photos: photoUrls,
         status: "draft" as const,
         slug: experienceId ? existingExperience?.slug : generateSlug(title),
+        seo_title_en: data.seo_title_en,
+        seo_title_he: data.seo_title_he,
+        meta_description_en: data.meta_description_en,
+        meta_description_he: data.meta_description_he,
+        og_title_en: data.og_title_en,
+        og_title_he: data.og_title_he,
+        og_description_en: data.og_description_en,
+        og_description_he: data.og_description_he,
+        og_image: data.og_image,
       };
 
       if (experienceId) {
@@ -360,6 +388,15 @@ export function UnifiedExperienceForm({
         photos: photoUrls,
         status: publishStatus,
         slug: experienceId ? existingExperience?.slug : generateSlug(title),
+        seo_title_en: data.seo_title_en,
+        seo_title_he: data.seo_title_he,
+        meta_description_en: data.meta_description_en,
+        meta_description_he: data.meta_description_he,
+        og_title_en: data.og_title_en,
+        og_title_he: data.og_title_he,
+        og_description_en: data.og_description_en,
+        og_description_he: data.og_description_he,
+        og_image: data.og_image,
       };
 
       if (experienceId) {
@@ -809,6 +846,142 @@ export function UnifiedExperienceForm({
             </CardContent>
           </Card>
         )}
+
+        {/* SEO Section */}
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle>SEO Configuration</CardTitle>
+            <CardDescription>
+              Configure SEO metadata for search engines and social media sharing
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* English Column */}
+              <div className="space-y-4">
+                <div className="bg-background p-2 rounded">
+                  <h4 className="font-medium text-sm">English SEO</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo_title_en">SEO Title</Label>
+                  <Input
+                    id="seo_title_en"
+                    {...register("seo_title_en")}
+                    placeholder="Displayed in browser tab and Google results"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Recommended: Max ~60 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meta_description_en">Meta Description</Label>
+                  <Textarea
+                    id="meta_description_en"
+                    {...register("meta_description_en")}
+                    placeholder="Shown in Google search results"
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Recommended: Max ~155 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_title_en">Open Graph Title</Label>
+                  <Input
+                    id="og_title_en"
+                    {...register("og_title_en")}
+                    placeholder="Title when shared on social media"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_description_en">Open Graph Description</Label>
+                  <Textarea
+                    id="og_description_en"
+                    {...register("og_description_en")}
+                    placeholder="Description when shared on social media"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              {/* Hebrew Column */}
+              <div className="space-y-4">
+                <div className="bg-background p-2 rounded">
+                  <h4 className="font-medium text-sm">Hebrew SEO (עברית)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo_title_he">כותרת SEO</Label>
+                  <Input
+                    id="seo_title_he"
+                    {...register("seo_title_he")}
+                    placeholder="כותרת עבור גוגל וכרטיסייה"
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~60 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meta_description_he">תיאור Meta</Label>
+                  <Textarea
+                    id="meta_description_he"
+                    {...register("meta_description_he")}
+                    placeholder="תיאור עבור תוצאות גוגל"
+                    rows={3}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~155 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_title_he">כותרת Open Graph</Label>
+                  <Input
+                    id="og_title_he"
+                    {...register("og_title_he")}
+                    placeholder="כותרת עבור שיתוף ברשתות חברתיות"
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_description_he">תיאור Open Graph</Label>
+                  <Textarea
+                    id="og_description_he"
+                    {...register("og_description_he")}
+                    placeholder="תיאור עבור שיתוף ברשתות חברתיות"
+                    rows={3}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* OG Image - Shared */}
+            <div className="space-y-2">
+              <Label htmlFor="og_image">Open Graph Image</Label>
+              <Input
+                id="og_image"
+                {...register("og_image")}
+                placeholder="Image URL for social media sharing"
+              />
+              <p className="text-xs text-muted-foreground">
+                Recommended: 1200x630px. Leave empty to use hero image.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </form>
 
       {/* Delete Confirmation */}
