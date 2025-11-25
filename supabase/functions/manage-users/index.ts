@@ -54,6 +54,9 @@ serve(async (req) => {
         const { email, password, firstName, lastName, role, country, hotelId } = params;
 
         // Create the user in auth
+        // The database trigger handle_new_user() will automatically create:
+        // - user_profiles (from display_name and locale in metadata)
+        // - user_roles (from role in metadata)
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email,
           password,
@@ -61,6 +64,9 @@ serve(async (req) => {
           user_metadata: {
             first_name: firstName,
             last_name: lastName,
+            display_name: `${firstName} ${lastName}`,
+            locale: 'en',
+            role: role, // Trigger will create user_role from this
           }
         });
 
@@ -72,37 +78,8 @@ serve(async (req) => {
           throw createError;
         }
 
-        // Create user profile
-        const { error: profileError } = await supabaseAdmin
-          .from('user_profiles')
-          .insert({
-            user_id: newUser.user.id,
-            display_name: `${firstName} ${lastName}`,
-            locale: 'en',
-            marketing_opt_in: false,
-            tos_accepted_at: new Date().toISOString(),
-          });
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-          throw new Error('Failed to create user profile');
-        }
-
-        // Create user role
-        const { error: roleError } = await supabaseAdmin
-          .from('user_roles')
-          .insert({
-            user_id: newUser.user.id,
-            role: role,
-          });
-
-        if (roleError) {
-          console.error('Role creation error:', roleError);
-          await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-          await supabaseAdmin.from('user_profiles').delete().eq('user_id', newUser.user.id);
-          throw new Error('Failed to create user role');
-        }
+        // Wait briefly for trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // If customer, create customer profile
         if (role === 'customer') {
@@ -119,8 +96,6 @@ serve(async (req) => {
           if (customerError) {
             console.error('Customer creation error:', customerError);
             await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-            await supabaseAdmin.from('user_profiles').delete().eq('user_id', newUser.user.id);
-            await supabaseAdmin.from('user_roles').delete().eq('user_id', newUser.user.id);
             throw new Error('Failed to create customer profile');
           }
         }
@@ -137,8 +112,6 @@ serve(async (req) => {
           if (hotelAdminError) {
             console.error('Hotel admin creation error:', hotelAdminError);
             await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-            await supabaseAdmin.from('user_profiles').delete().eq('user_id', newUser.user.id);
-            await supabaseAdmin.from('user_roles').delete().eq('user_id', newUser.user.id);
             if (role === 'customer') {
               await supabaseAdmin.from('customers').delete().eq('user_id', newUser.user.id);
             }
