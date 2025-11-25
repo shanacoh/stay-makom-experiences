@@ -165,7 +165,7 @@ const AdminJournal = () => {
             <TableBody>
               {posts.map((post) => (
                 <TableRow key={post.id}>
-                  <TableCell className="font-medium">{post.title}</TableCell>
+                  <TableCell className="font-medium">{post.title_en || post.title}</TableCell>
                   <TableCell>
                     <Badge className={`${getCategoryColor(post.category)} text-white`}>
                       {post.category}
