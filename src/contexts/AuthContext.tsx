@@ -169,8 +169,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          display_name: displayName,
-          role: "customer", // Default role for new signups
+          display_name: displayName || '',
+          locale: 'en',
+          role: 'customer', // Trigger will create user_role with customer role
         },
       },
     });
