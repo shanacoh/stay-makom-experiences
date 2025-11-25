@@ -22,6 +22,20 @@ const Footer = () => {
       return data;
     },
   });
+
+  const { data: settings } = useQuery({
+    queryKey: ["global-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("*")
+        .eq("key", "site_config")
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
   
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,21 +160,21 @@ const Footer = () => {
 
             {/* Contact Info */}
             <div className="space-y-2">
-              <a href="mailto:hello@staymakom.com" className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
-                <Mail className="h-4 w-4" />
-                hello@staymakom.com
-              </a>
-              <a href="tel:+15551234567" className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
-                <Phone className="h-4 w-4" />
-                +1 (555) 123-4567
-              </a>
+              {settings?.contact_email && (
+                <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
+                  <Mail className="h-4 w-4" />
+                  {settings.contact_email}
+                </a>
+              )}
             </div>
 
             {/* Social Icons */}
             <div className="flex items-center gap-4 mt-4">
-              <a href="https://instagram.com/staymakom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-primary transition-smooth">
-                <Instagram className="h-5 w-5" />
-              </a>
+              {settings?.instagram_handle && (
+                <a href={`https://instagram.com/${settings.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-white hover:text-primary transition-smooth">
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
               <a href="https://tiktok.com/@staymakom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-primary transition-smooth">
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />

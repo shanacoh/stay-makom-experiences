@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,20 @@ const Contact = () => {
       subject: "general",
       message: ""
     }
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ["global-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("*")
+        .eq("key", "site_config")
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
   });
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -166,14 +181,18 @@ const Contact = () => {
         <section className="text-center border-t pt-12">
           <h3 className="font-serif text-2xl mb-6">Get in touch directly</h3>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-muted-foreground">
-            <a href="mailto:hello@staymakom.com" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
-              <Mail className="w-5 h-5" />
-              hello@staymakom.com
-            </a>
-            <a href="https://instagram.com/staymakom" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
-              <Instagram className="w-5 h-5" />
-              @staymakom
-            </a>
+            {settings?.contact_email && (
+              <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
+                <Mail className="w-5 h-5" />
+                {settings.contact_email}
+              </a>
+            )}
+            {settings?.instagram_handle && (
+              <a href={`https://instagram.com/${settings.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
+                <Instagram className="w-5 h-5" />
+                {settings.instagram_handle.startsWith('@') ? settings.instagram_handle : `@${settings.instagram_handle}`}
+              </a>
+            )}
           </div>
         </section>
       </main>

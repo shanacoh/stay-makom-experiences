@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
+import { Mail } from "lucide-react";
 import partnersHero from "@/assets/partners-hero.jpg";
 import { supabase } from "@/integrations/supabase/client";
 const formSchema = z.object({
@@ -33,6 +35,20 @@ const Partners = () => {
       phone: "",
       message: ""
     }
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ["global-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("*")
+        .eq("key", "site_config")
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
   });
   const scrollToForm = () => {
     document.getElementById("partner-form")?.scrollIntoView({
@@ -225,6 +241,17 @@ const Partners = () => {
               </form>
             </Form>}
         </section>
+
+        {/* Direct Contact Section */}
+        {settings?.partners_email && (
+          <section className="text-center border-t pt-12 mt-12">
+            <h3 className="font-serif text-2xl mb-6">Contact us directly</h3>
+            <a href={`mailto:${settings.partners_email}`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-[#D72638] transition-colors">
+              <Mail className="w-5 h-5" />
+              {settings.partners_email}
+            </a>
+          </section>
+        )}
       </main>
 
       <Footer />
