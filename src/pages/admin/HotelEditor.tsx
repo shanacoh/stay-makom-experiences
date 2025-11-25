@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { generateSlug } from "@/lib/utils";
 
 interface HotelEditorProps {
   hotelId?: string;
@@ -21,7 +22,6 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
-    slug: "",
     region: "",
     region_he: "",
     city: "",
@@ -54,7 +54,6 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
       setFormData({
         name: hotel.name || "",
         name_he: hotel.name_he || "",
-        slug: hotel.slug || "",
         region: hotel.region || "",
         region_he: hotel.region_he || "",
         city: hotel.city || "",
@@ -71,16 +70,21 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const dataWithSlug = {
+        ...data,
+        slug: hotelId ? hotel?.slug : generateSlug(data.name),
+      };
+      
       if (hotelId) {
         const { error } = await supabase
           .from("hotels")
-          .update(data)
+          .update(dataWithSlug)
           .eq("id", hotelId);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("hotels")
-          .insert([data]);
+          .insert([dataWithSlug]);
         if (error) throw error;
       }
     },
@@ -126,16 +130,6 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Basic Fields */}
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                required
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
               <Select
