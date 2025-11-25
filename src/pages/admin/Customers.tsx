@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Search, Plus, Download, Trash2, UserX, UserCheck } from "lucide-react";
+import { Eye, Search, Plus, Download, Trash2, UserX, UserCheck, Edit } from "lucide-react";
 import { format } from "date-fns";
 import {
   Select,
@@ -49,6 +49,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { CountrySelect } from "@/components/admin/CountrySelect";
 
 const AdminCustomers = () => {
   const queryClient = useQueryClient();
@@ -59,6 +60,7 @@ const AdminCustomers = () => {
   const [bookingsFilter, setBookingsFilter] = useState<"all" | "has_bookings" | "no_bookings">("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [editUserOpen, setEditUserOpen] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({
     email: "",
@@ -69,6 +71,7 @@ const AdminCustomers = () => {
     country: "",
     hotelId: "",
   });
+  const [editUser, setEditUser] = useState<any>(null);
 
   // Fetch all hotels for hotel assignment
   const { data: hotels } = useQuery({
@@ -627,11 +630,6 @@ const AdminCustomers = () => {
                   <TableRow key={customer.user_id}>
                     <TableCell className="font-medium">
                       {customer.first_name} {customer.last_name}
-                      {customer.user_profiles?.display_name && (
-                        <div className="text-xs text-muted-foreground">
-                          {customer.user_profiles.display_name}
-                        </div>
-                      )}
                     </TableCell>
                     <TableCell className="text-sm">{customer.user_email || "-"}</TableCell>
                     <TableCell>{customer.user_profiles?.phone || "-"}</TableCell>
@@ -697,8 +695,32 @@ const AdminCustomers = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedCustomerId(customer.user_id)}
+                          title="View Details"
                         >
                           <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditUser({
+                              userId: customer.user_id,
+                              email: customer.user_email,
+                              firstName: customer.first_name,
+                              lastName: customer.last_name,
+                              phone: customer.user_profiles?.phone || "",
+                              country: customer.address_country || "",
+                              role: currentRole,
+                              hotelId: customer.hotel_admin?.hotel_id || "",
+                              isActive: customer.isActive,
+                              roleId: customer.user_roles?.id,
+                              customerId: customer.id,
+                            });
+                            setEditUserOpen(true);
+                          }}
+                          title="Edit User"
+                        >
+                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -709,6 +731,7 @@ const AdminCustomers = () => {
                               activate: !customer.isActive,
                             });
                           }}
+                          title={customer.isActive ? "Deactivate" : "Activate"}
                         >
                           {customer.isActive ? (
                             <UserX className="w-4 h-4 text-orange-600" />
@@ -720,6 +743,7 @@ const AdminCustomers = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => setDeleteUserId(customer.user_id)}
+                          title="Delete User"
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
@@ -941,10 +965,10 @@ const AdminCustomers = () => {
             )}
             <div className="space-y-2">
               <Label>Country</Label>
-              <Input
+              <CountrySelect
                 value={newUser.country}
-                onChange={(e) => setNewUser({ ...newUser, country: e.target.value })}
-                placeholder="United States"
+                onChange={(value) => setNewUser({ ...newUser, country: value })}
+                placeholder="Select country"
               />
             </div>
           </div>
@@ -957,6 +981,183 @@ const AdminCustomers = () => {
               disabled={!newUser.email || !newUser.password || !newUser.firstName || !newUser.lastName}
             >
               Create User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>Update user information, role, and permissions</DialogDescription>
+          </DialogHeader>
+          {editUser && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Name</Label>
+                  <Input
+                    value={editUser.firstName}
+                    onChange={(e) => setEditUser({ ...editUser, firstName: e.target.value })}
+                    placeholder="John"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name</Label>
+                  <Input
+                    value={editUser.lastName}
+                    onChange={(e) => setEditUser({ ...editUser, lastName: e.target.value })}
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={editUser.email}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  value={editUser.phone}
+                  onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })}
+                  placeholder="+1 234 567 890"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Country</Label>
+                <CountrySelect
+                  value={editUser.country}
+                  onChange={(value) => setEditUser({ ...editUser, country: value })}
+                  placeholder="Select country"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select value={editUser.role} onValueChange={(value: any) => setEditUser({ ...editUser, role: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="hotel_admin">Hotel Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {editUser.role === "hotel_admin" && (
+                <div className="space-y-2">
+                  <Label>Assigned Hotel</Label>
+                  <Select value={editUser.hotelId} onValueChange={(value) => setEditUser({ ...editUser, hotelId: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select hotel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hotels?.map((hotel) => (
+                        <SelectItem key={hotel.id} value={hotel.id}>
+                          {hotel.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>Account Status</Label>
+                <Select 
+                  value={editUser.isActive ? "active" : "inactive"} 
+                  onValueChange={(value) => setEditUser({ ...editUser, isActive: value === "active" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditUserOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!editUser) return;
+
+                try {
+                  // Update customer profile
+                  const { error: customerError } = await supabase
+                    .from("customers")
+                    .update({
+                      first_name: editUser.firstName,
+                      last_name: editUser.lastName,
+                      address_country: editUser.country,
+                    })
+                    .eq("id", editUser.customerId);
+
+                  if (customerError) throw customerError;
+
+                  // Update user profile
+                  const { error: profileError } = await supabase
+                    .from("user_profiles")
+                    .update({
+                      phone: editUser.phone,
+                      display_name: `${editUser.firstName} ${editUser.lastName}`,
+                    })
+                    .eq("user_id", editUser.userId);
+
+                  if (profileError) throw profileError;
+
+                  // Update role if changed
+                  const customer = customers?.find((c: any) => c.user_id === editUser.userId);
+                  const currentRole = customer?.user_roles?.role;
+                  
+                  if (currentRole !== editUser.role) {
+                    await updateRoleMutation.mutateAsync({
+                      userId: editUser.userId,
+                      newRole: editUser.role,
+                      oldRoleId: editUser.roleId,
+                    });
+                  }
+
+                  // Update hotel assignment if hotel_admin
+                  if (editUser.role === "hotel_admin" && editUser.hotelId) {
+                    await assignHotelMutation.mutateAsync({
+                      userId: editUser.userId,
+                      hotelId: editUser.hotelId,
+                    });
+                  }
+
+                  // Update account status if changed
+                  const wasActive = customer?.isActive;
+                  if (wasActive !== editUser.isActive) {
+                    await toggleAccountStatusMutation.mutateAsync({
+                      userId: editUser.userId,
+                      activate: editUser.isActive,
+                    });
+                  }
+
+                  toast.success("User updated successfully");
+                  setEditUserOpen(false);
+                  setEditUser(null);
+                  refetch();
+                } catch (error: any) {
+                  toast.error(error.message || "Failed to update user");
+                }
+              }}
+              disabled={!editUser?.firstName || !editUser?.lastName}
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
