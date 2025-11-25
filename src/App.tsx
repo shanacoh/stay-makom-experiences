@@ -96,6 +96,7 @@ const App = () => (
               <Route path="categories/edit/:id" element={<CategoryEditor />} />
               <Route path="hotels" element={<AdminHotels />} />
               <Route path="experiences" element={<AdminExperiences />} />
+              <Route path="extras" element={<HotelExtrasManagement />} />
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="reservations" element={<AdminBookings />} />
               <Route path="reservations/:bookingId" element={<AdminReservationDetails />} />
