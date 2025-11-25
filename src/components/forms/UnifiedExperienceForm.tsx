@@ -76,12 +76,16 @@ const experienceSchema = z.object({
   internal_notes: z.string().optional(),
   seo_title_en: z.string().optional(),
   seo_title_he: z.string().optional(),
+  seo_title_fr: z.string().optional(),
   meta_description_en: z.string().optional(),
   meta_description_he: z.string().optional(),
+  meta_description_fr: z.string().optional(),
   og_title_en: z.string().optional(),
   og_title_he: z.string().optional(),
+  og_title_fr: z.string().optional(),
   og_description_en: z.string().optional(),
   og_description_he: z.string().optional(),
+  og_description_fr: z.string().optional(),
   og_image: z.string().optional(),
 });
 
@@ -207,12 +211,16 @@ export function UnifiedExperienceForm({
       setValue("cancellation_policy_he", existingExperience.cancellation_policy_he || "");
       setValue("seo_title_en", existingExperience.seo_title_en || "");
       setValue("seo_title_he", existingExperience.seo_title_he || "");
+      setValue("seo_title_fr", existingExperience.seo_title_fr || "");
       setValue("meta_description_en", existingExperience.meta_description_en || "");
       setValue("meta_description_he", existingExperience.meta_description_he || "");
+      setValue("meta_description_fr", existingExperience.meta_description_fr || "");
       setValue("og_title_en", existingExperience.og_title_en || "");
       setValue("og_title_he", existingExperience.og_title_he || "");
+      setValue("og_title_fr", existingExperience.og_title_fr || "");
       setValue("og_description_en", existingExperience.og_description_en || "");
       setValue("og_description_he", existingExperience.og_description_he || "");
+      setValue("og_description_fr", existingExperience.og_description_fr || "");
       setValue("og_image", existingExperience.og_image || "");
       
       if (existingExperience.hero_image) {
@@ -856,7 +864,7 @@ export function UnifiedExperienceForm({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {/* English Column */}
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
@@ -963,6 +971,57 @@ export function UnifiedExperienceForm({
                     rows={3}
                     dir="rtl"
                     className="bg-hebrew-input"
+                  />
+                </div>
+              </div>
+
+              {/* French Column */}
+              <div className="space-y-4">
+                <div className="bg-background p-2 rounded">
+                  <h4 className="font-medium text-sm">French SEO (Français)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo_title_fr">Titre SEO</Label>
+                  <Input
+                    id="seo_title_fr"
+                    {...register("seo_title_fr")}
+                    placeholder="Titre pour Google et l'onglet"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~60 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meta_description_fr">Description Meta</Label>
+                  <Textarea
+                    id="meta_description_fr"
+                    {...register("meta_description_fr")}
+                    placeholder="Description pour les résultats Google"
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~155 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_title_fr">Titre Open Graph</Label>
+                  <Input
+                    id="og_title_fr"
+                    {...register("og_title_fr")}
+                    placeholder="Titre pour les réseaux sociaux"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_description_fr">Description Open Graph</Label>
+                  <Textarea
+                    id="og_description_fr"
+                    {...register("og_description_fr")}
+                    placeholder="Description pour les réseaux sociaux"
+                    rows={3}
                   />
                 </div>
               </div>
