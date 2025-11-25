@@ -332,16 +332,30 @@ const AdminCustomers = () => {
         }
       });
       
-      // Handle edge function errors
+      // Handle edge function errors (network errors, 400/500 responses)
       if (error) {
-        const errorMessage = error.message || JSON.stringify(error);
-        throw new Error(errorMessage);
+        console.error('Edge function error:', error);
+        // Extract error message from various possible formats
+        if (error.message) {
+          throw new Error(error.message);
+        } else if (typeof error === 'string') {
+          throw new Error(error);
+        } else {
+          throw new Error('Failed to create user');
+        }
       }
       
-      // Handle business logic errors from the function
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to create user');
+      // Handle business logic errors returned in data
+      if (data && typeof data === 'object') {
+        if (!data.success && data.error) {
+          throw new Error(data.error);
+        }
+        if (!data.success) {
+          throw new Error('Failed to create user');
+        }
       }
+      
+      return data;
     },
     onSuccess: () => {
       toast.success("User created successfully");
@@ -358,20 +372,18 @@ const AdminCustomers = () => {
       refetch();
     },
     onError: (error: any) => {
+      console.error('Create user mutation error:', error);
       // Extract error message from various error formats
       let errorMessage = "Failed to create user";
       
-      if (error?.message) {
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error?.message) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
         errorMessage = error;
       } else if (error?.error) {
         errorMessage = error.error;
-      }
-      
-      // Make email already exists error more user-friendly
-      if (errorMessage.includes("already been registered") || errorMessage.includes("email_exists")) {
-        errorMessage = "This email address is already registered. Please use a different email.";
       }
       
       toast.error(errorMessage);
