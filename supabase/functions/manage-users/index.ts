@@ -67,6 +67,8 @@ serve(async (req) => {
             display_name: `${firstName} ${lastName}`,
             locale: 'en',
             role: role, // Trigger will create user_role from this
+            hotel_id: hotelId, // Trigger will use this for hotel_admin role
+            country: country, // Will be used if we extend user_profiles
           }
         });
 
