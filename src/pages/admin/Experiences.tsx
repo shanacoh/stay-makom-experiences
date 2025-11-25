@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ExperienceForm } from "@/components/hotel-admin/ExperienceForm";
+import { UnifiedExperienceForm } from "@/components/forms/UnifiedExperienceForm";
+
 const AdminExperiences = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -146,11 +147,12 @@ const AdminExperiences = () => {
     const hotelName = hotels?.find(h => h.id === selectedHotelId)?.name || "";
     return (
       <div className="container mx-auto p-6">
-        <ExperienceForm
+        <UnifiedExperienceForm
           hotelId={selectedHotelId}
           hotelName={hotelName}
           experienceId={editingExperienceId || undefined}
           onClose={handleCloseForm}
+          mode="admin"
         />
       </div>
     );
