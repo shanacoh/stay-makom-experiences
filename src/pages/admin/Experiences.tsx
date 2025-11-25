@@ -139,15 +139,15 @@ const AdminExperiences = () => {
       
       if (fetchError) throw fetchError;
 
+      // Destructure to exclude fields we don't want to copy
+      const { id, created_at, updated_at, ...rest } = original;
+
       const newExperience = {
-        ...original,
-        id: undefined,
+        ...rest,
         title: `${original.title} (Copy)`,
         title_he: original.title_he ? `${original.title_he} (עותק)` : null,
         slug: generateSlug(`${original.title}-copy-${Date.now()}`),
         status: "draft" as const,
-        created_at: undefined,
-        updated_at: undefined,
       };
 
       const { error: insertError } = await supabase
