@@ -1,13 +1,95 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { Loader2, AlertTriangle } from "lucide-react";
 
 const AdminSettings = () => {
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState({
+    site_name: "",
+    site_tagline: "",
+    contact_email: "",
+    partners_email: "",
+    instagram_handle: "",
+    default_commission_rate: 18,
+    default_currency: "USD",
+    stripe_publishable_key: "",
+    stripe_secret_key: "",
+  });
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ["global-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("*")
+        .eq("key", "site_config")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        site_name: settings.site_name || "",
+        site_tagline: settings.site_tagline || "",
+        contact_email: settings.contact_email || "",
+        partners_email: settings.partners_email || "",
+        instagram_handle: settings.instagram_handle || "",
+        default_commission_rate: settings.default_commission_rate || 18,
+        default_currency: settings.default_currency || "USD",
+        stripe_publishable_key: settings.stripe_publishable_key || "",
+        stripe_secret_key: settings.stripe_secret_key || "",
+      });
+    }
+  }, [settings]);
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      if (settings?.id) {
+        // Update existing settings
+        const { error } = await supabase
+          .from("global_settings")
+          .update(data)
+          .eq("id", settings.id);
+        if (error) throw error;
+      } else {
+        // Create new settings
+        const { error } = await supabase
+          .from("global_settings")
+          .insert([{ key: "site_config", ...data }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["global-settings"] });
+      toast.success("Settings saved successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to save settings: ${error.message}`);
+    },
+  });
+
   const handleSave = () => {
-    toast.success("Settings saved successfully");
+    saveMutation.mutate(formData);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -15,6 +97,14 @@ const AdminSettings = () => {
         <h2 className="text-3xl font-bold">Settings</h2>
         <p className="text-muted-foreground">Manage site configuration</p>
       </div>
+
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Note:</strong> Stripe API keys should be stored as Supabase secrets for better security. 
+          The fields below are for reference only and shouldn't store sensitive keys directly.
+        </AlertDescription>
+      </Alert>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -24,11 +114,19 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="site-name">Site Name</Label>
-              <Input id="site-name" defaultValue="STAYMAKOM" />
+              <Input
+                id="site-name"
+                value={formData.site_name}
+                onChange={(e) => setFormData({ ...formData, site_name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="site-tagline">Tagline</Label>
-              <Input id="site-tagline" defaultValue="Israel... differently." />
+              <Input
+                id="site-tagline"
+                value={formData.site_tagline}
+                onChange={(e) => setFormData({ ...formData, site_tagline: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
@@ -40,15 +138,29 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="contact-email">General Email</Label>
-              <Input id="contact-email" type="email" defaultValue="hello@staymakom.com" />
+              <Input
+                id="contact-email"
+                type="email"
+                value={formData.contact_email}
+                onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="partners-email">Partners Email</Label>
-              <Input id="partners-email" type="email" defaultValue="partners@staymakom.com" />
+              <Input
+                id="partners-email"
+                type="email"
+                value={formData.partners_email}
+                onChange={(e) => setFormData({ ...formData, partners_email: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="instagram">Instagram Handle</Label>
-              <Input id="instagram" defaultValue="@staymakom" />
+              <Input
+                id="instagram"
+                value={formData.instagram_handle}
+                onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
@@ -60,11 +172,23 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="commission">Default Commission Rate (%)</Label>
-              <Input id="commission" type="number" defaultValue="18" step="0.1" />
+              <Input
+                id="commission"
+                type="number"
+                value={formData.default_commission_rate}
+                onChange={(e) =>
+                  setFormData({ ...formData, default_commission_rate: parseFloat(e.target.value) || 0 })
+                }
+                step="0.1"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="currency">Default Currency</Label>
-              <Input id="currency" defaultValue="USD" />
+              <Input
+                id="currency"
+                value={formData.default_currency}
+                onChange={(e) => setFormData({ ...formData, default_currency: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
@@ -76,18 +200,34 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="stripe-key">Stripe Publishable Key</Label>
-              <Input id="stripe-key" type="password" placeholder="pk_..." />
+              <Input
+                id="stripe-key"
+                type="password"
+                placeholder="pk_..."
+                value={formData.stripe_publishable_key}
+                onChange={(e) => setFormData({ ...formData, stripe_publishable_key: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="stripe-secret">Stripe Secret Key</Label>
-              <Input id="stripe-secret" type="password" placeholder="sk_..." />
+              <Input
+                id="stripe-secret"
+                type="password"
+                placeholder="sk_..."
+                value={formData.stripe_secret_key}
+                onChange={(e) => setFormData({ ...formData, stripe_secret_key: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                ⚠️ Consider using Supabase secrets for sensitive keys
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} size="lg">
+        <Button onClick={handleSave} size="lg" disabled={saveMutation.isPending}>
+          {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Save Settings
         </Button>
       </div>

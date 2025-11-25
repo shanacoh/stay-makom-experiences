@@ -831,8 +831,12 @@ export type Database = {
       }
       global_settings: {
         Row: {
+          contact_email: string | null
           created_at: string | null
+          default_commission_rate: number | null
+          default_currency: string | null
           id: string
+          instagram_handle: string | null
           key: string
           meta_description_en: string | null
           meta_description_fr: string | null
@@ -844,14 +848,23 @@ export type Database = {
           og_title_en: string | null
           og_title_fr: string | null
           og_title_he: string | null
+          partners_email: string | null
           seo_title_en: string | null
           seo_title_fr: string | null
           seo_title_he: string | null
+          site_name: string | null
+          site_tagline: string | null
+          stripe_publishable_key: string | null
+          stripe_secret_key: string | null
           updated_at: string | null
         }
         Insert: {
+          contact_email?: string | null
           created_at?: string | null
+          default_commission_rate?: number | null
+          default_currency?: string | null
           id?: string
+          instagram_handle?: string | null
           key: string
           meta_description_en?: string | null
           meta_description_fr?: string | null
@@ -863,14 +876,23 @@ export type Database = {
           og_title_en?: string | null
           og_title_fr?: string | null
           og_title_he?: string | null
+          partners_email?: string | null
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
+          site_name?: string | null
+          site_tagline?: string | null
+          stripe_publishable_key?: string | null
+          stripe_secret_key?: string | null
           updated_at?: string | null
         }
         Update: {
+          contact_email?: string | null
           created_at?: string | null
+          default_commission_rate?: number | null
+          default_currency?: string | null
           id?: string
+          instagram_handle?: string | null
           key?: string
           meta_description_en?: string | null
           meta_description_fr?: string | null
@@ -882,9 +904,14 @@ export type Database = {
           og_title_en?: string | null
           og_title_fr?: string | null
           og_title_he?: string | null
+          partners_email?: string | null
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
+          site_name?: string | null
+          site_tagline?: string | null
+          stripe_publishable_key?: string | null
+          stripe_secret_key?: string | null
           updated_at?: string | null
         }
         Relationships: []
