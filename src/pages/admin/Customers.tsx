@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -281,7 +282,18 @@ const AdminCustomers = () => {
           banned: !activate
         }
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Edge function error:', error);
+        
+        if (error instanceof FunctionsHttpError) {
+          const errorData = await error.context.json();
+          throw new Error(errorData.error || 'Failed to update status');
+        }
+        
+        throw new Error(error.message || 'Failed to update status');
+      }
+      
       if (!data?.success) throw new Error(data?.error || 'Failed to update status');
     },
     onSuccess: (_, { activate }) => {
@@ -302,7 +314,18 @@ const AdminCustomers = () => {
           userId
         }
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Edge function error:', error);
+        
+        if (error instanceof FunctionsHttpError) {
+          const errorData = await error.context.json();
+          throw new Error(errorData.error || 'Failed to delete user');
+        }
+        
+        throw new Error(error.message || 'Failed to delete user');
+      }
+      
       if (!data?.success) throw new Error(data?.error || 'Failed to delete user');
     },
     onSuccess: () => {
@@ -335,14 +358,14 @@ const AdminCustomers = () => {
       // Handle edge function errors (network errors, 400/500 responses)
       if (error) {
         console.error('Edge function error:', error);
-        // Extract error message from various possible formats
-        if (error.message) {
-          throw new Error(error.message);
-        } else if (typeof error === 'string') {
-          throw new Error(error);
-        } else {
-          throw new Error('Failed to create user');
+        
+        // FunctionsHttpError contains the response body in error.context
+        if (error instanceof FunctionsHttpError) {
+          const errorData = await error.context.json();
+          throw new Error(errorData.error || 'Failed to create user');
         }
+        
+        throw new Error(error.message || 'Failed to create user');
       }
       
       // Handle business logic errors returned in data
