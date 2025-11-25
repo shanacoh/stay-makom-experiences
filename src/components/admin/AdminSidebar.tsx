@@ -9,6 +9,7 @@ import {
   BookOpen,
   Settings,
   Sparkles,
+  ShoppingBag,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,7 @@ const menuItems = [
   { title: "Categories", url: "/admin/categories", icon: FolderKanban },
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
   { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
+  { title: "Extras", url: "/admin/extras", icon: ShoppingBag },
   { title: "Bookings", url: "/admin/bookings", icon: Calendar },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Customers", url: "/admin/customers", icon: UserCircle },
