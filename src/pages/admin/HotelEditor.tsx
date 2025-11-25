@@ -11,6 +11,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
+import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
 
 interface HotelEditorProps {
   hotelId?: string;
@@ -518,6 +519,21 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Hotel Extras Section - Only show when editing existing hotel */}
+        {hotelId && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Hotel Extras</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage extras that can be added to experiences at this hotel
+              </p>
+            </CardHeader>
+            <CardContent>
+              <HotelExtrasManager hotelId={hotelId} />
+            </CardContent>
+          </Card>
+        )}
       </form>
     </div>
   );
