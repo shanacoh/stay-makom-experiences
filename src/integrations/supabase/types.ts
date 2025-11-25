@@ -691,7 +691,7 @@ export type Database = {
           currency: string | null
           description: string | null
           description_he: string | null
-          experience_id: string
+          hotel_id: string
           id: string
           image_url: string | null
           is_available: boolean | null
@@ -707,7 +707,7 @@ export type Database = {
           currency?: string | null
           description?: string | null
           description_he?: string | null
-          experience_id: string
+          hotel_id: string
           id?: string
           image_url?: string | null
           is_available?: boolean | null
@@ -723,7 +723,7 @@ export type Database = {
           currency?: string | null
           description?: string | null
           description_he?: string | null
-          experience_id?: string
+          hotel_id?: string
           id?: string
           image_url?: string | null
           is_available?: boolean | null
@@ -736,10 +736,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "extras_experience_id_fkey"
-            columns: ["experience_id"]
+            foreignKeyName: "extras_hotel_id_fkey"
+            columns: ["hotel_id"]
             isOneToOne: false
-            referencedRelation: "experiences"
+            referencedRelation: "hotels"
             referencedColumns: ["id"]
           },
         ]

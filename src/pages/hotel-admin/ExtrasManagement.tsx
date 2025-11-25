@@ -1,21 +1,20 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
-import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
-interface ExtrasManagerProps {
-  experienceId: string;
-}
-
-const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
+export default function ExtrasManagement() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [newExtra, setNewExtra] = useState({
     name: "",
@@ -27,18 +26,35 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
     image_url: "",
   });
 
+  // Fetch hotel admin's hotel ID
+  const { data: hotelAdmin } = useQuery({
+    queryKey: ["hotel-admin", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hotel_admins")
+        .select("hotel_id")
+        .eq("user_id", user?.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch hotel extras
   const { data: extras, isLoading } = useQuery({
-    queryKey: ["experience-extras", experienceId],
+    queryKey: ["hotel-extras", hotelAdmin?.hotel_id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("extras")
         .select("*")
-        .eq("experience_id", experienceId)
+        .eq("hotel_id", hotelAdmin?.hotel_id)
         .order("sort_order");
 
       if (error) throw error;
       return data;
     },
+    enabled: !!hotelAdmin?.hotel_id,
   });
 
   const createMutation = useMutation({
@@ -52,7 +68,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
       const { error } = await supabase
         .from("extras")
         .insert([{
-          experience_id: experienceId,
+          hotel_id: hotelAdmin?.hotel_id,
           name: newExtra.name,
           name_he: newExtra.name_he || null,
           description: newExtra.description || null,
@@ -62,12 +78,13 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
           image_url: newExtra.image_url || null,
           sort_order: maxOrder + 1,
           is_available: true,
+          currency: "ILS",
         }]);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["experience-extras", experienceId] });
+      queryClient.invalidateQueries({ queryKey: ["hotel-extras", hotelAdmin?.hotel_id] });
       setNewExtra({ 
         name: "", 
         name_he: "",
@@ -94,7 +111,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["experience-extras", experienceId] });
+      queryClient.invalidateQueries({ queryKey: ["hotel-extras", hotelAdmin?.hotel_id] });
       toast.success("Extra deleted");
     },
   });
@@ -109,27 +126,39 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["experience-extras", experienceId] });
+      queryClient.invalidateQueries({ queryKey: ["hotel-extras", hotelAdmin?.hotel_id] });
       toast.success("Extra updated");
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Extras / Add-ons</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-4 p-4 border border-border rounded-lg">
-          <h4 className="font-medium">Add new extra</h4>
-          
+    <div className="p-8 space-y-6">
+      <div>
+        <h1 className="font-sans text-4xl font-bold">Extras Management</h1>
+        <p className="text-muted-foreground mt-2">
+          Manage extras and add-ons that can be assigned to your experiences
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Extra</CardTitle>
+          <CardDescription>Create extras that guests can add to their bookings</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           {/* Bilingual Name & Description - Side by Side */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             {/* English Column */}
-            <div className="space-y-3">
-              <div className="bg-muted/30 p-2 rounded">
+            <div className="space-y-4">
+              <div className="bg-muted/30 p-3 rounded">
                 <h5 className="text-sm font-medium">English Version</h5>
               </div>
               
@@ -150,14 +179,14 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
                   placeholder="Describe this extra..."
                   value={newExtra.description}
                   onChange={(e) => setNewExtra({ ...newExtra, description: e.target.value })}
-                  rows={3}
+                  rows={4}
                 />
               </div>
             </div>
 
             {/* Hebrew Column */}
-            <div className="space-y-3">
-              <div className="bg-muted/30 p-2 rounded">
+            <div className="space-y-4">
+              <div className="bg-muted/30 p-3 rounded">
                 <h5 className="text-sm font-medium">Hebrew Version (עברית)</h5>
               </div>
               
@@ -180,7 +209,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
                   placeholder="תאר את התוספת..."
                   value={newExtra.description_he}
                   onChange={(e) => setNewExtra({ ...newExtra, description_he: e.target.value })}
-                  rows={3}
+                  rows={4}
                   dir="rtl"
                   className="bg-hebrew-input"
                 />
@@ -189,9 +218,9 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
           </div>
 
           {/* Price & Settings */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Price *</Label>
+              <Label>Price (ILS) *</Label>
               <Input
                 type="number"
                 placeholder="0.00"
@@ -225,66 +254,86 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
             description="Image for this add-on"
           />
 
-          <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+          <Button 
+            onClick={() => createMutation.mutate()} 
+            disabled={createMutation.isPending || !newExtra.name || !newExtra.price}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Extra
           </Button>
-        </div>
+        </CardContent>
+      </Card>
 
-        {extras && extras.length > 0 && (
-          <div className="space-y-2">
-            {extras.map((extra) => (
-              <div
-                key={extra.id}
-                className="flex items-start gap-3 p-3 border border-border rounded-lg"
-              >
-                <div className="flex-1">
-                  <div className="font-medium">
-                    {extra.name}
-                    {extra.name_he && (
-                      <span className="text-muted-foreground mr-2 text-sm" dir="rtl"> / {extra.name_he}</span>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    ${extra.price} / {extra.pricing_type.replace("_", " ")}
-                  </div>
-                  {(extra.description || extra.description_he) && (
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {extra.description}
-                      {extra.description_he && (
-                        <span className="block mt-1" dir="rtl">{extra.description_he}</span>
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Extras ({extras?.length || 0})</CardTitle>
+          <CardDescription>Manage existing extras for your hotel</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {extras && extras.length > 0 ? (
+            <div className="space-y-3">
+              {extras.map((extra) => (
+                <div
+                  key={extra.id}
+                  className="flex items-start gap-4 p-4 border border-border rounded-lg"
+                >
+                  {extra.image_url && (
+                    <img 
+                      src={extra.image_url} 
+                      alt={extra.name} 
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <div className="font-medium text-lg">
+                      {extra.name}
+                      {extra.name_he && (
+                        <span className="text-muted-foreground ml-3 text-sm" dir="rtl">/ {extra.name_he}</span>
                       )}
                     </div>
-                  )}
+                    <div className="text-sm font-semibold text-primary mt-1">
+                      {extra.price} {extra.currency} / {extra.pricing_type.replace("_", " ")}
+                    </div>
+                    {(extra.description || extra.description_he) && (
+                      <div className="text-sm text-muted-foreground mt-2">
+                        {extra.description}
+                        {extra.description_he && (
+                          <span className="block mt-1" dir="rtl">{extra.description_he}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-muted-foreground">
+                        {extra.is_available ? "Active" : "Inactive"}
+                      </Label>
+                      <Switch
+                        checked={extra.is_available || false}
+                        onCheckedChange={(checked) => 
+                          toggleAvailableMutation.mutate({ id: extra.id, is_available: checked })
+                        }
+                      />
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => deleteMutation.mutate(extra.id)}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => toggleAvailableMutation.mutate({
-                    id: extra.id,
-                    is_available: !extra.is_available
-                  })}
-                >
-                  {extra.is_available ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => deleteMutation.mutate(extra.id)}
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Plus className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>No extras yet. Create your first extra above.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
-};
-
-export default ExtrasManager;
+}

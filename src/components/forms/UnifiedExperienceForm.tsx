@@ -51,7 +51,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import IncludesManager from "@/components/admin/IncludesManager";
-import ExtrasManager from "@/components/admin/ExtrasManager";
+import ExperienceExtrasSelector from "@/components/admin/ExperienceExtrasSelector";
 import ReviewsManager from "@/components/admin/ReviewsManager";
 import { generateSlug } from "@/lib/utils";
 
@@ -822,11 +822,14 @@ export function UnifiedExperienceForm({
 
             <Card>
               <CardHeader>
-                <CardTitle>Extras (Add-ons)</CardTitle>
-                <CardDescription>Manage optional extras for this experience</CardDescription>
+                <CardTitle>Spice It Up (Extras)</CardTitle>
+                <CardDescription>Select extras from your hotel that guests can add to this experience</CardDescription>
               </CardHeader>
               <CardContent>
-                <ExtrasManager experienceId={experienceId} />
+                <ExperienceExtrasSelector 
+                  experienceId={experienceId} 
+                  hotelId={watch("hotel_id")}
+                />
               </CardContent>
             </Card>
 

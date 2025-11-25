@@ -20,15 +20,22 @@ const ExtrasSelector = ({
   const { data: extras, isLoading } = useQuery({
     queryKey: ["extras", experienceId],
     queryFn: async () => {
+      // Fetch extras through the experience_extras join table
       const { data, error } = await supabase
-        .from("extras")
-        .select("*")
-        .eq("experience_id", experienceId)
-        .eq("is_available", true)
-        .order("sort_order", { ascending: true });
+        .from("experience_extras")
+        .select(`
+          extra_id,
+          extras (*)
+        `)
+        .eq("experience_id", experienceId);
 
       if (error) throw error;
-      return data;
+      
+      // Filter to only available extras and flatten the structure
+      return data
+        ?.map(item => item.extras)
+        .filter(extra => extra && extra.is_available)
+        .sort((a, b) => (a?.sort_order || 0) - (b?.sort_order || 0)) || [];
     },
   });
 

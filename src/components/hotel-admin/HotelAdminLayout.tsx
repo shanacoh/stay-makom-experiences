@@ -21,7 +21,7 @@ const navigation = [
   { name: "Property", href: "/hotel-admin/property", icon: Hotel },
   { name: "Experiences", href: "/hotel-admin/experiences", icon: Ticket },
   { name: "Bookings", href: "/hotel-admin/bookings", icon: FileText },
-  { name: "Extras", href: "/hotel-admin/extras", icon: Plus },
+  { name: "Extras", href: "/hotel-admin/extras-management", icon: Plus },
   { name: "Billing", href: "/hotel-admin/billing", icon: CreditCard },
   { name: "Reviews", href: "/hotel-admin/reviews", icon: Star },
   { name: "Payment Info", href: "/hotel-admin/payment-info", icon: Wallet },
