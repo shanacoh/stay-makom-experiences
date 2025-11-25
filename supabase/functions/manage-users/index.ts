@@ -85,7 +85,8 @@ serve(async (req) => {
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
-          throw profileError;
+          await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+          throw new Error('Failed to create user profile');
         }
 
         // Create user role
@@ -98,7 +99,9 @@ serve(async (req) => {
 
         if (roleError) {
           console.error('Role creation error:', roleError);
-          throw roleError;
+          await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+          await supabaseAdmin.from('user_profiles').delete().eq('user_id', newUser.user.id);
+          throw new Error('Failed to create user role');
         }
 
         // If customer, create customer profile
@@ -115,7 +118,10 @@ serve(async (req) => {
 
           if (customerError) {
             console.error('Customer creation error:', customerError);
-            throw customerError;
+            await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+            await supabaseAdmin.from('user_profiles').delete().eq('user_id', newUser.user.id);
+            await supabaseAdmin.from('user_roles').delete().eq('user_id', newUser.user.id);
+            throw new Error('Failed to create customer profile');
           }
         }
 
@@ -130,7 +136,13 @@ serve(async (req) => {
 
           if (hotelAdminError) {
             console.error('Hotel admin creation error:', hotelAdminError);
-            throw hotelAdminError;
+            await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+            await supabaseAdmin.from('user_profiles').delete().eq('user_id', newUser.user.id);
+            await supabaseAdmin.from('user_roles').delete().eq('user_id', newUser.user.id);
+            if (role === 'customer') {
+              await supabaseAdmin.from('customers').delete().eq('user_id', newUser.user.id);
+            }
+            throw new Error('Failed to assign hotel to admin');
           }
         }
 
