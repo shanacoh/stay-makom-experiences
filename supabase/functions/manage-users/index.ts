@@ -1,0 +1,202 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.80.0";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Create admin client with service role
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+
+    // Get the authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
+
+    // Verify the caller is authenticated and is admin
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      throw new Error('Unauthorized');
+    }
+
+    // Check if user is admin
+    const { data: hasAdminRole } = await supabaseAdmin
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    if (!hasAdminRole) {
+      throw new Error('User is not admin');
+    }
+
+    const { action, ...params } = await req.json();
+
+    console.log('Manage users action:', action, 'by user:', user.email);
+
+    switch (action) {
+      case 'create': {
+        const { email, password, firstName, lastName, role, country, hotelId } = params;
+
+        // Create the user in auth
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: {
+            first_name: firstName,
+            last_name: lastName,
+          }
+        });
+
+        if (createError) throw createError;
+
+        // Create user profile
+        const { error: profileError } = await supabaseAdmin
+          .from('user_profiles')
+          .insert({
+            user_id: newUser.user.id,
+            display_name: `${firstName} ${lastName}`,
+            locale: 'en',
+            marketing_opt_in: false,
+            tos_accepted_at: new Date().toISOString(),
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw profileError;
+        }
+
+        // Create user role
+        const { error: roleError } = await supabaseAdmin
+          .from('user_roles')
+          .insert({
+            user_id: newUser.user.id,
+            role: role,
+          });
+
+        if (roleError) {
+          console.error('Role creation error:', roleError);
+          throw roleError;
+        }
+
+        // If customer, create customer profile
+        if (role === 'customer') {
+          const { error: customerError } = await supabaseAdmin
+            .from('customers')
+            .insert({
+              user_id: newUser.user.id,
+              first_name: firstName,
+              last_name: lastName,
+              address_country: country || null,
+              default_party_size: 2,
+            });
+
+          if (customerError) {
+            console.error('Customer creation error:', customerError);
+            throw customerError;
+          }
+        }
+
+        // If hotel_admin, create hotel admin assignment
+        if (role === 'hotel_admin' && hotelId) {
+          const { error: hotelAdminError } = await supabaseAdmin
+            .from('hotel_admins')
+            .insert({
+              user_id: newUser.user.id,
+              hotel_id: hotelId,
+            });
+
+          if (hotelAdminError) {
+            console.error('Hotel admin creation error:', hotelAdminError);
+            throw hotelAdminError;
+          }
+        }
+
+        return new Response(
+          JSON.stringify({ success: true, userId: newUser.user.id }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      case 'delete': {
+        const { userId } = params;
+
+        // Check if user has bookings
+        const { data: bookings } = await supabaseAdmin
+          .from('bookings')
+          .select('id')
+          .eq('customer_id', userId)
+          .limit(1);
+
+        if (bookings && bookings.length > 0) {
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'Cannot delete user with existing bookings. Please archive the user instead.' 
+            }),
+            { 
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+
+        // Delete the user
+        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+        if (deleteError) throw deleteError;
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      case 'toggle-status': {
+        const { userId, banned } = params;
+
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+          userId,
+          { ban_duration: banned ? '876000h' : 'none' }
+        );
+
+        if (updateError) throw updateError;
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      default:
+        throw new Error('Invalid action');
+    }
+
+  } catch (error) {
+    console.error('Error in manage-users function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+});
