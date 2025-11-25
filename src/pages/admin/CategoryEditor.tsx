@@ -30,12 +30,16 @@ const CategoryEditor = () => {
     status: "draft" as "draft" | "published",
     seo_title_en: "",
     seo_title_he: "",
+    seo_title_fr: "",
     meta_description_en: "",
     meta_description_he: "",
+    meta_description_fr: "",
     og_title_en: "",
     og_title_he: "",
+    og_title_fr: "",
     og_description_en: "",
     og_description_he: "",
+    og_description_fr: "",
     og_image: "",
   });
   const [uploading, setUploading] = useState(false);
@@ -72,12 +76,16 @@ const CategoryEditor = () => {
         status: category.status || "draft",
         seo_title_en: category.seo_title_en || "",
         seo_title_he: category.seo_title_he || "",
+        seo_title_fr: category.seo_title_fr || "",
         meta_description_en: category.meta_description_en || "",
         meta_description_he: category.meta_description_he || "",
+        meta_description_fr: category.meta_description_fr || "",
         og_title_en: category.og_title_en || "",
         og_title_he: category.og_title_he || "",
+        og_title_fr: category.og_title_fr || "",
         og_description_en: category.og_description_en || "",
         og_description_he: category.og_description_he || "",
+        og_description_fr: category.og_description_fr || "",
         og_image: category.og_image || "",
       });
       setImagePreview(category.hero_image || "");
@@ -450,7 +458,7 @@ const CategoryEditor = () => {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {/* English Column */}
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">

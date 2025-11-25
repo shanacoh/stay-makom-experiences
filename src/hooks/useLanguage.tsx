@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 
-export type Language = "en" | "he";
+export type Language = "en" | "he" | "fr";
 
 export const useLanguage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
