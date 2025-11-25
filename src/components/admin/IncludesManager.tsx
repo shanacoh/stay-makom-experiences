@@ -464,29 +464,50 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                       </Button>
                     </div>
                   </div>
-                ) : (
-                  // View mode
+                 ) : (
+                  // View mode - Compact display with only image + title
                   <>
                     {include.icon_url && (
                       <img 
                         src={include.icon_url} 
                         alt={include.title} 
-                        className="w-20 h-16 object-cover rounded-lg flex-shrink-0"
+                        className="w-12 h-12 object-cover rounded flex-shrink-0"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium">
+                      <div className="font-medium text-sm">
                         {include.title}
-                        {include.title_he && (
-                          <span className="text-muted-foreground mr-2 text-sm block" dir="rtl">{include.title_he}</span>
-                        )}
                       </div>
-                      {(include.description || include.description_he) && (
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {include.description}
-                          {include.description_he && (
-                            <span className="block" dir="rtl">{include.description_he}</span>
-                          )}
+                      {include.title_he && (
+                        <div className="text-xs text-muted-foreground" dir="rtl">
+                          {include.title_he}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Switch
+                        checked={include.published}
+                        onCheckedChange={() => togglePublishedMutation.mutate({ id: include.id, published: !include.published })}
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => startEditing(include)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => deleteMutation.mutate(include.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </>
+                )}
                         </div>
                       )}
                     </div>
