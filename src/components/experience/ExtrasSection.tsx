@@ -18,7 +18,19 @@ interface ExtrasSectionProps {
 }
 
 const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSectionProps) => {
-  if (!extras || extras.length === 0) return null;
+  // Create placeholder items if fewer than 2
+  const displayExtras = [...(extras || [])];
+  while (displayExtras.length < 2) {
+    displayExtras.push({
+      id: `placeholder-${displayExtras.length}`,
+      name: 'Extra',
+      description: 'To be determined',
+      price: 0,
+      currency: 'EUR',
+      pricing_type: 'per_booking',
+      image_url: undefined,
+    });
+  }
 
   const getPricingLabel = (pricingType: string) => {
     switch (pricingType) {
@@ -41,13 +53,14 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {extras.map((extra) => {
+        {displayExtras.map((extra) => {
+          const isPlaceholder = extra.id.startsWith('placeholder');
           const quantity = selectedExtras[extra.id] || 0;
           
           return (
             <div
               key={extra.id}
-              className="group space-y-2 sm:space-y-3"
+              className={`group space-y-2 sm:space-y-3 ${isPlaceholder ? 'opacity-50' : ''}`}
             >
               <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                 {extra.image_url ? (
@@ -66,13 +79,16 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                   <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed h-6 sm:h-8 line-clamp-2">
                     {extra.description || '\u00A0'}
                   </p>
-                  <div className="text-xs sm:text-sm font-bold pt-0.5 sm:pt-1">
-                    ${extra.price} <span className="text-[10px] sm:text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
-                  </div>
+                  {!isPlaceholder && (
+                    <div className="text-xs sm:text-sm font-bold pt-0.5 sm:pt-1">
+                      ${extra.price} <span className="text-[10px] sm:text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
+                    </div>
+                  )}
                 </div>
                 
-                <div className="flex items-center justify-center pt-0.5 sm:pt-1">
-                  {quantity === 0 ? (
+                {!isPlaceholder && (
+                  <div className="flex items-center justify-center pt-0.5 sm:pt-1">
+                    {quantity === 0 ? (
                     <Button
                       size="sm"
                       className="w-full h-7 sm:h-8 text-[10px] sm:text-xs"
@@ -102,7 +118,8 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                       </Button>
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           );

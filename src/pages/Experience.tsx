@@ -5,14 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ExperienceHero from "@/components/experience/ExperienceHero";
-import HotelSpotlight from "@/components/experience/HotelSpotlight";
+import TitleBlock from "@/components/experience/TitleBlock";
 import BookingPanel from "@/components/experience/BookingPanel";
 import ExperienceDetails from "@/components/experience/ExperienceDetails";
 import WhatsIncludedPhotos from "@/components/experience/WhatsIncludedPhotos";
 import ExtrasSection from "@/components/experience/ExtrasSection";
 import GoodToKnow from "@/components/experience/GoodToKnow";
 import ReviewsSection from "@/components/experience/ReviewsSection";
-import ImportantInformation from "@/components/experience/ImportantInformation";
+import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
 import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -46,20 +46,33 @@ const Experience = () => {
     },
     enabled: !!slug
   });
-  const {
-    data: includes,
-    isLoading: includesLoading
-  } = useQuery({
+  const { data: includes } = useQuery({
     queryKey: ["experience-includes", experience?.id],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await (supabase as any).from("experience_includes").select("*").eq("experience_id", experience?.id).eq("published", true).order("order_index");
+      const { data, error } = await (supabase as any)
+        .from("experience_includes")
+        .select("*")
+        .eq("experience_id", experience?.id)
+        .eq("published", true)
+        .order("order_index");
       if (error) throw error;
       return data;
     },
-    enabled: !!experience?.id
+    enabled: !!experience?.id,
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: ["experience-reviews", experience?.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("experience_reviews")
+        .select("*")
+        .eq("experience_id", experience?.id)
+        .eq("published", true);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!experience?.id,
   });
   const {
     data: extras
@@ -98,31 +111,64 @@ const Experience = () => {
 
         <div className="container pb-16 px-4 sm:px-6 my-[26px]">
           <div className={`grid lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 ${isMobile ? 'pb-24' : ''}`}>
-            {/* Left Column - Details */}
+            {/* Left Column - Content */}
             <div className="lg:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
+              {/* Title Block */}
+              <TitleBlock
+                title={experience.title}
+                hotelName={experience.hotels?.name || ''}
+                hotelSlug={experience.hotels?.slug}
+                isNew={false}
+                rating={reviews && reviews.length > 0 ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length : undefined}
+                reviewCount={reviews?.length}
+                city={experience.hotels?.city}
+                address={(experience as any).address}
+                googleMapsLink={(experience as any).google_maps_link}
+              />
+
+              {/* Description */}
               <ExperienceDetails experience={experience} />
 
-              {includes && includes.length > 0 && <WhatsIncludedPhotos includes={includes} />}
+              {/* What's Included */}
+              <WhatsIncludedPhotos includes={includes} />
 
-              {extras && extras.length > 0 && <ExtrasSection extras={extras} selectedExtras={selectedExtras} onUpdateQuantity={(extraId, quantity) => {
-              setSelectedExtras(prev => ({
-                ...prev,
-                [extraId]: quantity
-              }));
-            }} />}
+              {/* Spice It Up (Extras) */}
+              <ExtrasSection 
+                extras={extras || []} 
+                selectedExtras={selectedExtras} 
+                onUpdateQuantity={(extraId, quantity) => {
+                  setSelectedExtras(prev => ({
+                    ...prev,
+                    [extraId]: quantity
+                  }));
+                }} 
+              />
 
-              <GoodToKnow items={experience.good_to_know} />
-
-              {experience.hotels && <HotelSpotlight hotel={experience.hotels} />}
-
+              {/* Reviews */}
               <ReviewsSection experienceId={experience.id} />
 
-              <ImportantInformation checkinTime={(experience as any).checkin_time} checkoutTime={(experience as any).checkout_time} address={(experience as any).address} googleMapsLink={(experience as any).google_maps_link} accessibilityInfo={(experience as any).accessibility_info} services={(experience as any).services} />
+              {/* Good to Know */}
+              <GoodToKnow items={experience.good_to_know} />
+
+              {/* Other Experiences from This Hotel */}
+              <OtherExperiencesFromHotel 
+                hotelId={experience.hotel_id}
+                currentExperienceId={experience.id}
+                hotelName={experience.hotels?.name || ''}
+              />
             </div>
 
-            {/* Right Column - Booking Panel */}
-            <div className="lg:col-span-1 hidden lg:block">
-              <BookingPanel experienceId={experience.id} hotelId={experience.hotel_id} basePrice={experience.base_price} basePriceType={experience.base_price_type || "per_person"} currency={experience.currency || "USD"} minParty={experience.min_party || 2} maxParty={experience.max_party || 4} />
+            {/* Right Column - Sticky Booking Panel */}
+            <div className="lg:col-span-1 hidden lg:block self-start">
+              <BookingPanel 
+                experienceId={experience.id} 
+                hotelId={experience.hotel_id} 
+                basePrice={experience.base_price} 
+                basePriceType={experience.base_price_type || "per_person"} 
+                currency={experience.currency || "USD"} 
+                minParty={experience.min_party || 2} 
+                maxParty={experience.max_party || 4} 
+              />
             </div>
           </div>
         </div>
