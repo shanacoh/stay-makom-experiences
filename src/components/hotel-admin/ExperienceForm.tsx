@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
@@ -49,6 +49,7 @@ import { Save, Rocket, Plus, X, Upload, GripVertical, Loader2, Trash2, AlertCirc
 import { toast } from "sonner";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import IncludesManager from "@/components/admin/IncludesManager";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 
 const experienceSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -200,6 +201,7 @@ export function ExperienceForm({
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceSchema),
@@ -711,11 +713,16 @@ export function ExperienceForm({
 
             <div>
               <Label htmlFor="description">Description * (min 100 characters)</Label>
-              <Textarea
-                id="description"
-                placeholder="What you'll do during this experience..."
-                rows={6}
-                {...register("description")}
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <RichTextEditor
+                    content={field.value || ''}
+                    onChange={field.onChange}
+                    placeholder="What you'll do during this experience..."
+                  />
+                )}
               />
               <div className="flex justify-between mt-1">
                 {errors.description && (
