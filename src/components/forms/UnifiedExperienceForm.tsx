@@ -293,7 +293,8 @@ export function UnifiedExperienceForm({
         heroImageUrl = await uploadImage(heroImage, "hero");
       }
 
-      const photoUrls = existingExperience?.photos || [];
+      // Start with current gallery previews (reflects deletions), filter out data URLs (new uploads not yet saved)
+      const photoUrls = galleryPreviews.filter(url => url.startsWith('http'));
       for (const img of galleryImages) {
         const url = await uploadImage(img, "gallery");
         photoUrls.push(url);
@@ -366,7 +367,8 @@ export function UnifiedExperienceForm({
         heroImageUrl = await uploadImage(heroImage, "hero");
       }
 
-      const photoUrls = existingExperience?.photos || [];
+      // Start with current gallery previews (reflects deletions), filter out data URLs (new uploads not yet saved)
+      const photoUrls = galleryPreviews.filter(url => url.startsWith('http'));
       for (const img of galleryImages) {
         const url = await uploadImage(img, "gallery");
         photoUrls.push(url);
