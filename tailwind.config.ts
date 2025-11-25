@@ -53,6 +53,7 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         logo: "hsl(var(--logo))",
+        "hebrew-input": "hsl(var(--input-hebrew-bg))",
       },
       borderRadius: {
         lg: "var(--radius)",

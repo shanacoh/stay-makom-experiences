@@ -169,6 +169,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
                   value={newExtra.name_he}
                   onChange={(e) => setNewExtra({ ...newExtra, name_he: e.target.value })}
                   dir="rtl"
+                  className="bg-hebrew-input"
                 />
               </div>
 
@@ -181,6 +182,7 @@ const ExtrasManager = ({ experienceId }: ExtrasManagerProps) => {
                   onChange={(e) => setNewExtra({ ...newExtra, description_he: e.target.value })}
                   rows={3}
                   dir="rtl"
+                  className="bg-hebrew-input"
                 />
               </div>
             </div>

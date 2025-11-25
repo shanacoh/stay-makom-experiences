@@ -386,6 +386,7 @@ const CategoryEditor = () => {
                     onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
                     placeholder="שם הקטגוריה בעברית"
                     dir="rtl"
+                    className="bg-hebrew-input"
                   />
                 </div>
 
@@ -397,6 +398,7 @@ const CategoryEditor = () => {
                     onChange={(e) => setFormData({ ...formData, presentation_title_he: e.target.value })}
                     placeholder="כותרת גדולה של הקטגוריה"
                     dir="rtl"
+                    className="bg-hebrew-input"
                   />
                   <p className="text-sm text-muted-foreground">
                     Large title for Hebrew version
@@ -412,6 +414,7 @@ const CategoryEditor = () => {
                     placeholder="תיאור מרתק של הקטגוריה..."
                     rows={4}
                     dir="rtl"
+                    className="bg-hebrew-input"
                   />
                 </div>
 
@@ -428,6 +431,7 @@ const CategoryEditor = () => {
                       }}
                       placeholder={`תכונה ${index + 1}`}
                       dir="rtl"
+                      className="bg-hebrew-input"
                     />
                   ))}
                   <Button

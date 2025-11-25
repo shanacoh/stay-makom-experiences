@@ -531,12 +531,12 @@ export function UnifiedExperienceForm({
                 
                 <div>
                   <Label htmlFor="title_he">Title (HE)</Label>
-                  <Input id="title_he" {...register("title_he")} dir="rtl" />
+                  <Input id="title_he" {...register("title_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
 
                 <div>
                   <Label htmlFor="subtitle_he">Subtitle (HE)</Label>
-                  <Input id="subtitle_he" {...register("subtitle_he")} dir="rtl" />
+                  <Input id="subtitle_he" {...register("subtitle_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
 
                 <div>
@@ -560,7 +560,7 @@ export function UnifiedExperienceForm({
 
                 <div>
                   <Label htmlFor="cancellation_policy_he">Cancellation Policy (HE)</Label>
-                  <Input id="cancellation_policy_he" {...register("cancellation_policy_he")} dir="rtl" />
+                  <Input id="cancellation_policy_he" {...register("cancellation_policy_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
               </div>
             </div>
