@@ -5,15 +5,19 @@ interface SEOHeadProps {
   title?: string;
   titleEn?: string;
   titleHe?: string;
+  titleFr?: string;
   description?: string;
   descriptionEn?: string;
   descriptionHe?: string;
+  descriptionFr?: string;
   ogTitle?: string;
   ogTitleEn?: string;
   ogTitleHe?: string;
+  ogTitleFr?: string;
   ogDescription?: string;
   ogDescriptionEn?: string;
   ogDescriptionHe?: string;
+  ogDescriptionFr?: string;
   ogImage?: string;
   fallbackTitle?: string;
   fallbackDescription?: string;
@@ -23,15 +27,19 @@ export function SEOHead({
   title,
   titleEn,
   titleHe,
+  titleFr,
   description,
   descriptionEn,
   descriptionHe,
+  descriptionFr,
   ogTitle,
   ogTitleEn,
   ogTitleHe,
+  ogTitleFr,
   ogDescription,
   ogDescriptionEn,
   ogDescriptionHe,
+  ogDescriptionFr,
   ogImage,
   fallbackTitle = "StayMakom - Curated Boutique Experiences in Israel",
   fallbackDescription = "Discover unique boutique hotels and immersive experiences across Israel. From desert escapes to vineyard retreats, find your perfect getaway.",
@@ -42,18 +50,26 @@ export function SEOHead({
     // Determine the correct values based on language
     const finalTitle = lang === "he" 
       ? (titleHe || title || fallbackTitle)
+      : lang === "fr"
+      ? (titleFr || titleEn || title || fallbackTitle)
       : (titleEn || title || fallbackTitle);
     
     const finalDescription = lang === "he"
       ? (descriptionHe || description || fallbackDescription)
+      : lang === "fr"
+      ? (descriptionFr || descriptionEn || description || fallbackDescription)
       : (descriptionEn || description || fallbackDescription);
     
     const finalOgTitle = lang === "he"
       ? (ogTitleHe || ogTitle || titleHe || title || fallbackTitle)
+      : lang === "fr"
+      ? (ogTitleFr || ogTitleEn || ogTitle || titleFr || titleEn || title || fallbackTitle)
       : (ogTitleEn || ogTitle || titleEn || title || fallbackTitle);
     
     const finalOgDescription = lang === "he"
       ? (ogDescriptionHe || ogDescription || descriptionHe || description || fallbackDescription)
+      : lang === "fr"
+      ? (ogDescriptionFr || ogDescriptionEn || ogDescription || descriptionFr || descriptionEn || description || fallbackDescription)
       : (ogDescriptionEn || ogDescription || descriptionEn || description || fallbackDescription);
 
     // Update document title
@@ -99,15 +115,19 @@ export function SEOHead({
     title,
     titleEn,
     titleHe,
+    titleFr,
     description,
     descriptionEn,
     descriptionHe,
+    descriptionFr,
     ogTitle,
     ogTitleEn,
     ogTitleHe,
+    ogTitleFr,
     ogDescription,
     ogDescriptionEn,
     ogDescriptionHe,
+    ogDescriptionFr,
     ogImage,
     fallbackTitle,
     fallbackDescription,

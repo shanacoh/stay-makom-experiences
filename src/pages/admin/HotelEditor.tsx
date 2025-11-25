@@ -34,12 +34,16 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
     status: "draft" as "draft" | "published" | "pending" | "archived",
     seo_title_en: "",
     seo_title_he: "",
+    seo_title_fr: "",
     meta_description_en: "",
     meta_description_he: "",
+    meta_description_fr: "",
     og_title_en: "",
     og_title_he: "",
+    og_title_fr: "",
     og_description_en: "",
     og_description_he: "",
+    og_description_fr: "",
     og_image: "",
   });
 
@@ -75,12 +79,16 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
         status: hotel.status || "draft",
         seo_title_en: hotel.seo_title_en || "",
         seo_title_he: hotel.seo_title_he || "",
+        seo_title_fr: hotel.seo_title_fr || "",
         meta_description_en: hotel.meta_description_en || "",
         meta_description_he: hotel.meta_description_he || "",
+        meta_description_fr: hotel.meta_description_fr || "",
         og_title_en: hotel.og_title_en || "",
         og_title_he: hotel.og_title_he || "",
+        og_title_fr: hotel.og_title_fr || "",
         og_description_en: hotel.og_description_en || "",
         og_description_he: hotel.og_description_he || "",
+        og_description_fr: hotel.og_description_fr || "",
         og_image: hotel.og_image || "",
       });
     }
@@ -320,7 +328,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {/* English Column */}
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
@@ -382,6 +390,138 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                   <h4 className="font-medium text-sm">Hebrew SEO (עברית)</h4>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="seo_title_he">כותרת SEO</Label>
+                  <Input
+                    id="seo_title_he"
+                    value={formData.seo_title_he}
+                    onChange={(e) => setFormData({ ...formData, seo_title_he: e.target.value })}
+                    placeholder="כותרת עבור גוגל וכרטיסייה"
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~60 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meta_description_he">תיאור Meta</Label>
+                  <Textarea
+                    id="meta_description_he"
+                    value={formData.meta_description_he}
+                    onChange={(e) => setFormData({ ...formData, meta_description_he: e.target.value })}
+                    placeholder="תיאור עבור תוצאות גוגל"
+                    rows={3}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~155 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_title_he">כותרת Open Graph</Label>
+                  <Input
+                    id="og_title_he"
+                    value={formData.og_title_he}
+                    onChange={(e) => setFormData({ ...formData, og_title_he: e.target.value })}
+                    placeholder="כותרת עבור שיתוף ברשתות חברתיות"
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_description_he">תיאור Open Graph</Label>
+                  <Textarea
+                    id="og_description_he"
+                    value={formData.og_description_he}
+                    onChange={(e) => setFormData({ ...formData, og_description_he: e.target.value })}
+                    placeholder="תיאור עבור שיתוף ברשתות חברתיות"
+                    rows={3}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                </div>
+              </div>
+
+              {/* French Column */}
+              <div className="space-y-4">
+                <div className="bg-background p-2 rounded">
+                  <h4 className="font-medium text-sm">French SEO (Français)</h4>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo_title_fr">Titre SEO</Label>
+                  <Input
+                    id="seo_title_fr"
+                    value={formData.seo_title_fr}
+                    onChange={(e) => setFormData({ ...formData, seo_title_fr: e.target.value })}
+                    placeholder="Titre pour Google et l'onglet"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~60 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meta_description_fr">Description Meta</Label>
+                  <Textarea
+                    id="meta_description_fr"
+                    value={formData.meta_description_fr}
+                    onChange={(e) => setFormData({ ...formData, meta_description_fr: e.target.value })}
+                    placeholder="Description pour les résultats Google"
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max ~155 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_title_fr">Titre Open Graph</Label>
+                  <Input
+                    id="og_title_fr"
+                    value={formData.og_title_fr}
+                    onChange={(e) => setFormData({ ...formData, og_title_fr: e.target.value })}
+                    placeholder="Titre pour les réseaux sociaux"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="og_description_fr">Description Open Graph</Label>
+                  <Textarea
+                    id="og_description_fr"
+                    value={formData.og_description_fr}
+                    onChange={(e) => setFormData({ ...formData, og_description_fr: e.target.value })}
+                    placeholder="Description pour les réseaux sociaux"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* OG Image - Shared */}
+            <div className="space-y-2">
+              <Label htmlFor="og_image">Open Graph Image</Label>
+              <Input
+                id="og_image"
+                value={formData.og_image}
+                onChange={(e) => setFormData({ ...formData, og_image: e.target.value })}
+                placeholder="Image URL for social media sharing"
+              />
+              <p className="text-xs text-muted-foreground">
+                Recommended: 1200x630px. Leave empty to use hero image.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </form>
+    </div>
+  );
+};
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_he">כותרת SEO</Label>
                   <Input
