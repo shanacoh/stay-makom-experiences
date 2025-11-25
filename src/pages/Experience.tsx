@@ -159,7 +159,7 @@ const Experience = () => {
             </div>
 
             {/* Right Column - Sticky Booking Panel */}
-            <div className="lg:col-span-1 hidden lg:block self-start">
+            <div className="lg:col-span-1 hidden lg:block">
               <BookingPanel 
                 experienceId={experience.id} 
                 hotelId={experience.hotel_id} 
