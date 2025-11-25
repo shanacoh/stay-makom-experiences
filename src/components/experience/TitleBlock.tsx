@@ -34,7 +34,7 @@ const TitleBlock = ({
 
   return (
     <>
-      <div className="space-y-4 sm:space-y-5">
+      <div className="space-y-3">
         {/* NEW Badge */}
         {isNew && (
           <div>
@@ -45,20 +45,20 @@ const TitleBlock = ({
         )}
 
         {/* Main Title Line */}
-        <div className="flex flex-wrap items-baseline gap-3">
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h2 className="font-serif text-2xl md:text-3xl font-bold leading-tight">
             {title}
-          </h1>
-          <span className="text-3xl sm:text-4xl md:text-5xl text-muted-foreground font-light">•</span>
+          </h2>
+          <span className="text-2xl md:text-3xl text-muted-foreground font-light">•</span>
           {hotelSlug ? (
             <a
               href={`/hotel/${hotelSlug}`}
-              className="text-2xl sm:text-3xl md:text-4xl text-primary hover:underline font-semibold transition-colors"
+              className="text-lg md:text-xl text-primary hover:underline font-medium transition-colors"
             >
               {hotelName}
             </a>
           ) : (
-            <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">
+            <span className="text-lg md:text-xl font-medium text-muted-foreground">
               {hotelName}
             </span>
           )}
