@@ -128,6 +128,7 @@ const AdminExperiences = () => {
   // Duplicate mutation
   const duplicateMutation = useMutation({
     mutationFn: async (experienceId: string) => {
+      // Fetch original experience
       const { data: original, error: fetchError } = await supabase
         .from("experiences")
         .select("*")
@@ -147,18 +148,66 @@ const AdminExperiences = () => {
         status: "draft" as const,
       };
 
-      const { error: insertError } = await supabase
+      // Insert new experience and get the new ID
+      const { data: insertedExperience, error: insertError } = await supabase
         .from("experiences")
-        .insert([newExperience]);
+        .insert([newExperience])
+        .select()
+        .single();
       
       if (insertError) throw insertError;
+      
+      const newExperienceId = insertedExperience.id;
+
+      // Duplicate experience_includes (What's Included items)
+      const { data: includes, error: includesError } = await supabase
+        .from("experience_includes")
+        .select("*")
+        .eq("experience_id", experienceId);
+      
+      if (includesError) throw includesError;
+      
+      if (includes && includes.length > 0) {
+        const newIncludes = includes.map(({ id, created_at, updated_at, experience_id, ...includeRest }) => ({
+          ...includeRest,
+          experience_id: newExperienceId,
+        }));
+        
+        const { error: includesInsertError } = await supabase
+          .from("experience_includes")
+          .insert(newIncludes);
+        
+        if (includesInsertError) throw includesInsertError;
+      }
+
+      // Duplicate experience_extras (Linked extras)
+      const { data: extras, error: extrasError } = await supabase
+        .from("experience_extras")
+        .select("*")
+        .eq("experience_id", experienceId);
+      
+      if (extrasError) throw extrasError;
+      
+      if (extras && extras.length > 0) {
+        const newExtras = extras.map(({ id, created_at, updated_at, experience_id, ...extraRest }) => ({
+          ...extraRest,
+          experience_id: newExperienceId,
+        }));
+        
+        const { error: extrasInsertError } = await supabase
+          .from("experience_extras")
+          .insert(newExtras);
+        
+        if (extrasInsertError) throw extrasInsertError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-experiences"] });
-      toast.success("Experience duplicated successfully");
+      toast.success("Experience duplicated successfully with all items");
     },
-    onError: () => {
-      toast.error("Error duplicating experience");
+    onError: (error: any) => {
+      console.error("Duplicate error:", error);
+      toast.error(error.message || "Error duplicating experience");
     },
   });
 
