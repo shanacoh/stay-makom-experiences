@@ -13,6 +13,7 @@ interface ExperienceCardProps {
     title: string;
     title_he?: string | null;
     hero_image?: string | null;
+    photos?: string[] | null;
     base_price: number;
     currency?: string | null;
     base_price_type?: string | null;
@@ -142,7 +143,7 @@ export default function ExperienceCard({
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl mb-2">
         {/* Image with zoom on hover */}
         <img
-          src={experience.hero_image || '/placeholder.svg'}
+          src={experience.hero_image || experience.photos?.[0] || '/placeholder.svg'}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
