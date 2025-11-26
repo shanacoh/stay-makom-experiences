@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Sparkles } from "lucide-react";
+import { icons } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface Extra {
   id: string;
@@ -45,6 +47,12 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
     }
   };
 
+  const getIconComponent = (iconName?: string): LucideIcon => {
+    if (!iconName) return Sparkles;
+    const IconComponent = icons[iconName as keyof typeof icons];
+    return (IconComponent as LucideIcon) || Sparkles;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
@@ -56,6 +64,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
         {displayExtras.map((extra) => {
           const isPlaceholder = extra.id.startsWith('placeholder');
           const quantity = selectedExtras[extra.id] || 0;
+          const IconComponent = getIconComponent(extra.image_url);
           
           return (
             <div
@@ -63,11 +72,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
               className={`group space-y-2 sm:space-y-3 ${isPlaceholder ? 'opacity-50' : ''}`}
             >
               <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                {extra.image_url ? (
-                  <img src={extra.image_url} alt={extra.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                ) : (
-                  <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary" />
-                )}
+                <IconComponent className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-primary" />
               </div>
               
               <div className="space-y-1.5 sm:space-y-2">
