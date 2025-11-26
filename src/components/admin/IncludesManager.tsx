@@ -231,7 +231,7 @@ const IncludesManager = ({
   return <Card>
       
       <CardContent className="space-y-4">
-        <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
+        <div className="space-y-4">
           <h4 className="font-medium">Add new item</h4>
           
           <div className="flex items-end gap-3">
