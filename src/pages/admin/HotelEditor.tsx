@@ -31,6 +31,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
     story: "",
     story_he: "",
     hero_image: "",
+    photos: [] as string[],
     contact_email: "",
     contact_phone: "",
     status: "draft" as "draft" | "published" | "pending" | "archived",
@@ -76,6 +77,7 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
         story: hotel.story || "",
         story_he: hotel.story_he || "",
         hero_image: hotel.hero_image || "",
+        photos: hotel.photos || [],
         contact_email: hotel.contact_email || "",
         contact_phone: hotel.contact_phone || "",
         status: hotel.status || "draft",
@@ -179,13 +181,44 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
               </Select>
             </div>
 
-            <ImageUpload
-              label="Hero Image"
-              bucket="hotel-images"
-              value={formData.hero_image}
-              onChange={(url) => setFormData({ ...formData, hero_image: url })}
-              description="Main image for the hotel page"
-            />
+            {/* Images & Media Section */}
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-lg font-semibold">Images & Media</h3>
+              <p className="text-sm text-muted-foreground">Upload hero image and gallery photos</p>
+              
+              <div className="space-y-2">
+                <ImageUpload
+                  label="Hero Image"
+                  bucket="hotel-images"
+                  value={formData.hero_image}
+                  onChange={(url) => setFormData({ ...formData, hero_image: url })}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label>Gallery Images (up to 8)</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[...Array(8)].map((_, index) => (
+                    <div key={index}>
+                      <ImageUpload
+                        label=""
+                        bucket="hotel-images"
+                        value={formData.photos[index] || ""}
+                        onChange={(url) => {
+                          const newPhotos = [...formData.photos];
+                          if (url) {
+                            newPhotos[index] = url;
+                          } else {
+                            newPhotos.splice(index, 1);
+                          }
+                          setFormData({ ...formData, photos: newPhotos.filter(Boolean) });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
