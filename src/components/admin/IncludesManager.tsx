@@ -19,8 +19,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
   const [newInclude, setNewInclude] = useState({
     title: "",
     title_he: "",
-    description: "",
-    description_he: "",
     icon_url: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -30,8 +28,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
   const [editData, setEditData] = useState({
     title: "",
     title_he: "",
-    description: "",
-    description_he: "",
   });
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
@@ -113,8 +109,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
           experience_id: experienceId,
           title: newInclude.title,
           title_he: newInclude.title_he || null,
-          description: newInclude.description || null,
-          description_he: newInclude.description_he || null,
           icon_url: imageUrl || null,
           order_index: maxOrder + 1,
           published: true,
@@ -125,7 +119,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience-includes", experienceId] });
-      setNewInclude({ title: "", title_he: "", description: "", description_he: "", icon_url: "" });
+      setNewInclude({ title: "", title_he: "", icon_url: "" });
       setImageFile(null);
       setImagePreview(null);
       toast.success("Item added successfully");
@@ -149,8 +143,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
         .update({ 
           title: editData.title,
           title_he: editData.title_he || null,
-          description: editData.description || null,
-          description_he: editData.description_he || null,
           icon_url: finalIconUrl 
         })
         .eq("id", id);
@@ -160,7 +152,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience-includes", experienceId] });
       setEditingId(null);
-      setEditData({ title: "", title_he: "", description: "", description_he: "" });
+      setEditData({ title: "", title_he: "" });
       setEditImageFile(null);
       setEditImagePreview(null);
       toast.success("Item updated successfully");
@@ -208,8 +200,6 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
     setEditData({
       title: include.title || "",
       title_he: include.title_he || "",
-      description: include.description || "",
-      description_he: include.description_he || "",
     });
     setEditImagePreview(include.icon_url);
     setEditImageFile(null);
@@ -217,7 +207,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
 
   const cancelEditing = () => {
     setEditingId(null);
-    setEditData({ title: "", title_he: "", description: "", description_he: "" });
+    setEditData({ title: "", title_he: "" });
     setEditImageFile(null);
     setEditImagePreview(null);
   };
@@ -244,77 +234,17 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
         <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
           <h4 className="font-medium">Add new item</h4>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="bg-muted/30 p-2 rounded">
-                <h5 className="text-sm font-medium">English Version</h5>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Breakfast Included"
-                  value={newInclude.title}
-                  onChange={(e) => setNewInclude({ ...newInclude, title: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Additional details..."
-                  value={newInclude.description}
-                  onChange={(e) => setNewInclude({ ...newInclude, description: e.target.value })}
-                  rows={2}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="bg-muted/30 p-2 rounded">
-                <h5 className="text-sm font-medium">Hebrew Version (עברית)</h5>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="title_he">כותרת</Label>
-                <Input
-                  id="title_he"
-                  placeholder="למשל: ארוחת בוקר כלולה"
-                  value={newInclude.title_he}
-                  onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })}
-                  dir="rtl"
-                  className="bg-hebrew-input"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_he">תיאור</Label>
-                <Textarea
-                  id="description_he"
-                  placeholder="פרטים נוספים..."
-                  value={newInclude.description_he}
-                  onChange={(e) => setNewInclude({ ...newInclude, description_he: e.target.value })}
-                  rows={2}
-                  dir="rtl"
-                  className="bg-hebrew-input"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Icon Image *</Label>
-            <div className="flex gap-2 items-center">
+          <div className="flex items-end gap-3">
+            <div className="w-32 flex-shrink-0">
+              <Label className="text-sm font-medium">Icon Image *</Label>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start mt-2"
                 onClick={() => document.getElementById('new-include-image')?.click()}
               >
                 <ImageIcon className="w-4 h-4 mr-2" />
-                {imageFile ? imageFile.name : "Choose image"}
+                {imageFile ? "Change" : "Choose"}
               </Button>
               <input
                 id="new-include-image"
@@ -323,40 +253,62 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                 onChange={handleImageSelect}
                 className="hidden"
               />
-              {imageFile && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setImageFile(null);
-                    setImagePreview(null);
-                  }}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+              {imagePreview && (
+                <div className="mt-2 relative">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-20 object-cover rounded-lg border"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
               )}
             </div>
-            {imagePreview && (
-              <div className="mt-2">
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
-                  className="w-32 h-24 object-cover rounded-lg border"
-                />
-              </div>
-            )}
-          </div>
 
-          <Button
-            type="button"
-            onClick={() => createMutation.mutate()}
-            disabled={createMutation.isPending || isUploading || !newInclude.title.trim()}
-            className="w-full"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {isUploading ? "Uploading..." : "Add Item"}
-          </Button>
+            <div className="flex-1">
+              <Label htmlFor="title">Title EN *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Breakfast Included"
+                value={newInclude.title}
+                onChange={(e) => setNewInclude({ ...newInclude, title: e.target.value })}
+                className="mt-2"
+              />
+            </div>
+
+            <div className="flex-1">
+              <Label htmlFor="title_he">Title HE (כותרת)</Label>
+              <Input
+                id="title_he"
+                placeholder="למשל: ארוחת בוקר כלולה"
+                value={newInclude.title_he}
+                onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })}
+                dir="rtl"
+                className="bg-hebrew-input mt-2"
+              />
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => createMutation.mutate()}
+              disabled={createMutation.isPending || isUploading || !newInclude.title.trim()}
+              className="flex-shrink-0"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {isUploading ? "Uploading..." : "Add"}
+            </Button>
+          </div>
         </div>
 
         {!includes || includes.length === 0 ? (
@@ -371,53 +323,15 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                 <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1 flex-shrink-0" />
                 
                 {editingId === include.id ? (
-                  <div className="flex-1 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <Label className="text-xs">English</Label>
-                        <Input
-                          value={editData.title}
-                          onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-                          placeholder="Title"
-                        />
-                        <Textarea
-                          value={editData.description}
-                          onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                          placeholder="Description"
-                          rows={2}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label className="text-xs">עברית</Label>
-                        <Input
-                          value={editData.title_he}
-                          onChange={(e) => setEditData({ ...editData, title_he: e.target.value })}
-                          placeholder="כותרת"
-                          dir="rtl"
-                          className="bg-hebrew-input"
-                        />
-                        <Textarea
-                          value={editData.description_he}
-                          onChange={(e) => setEditData({ ...editData, description_he: e.target.value })}
-                          placeholder="תיאור"
-                          rows={2}
-                          dir="rtl"
-                          className="bg-hebrew-input"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="w-20 flex-shrink-0">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="w-full justify-start"
                         onClick={() => document.getElementById(`edit-image-${include.id}`)?.click()}
                       >
-                        <ImageIcon className="w-4 h-4 mr-2" />
-                        {editImageFile ? editImageFile.name : "Change image"}
+                        <ImageIcon className="w-4 h-4" />
                       </Button>
                       <input
                         id={`edit-image-${include.id}`}
@@ -430,20 +344,34 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         <img 
                           src={editImagePreview} 
                           alt="Preview" 
-                          className="w-32 h-24 object-cover rounded-lg border"
+                          className="w-full h-16 object-cover rounded-lg border mt-2"
                         />
                       )}
                     </div>
                     
-                    <div className="flex gap-2">
+                    <Input
+                      value={editData.title}
+                      onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                      placeholder="Title EN"
+                      className="flex-1"
+                    />
+                    
+                    <Input
+                      value={editData.title_he}
+                      onChange={(e) => setEditData({ ...editData, title_he: e.target.value })}
+                      placeholder="כותרת HE"
+                      dir="rtl"
+                      className="bg-hebrew-input flex-1"
+                    />
+                    
+                    <div className="flex gap-2 flex-shrink-0">
                       <Button
                         type="button"
                         size="sm"
                         onClick={() => saveEdit(include)}
                         disabled={updateMutation.isPending}
                       >
-                        <Save className="w-4 h-4 mr-1" />
-                        Save
+                        <Save className="w-4 h-4" />
                       </Button>
                       <Button
                         type="button"
@@ -452,8 +380,7 @@ const IncludesManager = ({ experienceId }: IncludesManagerProps) => {
                         onClick={cancelEditing}
                         disabled={updateMutation.isPending}
                       >
-                        <X className="w-4 h-4 mr-1" />
-                        Cancel
+                        <X className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
