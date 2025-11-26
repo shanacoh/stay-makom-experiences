@@ -196,7 +196,55 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
               </div>
 
               <div className="space-y-3">
-                <Label>Gallery Images (up to 8)</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Gallery Images (up to 8)</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.multiple = true;
+                      input.accept = 'image/*';
+                      input.onchange = async (e) => {
+                        const files = Array.from((e.target as HTMLInputElement).files || []);
+                        const remainingSlots = 8 - formData.photos.length;
+                        const filesToUpload = files.slice(0, remainingSlots);
+                        
+                        toast.promise(
+                          Promise.all(
+                            filesToUpload.map(async (file) => {
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `${Math.random()}.${fileExt}`;
+                              const { error: uploadError, data } = await supabase.storage
+                                .from('hotel-images')
+                                .upload(fileName, file);
+                              
+                              if (uploadError) throw uploadError;
+                              
+                              const { data: { publicUrl } } = supabase.storage
+                                .from('hotel-images')
+                                .getPublicUrl(fileName);
+                              
+                              return publicUrl;
+                            })
+                          ).then((urls) => {
+                            setFormData({ ...formData, photos: [...formData.photos, ...urls] });
+                          }),
+                          {
+                            loading: `Uploading ${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''}...`,
+                            success: `${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''} uploaded successfully!`,
+                            error: 'Failed to upload images',
+                          }
+                        );
+                      };
+                      input.click();
+                    }}
+                  >
+                    Upload Multiple Images
+                  </Button>
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[...Array(8)].map((_, index) => (
                     <div key={index}>
