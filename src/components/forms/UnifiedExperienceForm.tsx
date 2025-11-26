@@ -171,6 +171,13 @@ export function UnifiedExperienceForm({
   } = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
+      title: "",
+      title_he: "",
+      subtitle: "",
+      subtitle_he: "",
+      category_id: "",
+      long_copy: "",
+      long_copy_he: "",
       hotel_id: propHotelId || "",
       min_nights: 1,
       max_nights: 4,
@@ -179,6 +186,21 @@ export function UnifiedExperienceForm({
       base_price: 0,
       currency: "ILS",
       base_price_type: "per_person",
+      cancellation_policy: "",
+      cancellation_policy_he: "",
+      seo_title_en: "",
+      seo_title_he: "",
+      seo_title_fr: "",
+      meta_description_en: "",
+      meta_description_he: "",
+      meta_description_fr: "",
+      og_title_en: "",
+      og_title_he: "",
+      og_title_fr: "",
+      og_description_en: "",
+      og_description_he: "",
+      og_description_fr: "",
+      og_image: "",
     },
   });
 
@@ -609,7 +631,7 @@ export function UnifiedExperienceForm({
                 <div>
                   <Label htmlFor="hotel_id">Hotel *</Label>
                   <Select
-                    value={watch("hotel_id")}
+                    value={watch("hotel_id") || ""}
                     onValueChange={(value) => setValue("hotel_id", value)}
                   >
                     <SelectTrigger>
@@ -637,7 +659,7 @@ export function UnifiedExperienceForm({
               <div>
                 <Label htmlFor="category_id">Category *</Label>
                 <Select
-                  value={watch("category_id")}
+                  value={watch("category_id") || ""}
                   onValueChange={(value) => setValue("category_id", value)}
                 >
                   <SelectTrigger>
