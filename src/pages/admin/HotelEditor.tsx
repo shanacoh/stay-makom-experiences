@@ -198,72 +198,86 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>Gallery Images (up to 8)</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.multiple = true;
-                      input.accept = 'image/*';
-                      input.onchange = async (e) => {
-                        const files = Array.from((e.target as HTMLInputElement).files || []);
-                        const remainingSlots = 8 - formData.photos.length;
-                        const filesToUpload = files.slice(0, remainingSlots);
-                        
-                        toast.promise(
-                          Promise.all(
-                            filesToUpload.map(async (file) => {
-                              const fileExt = file.name.split('.').pop();
-                              const fileName = `${Math.random()}.${fileExt}`;
-                              const { error: uploadError, data } = await supabase.storage
-                                .from('hotel-images')
-                                .upload(fileName, file);
-                              
-                              if (uploadError) throw uploadError;
-                              
-                              const { data: { publicUrl } } = supabase.storage
-                                .from('hotel-images')
-                                .getPublicUrl(fileName);
-                              
-                              return publicUrl;
-                            })
-                          ).then((urls) => {
-                            setFormData({ ...formData, photos: [...formData.photos, ...urls] });
-                          }),
-                          {
-                            loading: `Uploading ${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''}...`,
-                            success: `${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''} uploaded successfully!`,
-                            error: 'Failed to upload images',
-                          }
-                        );
-                      };
-                      input.click();
-                    }}
-                  >
-                    Upload Multiple Images
-                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    {formData.photos.length} / 8 images
+                  </span>
                 </div>
+                
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[...Array(8)].map((_, index) => (
-                    <div key={index}>
-                      <ImageUpload
-                        label=""
-                        bucket="hotel-images"
-                        value={formData.photos[index] || ""}
-                        onChange={(url) => {
-                          const newPhotos = [...formData.photos];
-                          if (url) {
-                            newPhotos[index] = url;
-                          } else {
-                            newPhotos.splice(index, 1);
-                          }
-                          setFormData({ ...formData, photos: newPhotos.filter(Boolean) });
-                        }}
+                  {/* Display uploaded images */}
+                  {formData.photos.map((photo, index) => (
+                    <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border bg-muted">
+                      <img 
+                        src={photo} 
+                        alt={`Gallery ${index + 1}`} 
+                        className="w-full h-full object-cover"
                       />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          const newPhotos = formData.photos.filter((_, i) => i !== index);
+                          setFormData({ ...formData, photos: newPhotos });
+                        }}
+                      >
+                        <span className="text-xs">×</span>
+                      </Button>
                     </div>
                   ))}
+                  
+                  {/* Add images button - only show if less than 8 */}
+                  {formData.photos.length < 8 && (
+                    <button
+                      type="button"
+                      className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.multiple = true;
+                        input.accept = 'image/*';
+                        input.onchange = async (e) => {
+                          const files = Array.from((e.target as HTMLInputElement).files || []);
+                          const remainingSlots = 8 - formData.photos.length;
+                          const filesToUpload = files.slice(0, remainingSlots);
+                          
+                          toast.promise(
+                            Promise.all(
+                              filesToUpload.map(async (file) => {
+                                const fileExt = file.name.split('.').pop();
+                                const fileName = `${Math.random()}.${fileExt}`;
+                                const { error: uploadError } = await supabase.storage
+                                  .from('hotel-images')
+                                  .upload(fileName, file);
+                                
+                                if (uploadError) throw uploadError;
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('hotel-images')
+                                  .getPublicUrl(fileName);
+                                
+                                return publicUrl;
+                              })
+                            ).then((urls) => {
+                              setFormData({ ...formData, photos: [...formData.photos, ...urls] });
+                            }),
+                            {
+                              loading: `Uploading ${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''}...`,
+                              success: `${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''} uploaded!`,
+                              error: 'Failed to upload images',
+                            }
+                          );
+                        };
+                        input.click();
+                      }}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                        <span className="text-2xl">+</span>
+                      </div>
+                      <span className="text-sm font-medium">Add images</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
