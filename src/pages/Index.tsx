@@ -194,15 +194,15 @@ const Index = () => {
         </section>
 
         {/* Categories Section */}
-        <section className="container py-12 sm:py-16 md:py-20 px-4">
-          <div className="text-center mb-8 sm:mb-12">
+        <section className="container py-8 sm:py-12 md:py-16 px-4">
+          <div className="text-center mb-6 sm:mb-8">
             <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold tracking-[-0.02em] mb-4">DON'T CHOOSE A CITY<br />CHOOSE YOUR ESCAPE</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else. </p>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else. </p>
           </div>
 
           {isLoading ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div> : <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+            </div> : <div className="grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-4">
               {categories?.map(category => <CategoryCard key={category.slug} category={category} />)}
             </div>}
         </section>

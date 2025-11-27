@@ -23,7 +23,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
       to={`/category/${category.slug}?lang=${lang}`}
       className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-smooth"
     >
-      <div className="aspect-[1/1] relative">
+      <div className="aspect-[4/3] relative">
         <img 
           src={image} 
           alt={title}
@@ -31,8 +31,8 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
         />
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-smooth" />
         
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          <h3 className="font-sans text-3xl md:text-4xl font-bold text-white text-center uppercase tracking-tight flex flex-col">
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <h3 className="font-sans text-2xl md:text-3xl font-bold text-white text-center uppercase tracking-tight flex flex-col">
             {title.split(' ').map((word, index) => (
               <span key={index}>{word}</span>
             ))}
