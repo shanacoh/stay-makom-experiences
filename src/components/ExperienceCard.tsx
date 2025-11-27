@@ -153,7 +153,7 @@ export default function ExperienceCard({
         
         {/* Experience name - bottom left */}
         <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="font-sans text-sm sm:text-base lg:text-lg font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
+          <h3 className="font-sans text-base sm:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
             {title}
           </h3>
         </div>
