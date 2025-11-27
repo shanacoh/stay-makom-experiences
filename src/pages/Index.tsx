@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap } from "lucide-react";
+import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect, useRef } from "react";
@@ -285,36 +285,53 @@ const Index = () => {
             {/* Category Tabs */}
             {!isLoading && categories && (
               <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 sm:mb-12">
-                {categories.map((category) => (
-                  <button
-                    key={category.slug}
-                    onClick={() => {
-                      setSelectedCategoryId(category.id);
-                    }}
-                    className={`flex flex-col items-center gap-3 group cursor-pointer w-20 sm:w-24 ${
-                      selectedCategoryId === category.id ? 'text-primary' : ''
-                    }`}
-                  >
-                    {/* Icon with circular hover background */}
-                    <div className={`p-3 rounded-full transition-all group-hover:bg-muted ${
-                      selectedCategoryId === category.id ? 'bg-primary/10' : ''
-                    }`}>
-                      {category.slug === 'romantic' && <Heart className="w-6 h-6" strokeWidth={1.5} />}
-                      {category.slug === 'family' && <Users className="w-6 h-6" strokeWidth={1.5} />}
-                      {category.slug === 'golden-age' && <Sparkles className="w-6 h-6" strokeWidth={1.5} />}
-                      {category.slug === 'beyond-nature' && <Leaf className="w-6 h-6" strokeWidth={1.5} />}
-                      {category.slug === 'taste-affair' && <Wine className="w-6 h-6" strokeWidth={1.5} />}
-                      {category.slug === 'active-break' && <Zap className="w-6 h-6" strokeWidth={1.5} />}
-                    </div>
-                    
-                    {/* 2-line text with fixed height */}
-                    <span className={`text-xs font-medium uppercase tracking-wider text-center h-8 leading-4 line-clamp-2 transition-colors ${
-                      selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'
-                    }`}>
-                      {category.name}
-                    </span>
-                  </button>
-                ))}
+                {categories.map((category) => {
+                  // Force 2-line display for all category names
+                  const getCategoryDisplay = (name: string, slug: string) => {
+                    const displayMap: Record<string, string> = {
+                      'romantic': 'Romantic\nEscape',
+                      'family': 'Family\nFun',
+                      'golden-age': 'Golden\nAge',
+                      'nature': 'Beyond\nNature',
+                      'taste': 'Taste\nAffair',
+                      'active': 'Active\nBreak',
+                      'work-unplugged': 'Work\nUnplugged'
+                    };
+                    return displayMap[slug] || name;
+                  };
+                  
+                  return (
+                    <button
+                      key={category.slug}
+                      onClick={() => {
+                        setSelectedCategoryId(category.id);
+                      }}
+                      className={`flex flex-col items-center gap-3 group cursor-pointer w-20 sm:w-24 ${
+                        selectedCategoryId === category.id ? 'text-primary' : ''
+                      }`}
+                    >
+                      {/* Icon with circular hover background */}
+                      <div className={`p-3 rounded-full transition-all group-hover:bg-muted ${
+                        selectedCategoryId === category.id ? 'bg-primary/10' : ''
+                      }`}>
+                        {category.slug === 'romantic' && <Heart className="w-7 h-7" strokeWidth={1.5} />}
+                        {category.slug === 'family' && <Users className="w-7 h-7" strokeWidth={1.5} />}
+                        {category.slug === 'golden-age' && <Sparkles className="w-7 h-7" strokeWidth={1.5} />}
+                        {category.slug === 'nature' && <Leaf className="w-7 h-7" strokeWidth={1.5} />}
+                        {category.slug === 'taste' && <Wine className="w-7 h-7" strokeWidth={1.5} />}
+                        {category.slug === 'active' && <Zap className="w-7 h-7" strokeWidth={1.5} />}
+                        {category.slug === 'work-unplugged' && <Laptop className="w-7 h-7" strokeWidth={1.5} />}
+                      </div>
+                      
+                      {/* 2-line text with fixed height */}
+                      <span className={`text-xs font-medium uppercase tracking-wider text-center h-8 leading-4 whitespace-pre-line transition-colors ${
+                        selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'
+                      }`}>
+                        {getCategoryDisplay(category.name, category.slug)}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
