@@ -260,11 +260,7 @@ const Index = () => {
                 Check in, drop your bags and let the desert do the rest.
               </p>
               <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto" onClick={() => {
-              if (latestExperiences && latestExperiences.length > 0) {
-                navigate(`/experience/${latestExperiences[0].slug}`);
-              } else {
-                navigate('/category/beyond-nature');
-              }
+                navigate('/experience/desert-flavors');
             }}>
                 Let the journey begin
               </Button>
