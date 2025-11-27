@@ -113,7 +113,13 @@ const Experience = () => {
         <Footer />
       </div>;
   }
-  const photos = experience.photos && experience.photos.length > 0 ? experience.photos : experience.hero_image ? [experience.hero_image] : experience.hotels?.hero_image ? [experience.hotels.hero_image] : [];
+  // Combine all available photos: experience hero + experience gallery + hotel hero + hotel gallery
+  const allPhotos: string[] = [];
+  if (experience.hero_image) allPhotos.push(experience.hero_image);
+  if (experience.photos?.length) allPhotos.push(...experience.photos.filter((p: string) => p !== experience.hero_image));
+  if (experience.hotels?.hero_image && !allPhotos.includes(experience.hotels.hero_image)) allPhotos.push(experience.hotels.hero_image);
+  if (experience.hotels?.photos?.length) allPhotos.push(...experience.hotels.photos.filter((p: string) => !allPhotos.includes(p)));
+  const photos = allPhotos.length > 0 ? allPhotos : ['/placeholder.svg'];
   return <div className="min-h-screen flex flex-col">
       <SEOHead
         titleEn={experience.seo_title_en}
