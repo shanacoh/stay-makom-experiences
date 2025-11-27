@@ -273,18 +273,18 @@ const Index = () => {
         </section>
 
         {/* Category Experiences Section */}
-        <section className="container py-12 sm:py-16 md:py-20 px-4">
-          <div className="text-center mb-8 sm:mb-12">
+        <section className="container py-10 sm:py-12 md:py-14 px-4">
+          <div className="text-center mb-6 sm:mb-8">
             <p className="text-xs sm:text-sm font-medium tracking-widest uppercase text-muted-foreground mb-2">
               YOUR STAYMAKOM EXPERIENCES
             </p>
-            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium mb-8 sm:mb-12">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium mb-6 sm:mb-8">
               Follow your heart's desire
             </h2>
             
             {/* Category Tabs */}
             {!isLoading && categories && (
-              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 sm:mb-12">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {categories.map((category) => {
                   // Force 2-line display for all category names
                   const getCategoryDisplay = (name: string, slug: string) => {
@@ -306,12 +306,12 @@ const Index = () => {
                       onClick={() => {
                         setSelectedCategoryId(category.id);
                       }}
-                      className={`flex flex-col items-center gap-3 group cursor-pointer w-20 sm:w-24 ${
+                      className={`flex flex-col items-center gap-2 group cursor-pointer w-16 sm:w-20 ${
                         selectedCategoryId === category.id ? 'text-primary' : ''
                       }`}
                     >
                       {/* Icon with circular hover background */}
-                      <div className={`p-3 rounded-full transition-all group-hover:bg-muted ${
+                      <div className={`p-2 rounded-full transition-all group-hover:bg-muted ${
                         selectedCategoryId === category.id ? 'bg-primary/10' : ''
                       }`}>
                         {category.slug === 'romantic' && <Heart className="w-7 h-7" strokeWidth={1.5} />}
@@ -374,7 +374,7 @@ const Index = () => {
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden lg:grid lg:grid-cols-4 gap-2 md:gap-3 mb-8">
+              <div className="hidden lg:grid lg:grid-cols-4 gap-4 mb-6">
                 {filteredExperiences?.map((experience) => (
                   <ExperienceCard
                     key={experience.id}
