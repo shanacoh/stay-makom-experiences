@@ -313,8 +313,8 @@ const Index = () => {
             </div>
           ) : (
             <>
-              {/* Mobile Carousel */}
-              <div className="md:hidden relative mb-8">
+              {/* Mobile & Tablet Carousel */}
+              <div className="lg:hidden relative mb-8">
                 <div
                   ref={carouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -324,7 +324,7 @@ const Index = () => {
                     {[...(filteredExperiences || []), ...(filteredExperiences || [])].map((experience, index) => (
                       <div 
                         key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] snap-center"
+                        className="flex-shrink-0 w-[75vw] md:w-[45vw] snap-center"
                       >
                         <ExperienceCard
                           experience={experience}
@@ -336,29 +336,11 @@ const Index = () => {
                     {/* Empty spaces if less than 4 in selected category */}
                     {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
                       Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                        <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] snap-center invisible"></div>
+                        <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] md:w-[45vw] snap-center invisible"></div>
                       ))
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* Tablet Grid */}
-              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-3 mb-8">
-                {filteredExperiences?.map((experience) => (
-                  <ExperienceCard
-                    key={experience.id}
-                    experience={experience}
-                    rating={8.5 + Math.random() * 0.5}
-                    reviewCount={50 + Math.floor(Math.random() * 950)}
-                  />
-                ))}
-                {/* Empty spaces if less than 4 in selected category */}
-                {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
-                  Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="invisible"></div>
-                  ))
-                )}
               </div>
 
               {/* Desktop Grid */}
@@ -471,8 +453,8 @@ const Index = () => {
             </div>
           ) : (
             <>
-              {/* Mobile Carousel */}
-              <div className="md:hidden relative">
+              {/* Mobile & Tablet Carousel */}
+              <div className="lg:hidden relative">
                 <div
                   ref={latestCarouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -482,7 +464,7 @@ const Index = () => {
                     {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
                       <div 
                         key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] snap-center"
+                        className="flex-shrink-0 w-[75vw] md:w-[45vw] snap-center"
                       >
                         <ExperienceCard
                           experience={experience}
@@ -494,19 +476,6 @@ const Index = () => {
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* Tablet Grid */}
-              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-3">
-                {latestExperiences?.map((experience) => (
-                  <ExperienceCard
-                    key={experience.id}
-                    experience={experience}
-                    badge="NEW"
-                    rating={8.5 + Math.random() * 0.5}
-                    reviewCount={50 + Math.floor(Math.random() * 950)}
-                  />
-                ))}
               </div>
 
               {/* Desktop Grid */}
