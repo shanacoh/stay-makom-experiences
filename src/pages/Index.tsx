@@ -324,7 +324,7 @@ const Index = () => {
                     {[...(filteredExperiences || []), ...(filteredExperiences || [])].map((experience, index) => (
                       <div 
                         key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] md:w-[45vw] snap-center"
+                        className="flex-shrink-0 w-[75vw] md:w-[35vw] snap-center"
                       >
                         <ExperienceCard
                           experience={experience}
@@ -336,7 +336,7 @@ const Index = () => {
                     {/* Empty spaces if less than 4 in selected category */}
                     {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
                       Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                        <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] md:w-[45vw] snap-center invisible"></div>
+                        <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] md:w-[35vw] snap-center invisible"></div>
                       ))
                     )}
                   </div>
@@ -464,7 +464,7 @@ const Index = () => {
                     {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
                       <div 
                         key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] md:w-[45vw] snap-center"
+                        className="flex-shrink-0 w-[75vw] md:w-[35vw] snap-center"
                       >
                         <ExperienceCard
                           experience={experience}
