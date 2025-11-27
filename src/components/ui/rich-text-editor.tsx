@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Link as TiptapLink } from '@tiptap/extension-link';
+import { useEffect } from 'react';
 import { 
   Bold, 
   Italic, 
@@ -55,6 +56,13 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
       },
     },
   });
+
+  // Sync content prop changes with editor (for async data loading)
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   if (!editor) {
     return null;
