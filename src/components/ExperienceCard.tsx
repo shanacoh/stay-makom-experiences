@@ -22,6 +22,7 @@ interface ExperienceCardProps {
       name_he?: string | null;
       city: string;
       city_he?: string | null;
+      hero_image?: string | null;
     } | null;
     includes?: string[] | null;
     includes_he?: string[] | null;
@@ -141,9 +142,9 @@ export default function ExperienceCard({
     >
       {/* Photo section */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl mb-2">
-        {/* Image with zoom on hover */}
+        {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
         <img
-          src={experience.hero_image || experience.photos?.[0] || '/placeholder.svg'}
+          src={experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />

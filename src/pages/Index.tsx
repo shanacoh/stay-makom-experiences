@@ -65,7 +65,7 @@ const Index = () => {
       const {
         data,
         error
-      } = await supabase.from("experiences").select("*, hotels(name, city, region)").eq("status", "published").order("created_at", {
+      } = await supabase.from("experiences").select("*, hotels(name, name_he, city, city_he, region, hero_image)").eq("status", "published").order("created_at", {
         ascending: false
       }).limit(4);
       if (error) throw error;
@@ -82,7 +82,7 @@ const Index = () => {
       const {
         data,
         error
-      } = await supabase.from("experiences").select("*, hotels(name, city, region), experience_reviews(rating)").eq("status", "published");
+      } = await supabase.from("experiences").select("*, hotels(name, name_he, city, city_he, region, hero_image), experience_reviews(rating)").eq("status", "published");
       if (error) throw error;
       return data;
     }
