@@ -69,60 +69,72 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
           return (
             <div
               key={extra.id}
-              className={`group space-y-2 sm:space-y-3 ${isPlaceholder ? 'opacity-50' : ''}`}
+              className={`group flex flex-col ${isPlaceholder ? 'opacity-40' : ''}`}
             >
-              <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                <IconComponent className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-primary" />
+              {/* Icon Container */}
+              <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                <IconComponent className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary" />
               </div>
               
-              <div className="space-y-1.5 sm:space-y-2">
-                <div className="space-y-0.5 sm:space-y-1">
-                  <div className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Extra
-                  </div>
-                  <h3 className="font-semibold text-xs sm:text-sm leading-tight">{extra.name}</h3>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed h-6 sm:h-8 line-clamp-2">
-                    {extra.description || '\u00A0'}
-                  </p>
-                  {!isPlaceholder && (
-                    <div className="text-xs sm:text-sm font-bold pt-0.5 sm:pt-1">
-                      ${extra.price} <span className="text-[10px] sm:text-xs font-normal text-muted-foreground">{getPricingLabel(extra.pricing_type)}</span>
-                    </div>
-                  )}
+              {/* Content Container - Fixed heights for alignment */}
+              <div className="flex flex-col flex-1">
+                {/* Label */}
+                <div className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  Extra
                 </div>
                 
+                {/* Title - Fixed 2-line height */}
+                <h3 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-2 h-8 sm:h-9">
+                  {extra.name}
+                </h3>
+                
+                {/* Price - Directly under title, no extra spacing */}
                 {!isPlaceholder && (
-                  <div className="flex items-center justify-center pt-0.5 sm:pt-1">
+                  <div className="text-sm sm:text-base font-bold text-primary">
+                    ${extra.price}
+                    <span className="text-[10px] sm:text-xs font-normal text-muted-foreground ml-1">
+                      {getPricingLabel(extra.pricing_type)}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Spacer to push button to bottom */}
+                <div className="flex-1 min-h-2" />
+                
+                {/* Add Button */}
+                {!isPlaceholder && (
+                  <div className="mt-2">
                     {quantity === 0 ? (
-                    <Button
-                      size="sm"
-                      className="w-full h-7 sm:h-8 text-[10px] sm:text-xs"
-                      onClick={() => onUpdateQuantity(extra.id, 1)}
-                    >
-                      <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                      Add
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-1.5 sm:gap-2 w-full justify-center">
                       <Button
-                        size="icon"
+                        size="sm"
                         variant="outline"
-                        className="h-6 w-6 sm:h-7 sm:w-7"
-                        onClick={() => onUpdateQuantity(extra.id, quantity - 1)}
+                        className="w-full h-8 text-xs hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() => onUpdateQuantity(extra.id, 1)}
                       >
-                        <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add
                       </Button>
-                      <span className="w-5 sm:w-6 text-center font-medium text-xs sm:text-sm">{quantity}</span>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-6 w-6 sm:h-7 sm:w-7"
-                        onClick={() => onUpdateQuantity(extra.id, quantity + 1)}
-                      >
-                        <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      </Button>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex items-center gap-2 w-full justify-center bg-muted rounded-md p-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 hover:bg-background"
+                          onClick={() => onUpdateQuantity(extra.id, quantity - 1)}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <span className="w-6 text-center font-semibold text-sm">{quantity}</span>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 hover:bg-background"
+                          onClick={() => onUpdateQuantity(extra.id, quantity + 1)}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
