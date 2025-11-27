@@ -1,5 +1,42 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop } from "lucide-react";
+import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop, Brain, Mountain, Utensils, Plane, Camera, Music, Book, Coffee, Sun, Moon, Star, Compass, Map, Globe, Briefcase, Award, Gift, Gem, Crown, Shield, Flame, Droplet, Wind, Cloud, TreePine, Flower2, type LucideIcon } from "lucide-react";
+
+// Icon mapping for dynamic category icons
+const iconMap: Record<string, LucideIcon> = {
+  heart: Heart,
+  users: Users,
+  sparkles: Sparkles,
+  leaf: Leaf,
+  wine: Wine,
+  zap: Zap,
+  laptop: Laptop,
+  brain: Brain,
+  mountain: Mountain,
+  utensils: Utensils,
+  plane: Plane,
+  camera: Camera,
+  music: Music,
+  book: Book,
+  coffee: Coffee,
+  sun: Sun,
+  moon: Moon,
+  star: Star,
+  compass: Compass,
+  map: Map,
+  globe: Globe,
+  briefcase: Briefcase,
+  award: Award,
+  gift: Gift,
+  gem: Gem,
+  crown: Crown,
+  shield: Shield,
+  flame: Flame,
+  droplet: Droplet,
+  wind: Wind,
+  cloud: Cloud,
+  "tree-pine": TreePine,
+  flower: Flower2,
+};
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect, useRef } from "react";
@@ -291,7 +328,8 @@ const Index = () => {
                       'nature': 'Beyond\nNature',
                       'taste': 'Taste\nAffair',
                       'active': 'Active\nBreak',
-                      'work-unplugged': 'Work\nUnplugged'
+                      'work-unplugged': 'Work\nUnplugged',
+                      'mindful-reset': 'Mindful\nReset'
                     };
                     return displayMap[slug] || name;
                   };
@@ -310,13 +348,10 @@ const Index = () => {
                       <div className={`p-3 rounded-full transition-all group-hover:bg-muted ${
                         selectedCategoryId === category.id ? 'bg-primary/10' : ''
                       }`}>
-                        {category.slug === 'romantic' && <Heart className="w-7 h-7" strokeWidth={1.5} />}
-                        {category.slug === 'family' && <Users className="w-7 h-7" strokeWidth={1.5} />}
-                        {category.slug === 'golden-age' && <Sparkles className="w-7 h-7" strokeWidth={1.5} />}
-                        {category.slug === 'nature' && <Leaf className="w-7 h-7" strokeWidth={1.5} />}
-                        {category.slug === 'taste' && <Wine className="w-7 h-7" strokeWidth={1.5} />}
-                        {category.slug === 'active' && <Zap className="w-7 h-7" strokeWidth={1.5} />}
-                        {category.slug === 'work-unplugged' && <Laptop className="w-7 h-7" strokeWidth={1.5} />}
+                        {(() => {
+                          const IconComponent = category.icon ? iconMap[category.icon] : null;
+                          return IconComponent ? <IconComponent className="w-7 h-7" strokeWidth={1.5} /> : <Sparkles className="w-7 h-7" strokeWidth={1.5} />;
+                        })()}
                       </div>
                       
                       {/* 2-line text with fixed height */}

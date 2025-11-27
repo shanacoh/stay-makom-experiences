@@ -226,6 +226,7 @@ export type Database = {
           display_order: number | null
           editorial_tiles: Json | null
           hero_image: string | null
+          icon: string | null
           id: string
           intro_rich_text: string | null
           intro_rich_text_he: string | null
@@ -257,6 +258,7 @@ export type Database = {
           display_order?: number | null
           editorial_tiles?: Json | null
           hero_image?: string | null
+          icon?: string | null
           id?: string
           intro_rich_text?: string | null
           intro_rich_text_he?: string | null
@@ -288,6 +290,7 @@ export type Database = {
           display_order?: number | null
           editorial_tiles?: Json | null
           hero_image?: string | null
+          icon?: string | null
           id?: string
           intro_rich_text?: string | null
           intro_rich_text_he?: string | null

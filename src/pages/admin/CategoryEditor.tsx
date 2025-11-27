@@ -8,8 +8,45 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Upload, X, Eye } from "lucide-react";
+import { ArrowLeft, Upload, X, Eye, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop, Brain, Mountain, Utensils, Plane, Camera, Music, Book, Coffee, Sun, Moon, Star, Compass, Map, Globe, Briefcase, Award, Gift, Gem, Crown, Shield, Flame, Droplet, Wind, Cloud, TreePine, Flower2, type LucideIcon } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
+
+// Available icons for categories
+const availableIcons: { name: string; icon: LucideIcon }[] = [
+  { name: "heart", icon: Heart },
+  { name: "users", icon: Users },
+  { name: "sparkles", icon: Sparkles },
+  { name: "leaf", icon: Leaf },
+  { name: "wine", icon: Wine },
+  { name: "zap", icon: Zap },
+  { name: "laptop", icon: Laptop },
+  { name: "brain", icon: Brain },
+  { name: "mountain", icon: Mountain },
+  { name: "utensils", icon: Utensils },
+  { name: "plane", icon: Plane },
+  { name: "camera", icon: Camera },
+  { name: "music", icon: Music },
+  { name: "book", icon: Book },
+  { name: "coffee", icon: Coffee },
+  { name: "sun", icon: Sun },
+  { name: "moon", icon: Moon },
+  { name: "star", icon: Star },
+  { name: "compass", icon: Compass },
+  { name: "map", icon: Map },
+  { name: "globe", icon: Globe },
+  { name: "briefcase", icon: Briefcase },
+  { name: "award", icon: Award },
+  { name: "gift", icon: Gift },
+  { name: "gem", icon: Gem },
+  { name: "crown", icon: Crown },
+  { name: "shield", icon: Shield },
+  { name: "flame", icon: Flame },
+  { name: "droplet", icon: Droplet },
+  { name: "wind", icon: Wind },
+  { name: "cloud", icon: Cloud },
+  { name: "tree-pine", icon: TreePine },
+  { name: "flower", icon: Flower2 },
+];
 
 const CategoryEditor = () => {
   const { id } = useParams();
@@ -20,6 +57,7 @@ const CategoryEditor = () => {
     name: "",
     name_he: "",
     hero_image: "",
+    icon: "",
     presentation_title: "",
     presentation_title_he: "",
     intro_rich_text: "",
@@ -66,6 +104,7 @@ const CategoryEditor = () => {
         name: category.name || "",
         name_he: category.name_he || "",
         hero_image: category.hero_image || "",
+        icon: category.icon || "",
         presentation_title: category.presentation_title || "",
         presentation_title_he: category.presentation_title_he || "",
         intro_rich_text: category.intro_rich_text || "",
@@ -297,6 +336,35 @@ const CategoryEditor = () => {
               <p className="text-sm text-muted-foreground">
                 Lower numbers appear first
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Category Icon *</Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                Select an icon to represent this category on the homepage
+              </p>
+              <div className="grid grid-cols-8 gap-2 p-4 border rounded-lg bg-muted/30">
+                {availableIcons.map(({ name, icon: Icon }) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, icon: name })}
+                    className={`p-3 rounded-lg transition-all flex items-center justify-center ${
+                      formData.icon === name
+                        ? 'bg-primary text-primary-foreground ring-2 ring-primary'
+                        : 'bg-background hover:bg-muted border'
+                    }`}
+                    title={name}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </button>
+                ))}
+              </div>
+              {formData.icon && (
+                <p className="text-sm text-muted-foreground">
+                  Selected: <span className="font-medium">{formData.icon}</span>
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
