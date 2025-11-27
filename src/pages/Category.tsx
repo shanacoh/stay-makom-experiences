@@ -52,7 +52,9 @@ const Category = () => {
           hotels (
             id,
             name,
+            name_he,
             city,
+            city_he,
             region,
             latitude,
             longitude,
