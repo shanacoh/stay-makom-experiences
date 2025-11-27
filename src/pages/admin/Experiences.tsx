@@ -128,7 +128,7 @@ const AdminExperiences = () => {
   // Duplicate mutation
   const duplicateMutation = useMutation({
     mutationFn: async (experienceId: string) => {
-      // Fetch original experience
+      // Fetch original experience with all fields
       const { data: original, error: fetchError } = await supabase
         .from("experiences")
         .select("*")
@@ -137,13 +137,59 @@ const AdminExperiences = () => {
       
       if (fetchError) throw fetchError;
 
-      // Destructure to exclude fields we don't want to copy
-      const { id, created_at, updated_at, ...rest } = original;
-
+      // Create new experience with all fields explicitly copied
       const newExperience = {
-        ...rest,
         title: `${original.title} (Copy)`,
         title_he: original.title_he ? `${original.title_he} (עותק)` : null,
+        subtitle: original.subtitle,
+        subtitle_he: original.subtitle_he,
+        category_id: original.category_id,
+        long_copy: original.long_copy,
+        long_copy_he: original.long_copy_he,
+        min_nights: original.min_nights,
+        max_nights: original.max_nights,
+        min_party: original.min_party,
+        max_party: original.max_party,
+        base_price: original.base_price,
+        currency: original.currency,
+        base_price_type: original.base_price_type,
+        hotel_id: original.hotel_id,
+        cancellation_policy: original.cancellation_policy,
+        cancellation_policy_he: original.cancellation_policy_he,
+        hero_image: original.hero_image,
+        photos: original.photos,
+        duration: original.duration,
+        duration_he: original.duration_he,
+        includes: original.includes,
+        includes_he: original.includes_he,
+        not_includes: original.not_includes,
+        not_includes_he: original.not_includes_he,
+        good_to_know: original.good_to_know,
+        good_to_know_he: original.good_to_know_he,
+        services: original.services,
+        services_he: original.services_he,
+        checkin_time: original.checkin_time,
+        checkout_time: original.checkout_time,
+        address: original.address,
+        address_he: original.address_he,
+        google_maps_link: original.google_maps_link,
+        accessibility_info: original.accessibility_info,
+        accessibility_info_he: original.accessibility_info_he,
+        region_type: original.region_type,
+        lead_time_days: original.lead_time_days,
+        seo_title_en: original.seo_title_en,
+        seo_title_he: original.seo_title_he,
+        seo_title_fr: original.seo_title_fr,
+        meta_description_en: original.meta_description_en,
+        meta_description_he: original.meta_description_he,
+        meta_description_fr: original.meta_description_fr,
+        og_title_en: original.og_title_en,
+        og_title_he: original.og_title_he,
+        og_title_fr: original.og_title_fr,
+        og_description_en: original.og_description_en,
+        og_description_he: original.og_description_he,
+        og_description_fr: original.og_description_fr,
+        og_image: original.og_image,
         slug: generateSlug(`${original.title}-copy-${Date.now()}`),
         status: "draft" as const,
       };
