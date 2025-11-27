@@ -113,13 +113,16 @@ const Experience = () => {
         <Footer />
       </div>;
   }
-  // Combine all available photos: experience hero + experience gallery + hotel hero + hotel gallery
-  const allPhotos: string[] = [];
-  if (experience.hero_image) allPhotos.push(experience.hero_image);
-  if (experience.photos?.length) allPhotos.push(...experience.photos.filter((p: string) => p !== experience.hero_image));
-  if (experience.hotels?.hero_image && !allPhotos.includes(experience.hotels.hero_image)) allPhotos.push(experience.hotels.hero_image);
-  if (experience.hotels?.photos?.length) allPhotos.push(...experience.hotels.photos.filter((p: string) => !allPhotos.includes(p)));
-  const photos = allPhotos.length > 0 ? allPhotos : ['/placeholder.svg'];
+  // Hero image: prioritize experience hero, then hotel hero
+  const heroImage = experience.hero_image || experience.hotels?.hero_image || '/placeholder.svg';
+  
+  // Gallery photos: combine all available photos for the modal
+  const galleryPhotos: string[] = [];
+  if (experience.hero_image) galleryPhotos.push(experience.hero_image);
+  if (experience.photos?.length) galleryPhotos.push(...experience.photos.filter((p: string) => p !== experience.hero_image));
+  if (experience.hotels?.hero_image && !galleryPhotos.includes(experience.hotels.hero_image)) galleryPhotos.push(experience.hotels.hero_image);
+  if (experience.hotels?.photos?.length) galleryPhotos.push(...experience.hotels.photos.filter((p: string) => !galleryPhotos.includes(p)));
+  
   return <div className="min-h-screen flex flex-col">
       <SEOHead
         titleEn={experience.seo_title_en}
@@ -137,7 +140,7 @@ const Experience = () => {
       <Header />
 
       <main className="flex-1">
-        <ExperienceHero title={experience.title} subtitle={experience.subtitle} hotelName={experience.hotels?.name} photos={photos} />
+        <ExperienceHero title={experience.title} subtitle={experience.subtitle} hotelName={experience.hotels?.name} heroImage={heroImage} galleryPhotos={galleryPhotos} />
 
         <div className="container pb-16 px-4 sm:px-6 my-[26px]">
           <div className={`grid lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 ${isMobile ? 'pb-24' : ''}`}>
