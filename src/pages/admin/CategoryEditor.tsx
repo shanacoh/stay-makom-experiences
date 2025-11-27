@@ -166,7 +166,11 @@ const CategoryEditor = () => {
 
   const publishMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const publishData = { ...data, status: "published" as const };
+      const publishData = { 
+        ...data, 
+        status: "published" as const,
+        slug: isEditing ? category?.slug : generateSlug(data.name),
+      };
       if (isEditing) {
         const { error } = await supabase
           .from("categories" as any)
