@@ -284,24 +284,33 @@ const Index = () => {
             
             {/* Category Tabs */}
             {!isLoading && categories && (
-              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
+              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 sm:mb-12">
                 {categories.map((category) => (
                   <button
                     key={category.slug}
                     onClick={() => {
                       setSelectedCategoryId(category.id);
                     }}
-                    className="flex flex-col items-center gap-2 group cursor-pointer"
+                    className={`flex flex-col items-center gap-3 group cursor-pointer w-20 sm:w-24 ${
+                      selectedCategoryId === category.id ? 'text-primary' : ''
+                    }`}
                   >
-                    <div className="transition-transform group-hover:scale-110">
-                      {category.slug === 'romantic' && <Heart className="w-8 h-8 text-foreground" />}
-                      {category.slug === 'family' && <Users className="w-8 h-8 text-foreground" />}
-                      {category.slug === 'golden-age' && <Sparkles className="w-8 h-8 text-foreground" />}
-                      {category.slug === 'beyond-nature' && <Leaf className="w-8 h-8 text-foreground" />}
-                      {category.slug === 'taste-affair' && <Wine className="w-8 h-8 text-foreground" />}
-                      {category.slug === 'active-break' && <Zap className="w-8 h-8 text-foreground" />}
+                    {/* Icon with circular hover background */}
+                    <div className={`p-3 rounded-full transition-all group-hover:bg-muted ${
+                      selectedCategoryId === category.id ? 'bg-primary/10' : ''
+                    }`}>
+                      {category.slug === 'romantic' && <Heart className="w-6 h-6" strokeWidth={1.5} />}
+                      {category.slug === 'family' && <Users className="w-6 h-6" strokeWidth={1.5} />}
+                      {category.slug === 'golden-age' && <Sparkles className="w-6 h-6" strokeWidth={1.5} />}
+                      {category.slug === 'beyond-nature' && <Leaf className="w-6 h-6" strokeWidth={1.5} />}
+                      {category.slug === 'taste-affair' && <Wine className="w-6 h-6" strokeWidth={1.5} />}
+                      {category.slug === 'active-break' && <Zap className="w-6 h-6" strokeWidth={1.5} />}
                     </div>
-                    <span className="text-xs sm:text-sm font-medium uppercase tracking-wider group-hover:text-primary transition-colors">
+                    
+                    {/* 2-line text with fixed height */}
+                    <span className={`text-xs font-medium uppercase tracking-wider text-center h-8 leading-4 line-clamp-2 transition-colors ${
+                      selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'
+                    }`}>
                       {category.name}
                     </span>
                   </button>
