@@ -314,7 +314,7 @@ const Index = () => {
           ) : (
             <>
               {/* Mobile Carousel */}
-              <div className="lg:hidden relative mb-8">
+              <div className="md:hidden relative mb-8">
                 <div
                   ref={carouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -341,6 +341,24 @@ const Index = () => {
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Tablet Grid */}
+              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-3 mb-8">
+                {filteredExperiences?.map((experience) => (
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    rating={8.5 + Math.random() * 0.5}
+                    reviewCount={50 + Math.floor(Math.random() * 950)}
+                  />
+                ))}
+                {/* Empty spaces if less than 4 in selected category */}
+                {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
+                  Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
+                    <div key={`empty-${idx}`} className="invisible"></div>
+                  ))
+                )}
               </div>
 
               {/* Desktop Grid */}
@@ -454,7 +472,7 @@ const Index = () => {
           ) : (
             <>
               {/* Mobile Carousel */}
-              <div className="lg:hidden relative">
+              <div className="md:hidden relative">
                 <div
                   ref={latestCarouselRef}
                   className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
@@ -476,6 +494,19 @@ const Index = () => {
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* Tablet Grid */}
+              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-3">
+                {latestExperiences?.map((experience) => (
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    badge="NEW"
+                    rating={8.5 + Math.random() * 0.5}
+                    reviewCount={50 + Math.floor(Math.random() * 950)}
+                  />
+                ))}
               </div>
 
               {/* Desktop Grid */}
