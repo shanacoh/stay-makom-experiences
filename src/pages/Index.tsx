@@ -317,7 +317,7 @@ const Index = () => {
             
             {/* Category Tabs */}
             {!isLoading && categories && (
-              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 sm:mb-12">
+              <div className="flex flex-nowrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 overflow-x-auto">
                 {categories.map((category) => {
                   // Force 2-line display for all category names
                   const getCategoryDisplay = (name: string, slug: string) => {
