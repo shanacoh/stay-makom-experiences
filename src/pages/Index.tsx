@@ -317,7 +317,7 @@ const Index = () => {
             
             {/* Category Tabs */}
             {!isLoading && categories && (
-              <div className="flex flex-nowrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 overflow-x-auto">
+              <div className="flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-3 mb-6 sm:mb-12 overflow-x-auto px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide">
                 {categories.map((category) => {
                   // Force 2-line display for all category names
                   const getCategoryDisplay = (name: string, slug: string) => {
@@ -340,22 +340,22 @@ const Index = () => {
                       onClick={() => {
                         setSelectedCategoryId(category.id);
                       }}
-                      className={`flex flex-col items-center gap-3 group cursor-pointer w-20 sm:w-24 ${
-                        selectedCategoryId === category.id ? 'text-primary' : ''
+                      className={`flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer flex-shrink-0 w-14 sm:w-20 transition-all ${
+                        selectedCategoryId === category.id ? 'text-primary scale-105' : ''
                       }`}
                     >
                       {/* Icon with circular hover background */}
-                      <div className={`p-3 rounded-full transition-all group-hover:bg-muted ${
+                      <div className={`p-2 sm:p-3 rounded-full transition-all group-hover:bg-muted ${
                         selectedCategoryId === category.id ? 'bg-primary/10' : ''
                       }`}>
                         {(() => {
                           const IconComponent = category.icon ? iconMap[category.icon] : null;
-                          return IconComponent ? <IconComponent className="w-7 h-7" strokeWidth={1.5} /> : <Sparkles className="w-7 h-7" strokeWidth={1.5} />;
+                          return IconComponent ? <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />;
                         })()}
                       </div>
                       
                       {/* 2-line text with fixed height */}
-                      <span className={`text-xs font-medium uppercase tracking-wider text-center h-8 leading-4 whitespace-pre-line transition-colors ${
+                      <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wide text-center h-7 sm:h-8 leading-[14px] sm:leading-4 whitespace-pre-line transition-colors ${
                         selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'
                       }`}>
                         {getCategoryDisplay(category.name, category.slug)}
