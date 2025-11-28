@@ -35,7 +35,7 @@ const menuItems = [
 ];
 
 export function AdminSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const location = useLocation();
   const collapsed = state === "collapsed";
 
@@ -46,12 +46,23 @@ export function AdminSidebar() {
     return location.pathname.startsWith(path);
   };
 
+  const handleNavClick = () => {
+    // Close sidebar on mobile after navigation
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar className={collapsed ? "w-14" : "w-64"}>
-      <SidebarContent>
+      <SidebarContent className="pt-2">
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "px-2" : ""}>
-            {!collapsed && "STAYMAKOM Admin"}
+          <SidebarGroupLabel className={collapsed ? "px-2" : "px-3"}>
+            {!collapsed && (
+              <span className="text-sm font-bold tracking-wide text-primary">
+                STAYMAKOM
+              </span>
+            )}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -65,9 +76,9 @@ export function AdminSidebar() {
                         : "hover:bg-muted"
                     }
                   >
-                    <Link to={item.url}>
+                    <Link to={item.url} onClick={handleNavClick}>
                       <item.icon className={collapsed ? "h-5 w-5" : "h-5 w-5 mr-3"} />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
