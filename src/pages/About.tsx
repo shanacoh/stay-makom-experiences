@@ -8,16 +8,16 @@ const About = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center">
+      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={aboutHero} alt="About STAYMAKOM" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
-        <div className="relative z-10 text-center text-white px-6 animate-fade-in">
-          <h1 className="text-6xl md:text-7xl lg:text-8xl mb-6 font-sans text-slate-50">
+        <div className="relative z-10 text-center text-white px-6 animate-fade-in max-w-4xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 font-sans font-bold text-slate-50">
             Israel… differently.
           </h1>
-          <p className="text-2xl md:text-3xl text-slate-50 font-sans font-medium">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-50 font-sans font-medium">
             A curated way to explore, feel, and belong.
           </p>
         </div>

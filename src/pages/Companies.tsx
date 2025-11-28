@@ -118,7 +118,7 @@ export default function Companies() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[70vh] overflow-hidden">
+      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] overflow-hidden">
         <img 
           src={corporateHero}
           alt="Team retreat moment"
@@ -127,11 +127,11 @@ export default function Companies() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         
         <div className="relative h-full flex items-center justify-center text-center px-4">
-          <div className="max-w-3xl space-y-6">
-            <h1 className="font-sans text-5xl md:text-7xl font-bold text-white tracking-tight">
+          <div className="max-w-4xl space-y-6">
+            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight">
               Create meaningful moments for your team.
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 font-light max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-2xl mx-auto">
               Corporate escapes, wellbeing retreats, team-building experiences and curated gift cards — crafted to inspire and connect.
             </p>
             

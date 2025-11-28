@@ -86,16 +86,16 @@ const Partners = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center">
+      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={partnersHero} alt="Boutique hotel" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/30" />
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl mb-6 font-sans text-slate-50">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 font-sans font-bold text-slate-50">
             Let's create extraordinary stays together.
           </h1>
-          <p className="text-xl md:text-2xl mb-10 text-white/90">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-10 text-white/90">
             Join a curated network of Israel's most inspiring hotels and experiences.
           </p>
           <Button onClick={() => navigate("/auth")} size="lg" className="bg-slate-50 text-slate-950">
