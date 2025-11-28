@@ -1,7 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -16,15 +22,10 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const {
-    user,
-    role,
-    roles,
-    signOut
-  } = useAuth();
+  const { user, role, roles, signOut } = useAuth();
   const navigate = useNavigate();
   const { lang, setLanguage } = useLanguage();
-  
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -39,7 +40,7 @@ const Header = () => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const scrolled = currentScrollY > 80;
-      
+
       // Show/hide header based on scroll direction
       if (currentScrollY < 10) {
         // Always show at top
@@ -51,7 +52,7 @@ const Header = () => {
         // Scrolling up - show immediately
         setIsVisible(true);
       }
-      
+
       setIsScrolled(isTransparentPage ? scrolled : true);
       setLastScrollY(currentScrollY);
     };
@@ -61,24 +62,22 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isTransparentPage, lastScrollY]);
 
-  const headerClasses = isTransparentPage && !isScrolled
-    ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? 'top-0' : '-top-full'}`
-    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ${isVisible ? 'top-0' : '-top-full'}`;
+  const headerClasses =
+    isTransparentPage && !isScrolled
+      ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`
+      : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`;
 
-  const textClasses = isTransparentPage && !isScrolled
-    ? "text-white"
-    : "text-foreground";
+  const textClasses = isTransparentPage && !isScrolled ? "text-white" : "text-foreground";
 
-  const logoClasses = isTransparentPage && !isScrolled
-    ? "text-white"
-    : "text-logo";
+  const logoClasses = isTransparentPage && !isScrolled ? "text-white" : "text-logo";
 
-  return <header className={headerClasses}>
+  return (
+    <header className={headerClasses}>
       <div className="container flex h-16 items-center justify-between bg-transparent">
         <Link to="/" className="flex items-center space-x-2">
           <span className={`font-sans text-2xl font-bold tracking-[-0.04em] uppercase ${logoClasses}`}>STAYMAKOM</span>
         </Link>
-        
+
         <div className="flex-1"></div>
 
         <div className="flex items-center space-x-3">
@@ -87,41 +86,54 @@ const Header = () => {
               onClick={() => setLanguage("en")}
               className={`text-xs transition-colors ${
                 lang === "en"
-                  ? isTransparentPage && !isScrolled ? 'text-white font-semibold' : 'text-foreground font-semibold'
-                  : isTransparentPage && !isScrolled ? 'text-white/60 hover:text-white/80' : 'text-muted-foreground hover:text-foreground'
+                  ? isTransparentPage && !isScrolled
+                    ? "text-white font-semibold"
+                    : "text-foreground font-semibold"
+                  : isTransparentPage && !isScrolled
+                    ? "text-white/60 hover:text-white/80"
+                    : "text-muted-foreground hover:text-foreground"
               }`}
             >
               EN
             </button>
-            <span className={`text-xs ${isTransparentPage && !isScrolled ? 'text-white/40' : 'text-muted-foreground/40'}`}>|</span>
+            <span
+              className={`text-xs ${isTransparentPage && !isScrolled ? "text-white/40" : "text-muted-foreground/40"}`}
+            >
+              |
+            </span>
             <button
               onClick={() => setLanguage("he")}
               className={`text-xs transition-colors ${
                 lang === "he"
-                  ? isTransparentPage && !isScrolled ? 'text-white font-semibold' : 'text-foreground font-semibold'
-                  : isTransparentPage && !isScrolled ? 'text-white/60 hover:text-white/80' : 'text-muted-foreground hover:text-foreground'
+                  ? isTransparentPage && !isScrolled
+                    ? "text-white font-semibold"
+                    : "text-foreground font-semibold"
+                  : isTransparentPage && !isScrolled
+                    ? "text-white/60 hover:text-white/80"
+                    : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              עברית
+              עב
             </button>
           </div>
-          
+
           <Link to="/partners">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={`hidden md:flex ${isTransparentPage && !isScrolled ? 'border-white/30 text-white hover:bg-white/10 hover:text-white' : ''}`}
+            <Button
+              variant="outline"
+              size="sm"
+              className={`hidden md:flex ${isTransparentPage && !isScrolled ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : ""}`}
             >
               Hotel partnership
             </Button>
           </Link>
-          
-          {user ? <DropdownMenu>
+
+          {user ? (
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={`${isTransparentPage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`${isTransparentPage && !isScrolled ? "text-white hover:bg-white/10" : ""}`}
                 >
                   <User className="h-5 w-5" />
                 </Button>
@@ -129,9 +141,7 @@ const Header = () => {
               <DropdownMenuContent align="end" className="w-64">
                 <div className="px-2 py-1.5 text-sm text-muted-foreground">
                   {roles.length > 0 && (
-                    <div className="font-medium text-foreground mb-1">
-                      Roles: {roles.join(", ")}
-                    </div>
+                    <div className="font-medium text-foreground mb-1">Roles: {roles.join(", ")}</div>
                   )}
                   {user?.email}
                 </div>
@@ -160,20 +170,24 @@ const Header = () => {
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu> : <Button 
-              variant="ghost" 
-              size="icon" 
-              asChild 
-              className={`${isTransparentPage && !isScrolled ? 'text-white hover:bg-white/10' : ''}`}
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className={`${isTransparentPage && !isScrolled ? "text-white hover:bg-white/10" : ""}`}
             >
               <Link to="/auth">
                 <User className="h-5 w-5" />
               </Link>
-            </Button>}
-          
+            </Button>
+          )}
+
           <HamburgerMenu isScrolled={isScrolled} />
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
 export default Header;
