@@ -83,13 +83,13 @@ const Contact = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center">
+      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={contactHero} alt="Contact us" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
-        <div className="relative z-10 text-center text-white px-6">
-          <h1 className="text-5xl md:text-6xl text-slate-50 font-sans">
+        <div className="relative z-10 text-center text-white px-6 max-w-4xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold text-slate-50">
             We're here for you.
           </h1>
         </div>
