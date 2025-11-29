@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import NotFound from "./NotFound";
 import DOMPurify from "dompurify";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { Block } from "@/components/admin/journal/types";
 
 const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -42,6 +43,103 @@ const JournalPost = () => {
     return colors[category as keyof typeof colors] || "bg-gray-500";
   };
 
+  // Parse blocks from JSON string, fallback to legacy HTML
+  const parseContent = (content: string): { blocks: Block[] | null; html: string | null } => {
+    if (!content) return { blocks: null, html: null };
+    try {
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        return { blocks: parsed, html: null };
+      }
+      return { blocks: null, html: content };
+    } catch {
+      // Legacy HTML content
+      return { blocks: null, html: content };
+    }
+  };
+
+  const renderBlock = (block: Block) => {
+    switch (block.type) {
+      case "title":
+        const TitleTag = block.level;
+        const titleClasses = {
+          h1: "text-4xl font-bold mt-10 mb-4",
+          h2: "text-3xl font-bold mt-8 mb-3",
+          h3: "text-2xl font-semibold mt-6 mb-2",
+        };
+        return block.content ? (
+          <TitleTag className={titleClasses[block.level]}>{block.content}</TitleTag>
+        ) : null;
+
+      case "text":
+        return block.content ? (
+          <p className="text-lg leading-relaxed mb-6 whitespace-pre-wrap">
+            {block.content}
+          </p>
+        ) : null;
+
+      case "image":
+        return block.url ? (
+          <figure className="my-8">
+            <img
+              src={block.url}
+              alt={block.alt || "Article image"}
+              className="w-full rounded-lg shadow-md"
+            />
+            {block.caption && (
+              <figcaption className="text-sm text-muted-foreground text-center mt-3">
+                {block.caption}
+              </figcaption>
+            )}
+          </figure>
+        ) : null;
+
+      case "cta":
+        return block.text ? (
+          <div className="my-10 text-center">
+            <Button size="lg" asChild>
+              <a href={block.url} target="_blank" rel="noopener noreferrer">
+                {block.text}
+              </a>
+            </Button>
+          </div>
+        ) : null;
+
+      case "quote":
+        return block.content ? (
+          <blockquote className="my-8 pl-6 border-l-4 border-primary">
+            <p className="text-xl italic text-muted-foreground leading-relaxed">
+              {block.content}
+            </p>
+            {block.author && (
+              <cite className="block mt-3 text-sm font-medium not-italic">
+                — {block.author}
+              </cite>
+            )}
+          </blockquote>
+        ) : null;
+
+      case "list":
+        const ListTag = block.style === "bullet" ? "ul" : "ol";
+        const listClass =
+          block.style === "bullet"
+            ? "list-disc list-inside"
+            : "list-decimal list-inside";
+        return block.items.some((item) => item) ? (
+          <ListTag className={`${listClass} my-6 space-y-2 text-lg`}>
+            {block.items
+              .filter((item) => item)
+              .map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+          </ListTag>
+        ) : null;
+
+      default:
+        return null;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#FAF8F5]">
@@ -69,6 +167,8 @@ const JournalPost = () => {
   const title = getLocalizedField(post, "title", lang) || post.title_en;
   const excerpt = getLocalizedField(post, "excerpt", lang) || post.excerpt_en;
   const content = getLocalizedField(post, "content", lang) || post.content_en;
+  const { blocks, html } = parseContent(content);
+  const isRTL = lang === "he";
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
@@ -89,11 +189,11 @@ const JournalPost = () => {
       />
       <Header />
 
-      <main className="max-w-4xl mx-auto px-6 py-20">
+      <main className="max-w-4xl mx-auto px-6 py-20" dir={isRTL ? "rtl" : "ltr"}>
         <Link to="/journal">
           <Button variant="ghost" className="mb-8">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Journal
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? "ml-2 rotate-180" : "mr-2"}`} />
+            {isRTL ? "חזרה ליומן" : "Back to Journal"}
           </Button>
         </Link>
 
@@ -116,7 +216,7 @@ const JournalPost = () => {
 
           {post.author_name && (
             <p className="text-lg text-muted-foreground mb-12">
-              By {post.author_name}
+              {isRTL ? `מאת ${post.author_name}` : `By ${post.author_name}`}
             </p>
           )}
 
@@ -131,35 +231,45 @@ const JournalPost = () => {
           )}
 
           {excerpt && (
-            <div className="text-xl leading-relaxed mb-8 text-muted-foreground font-serif">
+            <div className="text-xl leading-relaxed mb-10 text-muted-foreground font-serif">
               {excerpt}
             </div>
           )}
 
-          <div
-            className="prose prose-lg max-w-none"
-            style={{
-              fontSize: "1.125rem",
-              lineHeight: "1.75rem",
-            }}
-          >
+          {/* Render block-based content */}
+          {blocks && blocks.length > 0 ? (
+            <div className="prose prose-lg max-w-none">
+              {blocks.map((block) => (
+                <div key={block.id}>{renderBlock(block)}</div>
+              ))}
+            </div>
+          ) : html ? (
+            // Fallback to legacy HTML content
             <div
-              dangerouslySetInnerHTML={{ 
-                __html: DOMPurify.sanitize(content, {
-                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'img', 'pre', 'code', 'span', 'div'],
-                  ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'style']
-                })
-              }}
-              className="whitespace-pre-wrap"
-            />
-          </div>
+              className="prose prose-lg max-w-none"
+              style={{ fontSize: "1.125rem", lineHeight: "1.75rem" }}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(html, {
+                    ALLOWED_TAGS: [
+                      "p", "br", "strong", "em", "u", "h1", "h2", "h3", "h4", "h5", "h6",
+                      "ul", "ol", "li", "a", "blockquote", "img", "pre", "code", "span", "div",
+                    ],
+                    ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "title", "class", "style"],
+                  }),
+                }}
+                className="whitespace-pre-wrap"
+              />
+            </div>
+          ) : null}
         </article>
 
         <div className="mt-16 pt-8 border-t">
           <Link to="/journal">
             <Button variant="outline" size="lg">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              More Stories
+              <ArrowLeft className={`w-4 h-4 ${isRTL ? "ml-2 rotate-180" : "mr-2"}`} />
+              {isRTL ? "עוד סיפורים" : "More Stories"}
             </Button>
           </Link>
         </div>
