@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,28 +13,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUpload } from "@/components/ui/image-upload";
-import RichTextEditor from "@/components/ui/rich-text-editor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Eye } from "lucide-react";
+import { ArrowLeft, Save, Eye, EyeOff, Clock, FileText, Check } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
+import { Block, calculateReadingTime } from "@/components/admin/journal/types";
+import { BlockEditor } from "@/components/admin/journal/BlockEditor";
+import { ArticlePreview } from "@/components/admin/journal/ArticlePreview";
 
 const JournalEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isEdit = !!id;
+  const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [previewLang, setPreviewLang] = useState<"en" | "he">("en");
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   const [formData, setFormData] = useState({
     title_en: "",
     title_he: "",
+    slug: "",
     cover_image: "",
     category: "Stories",
     excerpt_en: "",
     excerpt_he: "",
-    content_en: "",
-    content_he: "",
+    blocks_en: [] as Block[],
+    blocks_he: [] as Block[],
     author_name: "STAYMAKOM",
     status: "draft",
     seo_title_en: "",
@@ -51,6 +59,26 @@ const JournalEditor = () => {
     og_description_fr: "",
     og_image: "",
   });
+
+  // Parse blocks from JSON string
+  const parseBlocks = (content: string): Block[] => {
+    if (!content) return [];
+    try {
+      const parsed = JSON.parse(content);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      // Legacy HTML content - convert to single text block
+      if (content.trim()) {
+        return [{ id: "legacy-1", type: "text", content: content.replace(/<[^>]*>/g, "") }];
+      }
+      return [];
+    }
+  };
+
+  // Stringify blocks to JSON
+  const stringifyBlocks = (blocks: Block[]): string => {
+    return JSON.stringify(blocks);
+  };
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["journal-post", id],
@@ -72,12 +100,13 @@ const JournalEditor = () => {
       setFormData({
         title_en: post.title_en || "",
         title_he: post.title_he || "",
+        slug: post.slug || "",
         cover_image: post.cover_image || "",
         category: post.category,
         excerpt_en: post.excerpt_en || "",
         excerpt_he: post.excerpt_he || "",
-        content_en: post.content_en || "",
-        content_he: post.content_he || "",
+        blocks_en: parseBlocks(post.content_en),
+        blocks_he: parseBlocks(post.content_he),
         author_name: post.author_name,
         status: post.status,
         seo_title_en: post.seo_title_en || "",
@@ -94,31 +123,98 @@ const JournalEditor = () => {
         og_description_fr: post.og_description_fr || "",
         og_image: post.og_image || "",
       });
+      setSlugManuallyEdited(true);
     }
   }, [post]);
 
-  const saveMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const dataWithSlug = {
-        ...data,
-        slug: isEdit ? post?.slug : generateSlug(data.title_en),
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (!slugManuallyEdited && formData.title_en) {
+      setFormData((prev) => ({ ...prev, slug: generateSlug(formData.title_en) }));
+    }
+  }, [formData.title_en, slugManuallyEdited]);
+
+  const saveToDatabase = useCallback(
+    async (data: typeof formData, showToast = false) => {
+      const dataToSave = {
+        title_en: data.title_en,
+        title_he: data.title_he,
+        slug: data.slug || generateSlug(data.title_en),
+        cover_image: data.cover_image,
+        category: data.category,
+        excerpt_en: data.excerpt_en,
+        excerpt_he: data.excerpt_he,
+        content_en: stringifyBlocks(data.blocks_en),
+        content_he: stringifyBlocks(data.blocks_he),
+        author_name: data.author_name,
+        status: data.status,
+        seo_title_en: data.seo_title_en,
+        seo_title_he: data.seo_title_he,
+        seo_title_fr: data.seo_title_fr,
+        meta_description_en: data.meta_description_en,
+        meta_description_he: data.meta_description_he,
+        meta_description_fr: data.meta_description_fr,
+        og_title_en: data.og_title_en,
+        og_title_he: data.og_title_he,
+        og_title_fr: data.og_title_fr,
+        og_description_en: data.og_description_en,
+        og_description_he: data.og_description_he,
+        og_description_fr: data.og_description_fr,
+        og_image: data.og_image,
       };
-      
+
       if (isEdit) {
         const { error } = await supabase
           .from("journal_posts" as any)
-          .update(dataWithSlug as any)
+          .update(dataToSave as any)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("journal_posts" as any).insert([dataWithSlug as any]);
+        const { data: inserted, error } = await supabase
+          .from("journal_posts" as any)
+          .insert([dataToSave as any])
+          .select()
+          .single();
         if (error) throw error;
+        // Navigate to edit mode after first save
+        if (inserted && (inserted as any).id) {
+          navigate(`/admin/journal/${(inserted as any).id}`, { replace: true });
+        }
+      }
+
+      setLastSaved(new Date());
+      if (showToast) {
+        toast.success("Saved");
       }
     },
+    [isEdit, id, navigate]
+  );
+
+  // Autosave effect
+  useEffect(() => {
+    if (!formData.title_en) return; // Don't autosave without title
+
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current);
+    }
+
+    autosaveTimeoutRef.current = setTimeout(() => {
+      saveToDatabase(formData, false).catch((err) => {
+        console.error("Autosave failed:", err);
+      });
+    }, 3000);
+
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+      }
+    };
+  }, [formData, saveToDatabase]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => saveToDatabase(formData, true),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-journal-posts"] });
-      toast.success(isEdit ? "Article updated" : "Article created");
-      navigate("/admin/journal");
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to save article");
@@ -129,7 +225,9 @@ const JournalEditor = () => {
     mutationFn: async () => {
       const dataToSave = {
         ...formData,
-        slug: isEdit ? post?.slug : generateSlug(formData.title_en),
+        content_en: stringifyBlocks(formData.blocks_en),
+        content_he: stringifyBlocks(formData.blocks_he),
+        slug: formData.slug || generateSlug(formData.title_en),
         status: "published" as const,
         published_at: new Date().toISOString(),
       };
@@ -155,342 +253,414 @@ const JournalEditor = () => {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveMutation.mutate(formData);
-  };
+  const { words: wordsEn, minutes: minutesEn } = calculateReadingTime(formData.blocks_en);
+  const { words: wordsHe, minutes: minutesHe } = calculateReadingTime(formData.blocks_he);
 
   if (isLoading) {
     return <div className="text-center py-12">Loading...</div>;
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Link to="/admin/journal">
-          <Button variant="ghost">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Journal
-          </Button>
-        </Link>
-        <div className="flex gap-2">
-          {isEdit && post?.slug && (
-            <Link to={`/journal/${post.slug}`} target="_blank">
-              <Button variant="outline">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
+  if (isPreviewMode) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Preview Header */}
+        <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+          <div className="container flex items-center justify-between h-14">
+            <Button variant="ghost" onClick={() => setIsPreviewMode(false)}>
+              <EyeOff className="w-4 h-4 mr-2" />
+              Exit Preview
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant={previewLang === "en" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPreviewLang("en")}
+              >
+                English
               </Button>
-            </Link>
-          )}
+              <Button
+                variant={previewLang === "he" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPreviewLang("he")}
+              >
+                עברית
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Preview Content */}
+        <div className="container py-8" dir={previewLang === "he" ? "rtl" : "ltr"}>
+          <ArticlePreview
+            title={previewLang === "en" ? formData.title_en : formData.title_he}
+            coverImage={formData.cover_image}
+            excerpt={previewLang === "en" ? formData.excerpt_en : formData.excerpt_he}
+            blocks={previewLang === "en" ? formData.blocks_en : formData.blocks_he}
+            author={formData.author_name}
+            category={formData.category}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-[calc(100vh-4rem)] flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b bg-background shrink-0">
+        <div className="flex items-center gap-4">
+          <Link to="/admin/journal">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </Link>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {lastSaved && (
+              <>
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Saved {lastSaved.toLocaleTimeString()}</span>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setIsPreviewMode(true)}>
+            <Eye className="w-4 h-4 mr-2" />
+            Preview
+          </Button>
           <Button
             variant="outline"
-            onClick={() => saveMutation.mutate(formData)}
+            size="sm"
+            onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
           >
             <Save className="w-4 h-4 mr-2" />
-            Save Draft
+            Save
           </Button>
-          <Button onClick={() => publishMutation.mutate()} disabled={publishMutation.isPending}>
+          <Button size="sm" onClick={() => publishMutation.mutate()} disabled={publishMutation.isPending}>
             Publish
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{isEdit ? "Edit Article" : "New Article"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Article Settings */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Article Settings</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Stories">Stories</SelectItem>
-                      <SelectItem value="Places">Places</SelectItem>
-                      <SelectItem value="Guides">Guides</SelectItem>
-                      <SelectItem value="People">People</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left: Editor */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Article Meta */}
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Cover Image */}
+            <ImageUpload
+              label="Cover Image"
+              bucket="journal-images"
+              value={formData.cover_image}
+              onChange={(url) => setFormData({ ...formData, cover_image: url })}
+              description="Main image displayed at the top of your article"
+            />
 
-                <div className="space-y-2">
-                  <Label htmlFor="author_name">Author Name *</Label>
-                  <Input
-                    id="author_name"
-                    value={formData.author_name}
-                    onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
-                    required
-                  />
-                </div>
+            {/* Title & Settings Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2 space-y-2">
+                <Label>Article Title (EN) *</Label>
+                <Input
+                  value={formData.title_en}
+                  onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
+                  placeholder="Enter article title..."
+                  className="text-xl font-semibold h-12"
+                />
               </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Stories">Stories</SelectItem>
+                    <SelectItem value="Places">Places</SelectItem>
+                    <SelectItem value="Guides">Guides</SelectItem>
+                    <SelectItem value="People">People</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-              <ImageUpload
-                label="Cover Image"
-                bucket="journal-images"
-                value={formData.cover_image}
-                onChange={(url) => setFormData({ ...formData, cover_image: url })}
-                description="Main image for the article (appears in list and at the top of the post)"
+            {/* Excerpt */}
+            <div className="space-y-2">
+              <Label>Excerpt (EN)</Label>
+              <Textarea
+                value={formData.excerpt_en}
+                onChange={(e) => setFormData({ ...formData, excerpt_en: e.target.value })}
+                placeholder="A short introduction that appears in article lists..."
+                rows={2}
               />
             </div>
 
-            {/* Bilingual Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* English Version */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">English Version</h3>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="title_en">Title (EN) *</Label>
-                  <Input
-                    id="title_en"
-                    value={formData.title_en}
-                    onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="excerpt_en">Excerpt (EN)</Label>
-                  <Textarea
-                    id="excerpt_en"
-                    value={formData.excerpt_en}
-                    onChange={(e) => setFormData({ ...formData, excerpt_en: e.target.value })}
-                    placeholder="Short introduction (will appear in article list)"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="content_en">Content (EN) *</Label>
-                  <RichTextEditor
-                    content={formData.content_en}
-                    onChange={(content) => setFormData({ ...formData, content_en: content })}
-                    placeholder="Write your article content here..."
-                  />
-                </div>
+            {/* Word Count & Reading Time */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground border-t border-b py-3">
+              <div className="flex items-center gap-1">
+                <FileText className="w-4 h-4" />
+                <span>{wordsEn} words</span>
               </div>
-
-              {/* Hebrew Version */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Hebrew Version</h3>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="title_he">Title (HE)</Label>
-                  <Input
-                    id="title_he"
-                    value={formData.title_he}
-                    onChange={(e) => setFormData({ ...formData, title_he: e.target.value })}
-                    className="bg-[#EAF4FF]"
-                    dir="rtl"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="excerpt_he">Excerpt (HE)</Label>
-                  <Textarea
-                    id="excerpt_he"
-                    value={formData.excerpt_he}
-                    onChange={(e) => setFormData({ ...formData, excerpt_he: e.target.value })}
-                    placeholder="תיאור קצר (יופיע ברשימת המאמרים)"
-                    rows={3}
-                    className="bg-[#EAF4FF]"
-                    dir="rtl"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="content_he">Content (HE)</Label>
-                  <RichTextEditor
-                    content={formData.content_he}
-                    onChange={(content) => setFormData({ ...formData, content_he: content })}
-                    placeholder="כתוב את תוכן המאמר כאן..."
-                    dir="rtl"
-                  />
-                </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                <span>{minutesEn} min read</span>
               </div>
             </div>
 
-            {/* SEO Section */}
-            <div className="space-y-4 p-6 bg-muted/30 rounded-lg border">
-              <h3 className="text-lg font-semibold">SEO Settings</h3>
-              <p className="text-sm text-muted-foreground">
-                Optimize how this article appears in search engines and social media
+            {/* Content Tabs */}
+            <Tabs defaultValue="en" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="en">English Content</TabsTrigger>
+                <TabsTrigger value="he">Hebrew Content</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="en" className="mt-0">
+                <BlockEditor
+                  blocks={formData.blocks_en}
+                  onChange={(blocks) => setFormData({ ...formData, blocks_en: blocks })}
+                />
+              </TabsContent>
+
+              <TabsContent value="he" className="mt-0">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Article Title (HE)</Label>
+                      <Input
+                        value={formData.title_he}
+                        onChange={(e) => setFormData({ ...formData, title_he: e.target.value })}
+                        placeholder="כותרת המאמר..."
+                        className="bg-[#EAF4FF] text-lg"
+                        dir="rtl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Excerpt (HE)</Label>
+                      <Input
+                        value={formData.excerpt_he}
+                        onChange={(e) => setFormData({ ...formData, excerpt_he: e.target.value })}
+                        placeholder="תיאור קצר..."
+                        className="bg-[#EAF4FF]"
+                        dir="rtl"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground border-t border-b py-3">
+                    <div className="flex items-center gap-1">
+                      <FileText className="w-4 h-4" />
+                      <span>{wordsHe} words</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{minutesHe} min read</span>
+                    </div>
+                  </div>
+                  <BlockEditor
+                    blocks={formData.blocks_he}
+                    onChange={(blocks) => setFormData({ ...formData, blocks_he: blocks })}
+                    isHebrew
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* Right: SEO Panel */}
+        <div className="w-80 border-l bg-muted/20 overflow-y-auto p-4 shrink-0 hidden lg:block">
+          <h3 className="font-semibold mb-4">SEO & Settings</h3>
+
+          <div className="space-y-6">
+            {/* Slug */}
+            <div className="space-y-2">
+              <Label>URL Slug</Label>
+              <Input
+                value={formData.slug}
+                onChange={(e) => {
+                  setSlugManuallyEdited(true);
+                  setFormData({ ...formData, slug: e.target.value });
+                }}
+                placeholder="article-url-slug"
+              />
+              <p className="text-xs text-muted-foreground">
+                /journal/{formData.slug || "..."}
               </p>
+            </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* English SEO */}
-                <div className="space-y-4">
-                  <h4 className="font-medium">English</h4>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="seo_title_en">SEO Title (EN)</Label>
-                    <Input
-                      id="seo_title_en"
-                      value={formData.seo_title_en}
-                      onChange={(e) => setFormData({ ...formData, seo_title_en: e.target.value })}
-                      placeholder="Title for search engines"
-                    />
-                  </div>
+            {/* Author */}
+            <div className="space-y-2">
+              <Label>Author</Label>
+              <Input
+                value={formData.author_name}
+                onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
+              />
+            </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="meta_description_en">Meta Description (EN)</Label>
-                    <Textarea
-                      id="meta_description_en"
-                      value={formData.meta_description_en}
-                      onChange={(e) => setFormData({ ...formData, meta_description_en: e.target.value })}
-                      placeholder="Description for search results"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="og_title_en">OG Title (EN)</Label>
-                    <Input
-                      id="og_title_en"
-                      value={formData.og_title_en}
-                      onChange={(e) => setFormData({ ...formData, og_title_en: e.target.value })}
-                      placeholder="Title for social sharing"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="og_description_en">OG Description (EN)</Label>
-                    <Textarea
-                      id="og_description_en"
-                      value={formData.og_description_en}
-                      onChange={(e) => setFormData({ ...formData, og_description_en: e.target.value })}
-                      placeholder="Description for social sharing"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                {/* Hebrew SEO */}
-                <div className="space-y-4">
-                  <h4 className="font-medium">Hebrew</h4>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="seo_title_he">SEO Title (HE)</Label>
-                    <Input
-                      id="seo_title_he"
-                      value={formData.seo_title_he}
-                      onChange={(e) => setFormData({ ...formData, seo_title_he: e.target.value })}
-                      placeholder="כותרת למנועי חיפוש"
-                      className="bg-[#EAF4FF]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="meta_description_he">Meta Description (HE)</Label>
-                    <Textarea
-                      id="meta_description_he"
-                      value={formData.meta_description_he}
-                      onChange={(e) => setFormData({ ...formData, meta_description_he: e.target.value })}
-                      placeholder="תיאור לתוצאות חיפוש"
-                      rows={3}
-                      className="bg-[#EAF4FF]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="og_title_he">OG Title (HE)</Label>
-                    <Input
-                      id="og_title_he"
-                      value={formData.og_title_he}
-                      onChange={(e) => setFormData({ ...formData, og_title_he: e.target.value })}
-                      placeholder="כותרת לשיתוף ברשתות"
-                      className="bg-[#EAF4FF]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="og_description_he">OG Description (HE)</Label>
-                    <Textarea
-                      id="og_description_he"
-                      value={formData.og_description_he}
-                      onChange={(e) => setFormData({ ...formData, og_description_he: e.target.value })}
-                      placeholder="תיאור לשיתוף ברשתות"
-                      rows={3}
-                      className="bg-[#EAF4FF]"
-                      dir="rtl"
-                    />
-                  </div>
-                </div>
-
-                {/* French SEO */}
-                <div className="space-y-4">
-                  <h4 className="font-medium">French</h4>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="seo_title_fr">SEO Title (FR)</Label>
-                    <Input
-                      id="seo_title_fr"
-                      value={formData.seo_title_fr}
-                      onChange={(e) => setFormData({ ...formData, seo_title_fr: e.target.value })}
-                      placeholder="Titre pour les moteurs de recherche"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="meta_description_fr">Meta Description (FR)</Label>
-                    <Textarea
-                      id="meta_description_fr"
-                      value={formData.meta_description_fr}
-                      onChange={(e) => setFormData({ ...formData, meta_description_fr: e.target.value })}
-                      placeholder="Description pour les résultats de recherche"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="og_title_fr">OG Title (FR)</Label>
-                    <Input
-                      id="og_title_fr"
-                      value={formData.og_title_fr}
-                      onChange={(e) => setFormData({ ...formData, og_title_fr: e.target.value })}
-                      placeholder="Titre pour le partage social"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="og_description_fr">OG Description (FR)</Label>
-                    <Textarea
-                      id="og_description_fr"
-                      value={formData.og_description_fr}
-                      onChange={(e) => setFormData({ ...formData, og_description_fr: e.target.value })}
-                      placeholder="Description pour le partage social"
-                      rows={3}
-                    />
-                  </div>
-                </div>
+            {/* English SEO */}
+            <div className="space-y-3 pt-4 border-t">
+              <h4 className="text-sm font-medium">English SEO</h4>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">SEO Title</Label>
+                <Input
+                  value={formData.seo_title_en}
+                  onChange={(e) => setFormData({ ...formData, seo_title_en: e.target.value })}
+                  placeholder={formData.title_en || "SEO title..."}
+                  className="text-sm"
+                />
               </div>
 
+              <div className="space-y-2">
+                <Label className="text-xs">Meta Description</Label>
+                <Textarea
+                  value={formData.meta_description_en}
+                  onChange={(e) => setFormData({ ...formData, meta_description_en: e.target.value })}
+                  placeholder="Description for search engines..."
+                  rows={2}
+                  className="text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {formData.meta_description_en.length}/160
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">OG Title</Label>
+                <Input
+                  value={formData.og_title_en}
+                  onChange={(e) => setFormData({ ...formData, og_title_en: e.target.value })}
+                  placeholder="Social share title..."
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">OG Description</Label>
+                <Textarea
+                  value={formData.og_description_en}
+                  onChange={(e) => setFormData({ ...formData, og_description_en: e.target.value })}
+                  placeholder="Social share description..."
+                  rows={2}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Hebrew SEO */}
+            <div className="space-y-3 pt-4 border-t">
+              <h4 className="text-sm font-medium">Hebrew SEO</h4>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">SEO Title (HE)</Label>
+                <Input
+                  value={formData.seo_title_he}
+                  onChange={(e) => setFormData({ ...formData, seo_title_he: e.target.value })}
+                  placeholder="כותרת SEO..."
+                  className="text-sm bg-[#EAF4FF]"
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">Meta Description (HE)</Label>
+                <Textarea
+                  value={formData.meta_description_he}
+                  onChange={(e) => setFormData({ ...formData, meta_description_he: e.target.value })}
+                  placeholder="תיאור למנועי חיפוש..."
+                  rows={2}
+                  className="text-sm bg-[#EAF4FF]"
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">OG Title (HE)</Label>
+                <Input
+                  value={formData.og_title_he}
+                  onChange={(e) => setFormData({ ...formData, og_title_he: e.target.value })}
+                  placeholder="כותרת לשיתוף..."
+                  className="text-sm bg-[#EAF4FF]"
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">OG Description (HE)</Label>
+                <Textarea
+                  value={formData.og_description_he}
+                  onChange={(e) => setFormData({ ...formData, og_description_he: e.target.value })}
+                  placeholder="תיאור לשיתוף..."
+                  rows={2}
+                  className="text-sm bg-[#EAF4FF]"
+                  dir="rtl"
+                />
+              </div>
+            </div>
+
+            {/* French SEO */}
+            <div className="space-y-3 pt-4 border-t">
+              <h4 className="text-sm font-medium">French SEO</h4>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">SEO Title (FR)</Label>
+                <Input
+                  value={formData.seo_title_fr}
+                  onChange={(e) => setFormData({ ...formData, seo_title_fr: e.target.value })}
+                  placeholder="Titre SEO..."
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">Meta Description (FR)</Label>
+                <Textarea
+                  value={formData.meta_description_fr}
+                  onChange={(e) => setFormData({ ...formData, meta_description_fr: e.target.value })}
+                  placeholder="Description pour les moteurs..."
+                  rows={2}
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">OG Title (FR)</Label>
+                <Input
+                  value={formData.og_title_fr}
+                  onChange={(e) => setFormData({ ...formData, og_title_fr: e.target.value })}
+                  placeholder="Titre de partage..."
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">OG Description (FR)</Label>
+                <Textarea
+                  value={formData.og_description_fr}
+                  onChange={(e) => setFormData({ ...formData, og_description_fr: e.target.value })}
+                  placeholder="Description de partage..."
+                  rows={2}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+
+            {/* OG Image */}
+            <div className="space-y-2 pt-4 border-t">
               <ImageUpload
-                label="OG Image"
+                label="OG Image (Social Share)"
                 bucket="journal-images"
                 value={formData.og_image}
                 onChange={(url) => setFormData({ ...formData, og_image: url })}
-                description="Image for social media sharing (recommended: 1200x630px)"
               />
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
