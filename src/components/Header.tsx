@@ -117,15 +117,20 @@ const Header = () => {
             </button>
           </div>
 
-          <Link to="/partners">
-            <Button
-              variant="outline"
-              size="sm"
-              className={`hidden md:flex ${isTransparentPage && !isScrolled ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : ""}`}
-            >
-              Hotel partnership
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            className={`hidden md:flex ${isTransparentPage && !isScrolled ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : ""}`}
+            onClick={() => {
+              if (location.pathname !== "/") {
+                navigate("/#choose-escape");
+              } else {
+                document.getElementById("choose-escape")?.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            HOTEL + EXPERIENCE
+          </Button>
 
           {user ? (
             <DropdownMenu>
