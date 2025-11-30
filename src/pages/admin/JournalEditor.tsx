@@ -213,7 +213,7 @@ const JournalEditor = () => {
         if (error) throw error;
         // Navigate to edit mode after first save
         if (inserted && (inserted as any).id) {
-          navigate(`/admin/journal/${(inserted as any).id}`, { replace: true });
+          navigate(`/admin/journal/edit/${(inserted as any).id}`, { replace: true });
         }
       }
 
