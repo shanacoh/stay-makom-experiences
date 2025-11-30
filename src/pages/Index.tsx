@@ -350,34 +350,7 @@ const Index = () => {
         </section>
 
         {/* Hottest of the Season Section */}
-        <section className="container py-12 sm:py-16 md:py-20 px-4">
-          <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.02em] mb-6 sm:mb-8 md:mb-10">
-            Hottest of the season
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-3 gap-6 md:gap-8 items-center">
-            <div className="rounded-2xl overflow-hidden md:col-span-2 lg:col-span-1">
-              <img src={desertHotelPool} alt="Desert hotel with pool" className="w-full h-48 sm:h-56 md:h-64 lg:h-80 object-cover" />
-            </div>
-            
-            <div className="space-y-3 sm:space-y-4 md:col-span-3 lg:col-span-2 md:pl-4 lg:pl-8">
-              <p className="text-xs sm:text-sm font-medium tracking-widest uppercase text-muted-foreground">
-                DESERT MADNESS
-              </p>
-              <h3 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-[-0.02em]">
-                40° of internal peace
-              </h3>
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
-                Check in, drop your bags and let the desert do the rest.
-              </p>
-              <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto" onClick={() => {
-              navigate('/experience/desert-flavors');
-            }}>
-                Let the journey begin
-              </Button>
-            </div>
-          </div>
-        </section>
+        
 
         {/* How It Works Section */}
         <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
