@@ -35,7 +35,7 @@ const iconMap: Record<string, LucideIcon> = {
   wind: Wind,
   cloud: Cloud,
   "tree-pine": TreePine,
-  flower: Flower2,
+  flower: Flower2
 };
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,10 +73,11 @@ const Index = () => {
   const navigate = useNavigate();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const { lang } = useLanguage();
+  const {
+    lang
+  } = useLanguage();
   const carouselRef = useRef<HTMLDivElement>(null);
   const latestCarouselRef = useRef<HTMLDivElement>(null);
-
   const {
     data: categories,
     isLoading
@@ -109,7 +110,6 @@ const Index = () => {
       return data;
     }
   });
-
   const {
     data: allExperiences,
     isLoading: isLoadingAllExperiences
@@ -126,49 +126,44 @@ const Index = () => {
   });
 
   // Fetch homepage SEO settings
-  const { data: homepageSEO } = useQuery({
+  const {
+    data: homepageSEO
+  } = useQuery({
     queryKey: ["homepage-seo"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("global_settings")
-        .select("*")
-        .eq("key", "homepage")
-        .single();
+      const {
+        data,
+        error
+      } = await supabase.from("global_settings").select("*").eq("key", "homepage").single();
       if (error) throw error;
       return data;
-    },
+    }
   });
-
-  const filteredExperiences = selectedCategoryId
-    ? allExperiences?.filter(exp => exp.category_id === selectedCategoryId)
-        .sort((a, b) => {
-          const avgRatingA = a.experience_reviews?.length 
-            ? a.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / a.experience_reviews.length 
-            : 0;
-          const avgRatingB = b.experience_reviews?.length 
-            ? b.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / b.experience_reviews.length 
-            : 0;
-          return avgRatingB - avgRatingA;
-        })
-        .slice(0, 4)
-    : latestExperiences?.slice(0, 8);
-
+  const filteredExperiences = selectedCategoryId ? allExperiences?.filter(exp => exp.category_id === selectedCategoryId).sort((a, b) => {
+    const avgRatingA = a.experience_reviews?.length ? a.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / a.experience_reviews.length : 0;
+    const avgRatingB = b.experience_reviews?.length ? b.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / b.experience_reviews.length : 0;
+    return avgRatingB - avgRatingA;
+  }).slice(0, 4) : latestExperiences?.slice(0, 8);
   const selectedCategory = categories?.find(cat => cat.id === selectedCategoryId);
 
   // Auto-scroll for carousel
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel || !filteredExperiences || filteredExperiences.length === 0) return;
-
     const scrollInterval = setInterval(() => {
       const scrollAmount = carousel.scrollLeft + (carousel.offsetWidth * 0.75 + 12); // 75vw + gap
       const maxScroll = carousel.scrollWidth - carousel.offsetWidth;
-      
       if (scrollAmount >= maxScroll - 10) {
         // Reset to beginning for infinite loop
-        carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        carousel.scrollTo({
+          left: 0,
+          behavior: 'smooth'
+        });
       } else {
-        carousel.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+        carousel.scrollTo({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
       }
     }, 3000); // Scroll every 3 seconds
 
@@ -179,32 +174,25 @@ const Index = () => {
   useEffect(() => {
     const carousel = latestCarouselRef.current;
     if (!carousel || !latestExperiences || latestExperiences.length === 0) return;
-
     const scrollInterval = setInterval(() => {
       const scrollAmount = carousel.scrollLeft + (carousel.offsetWidth * 0.75 + 12);
       const maxScroll = carousel.scrollWidth - carousel.offsetWidth;
-      
       if (scrollAmount >= maxScroll - 10) {
-        carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        carousel.scrollTo({
+          left: 0,
+          behavior: 'smooth'
+        });
       } else {
-        carousel.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+        carousel.scrollTo({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
       }
     }, 3000);
-
     return () => clearInterval(scrollInterval);
   }, [latestExperiences]);
   return <div className="min-h-screen flex flex-col">
-      <SEOHead
-        titleEn={homepageSEO?.seo_title_en}
-        titleHe={homepageSEO?.seo_title_he}
-        descriptionEn={homepageSEO?.meta_description_en}
-        descriptionHe={homepageSEO?.meta_description_he}
-        ogTitleEn={homepageSEO?.og_title_en}
-        ogTitleHe={homepageSEO?.og_title_he}
-        ogDescriptionEn={homepageSEO?.og_description_en}
-        ogDescriptionHe={homepageSEO?.og_description_he}
-        ogImage={homepageSEO?.og_image}
-      />
+      <SEOHead titleEn={homepageSEO?.seo_title_en} titleHe={homepageSEO?.seo_title_he} descriptionEn={homepageSEO?.meta_description_en} descriptionHe={homepageSEO?.meta_description_he} ogTitleEn={homepageSEO?.og_title_en} ogTitleHe={homepageSEO?.og_title_he} ogDescriptionEn={homepageSEO?.og_description_en} ogDescriptionHe={homepageSEO?.og_description_he} ogImage={homepageSEO?.og_image} />
       <Header />
       
       <main className="flex-1">
@@ -220,10 +208,7 @@ const Index = () => {
               More than a stay,
               <br />
               it's a{" "}
-              <RotatingText 
-                words={categories?.map(cat => getLocalizedField(cat, 'name', lang) as string) || ["Romance", "Adventure", "Family"]} 
-                interval={2500} 
-              />
+              <RotatingText words={categories?.map(cat => getLocalizedField(cat, 'name', lang) as string) || ["Romance", "Adventure", "Family"]} interval={2500} />
             </h1>
             
             
@@ -282,131 +267,83 @@ const Index = () => {
             </h2>
             
             {/* Category Tabs */}
-            {!isLoading && categories && (
-              <div className="flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-3 mb-6 sm:mb-12 overflow-x-auto px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide">
-                {categories.map((category) => {
-                  // Force 2-line display for all category names
-                  const getCategoryDisplay = (name: string, slug: string) => {
-                    const displayMap: Record<string, string> = {
-                      'romantic': 'Romantic\nEscape',
-                      'family': 'Family\nFun',
-                      'golden-age': 'Golden\nAge',
-                      'nature': 'Beyond\nNature',
-                      'taste': 'Taste\nAffair',
-                      'active': 'Active\nBreak',
-                      'work-unplugged': 'Work\nUnplugged',
-                      'mindful-reset': 'Mindful\nReset'
-                    };
-                    return displayMap[slug] || name;
-                  };
-                  
-                  return (
-                    <button
-                      key={category.slug}
-                      onClick={() => {
-                        setSelectedCategoryId(category.id);
-                      }}
-                      className={`flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer flex-shrink-0 w-14 sm:w-20 transition-all ${
-                        selectedCategoryId === category.id ? 'text-primary scale-105' : ''
-                      }`}
-                    >
+            {!isLoading && categories && <div className="flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-3 mb-6 sm:mb-12 overflow-x-auto px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide">
+                {categories.map(category => {
+              // Force 2-line display for all category names
+              const getCategoryDisplay = (name: string, slug: string) => {
+                const displayMap: Record<string, string> = {
+                  'romantic': 'Romantic\nEscape',
+                  'family': 'Family\nFun',
+                  'golden-age': 'Golden\nAge',
+                  'nature': 'Beyond\nNature',
+                  'taste': 'Taste\nAffair',
+                  'active': 'Active\nBreak',
+                  'work-unplugged': 'Work\nUnplugged',
+                  'mindful-reset': 'Mindful\nReset'
+                };
+                return displayMap[slug] || name;
+              };
+              return <button key={category.slug} onClick={() => {
+                setSelectedCategoryId(category.id);
+              }} className={`flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer flex-shrink-0 w-14 sm:w-20 transition-all ${selectedCategoryId === category.id ? 'text-primary scale-105' : ''}`}>
                       {/* Icon with circular hover background */}
-                      <div className={`p-2 sm:p-3 rounded-full transition-all group-hover:bg-muted ${
-                        selectedCategoryId === category.id ? 'bg-primary/10' : ''
-                      }`}>
+                      <div className={`p-2 sm:p-3 rounded-full transition-all group-hover:bg-muted ${selectedCategoryId === category.id ? 'bg-primary/10' : ''}`}>
                         {(() => {
-                          const IconComponent = category.icon ? iconMap[category.icon] : null;
-                          return IconComponent ? <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />;
-                        })()}
+                    const IconComponent = category.icon ? iconMap[category.icon] : null;
+                    return IconComponent ? <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} /> : <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />;
+                  })()}
                       </div>
                       
                       {/* 2-line text with fixed height */}
-                      <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wide text-center h-7 sm:h-8 leading-[14px] sm:leading-4 whitespace-pre-line transition-colors ${
-                        selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'
-                      }`}>
+                      <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wide text-center h-7 sm:h-8 leading-[14px] sm:leading-4 whitespace-pre-line transition-colors ${selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'}`}>
                         {getCategoryDisplay(category.name, category.slug)}
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                    </button>;
+            })}
+              </div>}
           </div>
 
           {/* Experiences Grid/Carousel */}
-          {isLoadingExperiences || isLoadingAllExperiences ? (
-            <div className="text-center py-12">
+          {isLoadingExperiences || isLoadingAllExperiences ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div>
-          ) : (
-            <>
+            </div> : <>
               {/* Mobile & Tablet Carousel */}
               <div className="lg:hidden relative mb-8">
-                <div
-                  ref={carouselRef}
-                  className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
-                >
+                <div ref={carouselRef} className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide">
                   <div className="flex gap-3 pb-4">
                     {/* Duplicate experiences for infinite loop effect */}
-                    {[...(filteredExperiences || []), ...(filteredExperiences || [])].map((experience, index) => (
-                      <div 
-                        key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center"
-                      >
-                        <ExperienceCard
-                          experience={experience}
-                          rating={8.5 + Math.random() * 0.5}
-                          reviewCount={50 + Math.floor(Math.random() * 950)}
-                        />
-                      </div>
-                    ))}
+                    {[...(filteredExperiences || []), ...(filteredExperiences || [])].map((experience, index) => <div key={`${experience.id}-${index}`} className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center">
+                        <ExperienceCard experience={experience} rating={8.5 + Math.random() * 0.5} reviewCount={50 + Math.floor(Math.random() * 950)} />
+                      </div>)}
                     {/* Empty spaces if less than 4 in selected category */}
-                    {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
-                      Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                        <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center invisible"></div>
-                      ))
-                    )}
+                    {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && Array.from({
+                  length: 4 - filteredExperiences.length
+                }).map((_, idx) => <div key={`empty-${idx}`} className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center invisible"></div>)}
                   </div>
                 </div>
               </div>
 
               {/* Desktop Grid */}
               <div className="hidden lg:grid lg:grid-cols-4 gap-2 md:gap-3 mb-8">
-                {filteredExperiences?.map((experience) => (
-                  <ExperienceCard
-                    key={experience.id}
-                    experience={experience}
-                    rating={8.5 + Math.random() * 0.5}
-                    reviewCount={50 + Math.floor(Math.random() * 950)}
-                  />
-                ))}
+                {filteredExperiences?.map(experience => <ExperienceCard key={experience.id} experience={experience} rating={8.5 + Math.random() * 0.5} reviewCount={50 + Math.floor(Math.random() * 950)} />)}
                 {/* Empty spaces if less than 4 in selected category */}
-                {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && (
-                  Array.from({ length: 4 - filteredExperiences.length }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="invisible"></div>
-                  ))
-                )}
+                {selectedCategoryId && filteredExperiences && filteredExperiences.length < 4 && Array.from({
+              length: 4 - filteredExperiences.length
+            }).map((_, idx) => <div key={`empty-${idx}`} className="invisible"></div>)}
               </div>
 
               {/* View More Button for Selected Category */}
-              {selectedCategoryId && selectedCategory && (
-                <div className="text-center mt-8">
+              {selectedCategoryId && selectedCategory && <div className="text-center mt-8">
                   <Button asChild variant="outline" size="lg" className="rounded-full">
                     <Link to={`/category/${selectedCategory.slug}${lang === 'he' ? '?lang=he' : ''}`}>
                       View more of {getLocalizedField(selectedCategory, 'name', lang)}
                     </Link>
                   </Button>
-                </div>
-              )}
-            </>
-          )}
+                </div>}
+            </>}
 
           <div className="text-center">
-            <Button 
-              size="lg" 
-              className="bg-black hover:bg-black/90 text-white rounded-full px-8"
-              onClick={() => navigate('/category/romantic')}
-            >
+            <Button size="lg" className="bg-black hover:bg-black/90 text-white rounded-full px-8" onClick={() => navigate('/category/romantic')}>
               VIEW ALL EXPERIENCES
             </Button>
           </div>
@@ -420,11 +357,7 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-3 gap-6 md:gap-8 items-center">
             <div className="rounded-2xl overflow-hidden md:col-span-2 lg:col-span-1">
-              <img 
-                src={desertHotelPool} 
-                alt="Desert hotel with pool" 
-                className="w-full h-48 sm:h-56 md:h-64 lg:h-80 object-cover" 
-              />
+              <img src={desertHotelPool} alt="Desert hotel with pool" className="w-full h-48 sm:h-56 md:h-64 lg:h-80 object-cover" />
             </div>
             
             <div className="space-y-3 sm:space-y-4 md:col-span-3 lg:col-span-2 md:pl-4 lg:pl-8">
@@ -438,8 +371,8 @@ const Index = () => {
                 Check in, drop your bags and let the desert do the rest.
               </p>
               <Button size="lg" className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto" onClick={() => {
-                navigate('/experience/desert-flavors');
-              }}>
+              navigate('/experience/desert-flavors');
+            }}>
                 Let the journey begin
               </Button>
             </div>
@@ -462,36 +395,28 @@ const Index = () => {
               <div className="text-center space-y-3 sm:space-y-4 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.1s'
             }}>
-                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">
-                  Follow what moves you
-                </h3>
-                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">
-                  Explore experiences that speak to your mood — slow mornings in the desert, sunrise yoga, a hidden vineyard at dusk, or simply a moment to breathe.
-                </p>
+                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">Choose your vibe
+
+              </h3>
+                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">Choose the atmosphere you’re craving today. Nature escape, adventure, calm, food, or wellness. We guide you straight to the experiences that match your mood.</p>
               </div>
               
               {/* Block 2 */}
               <div className="text-center space-y-3 sm:space-y-4 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.3s'
             }}>
-                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">
-                  Shape your own moment
-                </h3>
-                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">
-                  Choose your stay, then add the touches that make it uniquely yours — a private ritual, a tasting under the stars, or something beautifully unexpected.
-                </p>
+                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">Pick your experience</h3>
+                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">Browse the curated experiences available for that vibe. Each one is designed to be easy to book, easy to enjoy, and true to the place.</p>
               </div>
               
               {/* Block 3 */}
               <div className="text-center space-y-3 sm:space-y-4 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.5s'
             }}>
-                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">
-                  Book, unwind, begin
-                </h3>
-                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">
-                  Secure your date and let the anticipation start. Your STAYMAKOM is waiting — quietly, gently, beautifully.
-                </p>
+                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">Book your hotel
+
+              </h3>
+                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">Discover the hotel that hosts your experience, choose your date, and make it yours by adding extras that elevate the moment even more.</p>
               </div>
             </div>
           </div>
@@ -508,51 +433,26 @@ const Index = () => {
             </Button>
           </div>
 
-          {isLoadingExperiences ? (
-            <div className="text-center py-12">
+          {isLoadingExperiences ? <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div>
-          ) : (
-            <>
+            </div> : <>
               {/* Mobile & Tablet Carousel */}
               <div className="lg:hidden relative">
-                <div
-                  ref={latestCarouselRef}
-                  className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide"
-                >
+                <div ref={latestCarouselRef} className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide">
                   <div className="flex gap-3 pb-4">
                     {/* Duplicate experiences for infinite loop effect */}
-                    {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
-                      <div 
-                        key={`${experience.id}-${index}`} 
-                        className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center"
-                      >
-                        <ExperienceCard
-                          experience={experience}
-                          badge="NEW"
-                          rating={8.5 + Math.random() * 0.5}
-                          reviewCount={50 + Math.floor(Math.random() * 950)}
-                        />
-                      </div>
-                    ))}
+                    {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => <div key={`${experience.id}-${index}`} className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center">
+                        <ExperienceCard experience={experience} badge="NEW" rating={8.5 + Math.random() * 0.5} reviewCount={50 + Math.floor(Math.random() * 950)} />
+                      </div>)}
                   </div>
                 </div>
               </div>
 
               {/* Desktop Grid */}
               <div className="hidden lg:grid lg:grid-cols-4 gap-2 md:gap-3">
-                {latestExperiences?.map((experience) => (
-                  <ExperienceCard
-                    key={experience.id}
-                    experience={experience}
-                    badge="NEW"
-                    rating={8.5 + Math.random() * 0.5}
-                    reviewCount={50 + Math.floor(Math.random() * 950)}
-                  />
-                ))}
+                {latestExperiences?.map(experience => <ExperienceCard key={experience.id} experience={experience} badge="NEW" rating={8.5 + Math.random() * 0.5} reviewCount={50 + Math.floor(Math.random() * 950)} />)}
               </div>
-            </>
-          )}
+            </>}
         </section>
 
         {/* Desert Kiosk Hero Section */}
