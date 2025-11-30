@@ -139,12 +139,42 @@ const JournalEditor = () => {
     }
   }, [formData.title_en, slugManuallyEdited]);
 
+  // Generate unique slug by checking database
+  const generateUniqueSlug = async (baseSlug: string, currentId?: string): Promise<string> => {
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (true) {
+      const query = supabase
+        .from("journal_posts" as any)
+        .select("id")
+        .eq("slug", slug);
+      
+      // Exclude current post when editing
+      if (currentId) {
+        query.neq("id", currentId);
+      }
+      
+      const { data } = await query.maybeSingle();
+      
+      if (!data) {
+        return slug;
+      }
+      
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+  };
+
   const saveToDatabase = useCallback(
     async (data: typeof formData, showToast = false) => {
+      const baseSlug = data.slug || generateSlug(data.title_en);
+      const uniqueSlug = await generateUniqueSlug(baseSlug, isEdit ? id : undefined);
+      
       const dataToSave = {
         title_en: data.title_en,
         title_he: data.title_he,
-        slug: data.slug || generateSlug(data.title_en),
+        slug: uniqueSlug,
         cover_image: data.cover_image,
         category: data.category,
         excerpt_en: data.excerpt_en,
@@ -229,11 +259,14 @@ const JournalEditor = () => {
   const publishMutation = useMutation({
     mutationFn: async (scheduleDate?: Date | null) => {
       const isScheduled = scheduleDate && scheduleDate > new Date();
+      const baseSlug = formData.slug || generateSlug(formData.title_en);
+      const uniqueSlug = await generateUniqueSlug(baseSlug, isEdit ? id : undefined);
+      
       const dataToSave = {
         ...formData,
         content_en: stringifyBlocks(formData.blocks_en),
         content_he: stringifyBlocks(formData.blocks_he),
-        slug: formData.slug || generateSlug(formData.title_en),
+        slug: uniqueSlug,
         status: "published" as const,
         published_at: isScheduled ? scheduleDate.toISOString() : new Date().toISOString(),
       };
