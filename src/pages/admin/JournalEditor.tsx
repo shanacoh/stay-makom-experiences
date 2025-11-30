@@ -15,12 +15,15 @@ import {
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Eye, EyeOff, Clock, FileText, Check } from "lucide-react";
-import { generateSlug } from "@/lib/utils";
+import { ArrowLeft, Save, Eye, EyeOff, Clock, FileText, Check, CalendarIcon, Send } from "lucide-react";
+import { generateSlug, cn } from "@/lib/utils";
 import { Block, calculateReadingTime } from "@/components/admin/journal/types";
 import { BlockEditor } from "@/components/admin/journal/BlockEditor";
 import { ArticlePreview } from "@/components/admin/journal/ArticlePreview";
+import { format } from "date-fns";
 
 const JournalEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +48,7 @@ const JournalEditor = () => {
     blocks_he: [] as Block[],
     author_name: "STAYMAKOM",
     status: "draft",
+    scheduled_at: null as Date | null,
     seo_title_en: "",
     seo_title_he: "",
     seo_title_fr: "",
@@ -109,6 +113,7 @@ const JournalEditor = () => {
         blocks_he: parseBlocks(post.content_he),
         author_name: post.author_name,
         status: post.status,
+        scheduled_at: post.published_at && new Date(post.published_at) > new Date() ? new Date(post.published_at) : null,
         seo_title_en: post.seo_title_en || "",
         seo_title_he: post.seo_title_he || "",
         seo_title_fr: post.seo_title_fr || "",
@@ -222,30 +227,36 @@ const JournalEditor = () => {
   });
 
   const publishMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (scheduleDate?: Date | null) => {
+      const isScheduled = scheduleDate && scheduleDate > new Date();
       const dataToSave = {
         ...formData,
         content_en: stringifyBlocks(formData.blocks_en),
         content_he: stringifyBlocks(formData.blocks_he),
         slug: formData.slug || generateSlug(formData.title_en),
         status: "published" as const,
-        published_at: new Date().toISOString(),
+        published_at: isScheduled ? scheduleDate.toISOString() : new Date().toISOString(),
       };
+
+      // Remove non-db fields
+      const { blocks_en, blocks_he, scheduled_at, ...dbData } = dataToSave as any;
 
       if (isEdit) {
         const { error } = await supabase
           .from("journal_posts" as any)
-          .update(dataToSave as any)
+          .update(dbData as any)
           .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("journal_posts" as any).insert([dataToSave as any]);
+        const { error } = await supabase.from("journal_posts" as any).insert([dbData as any]);
         if (error) throw error;
       }
+      
+      return isScheduled;
     },
-    onSuccess: () => {
+    onSuccess: (isScheduled) => {
       queryClient.invalidateQueries({ queryKey: ["admin-journal-posts"] });
-      toast.success("Article published successfully");
+      toast.success(isScheduled ? "Article scheduled for publication" : "Article published successfully");
       navigate("/admin/journal");
     },
     onError: (error: any) => {
@@ -338,8 +349,22 @@ const JournalEditor = () => {
             <Save className="w-4 h-4 mr-2" />
             Save
           </Button>
-          <Button size="sm" onClick={() => publishMutation.mutate()} disabled={publishMutation.isPending}>
-            Publish
+          <Button 
+            size="sm" 
+            onClick={() => publishMutation.mutate(formData.scheduled_at)} 
+            disabled={publishMutation.isPending}
+          >
+            {formData.scheduled_at && formData.scheduled_at > new Date() ? (
+              <>
+                <CalendarIcon className="w-4 h-4 mr-2" />
+                Schedule
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4 mr-2" />
+                Publish Now
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -499,6 +524,57 @@ const JournalEditor = () => {
                 value={formData.author_name}
                 onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
               />
+            </div>
+
+            {/* Scheduled Publishing */}
+            <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <Label className="flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-primary" />
+                Schedule Publication
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.scheduled_at && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.scheduled_at ? (
+                      format(formData.scheduled_at, "PPP 'at' p")
+                    ) : (
+                      <span>Publish immediately</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.scheduled_at || undefined}
+                    onSelect={(date) => setFormData({ ...formData, scheduled_at: date || null })}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              {formData.scheduled_at && (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Article will go live on {format(formData.scheduled_at, "MMM d, yyyy")}
+                  </p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 text-xs"
+                    onClick={() => setFormData({ ...formData, scheduled_at: null })}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* English SEO */}
