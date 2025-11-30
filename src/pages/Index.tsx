@@ -49,6 +49,7 @@ import ContactDialog from "@/components/ContactDialog";
 import ExperienceCard from "@/components/ExperienceCard";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { SEOHead } from "@/components/SEOHead";
+import JournalSection from "@/components/JournalSection";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertKioskHero from "@/assets/desert-kiosk-hero.png";
@@ -427,6 +428,9 @@ const Index = () => {
               </div>
             </>}
         </section>
+
+        {/* Journal Section */}
+        <JournalSection lang={lang} />
 
         {/* Desert Kiosk Hero Section */}
         <section className="relative min-h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center">
