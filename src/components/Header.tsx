@@ -65,7 +65,7 @@ const Header = () => {
   const headerClasses =
     isTransparentPage && !isScrolled
       ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`
-      : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b border-border shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`;
+      : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm border-b border-border/40 transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`;
 
   const textClasses = isTransparentPage && !isScrolled ? "text-white" : "text-foreground";
 
@@ -73,9 +73,9 @@ const Header = () => {
 
   return (
     <header className={headerClasses}>
-      <div className="container flex h-16 items-center justify-between bg-transparent">
+      <div className={`container flex items-center justify-between bg-transparent ${isTransparentPage && !isScrolled ? "h-16" : "h-12"}`}>
         <Link to="/" className="flex items-center space-x-2">
-          <span className={`font-sans text-2xl font-bold tracking-[-0.04em] uppercase ${logoClasses}`}>STAYMAKOM</span>
+          <span className={`font-sans font-bold tracking-[-0.04em] uppercase ${isTransparentPage && !isScrolled ? "text-2xl" : "text-xl"} ${logoClasses}`}>STAYMAKOM</span>
         </Link>
 
         <div className="flex-1"></div>
@@ -120,7 +120,7 @@ const Header = () => {
           <Button
             variant="outline"
             size="sm"
-            className={`hidden md:flex ${isTransparentPage && !isScrolled ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : ""}`}
+            className={`hidden md:flex text-xs h-7 px-3 ${isTransparentPage && !isScrolled ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : "border-border/60"}`}
             onClick={() => {
               if (location.pathname !== "/") {
                 navigate("/#choose-escape");
