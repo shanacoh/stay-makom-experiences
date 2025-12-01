@@ -112,28 +112,30 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
               <Link
                 key={post.id}
                 to={`/journal/${post.slug}${lang === "he" ? "?lang=he" : ""}`}
-                className="group flex gap-3 bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow p-2"
+                className="group relative overflow-hidden rounded-lg flex-1 min-h-[120px]"
               >
-                <div className="flex-shrink-0 w-16 h-16 rounded overflow-hidden">
-                  {post.cover_image ? (
-                    <img
-                      src={post.cover_image}
-                      alt={getLocalizedField(post, "title", lang) as string}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50" />
-                  )}
-                </div>
-                <div className="flex flex-col justify-center min-w-0 flex-1">
+                {/* Background Image */}
+                {post.cover_image ? (
+                  <img
+                    src={post.cover_image}
+                    alt={getLocalizedField(post, "title", lang) as string}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-muted to-muted/50" />
+                )}
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-3">
                   <span
-                    className={`self-start px-1.5 py-0.5 text-[9px] font-medium rounded mb-1 ${getCategoryColor(
+                    className={`inline-block px-1.5 py-0.5 text-[9px] font-medium rounded mb-1 ${getCategoryColor(
                       post.category
                     )}`}
                   >
                     {post.category}
                   </span>
-                  <h3 className="font-medium text-xs sm:text-sm group-hover:text-primary transition-colors line-clamp-2">
+                  <h3 className="text-white font-medium text-xs sm:text-sm line-clamp-2">
                     {getLocalizedField(post, "title", lang) as string}
                   </h3>
                 </div>
