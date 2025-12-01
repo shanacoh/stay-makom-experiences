@@ -86,7 +86,7 @@ const Partners = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] flex items-center justify-center">
+      <section className="relative h-[70vh] min-h-[450px] sm:min-h-[500px] md:min-h-[550px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={partnersHero} alt="Boutique hotel" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/30" />

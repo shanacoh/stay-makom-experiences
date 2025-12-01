@@ -77,7 +77,7 @@ export default function GiftCard() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] overflow-hidden">
+      <section className="relative h-[70vh] min-h-[450px] sm:min-h-[500px] md:min-h-[550px] overflow-hidden">
         <img 
           src={giftCardHero}
           alt="Gift a Staymakom moment"

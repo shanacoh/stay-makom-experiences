@@ -83,7 +83,7 @@ const Contact = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] flex items-center justify-center">
+      <section className="relative h-[70vh] min-h-[450px] sm:min-h-[500px] md:min-h-[550px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={contactHero} alt="Contact us" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/20" />
