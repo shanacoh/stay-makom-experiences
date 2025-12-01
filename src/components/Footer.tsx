@@ -69,7 +69,7 @@ const Footer = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-8 lg:gap-6">
           {/* Column 1: Brand - Hidden on Mobile */}
           <div className="hidden lg:block">
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
@@ -146,6 +146,40 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Column 4: Legal */}
+          <div className="hidden lg:block">
+            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
+              LEGAL
+            </h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/terms" className="text-sm text-white hover:text-primary transition-smooth">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-sm text-white hover:text-primary transition-smooth">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/cancellation-policy" className="text-sm text-white hover:text-primary transition-smooth">
+                  Cancellation Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookies" className="text-sm text-white hover:text-primary transition-smooth">
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/legal" className="text-sm text-white hover:text-primary transition-smooth">
+                  Legal Notice
+                </Link>
+              </li>
+            </ul>
+          </div>
+
           {/* Column 4: Newsletter - Full Width on Mobile Below */}
           <div className="col-span-2 lg:col-span-1">
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4">
@@ -186,6 +220,20 @@ const Footer = () => {
                 </svg>
               </a>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile Legal Links */}
+        <div className="lg:hidden mt-6 pt-6 border-t border-white/20">
+          <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
+            LEGAL
+          </h4>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <Link to="/terms" className="text-sm text-white hover:text-primary transition-smooth">Terms</Link>
+            <Link to="/privacy" className="text-sm text-white hover:text-primary transition-smooth">Privacy</Link>
+            <Link to="/cancellation-policy" className="text-sm text-white hover:text-primary transition-smooth">Cancellation</Link>
+            <Link to="/cookies" className="text-sm text-white hover:text-primary transition-smooth">Cookies</Link>
+            <Link to="/legal" className="text-sm text-white hover:text-primary transition-smooth">Legal Notice</Link>
           </div>
         </div>
 
