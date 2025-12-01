@@ -20,6 +20,11 @@ import Journal from "./pages/Journal";
 import JournalPost from "./pages/JournalPost";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import CancellationPolicy from "./pages/CancellationPolicy";
+import Cookies from "./pages/Cookies";
+import Legal from "./pages/Legal";
 import { HotelAdminLayout } from "@/components/hotel-admin/HotelAdminLayout";
 import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
@@ -70,6 +75,11 @@ const App = () => (
             <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/cancellation-policy" element={<CancellationPolicy />} />
+            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/legal" element={<Legal />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/experience/:slug" element={<Experience />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
