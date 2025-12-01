@@ -231,7 +231,7 @@ const Index = () => {
         </section>
 
         {/* Handpicked Hotels Hero Section */}
-        <section className="relative py-10 sm:py-14 md:py-16 overflow-hidden">
+        <section className="relative py-14 sm:py-18 md:py-24 overflow-hidden">
           <div className="absolute inset-0">
             <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
