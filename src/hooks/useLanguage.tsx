@@ -38,6 +38,25 @@ export const getLocalizedField = <T extends Record<string, any>>(
     }
   }
   
-  // Fall back to base field (English)
-  return obj[fieldName] ?? null;
+  // For French, check if *_fr field exists and has value
+  if (lang === "fr") {
+    const frField = `${fieldName}_fr`;
+    if (frField in obj && obj[frField] != null) {
+      return obj[frField];
+    }
+  }
+  
+  // Fall back to base field (English) - check both patterns
+  // Pattern 1: base field name (e.g., "title")
+  if (fieldName in obj && obj[fieldName] != null) {
+    return obj[fieldName];
+  }
+  
+  // Pattern 2: _en suffix (e.g., "title_en")
+  const enField = `${fieldName}_en`;
+  if (enField in obj && obj[enField] != null) {
+    return obj[enField];
+  }
+  
+  return null;
 };
