@@ -360,32 +360,26 @@ const Index = () => {
           <div className="container max-w-5xl relative z-10 px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
               {/* Block 1 */}
-              <div className="text-center space-y-3 opacity-0 animate-fade-in-up" style={{
+              <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.1s'
             }}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/60 flex items-center justify-center mx-auto mb-2">
-                  <span className="font-serif text-lg sm:text-xl text-white font-medium">1</span>
-                </div>
+                <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-white/80 font-light">1</span>
                 <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Choose your vibe</h3>
               </div>
               
               {/* Block 2 */}
-              <div className="text-center space-y-3 opacity-0 animate-fade-in-up" style={{
+              <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.3s'
             }}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/60 flex items-center justify-center mx-auto mb-2">
-                  <span className="font-serif text-lg sm:text-xl text-white font-medium">2</span>
-                </div>
+                <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-white/80 font-light">2</span>
                 <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Pick your experience</h3>
               </div>
               
               {/* Block 3 */}
-              <div className="text-center space-y-3 opacity-0 animate-fade-in-up" style={{
+              <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.5s'
             }}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/60 flex items-center justify-center mx-auto mb-2">
-                  <span className="font-serif text-lg sm:text-xl text-white font-medium">3</span>
-                </div>
+                <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-white/80 font-light">3</span>
                 <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Book your hotel</h3>
               </div>
             </div>
