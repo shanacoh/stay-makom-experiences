@@ -231,27 +231,23 @@ const Index = () => {
         </section>
 
         {/* Handpicked Hotels Hero Section */}
-        <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
+        <section className="relative py-10 sm:py-14 md:py-16 overflow-hidden">
           <div className="absolute inset-0">
             <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
-          <div className="container max-w-4xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.02em] mb-6 text-white">
+          <div className="container max-w-3xl relative z-10 px-4 text-center">
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 text-white">
               Handpicked Hotels. Unforgettable Experiences.
             </h2>
-            <div className="text-base sm:text-lg md:text-xl leading-relaxed text-white/95 max-w-3xl mx-auto space-y-4">
+            <div className="text-sm sm:text-base md:text-lg leading-relaxed text-white/95 max-w-2xl mx-auto space-y-3">
               <p>
                 Today, we don't just book a room anymore, we look for something to feel.
-                Staymakom curates the best hotels in the country and pairs them with immersive experiences that turn a simple stay into something unforgettable: farm-to-table workshops in a kibbutz, desert escapes, wellness retreats, local encounters, cultural discoveries…
-              </p>
-              <p>
-                It's about going beyond Tel Aviv, Jerusalem or Eilat, and uncovering a more intimate, vibrant, authentic Israel.
+                Staymakom curates the best hotels in the country and pairs them with immersive experiences that turn a simple stay into something unforgettable.
               </p>
               <p className="font-medium">
                 Your trip isn't just "beautiful" anymore, it becomes meaningful.
-                And that's where the magic happens.
               </p>
             </div>
           </div>
@@ -354,43 +350,37 @@ const Index = () => {
         
 
         {/* How It Works Section */}
-        <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
+        <section className="relative py-10 sm:py-12 md:py-16 overflow-hidden">
           {/* Background Image */}
           <div className="absolute inset-0">
             <img src={desertJourney} alt="Desert journey" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
           </div>
           
-          <div className="container max-w-6xl relative z-10 px-4">
-            
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 sm:gap-16 md:gap-12">
+          <div className="container max-w-5xl relative z-10 px-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 md:gap-8">
               {/* Block 1 */}
-              <div className="text-center space-y-3 sm:space-y-4 opacity-0 animate-fade-in-up" style={{
+              <div className="text-center space-y-2 sm:space-y-3 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.1s'
             }}>
-                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">Choose your vibe
-
-              </h3>
-                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">Choose the atmosphere you’re craving today. Nature escape, adventure, calm, food, or wellness. We guide you straight to the experiences that match your mood.</p>
+                <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Choose your vibe</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-white/90 max-w-xs mx-auto">Choose the atmosphere you're craving today. Nature escape, adventure, calm, food, or wellness.</p>
               </div>
               
               {/* Block 2 */}
-              <div className="text-center space-y-3 sm:space-y-4 opacity-0 animate-fade-in-up" style={{
+              <div className="text-center space-y-2 sm:space-y-3 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.3s'
             }}>
-                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">Pick your experience</h3>
-                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">Browse the curated experiences available for that vibe. Each one is designed to be easy to book, easy to enjoy, and true to the place.</p>
+                <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Pick your experience</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-white/90 max-w-xs mx-auto">Browse curated experiences designed to be easy to book, easy to enjoy, and true to the place.</p>
               </div>
               
               {/* Block 3 */}
-              <div className="text-center space-y-3 sm:space-y-4 opacity-0 animate-fade-in-up" style={{
+              <div className="text-center space-y-2 sm:space-y-3 opacity-0 animate-fade-in-up" style={{
               animationDelay: '0.5s'
             }}>
-                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl font-medium text-white">Book your hotel
-
-              </h3>
-                <p className="text-sm sm:text-base leading-relaxed text-white/90 max-w-sm mx-auto px-4">Discover the hotel that hosts your experience, choose your date, and make it yours by adding extras that elevate the moment even more.</p>
+                <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Book your hotel</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-white/90 max-w-xs mx-auto">Discover the hotel, choose your date, and add extras that elevate the moment even more.</p>
               </div>
             </div>
           </div>
@@ -433,20 +423,20 @@ const Index = () => {
         <JournalSection lang={lang} />
 
         {/* Desert Kiosk Hero Section */}
-        <section className="relative min-h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center">
+        <section className="relative min-h-[280px] sm:h-[320px] md:h-[380px] flex items-center justify-center">
           <div className="absolute inset-0 bg-cover bg-center" style={{
           backgroundImage: `url(${desertKioskHero})`
         }} />
           <div className="absolute inset-0 bg-black/30" />
           
-          <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase text-slate-50 lg:text-5xl">
+          <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-3xl mx-auto">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 sm:mb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase text-slate-50 lg:text-4xl">
               BECOME A PARTNER
             </h2>
-            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-2xl mx-auto">
-              If you want to be part of Staymakom’s curated selection, leave your info and we’ll get back to you shortly.
+            <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-xl mx-auto">
+              If you want to be part of Staymakom's curated selection, leave your info and we'll get back to you shortly.
             </p>
-            <Button size="lg" className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-3 sm:py-4 px-6 sm:px-8" onClick={() => navigate('/category/beyond-nature')}>it's time to join the club</Button>
+            <Button size="default" className="bg-white hover:bg-primary text-foreground hover:text-white uppercase tracking-wide font-medium rounded-none animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 text-xs sm:text-sm h-auto py-2.5 sm:py-3 px-5 sm:px-6" onClick={() => navigate('/category/beyond-nature')}>it's time to join the club</Button>
           </div>
         </section>
       </main>
