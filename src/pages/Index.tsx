@@ -217,15 +217,15 @@ const Index = () => {
         </section>
 
         {/* Categories Section */}
-        <section id="choose-escape" className="container py-8 sm:py-12 md:py-16 px-4 scroll-mt-20">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold tracking-[-0.02em] mb-4">DON'T CHOOSE A CITY<br />CHOOSE YOUR ESCAPE</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else. </p>
+        <section id="choose-escape" className="container py-6 sm:py-8 md:py-10 px-4 scroll-mt-20">
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-[-0.02em] mb-2">DON'T CHOOSE A CITY<br />CHOOSE YOUR ESCAPE</h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else.</p>
           </div>
 
-          {isLoading ? <div className="text-center py-12">
+          {isLoading ? <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div> : <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+            </div> : <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
               {categories?.map(category => <CategoryCard key={category.slug} category={category} />)}
             </div>}
         </section>
