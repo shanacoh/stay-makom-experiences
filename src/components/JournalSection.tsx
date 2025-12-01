@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getLocalizedField, Language } from "@/hooks/useLanguage";
-import { format } from "date-fns";
 
 interface JournalSectionProps {
   lang: Language;
@@ -38,9 +37,9 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
 
   if (isLoading) {
     return (
-      <section className="container py-16 sm:py-20 md:py-24 px-4">
-        <div className="text-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+      <section className="container py-6 sm:py-8 px-4">
+        <div className="text-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto" />
         </div>
       </section>
     );
@@ -50,130 +49,60 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
     return null;
   }
 
-  const featuredPost = posts[0];
-  const otherPosts = posts.slice(1);
-
   return (
-    <section className="bg-muted/30 py-10 sm:py-12 md:py-14">
+    <section className="bg-muted/30 py-6 sm:py-8">
       <div className="container px-4">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 sm:mb-8 gap-3">
-          <div>
-            <p className="text-xs font-medium tracking-widest uppercase text-muted-foreground mb-1">
-              THE JOURNAL
-            </p>
-            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight">
-              Stories & Discoveries
-            </h2>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-sans text-lg sm:text-xl font-bold tracking-tight uppercase">
+            The Journal
+          </h2>
           <Button
             asChild
             variant="ghost"
-            className="group text-foreground hover:text-primary -ml-4 sm:ml-0"
+            size="sm"
+            className="group text-foreground hover:text-primary text-xs"
           >
             <Link to={`/journal${lang === "he" ? "?lang=he" : ""}`}>
-              View all articles
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              View all
+              <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>
 
-        {/* Editorial Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Featured Post - Large Card */}
-          <Link
-            to={`/journal/${featuredPost.slug}${lang === "he" ? "?lang=he" : ""}`}
-            className="group relative overflow-hidden rounded-xl bg-background shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="aspect-[16/9] overflow-hidden">
-              {featuredPost.cover_image ? (
-                <img
-                  src={featuredPost.cover_image}
-                  alt={getLocalizedField(featuredPost, "title", lang) as string}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50" />
-              )}
-            </div>
-            <div className="p-4 sm:p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className={`px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full ${getCategoryColor(
-                    featuredPost.category
-                  )}`}
-                >
-                  {featuredPost.category}
-                </span>
-                {featuredPost.published_at && (
-                  <span className="text-[10px] sm:text-xs text-muted-foreground">
-                    {format(new Date(featuredPost.published_at), "MMM d, yyyy")}
-                  </span>
+        {/* Horizontal Card Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {posts.map((post) => (
+            <Link
+              key={post.id}
+              to={`/journal/${post.slug}${lang === "he" ? "?lang=he" : ""}`}
+              className="group flex sm:flex-col gap-3 bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
+            >
+              <div className="flex-shrink-0 w-20 h-20 sm:w-full sm:h-auto sm:aspect-[16/10] overflow-hidden">
+                {post.cover_image ? (
+                  <img
+                    src={post.cover_image}
+                    alt={getLocalizedField(post, "title", lang) as string}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50" />
                 )}
               </div>
-              <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                {getLocalizedField(featuredPost, "title", lang) as string}
-              </h3>
-              <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2 leading-relaxed">
-                {getLocalizedField(featuredPost, "excerpt", lang) as string}
-              </p>
-            </div>
-          </Link>
-
-          {/* Other Posts - Stacked Cards */}
-          <div className="flex flex-col gap-4">
-            {otherPosts.map((post) => (
-              <Link
-                key={post.id}
-                to={`/journal/${post.slug}${lang === "he" ? "?lang=he" : ""}`}
-                className="group flex gap-3 sm:gap-4 bg-background rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-300"
-              >
-                <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-md overflow-hidden">
-                  {post.cover_image ? (
-                    <img
-                      src={post.cover_image}
-                      alt={getLocalizedField(post, "title", lang) as string}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50" />
-                  )}
-                </div>
-                <div className="flex flex-col justify-center flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${getCategoryColor(
-                        post.category
-                      )}`}
-                    >
-                      {post.category}
-                    </span>
-                    {post.published_at && (
-                      <span className="text-[10px] text-muted-foreground">
-                        {format(new Date(post.published_at), "MMM d")}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-serif text-sm sm:text-base md:text-lg font-medium group-hover:text-primary transition-colors line-clamp-2">
-                    {getLocalizedField(post, "title", lang) as string}
-                  </h3>
-                </div>
-              </Link>
-            ))}
-
-            {/* If only 1 other post, add a CTA card */}
-            {otherPosts.length === 1 && (
-              <Link
-                to={`/journal${lang === "he" ? "?lang=he" : ""}`}
-                className="group flex items-center justify-center gap-2 bg-primary/5 hover:bg-primary/10 rounded-lg p-5 transition-colors duration-300 border-2 border-dashed border-primary/20"
-              >
-                <span className="text-sm font-medium text-primary">
-                  Explore more stories
+              <div className="flex flex-col justify-center sm:p-3 pr-3 py-2 sm:py-0">
+                <span
+                  className={`self-start px-1.5 py-0.5 text-[9px] font-medium rounded mb-1 ${getCategoryColor(
+                    post.category
+                  )}`}
+                >
+                  {post.category}
                 </span>
-                <ArrowRight className="h-4 w-4 text-primary transition-transform group-hover:translate-x-1" />
-              </Link>
-            )}
-          </div>
+                <h3 className="font-medium text-xs sm:text-sm group-hover:text-primary transition-colors line-clamp-2">
+                  {getLocalizedField(post, "title", lang) as string}
+                </h3>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
