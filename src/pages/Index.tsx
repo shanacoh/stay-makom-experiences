@@ -238,8 +238,10 @@ const Index = () => {
           </div>
           
           <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 text-white">Handpicked Hotels. 
-Unforgettable Experiences.</h2>
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 text-white">
+              HANDPICKED HOTELS.<br />
+              Unforgettable Experiences.
+            </h2>
             <div className="text-sm sm:text-base md:text-lg leading-relaxed text-white/95 max-w-2xl mx-auto space-y-3">
               <p>Today, we don't just book a room anymore, we look for something to feel. Staymakom curates the best hotels in the country and pairs them with immersive experiences that turn a simple stay into something unforgettable: farm-to-table workshops in a kibbutz, desert escapes, wellness retreats, local encounters, cultural discoveries…</p>
               <p>It's about going beyond Tel Aviv, Jerusalem or Eilat, and uncovering a more intimate, vibrant, authentic Israel.</p>
