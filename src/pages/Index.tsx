@@ -242,13 +242,24 @@ const Index = () => {
               Handpicked Hotels. Unforgettable Experiences.
             </h2>
             <div className="text-sm sm:text-base md:text-lg leading-relaxed text-white/95 max-w-2xl mx-auto space-y-3">
-              <p>
-                Today, we don't just book a room anymore, we look for something to feel.
-                Staymakom curates the best hotels in the country and pairs them with immersive experiences that turn a simple stay into something unforgettable.
-              </p>
-              <p className="font-medium">
-                Your trip isn't just "beautiful" anymore, it becomes meaningful.
-              </p>
+              <p>Today, we don't just book a room anymore, we look for something to feel.
+
+Staymakom curates the best hotels in the country and pairs them with immersive
+
+experiences that turn a simple stay into something unforgettable: farm-to-table
+
+workshops in a kibbutz, desert escapes, wellness retreats, local encounters,
+
+cultural discoveries…
+
+It's about going beyond Tel Aviv, Jerusalem or Eilat, and uncovering a more
+
+intimate, vibrant, authentic Israel.
+
+Your trip isn't just "beautiful" anymore, it becomes meaningful. And that's
+
+where the magic happens.</p>
+              
             </div>
           </div>
         </section>
