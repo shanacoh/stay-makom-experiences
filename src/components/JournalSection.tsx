@@ -73,11 +73,11 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
         </div>
 
         {/* Editorial Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {/* Featured Article (Left) */}
           <Link
             to={`/journal/${featuredPost.slug}${lang === "he" ? "?lang=he" : ""}`}
-            className="lg:col-span-3 group relative overflow-hidden rounded-lg"
+            className="md:col-span-3 group relative overflow-hidden rounded-lg"
           >
             <div className="aspect-[16/9] overflow-hidden">
               {featuredPost.cover_image ? (
@@ -107,7 +107,7 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
           </Link>
 
           {/* Side Stack (Right) */}
-          <div className="lg:col-span-2 flex flex-col gap-2">
+          <div className="md:col-span-2 flex flex-col gap-2">
             {sidePosts.map((post) => (
               <Link
                 key={post.id}
