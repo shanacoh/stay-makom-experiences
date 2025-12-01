@@ -6,12 +6,104 @@ import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, ArrowLeft } from "lucide-react";
+import { Calendar, ArrowLeft, MapPin, Star } from "lucide-react";
 import { format } from "date-fns";
 import NotFound from "./NotFound";
 import DOMPurify from "dompurify";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { Block } from "@/components/admin/journal/types";
+
+// Embedded Experience Card Component
+function EmbeddedExperienceCard({ experienceId }: { experienceId: string }) {
+  const { lang } = useLanguage();
+  
+  const { data: experience, isLoading } = useQuery({
+    queryKey: ["embedded-experience", experienceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experiences")
+        .select(`
+          id,
+          title,
+          title_he,
+          slug,
+          hero_image,
+          base_price,
+          currency,
+          status,
+          hotels!inner(name, name_he, city, city_he, hero_image)
+        `)
+        .eq("id", experienceId)
+        .eq("status", "published")
+        .single();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!experienceId,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="my-8 p-4 border rounded-lg bg-muted/30 animate-pulse">
+        <div className="flex gap-4">
+          <div className="w-32 h-24 bg-muted rounded" />
+          <div className="flex-1 space-y-2">
+            <div className="h-5 bg-muted rounded w-3/4" />
+            <div className="h-4 bg-muted rounded w-1/2" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!experience) {
+    return null; // Experience deleted/archived - don't show anything
+  }
+
+  const hotel = experience.hotels as any;
+  const title = lang === "he" ? experience.title_he || experience.title : experience.title;
+  const hotelName = lang === "he" ? hotel?.name_he || hotel?.name : hotel?.name;
+  const city = lang === "he" ? hotel?.city_he || hotel?.city : hotel?.city;
+  const imageUrl = experience.hero_image || hotel?.hero_image;
+
+  return (
+    <Link 
+      to={`/experience/${experience.slug}`}
+      className="block my-8 group"
+    >
+      <div className="border rounded-xl overflow-hidden bg-card hover:shadow-lg transition-shadow">
+        <div className="flex flex-col sm:flex-row">
+          {imageUrl && (
+            <div className="sm:w-48 aspect-video sm:aspect-square overflow-hidden">
+              <img
+                src={imageUrl}
+                alt={title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          )}
+          <div className="flex-1 p-4 sm:p-6 flex flex-col justify-center">
+            <p className="text-sm text-muted-foreground mb-1">{hotelName}</p>
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              {city && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {city}
+                </span>
+              )}
+              <span className="font-semibold text-foreground">
+                {experience.currency} {experience.base_price}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -72,10 +164,20 @@ const JournalPost = () => {
         ) : null;
 
       case "text":
+        // Rich text content - render as sanitized HTML
         return block.content ? (
-          <p className="text-lg leading-relaxed mb-6 whitespace-pre-wrap">
-            {block.content}
-          </p>
+          <div 
+            className="text-lg leading-relaxed mb-6 prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(block.content, {
+                ALLOWED_TAGS: [
+                  "p", "br", "strong", "em", "u", "s", "h1", "h2", "h3",
+                  "ul", "ol", "li", "a", "span",
+                ],
+                ALLOWED_ATTR: ["href", "target", "rel", "class", "style"],
+              }),
+            }}
+          />
         ) : null;
 
       case "image":
@@ -98,9 +200,9 @@ const JournalPost = () => {
         return block.text ? (
           <div className="my-10 text-center">
             <Button size="lg" asChild>
-              <a href={block.url} target="_blank" rel="noopener noreferrer">
+              <Link to={block.url}>
                 {block.text}
-              </a>
+              </Link>
             </Button>
           </div>
         ) : null;
@@ -133,6 +235,11 @@ const JournalPost = () => {
                 <li key={i}>{item}</li>
               ))}
           </ListTag>
+        ) : null;
+
+      case "experience":
+        return block.experience_id ? (
+          <EmbeddedExperienceCard experienceId={block.experience_id} />
         ) : null;
 
       default:

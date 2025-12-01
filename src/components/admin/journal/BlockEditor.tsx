@@ -1,4 +1,4 @@
-import { Block, BlockType, createEmptyBlock } from "./types";
+import { Block, BlockType, createEmptyBlock, mirrorBlocks } from "./types";
 import { BlockItem } from "./BlockItem";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,24 +15,35 @@ import {
   MousePointerClick,
   Quote,
   List,
+  Sparkles,
+  Copy,
 } from "lucide-react";
 
 interface BlockEditorProps {
   blocks: Block[];
   onChange: (blocks: Block[]) => void;
   isHebrew?: boolean;
+  sourceBlocks?: Block[]; // For mirroring from other language
+  onMirror?: () => void; // Callback when mirror button is clicked
 }
 
 const blockOptions: { type: BlockType; label: string; icon: React.ReactNode }[] = [
   { type: "title", label: "Title", icon: <Type className="w-4 h-4" /> },
-  { type: "text", label: "Text Paragraph", icon: <FileText className="w-4 h-4" /> },
+  { type: "text", label: "Rich Text", icon: <FileText className="w-4 h-4" /> },
   { type: "image", label: "Image", icon: <Image className="w-4 h-4" /> },
   { type: "cta", label: "CTA Button", icon: <MousePointerClick className="w-4 h-4" /> },
   { type: "quote", label: "Quote", icon: <Quote className="w-4 h-4" /> },
   { type: "list", label: "Bullet List", icon: <List className="w-4 h-4" /> },
+  { type: "experience", label: "Experience Card", icon: <Sparkles className="w-4 h-4" /> },
 ];
 
-export function BlockEditor({ blocks, onChange, isHebrew = false }: BlockEditorProps) {
+export function BlockEditor({ 
+  blocks, 
+  onChange, 
+  isHebrew = false,
+  sourceBlocks,
+  onMirror 
+}: BlockEditorProps) {
   const addBlock = (type: BlockType, index?: number) => {
     const newBlock = createEmptyBlock(type);
     if (index !== undefined) {
@@ -87,10 +98,29 @@ export function BlockEditor({ blocks, onChange, isHebrew = false }: BlockEditorP
 
   return (
     <div className="space-y-3">
+      {/* Mirror button for Hebrew tab */}
+      {isHebrew && sourceBlocks && sourceBlocks.length > 0 && onMirror && (
+        <div className="flex justify-end mb-4">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onMirror}
+            className="gap-2"
+          >
+            <Copy className="w-4 h-4" />
+            Mirror from English
+          </Button>
+        </div>
+      )}
+
       {blocks.length === 0 ? (
         <div className="border-2 border-dashed rounded-lg p-8 text-center">
           <p className="text-muted-foreground mb-4">
-            Start building your article by adding blocks
+            {isHebrew 
+              ? "Start building your article by adding blocks, or mirror from English"
+              : "Start building your article by adding blocks"
+            }
           </p>
           <AddBlockButton />
         </div>

@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Block, BlockType } from "./types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { SmartLinkPicker } from "@/components/ui/smart-link-picker";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -22,6 +26,7 @@ import {
   List,
   Plus,
   X,
+  Sparkles,
 } from "lucide-react";
 
 interface BlockItemProps {
@@ -42,16 +47,34 @@ const blockTypeIcons: Record<BlockType, React.ReactNode> = {
   cta: <MousePointerClick className="w-4 h-4" />,
   quote: <Quote className="w-4 h-4" />,
   list: <List className="w-4 h-4" />,
+  experience: <Sparkles className="w-4 h-4" />,
 };
 
 const blockTypeLabels: Record<BlockType, string> = {
   title: "Title",
-  text: "Text",
+  text: "Rich Text",
   image: "Image",
   cta: "CTA Button",
   quote: "Quote",
   list: "List",
+  experience: "Experience",
 };
+
+// Fetch experiences for the experience block
+function useExperiences() {
+  return useQuery({
+    queryKey: ["experiences-for-embed"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experiences")
+        .select("id, title, slug, hero_image, status")
+        .eq("status", "published")
+        .order("title");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
 
 export function BlockItem({
   block,
@@ -64,6 +87,7 @@ export function BlockItem({
   isHebrew = false,
 }: BlockItemProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const { data: experiences = [] } = useExperiences();
 
   const inputClass = isHebrew ? "bg-[#EAF4FF]" : "";
   const dir = isHebrew ? "rtl" : "ltr";
@@ -102,14 +126,14 @@ export function BlockItem({
 
       case "text":
         return (
-          <Textarea
-            value={block.content}
-            onChange={(e) => onChange({ ...block, content: e.target.value })}
-            placeholder="Write your paragraph here..."
-            rows={4}
-            className={inputClass}
-            dir={dir}
-          />
+          <div className={isHebrew ? "bg-[#EAF4FF] rounded-lg p-1" : ""}>
+            <RichTextEditor
+              content={block.content}
+              onChange={(content) => onChange({ ...block, content })}
+              placeholder="Write your content here with formatting..."
+              dir={dir}
+            />
+          </div>
         );
 
       case "image":
@@ -148,11 +172,13 @@ export function BlockItem({
               className={inputClass}
               dir={dir}
             />
-            <Input
-              value={block.url}
-              onChange={(e) => onChange({ ...block, url: e.target.value })}
-              placeholder="URL (e.g., https://example.com)"
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Link destination</label>
+              <SmartLinkPicker
+                value={block.url}
+                onChange={(url) => onChange({ ...block, url })}
+              />
+            </div>
             {/* CTA Preview */}
             {block.text && (
               <div className="pt-2">
@@ -243,6 +269,55 @@ export function BlockItem({
                 <Plus className="w-4 h-4 mr-1" /> Add item
               </Button>
             </div>
+          </div>
+        );
+
+      case "experience":
+        const selectedExp = experiences.find(e => e.id === block.experience_id);
+        return (
+          <div className="space-y-3">
+            <Select
+              value={block.experience_id}
+              onValueChange={(value) => onChange({ ...block, experience_id: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an experience to embed..." />
+              </SelectTrigger>
+              <SelectContent>
+                {experiences.map((exp) => (
+                  <SelectItem key={exp.id} value={exp.id}>
+                    {exp.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {/* Experience Preview */}
+            {selectedExp && (
+              <div className="border rounded-lg p-4 bg-muted/30">
+                <div className="flex gap-4">
+                  {selectedExp.hero_image && (
+                    <img 
+                      src={selectedExp.hero_image} 
+                      alt={selectedExp.title}
+                      className="w-24 h-16 object-cover rounded"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium">{selectedExp.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Will render as an experience card in the article
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {!selectedExp && block.experience_id && (
+              <p className="text-sm text-destructive">
+                Experience not found or has been archived/deleted
+              </p>
+            )}
           </div>
         );
     }

@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "sonner";
 import { ArrowLeft, Save, Eye, EyeOff, Clock, FileText, Check, CalendarIcon, Send } from "lucide-react";
 import { generateSlug, cn } from "@/lib/utils";
-import { Block, calculateReadingTime } from "@/components/admin/journal/types";
+import { Block, calculateReadingTime, mirrorBlocks } from "@/components/admin/journal/types";
 import { BlockEditor } from "@/components/admin/journal/BlockEditor";
 import { ArticlePreview } from "@/components/admin/journal/ArticlePreview";
 import { format } from "date-fns";
@@ -522,6 +522,11 @@ const JournalEditor = () => {
                     blocks={formData.blocks_he}
                     onChange={(blocks) => setFormData({ ...formData, blocks_he: blocks })}
                     isHebrew
+                    sourceBlocks={formData.blocks_en}
+                    onMirror={() => {
+                      const mirrored = mirrorBlocks(formData.blocks_en);
+                      setFormData({ ...formData, blocks_he: mirrored });
+                    }}
                   />
                 </div>
               </TabsContent>
