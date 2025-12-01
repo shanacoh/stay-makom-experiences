@@ -364,7 +364,7 @@ const Index = () => {
               animationDelay: '0.1s'
             }}>
                 <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Choose your vibe</h3>
-                <p className="text-xs sm:text-sm leading-relaxed text-white/90 max-w-xs mx-auto">Choose the atmosphere you're craving today. Nature escape, adventure, calm, food, or wellness.</p>
+                
               </div>
               
               {/* Block 2 */}
@@ -372,7 +372,7 @@ const Index = () => {
               animationDelay: '0.3s'
             }}>
                 <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Pick your experience</h3>
-                <p className="text-xs sm:text-sm leading-relaxed text-white/90 max-w-xs mx-auto">Browse curated experiences designed to be easy to book, easy to enjoy, and true to the place.</p>
+                
               </div>
               
               {/* Block 3 */}
@@ -380,7 +380,7 @@ const Index = () => {
               animationDelay: '0.5s'
             }}>
                 <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">Book your hotel</h3>
-                <p className="text-xs sm:text-sm leading-relaxed text-white/90 max-w-xs mx-auto">Discover the hotel, choose your date, and add extras that elevate the moment even more.</p>
+                
               </div>
             </div>
           </div>
