@@ -1,4 +1,4 @@
-export type BlockType = 'title' | 'text' | 'image' | 'cta' | 'quote' | 'list';
+export type BlockType = 'title' | 'text' | 'image' | 'cta' | 'quote' | 'list' | 'experience';
 
 export interface BaseBlock {
   id: string;
@@ -13,7 +13,7 @@ export interface TitleBlock extends BaseBlock {
 
 export interface TextBlock extends BaseBlock {
   type: 'text';
-  content: string;
+  content: string; // Now stores HTML from rich text editor
 }
 
 export interface ImageBlock extends BaseBlock {
@@ -41,7 +41,12 @@ export interface ListBlock extends BaseBlock {
   style: 'bullet' | 'numbered';
 }
 
-export type Block = TitleBlock | TextBlock | ImageBlock | CTABlock | QuoteBlock | ListBlock;
+export interface ExperienceBlock extends BaseBlock {
+  type: 'experience';
+  experience_id: string;
+}
+
+export type Block = TitleBlock | TextBlock | ImageBlock | CTABlock | QuoteBlock | ListBlock | ExperienceBlock;
 
 export interface ArticleData {
   title_en: string;
@@ -90,7 +95,36 @@ export function createEmptyBlock(type: BlockType): Block {
       return { id, type: 'quote', content: '', author: '' };
     case 'list':
       return { id, type: 'list', items: [''], style: 'bullet' };
+    case 'experience':
+      return { id, type: 'experience', experience_id: '' };
   }
+}
+
+// Mirror blocks from one language to another (copy structure, clear text content for translation)
+export function mirrorBlocks(sourceBlocks: Block[]): Block[] {
+  return sourceBlocks.map(block => {
+    const newId = generateBlockId();
+    
+    switch (block.type) {
+      case 'title':
+        return { ...block, id: newId, content: '' };
+      case 'text':
+        return { ...block, id: newId, content: '' };
+      case 'image':
+        // Keep image URL, clear alt and caption for translation
+        return { ...block, id: newId, alt: '', caption: '' };
+      case 'cta':
+        // Keep URL, clear text for translation
+        return { ...block, id: newId, text: '' };
+      case 'quote':
+        return { ...block, id: newId, content: '', author: '' };
+      case 'list':
+        return { ...block, id: newId, items: block.items.map(() => '') };
+      case 'experience':
+        // Experience blocks are copied as-is (same experience)
+        return { ...block, id: newId };
+    }
+  });
 }
 
 export function calculateReadingTime(blocks: Block[]): { words: number; minutes: number } {
@@ -99,9 +133,12 @@ export function calculateReadingTime(blocks: Block[]): { words: number; minutes:
   blocks.forEach(block => {
     switch (block.type) {
       case 'title':
-      case 'text':
       case 'quote':
         text += ' ' + block.content;
+        break;
+      case 'text':
+        // Strip HTML tags for word count
+        text += ' ' + block.content.replace(/<[^>]*>/g, '');
         break;
       case 'cta':
         text += ' ' + block.text;
