@@ -3,10 +3,8 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, MapPin, Sparkles } from "lucide-react";
 import aboutHero from "@/assets/about-hero-road.jpg";
-
 const About = () => {
-  return (
-    <div className="min-h-screen bg-[#FAF8F5]">
+  return <div className="min-h-screen bg-[#FAF8F5]">
       <Header />
 
       {/* Hero Section */}
@@ -16,30 +14,30 @@ const About = () => {
           <div className="absolute inset-0 bg-black/20" />
         </div>
         <div className="relative z-10 text-center text-white px-6 animate-fade-in max-w-3xl">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-4 font-sans font-bold text-slate-50">
-            Israel… differently.
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg text-slate-50 font-sans font-medium">
-            A curated way to explore, feel, and belong.
-          </p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-4 font-sans font-bold text-slate-50">STAYMAKOM</h1>
+          <p className="text-sm sm:text-base md:text-lg text-slate-50 font-sans font-medium">HANDPICKED HOTELS. UNFORGETTABLE EXPERIENCES.</p>
         </div>
       </section>
 
       <main className="max-w-4xl mx-auto px-6">
         {/* Our Philosophy */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <section className="py-16 animate-fade-in" style={{
+        animationDelay: "0.2s"
+      }}>
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-8">
             Our Philosophy
           </h2>
-          <p className="text-base md:text-lg leading-relaxed text-muted-foreground text-center max-w-3xl mx-auto font-light">
-            STAYMAKOM was born from a simple belief: travel is not about ticking places off a list — but about feeling something.
-            <br /><br />
+          <p className="text-base md:text-lg leading-relaxed text-muted-foreground text-center max-w-3xl mx-auto font-light">STAYMAKOM was born from a simple belief: travel is not about ticking places off a list, but about feeling something.
+
+We curate stays and experiences across Israel that speak to the senses: slow mornings, desert silence, shared meals, unexpected encounters.<br /><br />
             We curate stays and experiences across Israel that speak to the senses: slow mornings, desert silence, shared meals, unexpected encounters.
           </p>
         </section>
 
         {/* What We Do */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <section className="py-16 animate-fade-in" style={{
+        animationDelay: "0.4s"
+      }}>
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-10">
             What We Do
           </h2>
@@ -80,16 +78,16 @@ const About = () => {
                   </div>
                 </div>
                 <h3 className="font-serif text-lg mb-3">A Different Way to Travel</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Slow, emotional, intimate — beyond the usual.
-                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">Slow, emotional, intimate, beyond the usual.</p>
               </CardContent>
             </Card>
           </div>
         </section>
 
         {/* Why We Exist */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: "0.6s" }}>
+        <section className="py-16 animate-fade-in" style={{
+        animationDelay: "0.6s"
+      }}>
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-8">
             Why We Exist
           </h2>
@@ -101,7 +99,9 @@ const About = () => {
         </section>
 
         {/* Who We Are */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: "0.8s" }}>
+        <section className="py-16 animate-fade-in" style={{
+        animationDelay: "0.8s"
+      }}>
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-8">
             Who We Are
           </h2>
@@ -122,7 +122,9 @@ const About = () => {
         </section>
 
         {/* Final Touch */}
-        <section className="py-16 text-center animate-fade-in" style={{ animationDelay: "1s" }}>
+        <section className="py-16 text-center animate-fade-in" style={{
+        animationDelay: "1s"
+      }}>
           <div className="max-w-xl mx-auto">
             <p className="font-serif text-xl md:text-2xl text-muted-foreground italic">
               "The art of travel is the art of seeing with new eyes."
@@ -132,8 +134,6 @@ const About = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
