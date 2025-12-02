@@ -40,29 +40,29 @@ const Journal = () => {
     <div className="min-h-screen bg-[#FAF8F5]">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-16">
-          <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6">Journal</h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto">
+      <main className="max-w-6xl mx-auto px-6 py-12">
+        <div className="text-center mb-10">
+          <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Journal</h1>
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
             Stories, places, and insights from extraordinary stays across Israel
           </p>
         </div>
 
         {isLoading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="overflow-hidden">
                 <div className="aspect-[4/3] bg-muted animate-pulse" />
-                <CardContent className="p-6">
-                  <div className="h-4 bg-muted rounded mb-4 animate-pulse" />
-                  <div className="h-6 bg-muted rounded mb-2 animate-pulse" />
-                  <div className="h-4 bg-muted rounded animate-pulse" />
+                <CardContent className="p-4">
+                  <div className="h-3 bg-muted rounded mb-3 animate-pulse" />
+                  <div className="h-5 bg-muted rounded mb-2 animate-pulse" />
+                  <div className="h-3 bg-muted rounded animate-pulse" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : posts && posts.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
               <Link key={post.id} to={`/journal/${post.slug}`}>
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
@@ -75,23 +75,23 @@ const Journal = () => {
                       />
                     </div>
                   )}
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Badge className={`${getCategoryColor(post.category)} text-white`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className={`${getCategoryColor(post.category)} text-white text-xs`}>
                         {post.category}
                       </Badge>
                       {post.published_at && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
                           {format(new Date(post.published_at), "MMM d, yyyy")}
                         </div>
                       )}
                     </div>
-                   <h3 className="font-serif text-2xl mb-2 line-clamp-2">
+                    <h3 className="font-serif text-lg mb-1 line-clamp-2">
                       {getLocalizedField(post, "title", lang) || post.title_en}
                     </h3>
                     {(getLocalizedField(post, "excerpt", lang) || post.excerpt_en) && (
-                      <p className="text-muted-foreground line-clamp-3">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {getLocalizedField(post, "excerpt", lang) || post.excerpt_en}
                       </p>
                     )}
@@ -101,8 +101,8 @@ const Journal = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <p className="text-xl text-muted-foreground">
+          <div className="text-center py-12">
+            <p className="text-base text-muted-foreground">
               No articles published yet. Check back soon!
             </p>
           </div>

@@ -14,13 +14,16 @@ import { toast } from "sonner";
 import { Mail, Instagram } from "lucide-react";
 import contactHero from "@/assets/contact-hero-new.jpg";
 import { supabase } from "@/integrations/supabase/client";
+
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   email: z.string().trim().email("Invalid email address").max(255),
   subject: z.enum(["general", "experience", "corporate", "partnership", "other"]),
   message: z.string().trim().min(1, "Message is required").max(1000)
 });
+
 type FormData = z.infer<typeof formSchema>;
+
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -47,6 +50,7 @@ const Contact = () => {
       return data;
     },
   });
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
@@ -72,6 +76,7 @@ const Contact = () => {
       setIsSubmitting(false);
     }
   };
+
   const subjectLabels = {
     general: "General question",
     experience: "Experience inquiry",
@@ -79,72 +84,87 @@ const Contact = () => {
     partnership: "Hotel partnership",
     other: "Other"
   };
-  return <div className="min-h-screen bg-white">
+
+  return (
+    <div className="min-h-screen bg-white">
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[450px] sm:min-h-[500px] md:min-h-[550px] flex items-center justify-center">
+      <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={contactHero} alt="Contact us" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
-        <div className="relative z-10 text-center text-white px-6 max-w-4xl">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold text-slate-50">
+        <div className="relative z-10 text-center text-white px-6 max-w-3xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-50">
             We're here for you.
           </h1>
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-6 py-20">
+      <main className="max-w-3xl mx-auto px-6 py-12">
         {/* Contact Text */}
-        <section className="text-center mb-16">
-          <p className="text-xl text-muted-foreground leading-relaxed">
+        <section className="text-center mb-10">
+          <p className="text-base text-muted-foreground leading-relaxed">
             Questions, ideas, partnership requests?<br />
             Send us a message — we'll be happy to help.
           </p>
         </section>
 
         {/* Contact Form */}
-        <section className="max-w-2xl mx-auto mb-20">
-          {showSuccess ? <div className="bg-[#FAF8F5] rounded-lg p-12 text-center">
-              <div className="mb-6 text-[#D72638]">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <section className="max-w-lg mx-auto mb-12">
+          {showSuccess ? (
+            <div className="bg-[#FAF8F5] rounded-lg p-8 text-center">
+              <div className="mb-4 text-[#D72638]">
+                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="font-serif text-3xl mb-4">Thank you!</h3>
-              <p className="text-lg text-muted-foreground mb-8">
+              <h3 className="font-serif text-2xl mb-3">Thank you!</h3>
+              <p className="text-sm text-muted-foreground mb-6">
                 We'll get back to you shortly.
               </p>
-              <Button variant="outline" onClick={() => setShowSuccess(false)}>
+              <Button variant="outline" size="sm" onClick={() => setShowSuccess(false)}>
                 Send Another Message
               </Button>
-            </div> : <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField control={form.control} name="name" render={({
-              field
-            }) => <FormItem>
-                      <FormLabel>Your Name *</FormLabel>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">Your Name *</FormLabel>
                       <FormControl>
                         <Input placeholder="John Doe" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>} />
+                    </FormItem>
+                  )}
+                />
 
-                <FormField control={form.control} name="email" render={({
-              field
-            }) => <FormItem>
-                      <FormLabel>Email *</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">Email *</FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="your@email.com" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>} />
+                    </FormItem>
+                  )}
+                />
 
-                <FormField control={form.control} name="subject" render={({
-              field
-            }) => <FormItem>
-                      <FormLabel>Subject *</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">Subject *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -152,44 +172,53 @@ const Contact = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.entries(subjectLabels).map(([value, label]) => <SelectItem key={value} value={value}>
+                          {Object.entries(subjectLabels).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
                               {label}
-                            </SelectItem>)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>} />
+                    </FormItem>
+                  )}
+                />
 
-                <FormField control={form.control} name="message" render={({
-              field
-            }) => <FormItem>
-                      <FormLabel>Message *</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">Message *</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Tell us how we can help..." className="min-h-[150px]" {...field} />
+                        <Textarea placeholder="Tell us how we can help..." className="min-h-[100px]" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>} />
+                    </FormItem>
+                  )}
+                />
 
-                <Button type="submit" disabled={isSubmitting} className="w-full bg-[#D72638] hover:bg-[#D72638]/90" size="lg">
+                <Button type="submit" disabled={isSubmitting} className="w-full bg-[#D72638] hover:bg-[#D72638]/90">
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
-            </Form>}
+            </Form>
+          )}
         </section>
 
         {/* Direct Contact Info */}
-        <section className="text-center border-t pt-12">
-          <h3 className="font-serif text-2xl mb-6">Get in touch directly</h3>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-muted-foreground">
+        <section className="text-center border-t pt-8">
+          <h3 className="font-serif text-xl mb-4">Get in touch directly</h3>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-muted-foreground text-sm">
             {settings?.contact_email && (
               <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
-                <Mail className="w-5 h-5" />
+                <Mail className="w-4 h-4" />
                 {settings.contact_email}
               </a>
             )}
             {settings?.instagram_handle && (
               <a href={`https://instagram.com/${settings.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
-                <Instagram className="w-5 h-5" />
+                <Instagram className="w-4 h-4" />
                 {settings.instagram_handle.startsWith('@') ? settings.instagram_handle : `@${settings.instagram_handle}`}
               </a>
             )}
@@ -198,6 +227,8 @@ const Contact = () => {
       </main>
 
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default Contact;

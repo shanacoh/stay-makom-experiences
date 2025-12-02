@@ -77,7 +77,7 @@ export default function GiftCard() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[450px] sm:min-h-[500px] md:min-h-[550px] overflow-hidden">
+      <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] overflow-hidden">
         <img 
           src={giftCardHero}
           alt="Gift a Staymakom moment"
@@ -86,17 +86,17 @@ export default function GiftCard() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         
         <div className="relative h-full flex items-center justify-center text-center px-4">
-          <div className="max-w-4xl space-y-6">
-            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight">
+          <div className="max-w-3xl space-y-4">
+            <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
               Give a Staymakom moment.
             </h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light">
+            <p className="text-sm sm:text-base md:text-lg text-white/90 font-light">
               Curated stays, crafted stories, meaningful gifts.
             </p>
             
-            <div className="flex justify-center pt-8">
+            <div className="flex justify-center pt-4">
               <Button 
-                size="lg"
+                size="default"
                 onClick={() => {
                   const element = document.getElementById("gift-by-amount");
                   element?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -110,26 +110,26 @@ export default function GiftCard() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-20 space-y-32">
+      <div className="max-w-5xl mx-auto px-4 py-12 space-y-16">
         {/* Gift by Amount Section */}
-        <section id="gift-by-amount" className="scroll-mt-24">
-          <div className="max-w-2xl mx-auto">
+        <section id="gift-by-amount" className="scroll-mt-20">
+          <div className="max-w-lg mx-auto">
             {/* Centered Intro */}
-            <div className="text-center space-y-4 mb-12">
-              <h2 className="font-sans text-4xl md:text-5xl font-bold">Gift a stay, your way.</h2>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            <div className="text-center space-y-3 mb-8">
+              <h2 className="font-sans text-2xl md:text-3xl font-bold">Gift a stay, your way.</h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Choose an amount and let them explore Israel's most inspiring hotels and experiences.
               </p>
             </div>
 
             {/* Centered Form Card */}
             <Card className="shadow-medium">
-              <CardHeader>
-                <CardTitle>Select Amount</CardTitle>
-                <CardDescription>Freedom to choose. A journey waiting to begin.</CardDescription>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg">Select Amount</CardTitle>
+                <CardDescription className="text-sm">Freedom to choose. A journey waiting to begin.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-3 gap-3">
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-2">
                   {[250, 500, 1000].map((amount) => (
                     <Button
                       key={amount}
@@ -138,15 +138,15 @@ export default function GiftCard() {
                         setSelectedAmount(amount);
                         setCustomAmount("");
                       }}
-                      className="h-auto py-4 flex flex-col"
+                      className="h-auto py-3 flex flex-col"
                     >
-                      <span className="text-2xl font-bold">₪{amount}</span>
+                      <span className="text-xl font-bold">₪{amount}</span>
                     </Button>
                   ))}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="custom-amount">Custom Amount</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="custom-amount" className="text-sm">Custom Amount</Label>
                   <Input
                     id="custom-amount"
                     type="number"
@@ -159,22 +159,22 @@ export default function GiftCard() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="amount-message">Add a message (optional)</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="amount-message" className="text-sm">Add a message (optional)</Label>
                   <Textarea
                     id="amount-message"
                     placeholder="Write a personal message..."
                     maxLength={200}
                     value={amountMessage}
                     onChange={(e) => setAmountMessage(e.target.value)}
-                    className="min-h-[100px]"
+                    className="min-h-[80px]"
                   />
                   <p className="text-xs text-muted-foreground">{amountMessage.length}/200</p>
                 </div>
 
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="amount-recipient-email">Recipient Email *</Label>
+                <div className="grid gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="amount-recipient-email" className="text-sm">Recipient Email *</Label>
                     <Input
                       id="amount-recipient-email"
                       type="email"
@@ -184,8 +184,8 @@ export default function GiftCard() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="amount-sender-name">Your Name *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="amount-sender-name" className="text-sm">Your Name *</Label>
                     <Input
                       id="amount-sender-name"
                       required
@@ -194,8 +194,8 @@ export default function GiftCard() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="amount-sender-email">Your Email *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="amount-sender-email" className="text-sm">Your Email *</Label>
                     <Input
                       id="amount-sender-email"
                       type="email"
@@ -206,14 +206,15 @@ export default function GiftCard() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <Label>Delivery</Label>
-                  <div className="flex gap-4">
+                <div className="space-y-3">
+                  <Label className="text-sm">Delivery</Label>
+                  <div className="flex gap-3">
                     <Button
                       type="button"
                       variant={amountDeliveryType === "now" ? "default" : "outline"}
                       onClick={() => setAmountDeliveryType("now")}
                       className="flex-1"
+                      size="sm"
                     >
                       Send Now
                     </Button>
@@ -222,6 +223,7 @@ export default function GiftCard() {
                       variant={amountDeliveryType === "scheduled" ? "default" : "outline"}
                       onClick={() => setAmountDeliveryType("scheduled")}
                       className="flex-1"
+                      size="sm"
                     >
                       Schedule
                     </Button>
@@ -257,7 +259,6 @@ export default function GiftCard() {
 
                 <Button 
                   className="w-full" 
-                  size="lg"
                   onClick={handleAmountSubmit}
                 >
                   Send Gift Card
@@ -268,35 +269,35 @@ export default function GiftCard() {
         </section>
 
         {/* FAQ Section */}
-        <section className="max-w-3xl mx-auto">
-          <h2 className="font-sans text-3xl font-bold text-center mb-8">Common Questions</h2>
+        <section className="max-w-2xl mx-auto">
+          <h2 className="font-sans text-xl font-bold text-center mb-6">Common Questions</h2>
           
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="text-left">
+              <AccordionTrigger className="text-left text-sm">
                 How long is my gift card valid?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+              <AccordionContent className="text-muted-foreground text-sm">
                 All Staymakom gift cards are valid for 12 months from the purchase date. 
                 This gives recipients plenty of time to choose the perfect moment for their stay.
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-2">
-              <AccordionTrigger className="text-left">
+              <AccordionTrigger className="text-left text-sm">
                 Can the recipient change the experience?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+              <AccordionContent className="text-muted-foreground text-sm">
                 Yes! Recipients can redeem their gift card for any available Staymakom experience 
                 of equal or lesser value. If they choose something more expensive, they can pay the difference.
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-3">
-              <AccordionTrigger className="text-left">
+              <AccordionTrigger className="text-left text-sm">
                 Is the gift card refundable?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+              <AccordionContent className="text-muted-foreground text-sm">
                 Gift cards are non-refundable, but they can be transferred to someone else. 
                 Simply contact us with the gift card code and the new recipient's email address.
               </AccordionContent>
