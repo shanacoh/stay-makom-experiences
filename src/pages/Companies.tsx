@@ -118,7 +118,7 @@ export default function Companies() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[450px] sm:min-h-[500px] md:min-h-[550px] overflow-hidden">
+      <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] overflow-hidden">
         <img 
           src={corporateHero}
           alt="Team retreat moment"
@@ -127,17 +127,17 @@ export default function Companies() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         
         <div className="relative h-full flex items-center justify-center text-center px-4">
-          <div className="max-w-4xl space-y-6">
-            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white tracking-tight">
+          <div className="max-w-3xl space-y-4">
+            <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
               Create meaningful moments for your team.
             </h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-2xl mx-auto">
-              Corporate escapes, wellbeing retreats, team-building experiences and curated gift cards — crafted to inspire and connect.
+            <p className="text-sm sm:text-base md:text-lg text-white/90 font-light max-w-2xl mx-auto">
+              Corporate escapes, wellbeing retreats, team-building experiences and curated gift cards.
             </p>
             
-            <div className="pt-8">
+            <div className="pt-4">
               <Button 
-                size="lg"
+                size="default"
                 onClick={() => scrollToForm()}
                 className="bg-white text-foreground hover:bg-white/90 font-medium"
               >
@@ -148,38 +148,34 @@ export default function Companies() {
         </div>
       </section>
 
-      <div className="max-w-6xl mx-auto px-4 py-20 space-y-32">
+      <div className="max-w-4xl mx-auto px-4 py-12 space-y-16">
         {/* What We Offer Section */}
         <section>
-          <h2 className="font-sans text-4xl font-bold text-center mb-16">What We Offer</h2>
+          <h2 className="font-sans text-2xl font-bold text-center mb-10">What We Offer</h2>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Corporate Gift Packages */}
             <Card className="shadow-medium border-0">
-              <CardContent className="pt-8 space-y-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Gift className="h-6 w-6 text-primary" />
+              <CardContent className="pt-6 space-y-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Gift className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-sans text-2xl font-bold">Corporate Gift Packages</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Instead of material gifts, offer your employees the chance to experience Israel in a whole new way:
+                <h3 className="font-sans text-lg font-bold">Corporate Gift Packages</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Offer your employees the chance to experience Israel in a whole new way:
                 </p>
-                <ul className="space-y-2 text-muted-foreground">
+                <ul className="space-y-1.5 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">•</span>
+                    <span className="text-primary mt-0.5">•</span>
                     <span>Romantic escapes for two</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Family adventures to share with loved ones</span>
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>Family adventures</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Adrenaline-packed active breaks</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Wellness retreats to recharge body and mind</span>
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>Wellness retreats</span>
                   </li>
                 </ul>
               </CardContent>
@@ -187,32 +183,32 @@ export default function Companies() {
 
             {/* Team-Building Experiences */}
             <Card className="shadow-medium border-0">
-              <CardContent className="pt-8 space-y-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-primary" />
+              <CardContent className="pt-6 space-y-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Users className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-sans text-2xl font-bold">Team-Building Experiences</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="font-sans text-lg font-bold">Team-Building Experiences</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Strengthen bonds and reward your team with unforgettable collective moments.
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  From a sunrise hike in the desert to a private culinary journey in a vineyard, our tailor-made escapes bring people together.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  From sunrise hikes to private culinary journeys.
                 </p>
               </CardContent>
             </Card>
 
             {/* Customized Incentives */}
             <Card className="shadow-medium border-0">
-              <CardContent className="pt-8 space-y-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Sparkles className="h-6 w-6 text-primary" />
+              <CardContent className="pt-6 space-y-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Sparkles className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-sans text-2xl font-bold">Customized Incentives</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="font-sans text-lg font-bold">Customized Incentives</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   We curate exclusive packages that align with your company's DNA.
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  Whether you want to celebrate achievements, reward loyalty, or simply say "thank you", MAKOM creates the perfect experience.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Celebrate achievements or simply say "thank you".
                 </p>
               </CardContent>
             </Card>
@@ -220,37 +216,37 @@ export default function Companies() {
         </section>
 
         {/* Why MAKOM Section */}
-        <section className="bg-secondary/30 rounded-2xl p-12">
-          <h2 className="font-sans text-4xl font-bold text-center mb-12">Why MAKOM?</h2>
+        <section className="bg-secondary/30 rounded-xl p-8">
+          <h2 className="font-sans text-2xl font-bold text-center mb-8">Why MAKOM?</h2>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-primary" />
+          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg">Unique & Authentic</h3>
-              <p className="text-sm text-muted-foreground">
-                Every escape is designed to showcase the real Israel, beyond clichés.
+              <h3 className="font-semibold text-sm">Unique & Authentic</h3>
+              <p className="text-xs text-muted-foreground">
+                Every escape showcases the real Israel, beyond clichés.
               </p>
             </div>
             
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="h-8 w-8 text-primary" />
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg">Flexible & Scalable</h3>
-              <p className="text-sm text-muted-foreground">
-                From one employee to an entire department, our solutions adapt to your needs.
+              <h3 className="font-semibold text-sm">Flexible & Scalable</h3>
+              <p className="text-xs text-muted-foreground">
+                From one employee to an entire department.
               </p>
             </div>
             
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Gift className="h-8 w-8 text-primary" />
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Gift className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg">Seamless</h3>
-              <p className="text-sm text-muted-foreground">
-                We handle everything — you simply choose the experience, and we deliver it.
+              <h3 className="font-semibold text-sm">Seamless</h3>
+              <p className="text-xs text-muted-foreground">
+                We handle everything — you simply choose.
               </p>
             </div>
           </div>
@@ -258,43 +254,43 @@ export default function Companies() {
 
         {/* How It Works Section */}
         <section>
-          <h2 className="font-sans text-4xl font-bold text-center mb-12">How It Works</h2>
+          <h2 className="font-sans text-2xl font-bold text-center mb-8">How It Works</h2>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
+            <div className="text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto">
                 1
               </div>
-              <h3 className="font-semibold text-lg">Choose the package</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm">Choose the package</h3>
+              <p className="text-xs text-muted-foreground">
                 Gift card, themed experience, or tailor-made escape.
               </p>
             </div>
             
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
+            <div className="text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto">
                 2
               </div>
-              <h3 className="font-semibold text-lg">Personalize</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm">Personalize</h3>
+              <p className="text-xs text-muted-foreground">
                 Add your company branding or a personal note.
               </p>
             </div>
             
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
+            <div className="text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto">
                 3
               </div>
-              <h3 className="font-semibold text-lg">Surprise & delight</h3>
-              <p className="text-sm text-muted-foreground">
-                We deliver the experience directly to your employees.
+              <h3 className="font-semibold text-sm">Surprise & delight</h3>
+              <p className="text-xs text-muted-foreground">
+                We deliver directly to your employees.
               </p>
             </div>
           </div>
 
           <div className="text-center">
             <Button 
-              size="lg"
+              size="default"
               onClick={() => scrollToForm("corporate_gift_cards")}
             >
               Request Corporate Gift Cards
@@ -303,63 +299,63 @@ export default function Companies() {
         </section>
 
         {/* Contact Form Section */}
-        <section id="contact-form" className="scroll-mt-24">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="font-sans text-4xl font-bold text-center mb-4">
+        <section id="contact-form" className="scroll-mt-20">
+          <div className="max-w-lg mx-auto">
+            <h2 className="font-sans text-2xl font-bold text-center mb-3">
               Tell us what you're looking for.
             </h2>
-            <p className="text-center text-muted-foreground mb-12">
+            <p className="text-center text-sm text-muted-foreground mb-8">
               Fill out the form below and we'll get back to you with a tailored proposal.
             </p>
 
             {showSuccess ? (
               <Card className="shadow-medium border-0 bg-primary/5">
-                <CardContent className="pt-12 pb-12 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="h-8 w-8 text-primary" />
+                <CardContent className="pt-8 pb-8 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-xl">Thank you — your request has been sent.</h3>
-                  <p className="text-muted-foreground">
+                  <h3 className="font-semibold text-lg">Thank you — your request has been sent.</h3>
+                  <p className="text-sm text-muted-foreground">
                     We will reply shortly with a tailored proposal.
                   </p>
-                  <Button onClick={() => setShowSuccess(false)} variant="outline">
+                  <Button onClick={() => setShowSuccess(false)} variant="outline" size="sm">
                     Send Another Request
                   </Button>
                 </CardContent>
               </Card>
             ) : (
               <Card className="shadow-medium border-0">
-                <CardContent className="pt-8">
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name *</Label>
+                <CardContent className="pt-6">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="fullName" className="text-sm">Full Name *</Label>
                         <Input
                           id="fullName"
                           {...register("fullName")}
                           placeholder="Your name"
                         />
                         {errors.fullName && (
-                          <p className="text-sm text-destructive">{errors.fullName.message}</p>
+                          <p className="text-xs text-destructive">{errors.fullName.message}</p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="companyName">Company Name</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="companyName" className="text-sm">Company Name</Label>
                         <Input
                           id="companyName"
                           {...register("companyName")}
                           placeholder="Your company"
                         />
                         {errors.companyName && (
-                          <p className="text-sm text-destructive">{errors.companyName.message}</p>
+                          <p className="text-xs text-destructive">{errors.companyName.message}</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Work Email *</Label>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="email" className="text-sm">Work Email *</Label>
                         <Input
                           id="email"
                           type="email"
@@ -367,85 +363,85 @@ export default function Companies() {
                           placeholder="you@company.com"
                         />
                         {errors.email && (
-                          <p className="text-sm text-destructive">{errors.email.message}</p>
+                          <p className="text-xs text-destructive">{errors.email.message}</p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone (optional)</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone" className="text-sm">Phone (optional)</Label>
                         <Input
                           id="phone"
                           {...register("phone")}
                           placeholder="+972 XX XXX XXXX"
                         />
                         {errors.phone && (
-                          <p className="text-sm text-destructive">{errors.phone.message}</p>
+                          <p className="text-xs text-destructive">{errors.phone.message}</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label>Type of Request *</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Type of Request *</Label>
                       <RadioGroup
                         value={requestType}
                         onValueChange={(value) => setValue("requestType", value as any)}
+                        className="space-y-1"
                       >
                         {Object.entries(requestTypeLabels).map(([value, label]) => (
                           <div key={value} className="flex items-center space-x-2">
                             <RadioGroupItem value={value} id={value} />
-                            <Label htmlFor={value} className="font-normal cursor-pointer">
+                            <Label htmlFor={value} className="font-normal cursor-pointer text-sm">
                               {label}
                             </Label>
                           </div>
                         ))}
                       </RadioGroup>
                       {errors.requestType && (
-                        <p className="text-sm text-destructive">{errors.requestType.message}</p>
+                        <p className="text-xs text-destructive">{errors.requestType.message}</p>
                       )}
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="groupSize">Estimated group size (optional)</Label>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="groupSize" className="text-sm">Group Size</Label>
                         <Input
                           id="groupSize"
                           {...register("groupSize")}
-                          placeholder="e.g. 20-30 people"
+                          placeholder="e.g. 10-50 people"
                         />
                         {errors.groupSize && (
-                          <p className="text-sm text-destructive">{errors.groupSize.message}</p>
+                          <p className="text-xs text-destructive">{errors.groupSize.message}</p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="preferredDates">Preferred date(s) (optional)</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="preferredDates" className="text-sm">Preferred Dates</Label>
                         <Input
                           id="preferredDates"
                           {...register("preferredDates")}
-                          placeholder="e.g. March 2025"
+                          placeholder="e.g. Q1 2025"
                         />
                         {errors.preferredDates && (
-                          <p className="text-sm text-destructive">{errors.preferredDates.message}</p>
+                          <p className="text-xs text-destructive">{errors.preferredDates.message}</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Tell us more...</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="message" className="text-sm">Message (optional)</Label>
                       <Textarea
                         id="message"
                         {...register("message")}
-                        placeholder="Share any additional details about what you're looking for"
-                        className="min-h-[120px]"
+                        placeholder="Tell us more about your request..."
+                        className="min-h-[80px]"
                       />
                       {errors.message && (
-                        <p className="text-sm text-destructive">{errors.message.message}</p>
+                        <p className="text-xs text-destructive">{errors.message.message}</p>
                       )}
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      size="lg" 
+                    <Button
+                      type="submit"
                       className="w-full"
                       disabled={isSubmitting}
                     >
