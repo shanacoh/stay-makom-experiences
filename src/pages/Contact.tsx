@@ -94,8 +94,9 @@ Reimagining the way we travel</h1>
       <main className="max-w-3xl mx-auto px-6 py-12">
         {/* Contact Text */}
         <section className="text-center mb-10">
-          <p className="text-base text-muted-foreground leading-relaxed">Questions, ideas, partnership requests? 
-Send us a message and we'll be happy to help ! <br />
+          <p className="text-base text-muted-foreground leading-relaxed">Questions, ideas, partnership requests?  
+Send us a message and we'll be happy to help ! 
+          <br />
             Send us a message — we'll be happy to help.
           </p>
         </section>
