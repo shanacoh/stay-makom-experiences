@@ -86,18 +86,19 @@ const Contact = () => {
           <div className="absolute inset-0 bg-black/20" />
         </div>
         <div className="relative z-10 text-center text-white px-6 max-w-3xl">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-50">STAYMAKOM  
-Reimagining the way we travel</h1>
+          <p className="text-base sm:text-lg md:text-xl text-slate-100 mb-2">Reimagining the way we travel</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-50">STAYMAKOM</h1>
         </div>
       </section>
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         {/* Contact Text */}
         <section className="text-center mb-10">
-          <p className="text-base text-muted-foreground leading-relaxed">Questions, ideas, partnership requests?  
-Send us a message and we'll be happy to help ! 
-          <br />
-            Send us a message — we'll be happy to help.
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Questions, ideas, partnership requests?
+          </p>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Send us a message and we'll be happy to help!
           </p>
         </section>
 
