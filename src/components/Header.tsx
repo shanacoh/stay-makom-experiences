@@ -143,37 +143,71 @@ const Header = () => {
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                  {roles.length > 0 && (
-                    <div className="font-medium text-foreground mb-1">Roles: {roles.join(", ")}</div>
-                  )}
-                  {user?.email}
+              <DropdownMenuContent align="end" className="w-72 p-0 bg-background border border-border/60 shadow-xl rounded-lg overflow-hidden">
+                {/* Header Section */}
+                <div className="px-5 py-4 bg-gradient-to-br from-muted/50 to-muted/30 border-b border-border/40">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      role === "admin" 
+                        ? "bg-primary/10 text-primary" 
+                        : role === "hotel_admin" 
+                          ? "bg-amber-500/10 text-amber-600" 
+                          : "bg-emerald-500/10 text-emerald-600"
+                    }`}>
+                      {role === "admin" ? (
+                        <LayoutDashboard className="h-5 w-5" />
+                      ) : role === "hotel_admin" ? (
+                        <Hotel className="h-5 w-5" />
+                      ) : (
+                        <UserCircle className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-0.5">
+                        {role === "admin" ? "Administrator" : role === "hotel_admin" ? "Hotel Partner" : "Member"}
+                      </p>
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate(getDashboardLink())}>
-                  {role === "admin" ? (
-                    <>
-                      <LayoutDashboard className="h-4 w-4 mr-2" />
-                      Admin Dashboard
-                    </>
-                  ) : role === "hotel_admin" ? (
-                    <>
-                      <Hotel className="h-4 w-4 mr-2" />
-                      Hotel Dashboard
-                    </>
-                  ) : (
-                    <>
-                      <UserCircle className="h-4 w-4 mr-2" />
-                      My Account
-                    </>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
+                
+                {/* Actions Section */}
+                <div className="p-2">
+                  <DropdownMenuItem 
+                    onClick={() => navigate(getDashboardLink())}
+                    className="px-3 py-2.5 rounded-md cursor-pointer focus:bg-muted/80"
+                  >
+                    {role === "admin" ? (
+                      <>
+                        <LayoutDashboard className="h-4 w-4 mr-3 text-primary" />
+                        <span className="font-medium">Admin Dashboard</span>
+                      </>
+                    ) : role === "hotel_admin" ? (
+                      <>
+                        <Hotel className="h-4 w-4 mr-3 text-amber-600" />
+                        <span className="font-medium">Hotel Dashboard</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserCircle className="h-4 w-4 mr-3 text-emerald-600" />
+                        <span className="font-medium">My Account</span>
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                </div>
+                
+                {/* Sign Out Section */}
+                <div className="p-2 pt-0 border-t border-border/40">
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    className="px-3 py-2.5 rounded-md cursor-pointer text-muted-foreground hover:text-foreground focus:bg-muted/80"
+                  >
+                    <LogOut className="h-4 w-4 mr-3" />
+                    <span>Sign Out</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
