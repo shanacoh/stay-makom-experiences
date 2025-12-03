@@ -143,69 +143,41 @@ const Header = () => {
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72 p-0 bg-background border border-border/60 shadow-xl rounded-lg overflow-hidden">
-                {/* Header Section */}
-                <div className="px-5 py-4 bg-gradient-to-br from-muted/50 to-muted/30 border-b border-border/40">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      role === "admin" 
-                        ? "bg-primary/10 text-primary" 
-                        : role === "hotel_admin" 
-                          ? "bg-amber-500/10 text-amber-600" 
-                          : "bg-emerald-500/10 text-emerald-600"
-                    }`}>
-                      {role === "admin" ? (
-                        <LayoutDashboard className="h-5 w-5" />
-                      ) : role === "hotel_admin" ? (
-                        <Hotel className="h-5 w-5" />
-                      ) : (
-                        <UserCircle className="h-5 w-5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-0.5">
-                        {role === "admin" ? "Administrator" : role === "hotel_admin" ? "Hotel Partner" : "Member"}
-                      </p>
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {user?.email}
-                      </p>
-                    </div>
-                  </div>
+              <DropdownMenuContent align="end" className="w-52 p-0 bg-background border border-border/50 shadow-lg rounded-md overflow-hidden">
+                <div className="px-3 py-2.5 border-b border-border/30">
+                  <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/70">
+                    {role === "admin" ? "Administrator" : role === "hotel_admin" ? "Hotel Partner" : "Member"}
+                  </p>
+                  <p className="text-sm text-foreground truncate mt-0.5">
+                    {user?.email}
+                  </p>
                 </div>
                 
-                {/* Actions Section */}
-                <div className="p-2">
+                <div className="py-1">
                   <DropdownMenuItem 
                     onClick={() => navigate(getDashboardLink())}
-                    className="px-3 py-2.5 rounded-md cursor-pointer focus:bg-muted/80"
+                    className="px-3 py-2 cursor-pointer"
                   >
                     {role === "admin" ? (
-                      <>
-                        <LayoutDashboard className="h-4 w-4 mr-3 text-primary" />
-                        <span className="font-medium">Admin Dashboard</span>
-                      </>
+                      <LayoutDashboard className="h-4 w-4 mr-2.5 text-muted-foreground" />
                     ) : role === "hotel_admin" ? (
-                      <>
-                        <Hotel className="h-4 w-4 mr-3 text-amber-600" />
-                        <span className="font-medium">Hotel Dashboard</span>
-                      </>
+                      <Hotel className="h-4 w-4 mr-2.5 text-muted-foreground" />
                     ) : (
-                      <>
-                        <UserCircle className="h-4 w-4 mr-3 text-emerald-600" />
-                        <span className="font-medium">My Account</span>
-                      </>
+                      <UserCircle className="h-4 w-4 mr-2.5 text-muted-foreground" />
                     )}
+                    <span className="text-sm">
+                      {role === "admin" ? "Dashboard" : role === "hotel_admin" ? "Hotel Dashboard" : "My Account"}
+                    </span>
                   </DropdownMenuItem>
-                </div>
-                
-                {/* Sign Out Section */}
-                <div className="p-2 pt-0 border-t border-border/40">
+                  
+                  <DropdownMenuSeparator className="my-1" />
+                  
                   <DropdownMenuItem 
                     onClick={handleSignOut}
-                    className="px-3 py-2.5 rounded-md cursor-pointer text-muted-foreground hover:text-foreground focus:bg-muted/80"
+                    className="px-3 py-2 cursor-pointer text-muted-foreground"
                   >
-                    <LogOut className="h-4 w-4 mr-3" />
-                    <span>Sign Out</span>
+                    <LogOut className="h-4 w-4 mr-2.5" />
+                    <span className="text-sm">Sign Out</span>
                   </DropdownMenuItem>
                 </div>
               </DropdownMenuContent>
