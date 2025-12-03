@@ -238,8 +238,8 @@ const Index = () => {
           </div>
           
           <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 text-white">Handpicked Hotels. 
-Unforgettable Experiences.<br />
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 text-white">
+              Handpicked Hotels.<br />
               Unforgettable Experiences.
             </h2>
             <div className="text-xs sm:text-sm md:text-base leading-relaxed text-white/95 max-w-2xl mx-auto space-y-3">
