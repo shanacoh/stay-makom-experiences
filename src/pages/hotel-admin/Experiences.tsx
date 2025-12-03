@@ -1,18 +1,21 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Calendar, Users, DollarSign, TrendingUp, Package } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, Calendar, DollarSign, Package, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
 export default function HotelExperiences() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [openExtras, setOpenExtras] = useState<Record<string, boolean>>({});
 
   const { data: hotelAdmin } = useQuery({
     queryKey: ["hotel-admin", user?.id],
@@ -45,7 +48,6 @@ export default function HotelExperiences() {
     enabled: !!hotelAdmin?.hotel_id,
   });
 
-  // Fetch extras through experience_extras join
   const { data: experienceExtras } = useQuery({
     queryKey: ["experience-extras-links", hotelAdmin?.hotel_id],
     queryFn: async () => {
@@ -84,7 +86,6 @@ export default function HotelExperiences() {
             totalBookings: 0,
             confirmedBookings: 0,
             totalRevenue: 0,
-            recentBookings: 0,
           };
         }
         acc[booking.experience_id].totalBookings += 1;
@@ -92,13 +93,6 @@ export default function HotelExperiences() {
           acc[booking.experience_id].confirmedBookings += 1;
         }
         acc[booking.experience_id].totalRevenue += Number(booking.total_price);
-        
-        const bookingDate = new Date(booking.created_at);
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        if (bookingDate > thirtyDaysAgo) {
-          acc[booking.experience_id].recentBookings += 1;
-        }
         
         return acc;
       }, {});
@@ -108,7 +102,6 @@ export default function HotelExperiences() {
     enabled: !!hotelAdmin?.hotel_id,
   });
 
-  // Mutation to toggle extra availability
   const toggleExtraMutation = useMutation({
     mutationFn: async ({ extraId, isAvailable }: { extraId: string; isAvailable: boolean }) => {
       const { error } = await supabase
@@ -120,7 +113,7 @@ export default function HotelExperiences() {
     },
     onSuccess: () => {
       toast.success("Extra availability updated");
-      queryClient.invalidateQueries({ queryKey: ["experience-extras", hotelAdmin?.hotel_id] });
+      queryClient.invalidateQueries({ queryKey: ["experience-extras-links", hotelAdmin?.hotel_id] });
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to update extra");
@@ -131,20 +124,23 @@ export default function HotelExperiences() {
     toggleExtraMutation.mutate({ extraId, isAvailable: !currentAvailability });
   };
 
+  const toggleExtrasOpen = (expId: string) => {
+    setOpenExtras(prev => ({ ...prev, [expId]: !prev[expId] }));
+  };
+
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="font-sans text-4xl font-bold">Experiences</h1>
-        <p className="text-muted-foreground mt-2">
-          View your experiences and manage extras availability
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="font-sans text-3xl font-bold">Experiences</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          View experiences and manage extras availability
         </p>
       </div>
 
       <Alert className="mb-6">
         <Info className="h-4 w-4" />
-        <AlertDescription>
-          Experience content (titles, descriptions, pricing) is managed by STAYMAKOM Admin. 
-          You can activate or deactivate extras for your experiences here.
+        <AlertDescription className="text-sm">
+          Experience content is managed by STAYMAKOM Admin. You can activate or deactivate extras here.
         </AlertDescription>
       </Alert>
 
@@ -154,27 +150,28 @@ export default function HotelExperiences() {
         </div>
       ) : !experiences || experiences.length === 0 ? (
         <Card>
-          <CardContent className="py-16">
-            <p className="text-muted-foreground text-center">
-              No experiences available yet. Contact STAYMAKOM Admin to create experiences for your property.
+          <CardContent className="py-12">
+            <p className="text-muted-foreground text-center text-sm">
+              No experiences available yet. Contact STAYMAKOM Admin to create experiences.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {experiences.map((exp) => {
             const stats = bookingStats?.[exp.id] || {
               totalBookings: 0,
               confirmedBookings: 0,
               totalRevenue: 0,
-              recentBookings: 0,
             };
 
             const expExtras = experienceExtras?.filter(link => link.experience_id === exp.id).map(link => link.extras) || [];
+            const isExtrasOpen = openExtras[exp.id] || false;
 
             return (
-              <Card key={exp.id} className="overflow-hidden">
-                <div className="relative h-48 bg-muted">
+              <Card key={exp.id} className="overflow-hidden flex flex-col">
+                {/* Compact Hero */}
+                <div className="relative h-32 bg-muted">
                   {exp.hero_image ? (
                     <img
                       src={exp.hero_image}
@@ -183,121 +180,84 @@ export default function HotelExperiences() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Calendar className="h-12 w-12 text-muted-foreground" />
+                      <Calendar className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="absolute top-3 right-3">
-                    <Badge
-                      variant={exp.status === "published" ? "default" : "secondary"}
-                      className="capitalize"
-                    >
-                      {exp.status}
-                    </Badge>
-                  </div>
+                  <Badge
+                    variant={exp.status === "published" ? "default" : "secondary"}
+                    className="absolute top-2 right-2 text-xs capitalize"
+                  >
+                    {exp.status}
+                  </Badge>
                 </div>
 
-                <CardHeader>
-                  <div className="space-y-2">
-                    <CardTitle className="text-xl">{exp.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground capitalize">
+                {/* Compact Content */}
+                <CardContent className="p-4 flex-1 flex flex-col">
+                  {/* Title & Category */}
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-base line-clamp-1">{exp.title}</h3>
+                    <p className="text-xs text-muted-foreground capitalize">
                       {exp.categories?.name || 'No category'}
                     </p>
-                    {exp.subtitle && (
-                      <p className="text-sm text-muted-foreground">{exp.subtitle}</p>
-                    )}
                   </div>
-                </CardHeader>
 
-                <CardContent className="space-y-6">
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>Bookings</span>
+                  {/* Compact Stats - 2x2 grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                      <div>
+                        <p className="text-lg font-bold leading-none">{stats.totalBookings}</p>
+                        <p className="text-[10px] text-muted-foreground">Bookings</p>
                       </div>
-                      <p className="text-2xl font-bold">{stats.totalBookings}</p>
-                      {stats.recentBookings > 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          +{stats.recentBookings} this month
-                        </p>
-                      )}
                     </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <DollarSign className="h-4 w-4" />
-                        <span>Revenue</span>
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                      <div>
+                        <p className="text-lg font-bold leading-none">${Math.round(stats.totalRevenue)}</p>
+                        <p className="text-[10px] text-muted-foreground">Revenue</p>
                       </div>
-                      <p className="text-2xl font-bold">
-                        ${Math.round(stats.totalRevenue)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{exp.currency}</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span>Confirmed</span>
-                      </div>
-                      <p className="text-2xl font-bold">{stats.confirmedBookings}</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>Base Price</span>
-                      </div>
-                      <p className="text-2xl font-bold">
-                        ${exp.base_price}
-                      </p>
                     </div>
                   </div>
 
-                  {/* Extras Section */}
+                  {/* Collapsible Extras */}
                   {expExtras.length > 0 && (
-                    <div className="border-t pt-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Package className="h-5 w-5" />
-                        <h3 className="font-semibold">Extras & Add-ons</h3>
-                        <Badge variant="secondary">{expExtras.length}</Badge>
-                      </div>
-                      <div className="space-y-3">
+                    <Collapsible open={isExtrasOpen} onOpenChange={() => toggleExtrasOpen(exp.id)} className="mt-auto">
+                      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 border-t text-sm">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          <span className="font-medium">Extras</span>
+                          <Badge variant="secondary" className="text-xs px-1.5 py-0">{expExtras.length}</Badge>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isExtrasOpen ? 'rotate-180' : ''}`} />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2 space-y-2">
                         {expExtras.map((extra) => (
                           <div
                             key={extra.id}
-                            className="flex items-center justify-between p-4 border rounded-lg bg-muted/30"
+                            className="flex items-center justify-between p-2 border rounded bg-muted/30"
                           >
-                            <div className="space-y-1 flex-1">
-                              <p className="font-medium">{extra.name}</p>
-                              <p className="text-sm text-muted-foreground line-clamp-1">
-                                {extra.description}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{extra.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                ${extra.price}
                               </p>
-                              <div className="flex items-center gap-4 text-sm">
-                                <span className="font-semibold">
-                                  ${extra.price} {extra.currency}
-                                </span>
-                                <Badge variant="outline" className="text-xs">
-                                  {extra.pricing_type === "per_person" ? "Per person" : 
-                                   extra.pricing_type === "per_night" ? "Per night" : "Per booking"}
-                                </Badge>
-                              </div>
                             </div>
-                            <div className="flex items-center gap-3 ml-4">
-                              <Label htmlFor={`extra-${extra.id}`} className="text-sm">
-                                {extra.is_available ? "Active" : "Inactive"}
+                            <div className="flex items-center gap-2 ml-2">
+                              <Label htmlFor={`extra-${extra.id}`} className="text-xs">
+                                {extra.is_available ? "On" : "Off"}
                               </Label>
                               <Switch
                                 id={`extra-${extra.id}`}
                                 checked={extra.is_available || false}
                                 onCheckedChange={() => handleToggleExtra(extra.id, extra.is_available || false)}
                                 disabled={toggleExtraMutation.isPending}
+                                className="scale-90"
                               />
                             </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   )}
                 </CardContent>
               </Card>
