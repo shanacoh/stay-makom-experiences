@@ -88,20 +88,17 @@ const Footer = () => {
   return (
     <footer className="bg-[#1a1a1a] text-white mt-20">
       <div className="container py-10">
-        {/* Brand - Always visible */}
-        <div className="mb-8">
-          <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
-            STAYMAKOM
-          </h3>
-          <p className="text-sm text-white/80 leading-relaxed">
-            Book extraordinary stays — beyond the usual.
-          </p>
-        </div>
-
-        {/* Desktop Layout */}
+        {/* Desktop Layout - 5 columns all aligned */}
         <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6">
-          {/* Column 1: Empty (brand is above) */}
-          <div />
+          {/* Column 1: Brand */}
+          <div>
+            <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
+              STAYMAKOM
+            </h3>
+            <p className="text-sm text-white/80 leading-relaxed">
+              Book extraordinary stays —<br />beyond the usual.
+            </p>
+          </div>
 
           {/* Column 2: Navigation */}
           <div>
@@ -116,6 +113,7 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+              <li><span className="text-sm text-white/50">More to come</span></li>
             </ul>
           </div>
 
@@ -157,7 +155,7 @@ const Footer = () => {
           {/* Column 5: Newsletter */}
           <div>
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              Get on the list
+              GET ON THE LIST
             </h4>
             <form onSubmit={handleNewsletterSubmit} className="mb-6">
               <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary" required />
@@ -193,6 +191,16 @@ const Footer = () => {
 
         {/* Mobile Layout - Accordions */}
         <div className="lg:hidden space-y-0">
+          {/* Brand - Mobile */}
+          <div className="mb-6 pb-4 border-b border-white/20">
+            <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
+              STAYMAKOM
+            </h3>
+            <p className="text-sm text-white/80 leading-relaxed">
+              Book extraordinary stays — beyond the usual.
+            </p>
+          </div>
+
           {/* STAYMAKOM Accordion */}
           <Collapsible open={openSection === 'staymakom'} onOpenChange={() => toggleSection('staymakom')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full py-3 border-b border-white/20">
