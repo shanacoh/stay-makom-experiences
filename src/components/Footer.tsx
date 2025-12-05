@@ -102,7 +102,8 @@ const Footer = () => {
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
               STAYMAKOM
             </h3>
-            <p className="text-sm text-white/80 leading-relaxed">Handpicked Hotels. Unforgettable Experiences.<br />beyond the usual.
+            <p className="text-sm text-white/80 leading-relaxed">Handpicked Hotels. Unforgettable Experiences.
+            <br />beyond the usual.
             </p>
           </div>
 
