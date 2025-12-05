@@ -183,10 +183,10 @@ const Contact = () => {
                 <Mail className="w-4 h-4" />
                 {settings.contact_email}
               </a>}
-            {settings?.instagram_handle && <a href={`https://instagram.com/${settings.instagram_handle.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
+            <a href="https://www.instagram.com/staymakom/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
                 <Instagram className="w-4 h-4" />
-                {settings.instagram_handle.startsWith('@') ? settings.instagram_handle : `@${settings.instagram_handle}`}
-              </a>}
+                @staymakom
+              </a>
           </div>
         </section>
       </main>
