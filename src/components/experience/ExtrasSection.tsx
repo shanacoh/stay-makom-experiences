@@ -2,11 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus, Sparkles } from "lucide-react";
 import { icons } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
 
 interface Extra {
   id: string;
   name: string;
+  name_he?: string | null;
   description?: string;
+  description_he?: string | null;
   price: number;
   currency: string;
   image_url?: string;
@@ -20,13 +24,17 @@ interface ExtrasSectionProps {
 }
 
 const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSectionProps) => {
+  const { lang } = useLanguage();
+  
   // Create placeholder items if fewer than 2
   const displayExtras = [...(extras || [])];
   while (displayExtras.length < 2) {
     displayExtras.push({
       id: `placeholder-${displayExtras.length}`,
-      name: 'Extra',
-      description: 'To be determined',
+      name: lang === 'he' ? 'תוספת' : 'Extra',
+      name_he: 'תוספת',
+      description: lang === 'he' ? 'יתווסף בקרוב' : 'To be determined',
+      description_he: 'יתווסף בקרוב',
       price: 0,
       currency: 'EUR',
       pricing_type: 'per_booking',
@@ -37,11 +45,11 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
   const getPricingLabel = (pricingType: string) => {
     switch (pricingType) {
       case "per_person":
-        return "/ person";
+        return t(lang, 'perPerson');
       case "per_night":
-        return "/ night";
+        return t(lang, 'perNight');
       case "per_booking":
-        return "/ booking";
+        return t(lang, 'perBooking');
       default:
         return "";
     }
@@ -54,10 +62,14 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <div>
-        <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold mb-2">Spice it up</h2>
-        <p className="text-xs sm:text-sm text-muted-foreground italic">Enhance your stay with optional extras you can add to your booking on the right.</p>
+        <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold mb-2">
+          {t(lang, 'spiceItUp')}
+        </h2>
+        <p className="text-xs sm:text-sm text-muted-foreground italic">
+          {t(lang, 'spiceItUpDescription')}
+        </p>
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -65,6 +77,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
           const isPlaceholder = extra.id.startsWith('placeholder');
           const quantity = selectedExtras[extra.id] || 0;
           const IconComponent = getIconComponent(extra.image_url);
+          const name = getLocalizedField(extra, 'name', lang) as string || extra.name;
           
           return (
             <div
@@ -80,19 +93,19 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
               <div className="flex flex-col flex-1">
                 {/* Label */}
                 <div className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                  Extra
+                  {t(lang, 'extra')}
                 </div>
                 
                 {/* Title - Fixed 2-line height */}
                 <h3 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-2 h-8 sm:h-9">
-                  {extra.name}
+                  {name}
                 </h3>
                 
                 {/* Price - Directly under title, no extra spacing */}
                 {!isPlaceholder && (
                   <div className="text-sm sm:text-base font-bold text-primary">
                     ${extra.price}
-                    <span className="text-[10px] sm:text-xs font-normal text-muted-foreground ml-1">
+                    <span className="text-[10px] sm:text-xs font-normal text-muted-foreground ms-1">
                       {getPricingLabel(extra.pricing_type)}
                     </span>
                   </div>
@@ -111,8 +124,8 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                         className="w-full h-8 text-xs hover:bg-primary hover:text-primary-foreground transition-colors"
                         onClick={() => onUpdateQuantity(extra.id, 1)}
                       >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Add
+                        <Plus className="w-3 h-3 me-1" />
+                        {t(lang, 'add')}
                       </Button>
                     ) : (
                       <div className="flex items-center gap-2 w-full justify-center bg-muted rounded-md p-1">

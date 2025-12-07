@@ -11,43 +11,40 @@ import CategoryFilters, { FilterState } from "@/components/category/CategoryFilt
 import ExperienceMap from "@/components/category/ExperienceMap";
 import { useState, useMemo } from "react";
 import { SEOHead } from "@/components/SEOHead";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
+
 const Category = () => {
-  const {
-    slug
-  } = useParams<{
-    slug: string;
-  }>();
+  const { slug } = useParams<{ slug: string }>();
+  const { lang } = useLanguage();
   const [showMap, setShowMap] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "recommended",
     priceRange: [0, 10000],
     partySize: 1
   });
-  const {
-    data: category,
-    isLoading: categoryLoading
-  } = useQuery({
+
+  const { data: category, isLoading: categoryLoading } = useQuery({
     queryKey: ["category", slug],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("categories").select("*").eq("slug", slug).eq("status", "published").single();
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
       if (error) throw error;
       return data;
     },
     enabled: !!slug
   });
-  const {
-    data: experiences,
-    isLoading: experiencesLoading
-  } = useQuery({
+
+  const { data: experiences, isLoading: experiencesLoading } = useQuery({
     queryKey: ["category-experiences", category?.id],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("experiences").select(`
+      const { data, error } = await supabase
+        .from("experiences")
+        .select(`
           *,
           hotels (
             id,
@@ -60,12 +57,15 @@ const Category = () => {
             longitude,
             hero_image
           )
-        `).eq("category_id", category?.id).eq("status", "published");
+        `)
+        .eq("category_id", category?.id)
+        .eq("status", "published");
       if (error) throw error;
       return data;
     },
     enabled: !!category?.id
   });
+
   const filteredExperiences = useMemo(() => {
     if (!experiences) return [];
     let filtered = [...experiences];
@@ -98,26 +98,39 @@ const Category = () => {
     }
     return filtered;
   }, [experiences, filters]);
+
   if (categoryLoading) {
-    return <div className="min-h-screen flex items-center justify-center">
+    return (
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>;
+      </div>
+    );
   }
+
   if (!category) {
-    return <div className="min-h-screen flex flex-col">
+    return (
+      <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Category not found</p>
+            <p className="text-muted-foreground mb-4">{t(lang, 'categoryNotFound')}</p>
             <Button asChild>
-              <Link to="/">Back to Home</Link>
+              <Link to="/">{t(lang, 'backToHome')}</Link>
             </Button>
           </div>
         </main>
         <Footer />
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen flex flex-col">
+
+  // Get localized content
+  const categoryName = getLocalizedField(category, 'name', lang) as string || category.name;
+  const presentationTitle = getLocalizedField(category, 'presentation_title', lang) as string || categoryName;
+  const introText = getLocalizedField(category, 'intro_rich_text', lang) as string || '';
+
+  return (
+    <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <SEOHead
         titleEn={category.seo_title_en}
         titleHe={category.seo_title_he}
@@ -128,34 +141,35 @@ const Category = () => {
         ogDescriptionEn={category.og_description_en}
         ogDescriptionHe={category.og_description_he}
         ogImage={category.og_image || category.hero_image}
-        fallbackTitle={`${category.name} - StayMakom`}
-        fallbackDescription={category.intro_rich_text || ""}
+        fallbackTitle={`${categoryName} - StayMakom`}
+        fallbackDescription={introText}
       />
       <Header />
       
       <main className="flex-1">
         {/* Immersive Hero Section */}
         <section className="relative h-[70vh] min-h-[600px] flex items-end">
-          <div className="absolute inset-0 bg-cover bg-center" style={{
-          backgroundImage: `url(${category.hero_image || '/placeholder.svg'})`
-        }} />
+          <div 
+            className="absolute inset-0 bg-cover bg-center" 
+            style={{ backgroundImage: `url(${category.hero_image || '/placeholder.svg'})` }} 
+          />
           
           <div className="relative z-10 container text-white px-4 py-12">
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end max-w-7xl mx-auto">
               {/* Left side - Category name and Title */}
               <div className="space-y-4">
                 <p className="text-xs sm:text-sm uppercase tracking-widest text-white/90 font-bold">
-                  {category.name}
+                  {categoryName}
                 </p>
                 <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl font-bold leading-tight uppercase text-white">
-                  {(category as any).presentation_title || category.name}
+                  {presentationTitle}
                 </h1>
               </div>
               
               {/* Right side - Description only */}
               <div>
                 <p className="text-sm sm:text-base md:text-lg leading-relaxed text-white">
-                  {category.intro_rich_text}
+                  {introText}
                 </p>
               </div>
             </div>
@@ -163,7 +177,12 @@ const Category = () => {
         </section>
 
         {/* Filters */}
-        <CategoryFilters onFilterChange={setFilters} onShowMapToggle={setShowMap} showMap={showMap} className="my-0" />
+        <CategoryFilters 
+          onFilterChange={setFilters} 
+          onShowMapToggle={setShowMap} 
+          showMap={showMap} 
+          className="my-0" 
+        />
 
         {/* Experiences List with Optional Map */}
         <section className="container py-8">
@@ -172,51 +191,66 @@ const Category = () => {
             <div>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold mb-1">
-                  {filteredExperiences.length} experience{filteredExperiences.length !== 1 ? 's' : ''} available
+                  {t(lang, 'experiencesAvailable')(filteredExperiences.length)}
                 </h2>
                 <p className="text-muted-foreground">
-                  Discover extraordinary stays
+                  {t(lang, 'discoverExtraordinaryStays')}
                 </p>
               </div>
 
-              {experiencesLoading ? <div className="text-center py-12">
+              {experiencesLoading ? (
+                <div className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                </div> : filteredExperiences.length === 0 ? <div className="text-center py-12">
-                  <p className="text-muted-foreground mb-4">No experiences match your criteria.</p>
-                  <Button variant="outline" onClick={() => setFilters({
-                sortBy: "recommended",
-                priceRange: [0, 10000],
-                partySize: 1
-              })}>
-                    Reset filters
+                </div>
+              ) : filteredExperiences.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-4">{t(lang, 'noExperiencesMatch')}</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setFilters({
+                      sortBy: "recommended",
+                      priceRange: [0, 10000],
+                      partySize: 1
+                    })}
+                  >
+                    {t(lang, 'resetFilters')}
                   </Button>
-                </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredExperiences.map(experience => {
-                const originalPrice = Number(experience.base_price);
-                const discountPercent = Math.floor(Math.random() * 30) + 10; // 10-40% discount
-                const rating = Math.random() * 0.5 + 8.5; // 8.5-9.0
-                const reviewCount = Math.floor(Math.random() * 1000) + 50;
-                return <ExperienceCard
+                    const originalPrice = Number(experience.base_price);
+                    const discountPercent = Math.floor(Math.random() * 30) + 10;
+                    const rating = Math.random() * 0.5 + 8.5;
+                    const reviewCount = Math.floor(Math.random() * 1000) + 50;
+                    return (
+                      <ExperienceCard
                         key={experience.id}
                         experience={experience}
                         originalPrice={originalPrice}
                         discountPercent={discountPercent}
                         rating={rating}
                         reviewCount={reviewCount}
-                      />;
-              })}
-                </div>}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Map */}
-            {showMap && <div className="hidden lg:block">
+            {showMap && (
+              <div className="hidden lg:block">
                 <ExperienceMap experiences={filteredExperiences} />
-              </div>}
+              </div>
+            )}
           </div>
         </section>
       </main>
 
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default Category;
