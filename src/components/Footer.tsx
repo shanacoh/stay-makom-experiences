@@ -102,9 +102,7 @@ const Footer = () => {
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
               STAYMAKOM
             </h3>
-            <p className="text-sm text-white/80 leading-relaxed">Handpicked Hotels. Unforgettable Experiences.
-            <br />beyond the usual.
-            </p>
+            <p className="text-sm text-white/80 leading-relaxed">Handpicked Hotels. Unforgettable Experiences.</p>
           </div>
 
           {/* Column 2: Navigation */}
@@ -194,7 +192,7 @@ const Footer = () => {
               STAYMAKOM
             </h3>
             <p className="text-sm text-white/80 leading-relaxed">
-              Book extraordinary stays — beyond the usual.
+              Handpicked Hotels. Unforgettable Experiences.
             </p>
           </div>
 
