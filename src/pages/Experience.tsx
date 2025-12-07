@@ -18,35 +18,34 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
+
 const Experience = () => {
-  const {
-    slug
-  } = useParams<{
-    slug: string;
-  }>();
-  const [selectedExtras, setSelectedExtras] = useState<{
-    [key: string]: number;
-  }>({});
+  const { slug } = useParams<{ slug: string }>();
+  const { lang } = useLanguage();
+  const [selectedExtras, setSelectedExtras] = useState<{ [key: string]: number }>({});
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
   const isMobile = useIsMobile();
-  const {
-    data: experience,
-    isLoading
-  } = useQuery({
+
+  const { data: experience, isLoading } = useQuery({
     queryKey: ["experience", slug],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("experiences").select(`
+      const { data, error } = await supabase
+        .from("experiences")
+        .select(`
           *,
           hotels (*)
-        `).eq("slug", slug).eq("status", "published").single();
+        `)
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
       if (error) throw error;
       return data;
     },
     enabled: !!slug
   });
+
   const { data: includes } = useQuery({
     queryKey: ["experience-includes", experience?.id],
     queryFn: async () => {
@@ -75,12 +74,10 @@ const Experience = () => {
     },
     enabled: !!experience?.id,
   });
-  const {
-    data: extras
-  } = useQuery({
+
+  const { data: extras } = useQuery({
     queryKey: ["experience-extras", experience?.id],
     queryFn: async () => {
-      // Fetch extras through the experience_extras join table
       const { data, error } = await supabase
         .from("experience_extras")
         .select(`
@@ -91,7 +88,6 @@ const Experience = () => {
 
       if (error) throw error;
       
-      // Filter to only available extras and flatten the structure
       return data
         ?.map((item: any) => item.extras)
         .filter((extra: any) => extra && extra.is_available)
@@ -99,20 +95,35 @@ const Experience = () => {
     },
     enabled: !!experience?.id
   });
+
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">
+    return (
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>;
+      </div>
+    );
   }
+
   if (!experience) {
-    return <div className="min-h-screen flex flex-col">
+    return (
+      <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Experience not found</p>
+          <p className="text-muted-foreground">{t(lang, 'experienceNotFound')}</p>
         </main>
         <Footer />
-      </div>;
+      </div>
+    );
   }
+
+  // Get localized content
+  const title = getLocalizedField(experience, 'title', lang) as string || experience.title;
+  const subtitle = getLocalizedField(experience, 'subtitle', lang) as string || experience.subtitle;
+  const hotelName = getLocalizedField(experience.hotels, 'name', lang) as string || experience.hotels?.name;
+  const city = getLocalizedField(experience.hotels, 'city', lang) as string || experience.hotels?.city;
+  const address = getLocalizedField(experience, 'address', lang) as string || (experience as any).address;
+  const goodToKnowItems = getLocalizedField(experience, 'good_to_know', lang) as string[] || experience.good_to_know;
+
   // Hero image: prioritize experience hero, then hotel hero
   const heroImage = experience.hero_image || experience.hotels?.hero_image || '/placeholder.svg';
   
@@ -122,8 +133,9 @@ const Experience = () => {
   if (experience.photos?.length) galleryPhotos.push(...experience.photos.filter((p: string) => p !== experience.hero_image));
   if (experience.hotels?.hero_image && !galleryPhotos.includes(experience.hotels.hero_image)) galleryPhotos.push(experience.hotels.hero_image);
   if (experience.hotels?.photos?.length) galleryPhotos.push(...experience.hotels.photos.filter((p: string) => !galleryPhotos.includes(p)));
-  
-  return <div className="min-h-screen flex flex-col">
+
+  return (
+    <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <SEOHead
         titleEn={experience.seo_title_en}
         titleHe={experience.seo_title_he}
@@ -134,13 +146,19 @@ const Experience = () => {
         ogDescriptionEn={experience.og_description_en}
         ogDescriptionHe={experience.og_description_he}
         ogImage={experience.og_image || experience.hero_image}
-        fallbackTitle={`${experience.title} - ${experience.hotels?.name || ''} - StayMakom`}
-        fallbackDescription={experience.subtitle || experience.long_copy?.substring(0, 155) || ""}
+        fallbackTitle={`${title} - ${hotelName || ''} - StayMakom`}
+        fallbackDescription={subtitle || experience.long_copy?.substring(0, 155) || ""}
       />
       <Header />
 
       <main className="flex-1">
-        <ExperienceHero title={experience.title} subtitle={experience.subtitle} hotelName={experience.hotels?.name} heroImage={heroImage} galleryPhotos={galleryPhotos} />
+        <ExperienceHero 
+          title={title} 
+          subtitle={subtitle} 
+          hotelName={hotelName} 
+          heroImage={heroImage} 
+          galleryPhotos={galleryPhotos} 
+        />
 
         <div className="container pb-16 px-4 sm:px-6 my-[26px]">
           <div className={`grid lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 ${isMobile ? 'pb-24' : ''}`}>
@@ -148,14 +166,14 @@ const Experience = () => {
             <div className="lg:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
               {/* Title Block */}
               <TitleBlock
-                title={experience.title}
-                hotelName={experience.hotels?.name || ''}
+                title={title}
+                hotelName={hotelName || ''}
                 hotelSlug={experience.hotels?.slug}
                 isNew={false}
                 rating={reviews && reviews.length > 0 ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length : undefined}
                 reviewCount={reviews?.length}
-                city={experience.hotels?.city}
-                address={(experience as any).address}
+                city={city}
+                address={address}
                 googleMapsLink={(experience as any).google_maps_link}
               />
 
@@ -181,13 +199,13 @@ const Experience = () => {
               <ReviewsSection experienceId={experience.id} />
 
               {/* Good to Know */}
-              <GoodToKnow items={experience.good_to_know} />
+              <GoodToKnow items={goodToKnowItems} />
 
               {/* Other Experiences from This Hotel */}
               <OtherExperiencesFromHotel 
                 hotelId={experience.hotel_id}
                 currentExperienceId={experience.id}
-                hotelName={experience.hotels?.name || ''}
+                hotelName={hotelName || ''}
               />
             </div>
 
@@ -222,17 +240,25 @@ const Experience = () => {
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      / {experience.base_price_type === 'per_person' ? 'personne' : 'séjour'} · -26%
+                      / {experience.base_price_type === 'per_person' ? (lang === 'he' ? 'אדם' : 'person') : (lang === 'he' ? 'הזמנה' : 'booking')} · -26%
                     </span>
                   </div>
                   <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
-                    Book it now
+                    {t(lang, 'bookItNow')}
                   </Button>
                 </button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
                 <div className="p-6">
-                  <BookingPanel experienceId={experience.id} hotelId={experience.hotel_id} basePrice={experience.base_price} basePriceType={experience.base_price_type || "per_person"} currency={experience.currency || "USD"} minParty={experience.min_party || 2} maxParty={experience.max_party || 4} />
+                  <BookingPanel 
+                    experienceId={experience.id} 
+                    hotelId={experience.hotel_id} 
+                    basePrice={experience.base_price} 
+                    basePriceType={experience.base_price_type || "per_person"} 
+                    currency={experience.currency || "USD"} 
+                    minParty={experience.min_party || 2} 
+                    maxParty={experience.max_party || 4} 
+                  />
                 </div>
               </SheetContent>
             </Sheet>
@@ -241,6 +267,8 @@ const Experience = () => {
       </main>
 
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default Experience;
