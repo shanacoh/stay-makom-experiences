@@ -7,93 +7,82 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
+
 const Footer = () => {
   const [email, setEmail] = useState("");
-  const {
-    data: categories
-  } = useQuery({
+  const { lang } = useLanguage();
+  const isRTL = lang === 'he';
+
+  const { data: categories } = useQuery({
     queryKey: ["categories-footer"],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("categories").select("id, name, slug").eq("status", "published").order("display_order", {
-        ascending: true
-      });
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, name_he, slug")
+        .eq("status", "published")
+        .order("display_order", { ascending: true });
       if (error) throw error;
       return data;
     }
   });
-  const {
-    data: settings
-  } = useQuery({
+
+  const { data: settings } = useQuery({
     queryKey: ["global-settings"],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("global_settings").select("*").eq("key", "site_config").maybeSingle();
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("*")
+        .eq("key", "site_config")
+        .maybeSingle();
       if (error) throw error;
       return data;
     }
   });
+
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const {
-        error
-      } = await supabase.from("leads").insert({
+      const { error } = await supabase.from("leads").insert({
         source: "newsletter",
         email: email.trim()
       });
       if (error) throw error;
-      toast.success("Thank you for subscribing!");
+      toast.success(t(lang, 'footerSubscribed'));
       setEmail("");
     } catch (error) {
       console.error("Error subscribing:", error);
       toast.error("Something went wrong. Please try again.");
     }
   };
+
   const [openSection, setOpenSection] = useState<string | null>(null);
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
   };
-  const navLinks = [{
-    to: "/about",
-    label: "About"
-  }, {
-    to: "/partners",
-    label: "I'm a hotel"
-  }, {
-    to: "/companies",
-    label: "Company gift"
-  }, {
-    to: "/contact",
-    label: "Contact us"
-  }, {
-    to: "/partners",
-    label: "Become partner"
-  }, {
-    to: "/journal",
-    label: "Journal"
-  }];
-  const legalLinks = [{
-    to: "/terms",
-    label: "Terms & Conditions"
-  }, {
-    to: "/privacy",
-    label: "Privacy Policy"
-  }, {
-    to: "/cancellation-policy",
-    label: "Cancellation Policy"
-  }, {
-    to: "/cookies",
-    label: "Cookie Policy"
-  }, {
-    to: "/legal",
-    label: "Legal Notice"
-  }];
-  return <footer className="bg-[#1a1a1a] text-white mt-20">
+
+  const langParam = lang === 'he' ? '?lang=he' : '';
+
+  const navLinks = [
+    { to: `/about${langParam}`, label: t(lang, 'footerAbout') },
+    { to: `/partners${langParam}`, label: t(lang, 'footerImAHotel') },
+    { to: `/companies${langParam}`, label: t(lang, 'footerCompanyGift') },
+    { to: `/contact${langParam}`, label: t(lang, 'footerContactUs') },
+    { to: `/partners${langParam}`, label: t(lang, 'footerBecomePartner') },
+    { to: `/journal${langParam}`, label: t(lang, 'footerJournal') },
+  ];
+
+  const legalLinks = [
+    { to: `/terms${langParam}`, label: t(lang, 'footerTerms') },
+    { to: `/privacy${langParam}`, label: t(lang, 'footerPrivacy') },
+    { to: `/cancellation-policy${langParam}`, label: t(lang, 'footerCancellation') },
+    { to: `/cookies${langParam}`, label: t(lang, 'footerCookies') },
+    { to: `/legal${langParam}`, label: t(lang, 'footerLegalNotice') },
+  ];
+
+  return (
+    <footer className="bg-[#1a1a1a] text-white mt-20" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container py-10">
         {/* Desktop Layout - 5 columns all aligned */}
         <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6">
@@ -102,69 +91,86 @@ const Footer = () => {
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-3 text-slate-50">
               STAYMAKOM
             </h3>
-            <p className="text-sm text-white/80 leading-relaxed">Handpicked Hotels. Unforgettable Experiences.</p>
+            <p className="text-sm text-white/80 leading-relaxed">{t(lang, 'footerTagline')}</p>
           </div>
 
           {/* Column 2: Navigation */}
           <div>
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              STAYMAKOM
+              {t(lang, 'footerStaymakom')}
             </h4>
             <ul className="space-y-2">
-              {navLinks.map(link => <li key={link.to + link.label}>
+              {navLinks.map(link => (
+                <li key={link.to + link.label}>
                   <Link to={link.to} className="text-sm text-white hover:text-primary transition-smooth">
                     {link.label}
                   </Link>
-                </li>)}
-              <li><span className="text-sm text-white/50">More to come</span></li>
+                </li>
+              ))}
+              <li><span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span></li>
             </ul>
           </div>
 
           {/* Column 3: Experiences */}
           <div>
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              EXPERIENCES
+              {t(lang, 'footerExperiences')}
             </h4>
             <ul className="space-y-2">
-              {categories?.map(category => <li key={category.id}>
-                  <Link to={`/category/${category.slug}`} className="text-sm text-white hover:text-primary transition-smooth">
-                    {category.name}
+              {categories?.map(category => (
+                <li key={category.id}>
+                  <Link to={`/category/${category.slug}${langParam}`} className="text-sm text-white hover:text-primary transition-smooth">
+                    {getLocalizedField(category, 'name', lang) as string}
                   </Link>
-                </li>)}
-              {(!categories || categories.length === 0) && <li><span className="text-sm text-white/50">More to come</span></li>}
+                </li>
+              ))}
+              {(!categories || categories.length === 0) && (
+                <li><span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span></li>
+              )}
             </ul>
           </div>
 
           {/* Column 4: Legal */}
           <div>
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              LEGAL
+              {t(lang, 'footerLegal')}
             </h4>
             <ul className="space-y-2">
-              {legalLinks.map(link => <li key={link.to}>
+              {legalLinks.map(link => (
+                <li key={link.to}>
                   <Link to={link.to} className="text-sm text-white hover:text-primary transition-smooth">
                     {link.label}
                   </Link>
-                </li>)}
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Column 5: Newsletter */}
           <div>
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              GET ON THE LIST
+              {t(lang, 'footerNewsletter')}
             </h4>
             <form onSubmit={handleNewsletterSubmit} className="mb-6">
-              <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary" required />
+              <Input
+                type="email"
+                placeholder={t(lang, 'footerEmailPlaceholder')}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary"
+                required
+              />
               <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full">
-                Subscribe
+                {t(lang, 'footerSubscribe')}
               </Button>
             </form>
             <div className="space-y-2">
-              {settings?.contact_email && <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
+              {settings?.contact_email && (
+                <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
                   <Mail className="h-4 w-4" />
                   {settings.contact_email}
-                </a>}
+                </a>
+              )}
             </div>
             <div className="flex items-center gap-4 mt-4">
               <a href="https://www.instagram.com/staymakom/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-primary transition-smooth">
@@ -192,7 +198,7 @@ const Footer = () => {
               STAYMAKOM
             </h3>
             <p className="text-sm text-white/80 leading-relaxed">
-              Handpicked Hotels. Unforgettable Experiences.
+              {t(lang, 'footerTagline')}
             </p>
           </div>
 
@@ -200,14 +206,20 @@ const Footer = () => {
           <Collapsible open={openSection === 'staymakom'} onOpenChange={() => toggleSection('staymakom')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full py-3 border-b border-white/20">
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-slate-50">
-                STAYMAKOM
+                {t(lang, 'footerStaymakom')}
               </h4>
               <ChevronDown className={`h-4 w-4 text-white/70 transition-transform duration-200 ${openSection === 'staymakom' ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="py-3 space-y-2">
-              {navLinks.map(link => <Link key={link.to + link.label} to={link.to} className="block text-sm text-white/80 hover:text-primary transition-smooth py-1">
+              {navLinks.map(link => (
+                <Link
+                  key={link.to + link.label}
+                  to={link.to}
+                  className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
+                >
                   {link.label}
-                </Link>)}
+                </Link>
+              ))}
             </CollapsibleContent>
           </Collapsible>
 
@@ -215,15 +227,23 @@ const Footer = () => {
           <Collapsible open={openSection === 'experiences'} onOpenChange={() => toggleSection('experiences')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full py-3 border-b border-white/20">
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-slate-50">
-                EXPERIENCES
+                {t(lang, 'footerExperiences')}
               </h4>
               <ChevronDown className={`h-4 w-4 text-white/70 transition-transform duration-200 ${openSection === 'experiences' ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="py-3 space-y-2">
-              {categories?.map(category => <Link key={category.id} to={`/category/${category.slug}`} className="block text-sm text-white/80 hover:text-primary transition-smooth py-1">
-                  {category.name}
-                </Link>)}
-              {(!categories || categories.length === 0) && <span className="text-sm text-white/50">More to come</span>}
+              {categories?.map(category => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.slug}${langParam}`}
+                  className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
+                >
+                  {getLocalizedField(category, 'name', lang) as string}
+                </Link>
+              ))}
+              {(!categories || categories.length === 0) && (
+                <span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span>
+              )}
             </CollapsibleContent>
           </Collapsible>
 
@@ -231,35 +251,50 @@ const Footer = () => {
           <Collapsible open={openSection === 'legal'} onOpenChange={() => toggleSection('legal')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full py-3 border-b border-white/20">
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-slate-50">
-                LEGAL
+                {t(lang, 'footerLegal')}
               </h4>
               <ChevronDown className={`h-4 w-4 text-white/70 transition-transform duration-200 ${openSection === 'legal' ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="py-3 space-y-2">
-              {legalLinks.map(link => <Link key={link.to} to={link.to} className="block text-sm text-white/80 hover:text-primary transition-smooth py-1">
+              {legalLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
+                >
                   {link.label}
-                </Link>)}
+                </Link>
+              ))}
             </CollapsibleContent>
           </Collapsible>
 
           {/* Newsletter Section - Below accordions on mobile */}
           <div className="pt-6 mt-4">
             <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              Get on the list
+              {t(lang, 'footerNewsletter')}
             </h4>
             <form onSubmit={handleNewsletterSubmit} className="mb-6">
-              <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary" required />
+              <Input
+                type="email"
+                placeholder={t(lang, 'footerEmailPlaceholder')}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary"
+                required
+              />
               <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full">
-                Subscribe
+                {t(lang, 'footerSubscribe')}
               </Button>
             </form>
 
             {/* Contact Info */}
             <div className="space-y-2">
-              {settings?.contact_email && <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
+              {settings?.contact_email && (
+                <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 text-sm text-white hover:text-primary transition-smooth">
                   <Mail className="h-4 w-4" />
                   {settings.contact_email}
-                </a>}
+                </a>
+              )}
             </div>
 
             {/* Social Icons */}
@@ -284,10 +319,12 @@ const Footer = () => {
         {/* Copyright */}
         <div className="mt-8 pt-6 border-t border-white/20 text-center">
           <p className="text-sm text-white">
-            © 2025 STAYMAKOM. All rights reserved.
+            {t(lang, 'footerCopyright')}
           </p>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;
