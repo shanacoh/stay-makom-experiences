@@ -82,7 +82,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#1a1a1a] text-white mt-20" dir={isRTL ? 'rtl' : 'ltr'}>
+    <footer className="bg-[#1a1a1a] text-white" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container py-10">
         {/* Desktop Layout - 5 columns all aligned */}
         <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6">
