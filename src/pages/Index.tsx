@@ -221,14 +221,14 @@ const Index = () => {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-end">
+        <section className="relative min-h-screen flex items-center justify-center md:items-end md:justify-start">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
           <div className="absolute inset-0 bg-black/30" />
           
-          <div className={`relative z-10 container text-white px-4 sm:px-6 pb-8 sm:pb-12 md:pb-16 ${isRTL ? 'mr-0 sm:mr-4 md:mr-8 lg:mr-[1cm] text-right' : 'ml-0 sm:ml-4 md:ml-8 lg:ml-[1cm] text-left'}`}>
+          <div className={`relative z-10 container text-white px-4 sm:px-6 pb-8 md:pb-16 flex flex-col items-center text-center md:items-start md:text-left ${isRTL ? 'md:mr-0 md:mr-4 lg:mr-[1cm] md:text-right' : 'md:ml-0 md:ml-4 lg:ml-[1cm] md:text-left'}`}>
             <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-5xl text-slate-50 pt-6">
               {t(lang, 'heroTitle1')}
               <br />
