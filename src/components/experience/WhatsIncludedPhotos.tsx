@@ -32,8 +32,12 @@ const WhatsIncludedPhotos = ({ includes }: WhatsIncludedPhotosProps) => {
     });
   }
 
+  const isImageUrl = (url?: string | null): boolean => {
+    return !!url && (url.startsWith('http://') || url.startsWith('https://'));
+  };
+
   const getIconComponent = (iconName?: string | null): LucideIcon => {
-    if (!iconName) return Sparkles;
+    if (!iconName || isImageUrl(iconName)) return Sparkles;
     const IconComponent = icons[iconName as keyof typeof icons];
     return (IconComponent as LucideIcon) || Sparkles;
   };
@@ -48,6 +52,7 @@ const WhatsIncludedPhotos = ({ includes }: WhatsIncludedPhotosProps) => {
           const isPlaceholder = item.id.startsWith('placeholder');
           const title = getLocalizedField(item, 'title', lang) as string || item.title;
           const description = getLocalizedField(item, 'description', lang) as string || item.description;
+          const hasImageUrl = isImageUrl(item.icon_url);
           const IconComponent = getIconComponent(item.icon_url);
           
           return (
@@ -55,9 +60,17 @@ const WhatsIncludedPhotos = ({ includes }: WhatsIncludedPhotosProps) => {
               key={item.id}
               className={`group flex flex-col ${isPlaceholder ? 'opacity-40' : ''}`}
             >
-              {/* Icon Container */}
+              {/* Image or Icon Container */}
               <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-3">
-                <IconComponent className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary" />
+                {hasImageUrl ? (
+                  <img 
+                    src={item.icon_url!} 
+                    alt={title} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <IconComponent className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary" />
+                )}
               </div>
               
               {/* Content Container */}
