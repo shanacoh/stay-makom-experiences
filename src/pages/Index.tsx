@@ -238,6 +238,15 @@ const Index = () => {
                 interval={2500}
               />
             </h1>
+            <button
+              onClick={() => {
+                const element = document.getElementById('choose-escape');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="mt-4 sm:mt-6 px-6 sm:px-8 py-3 sm:py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm sm:text-base rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
+            >
+              {t(lang, 'heroCTA')}
+            </button>
           </div>
         </section>
 
