@@ -232,7 +232,7 @@ const Index = () => {
             <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-5xl text-slate-50 pt-6">
               {/* Mobile: "MORE THAN A STAY, IT'S A" on one line */}
               <span className="md:hidden">
-                {t(lang, 'heroTitle1')}, {t(lang, 'heroTitle2')}
+                {t(lang, 'heroTitle1')} {t(lang, 'heroTitle2')}
               </span>
               {/* Desktop: original layout with line break */}
               <span className="hidden md:inline">
