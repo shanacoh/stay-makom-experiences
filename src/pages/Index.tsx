@@ -230,13 +230,23 @@ const Index = () => {
           
           <div className={`relative z-10 container text-white px-4 sm:px-6 pb-8 md:pb-16 flex flex-col items-center text-center md:items-start md:text-left ${isRTL ? 'md:mr-0 md:mr-4 lg:mr-[1cm] md:text-right' : 'md:ml-0 md:ml-4 lg:ml-[1cm] md:text-left'}`}>
             <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-5xl text-slate-50 pt-6">
-              {t(lang, 'heroTitle1')}
-              <br />
-              {t(lang, 'heroTitle2')}{" "}
-              <RotatingText
-                words={categories?.map(cat => getLocalizedField(cat, 'name', lang) as string) || ["Romance", "Adventure", "Family"]}
-                interval={2500}
-              />
+              {/* Mobile: "MORE THAN A STAY, IT'S A" on one line */}
+              <span className="md:hidden">
+                {t(lang, 'heroTitle1')}, {t(lang, 'heroTitle2')}
+              </span>
+              {/* Desktop: original layout with line break */}
+              <span className="hidden md:inline">
+                {t(lang, 'heroTitle1')}
+                <br />
+                {t(lang, 'heroTitle2')}{" "}
+              </span>
+              {/* Rotating category - on its own line on mobile */}
+              <span className="block md:inline">
+                <RotatingText
+                  words={categories?.map(cat => getLocalizedField(cat, 'name', lang) as string) || ["Romance", "Adventure", "Family"]}
+                  interval={2500}
+                />
+              </span>
             </h1>
             <button
               onClick={() => {
