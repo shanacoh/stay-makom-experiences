@@ -82,7 +82,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#1a1a1a] text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+    <footer className="bg-[#1a1a1a] text-white">
       <div className="container py-10">
         {/* Desktop Layout - 5 columns all aligned */}
         <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6">
@@ -191,7 +191,7 @@ const Footer = () => {
         </div>
 
         {/* Mobile Layout - Accordions */}
-        <div className="lg:hidden space-y-0">
+        <div className="lg:hidden space-y-0" dir={isRTL ? 'rtl' : 'ltr'}>
           {/* Brand - Mobile */}
           <div className="mb-6 pb-4 border-b border-white/20">
             <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
