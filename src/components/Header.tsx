@@ -72,7 +72,7 @@ const Header = () => {
   const logoClasses = isTransparentPage && !isScrolled ? "text-white" : "text-logo";
 
   return (
-    <header className={headerClasses}>
+    <header className={headerClasses} dir="ltr">
       <div className={`container flex items-center justify-between bg-transparent ${isTransparentPage && !isScrolled ? "h-16" : "h-12"}`}>
         <Link to="/" className="flex items-center space-x-2">
           <span className={`font-sans font-bold tracking-[-0.04em] uppercase ${isTransparentPage && !isScrolled ? "text-2xl" : "text-xl"} ${logoClasses}`}>STAYMAKOM</span>
