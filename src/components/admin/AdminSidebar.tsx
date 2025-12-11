@@ -9,6 +9,7 @@ import {
   BookOpen,
   Settings,
   Sparkles,
+  Gift,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,6 +29,7 @@ const menuItems = [
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
   { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
   { title: "Bookings", url: "/admin/bookings", icon: Calendar },
+  { title: "Gift Cards", url: "/admin/gift-cards", icon: Gift },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Customers", url: "/admin/customers", icon: UserCircle },
   { title: "Journal", url: "/admin/journal", icon: BookOpen },

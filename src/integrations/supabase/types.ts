@@ -755,14 +755,18 @@ export type Database = {
           created_at: string
           currency: string | null
           delivery_date: string
+          delivery_type: string | null
           experience_id: string | null
           expires_at: string
           id: string
+          language: string | null
           message: string | null
           recipient_email: string
+          recipient_name: string | null
           redeemed_at: string | null
           sender_email: string
           sender_name: string
+          sent_at: string | null
           status: string
           stripe_payment_intent_id: string | null
           type: string
@@ -775,14 +779,18 @@ export type Database = {
           created_at?: string
           currency?: string | null
           delivery_date?: string
+          delivery_type?: string | null
           experience_id?: string | null
           expires_at?: string
           id?: string
+          language?: string | null
           message?: string | null
           recipient_email: string
+          recipient_name?: string | null
           redeemed_at?: string | null
           sender_email: string
           sender_name: string
+          sent_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
           type: string
@@ -795,14 +803,18 @@ export type Database = {
           created_at?: string
           currency?: string | null
           delivery_date?: string
+          delivery_type?: string | null
           experience_id?: string | null
           expires_at?: string
           id?: string
+          language?: string | null
           message?: string | null
           recipient_email?: string
+          recipient_name?: string | null
           redeemed_at?: string | null
           sender_email?: string
           sender_name?: string
+          sent_at?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
           type?: string
