@@ -50,6 +50,8 @@ import AdminUsers from "./pages/admin/Users";
 import AdminCustomers from "./pages/admin/Customers";
 import AdminJournal from "./pages/admin/Journal";
 import JournalEditor from "./pages/admin/JournalEditor";
+import AdminGiftCards from "./pages/admin/GiftCards";
+import AdminGiftCardDetails from "./pages/admin/GiftCardDetails";
 import AdminSettings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -113,6 +115,8 @@ const App = () => (
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="reservations" element={<AdminBookings />} />
               <Route path="reservations/:bookingId" element={<AdminReservationDetails />} />
+              <Route path="gift-cards" element={<AdminGiftCards />} />
+              <Route path="gift-cards/:id" element={<AdminGiftCardDetails />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="journal" element={<AdminJournal />} />

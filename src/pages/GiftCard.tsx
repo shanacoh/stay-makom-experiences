@@ -8,29 +8,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Gift } from "lucide-react";
-import { format } from "date-fns";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CalendarIcon } from "lucide-react";
+import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
 
+type Currency = "ILS" | "USD";
+
+const currencySymbols: Record<Currency, string> = {
+  ILS: "₪",
+  USD: "$"
+};
+
+const predefinedAmounts: Record<Currency, number[]> = {
+  ILS: [250, 500, 1000],
+  USD: [50, 100, 250]
+};
+
+function generateGiftCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let part1 = "";
+  let part2 = "";
+  for (let i = 0; i < 4; i++) {
+    part1 += chars.charAt(Math.floor(Math.random() * chars.length));
+    part2 += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `MK-${part1}-${part2}`;
+}
+
 export default function GiftCard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const currentLang = searchParams.get("lang") || "en";
   
-  // Gift by Amount state
+  // Form state
+  const [currency, setCurrency] = useState<Currency>("ILS");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
-  const [amountMessage, setAmountMessage] = useState("");
-  const [amountRecipientEmail, setAmountRecipientEmail] = useState("");
-  const [amountSenderName, setAmountSenderName] = useState("");
-  const [amountSenderEmail, setAmountSenderEmail] = useState("");
-  const [amountDeliveryDate, setAmountDeliveryDate] = useState<Date>();
-  const [amountDeliveryType, setAmountDeliveryType] = useState<"now" | "scheduled">("now");
+  const [message, setMessage] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [senderEmail, setSenderEmail] = useState("");
+  const [deliveryType, setDeliveryType] = useState<"now" | "scheduled">("now");
+  const [scheduledDate, setScheduledDate] = useState<Date>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAmountSubmit = async () => {
+  const handleSubmit = async () => {
     const amount = selectedAmount || parseFloat(customAmount);
     
     if (!amount || amount <= 0) {
@@ -38,27 +68,53 @@ export default function GiftCard() {
       return;
     }
     
-    if (!amountRecipientEmail || !amountSenderName || !amountSenderEmail) {
+    if (!recipientEmail || !senderName || !senderEmail) {
       toast.error("Please fill in all required fields");
       return;
     }
 
+    if (deliveryType === "scheduled" && !scheduledDate) {
+      toast.error("Please select a delivery date");
+      return;
+    }
+
+    // Validate email formats
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail)) {
+      toast.error("Please enter a valid recipient email");
+      return;
+    }
+    if (!emailRegex.test(senderEmail)) {
+      toast.error("Please enter a valid sender email");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     // Generate unique gift code
-    const code = `STAY-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+    const code = generateGiftCode();
+    const now = new Date();
+    const validUntil = addYears(now, 1);
 
     try {
       const { error } = await supabase.from("gift_cards").insert({
         code,
         type: "amount",
         amount,
-        currency: "ILS",
-        sender_name: amountSenderName,
-        sender_email: amountSenderEmail,
-        recipient_email: amountRecipientEmail,
-        message: amountMessage || null,
-        delivery_date: amountDeliveryType === "scheduled" && amountDeliveryDate 
-          ? amountDeliveryDate.toISOString()
-          : new Date().toISOString(),
+        currency,
+        sender_name: senderName,
+        sender_email: senderEmail,
+        recipient_name: recipientName || null,
+        recipient_email: recipientEmail,
+        message: message || null,
+        delivery_type: deliveryType,
+        delivery_date: deliveryType === "scheduled" && scheduledDate 
+          ? scheduledDate.toISOString()
+          : now.toISOString(),
+        status: deliveryType === "now" ? "sent" : "scheduled",
+        language: currentLang,
+        sent_at: deliveryType === "now" ? now.toISOString() : null,
+        expires_at: validUntil.toISOString(),
       });
 
       if (error) throw error;
@@ -69,8 +125,13 @@ export default function GiftCard() {
     } catch (error) {
       console.error("Error creating gift card:", error);
       toast.error("Failed to create gift card. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const symbol = currencySymbols[currency];
+  const amounts = predefinedAmounts[currency];
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,9 +189,28 @@ export default function GiftCard() {
                 <CardTitle className="text-lg">Select Amount</CardTitle>
                 <CardDescription className="text-sm">Freedom to choose. A journey waiting to begin.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
+                {/* Currency Selector */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Currency</Label>
+                  <Select value={currency} onValueChange={(val) => {
+                    setCurrency(val as Currency);
+                    setSelectedAmount(null);
+                    setCustomAmount("");
+                  }}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ILS">ILS (₪)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Predefined Amounts */}
                 <div className="grid grid-cols-3 gap-2">
-                  {[250, 500, 1000].map((amount) => (
+                  {amounts.map((amount) => (
                     <Button
                       key={amount}
                       variant={selectedAmount === amount ? "default" : "outline"}
@@ -140,114 +220,131 @@ export default function GiftCard() {
                       }}
                       className="h-auto py-3 flex flex-col"
                     >
-                      <span className="text-xl font-bold">₪{amount}</span>
+                      <span className="text-xl font-bold">{symbol}{amount}</span>
                     </Button>
                   ))}
                 </div>
 
+                {/* Custom Amount */}
                 <div className="space-y-1.5">
                   <Label htmlFor="custom-amount" className="text-sm">Custom Amount</Label>
-                  <Input
-                    id="custom-amount"
-                    type="number"
-                    placeholder="Enter amount"
-                    value={customAmount}
-                    onChange={(e) => {
-                      setCustomAmount(e.target.value);
-                      setSelectedAmount(null);
-                    }}
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      {symbol}
+                    </span>
+                    <Input
+                      id="custom-amount"
+                      type="number"
+                      placeholder="Enter amount"
+                      value={customAmount}
+                      onChange={(e) => {
+                        setCustomAmount(e.target.value);
+                        setSelectedAmount(null);
+                      }}
+                      className="pl-8"
+                    />
+                  </div>
                 </div>
 
+                {/* Message */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="amount-message" className="text-sm">Add a message (optional)</Label>
+                  <Label htmlFor="message" className="text-sm">Add a message (optional)</Label>
                   <Textarea
-                    id="amount-message"
+                    id="message"
                     placeholder="Write a personal message..."
                     maxLength={200}
-                    value={amountMessage}
-                    onChange={(e) => setAmountMessage(e.target.value)}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     className="min-h-[80px]"
                   />
-                  <p className="text-xs text-muted-foreground">{amountMessage.length}/200</p>
+                  <p className="text-xs text-muted-foreground">{message.length}/200</p>
                 </div>
 
+                {/* Recipient Info */}
                 <div className="grid gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="amount-recipient-email" className="text-sm">Recipient Email *</Label>
+                    <Label htmlFor="recipient-name" className="text-sm">Recipient Name</Label>
                     <Input
-                      id="amount-recipient-email"
-                      type="email"
-                      required
-                      value={amountRecipientEmail}
-                      onChange={(e) => setAmountRecipientEmail(e.target.value)}
+                      id="recipient-name"
+                      value={recipientName}
+                      onChange={(e) => setRecipientName(e.target.value)}
+                      placeholder="Who is this gift for?"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="amount-sender-name" className="text-sm">Your Name *</Label>
+                    <Label htmlFor="recipient-email" className="text-sm">Recipient Email *</Label>
                     <Input
-                      id="amount-sender-name"
-                      required
-                      value={amountSenderName}
-                      onChange={(e) => setAmountSenderName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="amount-sender-email" className="text-sm">Your Email *</Label>
-                    <Input
-                      id="amount-sender-email"
+                      id="recipient-email"
                       type="email"
                       required
-                      value={amountSenderEmail}
-                      onChange={(e) => setAmountSenderEmail(e.target.value)}
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-sm">Delivery</Label>
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant={amountDeliveryType === "now" ? "default" : "outline"}
-                      onClick={() => setAmountDeliveryType("now")}
-                      className="flex-1"
-                      size="sm"
-                    >
-                      Send Now
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={amountDeliveryType === "scheduled" ? "default" : "outline"}
-                      onClick={() => setAmountDeliveryType("scheduled")}
-                      className="flex-1"
-                      size="sm"
-                    >
-                      Schedule
-                    </Button>
+                {/* Sender Info */}
+                <div className="grid gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sender-name" className="text-sm">Your Name *</Label>
+                    <Input
+                      id="sender-name"
+                      required
+                      value={senderName}
+                      onChange={(e) => setSenderName(e.target.value)}
+                    />
                   </div>
 
-                  {amountDeliveryType === "scheduled" && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sender-email" className="text-sm">Your Email *</Label>
+                    <Input
+                      id="sender-email"
+                      type="email"
+                      required
+                      value={senderEmail}
+                      onChange={(e) => setSenderEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Delivery Options */}
+                <div className="space-y-3">
+                  <Label className="text-sm">Delivery</Label>
+                  <RadioGroup 
+                    value={deliveryType} 
+                    onValueChange={(val) => setDeliveryType(val as "now" | "scheduled")}
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="now" id="delivery-now" />
+                      <Label htmlFor="delivery-now" className="font-normal cursor-pointer">Send now</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="scheduled" id="delivery-scheduled" />
+                      <Label htmlFor="delivery-scheduled" className="font-normal cursor-pointer">Schedule for later</Label>
+                    </div>
+                  </RadioGroup>
+
+                  {deliveryType === "scheduled" && (
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           className={cn(
                             "w-full justify-start text-left font-normal",
-                            !amountDeliveryDate && "text-muted-foreground"
+                            !scheduledDate && "text-muted-foreground"
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {amountDeliveryDate ? format(amountDeliveryDate, "PPP") : "Pick a date"}
+                          {scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={amountDeliveryDate}
-                          onSelect={setAmountDeliveryDate}
+                          selected={scheduledDate}
+                          onSelect={setScheduledDate}
                           disabled={(date) => date < new Date()}
                           initialFocus
                           className="pointer-events-auto"
@@ -257,11 +354,18 @@ export default function GiftCard() {
                   )}
                 </div>
 
+                {/* Single CTA Button */}
                 <Button 
                   className="w-full" 
-                  onClick={handleAmountSubmit}
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
                 >
-                  Send Gift Card
+                  {isSubmitting 
+                    ? "Processing..." 
+                    : deliveryType === "now" 
+                      ? "Send gift card now" 
+                      : "Schedule gift card"
+                  }
                 </Button>
               </CardContent>
             </Card>
