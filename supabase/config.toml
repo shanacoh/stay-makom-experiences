@@ -5,3 +5,21 @@ verify_jwt = false
 
 [functions.collect-lead]
 verify_jwt = false
+
+[functions.send-gift-card]
+verify_jwt = false
+
+[functions.send-contact-request]
+verify_jwt = false
+
+[functions.send-partner-request]
+verify_jwt = false
+
+[functions.send-booking-confirmation]
+verify_jwt = false
+
+[functions.send-booking-status-update]
+verify_jwt = false
+
+[functions.manage-users]
+verify_jwt = false
