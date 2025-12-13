@@ -8,12 +8,8 @@ const corsHeaders = {
 };
 
 interface PartnerRequest {
-  propertyName: string;
-  propertyType: string;
-  city: string;
-  country: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  hotel_name: string;
   email: string;
   phone?: string;
   message?: string;
@@ -48,12 +44,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { 
-      propertyName, 
-      propertyType, 
-      city, 
-      country, 
-      firstName, 
-      lastName, 
+      name, 
+      hotel_name, 
       email, 
       phone, 
       message,
@@ -63,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Processing partner request from:", email);
 
     const isHebrew = language === 'he';
-    const fullName = `${firstName} ${lastName}`;
+    const firstName = name?.split(' ')[0] || name || 'Partner';
 
     // Email to Staymakom team
     const teamEmailHtml = `
@@ -89,21 +81,9 @@ const handler = async (req: Request): Promise<Response> => {
                 <h3 style="color: #1a1a1a; margin: 0 0 20px; font-size: 18px; font-weight: 600;">Property Information</h3>
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eeeeee;">
-                      <p style="color: #999999; font-size: 12px; margin: 0 0 3px; text-transform: uppercase;">Property Name</p>
-                      <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 500;">${escapeHTML(propertyName)}</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eeeeee;">
-                      <p style="color: #999999; font-size: 12px; margin: 0 0 3px; text-transform: uppercase;">Property Type</p>
-                      <p style="color: #1a1a1a; font-size: 16px; margin: 0;">${propertyTypeLabels[propertyType] || propertyType}</p>
-                    </td>
-                  </tr>
-                  <tr>
                     <td style="padding: 10px 0;">
-                      <p style="color: #999999; font-size: 12px; margin: 0 0 3px; text-transform: uppercase;">Location</p>
-                      <p style="color: #1a1a1a; font-size: 16px; margin: 0;">${escapeHTML(city)}, ${escapeHTML(country)}</p>
+                      <p style="color: #999999; font-size: 12px; margin: 0 0 3px; text-transform: uppercase;">Property Name</p>
+                      <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 500;">${escapeHTML(hotel_name)}</p>
                     </td>
                   </tr>
                 </table>
@@ -114,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eeeeee;">
                       <p style="color: #999999; font-size: 12px; margin: 0 0 3px; text-transform: uppercase;">Name</p>
-                      <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 500;">${escapeHTML(fullName)}</p>
+                      <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 500;">${escapeHTML(name)}</p>
                     </td>
                   </tr>
                   <tr>
@@ -148,8 +128,8 @@ const handler = async (req: Request): Promise<Response> => {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
-                    <a href="mailto:${escapeHTML(email)}?subject=Re: Partnership Inquiry - ${escapeHTML(propertyName)}" style="display: inline-block; background-color: #c9a87c; color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 4px; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
-                      REPLY TO ${escapeHTML(firstName.toUpperCase())}
+                    <a href="mailto:${escapeHTML(email)}?subject=Re: Partnership Inquiry - ${escapeHTML(hotel_name)}" style="display: inline-block; background-color: #c9a87c; color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 4px; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
+                      REPLY TO ${firstName.toUpperCase()}
                     </a>
                   </td>
                 </tr>
@@ -182,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
         from: "Staymakom Partners <partners@staymakom.com>",
         to: ["shana@staymakom.com"],
         reply_to: email,
-        subject: `🏨 New Partner: ${propertyName} (${city})`,
+        subject: `🏨 New Partner: ${hotel_name}`,
         html: teamEmailHtml,
       }),
     });
@@ -223,8 +203,8 @@ const handler = async (req: Request): Promise<Response> => {
               </h2>
               <p style="color: #666666; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
                 ${isHebrew 
-                  ? `תודה על עניינך בשותפות עם Staymakom! קיבלנו את הפרטים על <strong>${escapeHTML(propertyName)}</strong> ונשמח לבחון את האפשרות לשיתוף פעולה.`
-                  : `Thank you for your interest in partnering with Staymakom! We've received the details about <strong>${escapeHTML(propertyName)}</strong> and we're excited to explore a potential collaboration.`
+                  ? `תודה על עניינך בשותפות עם Staymakom! קיבלנו את הפרטים על <strong>${escapeHTML(hotel_name)}</strong> ונשמח לבחון את האפשרות לשיתוף פעולה.`
+                  : `Thank you for your interest in partnering with Staymakom! We've received the details about <strong>${escapeHTML(hotel_name)}</strong> and we're excited to explore a potential collaboration.`
                 }
               </p>
               <p style="color: #666666; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
@@ -238,9 +218,7 @@ const handler = async (req: Request): Promise<Response> => {
                   ${isHebrew ? 'הפרטים שהתקבלו:' : 'Details received:'}
                 </h3>
                 <p style="color: #666666; font-size: 14px; margin: 0; line-height: 1.8;">
-                  <strong>${isHebrew ? 'נכס:' : 'Property:'}</strong> ${escapeHTML(propertyName)}<br>
-                  <strong>${isHebrew ? 'סוג:' : 'Type:'}</strong> ${propertyTypeLabels[propertyType] || propertyType}<br>
-                  <strong>${isHebrew ? 'מיקום:' : 'Location:'}</strong> ${escapeHTML(city)}, ${escapeHTML(country)}
+                  <strong>${isHebrew ? 'נכס:' : 'Property:'}</strong> ${escapeHTML(hotel_name)}
                 </p>
               </div>
               <p style="color: #666666; font-size: 16px; margin-top: 30px;">

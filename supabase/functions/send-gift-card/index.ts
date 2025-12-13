@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -9,7 +8,15 @@ const corsHeaders = {
 };
 
 interface GiftCardEmailRequest {
-  giftCardId: string;
+  code: string;
+  amount: number;
+  currency: string;
+  sender_name: string;
+  recipient_name: string;
+  recipient_email: string;
+  message?: string;
+  valid_until: string;
+  language?: string;
 }
 
 const escapeHTML = (str: string): string => {
@@ -35,29 +42,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { giftCardId }: GiftCardEmailRequest = await req.json();
-    console.log("Processing gift card:", giftCardId);
+    const { 
+      code,
+      amount,
+      currency,
+      sender_name,
+      recipient_name,
+      recipient_email,
+      message,
+      valid_until,
+      language = 'en'
+    }: GiftCardEmailRequest = await req.json();
+    
+    console.log("Processing gift card:", code, "for:", recipient_email);
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Fetch gift card details
-    const { data: giftCard, error: fetchError } = await supabase
-      .from("gift_cards")
-      .select("*")
-      .eq("id", giftCardId)
-      .single();
-
-    if (fetchError || !giftCard) {
-      console.error("Gift card not found:", fetchError);
-      throw new Error("Gift card not found");
-    }
-
-    console.log("Gift card found:", giftCard.code);
-
-    const isHebrew = giftCard.language === 'he';
+    const isHebrew = language === 'he';
+    const expiresAt = new Date(valid_until);
     
     // Email to recipient
     const recipientEmailHtml = `
@@ -91,18 +91,18 @@ const handler = async (req: Request): Promise<Response> => {
               
               <p style="color: #666666; font-size: 16px; line-height: 1.6; text-align: center; margin-bottom: 30px;">
                 ${isHebrew 
-                  ? `<strong>${escapeHTML(giftCard.sender_name)}</strong> שלח/ה לך כרטיס מתנה של Staymakom!`
-                  : `<strong>${escapeHTML(giftCard.sender_name)}</strong> has sent you a Staymakom gift card!`
+                  ? `<strong>${escapeHTML(sender_name)}</strong> שלח/ה לך כרטיס מתנה של Staymakom!`
+                  : `<strong>${escapeHTML(sender_name)}</strong> has sent you a Staymakom gift card!`
                 }
               </p>
 
-              ${giftCard.message ? `
+              ${message ? `
               <div style="background-color: #f9f9f6; border-${isHebrew ? 'right' : 'left'}: 4px solid #c9a87c; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
                 <p style="color: #666666; font-size: 14px; margin: 0 0 10px; font-weight: 600;">
                   ${isHebrew ? 'ההודעה שלהם:' : 'Their message:'}
                 </p>
                 <p style="color: #1a1a1a; font-size: 16px; line-height: 1.6; margin: 0; font-style: italic;">
-                  "${escapeHTML(giftCard.message)}"
+                  "${escapeHTML(message)}"
                 </p>
               </div>
               ` : ''}
@@ -113,10 +113,10 @@ const handler = async (req: Request): Promise<Response> => {
                   ${isHebrew ? 'קוד הכרטיס שלך' : 'YOUR GIFT CARD CODE'}
                 </p>
                 <p style="color: #ffffff; font-size: 32px; font-weight: 700; margin: 0 0 15px; letter-spacing: 4px; font-family: monospace;">
-                  ${giftCard.code}
+                  ${code}
                 </p>
                 <p style="color: #ffffff; font-size: 28px; font-weight: 300; margin: 0;">
-                  ${formatCurrency(giftCard.amount, giftCard.currency || 'ILS')}
+                  ${formatCurrency(amount, currency || 'ILS')}
                 </p>
               </div>
 
@@ -140,8 +140,8 @@ const handler = async (req: Request): Promise<Response> => {
 
               <p style="color: #999999; font-size: 12px; text-align: center; margin-top: 30px;">
                 ${isHebrew 
-                  ? `כרטיס זה תקף עד ${new Date(giftCard.expires_at).toLocaleDateString('he-IL')}`
-                  : `This gift card is valid until ${new Date(giftCard.expires_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                  ? `כרטיס זה תקף עד ${expiresAt.toLocaleDateString('he-IL')}`
+                  : `This gift card is valid until ${expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`
                 }
               </p>
             </td>
@@ -176,11 +176,11 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Staymakom Gifts <gifts@staymakom.com>",
-        to: [giftCard.recipient_email],
+        to: [recipient_email],
         reply_to: "shana@staymakom.com",
         subject: isHebrew 
-          ? `🎁 ${giftCard.sender_name} שלח/ה לך מתנה מ-Staymakom!`
-          : `🎁 ${giftCard.sender_name} sent you a Staymakom gift!`,
+          ? `🎁 ${sender_name} שלח/ה לך מתנה מ-Staymakom!`
+          : `🎁 ${sender_name} sent you a Staymakom gift!`,
         html: recipientEmailHtml,
       }),
     });
@@ -191,20 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to send email: ${error}`);
     }
 
-    console.log("Email sent successfully to:", giftCard.recipient_email);
-
-    // Update gift card status
-    const { error: updateError } = await supabase
-      .from("gift_cards")
-      .update({ 
-        status: "sent",
-        sent_at: new Date().toISOString()
-      })
-      .eq("id", giftCardId);
-
-    if (updateError) {
-      console.error("Error updating gift card status:", updateError);
-    }
+    console.log("Email sent successfully to:", recipient_email);
 
     return new Response(
       JSON.stringify({ success: true, message: "Gift card email sent successfully" }),
