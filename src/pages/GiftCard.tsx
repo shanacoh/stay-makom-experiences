@@ -119,6 +119,28 @@ export default function GiftCard() {
 
       if (error) throw error;
 
+      // Send gift card email if delivery is now
+      if (deliveryType === "now") {
+        const { error: emailError } = await supabase.functions.invoke("send-gift-card", {
+          body: {
+            code,
+            amount,
+            currency,
+            sender_name: senderName,
+            recipient_name: recipientName || "Friend",
+            recipient_email: recipientEmail,
+            message: message || null,
+            valid_until: validUntil.toISOString(),
+            language: currentLang
+          }
+        });
+        
+        if (emailError) {
+          console.error("Email error:", emailError);
+          // Don't fail the submission if email fails
+        }
+      }
+
       // Navigate to confirmation page
       navigate(`/gift-card/confirmation?code=${code}&type=amount`);
       toast.success("Gift card created successfully!");

@@ -63,6 +63,7 @@ const Partners = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      // Insert lead in database
       const { error } = await supabase
         .from("leads")
         .insert({
@@ -76,6 +77,23 @@ const Partners = () => {
         });
 
       if (error) throw error;
+
+      // Send confirmation email via Edge Function
+      const { error: emailError } = await supabase.functions.invoke("send-partner-request", {
+        body: {
+          name: data.name,
+          hotel_name: data.hotel_name,
+          email: data.email,
+          phone: data.phone,
+          message: data.message,
+          language: "en"
+        }
+      });
+      
+      if (emailError) {
+        console.error("Email error:", emailError);
+        // Don't fail the submission if email fails
+      }
 
       setShowSuccess(true);
       form.reset();

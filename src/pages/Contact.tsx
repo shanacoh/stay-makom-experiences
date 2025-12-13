@@ -49,9 +49,8 @@ const Contact = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      const {
-        error
-      } = await supabase.from("leads").insert({
+      // Insert lead in database
+      const { error } = await supabase.from("leads").insert({
         source: "contact",
         name: data.name,
         email: data.email,
@@ -59,6 +58,23 @@ const Contact = () => {
         message: data.message
       });
       if (error) throw error;
+
+      // Send confirmation email via Edge Function
+      const { error: emailError } = await supabase.functions.invoke("send-contact-request", {
+        body: {
+          name: data.name,
+          email: data.email,
+          subject: subjectLabels[data.subject],
+          message: data.message,
+          language: "en"
+        }
+      });
+      
+      if (emailError) {
+        console.error("Email error:", emailError);
+        // Don't fail the submission if email fails
+      }
+
       setShowSuccess(true);
       form.reset();
       toast.success("Message sent successfully!");
