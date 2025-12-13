@@ -224,8 +224,31 @@ const BookingPanel = ({
 
       return booking;
     },
-    onSuccess: () => {
+    onSuccess: async (booking) => {
       queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+      
+      // Send booking confirmation email
+      try {
+        await supabase.functions.invoke("send-booking-confirmation", {
+          body: {
+            booking_id: booking.id,
+            customer_email: user?.email,
+            customer_name: user?.email?.split("@")[0] || "Guest",
+            experience_title: "Your experience", // Will be enhanced with actual data
+            hotel_name: "Your hotel",
+            checkin: format(selectedDate!.checkin, "yyyy-MM-dd"),
+            checkout: format(selectedDate!.checkout, "yyyy-MM-dd"),
+            party_size: partySize,
+            total_price: totalPrice,
+            currency: currency || "ILS",
+            language: lang
+          }
+        });
+      } catch (emailError) {
+        console.error("Email error:", emailError);
+        // Don't fail if email fails
+      }
+      
       toast.success("Booking request sent!", {
         description: "The hotel will review your request. Check your account for updates.",
       });
