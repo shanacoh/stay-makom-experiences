@@ -129,7 +129,7 @@ const Header = () => {
               }
             }}
           >
-            HOTEL + EXPERIENCE
+            {lang === 'he' ? 'מלון + חוויה' : 'HOTEL + EXPERIENCE'}
           </Button>
 
           {user ? (
