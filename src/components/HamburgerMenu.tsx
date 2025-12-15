@@ -8,6 +8,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
 
 interface HamburgerMenuProps {
   isScrolled?: boolean;
@@ -17,6 +19,8 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { lang } = useLanguage();
+  const isRTL = lang === 'he';
 
   const handleSignOut = async () => {
     await signOut();
@@ -29,12 +33,12 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
   };
 
   const menuItems = [
-    { label: "Gift card", to: "/gift-card" },
-    { label: "Company reward", to: "/corporate" },
-    { label: "Hotel partnership", to: "/partners" },
-    { label: "Journal blogging", to: "/journal" },
-    { label: "About staymakom", to: "/about" },
-    { label: "Contact us", to: "/contact" },
+    { label: t(lang, 'hamburgerGiftCard'), to: "/gift-card" },
+    { label: t(lang, 'hamburgerCompanyReward'), to: "/corporate" },
+    { label: t(lang, 'hamburgerHotelPartnership'), to: "/partners" },
+    { label: t(lang, 'hamburgerJournal'), to: "/journal" },
+    { label: t(lang, 'hamburgerAbout'), to: "/about" },
+    { label: t(lang, 'hamburgerContact'), to: "/contact" },
   ];
 
   return (
@@ -54,7 +58,7 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
         className="w-[230px] p-2 bg-white border border-border/10 shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-xl"
         sideOffset={8}
       >
-        <nav className="flex flex-col">
+        <nav className="flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
           {menuItems.map((item) => (
             <Link
               key={item.to}
@@ -72,7 +76,7 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
               onClick={handleNavClick}
               className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors"
             >
-              Sign in
+              {t(lang, 'hamburgerSignIn')}
             </Link>
           )}
         </nav>

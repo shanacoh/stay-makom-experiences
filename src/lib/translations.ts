@@ -109,6 +109,15 @@ export const translations = {
     footerCancellation: "Cancellation Policy",
     footerCookies: "Cookie Policy",
     footerLegalNotice: "Legal Notice",
+    
+    // Hamburger menu
+    hamburgerGiftCard: "Gift card",
+    hamburgerCompanyReward: "Company reward",
+    hamburgerHotelPartnership: "Hotel partnership",
+    hamburgerJournal: "Journal blogging",
+    hamburgerAbout: "About staymakom",
+    hamburgerContact: "Contact us",
+    hamburgerSignIn: "Sign in",
   },
   he: {
     // Category page
@@ -219,6 +228,15 @@ export const translations = {
     footerCancellation: "מדיניות ביטולים",
     footerCookies: "מדיניות עוגיות",
     footerLegalNotice: "הודעה משפטית",
+    
+    // Hamburger menu
+    hamburgerGiftCard: "כרטיס מתנה",
+    hamburgerCompanyReward: "מתנות לחברות",
+    hamburgerHotelPartnership: "שותפות מלונות",
+    hamburgerJournal: "ג׳ורנל",
+    hamburgerAbout: "אודות Staymakom",
+    hamburgerContact: "צרו קשר",
+    hamburgerSignIn: "התחברות",
   },
 };
 
