@@ -25,6 +25,7 @@ import Privacy from "./pages/Privacy";
 import CancellationPolicy from "./pages/CancellationPolicy";
 import Cookies from "./pages/Cookies";
 import Legal from "./pages/Legal";
+import Experiences from "./pages/Experiences";
 import { HotelAdminLayout } from "@/components/hotel-admin/HotelAdminLayout";
 import HotelAdminDashboard from "./pages/hotel-admin/Dashboard";
 import HotelProperty from "./pages/hotel-admin/Property";
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/cancellation-policy" element={<CancellationPolicy />} />
             <Route path="/cookies" element={<Cookies />} />
             <Route path="/legal" element={<Legal />} />
+            <Route path="/experiences" element={<Experiences />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/experience/:slug" element={<Experience />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
