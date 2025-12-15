@@ -391,26 +391,25 @@ const Index = () => {
                 }
               </div>
 
-              {/* View More Button for Selected Category */}
-              {selectedCategoryId && selectedCategory && (
-                <div className="text-center mt-8">
-                  <Button asChild variant="outline" size="lg" className="rounded-full">
-                    <Link to={`/category/${selectedCategory.slug}${lang === 'he' ? '?lang=he' : ''}`}>
-                      {t(lang, 'viewMoreOf')} {getLocalizedField(selectedCategory, 'name', lang)}
-                    </Link>
-                  </Button>
-                </div>
-              )}
             </>
           )}
 
-          <div className="text-center">
+          {/* Single Dynamic CTA */}
+          <div className="text-center mt-8">
             <Button
+              asChild
               size="lg"
               className="bg-black hover:bg-black/90 text-white rounded-full px-8"
-              onClick={() => navigate('/category/romantic')}
             >
-              {t(lang, 'viewAllExperiences')}
+              <Link to={selectedCategoryId && selectedCategory 
+                ? `/category/${selectedCategory.slug}${lang === 'he' ? '?lang=he' : ''}` 
+                : `/experiences${lang === 'he' ? '?lang=he' : ''}`
+              }>
+                {selectedCategoryId && selectedCategory 
+                  ? `${t(lang, 'viewMoreOf')} ${getLocalizedField(selectedCategory, 'name', lang)}`
+                  : t(lang, 'viewAllExperiences')
+                }
+              </Link>
             </Button>
           </div>
         </section>
