@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getLocalizedField, Language } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
 
 interface JournalSectionProps {
   lang: Language;
@@ -51,13 +52,15 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
 
   const [featuredPost, ...sidePosts] = posts;
 
+  const isRTL = lang === 'he';
+
   return (
-    <section className="bg-muted/30 py-6 sm:py-8">
+    <section className="bg-muted/30 py-6 sm:py-8" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container px-4">
         {/* Section Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-sans text-lg sm:text-xl font-bold tracking-tight uppercase">
-            The Journal
+            {t(lang, 'journalTitle')}
           </h2>
           <Button
             asChild
@@ -66,8 +69,12 @@ const JournalSection = ({ lang }: JournalSectionProps) => {
             className="group text-foreground hover:text-primary text-xs"
           >
             <Link to={`/journal${lang === "he" ? "?lang=he" : ""}`}>
-              View all
-              <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+              {t(lang, 'journalViewAll')}
+              {isRTL ? (
+                <ArrowLeft className="mr-1 h-3 w-3 transition-transform group-hover:-translate-x-1" />
+              ) : (
+                <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+              )}
             </Link>
           </Button>
         </div>
