@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
 
 interface ExperienceCardProps {
   experience: {
@@ -163,7 +164,7 @@ export default function ExperienceCard({
         {badge && (
           <div className="absolute top-2 left-2">
             <span className="inline-block px-2 py-0.5 bg-black rounded-md text-white text-[10px] font-semibold uppercase tracking-wider">
-              {badge}
+              {badge === "NEW" ? t(lang, 'badgeNew') : badge === "ON SALE" ? t(lang, 'badgeOnSale') : badge === "POPULAR" ? t(lang, 'badgePopular') : badge}
             </span>
           </div>
         )}

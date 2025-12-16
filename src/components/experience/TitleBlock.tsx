@@ -3,6 +3,7 @@ import { MapPin, Star } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { t } from "@/lib/translations";
 
 interface TitleBlockProps {
   title: string;
@@ -39,7 +40,7 @@ const TitleBlock = ({
         {isNew && (
           <div>
             <span className="inline-block px-4 py-1.5 bg-primary text-primary-foreground text-xs font-bold rounded-full uppercase tracking-wide">
-              New
+              {t(lang, 'badgeNew')}
             </span>
           </div>
         )}
