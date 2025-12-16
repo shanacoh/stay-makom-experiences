@@ -5,16 +5,9 @@ import { MapPin, Heart, Users, Globe, Hotel, Sparkles, Search, Calendar, CheckCi
 import aboutHero from "@/assets/about-hero-desert.png";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
-
 const About = () => {
-  return (
-    <div className="min-h-screen bg-[#FAF8F5]">
-      <SEOHead
-        titleEn="About STAYMAKOM | Curated Hotel Stays in Israel"
-        titleHe="אודות STAYMAKOM | חוויות אירוח מובחרות בישראל"
-        descriptionEn="Discover STAYMAKOM - a curated booking platform combining boutique hotels and immersive local experiences in Israel."
-        descriptionHe="גלו את STAYMAKOM - פלטפורמת הזמנות מובחרת המשלבת מלונות בוטיק וחוויות מקומיות סוחפות בישראל."
-      />
+  return <div className="min-h-screen bg-[#FAF8F5]">
+      <SEOHead titleEn="About STAYMAKOM | Curated Hotel Stays in Israel" titleHe="אודות STAYMAKOM | חוויות אירוח מובחרות בישראל" descriptionEn="Discover STAYMAKOM - a curated booking platform combining boutique hotels and immersive local experiences in Israel." descriptionHe="גלו את STAYMAKOM - פלטפורמת הזמנות מובחרת המשלבת מלונות בוטיק וחוויות מקומיות סוחפות בישראל." />
       <Header />
 
       {/* Hero Section */}
@@ -157,22 +150,14 @@ const About = () => {
         {/* What makes STAYMAKOM different */}
         <section className="py-16 md:py-20 px-6 bg-[#1a1a1a] text-white">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl mb-10">
+            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl mb-10 text-zinc-50">
               What makes STAYMAKOM different
             </h2>
             <div className="space-y-4 mb-10">
-              {[
-                "Hotels are curated, not listed",
-                "Experiences are included, not optional add-ons",
-                "Each stay is designed around a place, not a room",
-                "No endless scrolling, only relevant choices",
-                "One platform, one booking, one coherent stay"
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-center gap-3 text-base md:text-lg">
+              {["Hotels are curated, not listed", "Experiences are included, not optional add-ons", "Each stay is designed around a place, not a room", "No endless scrolling, only relevant choices", "One platform, one booking, one coherent stay"].map((item, index) => <div key={index} className="flex items-center justify-center gap-3 text-base md:text-lg">
                   <CheckCircle className="w-5 h-5 text-[#D72638] flex-shrink-0" />
                   <span>{item}</span>
-                </div>
-              ))}
+                </div>)}
             </div>
             <p className="text-base md:text-lg text-white/70 italic max-w-xl mx-auto">
               STAYMAKOM does not try to offer everything. It exists to offer the right stays, 
@@ -188,37 +173,30 @@ const About = () => {
               How it works
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                {
-                  icon: Search,
-                  title: "Discover",
-                  description: "Browse a limited selection of curated stays by mood, interest, or destination."
-                },
-                {
-                  icon: Sparkles,
-                  title: "Choose",
-                  description: "Each stay includes a hotel and a set of experiences designed to naturally fit together."
-                },
-                {
-                  icon: Calendar,
-                  title: "Book",
-                  description: "One booking. No coordination. Everything is prepared before you arrive."
-                },
-                {
-                  icon: Compass,
-                  title: "Experience",
-                  description: "Arrive, disconnect, and live the stay as it was designed to be lived."
-                }
-              ].map((step, index) => (
-                <div key={index} className="text-center">
+              {[{
+              icon: Search,
+              title: "Discover",
+              description: "Browse a limited selection of curated stays by mood, interest, or destination."
+            }, {
+              icon: Sparkles,
+              title: "Choose",
+              description: "Each stay includes a hotel and a set of experiences designed to naturally fit together."
+            }, {
+              icon: Calendar,
+              title: "Book",
+              description: "One booking. No coordination. Everything is prepared before you arrive."
+            }, {
+              icon: Compass,
+              title: "Experience",
+              description: "Arrive, disconnect, and live the stay as it was designed to be lived."
+            }].map((step, index) => <div key={index} className="text-center">
                   <div className="w-16 h-16 rounded-full bg-[#D72638]/10 flex items-center justify-center mx-auto mb-5">
                     <step.icon className="w-8 h-8 text-[#D72638]" />
                   </div>
                   <div className="text-3xl font-serif text-[#D72638]/30 mb-2">{String(index + 1).padStart(2, '0')}</div>
                   <h3 className="font-serif text-lg md:text-xl mb-3 text-foreground">{step.title}</h3>
                   <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{step.description}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </section>
@@ -268,7 +246,7 @@ const About = () => {
         {/* Final CTA */}
         <section className="py-20 md:py-28 px-6 bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] text-white">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl mb-10">
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl mb-10 text-neutral-50">
               Ready to discover STAYMAKOM?
             </h2>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -284,8 +262,6 @@ const About = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
