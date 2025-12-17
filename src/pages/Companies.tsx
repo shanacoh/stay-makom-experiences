@@ -14,6 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import corporateHero from "@/assets/corporate-hero.jpg";
+import { useLanguage } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
+
 const formSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
   companyName: z.string().trim().max(100, "Company name must be less than 100 characters").optional(),
@@ -24,18 +27,21 @@ const formSchema = z.object({
   preferredDates: z.string().trim().max(200, "Preferred dates must be less than 200 characters").optional(),
   message: z.string().trim().max(1000, "Message must be less than 1000 characters").optional()
 });
+
 type FormData = z.infer<typeof formSchema>;
+
 export default function Companies() {
+  const { lang } = useLanguage();
+  const isRTL = lang === 'he';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: {
-      errors
-    },
+    formState: { errors },
     reset
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -43,7 +49,9 @@ export default function Companies() {
       requestType: "corporate_gift_cards"
     }
   });
+  
   const requestType = watch("requestType");
+  
   const scrollToForm = (type?: string) => {
     if (type) {
       setValue("requestType", type as any);
@@ -54,13 +62,11 @@ export default function Companies() {
       block: "start"
     });
   };
+  
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // Save to leads table
-      const {
-        error: leadsError
-      } = await supabase.from("leads").insert({
+      const { error: leadsError } = await supabase.from("leads").insert({
         source: "corporate",
         name: data.fullName,
         email: data.email,
@@ -74,7 +80,6 @@ export default function Companies() {
       });
       if (leadsError) throw leadsError;
 
-      // Also send email notification via edge function
       await supabase.functions.invoke("send-corporate-request", {
         body: data
       });
@@ -85,20 +90,19 @@ export default function Companies() {
       }, 5000);
     } catch (error) {
       console.error("Error sending request:", error);
-      toast.error("Failed to send request. Please try again or contact us directly at hello@staymakom.com");
+      toast.error(lang === 'he' 
+        ? "שליחת הבקשה נכשלה. אנא נסו שוב או צרו קשר ישירות hello@staymakom.com"
+        : "Failed to send request. Please try again or contact us directly at hello@staymakom.com"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-  const requestTypeLabels = {
-    corporate_gift_cards: "Corporate Gift Cards",
-    team_building: "Team-Building Experience",
-    corporate_retreat: "Corporate Retreat / Offsite",
-    employee_reward: "Employee Reward (individual gifts)",
-    customized_incentive: "Customized Incentive",
-    other: "Other"
-  };
-  return <div className="min-h-screen bg-background">
+
+  const requestTypeLabels = t(lang, 'companiesRequestTypeLabels') as Record<string, string>;
+
+  return (
+    <div className="min-h-screen bg-background">
       <Header />
       
       {/* Hero Section */}
@@ -107,84 +111,81 @@ export default function Companies() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         
         <div className="relative h-full flex items-center justify-center text-center px-4">
-          <div className="max-w-3xl space-y-4">
+          <div className="max-w-3xl space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
             <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-              Create meaningful moments for your team.
+              {t(lang, 'companiesHeroTitle')}
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-white/90 font-light max-w-2xl mx-auto">
-              Corporate escapes, wellbeing retreats, team-building experiences and curated gift cards.
+              {t(lang, 'companiesHeroSubtitle')}
             </p>
             
             <div className="pt-4">
               <Button size="default" onClick={() => scrollToForm()} className="bg-white text-foreground hover:bg-white/90 font-medium">
-                Send a Request
+                {t(lang, 'companiesSendRequest')}
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-16">
+      <div className="max-w-4xl mx-auto px-4 py-12 space-y-16" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* What We Offer Section */}
         <section>
-          <h2 className="font-sans text-2xl font-bold text-center mb-10">What We Offer</h2>
+          <h2 className="font-sans text-2xl font-bold text-center mb-10">{t(lang, 'companiesWhatWeOffer')}</h2>
           
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Corporate Gift Packages */}
             <Card className="shadow-medium border-0">
               <CardContent className="pt-6 space-y-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Gift className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-sans text-lg font-bold">Corporate Gift Packages</h3>
+                <h3 className="font-sans text-lg font-bold">{t(lang, 'companiesCorporateGiftTitle')}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Offer your employees the chance to experience Israel in a whole new way:
+                  {t(lang, 'companiesCorporateGiftDesc')}
                 </p>
                 <ul className="space-y-1.5 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-0.5">•</span>
-                    <span>Romantic escapes for two</span>
+                    <span>{t(lang, 'companiesCorporateGiftItem1')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-0.5">•</span>
-                    <span>Family adventures</span>
+                    <span>{t(lang, 'companiesCorporateGiftItem2')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-0.5">•</span>
-                    <span>Wellness retreats</span>
+                    <span>{t(lang, 'companiesCorporateGiftItem3')}</span>
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
-            {/* Team-Building Experiences */}
             <Card className="shadow-medium border-0">
               <CardContent className="pt-6 space-y-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-sans text-lg font-bold">Team-Building Experiences</h3>
+                <h3 className="font-sans text-lg font-bold">{t(lang, 'companiesTeamBuildingTitle')}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Strengthen bonds and reward your team with unforgettable collective moments.
+                  {t(lang, 'companiesTeamBuildingDesc1')}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  From sunrise hikes to private culinary journeys.
+                  {t(lang, 'companiesTeamBuildingDesc2')}
                 </p>
               </CardContent>
             </Card>
 
-            {/* Customized Incentives */}
             <Card className="shadow-medium border-0">
               <CardContent className="pt-6 space-y-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Sparkles className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-sans text-lg font-bold">Customized Incentives</h3>
+                <h3 className="font-sans text-lg font-bold">{t(lang, 'companiesIncentivesTitle')}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  We curate exclusive packages that align with your company's DNA.
+                  {t(lang, 'companiesIncentivesDesc1')}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Celebrate achievements or simply say "thank you".
+                  {t(lang, 'companiesIncentivesDesc2')}
                 </p>
               </CardContent>
             </Card>
@@ -193,16 +194,16 @@ export default function Companies() {
 
         {/* Why MAKOM Section */}
         <section className="bg-secondary/30 rounded-xl p-8">
-          <h2 className="font-sans text-2xl font-bold text-center mb-8">Why STAYMAKOM?</h2>
+          <h2 className="font-sans text-2xl font-bold text-center mb-8">{t(lang, 'companiesWhyStaymakom')}</h2>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="text-center space-y-2">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                 <Sparkles className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-sm">Unique & Authentic</h3>
+              <h3 className="font-semibold text-sm">{t(lang, 'companiesUnique')}</h3>
               <p className="text-xs text-muted-foreground">
-                Every escape showcases the real Israel, beyond clichés.
+                {t(lang, 'companiesUniqueDesc')}
               </p>
             </div>
             
@@ -210,9 +211,9 @@ export default function Companies() {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                 <CheckCircle2 className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-sm">Flexible & Scalable</h3>
+              <h3 className="font-semibold text-sm">{t(lang, 'companiesFlexible')}</h3>
               <p className="text-xs text-muted-foreground">
-                From one employee to an entire department.
+                {t(lang, 'companiesFlexibleDesc')}
               </p>
             </div>
             
@@ -220,9 +221,9 @@ export default function Companies() {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                 <Gift className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-sm">Seamless</h3>
+              <h3 className="font-semibold text-sm">{t(lang, 'companiesSeamless')}</h3>
               <p className="text-xs text-muted-foreground">
-                We handle everything — you simply choose.
+                {t(lang, 'companiesSeamlessDesc')}
               </p>
             </div>
           </div>
@@ -230,16 +231,16 @@ export default function Companies() {
 
         {/* How It Works Section */}
         <section>
-          <h2 className="font-sans text-2xl font-bold text-center mb-8">How It Works</h2>
+          <h2 className="font-sans text-2xl font-bold text-center mb-8">{t(lang, 'companiesHowItWorks')}</h2>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
             <div className="text-center space-y-3">
               <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto">
                 1
               </div>
-              <h3 className="font-semibold text-sm">Choose the package</h3>
+              <h3 className="font-semibold text-sm">{t(lang, 'companiesStep1')}</h3>
               <p className="text-xs text-muted-foreground">
-                Gift card, themed experience, or tailor-made escape.
+                {t(lang, 'companiesStep1Desc')}
               </p>
             </div>
             
@@ -247,9 +248,9 @@ export default function Companies() {
               <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto">
                 2
               </div>
-              <h3 className="font-semibold text-sm">Personalize</h3>
+              <h3 className="font-semibold text-sm">{t(lang, 'companiesStep2')}</h3>
               <p className="text-xs text-muted-foreground">
-                Add your company branding or a personal note.
+                {t(lang, 'companiesStep2Desc')}
               </p>
             </div>
             
@@ -257,16 +258,16 @@ export default function Companies() {
               <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto">
                 3
               </div>
-              <h3 className="font-semibold text-sm">Surprise & delight</h3>
+              <h3 className="font-semibold text-sm">{t(lang, 'companiesStep3')}</h3>
               <p className="text-xs text-muted-foreground">
-                We deliver directly to your employees.
+                {t(lang, 'companiesStep3Desc')}
               </p>
             </div>
           </div>
 
           <div className="text-center">
             <Button size="default" onClick={() => scrollToForm("corporate_gift_cards")}>
-              Request Corporate Gift Cards
+              {t(lang, 'companiesRequestGiftCards')}
             </Button>
           </div>
         </section>
@@ -275,99 +276,106 @@ export default function Companies() {
         <section id="contact-form" className="scroll-mt-20">
           <div className="max-w-lg mx-auto">
             <h2 className="font-sans text-2xl font-bold text-center mb-3">
-              Tell us what you're looking for.
+              {t(lang, 'companiesFormTitle')}
             </h2>
             <p className="text-center text-sm text-muted-foreground mb-8">
-              Fill out the form below and we'll get back to you with a tailored proposal.
+              {t(lang, 'companiesFormSubtitle')}
             </p>
 
-            {showSuccess ? <Card className="shadow-medium border-0 bg-primary/5">
+            {showSuccess ? (
+              <Card className="shadow-medium border-0 bg-primary/5">
                 <CardContent className="pt-8 pb-8 text-center space-y-3">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-lg">Thank you — your request has been sent.</h3>
+                  <h3 className="font-semibold text-lg">{t(lang, 'companiesThankYou')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    We will reply shortly with a tailored proposal.
+                    {t(lang, 'companiesThankYouDesc')}
                   </p>
                   <Button onClick={() => setShowSuccess(false)} variant="outline" size="sm">
-                    Send Another Request
+                    {t(lang, 'companiesSendAnother')}
                   </Button>
                 </CardContent>
-              </Card> : <Card className="shadow-medium border-0">
+              </Card>
+            ) : (
+              <Card className="shadow-medium border-0">
                 <CardContent className="pt-6">
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label htmlFor="fullName" className="text-sm">Full Name *</Label>
-                        <Input id="fullName" {...register("fullName")} placeholder="Your name" />
+                        <Label htmlFor="fullName" className="text-sm">{t(lang, 'companiesFullName')} *</Label>
+                        <Input id="fullName" {...register("fullName")} placeholder={lang === 'he' ? "השם שלכם" : "Your name"} />
                         {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="companyName" className="text-sm">Company Name</Label>
-                        <Input id="companyName" {...register("companyName")} placeholder="Your company" />
+                        <Label htmlFor="companyName" className="text-sm">{t(lang, 'companiesCompanyName')}</Label>
+                        <Input id="companyName" {...register("companyName")} placeholder={lang === 'he' ? "שם החברה" : "Your company"} />
                         {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
                       </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label htmlFor="email" className="text-sm">Work Email *</Label>
+                        <Label htmlFor="email" className="text-sm">{t(lang, 'companiesWorkEmail')} *</Label>
                         <Input id="email" type="email" {...register("email")} placeholder="you@company.com" />
                         {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="phone" className="text-sm">Phone (optional)</Label>
+                        <Label htmlFor="phone" className="text-sm">{t(lang, 'companiesPhoneOptional')}</Label>
                         <Input id="phone" {...register("phone")} placeholder="+972 XX XXX XXXX" />
                         {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm">Type of Request *</Label>
+                      <Label className="text-sm">{t(lang, 'companiesRequestType')} *</Label>
                       <RadioGroup value={requestType} onValueChange={value => setValue("requestType", value as any)} className="space-y-1">
-                        {Object.entries(requestTypeLabels).map(([value, label]) => <div key={value} className="flex items-center space-x-2">
+                        {Object.entries(requestTypeLabels).map(([value, label]) => (
+                          <div key={value} className="flex items-center space-x-2">
                             <RadioGroupItem value={value} id={value} />
                             <Label htmlFor={value} className="font-normal cursor-pointer text-sm">
                               {label}
                             </Label>
-                          </div>)}
+                          </div>
+                        ))}
                       </RadioGroup>
                       {errors.requestType && <p className="text-xs text-destructive">{errors.requestType.message}</p>}
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label htmlFor="groupSize" className="text-sm">Group Size</Label>
-                        <Input id="groupSize" {...register("groupSize")} placeholder="e.g. 10-50 people" />
+                        <Label htmlFor="groupSize" className="text-sm">{t(lang, 'companiesGroupSize')}</Label>
+                        <Input id="groupSize" {...register("groupSize")} placeholder={t(lang, 'companiesGroupSizePlaceholder')} />
                         {errors.groupSize && <p className="text-xs text-destructive">{errors.groupSize.message}</p>}
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="preferredDates" className="text-sm">Preferred Dates</Label>
-                        <Input id="preferredDates" {...register("preferredDates")} placeholder="e.g. Q1 2025" />
+                        <Label htmlFor="preferredDates" className="text-sm">{t(lang, 'companiesPreferredDates')}</Label>
+                        <Input id="preferredDates" {...register("preferredDates")} placeholder={t(lang, 'companiesPreferredDatesPlaceholder')} />
                         {errors.preferredDates && <p className="text-xs text-destructive">{errors.preferredDates.message}</p>}
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="message" className="text-sm">Message (optional)</Label>
-                      <Textarea id="message" {...register("message")} placeholder="Tell us more about your request..." className="min-h-[80px]" />
+                      <Label htmlFor="message" className="text-sm">{t(lang, 'companiesMessageOptional')}</Label>
+                      <Textarea id="message" {...register("message")} placeholder={t(lang, 'companiesMessagePlaceholder')} className="min-h-[80px]" />
                       {errors.message && <p className="text-xs text-destructive">{errors.message.message}</p>}
                     </div>
 
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Sending..." : "Send Request"}
+                      {isSubmitting ? t(lang, 'companiesSending') : t(lang, 'companiesSendRequest')}
                     </Button>
                   </form>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </div>
         </section>
       </div>
 
       <Footer />
-    </div>;
+    </div>
+  );
 }

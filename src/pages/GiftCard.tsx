@@ -13,11 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon } from "lucide-react";
 import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
+import { useLanguage } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
+import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 type Currency = "ILS" | "USD";
 
@@ -43,9 +46,10 @@ function generateGiftCode(): string {
 }
 
 export default function GiftCard() {
+  const { navigateLocalized, getLocalizedPath } = useLocalizedNavigation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const currentLang = searchParams.get("lang") || "en";
+  const { lang } = useLanguage();
+  const isRTL = lang === 'he';
   
   // Form state
   const [currency, setCurrency] = useState<Currency>("ILS");
@@ -64,28 +68,28 @@ export default function GiftCard() {
     const amount = selectedAmount || parseFloat(customAmount);
     
     if (!amount || amount <= 0) {
-      toast.error("Please select or enter a valid amount");
+      toast.error(lang === 'he' ? "אנא בחרו או הזינו סכום תקין" : "Please select or enter a valid amount");
       return;
     }
     
     if (!recipientEmail || !senderName || !senderEmail) {
-      toast.error("Please fill in all required fields");
+      toast.error(lang === 'he' ? "אנא מלאו את כל השדות הנדרשים" : "Please fill in all required fields");
       return;
     }
 
     if (deliveryType === "scheduled" && !scheduledDate) {
-      toast.error("Please select a delivery date");
+      toast.error(lang === 'he' ? "אנא בחרו תאריך משלוח" : "Please select a delivery date");
       return;
     }
 
     // Validate email formats
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(recipientEmail)) {
-      toast.error("Please enter a valid recipient email");
+      toast.error(lang === 'he' ? "אנא הזינו אימייל נמען תקין" : "Please enter a valid recipient email");
       return;
     }
     if (!emailRegex.test(senderEmail)) {
-      toast.error("Please enter a valid sender email");
+      toast.error(lang === 'he' ? "אנא הזינו אימייל שולח תקין" : "Please enter a valid sender email");
       return;
     }
 
@@ -112,7 +116,7 @@ export default function GiftCard() {
           ? scheduledDate.toISOString()
           : now.toISOString(),
         status: deliveryType === "now" ? "sent" : "scheduled",
-        language: currentLang,
+        language: lang,
         sent_at: deliveryType === "now" ? now.toISOString() : null,
         expires_at: validUntil.toISOString(),
       });
@@ -131,22 +135,21 @@ export default function GiftCard() {
             recipient_email: recipientEmail,
             message: message || null,
             valid_until: validUntil.toISOString(),
-            language: currentLang
+            language: lang
           }
         });
         
         if (emailError) {
           console.error("Email error:", emailError);
-          // Don't fail the submission if email fails
         }
       }
 
       // Navigate to confirmation page
-      navigate(`/gift-card/confirmation?code=${code}&type=amount`);
-      toast.success("Gift card created successfully!");
+      navigate(getLocalizedPath(`/gift-card/confirmation?code=${code}&type=amount`));
+      toast.success(lang === 'he' ? "כרטיס המתנה נוצר בהצלחה!" : "Gift card created successfully!");
     } catch (error) {
       console.error("Error creating gift card:", error);
-      toast.error("Failed to create gift card. Please try again.");
+      toast.error(lang === 'he' ? "יצירת כרטיס המתנה נכשלה. אנא נסו שוב." : "Failed to create gift card. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -163,18 +166,18 @@ export default function GiftCard() {
       <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] overflow-hidden">
         <img 
           src={giftCardHero}
-          alt="Gift a Staymakom moment"
+          alt={t(lang, 'giftCardHeroTitle')}
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         
         <div className="relative h-full flex items-center justify-center text-center px-4">
-          <div className="max-w-3xl space-y-4">
+          <div className="max-w-3xl space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
             <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-              Give a Staymakom moment.
+              {t(lang, 'giftCardHeroTitle')}
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-white/90 font-light">
-              Curated stays, crafted stories, meaningful gifts.
+              {t(lang, 'giftCardHeroSubtitle')}
             </p>
             
             <div className="flex justify-center pt-4">
@@ -186,35 +189,35 @@ export default function GiftCard() {
                 }}
                 className="bg-white text-foreground hover:bg-white/90 font-medium"
               >
-                Gift a Staymakom Moment
+                {t(lang, 'giftCardHeroCTA')}
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 py-12 space-y-16">
+      <div className="max-w-5xl mx-auto px-4 py-12 space-y-16" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Gift by Amount Section */}
         <section id="gift-by-amount" className="scroll-mt-20">
           <div className="max-w-lg mx-auto">
             {/* Centered Intro */}
             <div className="text-center space-y-3 mb-8">
-              <h2 className="font-sans text-2xl md:text-3xl font-bold">Gift a stay, your way.</h2>
+              <h2 className="font-sans text-2xl md:text-3xl font-bold">{t(lang, 'giftCardFormTitle')}</h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Choose an amount and let them explore Israel's most inspiring hotels and experiences.
+                {t(lang, 'giftCardFormSubtitle')}
               </p>
             </div>
 
             {/* Centered Form Card */}
             <Card className="shadow-medium">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Select Amount</CardTitle>
-                <CardDescription className="text-sm">Freedom to choose. A journey waiting to begin.</CardDescription>
+                <CardTitle className="text-lg">{t(lang, 'giftCardSelectAmount')}</CardTitle>
+                <CardDescription className="text-sm">{t(lang, 'giftCardSelectAmountDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 {/* Currency Selector */}
                 <div className="space-y-1.5">
-                  <Label className="text-sm">Currency</Label>
+                  <Label className="text-sm">{t(lang, 'giftCardCurrency')}</Label>
                   <Select value={currency} onValueChange={(val) => {
                     setCurrency(val as Currency);
                     setSelectedAmount(null);
@@ -249,31 +252,31 @@ export default function GiftCard() {
 
                 {/* Custom Amount */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="custom-amount" className="text-sm">Custom Amount</Label>
+                  <Label htmlFor="custom-amount" className="text-sm">{t(lang, 'giftCardCustomAmount')}</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <span className={cn("absolute top-1/2 -translate-y-1/2 text-muted-foreground", isRTL ? "right-3" : "left-3")}>
                       {symbol}
                     </span>
                     <Input
                       id="custom-amount"
                       type="number"
-                      placeholder="Enter amount"
+                      placeholder={t(lang, 'giftCardEnterAmount')}
                       value={customAmount}
                       onChange={(e) => {
                         setCustomAmount(e.target.value);
                         setSelectedAmount(null);
                       }}
-                      className="pl-8"
+                      className={isRTL ? "pr-8" : "pl-8"}
                     />
                   </div>
                 </div>
 
                 {/* Message */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="message" className="text-sm">Add a message (optional)</Label>
+                  <Label htmlFor="message" className="text-sm">{t(lang, 'giftCardMessage')}</Label>
                   <Textarea
                     id="message"
-                    placeholder="Write a personal message..."
+                    placeholder={t(lang, 'giftCardMessagePlaceholder')}
                     maxLength={200}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -285,17 +288,17 @@ export default function GiftCard() {
                 {/* Recipient Info */}
                 <div className="grid gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="recipient-name" className="text-sm">Recipient Name</Label>
+                    <Label htmlFor="recipient-name" className="text-sm">{t(lang, 'giftCardRecipientName')}</Label>
                     <Input
                       id="recipient-name"
                       value={recipientName}
                       onChange={(e) => setRecipientName(e.target.value)}
-                      placeholder="Who is this gift for?"
+                      placeholder={t(lang, 'giftCardRecipientNamePlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="recipient-email" className="text-sm">Recipient Email *</Label>
+                    <Label htmlFor="recipient-email" className="text-sm">{t(lang, 'giftCardRecipientEmail')} *</Label>
                     <Input
                       id="recipient-email"
                       type="email"
@@ -309,7 +312,7 @@ export default function GiftCard() {
                 {/* Sender Info */}
                 <div className="grid gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="sender-name" className="text-sm">Your Name *</Label>
+                    <Label htmlFor="sender-name" className="text-sm">{t(lang, 'giftCardYourName')} *</Label>
                     <Input
                       id="sender-name"
                       required
@@ -319,7 +322,7 @@ export default function GiftCard() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="sender-email" className="text-sm">Your Email *</Label>
+                    <Label htmlFor="sender-email" className="text-sm">{t(lang, 'giftCardYourEmail')} *</Label>
                     <Input
                       id="sender-email"
                       type="email"
@@ -332,7 +335,7 @@ export default function GiftCard() {
 
                 {/* Delivery Options */}
                 <div className="space-y-3">
-                  <Label className="text-sm">Delivery</Label>
+                  <Label className="text-sm">{t(lang, 'giftCardDelivery')}</Label>
                   <RadioGroup 
                     value={deliveryType} 
                     onValueChange={(val) => setDeliveryType(val as "now" | "scheduled")}
@@ -340,11 +343,11 @@ export default function GiftCard() {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="now" id="delivery-now" />
-                      <Label htmlFor="delivery-now" className="font-normal cursor-pointer">Send now</Label>
+                      <Label htmlFor="delivery-now" className="font-normal cursor-pointer">{t(lang, 'giftCardSendNow')}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="scheduled" id="delivery-scheduled" />
-                      <Label htmlFor="delivery-scheduled" className="font-normal cursor-pointer">Schedule for later</Label>
+                      <Label htmlFor="delivery-scheduled" className="font-normal cursor-pointer">{t(lang, 'giftCardScheduleLater')}</Label>
                     </div>
                   </RadioGroup>
 
@@ -359,7 +362,7 @@ export default function GiftCard() {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"}
+                          {scheduledDate ? format(scheduledDate, "PPP") : t(lang, 'giftCardPickDate')}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -383,10 +386,10 @@ export default function GiftCard() {
                   disabled={isSubmitting}
                 >
                   {isSubmitting 
-                    ? "Processing..." 
+                    ? t(lang, 'giftCardProcessing')
                     : deliveryType === "now" 
-                      ? "Send gift card now" 
-                      : "Schedule gift card"
+                      ? t(lang, 'giftCardSendNowBtn')
+                      : t(lang, 'giftCardScheduleBtn')
                   }
                 </Button>
               </CardContent>
@@ -396,36 +399,33 @@ export default function GiftCard() {
 
         {/* FAQ Section */}
         <section className="max-w-2xl mx-auto">
-          <h2 className="font-sans text-xl font-bold text-center mb-6">Common Questions</h2>
+          <h2 className="font-sans text-xl font-bold text-center mb-6">{t(lang, 'giftCardFaqTitle')}</h2>
           
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
               <AccordionTrigger className="text-left text-sm">
-                How long is my gift card valid?
+                {t(lang, 'giftCardFaq1Q')}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground text-sm">
-                All Staymakom gift cards are valid for 12 months from the purchase date. 
-                This gives recipients plenty of time to choose the perfect moment for their stay.
+                {t(lang, 'giftCardFaq1A')}
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-2">
               <AccordionTrigger className="text-left text-sm">
-                Can the recipient change the experience?
+                {t(lang, 'giftCardFaq2Q')}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground text-sm">
-                Yes! Recipients can redeem their gift card for any available Staymakom experience 
-                of equal or lesser value. If they choose something more expensive, they can pay the difference.
+                {t(lang, 'giftCardFaq2A')}
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-3">
               <AccordionTrigger className="text-left text-sm">
-                Is the gift card refundable?
+                {t(lang, 'giftCardFaq3Q')}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground text-sm">
-                Gift cards are non-refundable, but they can be transferred to someone else. 
-                Simply contact us with the gift card code and the new recipient's email address.
+                {t(lang, 'giftCardFaq3A')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>

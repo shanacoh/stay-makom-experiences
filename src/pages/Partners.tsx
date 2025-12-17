@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,6 +13,9 @@ import { toast } from "sonner";
 import { Mail } from "lucide-react";
 import partnersHero from "@/assets/partners-hero.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/hooks/useLanguage";
+import { t } from "@/lib/translations";
+import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -26,9 +28,12 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const Partners = () => {
-  const navigate = useNavigate();
+  const { lang } = useLanguage();
+  const isRTL = lang === 'he';
+  const { navigateLocalized } = useLocalizedNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,16 +59,9 @@ const Partners = () => {
     },
   });
 
-  const scrollToForm = () => {
-    document.getElementById("partner-form")?.scrollIntoView({
-      behavior: "smooth"
-    });
-  };
-
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // Insert lead in database
       const { error } = await supabase
         .from("leads")
         .insert({
@@ -78,7 +76,6 @@ const Partners = () => {
 
       if (error) throw error;
 
-      // Send confirmation email via Edge Function
       const { error: emailError } = await supabase.functions.invoke("send-partner-request", {
         body: {
           name: data.name,
@@ -86,21 +83,20 @@ const Partners = () => {
           email: data.email,
           phone: data.phone,
           message: data.message,
-          language: "en"
+          language: lang
         }
       });
       
       if (emailError) {
         console.error("Email error:", emailError);
-        // Don't fail the submission if email fails
       }
 
       setShowSuccess(true);
       form.reset();
-      toast.success("Thank you for your interest!");
+      toast.success(lang === 'he' ? "תודה על ההתעניינות!" : "Thank you for your interest!");
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(lang === 'he' ? "משהו השתבש. אנא נסו שוב." : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -116,42 +112,42 @@ const Partners = () => {
           <img src={partnersHero} alt="Boutique hotel" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/30" />
         </div>
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center text-white">
+        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center text-white" dir={isRTL ? 'rtl' : 'ltr'}>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-4 font-sans font-bold text-slate-50">
-            Let's create extraordinary stays together.
+            {t(lang, 'partnersHeroTitle')}
           </h1>
           <p className="text-sm sm:text-base md:text-lg mb-6 text-white/90">
-            Join a curated network of Israel's most inspiring hotels and experiences.
+            {t(lang, 'partnersHeroSubtitle')}
           </p>
-          <Button onClick={() => navigate("/auth")} size="default" className="bg-slate-50 text-slate-950">
-            Log in to your hotel account
+          <Button onClick={() => navigateLocalized("/auth")} size="default" className="bg-slate-50 text-slate-950">
+            {t(lang, 'partnersLoginBtn')}
           </Button>
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-6 py-12" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Why Join Section */}
         <section className="mb-16">
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-10">
-            Why Join STAYMAKOM
+            {t(lang, 'partnersWhyJoin')}
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div>
-              <h3 className="font-serif text-lg mb-3">Curated visibility</h3>
+              <h3 className="font-serif text-lg mb-3">{t(lang, 'partnersCuratedVisibility')}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Be featured among the most inspiring stays — where storytelling meets discovery.
+                {t(lang, 'partnersCuratedVisibilityDesc')}
               </p>
             </div>
             <div>
-              <h3 className="font-serif text-lg mb-3">Experience-first approach</h3>
+              <h3 className="font-serif text-lg mb-3">{t(lang, 'partnersExperienceFirst')}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Guests discover your hotel through unique rituals, moments and tailored escapes.
+                {t(lang, 'partnersExperienceFirstDesc')}
               </p>
             </div>
             <div>
-              <h3 className="font-serif text-lg mb-3">No risk, no upfront cost</h3>
+              <h3 className="font-serif text-lg mb-3">{t(lang, 'partnersNoRisk')}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                We work on commission only. You focus on hosting; we handle the rest.
+                {t(lang, 'partnersNoRiskDesc')}
               </p>
             </div>
           </div>
@@ -160,31 +156,31 @@ const Partners = () => {
         {/* What We Offer Section */}
         <section className="mb-16 bg-white rounded-lg p-8">
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-6">
-            What We Offer
+            {t(lang, 'partnersWhatWeOffer')}
           </h2>
           <p className="text-sm text-center mb-8 max-w-2xl mx-auto text-muted-foreground">
-            From storytelling to photography, content curation and experience design, STAYMAKOM elevates your property.
+            {t(lang, 'partnersWhatWeOfferDesc')}
           </p>
           <ul className="space-y-3 max-w-md mx-auto text-sm">
             <li className="flex items-start gap-3">
               <span className="text-[#D72638] mt-0.5">•</span>
-              <span>Dedicated hotel page with curated visuals</span>
+              <span>{t(lang, 'partnersOfferItem1')}</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-[#D72638] mt-0.5">•</span>
-              <span>Experience creation support</span>
+              <span>{t(lang, 'partnersOfferItem2')}</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-[#D72638] mt-0.5">•</span>
-              <span>Add-ons & upsell system</span>
+              <span>{t(lang, 'partnersOfferItem3')}</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-[#D72638] mt-0.5">•</span>
-              <span>Seamless booking management</span>
+              <span>{t(lang, 'partnersOfferItem4')}</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-[#D72638] mt-0.5">•</span>
-              <span>Access to the hotel admin dashboard</span>
+              <span>{t(lang, 'partnersOfferItem5')}</span>
             </li>
           </ul>
         </section>
@@ -192,7 +188,7 @@ const Partners = () => {
         {/* Partner Form Section */}
         <section id="partner-form" className="max-w-lg mx-auto">
           <h2 className="font-serif text-2xl md:text-3xl text-center mb-8">
-            Become a Partner
+            {t(lang, 'partnersBecomePartner')}
           </h2>
 
           {showSuccess ? (
@@ -202,12 +198,12 @@ const Partners = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="font-serif text-2xl mb-3">Thank you!</h3>
+              <h3 className="font-serif text-2xl mb-3">{t(lang, 'partnersThankYou')}</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                We'll get back to you shortly with next steps.
+                {t(lang, 'partnersThankYouDesc')}
               </p>
               <Button variant="outline" size="sm" onClick={() => setShowSuccess(false)}>
-                Submit Another Request
+                {t(lang, 'partnersSubmitAnother')}
               </Button>
             </div>
           ) : (
@@ -218,9 +214,9 @@ const Partners = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Name *</FormLabel>
+                      <FormLabel className="text-sm">{t(lang, 'partnersName')} *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your name" {...field} />
+                        <Input placeholder={lang === 'he' ? "השם שלכם" : "Your name"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -232,9 +228,9 @@ const Partners = () => {
                   name="hotel_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Hotel Name *</FormLabel>
+                      <FormLabel className="text-sm">{t(lang, 'partnersHotelName')} *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your hotel name" {...field} />
+                        <Input placeholder={lang === 'he' ? "שם המלון שלכם" : "Your hotel name"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -246,7 +242,7 @@ const Partners = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Email *</FormLabel>
+                      <FormLabel className="text-sm">{t(lang, 'partnersEmail')} *</FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="your@email.com" {...field} />
                       </FormControl>
@@ -260,7 +256,7 @@ const Partners = () => {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Phone *</FormLabel>
+                      <FormLabel className="text-sm">{t(lang, 'partnersPhone')} *</FormLabel>
                       <FormControl>
                         <Input type="tel" placeholder="+972 XX XXX XXXX" {...field} />
                       </FormControl>
@@ -274,9 +270,9 @@ const Partners = () => {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Tell us more about your property *</FormLabel>
+                      <FormLabel className="text-sm">{t(lang, 'partnersPropertyDesc')} *</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Share what makes your hotel unique..." className="min-h-[100px]" {...field} />
+                        <Textarea placeholder={t(lang, 'partnersPropertyPlaceholder')} className="min-h-[100px]" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -284,7 +280,7 @@ const Partners = () => {
                 />
 
                 <Button type="submit" disabled={isSubmitting} className="w-full bg-[#D72638] hover:bg-[#D72638]/90">
-                  {isSubmitting ? "Sending..." : "Send Request"}
+                  {isSubmitting ? t(lang, 'partnersSending') : t(lang, 'partnersSendRequest')}
                 </Button>
               </form>
             </Form>
@@ -294,7 +290,7 @@ const Partners = () => {
         {/* Direct Contact Section */}
         {settings?.partners_email && (
           <section className="text-center border-t pt-8 mt-8">
-            <h3 className="font-serif text-lg mb-4">Contact us directly</h3>
+            <h3 className="font-serif text-lg mb-4">{t(lang, 'partnersDirectContact')}</h3>
             <a href={`mailto:${settings.partners_email}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-[#D72638] transition-colors">
               <Mail className="w-4 h-4" />
               {settings.partners_email}
