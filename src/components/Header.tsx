@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
 import {
@@ -9,28 +9,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const isExperiencePage = location.pathname.startsWith("/experience/");
-  const isDarkHeroPage = ["/gift-card", "/companies", "/corporate", "/contact", "/partners", "/about"].includes(location.pathname);
+  const isDarkHeroPage = [
+    "/gift-card",
+    "/companies",
+    "/corporate",
+    "/contact",
+    "/partners",
+    "/about",
+  ].includes(location.pathname);
   const isTransparentPage = isHomePage || isExperiencePage || isDarkHeroPage;
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const { user, role, roles, signOut } = useAuth();
+
+  const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
   const { lang, setLanguage } = useLanguage();
+  const { getLocalizedPath, navigateLocalized } = useLocalizedNavigation();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    navigateLocalized("/");
   };
+
   const getDashboardLink = () => {
     if (role === "admin") return "/admin";
     if (role === "hotel_admin") return "/hotel-admin";
@@ -65,18 +76,30 @@ const Header = () => {
 
   const headerClasses =
     isTransparentPage && !isScrolled
-      ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`
-      : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm border-b border-border/40 transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`;
-
-  const textClasses = isTransparentPage && !isScrolled ? "text-white" : "text-foreground";
+      ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${
+          isVisible ? "top-0" : "-top-full"
+        }`
+      : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm border-b border-border/40 transition-all duration-200 ${
+          isVisible ? "top-0" : "-top-full"
+        }`;
 
   const logoClasses = isTransparentPage && !isScrolled ? "text-white" : "text-logo";
 
   return (
     <header className={headerClasses} dir="ltr">
-      <div className={`container flex items-center justify-between bg-transparent ${isTransparentPage && !isScrolled ? "h-16" : "h-12"}`}>
-        <Link to="/" className="flex items-center space-x-2">
-          <span className={`font-sans font-bold tracking-[-0.04em] uppercase ${isTransparentPage && !isScrolled ? "text-2xl" : "text-xl"} ${logoClasses}`}>STAYMAKOM</span>
+      <div
+        className={`container flex items-center justify-between bg-transparent ${
+          isTransparentPage && !isScrolled ? "h-16" : "h-12"
+        }`}
+      >
+        <Link to={getLocalizedPath("/")} className="flex items-center space-x-2">
+          <span
+            className={`font-sans font-bold tracking-[-0.04em] uppercase ${
+              isTransparentPage && !isScrolled ? "text-2xl" : "text-xl"
+            } ${logoClasses}`}
+          >
+            STAYMAKOM
+          </span>
         </Link>
 
         <div className="flex-1"></div>
@@ -98,7 +121,11 @@ const Header = () => {
               EN
             </button>
             <span
-              className={`text-xs ${isTransparentPage && !isScrolled ? "text-white/40" : "text-muted-foreground/40"}`}
+              className={`text-xs ${
+                isTransparentPage && !isScrolled
+                  ? "text-white/40"
+                  : "text-muted-foreground/40"
+              }`}
             >
               |
             </span>
@@ -121,16 +148,23 @@ const Header = () => {
           <Button
             variant="outline"
             size="sm"
-            className={`hidden md:flex text-xs h-7 px-3 ${isTransparentPage && !isScrolled ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : "border-border/60"}`}
+            className={`hidden md:flex text-xs h-7 px-3 ${
+              isTransparentPage && !isScrolled
+                ? "border-white/30 text-white hover:bg-white/10 hover:text-white"
+                : "border-border/60"
+            }`}
             onClick={() => {
               if (location.pathname !== "/") {
-                navigate("/#choose-escape");
+                // keep language when navigating with hash
+                navigate(getLocalizedPath("/#choose-escape"));
               } else {
-                document.getElementById("choose-escape")?.scrollIntoView({ behavior: "smooth" });
+                document
+                  .getElementById("choose-escape")
+                  ?.scrollIntoView({ behavior: "smooth" });
               }
             }}
           >
-            {lang === 'he' ? 'מלון + חוויה' : 'HOTEL + EXPERIENCE'}
+            {lang === "he" ? "מלון + חוויה" : "HOTEL + EXPERIENCE"}
           </Button>
 
           {user ? (
@@ -139,23 +173,34 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`${isTransparentPage && !isScrolled ? "text-white hover:bg-white/10" : ""}`}
+                  className={`${
+                    isTransparentPage && !isScrolled
+                      ? "text-white hover:bg-white/10"
+                      : ""
+                  }`}
                 >
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 p-0 bg-background border border-border/50 shadow-lg rounded-md overflow-hidden">
+              <DropdownMenuContent
+                align="end"
+                className="w-52 p-0 bg-background border border-border/50 shadow-lg rounded-md overflow-hidden"
+              >
                 <div className="px-3 py-2.5 border-b border-border/30">
                   <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/70">
-                    {role === "admin" ? "Administrator" : role === "hotel_admin" ? "Hotel Partner" : "Member"}
+                    {role === "admin"
+                      ? "Administrator"
+                      : role === "hotel_admin"
+                        ? "Hotel Partner"
+                        : "Member"}
                   </p>
                   <p className="text-sm text-foreground truncate mt-0.5">
                     {user?.email}
                   </p>
                 </div>
-                
+
                 <div className="py-1">
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => navigate(getDashboardLink())}
                     className="px-3 py-2 cursor-pointer"
                   >
@@ -167,13 +212,17 @@ const Header = () => {
                       <UserCircle className="h-4 w-4 mr-2.5 text-muted-foreground" />
                     )}
                     <span className="text-sm">
-                      {role === "admin" ? "Dashboard" : role === "hotel_admin" ? "Hotel Dashboard" : "My Account"}
+                      {role === "admin"
+                        ? "Dashboard"
+                        : role === "hotel_admin"
+                          ? "Hotel Dashboard"
+                          : "My Account"}
                     </span>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuSeparator className="my-1" />
-                  
-                  <DropdownMenuItem 
+
+                  <DropdownMenuItem
                     onClick={handleSignOut}
                     className="px-3 py-2 cursor-pointer text-muted-foreground"
                   >
@@ -188,9 +237,13 @@ const Header = () => {
               variant="ghost"
               size="icon"
               asChild
-              className={`${isTransparentPage && !isScrolled ? "text-white hover:bg-white/10" : ""}`}
+              className={`${
+                isTransparentPage && !isScrolled
+                  ? "text-white hover:bg-white/10"
+                  : ""
+              }`}
             >
-              <Link to="/auth">
+              <Link to={getLocalizedPath("/auth")}>
                 <User className="h-5 w-5" />
               </Link>
             </Button>
@@ -202,4 +255,6 @@ const Header = () => {
     </header>
   );
 };
+
 export default Header;
+
