@@ -18,7 +18,8 @@ const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const isExperiencePage = location.pathname.startsWith("/experience/");
-  const isTransparentPage = isHomePage || isExperiencePage;
+  const isDarkHeroPage = ["/gift-card", "/companies", "/contact", "/partners", "/about"].includes(location.pathname);
+  const isTransparentPage = isHomePage || isExperiencePage || isDarkHeroPage;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
