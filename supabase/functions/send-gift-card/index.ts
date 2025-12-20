@@ -34,6 +34,14 @@ const formatCurrency = (amount: number, currency: string): string => {
   return `${symbols[currency] || currency}${amount}`;
 };
 
+// Validation constants
+const VALID_CURRENCIES = ['ILS', 'USD', 'EUR', 'GBP'];
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_AMOUNT = 50000;
+const MAX_MESSAGE_LENGTH = 500;
+const MAX_NAME_LENGTH = 100;
+const MAX_CODE_LENGTH = 50;
+
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-gift-card function called");
   
@@ -53,6 +61,81 @@ const handler = async (req: Request): Promise<Response> => {
       valid_until,
       language = 'en'
     }: GiftCardEmailRequest = await req.json();
+    
+    // Server-side input validation
+    const validationErrors: string[] = [];
+    
+    // Validate required fields exist
+    if (!code || typeof code !== 'string') {
+      validationErrors.push('Gift card code is required');
+    } else if (code.length > MAX_CODE_LENGTH) {
+      validationErrors.push(`Code must be less than ${MAX_CODE_LENGTH} characters`);
+    }
+    
+    // Validate amount
+    if (amount === undefined || amount === null || typeof amount !== 'number') {
+      validationErrors.push('Amount is required');
+    } else if (amount <= 0 || amount > MAX_AMOUNT) {
+      validationErrors.push(`Amount must be between 1 and ${MAX_AMOUNT}`);
+    }
+    
+    // Validate currency
+    if (!currency || typeof currency !== 'string') {
+      validationErrors.push('Currency is required');
+    } else if (!VALID_CURRENCIES.includes(currency)) {
+      validationErrors.push(`Currency must be one of: ${VALID_CURRENCIES.join(', ')}`);
+    }
+    
+    // Validate sender_name
+    if (!sender_name || typeof sender_name !== 'string') {
+      validationErrors.push('Sender name is required');
+    } else if (sender_name.trim().length === 0 || sender_name.length > MAX_NAME_LENGTH) {
+      validationErrors.push(`Sender name must be 1-${MAX_NAME_LENGTH} characters`);
+    }
+    
+    // Validate recipient_email
+    if (!recipient_email || typeof recipient_email !== 'string') {
+      validationErrors.push('Recipient email is required');
+    } else if (!EMAIL_REGEX.test(recipient_email)) {
+      validationErrors.push('Invalid recipient email format');
+    }
+    
+    // Validate recipient_name if provided
+    if (recipient_name && typeof recipient_name === 'string' && recipient_name.length > MAX_NAME_LENGTH) {
+      validationErrors.push(`Recipient name must be less than ${MAX_NAME_LENGTH} characters`);
+    }
+    
+    // Validate message if provided
+    if (message && typeof message === 'string' && message.length > MAX_MESSAGE_LENGTH) {
+      validationErrors.push(`Message must be less than ${MAX_MESSAGE_LENGTH} characters`);
+    }
+    
+    // Validate valid_until
+    if (!valid_until || typeof valid_until !== 'string') {
+      validationErrors.push('Valid until date is required');
+    } else {
+      const validUntilDate = new Date(valid_until);
+      if (isNaN(validUntilDate.getTime())) {
+        validationErrors.push('Invalid valid_until date format');
+      }
+    }
+    
+    // Validate language if provided
+    if (language && !['en', 'he'].includes(language)) {
+      validationErrors.push('Language must be "en" or "he"');
+    }
+    
+    // Return validation errors if any
+    if (validationErrors.length > 0) {
+      console.error("Validation errors:", validationErrors);
+      return new Response(
+        JSON.stringify({ error: 'Validation failed', details: validationErrors }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
     
     console.log("Processing gift card:", code, "for:", recipient_email);
 
