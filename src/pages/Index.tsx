@@ -316,7 +316,7 @@ const Index = () => {
             
             {/* Category Tabs */}
             {!isLoading && categories && (
-              <div className={`flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-3 mb-6 sm:mb-12 overflow-x-auto px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-3 mb-6 sm:mb-12 overflow-x-auto overflow-y-visible py-2 px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {categories.map(category => (
                   <button
                     key={category.slug}
