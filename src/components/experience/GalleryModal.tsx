@@ -43,7 +43,7 @@ const GalleryModal = ({ open, onOpenChange, photos, title }: GalleryModalProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="fixed inset-0 w-full h-full max-w-none m-0 p-0 bg-black border-none rounded-none data-[state=open]:slide-in-from-bottom-0 data-[state=closed]:slide-out-to-bottom-0"
+        className="fixed inset-0 left-0 top-0 w-full h-full max-w-none m-0 p-0 bg-black border-none rounded-none translate-x-0 translate-y-0 data-[state=open]:slide-in-from-bottom-0 data-[state=closed]:slide-out-to-bottom-0"
         hideCloseButton
       >
         {/* Sticky Header */}
