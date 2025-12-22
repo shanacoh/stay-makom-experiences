@@ -161,9 +161,9 @@ const Experience = () => {
         />
 
         <div className="container pb-16 px-4 sm:px-6 my-[26px]">
-          <div className={`grid lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 ${isMobile ? 'pb-24' : ''}`}>
+          <div className={`grid md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 xl:gap-12 ${isMobile ? 'pb-24' : ''}`}>
             {/* Left Column - Content */}
-            <div className="lg:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
+            <div className="md:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
               {/* Title Block */}
               <TitleBlock
                 title={title}
@@ -210,7 +210,7 @@ const Experience = () => {
             </div>
 
             {/* Right Column - Sticky Booking Panel */}
-            <div className="lg:col-span-1 hidden lg:block">
+            <div className="md:col-span-1 hidden md:block">
               <BookingPanel 
                 experienceId={experience.id} 
                 hotelId={experience.hotel_id} 
