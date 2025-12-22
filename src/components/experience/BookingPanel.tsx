@@ -291,8 +291,9 @@ const BookingPanel = ({
   );
 
   return (
-    <Card className="p-6 sticky top-4 shadow-strong">
-      <div className="space-y-6">
+    <Card className="p-6 sticky top-4 shadow-strong max-h-[calc(100vh-2rem)] flex flex-col">
+      {/* Fixed top section: Party size & Nights selector */}
+      <div className="space-y-4 flex-shrink-0">
         {/* Party Size Selector */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">
@@ -333,7 +334,7 @@ const BookingPanel = ({
                 type="button"
                 onClick={() => {
                   setSelectedNights(nights);
-                  setSelectedDateId(null); // Reset selection when changing nights
+                  setSelectedDateId(null);
                 }}
                 className={cn(
                   "flex-1 px-2 py-2 rounded-lg border-2 transition-all",
@@ -351,7 +352,10 @@ const BookingPanel = ({
             ))}
           </div>
         </div>
+      </div>
 
+      {/* Scrollable middle section: Dates, Rooms, Extras, Price breakdown */}
+      <div className="flex-1 overflow-y-auto min-h-0 mt-4 space-y-4 pr-1">
         {/* Date Options */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">
@@ -361,7 +365,7 @@ const BookingPanel = ({
             value={selectedDateId || ""}
             onValueChange={setSelectedDateId}
           >
-            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+            <div className="space-y-2">
               {dateOptions.map((option) => (
                 <label
                   key={option.id}
@@ -404,13 +408,6 @@ const BookingPanel = ({
           </RadioGroup>
         </div>
 
-        {/* Show booking button if no date selected */}
-        {!selectedDateId && (
-          <Button size="lg" className="w-full" disabled>
-            {lang === 'he' ? 'בחרו תאריך' : lang === 'en' ? 'Choose a date' : 'Choisissez une date'}
-          </Button>
-        )}
-
         {/* Room & Extras after date selection */}
         {selectedDate && (
           <>
@@ -435,42 +432,53 @@ const BookingPanel = ({
           </>
         )}
 
-        {/* Price Breakdown & Book Button */}
+        {/* Price Breakdown */}
         {canBook && (
-          <>
-            <PriceBreakdown
-              roomPrice={roomPrice}
-              experiencePrice={experiencePrice}
-              extrasTotal={extrasTotal}
-              totalPrice={totalPrice}
-              currency={currency}
-            />
-
-            <Button 
-              size="lg" 
-              className="w-full" 
-              onClick={handleBooking}
-              disabled={createBookingMutation.isPending}
-            >
-              {createBookingMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {lang === 'he' ? 'יוצר הזמנה...' : lang === 'en' ? 'Creating booking...' : 'Création de la réservation...'}
-                </>
-              ) : (
-                <>
-                  <Calendar className="mr-2 h-5 w-5" />
-                  {lang === 'he' ? 'הזמן ושלם' : lang === 'en' ? 'Book & Pay' : 'Réserver & Payer'}
-                </>
-              )}
-            </Button>
-          </>
+          <PriceBreakdown
+            roomPrice={roomPrice}
+            experiencePrice={experiencePrice}
+            extrasTotal={extrasTotal}
+            totalPrice={totalPrice}
+            currency={currency}
+          />
         )}
 
         {selectedDateId && !selectedRoom && (
           <p className="text-sm text-muted-foreground text-center">
             {lang === 'he' ? 'בחרו חדר להמשך' : lang === 'en' ? 'Select a room to continue' : 'Sélectionnez une chambre pour continuer'}
           </p>
+        )}
+      </div>
+
+      {/* Fixed bottom section: CTA Button */}
+      <div className="flex-shrink-0 pt-4 mt-4 border-t">
+        {!selectedDateId ? (
+          <Button size="lg" className="w-full" disabled>
+            {lang === 'he' ? 'בחרו תאריך' : lang === 'en' ? 'Choose a date' : 'Choisissez une date'}
+          </Button>
+        ) : canBook ? (
+          <Button 
+            size="lg" 
+            className="w-full" 
+            onClick={handleBooking}
+            disabled={createBookingMutation.isPending}
+          >
+            {createBookingMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                {lang === 'he' ? 'יוצר הזמנה...' : lang === 'en' ? 'Creating booking...' : 'Création de la réservation...'}
+              </>
+            ) : (
+              <>
+                <Calendar className="mr-2 h-5 w-5" />
+                {lang === 'he' ? 'הזמן ושלם' : lang === 'en' ? 'Book & Pay' : 'Réserver & Payer'}
+              </>
+            )}
+          </Button>
+        ) : (
+          <Button size="lg" className="w-full" disabled>
+            {lang === 'he' ? 'בחרו חדר' : lang === 'en' ? 'Select a room' : 'Sélectionnez une chambre'}
+          </Button>
         )}
       </div>
     </Card>
