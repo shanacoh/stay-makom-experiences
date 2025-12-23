@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/lib/translations';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  getSessionId, 
+  setLastSearchId, 
+  trackExperienceClick, 
+  trackNewSearch,
+  trackBounce 
+} from '@/lib/aiTracking';
 
 interface Recommendation {
   id: string;
@@ -24,6 +31,8 @@ interface Recommendation {
 interface AIResponse {
   intro: string;
   recommendations: Recommendation[];
+  search_id?: string;
+  session_id?: string;
   error?: string;
 }
 
@@ -31,10 +40,20 @@ const AIExperienceAssistant = () => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<AIResponse | null>(null);
+  const [currentSearchId, setCurrentSearchId] = useState<string | null>(null);
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
   const isRTL = lang === 'he';
+
+  // Track bounce on unmount if user had results but didn't click
+  useEffect(() => {
+    return () => {
+      if (response && response.recommendations.length > 0) {
+        trackBounce();
+      }
+    };
+  }, [response]);
 
   const placeholders = {
     en: [
@@ -60,11 +79,16 @@ const AIExperienceAssistant = () => {
     if (!query.trim()) return;
 
     setIsLoading(true);
-    setResponse(null);
+    
+    // Track new search if we already have results
+    const previousSearchId = currentSearchId;
 
     try {
+      const sessionId = getSessionId();
+      
       const { data, error } = await supabase.functions.invoke('recommend-experiences', {
-        body: { query: query.trim(), lang }
+        body: { query: query.trim(), lang },
+        headers: { 'x-session-id': sessionId }
       });
 
       if (error) {
@@ -78,6 +102,16 @@ const AIExperienceAssistant = () => {
           variant: 'destructive'
         });
         return;
+      }
+
+      // Track that user made a new search
+      if (data.search_id) {
+        if (previousSearchId) {
+          trackNewSearch(data.search_id);
+        } else {
+          setLastSearchId(data.search_id);
+        }
+        setCurrentSearchId(data.search_id);
       }
 
       setResponse(data);
@@ -102,13 +136,16 @@ const AIExperienceAssistant = () => {
     }
   };
 
-  const handleExperienceClick = (slug: string) => {
-    navigate(`/${lang}/experience/${slug}`);
+  const handleExperienceClick = (rec: Recommendation, index: number) => {
+    // Track the click with position
+    trackExperienceClick(rec.id, index + 1, currentSearchId);
+    navigate(`/${lang}/experience/${rec.slug}`);
   };
 
   const handleReset = () => {
     setQuery('');
     setResponse(null);
+    setCurrentSearchId(null);
   };
 
   return (
@@ -184,10 +221,10 @@ const AIExperienceAssistant = () => {
             {/* Recommendation Cards */}
             {response.recommendations && response.recommendations.length > 0 && (
               <div className="grid gap-4">
-                {response.recommendations.map((rec) => (
+                {response.recommendations.map((rec, index) => (
                   <div
                     key={rec.id}
-                    onClick={() => handleExperienceClick(rec.slug)}
+                    onClick={() => handleExperienceClick(rec, index)}
                     className="group flex gap-4 p-3 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-muted/30 cursor-pointer transition-all duration-200"
                   >
                     {/* Image */}
