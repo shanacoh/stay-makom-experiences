@@ -292,6 +292,19 @@ ${lang === 'he' ? 'בקשת המשתמש' : 'User request'}: "${query}"`;
       .filter(Boolean)
       .slice(0, 3);
 
+    // Save query for analytics (fire and forget)
+    const recommendedIds = enrichedRecommendations.map((r: { id: string }) => r.id);
+    supabase.from('ai_search_queries').insert({
+      query: query,
+      lang: lang,
+      recommended_ids: recommendedIds,
+      recommendation_count: recommendedIds.length,
+      user_agent: req.headers.get('user-agent')
+    }).then(({ error }) => {
+      if (error) console.error('Failed to save query:', error);
+      else console.log('Query saved for analytics');
+    });
+
     console.log(`Returning ${enrichedRecommendations.length} recommendations`);
 
     return new Response(

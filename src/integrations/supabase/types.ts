@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_search_queries: {
+        Row: {
+          created_at: string | null
+          id: string
+          lang: string | null
+          query: string
+          recommendation_count: number | null
+          recommended_ids: string[] | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lang?: string | null
+          query: string
+          recommendation_count?: number | null
+          recommended_ids?: string[] | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lang?: string | null
+          query?: string
+          recommendation_count?: number | null
+          recommended_ids?: string[] | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
