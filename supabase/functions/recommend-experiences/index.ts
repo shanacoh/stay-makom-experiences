@@ -292,25 +292,38 @@ ${lang === 'he' ? 'בקשת המשתמש' : 'User request'}: "${query}"`;
       .filter(Boolean)
       .slice(0, 3);
 
-    // Save query for analytics (fire and forget)
+    // Generate session_id if not provided
+    const sessionId = req.headers.get('x-session-id') || crypto.randomUUID();
+    
+    // Save query for analytics and return the search_id
     const recommendedIds = enrichedRecommendations.map((r: { id: string }) => r.id);
-    supabase.from('ai_search_queries').insert({
-      query: query,
-      lang: lang,
-      recommended_ids: recommendedIds,
-      recommendation_count: recommendedIds.length,
-      user_agent: req.headers.get('user-agent')
-    }).then(({ error }) => {
-      if (error) console.error('Failed to save query:', error);
-      else console.log('Query saved for analytics');
-    });
+    const { data: insertedQuery, error: insertError } = await supabase
+      .from('ai_search_queries')
+      .insert({
+        query: query,
+        lang: lang,
+        recommended_ids: recommendedIds,
+        recommendation_count: recommendedIds.length,
+        user_agent: req.headers.get('user-agent'),
+        session_id: sessionId
+      })
+      .select('id')
+      .single();
+
+    if (insertError) {
+      console.error('Failed to save query:', insertError);
+    } else {
+      console.log('Query saved for analytics, id:', insertedQuery?.id);
+    }
 
     console.log(`Returning ${enrichedRecommendations.length} recommendations`);
 
     return new Response(
       JSON.stringify({
         intro: parsedResponse.intro,
-        recommendations: enrichedRecommendations
+        recommendations: enrichedRecommendations,
+        search_id: insertedQuery?.id || null,
+        session_id: sessionId
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

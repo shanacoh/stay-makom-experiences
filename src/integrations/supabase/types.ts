@@ -14,8 +14,55 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_search_events: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          event_type: string
+          experience_id: string | null
+          id: string
+          metadata: Json | null
+          position: number | null
+          search_id: string | null
+          session_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          event_type: string
+          experience_id?: string | null
+          id?: string
+          metadata?: Json | null
+          position?: number | null
+          search_id?: string | null
+          session_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          experience_id?: string | null
+          id?: string
+          metadata?: Json | null
+          position?: number | null
+          search_id?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_search_events_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "ai_search_queries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_search_queries: {
         Row: {
+          conversion_booking_id: string | null
+          conversion_experience_id: string | null
+          converted: boolean | null
           created_at: string | null
           id: string
           lang: string | null
@@ -26,6 +73,9 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          conversion_booking_id?: string | null
+          conversion_experience_id?: string | null
+          converted?: boolean | null
           created_at?: string | null
           id?: string
           lang?: string | null
@@ -36,6 +86,9 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          conversion_booking_id?: string | null
+          conversion_experience_id?: string | null
+          converted?: boolean | null
           created_at?: string | null
           id?: string
           lang?: string | null
