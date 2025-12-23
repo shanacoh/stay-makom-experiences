@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Brain, Search, Globe, TrendingUp, Trash2, MousePointer, ShoppingCart, ArrowRight, RotateCcw } from "lucide-react";
+import { Brain, Search, Globe, TrendingUp, Trash2, MousePointer, ShoppingCart, ArrowRight, RotateCcw, Flame, Tag, Cloud } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { format, subDays, startOfDay, isAfter } from "date-fns";
 import { toast } from "sonner";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 interface AIQuery {
   id: string;
@@ -38,6 +40,46 @@ interface AIEvent {
   position: number | null;
   created_at: string | null;
 }
+
+// Stop words for keyword extraction (EN + FR + HE common words)
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'in', 'for', 'to', 'with', 'and', 'or', 'of', 'is', 'it', 'on', 'at', 'be', 'this', 'that', 'by', 'from', 'as', 'are', 'was', 'were', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'i', 'me', 'my', 'we', 'you', 'your', 'he', 'she', 'they', 'their', 'what', 'which', 'who', 'whom', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'some', 'any', 'no', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there', 'then',
+  'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'un', 'une', 'le', 'la', 'les', 'de', 'du', 'des', 'en', 'pour', 'avec', 'sur', 'dans', 'par', 'au', 'aux', 'ce', 'cette', 'ces', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'nos', 'votre', 'vos', 'leur', 'leurs', 'qui', 'que', 'quoi', 'dont', 'où', 'et', 'ou', 'mais', 'donc', 'car', 'ni', 'ne', 'pas', 'plus', 'moins', 'très', 'bien', 'aussi', 'comme', 'si', 'quand', 'comment', 'pourquoi', 'quel', 'quelle', 'quels', 'quelles', 'tout', 'tous', 'toute', 'toutes', 'autre', 'autres', 'même', 'mêmes', 'chaque', 'peu', 'beaucoup', 'trop', 'assez', 'encore', 'déjà', 'toujours', 'jamais', 'ici', 'là', 'y', 'est', 'sont', 'été', 'être', 'avoir', 'fait', 'faire', 'dit', 'dire', 'va', 'vont', 'aller', 'peut', 'peuvent', 'pouvoir', 'veut', 'vouloir', 'doit', 'devoir', 'faut', 'falloir',
+  'אני', 'אתה', 'את', 'הוא', 'היא', 'אנחנו', 'אתם', 'אתן', 'הם', 'הן', 'של', 'על', 'עם', 'אל', 'מה', 'מי', 'איפה', 'מתי', 'איך', 'למה', 'כי', 'אבל', 'או', 'גם', 'רק', 'כל', 'הרבה', 'קצת', 'מאוד', 'טוב', 'יפה', 'חדש', 'גדול', 'קטן', 'יש', 'אין', 'היה', 'היתה', 'היו', 'יהיה', 'להיות', 'לעשות', 'ללכת', 'לבוא', 'לראות', 'לדעת', 'לתת', 'לקחת', 'ב', 'ל', 'כ', 'ו', 'ה', 'זה', 'זאת', 'אלה', 'אלו',
+  'looking', 'want', 'need', 'search', 'find', 'cherche', 'veux', 'besoin', 'recherche', 'trouver', 'experience', 'expérience', 'trip', 'voyage', 'stay', 'séjour', 'hotel', 'hôtel'
+]);
+
+// Category detection keywords
+const CATEGORY_KEYWORDS: Record<string, { label: string; keywords: string[] }> = {
+  romantic: {
+    label: 'Romantic',
+    keywords: ['romantic', 'romantique', 'couple', 'love', 'amour', 'amoureux', 'honeymoon', 'lune de miel', 'valentine', 'saint-valentin', 'anniversary', 'anniversaire', 'רומנטי', 'זוג', 'אהבה']
+  },
+  nature: {
+    label: 'Nature & Desert',
+    keywords: ['nature', 'desert', 'désert', 'outdoor', 'calme', 'calm', 'quiet', 'tranquille', 'landscape', 'paysage', 'star', 'étoile', 'stargazing', 'מדבר', 'טבע', 'שקט', 'כוכבים']
+  },
+  active: {
+    label: 'Active & Adventure',
+    keywords: ['active', 'sport', 'adventure', 'aventure', 'hiking', 'randonnée', 'trek', 'climbing', 'escalade', 'bike', 'vélo', 'אקטיבי', 'ספורט', 'הרפתקה', 'טיול']
+  },
+  family: {
+    label: 'Family',
+    keywords: ['family', 'famille', 'kids', 'enfants', 'children', 'child', 'enfant', 'משפחה', 'ילדים', 'kid']
+  },
+  relaxation: {
+    label: 'Spa & Wellness',
+    keywords: ['spa', 'relax', 'relaxation', 'wellness', 'détente', 'massage', 'zen', 'retreat', 'retraite', 'ספא', 'מנוחה', 'רוגע']
+  },
+  luxury: {
+    label: 'Luxury',
+    keywords: ['luxury', 'luxe', 'premium', 'exclusive', 'exclusif', 'high-end', 'haut de gamme', 'פאר', 'יוקרה', 'vip']
+  },
+  gastronomy: {
+    label: 'Food & Wine',
+    keywords: ['food', 'cuisine', 'gastronomie', 'gastronomy', 'wine', 'vin', 'diner', 'dinner', 'restaurant', 'chef', 'taste', 'goût', 'אוכל', 'יין', 'מסעדה']
+  }
+};
 
 const AIInsights = () => {
   const { data: queries, isLoading: queriesLoading, refetch: refetchQueries } = useQuery({
@@ -87,6 +129,69 @@ const AIInsights = () => {
     if (!userAgent) return false;
     return /Mobile|Android|iPhone|iPad/i.test(userAgent);
   };
+
+  // Extract keywords from queries
+  const topKeywords = useMemo(() => {
+    if (!queries?.length) return [];
+    
+    const wordCounts: Record<string, number> = {};
+    
+    queries.forEach(q => {
+      const words = q.query.toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+      
+      words.forEach(word => {
+        wordCounts[word] = (wordCounts[word] || 0) + 1;
+      });
+    });
+    
+    return Object.entries(wordCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 15);
+  }, [queries]);
+
+  // Detect categories from queries
+  const categoryStats = useMemo(() => {
+    if (!queries?.length) return [];
+    
+    const counts: Record<string, number> = {};
+    
+    queries.forEach(q => {
+      const queryLower = q.query.toLowerCase();
+      Object.entries(CATEGORY_KEYWORDS).forEach(([key, { keywords }]) => {
+        if (keywords.some(kw => queryLower.includes(kw))) {
+          counts[key] = (counts[key] || 0) + 1;
+        }
+      });
+    });
+    
+    return Object.entries(counts)
+      .map(([key, count]) => ({
+        key,
+        label: CATEGORY_KEYWORDS[key].label,
+        count,
+        percentage: ((count / queries.length) * 100).toFixed(0)
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [queries]);
+
+  // Trend data for last 7 days
+  const trendData = useMemo(() => {
+    if (!queries?.length) return [];
+    
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = subDays(new Date(), 6 - i);
+      const dateStr = format(date, 'yyyy-MM-dd');
+      return {
+        date: format(date, 'dd/MM'),
+        count: queries.filter(q => 
+          q.created_at && format(new Date(q.created_at), 'yyyy-MM-dd') === dateStr
+        ).length
+      };
+    });
+  }, [queries]);
 
   // Calculate stats
   const totalQueries = queries?.length || 0;
@@ -139,6 +244,7 @@ const AIInsights = () => {
   }, {} as Record<string, number>) || {};
 
   const isLoading = queriesLoading || eventsLoading;
+  const maxKeywordCount = topKeywords[0]?.[1] || 1;
 
   return (
     <div className="space-y-6">
@@ -255,6 +361,153 @@ const AIInsights = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Keywords & Categories Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Keywords */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Flame className="h-4 w-4 text-orange-500" />
+              Top Termes Recherchés
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topKeywords.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Pas encore de données</p>
+            ) : (
+              <div className="space-y-2">
+                {topKeywords.slice(0, 10).map(([word, count], index) => (
+                  <div key={word} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-4">{index + 1}.</span>
+                    <span className="font-medium text-sm flex-shrink-0 w-24 truncate">{word}</span>
+                    <Progress 
+                      value={(count / maxKeywordCount) * 100} 
+                      className="flex-1 h-2"
+                    />
+                    <span className="text-xs text-muted-foreground w-8 text-right">{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Categories */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Tag className="h-4 w-4 text-primary" />
+              Catégories Détectées
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {categoryStats.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Pas encore de données</p>
+            ) : (
+              <div className="space-y-3">
+                {categoryStats.map(({ key, label, count, percentage }) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{label}</Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress value={parseInt(percentage)} className="w-20 h-2" />
+                      <span className="text-sm font-medium w-12 text-right">{percentage}%</span>
+                      <span className="text-xs text-muted-foreground">({count})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Word Cloud & Trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Word Cloud */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Cloud className="h-4 w-4 text-blue-500" />
+              Nuage de Mots
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topKeywords.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Pas encore de données</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 justify-center items-center min-h-[120px]">
+                {topKeywords.map(([word, count]) => {
+                  const size = Math.max(0.7, Math.min(2, (count / maxKeywordCount) * 1.5 + 0.5));
+                  const opacity = Math.max(0.5, count / maxKeywordCount);
+                  return (
+                    <span 
+                      key={word}
+                      className="text-primary transition-all hover:scale-110 cursor-default"
+                      style={{ 
+                        fontSize: `${size}rem`,
+                        opacity
+                      }}
+                    >
+                      {word}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Trends Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              Tendances (7 derniers jours)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {trendData.every(d => d.count === 0) ? (
+              <p className="text-sm text-muted-foreground">Pas encore de données</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={150}>
+                <LineChart data={trendData}>
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }} 
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }} 
+                    tickLine={false}
+                    axisLine={false}
+                    width={30}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                    labelStyle={{ fontWeight: 'bold' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Click Position Distribution */}
