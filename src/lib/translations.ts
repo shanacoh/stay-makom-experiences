@@ -323,6 +323,16 @@ export const translations = {
     aboutCTATitle: "Ready to discover STAYMAKOM?",
     aboutCTAExplore: "Explore Curated Stays",
     aboutCTAList: "Get on the List",
+    
+    // AI Experience Assistant
+    aiAssistantBadge: "AI Concierge",
+    aiAssistantTitle: "Describe your dream escape",
+    aiAssistantSubtitle: "Tell us what you're looking for and our AI will find the perfect experience for you.",
+    aiAssistantSearch: "Find",
+    aiAssistantSearching: "Searching...",
+    aiAssistantThinking: "Finding the perfect experiences for you...",
+    aiAssistantViewExperience: "View experience",
+    aiAssistantTryAgain: "Try another search",
   },
   he: {
     // Category page
@@ -647,6 +657,16 @@ export const translations = {
     aboutCTATitle: "מוכנים לגלות את STAYMAKOM?",
     aboutCTAExplore: "גלו שהיות מובחרות",
     aboutCTAList: "הצטרפו לרשימה",
+    
+    // AI Experience Assistant
+    aiAssistantBadge: "יועץ AI",
+    aiAssistantTitle: "תארו את החופשה המושלמת שלכם",
+    aiAssistantSubtitle: "ספרו לנו מה אתם מחפשים והבינה המלאכותית שלנו תמצא את החוויה המושלמת עבורכם.",
+    aiAssistantSearch: "חפש",
+    aiAssistantSearching: "מחפש...",
+    aiAssistantThinking: "מחפש את החוויות המושלמות עבורכם...",
+    aiAssistantViewExperience: "צפו בחוויה",
+    aiAssistantTryAgain: "נסו חיפוש אחר",
   },
 };
 
