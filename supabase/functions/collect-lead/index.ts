@@ -155,6 +155,42 @@ serve(async (req) => {
     const requestData = await req.json();
     console.log('Received lead data:', { ...requestData, email: '***' });
 
+    // Handle simple email collection from AI assistant
+    if (requestData.source === 'ai_assistant_save') {
+      if (!requestData.email || !validateEmail(requestData.email)) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Valid email is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data, error } = await supabase
+        .from('leads')
+        .insert([{
+          source: 'ai_assistant_save',
+          email: requestData.email.toLowerCase().trim(),
+          metadata: requestData.metadata || {},
+          marketing_opt_in: true,
+          is_b2b: false,
+        }])
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Database insertion error:', error);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to save email' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('AI assistant lead saved:', data.id);
+      return new Response(
+        JSON.stringify({ success: true, leadId: data.id }),
+        { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const isB2B = !!requestData.propertyName;
     const validation = isB2B 
       ? validateB2BLead(requestData) 

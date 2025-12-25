@@ -52,6 +52,7 @@ import { t } from "@/lib/translations";
 import { SEOHead } from "@/components/SEOHead";
 import JournalSection from "@/components/JournalSection";
 import AIExperienceAssistant from "@/components/AIExperienceAssistant";
+import StickyAIButton from "@/components/StickyAIButton";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertKioskHero from "@/assets/desert-kiosk-hero.png";
@@ -540,6 +541,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <StickyAIButton />
       <ContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
     </div>
   );
