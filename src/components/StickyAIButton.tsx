@@ -124,13 +124,19 @@ const StickyAIButton = () => {
 
       setResponse(data);
       setShowEmailPrompt(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting recommendations:', error);
+      
+      // Distinguish between network/CORS errors and function errors
+      const isNetworkError = error?.name === 'FunctionsFetchError' || 
+                            error?.message?.includes('Failed to fetch') ||
+                            error?.message?.includes('NetworkError');
+      
       toast({
         title: lang === 'he' ? 'שגיאה' : 'Error',
-        description: lang === 'he' 
-          ? 'לא הצלחנו למצוא המלצות. נסו שוב.' 
-          : 'Failed to get recommendations. Please try again.',
+        description: isNetworkError
+          ? (lang === 'he' ? 'בעיית חיבור. נסו שוב.' : 'Connection issue. Please try again.')
+          : (lang === 'he' ? 'לא הצלחנו למצוא המלצות. נסו שוב.' : 'Failed to get recommendations. Please try again.'),
         variant: 'destructive'
       });
     } finally {
