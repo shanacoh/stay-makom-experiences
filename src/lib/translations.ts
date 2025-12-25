@@ -334,6 +334,17 @@ export const translations = {
     aiAssistantThinking: "Finding the perfect experiences for you...",
     aiAssistantViewExperience: "View experience",
     aiAssistantTryAgain: "Try another search",
+    
+    // Sticky AI Button
+    stickyAIButton: "Ask AI",
+    stickyAIPanelTitle: "AI Concierge",
+    stickyAIPanelSubtitle: "Let me help you find the perfect stay",
+    stickyAIQuickStart: "Quick start by category:",
+    stickyAIOr: "or",
+    stickyAIDescribe: "Describe what you're looking for:",
+    stickyAIFind: "Find experiences",
+    stickyAISaveEmail: "💾 Save these recommendations",
+    stickyAIEmailPrompt: "Enter your email to receive these recommendations:",
   },
   he: {
     // Category page
@@ -669,6 +680,17 @@ export const translations = {
     aiAssistantThinking: "מחפש את החוויות המושלמות עבורכם...",
     aiAssistantViewExperience: "צפו בחוויה",
     aiAssistantTryAgain: "נסו חיפוש אחר",
+    
+    // Sticky AI Button
+    stickyAIButton: "שאלו AI",
+    stickyAIPanelTitle: "יועץ AI",
+    stickyAIPanelSubtitle: "תנו לי לעזור לכם למצוא את השהייה המושלמת",
+    stickyAIQuickStart: "התחלה מהירה לפי קטגוריה:",
+    stickyAIOr: "או",
+    stickyAIDescribe: "תארו מה אתם מחפשים:",
+    stickyAIFind: "מצא חוויות",
+    stickyAISaveEmail: "💾 שמרו את ההמלצות האלה",
+    stickyAIEmailPrompt: "הזינו אימייל כדי לקבל את ההמלצות:",
   },
 };
 
