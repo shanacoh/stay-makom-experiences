@@ -149,7 +149,7 @@ const AIExperienceAssistant = () => {
   };
 
   return (
-    <section className="container py-12 sm:py-16 px-4" dir={isRTL ? 'rtl' : 'ltr'}>
+    <section id="ai-assistant" className="container py-12 sm:py-16 px-4 scroll-mt-24" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
