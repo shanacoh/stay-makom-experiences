@@ -53,6 +53,7 @@ import { SEOHead } from "@/components/SEOHead";
 import JournalSection from "@/components/JournalSection";
 import AIExperienceAssistant from "@/components/AIExperienceAssistant";
 import StickyAIButton from "@/components/StickyAIButton";
+import MarqueeBanner from "@/components/MarqueeBanner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertKioskHero from "@/assets/desert-kiosk-hero.png";
@@ -223,7 +224,7 @@ const Index = () => {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center md:items-end md:justify-start">
+        <section className="relative h-[85vh] min-h-[500px] flex items-center justify-center md:items-end md:justify-start">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
@@ -272,6 +273,9 @@ const Index = () => {
             </button>
           </div>
         </section>
+
+        {/* Marquee Banner */}
+        <MarqueeBanner />
 
         {/* Categories Section */}
         <section id="choose-escape" className="container py-6 sm:py-8 md:py-10 px-4 scroll-mt-20">

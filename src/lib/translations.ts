@@ -91,6 +91,7 @@ export const translations = {
     
     // Footer
     footerTagline: "Handpicked Hotels. Unforgettable Experiences.",
+    marqueeBanner: "HANDPICKED HOTELS. UNFORGETTABLE EXPERIENCES.",
     footerStaymakom: "STAYMAKOM",
     footerExperiences: "EXPERIENCES",
     footerLegal: "LEGAL",
@@ -437,6 +438,7 @@ export const translations = {
     
     // Footer
     footerTagline: "מלונות נבחרים. חוויות בלתי נשכחות.",
+    marqueeBanner: "מלונות נבחרים בקפידה. חוויות בלתי נשכחות.",
     footerStaymakom: "STAYMAKOM",
     footerExperiences: "חוויות",
     footerLegal: "משפטי",
