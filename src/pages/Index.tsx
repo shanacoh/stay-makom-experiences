@@ -293,7 +293,7 @@ const Index = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
           ) : (
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-3xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                 {categories?.map(category => (
                   <CategoryCard key={category.slug} category={category} />
