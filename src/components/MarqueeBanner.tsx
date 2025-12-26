@@ -16,10 +16,10 @@ const MarqueeBanner = () => {
       aria-hidden="true"
     >
       <div className={`flex whitespace-nowrap ${isRTL ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
-        <span className="text-foreground font-semibold text-xs sm:text-sm tracking-[0.2em] uppercase mx-4">
+        <span className="font-display text-foreground text-sm sm:text-base md:text-lg tracking-wide uppercase mx-4">
           {repeatedContent}
         </span>
-        <span className="text-foreground font-semibold text-xs sm:text-sm tracking-[0.2em] uppercase mx-4">
+        <span className="font-display text-foreground text-sm sm:text-base md:text-lg tracking-wide uppercase mx-4">
           {repeatedContent}
         </span>
       </div>
