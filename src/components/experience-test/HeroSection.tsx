@@ -229,20 +229,30 @@ const HeroSection = ({
             <div className="flex flex-col">
               {/* Content info section */}
               <div className="space-y-4 pb-5">
-                {/* Title */}
-                <h1 className="text-2xl font-semibold text-foreground leading-tight">
+                {/* Title - centered */}
+                <h1 className="text-2xl font-semibold text-foreground leading-tight text-center">
                   {title}
                 </h1>
 
-                {/* Subtitle / Description */}
+                {/* Subtitle / Description - centered */}
                 {subtitle && (
-                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 text-center">
                     {subtitle}
                   </p>
                 )}
 
-                {/* Rating row */}
-                <div className="flex items-center gap-2">
+                {/* Share and Save buttons - centered, icons only */}
+                <div className="flex items-center justify-center gap-3">
+                  <button className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" aria-label="Share">
+                    <Share className="h-5 w-5" />
+                  </button>
+                  <button className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" aria-label="Save">
+                    <Heart className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Rating row - centered */}
+                <div className="flex items-center justify-center gap-2">
                   {averageRating && (
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-foreground text-foreground" />
@@ -255,27 +265,11 @@ const HeroSection = ({
                   )}
                 </div>
 
-                {/* Location */}
-                <div className="text-sm text-muted-foreground">
+                {/* Location - centered */}
+                <div className="text-sm text-muted-foreground text-center">
                   {city}
                   {city && categoryName && <span className="mx-1">·</span>}
                   {categoryName}
-                </div>
-
-                {/* Share and Save buttons */}
-                <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-2 text-sm text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors">
-                    <Share className="h-4 w-4" />
-                    <span className="underline font-medium">
-                      {lang === 'he' ? 'שתף' : lang === 'en' ? 'Share' : 'Partager'}
-                    </span>
-                  </button>
-                  <button className="flex items-center gap-2 text-sm text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors">
-                    <Heart className="h-4 w-4" />
-                    <span className="underline font-medium">
-                      {lang === 'he' ? 'שמור' : lang === 'en' ? 'Save' : 'Enregistrer'}
-                    </span>
-                  </button>
                 </div>
 
                 {/* Separator */}
@@ -302,10 +296,7 @@ const HeroSection = ({
                   </div>
                 )}
 
-                {/* Separator */}
-                <div className="border-t border-border" />
-
-                {/* Location with icon */}
+                {/* Location with icon - NO separator above */}
                 {(address || city) && (
                   <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
@@ -315,7 +306,7 @@ const HeroSection = ({
                   </div>
                 )}
 
-                {/* Recent review */}
+                {/* Recent review - NO separator above */}
                 {recentReview && (
                   <div className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />

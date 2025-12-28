@@ -287,6 +287,18 @@ const ExperienceTest = () => {
             {/* RIGHT COLUMN - Sticky Booking Panel */}
             <div className="hidden lg:block" ref={bookingRef}>
               <div className="sticky top-24">
+                {/* Subtle price indicator above booking panel */}
+                <div className="text-center mb-4 pb-4 border-b border-border">
+                  <span className="text-sm text-muted-foreground">
+                    {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
+                    <span className="font-semibold text-foreground underline">{experience.base_price}€</span>
+                    <span className="ml-1">
+                      {experience.base_price_type === 'per_person' 
+                        ? (lang === 'he' ? ' לאדם' : lang === 'fr' ? ' / pers.' : ' / person') 
+                        : ''}
+                    </span>
+                  </span>
+                </div>
                 <BookingPanel 
                   experienceId={experience.id} 
                   hotelId={experience.hotel_id} 
