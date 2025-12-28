@@ -226,14 +226,19 @@ const ExperienceTest = () => {
           />
         </section>
 
-        {/* CONTENT - Vertical Storytelling */}
-        <div className="container py-8 px-4 sm:px-6 lg:px-8">
-          <div className={`grid lg:grid-cols-3 gap-8 lg:gap-12 ${isMobile ? 'pb-24' : ''}`}>
+        {/* CONTENT - 2-column layout with sticky booking panel */}
+        <div className="container px-4 sm:px-6 lg:px-8">
+          <div className={`grid lg:grid-cols-[55fr_45fr] gap-8 lg:gap-12 ${isMobile ? 'pb-24' : ''}`}>
             
             {/* LEFT COLUMN - Story content (progressive disclosure) */}
-            <div className="lg:col-span-2 space-y-0">
+            <div className="space-y-0">
               
-              {/* 1. ABOUT - The story hook */}
+              {/* 1. AU PROGRAMME - What's included first */}
+              {includes && includes.length > 0 && (
+                <ProgramTimeline includes={includes} lang={lang} />
+              )}
+
+              {/* 2. ABOUT - The story hook */}
               {longCopy && (
                 <section className="py-8 border-b border-border">
                   <h2 className="text-xl font-bold mb-4">
@@ -245,12 +250,7 @@ const ExperienceTest = () => {
                 </section>
               )}
 
-              {/* 2. WHAT'S INCLUDED - Value proposition */}
-              {includes && includes.length > 0 && (
-                <ProgramTimeline includes={includes} lang={lang} />
-              )}
-
-              {/* 3. EXTRAS - Optional upgrades (after includes) */}
+              {/* 3. EXTRAS - Optional upgrades */}
               {extras && extras.length > 0 && (
                 <section className="py-8 border-b border-border">
                   <ExtrasSection 
@@ -295,9 +295,19 @@ const ExperienceTest = () => {
               )}
             </div>
 
-            {/* RIGHT COLUMN - Empty on desktop since booking panel is in hero */}
-            <div className="hidden lg:block lg:col-span-1" ref={bookingRef}>
-              {/* Booking panel is now integrated in HeroSection */}
+            {/* RIGHT COLUMN - Sticky Booking Panel */}
+            <div className="hidden lg:block" ref={bookingRef}>
+              <div className="sticky top-24">
+                <BookingPanel 
+                  experienceId={experience.id} 
+                  hotelId={experience.hotel_id} 
+                  basePrice={experience.base_price} 
+                  basePriceType={experience.base_price_type || "per_person"} 
+                  currency={experience.currency || "EUR"} 
+                  minParty={experience.min_party || 2} 
+                  maxParty={experience.max_party || 4} 
+                />
+              </div>
             </div>
           </div>
         </div>
