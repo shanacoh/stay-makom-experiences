@@ -278,32 +278,34 @@ const ExperienceTest = () => {
           </div>
         </div>
 
-        {/* Mobile Sticky Bottom Bar */}
+        {/* Mobile Sticky Bottom Bar - Airbnb style */}
         {isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
             <Sheet open={isBookingSheetOpen} onOpenChange={setIsBookingSheetOpen}>
               <SheetTrigger asChild>
-                <button className="w-full p-3 flex items-center justify-between">
+                <button className="w-full px-4 py-3 flex items-center justify-between">
                   <div className="flex flex-col items-start">
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-bold text-xl text-foreground">
-                        {experience.base_price}€
-                      </span>
-                      <span className="text-xs line-through text-muted-foreground">
-                        {Math.round(experience.base_price * 1.26)}€
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-semibold text-base text-foreground underline">
+                        {lang === 'he' ? `מ-${experience.base_price}€` : `À partir de ${experience.base_price}€`}
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      / {experience.base_price_type === 'per_person' ? (lang === 'he' ? 'אדם' : 'person') : (lang === 'he' ? 'הזמנה' : 'booking')} · -26%
+                      {experience.base_price_type === 'per_person' 
+                        ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person') 
+                        : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
                     </span>
                   </div>
-                  <Button size="default" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    {t(lang, 'bookItNow')}
+                  <Button 
+                    size="sm" 
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-5 text-sm font-medium"
+                  >
+                    {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
                   </Button>
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
-                <div className="p-4">
+              <SheetContent side="bottom" className="h-[85vh] overflow-y-auto p-0 rounded-t-2xl">
+                <div className="p-4 pt-6">
                   <BookingPanel 
                     experienceId={experience.id} 
                     hotelId={experience.hotel_id} 
