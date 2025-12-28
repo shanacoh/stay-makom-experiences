@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, X, Grid3X3, Star, MapPin, Share, Heart, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Star, MapPin, Share, Heart, CheckCircle } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import BookingPanel from "@/components/experience/BookingPanel";
 
 interface Review {
   id: string;
@@ -31,6 +32,11 @@ interface HeroSectionProps {
   currency?: string;
   lang: 'en' | 'he' | 'fr';
   onViewDates?: () => void;
+  // Booking panel props
+  experienceId?: string;
+  hotelId?: string;
+  minParty?: number;
+  maxParty?: number;
 }
 
 const HeroSection = ({ 
@@ -49,13 +55,17 @@ const HeroSection = ({
   basePriceType = 'per_person',
   currency = 'EUR',
   lang,
-  onViewDates
+  onViewDates,
+  experienceId,
+  hotelId,
+  minParty = 2,
+  maxParty = 4
 }: HeroSectionProps) => {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  // Only 4 photos for the grid
+  // 4 photos for the 2x2 grid
   const displayPhotos = photos.slice(0, 4);
 
   const handlePrevious = () => {
@@ -69,15 +79,9 @@ const HeroSection = ({
   // Get most recent review for the preview
   const recentReview = reviews[0];
 
-  // Format price
-  const formatPrice = (price: number) => {
-    if (lang === 'he') return `${price}€`;
-    return `${price}€`;
-  };
-
   return (
     <>
-      <div className="pt-20 lg:pt-24 pb-4 lg:pb-6">
+      <div className="pt-20 lg:pt-24">
         {/* MOBILE: Full-width carousel */}
         <div className="block lg:hidden">
           <div className="relative">
@@ -174,55 +178,49 @@ const HeroSection = ({
           </div>
         </div>
 
-        {/* DESKTOP: 2-column layout - 65% images / 35% content */}
+        {/* DESKTOP: Airbnb-style 2-column layout */}
         <div className="hidden lg:block container px-6 xl:px-8">
-          <div className="grid grid-cols-[65fr_35fr] gap-6 xl:gap-8">
+          <div className="grid grid-cols-[58fr_42fr] gap-6 items-start">
             
-            {/* LEFT: Photo Grid - 1 large + 3 small layout (4 photos only) */}
+            {/* LEFT: Photo Grid - 2x2 same size photos */}
             <div className="relative">
-              <div className="grid grid-cols-3 grid-rows-2 gap-1.5 rounded-xl overflow-hidden" style={{ height: 'calc(100vh - 140px)', maxHeight: '520px' }}>
-                {/* Main large photo - spans 2 cols and 2 rows */}
-                <div
-                  className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden"
-                  onClick={() => {
-                    setCurrentPhotoIndex(0);
-                    setIsGalleryOpen(true);
-                  }}
-                >
-                  <img
-                    src={displayPhotos[0] || "/placeholder.svg"}
-                    alt={`${title} - 1`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                
-                {/* 3 smaller photos stacked on the right */}
-                {displayPhotos.slice(1, 4).map((photo, index) => (
+              <div 
+                className="grid grid-cols-2 grid-rows-2 gap-2 rounded-xl overflow-hidden"
+                style={{ height: '420px' }}
+              >
+                {displayPhotos.map((photo, index) => (
                   <div
-                    key={index + 1}
-                    className="relative cursor-pointer overflow-hidden"
+                    key={index}
+                    className={`relative cursor-pointer overflow-hidden ${
+                      index === 0 ? 'rounded-tl-xl' : ''
+                    } ${
+                      index === 1 ? 'rounded-tr-xl' : ''
+                    } ${
+                      index === 2 ? 'rounded-bl-xl' : ''
+                    } ${
+                      index === 3 ? 'rounded-br-xl' : ''
+                    }`}
                     onClick={() => {
-                      setCurrentPhotoIndex(index + 1);
+                      setCurrentPhotoIndex(index);
                       setIsGalleryOpen(true);
                     }}
                   >
                     <img
                       src={photo || "/placeholder.svg"}
-                      alt={`${title} - ${index + 2}`}
+                      alt={`${title} - ${index + 1}`}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
                     {/* View all photos overlay on last photo */}
-                    {index === 2 && photos.length > 4 && (
+                    {index === 3 && photos.length > 4 && (
                       <button
-                        className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm font-medium hover:bg-black/50 transition-colors"
+                        className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-sm font-medium hover:bg-black/40 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           setCurrentPhotoIndex(0);
                           setIsGalleryOpen(true);
                         }}
                       >
-                        <Grid3X3 className="h-4 w-4 mr-2" />
-                        {lang === 'he' ? 'כל התמונות' : lang === 'en' ? 'View all' : 'Voir tout'}
+                        {lang === 'he' ? 'כל התמונות' : lang === 'en' ? 'View all photos' : 'Voir toutes les photos'}
                       </button>
                     )}
                   </div>
@@ -230,125 +228,124 @@ const HeroSection = ({
               </div>
             </div>
 
-            {/* RIGHT: Airbnb-style content column */}
-            <div className="flex flex-col py-2 h-full">
-              {/* Title */}
-              <h1 className="text-xl font-semibold text-foreground mb-2 leading-tight">
-                {title}
-              </h1>
+            {/* RIGHT: Content + Booking Panel integrated */}
+            <div className="flex flex-col">
+              {/* Content info section */}
+              <div className="space-y-4 pb-5">
+                {/* Title */}
+                <h1 className="text-2xl font-semibold text-foreground leading-tight">
+                  {title}
+                </h1>
 
-              {/* Subtitle / Description */}
-              {subtitle && (
-                <p className="text-muted-foreground text-sm mb-3 leading-relaxed line-clamp-2">
-                  {subtitle}
-                </p>
-              )}
+                {/* Subtitle / Description */}
+                {subtitle && (
+                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                    {subtitle}
+                  </p>
+                )}
 
-              {/* Rating row: ★ 4.95 · XX avis */}
-              {averageRating && (
-                <div className="flex items-center gap-1.5 text-sm mb-2">
-                  <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
-                  <span className="font-medium">{averageRating.toFixed(2)}</span>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="text-muted-foreground underline cursor-pointer text-xs">
-                    {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
-                  </span>
+                {/* Rating row */}
+                <div className="flex items-center gap-2">
+                  {averageRating && (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-foreground text-foreground" />
+                      <span className="font-semibold">{averageRating.toFixed(2)}</span>
+                      <span className="text-muted-foreground mx-1">·</span>
+                      <button className="text-muted-foreground underline text-sm hover:text-foreground transition-colors">
+                        {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Location row: Ville · Catégorie */}
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-                {city && <span>{city}</span>}
-                {city && categoryName && <span>·</span>}
-                {categoryName && <span>{categoryName}</span>}
-              </div>
-
-              {/* Share and Save buttons */}
-              <div className="flex items-center gap-4 mb-4">
-                <button className="flex items-center gap-1.5 text-sm text-foreground hover:text-foreground/80 transition-colors">
-                  <Share className="h-4 w-4" />
-                  <span className="underline">
-                    {lang === 'he' ? 'שתף' : lang === 'en' ? 'Share' : 'Partager'}
-                  </span>
-                </button>
-                <button className="flex items-center gap-1.5 text-sm text-foreground hover:text-foreground/80 transition-colors">
-                  <Heart className="h-4 w-4" />
-                  <span className="underline">
-                    {lang === 'he' ? 'שמור' : lang === 'en' ? 'Save' : 'Enregistrer'}
-                  </span>
-                </button>
-              </div>
-
-              {/* Thin separator */}
-              <div className="border-t border-border/50 my-4" />
-
-              {/* Host section with hotel info */}
-              {hotelName && (
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground overflow-hidden flex-shrink-0">
-                    {hotelImage ? (
-                      <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />
-                    ) : (
-                      hotelName.charAt(0)
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {lang === 'he' ? `מארח: ${hotelName}` : lang === 'en' ? `Host: ${hotelName}` : `Hôte : ${hotelName}`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {lang === 'he' ? 'חוויה מקומית' : lang === 'en' ? 'Local experience' : 'Expérience locale'}
-                    </p>
-                  </div>
+                {/* Location */}
+                <div className="text-sm text-muted-foreground">
+                  {city}
+                  {city && categoryName && <span className="mx-1">·</span>}
+                  {categoryName}
                 </div>
-              )}
 
-              {/* Location section with map icon */}
-              {(address || city) && (
-                <div className="flex items-start gap-3 mb-4">
-                  <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  <div>
+                {/* Share and Save buttons */}
+                <div className="flex items-center gap-4">
+                  <button className="flex items-center gap-2 text-sm text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors">
+                    <Share className="h-4 w-4" />
+                    <span className="underline font-medium">
+                      {lang === 'he' ? 'שתף' : lang === 'en' ? 'Share' : 'Partager'}
+                    </span>
+                  </button>
+                  <button className="flex items-center gap-2 text-sm text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors">
+                    <Heart className="h-4 w-4" />
+                    <span className="underline font-medium">
+                      {lang === 'he' ? 'שמור' : lang === 'en' ? 'Save' : 'Enregistrer'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Separator */}
+                <div className="border-t border-border" />
+
+                {/* Host section */}
+                {hotelName && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground overflow-hidden flex-shrink-0">
+                      {hotelImage ? (
+                        <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />
+                      ) : (
+                        hotelName.charAt(0)
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {lang === 'he' ? `מארח: ${hotelName}` : lang === 'en' ? `Host: ${hotelName}` : `Hôte : ${hotelName}`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {lang === 'he' ? 'חוויה מקומית' : lang === 'en' ? 'Local experience' : 'Expérience locale'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Separator */}
+                <div className="border-t border-border" />
+
+                {/* Location with icon */}
+                {(address || city) && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-foreground">
                       {address || city}
                     </p>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Recent review section */}
-              {recentReview && (
-                <div className="flex items-start gap-3 mb-4">
-                  <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-foreground line-clamp-2 italic">
-                      "{recentReview.text.substring(0, 100)}{recentReview.text.length > 100 ? '...' : ''}"
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(recentReview.created_at).toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'fr' ? 'fr-FR' : 'en-US', { month: 'long', year: 'numeric' })}
-                    </p>
+                {/* Recent review */}
+                {recentReview && (
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-foreground italic line-clamp-2">
+                        "{recentReview.text.substring(0, 80)}{recentReview.text.length > 80 ? '...' : ''}"
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(recentReview.created_at).toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'fr' ? 'fr-FR' : 'en-US', { month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Spacer to push price preview to bottom */}
-              <div className="flex-1" />
-
-              {/* Price preview sticky - visible at bottom, transitions to sticky on scroll */}
-              {basePrice && (
-                <div className="border-t border-border/50 pt-4 mt-4">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-semibold underline">
-                      {lang === 'he' ? `מ-${formatPrice(basePrice)}` : `À partir de ${formatPrice(basePrice)}`}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {basePriceType === 'per_person' 
-                      ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
-                      : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
-                  </p>
-                  <p className="text-sm text-primary mt-1">
-                    {lang === 'he' ? 'ביטול ללא תשלום' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
-                  </p>
+              {/* Booking Panel - Integrated directly in hero */}
+              {experienceId && hotelId && basePrice && (
+                <div className="mt-2">
+                  <BookingPanel 
+                    experienceId={experienceId}
+                    hotelId={hotelId}
+                    basePrice={basePrice}
+                    basePriceType={basePriceType as "fixed" | "per_person" | "per_booking"}
+                    currency={currency}
+                    minParty={minParty}
+                    maxParty={maxParty}
+                  />
                 </div>
               )}
             </div>
