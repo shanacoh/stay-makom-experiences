@@ -9,6 +9,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Category from "./pages/Category";
 import Experience from "./pages/Experience";
+import ExperienceTest from "./pages/ExperienceTest";
 import Hotel from "./pages/Hotel";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/experiences" element={<Experiences />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/experience/:slug" element={<Experience />} />
+            <Route path="/experience-test/:slug" element={<ExperienceTest />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
             <Route path="/hotels/:slug" element={<Hotel />} />
             <Route
