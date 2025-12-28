@@ -16,7 +16,7 @@ import ReviewsGrid from "@/components/experience-test/ReviewsGrid";
 import LocationMap from "@/components/experience-test/LocationMap";
 import ExtrasSection from "@/components/experience/ExtrasSection";
 import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
-import { Loader2, Star } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -200,57 +200,26 @@ const ExperienceTest = () => {
       />
 
       <main className="flex-1">
-        {/* HERO SECTION - Price visible immediately */}
+        {/* HERO SECTION - Airbnb-style layout */}
         <section ref={heroRef}>
           <HeroSection
             photos={galleryPhotos}
             title={title}
             subtitle={subtitle}
             hotelName={hotelName}
+            hotelImage={experience.hotels?.hero_image}
             city={city}
+            categoryName={experience.category_id ? undefined : undefined}
+            address={experience.address || experience.hotels?.city}
             averageRating={averageRating}
             reviewsCount={reviews?.length || 0}
+            reviews={reviews || []}
+            basePrice={experience.base_price}
+            basePriceType={experience.base_price_type || 'per_person'}
+            currency={experience.currency || 'EUR'}
             lang={lang}
-          >
-            {/* Desktop: Immediate price preview in hero */}
-            <div className="hidden lg:block space-y-4">
-              {/* Price Display */}
-              <div className="border border-border rounded-xl p-5 shadow-sm bg-background">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-2xl font-bold">
-                    {lang === 'he' ? `€${experience.base_price}` : `${experience.base_price}€`}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {experience.base_price_type === 'per_person' 
-                      ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
-                      : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
-                  </span>
-                </div>
-                
-                {averageRating && (
-                  <div className="flex items-center gap-1.5 text-sm mb-4">
-                    <Star className="h-4 w-4 fill-foreground text-foreground" />
-                    <span className="font-medium">{averageRating.toFixed(1)}</span>
-                    <span className="text-muted-foreground">
-                      · {reviews?.length || 0} {lang === 'he' ? 'ביקורות' : lang === 'fr' ? 'avis' : 'reviews'}
-                    </span>
-                  </div>
-                )}
-
-                <Button 
-                  onClick={scrollToBooking}
-                  className="w-full"
-                  size="lg"
-                >
-                  {lang === 'he' ? 'בדוק זמינות' : lang === 'fr' ? 'Vérifier la disponibilité' : 'Check availability'}
-                </Button>
-
-                <p className="text-xs text-center text-muted-foreground mt-3">
-                  {lang === 'he' ? 'לא יחויב כעת' : lang === 'fr' ? 'Aucun paiement immédiat' : 'You won\'t be charged yet'}
-                </p>
-              </div>
-            </div>
-          </HeroSection>
+            onViewDates={scrollToBooking}
+          />
         </section>
 
         {/* CONTENT - Vertical Storytelling */}
