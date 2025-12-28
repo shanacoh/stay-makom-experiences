@@ -200,7 +200,7 @@ const ExperienceTest = () => {
       />
 
       <main className="flex-1">
-        {/* HERO SECTION - Airbnb-style layout */}
+        {/* HERO SECTION - Airbnb-style layout with integrated booking panel */}
         <section ref={heroRef}>
           <HeroSection
             photos={galleryPhotos}
@@ -219,6 +219,10 @@ const ExperienceTest = () => {
             currency={experience.currency || 'EUR'}
             lang={lang}
             onViewDates={scrollToBooking}
+            experienceId={experience.id}
+            hotelId={experience.hotel_id}
+            minParty={experience.min_party || 2}
+            maxParty={experience.max_party || 4}
           />
         </section>
 
@@ -291,19 +295,9 @@ const ExperienceTest = () => {
               )}
             </div>
 
-            {/* RIGHT COLUMN - Sticky Booking Panel (Desktop) */}
+            {/* RIGHT COLUMN - Empty on desktop since booking panel is in hero */}
             <div className="hidden lg:block lg:col-span-1" ref={bookingRef}>
-              <div className="sticky top-24">
-                <BookingPanel 
-                  experienceId={experience.id} 
-                  hotelId={experience.hotel_id} 
-                  basePrice={experience.base_price} 
-                  basePriceType={experience.base_price_type || "per_person"} 
-                  currency={experience.currency || "EUR"} 
-                  minParty={experience.min_party || 2} 
-                  maxParty={experience.max_party || 4} 
-                />
-              </div>
+              {/* Booking panel is now integrated in HeroSection */}
             </div>
           </div>
         </div>
