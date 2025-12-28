@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,8 +6,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingPanel from "@/components/experience/BookingPanel";
 import HeroSection from "@/components/experience-test/HeroSection";
-import HeroBookingPreview from "@/components/experience-test/HeroBookingPreview";
-import FeaturedReview from "@/components/experience-test/FeaturedReview";
+import ExperienceSearchHeader from "@/components/experience-test/ExperienceSearchHeader";
+import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
+import YourStaySection from "@/components/experience-test/YourStaySection";
 import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
 import HostSection from "@/components/experience-test/HostSection";
 import PracticalInfo from "@/components/experience-test/PracticalInfo";
@@ -15,7 +16,7 @@ import ReviewsGrid from "@/components/experience-test/ReviewsGrid";
 import LocationMap from "@/components/experience-test/LocationMap";
 import ExtrasSection from "@/components/experience/ExtrasSection";
 import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,23 @@ const ExperienceTest = () => {
   const { lang } = useLanguage();
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<{ [key: string]: number }>({});
+  const [guestCount, setGuestCount] = useState(2);
+  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [showSearchHeader, setShowSearchHeader] = useState(false);
   const isMobile = useIsMobile();
+  
+  const heroRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
   const bookingRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll for search header visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowSearchHeader(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch experience data
   const { data: experience, isLoading } = useQuery({
@@ -153,9 +169,6 @@ const ExperienceTest = () => {
     ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length
     : null;
 
-  // Get featured review for hero
-  const featuredReview = reviews && reviews.length > 0 ? reviews[0] : null;
-
   return (
     <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <SEOHead
@@ -173,75 +186,123 @@ const ExperienceTest = () => {
       />
       <Header />
 
+      {/* Sticky Search Header - appears on scroll */}
+      <ExperienceSearchHeader
+        guestCount={guestCount}
+        onGuestChange={setGuestCount}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        minGuests={experience.min_party || 1}
+        maxGuests={experience.max_party || 8}
+        onViewDates={scrollToBooking}
+        lang={lang}
+        isVisible={showSearchHeader && !isMobile}
+      />
+
       <main className="flex-1">
-        {/* Hero Section - Airbnb style: Photos left, Info right */}
-        <HeroSection
-          photos={galleryPhotos}
-          title={title}
-          subtitle={subtitle}
-          hotelName={hotelName}
-          city={city}
-          averageRating={averageRating}
-          reviewsCount={reviews?.length || 0}
-          lang={lang}
-        >
-          <HeroBookingPreview
-            basePrice={experience.base_price}
-            basePriceType={experience.base_price_type || "per_person"}
-            currency={experience.currency || "EUR"}
+        {/* HERO SECTION - Price visible immediately */}
+        <section ref={heroRef}>
+          <HeroSection
+            photos={galleryPhotos}
+            title={title}
+            subtitle={subtitle}
+            hotelName={hotelName}
+            city={city}
             averageRating={averageRating}
             reviewsCount={reviews?.length || 0}
-            featuredReview={featuredReview}
             lang={lang}
-            onViewDates={scrollToBooking}
-          />
-        </HeroSection>
+          >
+            {/* Desktop: Immediate price preview in hero */}
+            <div className="hidden lg:block space-y-4">
+              {/* Price Display */}
+              <div className="border border-border rounded-xl p-5 shadow-sm bg-background">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-2xl font-bold">
+                    {lang === 'he' ? `€${experience.base_price}` : `${experience.base_price}€`}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {experience.base_price_type === 'per_person' 
+                      ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
+                      : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
+                  </span>
+                </div>
+                
+                {averageRating && (
+                  <div className="flex items-center gap-1.5 text-sm mb-4">
+                    <Star className="h-4 w-4 fill-foreground text-foreground" />
+                    <span className="font-medium">{averageRating.toFixed(1)}</span>
+                    <span className="text-muted-foreground">
+                      · {reviews?.length || 0} {lang === 'he' ? 'ביקורות' : lang === 'fr' ? 'avis' : 'reviews'}
+                    </span>
+                  </div>
+                )}
 
-        {/* Rest of Content */}
-        <div className="container py-6 px-4 sm:px-6">
-          <div className={`grid md:grid-cols-3 gap-6 lg:gap-8 ${isMobile ? 'pb-24' : ''}`}>
-            {/* Left Column - Content */}
-            <div className="md:col-span-2 space-y-0">
-              {/* Description */}
+                <Button 
+                  onClick={scrollToBooking}
+                  className="w-full"
+                  size="lg"
+                >
+                  {lang === 'he' ? 'בדוק זמינות' : lang === 'fr' ? 'Vérifier la disponibilité' : 'Check availability'}
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground mt-3">
+                  {lang === 'he' ? 'לא יחויב כעת' : lang === 'fr' ? 'Aucun paiement immédiat' : 'You won\'t be charged yet'}
+                </p>
+              </div>
+            </div>
+          </HeroSection>
+        </section>
+
+        {/* CONTENT - Vertical Storytelling */}
+        <div className="container py-8 px-4 sm:px-6 lg:px-8">
+          <div className={`grid lg:grid-cols-3 gap-8 lg:gap-12 ${isMobile ? 'pb-24' : ''}`}>
+            
+            {/* LEFT COLUMN - Story content (progressive disclosure) */}
+            <div className="lg:col-span-2 space-y-0">
+              
+              {/* 1. ABOUT - The story hook */}
               {longCopy && (
-                <div className="py-6 border-b border-border">
-                  <h2 className="text-lg font-bold mb-3">
-                    {lang === 'he' ? 'על החוויה' : lang === 'en' ? 'About this experience' : 'À propos de cette expérience'}
+                <section className="py-8 border-b border-border">
+                  <h2 className="text-xl font-bold mb-4">
+                    {lang === 'he' ? 'על החוויה' : lang === 'fr' ? 'À propos de cette expérience' : 'About this experience'}
                   </h2>
-                  <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                     {longCopy}
                   </p>
-                </div>
+                </section>
               )}
 
-              {/* Program Timeline */}
+              {/* 2. WHAT'S INCLUDED - Value proposition */}
               {includes && includes.length > 0 && (
                 <ProgramTimeline includes={includes} lang={lang} />
               )}
 
-              {/* Extras Section */}
+              {/* 3. EXTRAS - Optional upgrades (after includes) */}
               {extras && extras.length > 0 && (
-                <div className="py-6 border-b border-border">
+                <section className="py-8 border-b border-border">
                   <ExtrasSection 
                     extras={extras} 
                     selectedExtras={selectedExtras} 
                     onUpdateQuantity={handleUpdateQuantity} 
                   />
-                </div>
+                </section>
               )}
 
-              {/* Host Section */}
+              {/* 4. YOUR STAY - Hotel integration (the anchor) */}
+              <YourStaySection hotel={experience.hotels} lang={lang} />
+
+              {/* 5. HOST - Trust building */}
               <HostSection hotel={experience.hotels} lang={lang} />
 
-              {/* Practical Info */}
-              <PracticalInfo experience={experience} lang={lang} />
-
-              {/* Reviews Grid */}
+              {/* 6. REVIEWS - Social proof */}
               {reviews && reviews.length > 0 && (
                 <ReviewsGrid reviews={reviews} lang={lang} />
               )}
 
-              {/* Location Map */}
+              {/* 7. PRACTICAL INFO - Details for committed users */}
+              <PracticalInfo experience={experience} lang={lang} />
+
+              {/* 8. LOCATION - Final context */}
               <LocationMap 
                 latitude={experience.hotels?.latitude} 
                 longitude={experience.hotels?.longitude}
@@ -249,27 +310,27 @@ const ExperienceTest = () => {
                 lang={lang}
               />
 
-              {/* Other Experiences */}
+              {/* 9. OTHER EXPERIENCES - Keep exploring */}
               {experience.hotels && (
-                <div className="py-6">
+                <section className="py-8">
                   <OtherExperiencesFromHotel 
                     hotelId={experience.hotel_id}
                     currentExperienceId={experience.id}
                     hotelName={hotelName}
                   />
-                </div>
+                </section>
               )}
             </div>
 
-            {/* Right Column - Sticky Booking Panel */}
-            <div className="md:col-span-1 hidden md:block" ref={bookingRef}>
-              <div className="sticky top-4">
+            {/* RIGHT COLUMN - Sticky Booking Panel (Desktop) */}
+            <div className="hidden lg:block lg:col-span-1" ref={bookingRef}>
+              <div className="sticky top-24">
                 <BookingPanel 
                   experienceId={experience.id} 
                   hotelId={experience.hotel_id} 
                   basePrice={experience.base_price} 
                   basePriceType={experience.base_price_type || "per_person"} 
-                  currency={experience.currency || "USD"} 
+                  currency={experience.currency || "EUR"} 
                   minParty={experience.min_party || 2} 
                   maxParty={experience.max_party || 4} 
                 />
@@ -278,16 +339,29 @@ const ExperienceTest = () => {
           </div>
         </div>
 
-        {/* Mobile Sticky Bottom Bar - Airbnb style */}
+        {/* STICKY PRICE BAR - Desktop (appears on scroll) */}
+        <StickyPriceBar
+          basePrice={experience.base_price}
+          basePriceType={experience.base_price_type || "per_person"}
+          currency={experience.currency || "EUR"}
+          averageRating={averageRating}
+          reviewsCount={reviews?.length || 0}
+          lang={lang}
+          onViewDates={scrollToBooking}
+          heroRef={heroRef as React.RefObject<HTMLElement>}
+          footerRef={footerRef as React.RefObject<HTMLElement>}
+        />
+
+        {/* MOBILE STICKY BOTTOM BAR */}
         {isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
             <Sheet open={isBookingSheetOpen} onOpenChange={setIsBookingSheetOpen}>
               <SheetTrigger asChild>
-                <button className="w-full px-4 py-3 flex items-center justify-between">
+                <button className="w-full px-5 py-4 flex items-center justify-between">
                   <div className="flex flex-col items-start">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="font-semibold text-base text-foreground underline">
-                        {lang === 'he' ? `מ-${experience.base_price}€` : `À partir de ${experience.base_price}€`}
+                      <span className="font-bold text-base text-foreground underline">
+                        {lang === 'he' ? `מ-${experience.base_price}€` : lang === 'fr' ? `À partir de ${experience.base_price}€` : `From ${experience.base_price}€`}
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -297,21 +371,21 @@ const ExperienceTest = () => {
                     </span>
                   </div>
                   <Button 
-                    size="sm" 
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-5 text-sm font-medium"
+                    size="default" 
+                    className="rounded-lg px-6 font-medium"
                   >
                     {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
                   </Button>
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[85vh] overflow-y-auto p-0 rounded-t-2xl">
-                <div className="p-4 pt-6">
+              <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0 rounded-t-2xl">
+                <div className="p-5 pt-8">
                   <BookingPanel 
                     experienceId={experience.id} 
                     hotelId={experience.hotel_id} 
                     basePrice={experience.base_price} 
                     basePriceType={experience.base_price_type || "per_person"} 
-                    currency={experience.currency || "USD"} 
+                    currency={experience.currency || "EUR"} 
                     minParty={experience.min_party || 2} 
                     maxParty={experience.max_party || 4} 
                   />
@@ -322,7 +396,9 @@ const ExperienceTest = () => {
         )}
       </main>
 
-      <Footer />
+      <footer ref={footerRef as React.RefObject<HTMLElement>}>
+        <Footer />
+      </footer>
     </div>
   );
 };
