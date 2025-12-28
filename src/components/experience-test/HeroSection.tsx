@@ -180,18 +180,15 @@ const HeroSection = ({
 
         {/* DESKTOP: Airbnb-style 2-column layout */}
         <div className="hidden lg:block container px-6 xl:px-8">
-          <div className="grid grid-cols-[58fr_42fr] gap-6 items-start">
+          <div className="grid grid-cols-[55fr_45fr] gap-8 items-start">
             
-            {/* LEFT: Photo Grid - 2x2 same size photos */}
+            {/* LEFT: Photo Grid - 2x2 SQUARE photos */}
             <div className="relative">
-              <div 
-                className="grid grid-cols-2 grid-rows-2 gap-2 rounded-xl overflow-hidden"
-                style={{ height: '420px' }}
-              >
+              <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
                 {displayPhotos.map((photo, index) => (
                   <div
                     key={index}
-                    className={`relative cursor-pointer overflow-hidden ${
+                    className={`relative cursor-pointer overflow-hidden aspect-square ${
                       index === 0 ? 'rounded-tl-xl' : ''
                     } ${
                       index === 1 ? 'rounded-tr-xl' : ''
@@ -334,18 +331,35 @@ const HeroSection = ({
                 )}
               </div>
 
-              {/* Booking Panel - Integrated directly in hero */}
-              {experienceId && hotelId && basePrice && (
-                <div className="mt-2">
-                  <BookingPanel 
-                    experienceId={experienceId}
-                    hotelId={hotelId}
-                    basePrice={basePrice}
-                    basePriceType={basePriceType as "fixed" | "per_person" | "per_booking"}
-                    currency={currency}
-                    minParty={minParty}
-                    maxParty={maxParty}
-                  />
+              {/* Price bar at bottom - like Airbnb */}
+              {basePrice && (
+                <div className="border-t border-border pt-4 mt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-sm text-muted-foreground">
+                          {lang === 'he' ? 'מ-' : 'À partir de '}
+                        </span>
+                        <span className="text-lg font-semibold underline">
+                          {basePrice}€
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {basePriceType === 'per_person' 
+                          ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
+                          : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
+                      </p>
+                      <p className="text-sm text-primary">
+                        {lang === 'he' ? 'ביטול ללא תשלום' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={onViewDates}
+                      className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
