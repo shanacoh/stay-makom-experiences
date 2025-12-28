@@ -182,8 +182,8 @@ const HeroSection = ({
         <div className="hidden lg:block container px-6 xl:px-8">
           <div className="grid grid-cols-[55fr_45fr] gap-8 items-start">
             
-            {/* LEFT: Photo Grid - 2x2 photos that fill the viewport height */}
-            <div className="relative h-[calc(100vh-6rem)]">
+            {/* LEFT: Photo Grid - 2x2 photos with reasonable height to see content */}
+            <div className="relative h-[calc(100vh-12rem)]">
               <div className="grid grid-cols-2 grid-rows-2 gap-2 rounded-xl overflow-hidden h-full">
                 {displayPhotos.map((photo, index) => (
                   <div
