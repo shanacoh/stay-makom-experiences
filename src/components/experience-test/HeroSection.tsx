@@ -34,7 +34,7 @@ const HeroSection = ({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  const displayPhotos = photos.slice(0, 4);
+  const displayPhotos = photos.slice(0, 5);
 
   const handlePrevious = () => {
     setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
@@ -139,51 +139,66 @@ const HeroSection = ({
           </div>
         </div>
 
-        {/* DESKTOP: 2-column layout */}
+        {/* DESKTOP: 2-column layout - 65% images / 35% content */}
         <div className="hidden lg:block container px-6 xl:px-8">
-          <div className="grid grid-cols-2 gap-10 xl:gap-14">
+          <div className="grid grid-cols-[65fr_35fr] gap-6 xl:gap-8">
             
-            {/* LEFT: 2x2 Photo Grid */}
+            {/* LEFT: Photo Grid - 1 large + 4 small layout like Airbnb */}
             <div className="relative">
-              <div className="grid grid-cols-2 gap-1.5 aspect-square rounded-xl overflow-hidden">
-                {displayPhotos.map((photo, index) => (
+              <div className="grid grid-cols-4 grid-rows-2 gap-1.5 rounded-xl overflow-hidden" style={{ height: 'calc(100vh - 140px)', maxHeight: '520px' }}>
+                {/* Main large photo - spans 2 cols and 2 rows */}
+                <div
+                  className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden"
+                  onClick={() => {
+                    setCurrentPhotoIndex(0);
+                    setIsGalleryOpen(true);
+                  }}
+                >
+                  <img
+                    src={displayPhotos[0] || "/placeholder.svg"}
+                    alt={`${title} - 1`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                
+                {/* 4 smaller photos on the right */}
+                {displayPhotos.slice(1, 5).map((photo, index) => (
                   <div
-                    key={index}
+                    key={index + 1}
                     className="relative cursor-pointer overflow-hidden"
                     onClick={() => {
-                      setCurrentPhotoIndex(index);
+                      setCurrentPhotoIndex(index + 1);
                       setIsGalleryOpen(true);
                     }}
                   >
                     <img
                       src={photo || "/placeholder.svg"}
-                      alt={`${title} - ${index + 1}`}
+                      alt={`${title} - ${index + 2}`}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
-                    
-                    {/* Show all photos button on last photo */}
-                    {index === 3 && photos.length > 4 && (
-                      <button
-                        className="absolute bottom-2 right-2 bg-background/95 text-foreground text-xs font-medium px-2.5 py-1 rounded-md flex items-center gap-1 shadow-sm hover:bg-background transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentPhotoIndex(0);
-                          setIsGalleryOpen(true);
-                        }}
-                      >
-                        <Grid3X3 className="h-3 w-3" />
-                        {photos.length}
-                      </button>
-                    )}
                   </div>
                 ))}
               </div>
+              
+              {/* View all photos button - prominent like Airbnb */}
+              {photos.length > 5 && (
+                <button
+                  className="absolute bottom-4 right-4 bg-background text-foreground text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 shadow-md border border-border hover:bg-muted transition-colors"
+                  onClick={() => {
+                    setCurrentPhotoIndex(0);
+                    setIsGalleryOpen(true);
+                  }}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  {lang === 'he' ? 'הצג את כל התמונות' : lang === 'en' ? 'View all photos' : 'Voir toutes les photos'}
+                </button>
+              )}
             </div>
 
-            {/* RIGHT: Title, Description, Host */}
+            {/* RIGHT: Title, Description, Host - narrower column */}
             <div className="flex flex-col py-2">
               {/* Title */}
-              <h1 className="text-xl xl:text-2xl font-semibold text-foreground mb-2 leading-tight">
+              <h1 className="text-xl font-semibold text-foreground mb-2 leading-tight">
                 {title}
               </h1>
 
@@ -195,7 +210,7 @@ const HeroSection = ({
               )}
 
               {/* Rating, Reviews, Location row */}
-              <div className="flex items-center gap-1.5 text-sm mb-3">
+              <div className="flex items-center gap-1.5 text-sm mb-3 flex-wrap">
                 {averageRating && (
                   <>
                     <div className="flex items-center gap-1">
@@ -215,7 +230,7 @@ const HeroSection = ({
               </div>
 
               {/* Share and Save buttons */}
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-3">
                 <button className="flex items-center gap-1.5 text-xs text-foreground hover:text-foreground/80 transition-colors">
                   <Share className="h-3.5 w-3.5" />
                   <span className="underline">
@@ -231,12 +246,12 @@ const HeroSection = ({
               </div>
 
               {/* Separator */}
-              <div className="border-t border-border my-3" />
+              <div className="border-t border-border my-2" />
 
               {/* Host info */}
               {hotelName && (
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
                     {hotelName.charAt(0)}
                   </div>
                   <div>
