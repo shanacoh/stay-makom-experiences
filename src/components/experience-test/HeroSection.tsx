@@ -330,38 +330,6 @@ const HeroSection = ({
                   </div>
                 )}
               </div>
-
-              {/* Price bar at bottom - like Airbnb */}
-              {basePrice && (
-                <div className="border-t border-border pt-4 mt-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-sm text-muted-foreground">
-                          {lang === 'he' ? 'מ-' : 'À partir de '}
-                        </span>
-                        <span className="text-lg font-semibold underline">
-                          {basePrice}€
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {basePriceType === 'per_person' 
-                          ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
-                          : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
-                      </p>
-                      <p className="text-sm text-primary">
-                        {lang === 'he' ? 'ביטול ללא תשלום' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={onViewDates}
-                      className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
-                    >
-                      {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
