@@ -186,18 +186,7 @@ const ExperienceTest = () => {
       />
       <Header />
 
-      {/* Sticky Search Header - appears on scroll */}
-      <ExperienceSearchHeader
-        guestCount={guestCount}
-        onGuestChange={setGuestCount}
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        minGuests={experience.min_party || 1}
-        maxGuests={experience.max_party || 8}
-        onViewDates={scrollToBooking}
-        lang={lang}
-        isVisible={showSearchHeader && !isMobile}
-      />
+      {/* Removed sticky search header - not needed since we have sticky booking panel */}
 
       <main className="flex-1">
         {/* HERO SECTION - Airbnb-style layout with integrated booking panel */}
