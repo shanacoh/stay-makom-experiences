@@ -287,17 +287,28 @@ const ExperienceTest = () => {
             {/* RIGHT COLUMN - Sticky Booking Panel */}
             <div className="hidden lg:block" ref={bookingRef}>
               <div className="sticky top-24">
-                {/* Subtle price indicator above booking panel */}
-                <div className="text-center mb-4 pb-4 border-b border-border">
-                  <span className="text-sm text-muted-foreground">
-                    {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
-                    <span className="font-semibold text-foreground underline">{experience.base_price}€</span>
-                    <span className="ml-1">
-                      {experience.base_price_type === 'per_person' 
-                        ? (lang === 'he' ? ' לאדם' : lang === 'fr' ? ' / pers.' : ' / person') 
-                        : ''}
+                {/* Airbnb-style price header with CTA */}
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
+                  <div className="flex flex-col">
+                    <span className="text-base">
+                      {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
+                      <span className="font-semibold underline">{experience.base_price} €</span>
                     </span>
-                  </span>
+                    <span className="text-sm text-muted-foreground">
+                      {experience.base_price_type === 'per_person' 
+                        ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person') 
+                        : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
+                    </span>
+                    <span className="text-sm text-primary font-medium">
+                      {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
+                    </span>
+                  </div>
+                  <Button 
+                    onClick={scrollToBooking}
+                    className="rounded-lg px-6 py-3 font-medium"
+                  >
+                    {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
+                  </Button>
                 </div>
                 <BookingPanel 
                   experienceId={experience.id} 

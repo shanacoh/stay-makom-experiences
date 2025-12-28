@@ -182,13 +182,13 @@ const HeroSection = ({
         <div className="hidden lg:block container px-6 xl:px-8">
           <div className="grid grid-cols-[55fr_45fr] gap-8 items-start">
             
-            {/* LEFT: Photo Grid - 2x2 SQUARE photos */}
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
+            {/* LEFT: Photo Grid - 2x2 photos that fill the viewport height */}
+            <div className="relative h-[calc(100vh-6rem)]">
+              <div className="grid grid-cols-2 grid-rows-2 gap-2 rounded-xl overflow-hidden h-full">
                 {displayPhotos.map((photo, index) => (
                   <div
                     key={index}
-                    className={`relative cursor-pointer overflow-hidden aspect-square ${
+                    className={`relative cursor-pointer overflow-hidden ${
                       index === 0 ? 'rounded-tl-xl' : ''
                     } ${
                       index === 1 ? 'rounded-tr-xl' : ''
@@ -236,7 +236,7 @@ const HeroSection = ({
 
                 {/* Subtitle / Description - centered */}
                 {subtitle && (
-                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 text-center">
+                  <p className="text-muted-foreground text-sm leading-relaxed text-center">
                     {subtitle}
                   </p>
                 )}
