@@ -61,10 +61,11 @@ const StickyPriceBar = ({
     ? `${currencySymbol}${basePrice}`
     : `${basePrice}${currencySymbol}`;
 
+  // Only show on mobile - desktop has sticky booking panel
   return (
     <div
       className={cn(
-        "hidden md:block fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-all duration-300",
+        "lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-all duration-300",
         isSticky && !isHidden ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
       )}
     >
