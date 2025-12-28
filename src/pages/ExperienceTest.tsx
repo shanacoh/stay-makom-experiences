@@ -11,6 +11,9 @@ import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
 import HostSection from "@/components/experience-test/HostSection";
 import PracticalInfo from "@/components/experience-test/PracticalInfo";
 import ReviewsGrid from "@/components/experience-test/ReviewsGrid";
+import LocationMap from "@/components/experience-test/LocationMap";
+import ExtrasSection from "@/components/experience/ExtrasSection";
+import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
 import { Loader2, Star, MapPin } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -23,6 +26,7 @@ const ExperienceTest = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
+  const [selectedExtras, setSelectedExtras] = useState<{ [key: string]: number }>({});
   const isMobile = useIsMobile();
 
   // Fetch experience data
@@ -75,6 +79,30 @@ const ExperienceTest = () => {
     },
     enabled: !!experience?.id,
   });
+
+  // Fetch extras
+  const { data: extras } = useQuery({
+    queryKey: ["experience-extras", experience?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experience_extras")
+        .select(`
+          extra_id,
+          extras (*)
+        `)
+        .eq("experience_id", experience?.id);
+      if (error) throw error;
+      return data?.map((item: any) => item.extras).filter(Boolean) || [];
+    },
+    enabled: !!experience?.id,
+  });
+
+  const handleUpdateQuantity = (extraId: string, quantity: number) => {
+    setSelectedExtras(prev => ({
+      ...prev,
+      [extraId]: Math.max(0, quantity)
+    }));
+  };
 
   if (isLoading) {
     return (
@@ -133,41 +161,41 @@ const ExperienceTest = () => {
       <Header />
 
       <main className="flex-1">
-        {/* Airbnb-style Photo Grid */}
+        {/* Compact Photo Grid */}
         <PhotoGrid photos={galleryPhotos} title={title} />
 
         {/* Main Content */}
-        <div className="container py-8 px-4 sm:px-6">
-          <div className={`grid md:grid-cols-3 gap-8 lg:gap-12 ${isMobile ? 'pb-24' : ''}`}>
+        <div className="container py-6 px-4 sm:px-6">
+          <div className={`grid md:grid-cols-3 gap-6 lg:gap-8 ${isMobile ? 'pb-24' : ''}`}>
             {/* Left Column - Content */}
             <div className="md:col-span-2 space-y-0">
-              {/* Title Block - Airbnb style */}
-              <div className="pb-6 border-b border-border">
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
+              {/* Title Block - Compact */}
+              <div className="pb-4 border-b border-border">
+                <h1 className="text-xl md:text-2xl font-bold mb-1">{title}</h1>
                 
                 {/* Rating, reviews, location */}
                 <div className="flex items-center gap-2 text-sm flex-wrap">
                   {averageRating && (
                     <>
                       <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-foreground text-foreground" />
-                        <span className="font-semibold">{averageRating.toFixed(2)}</span>
+                        <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
+                        <span className="font-semibold text-sm">{averageRating.toFixed(2)}</span>
                       </div>
                       <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground underline cursor-pointer">
+                      <span className="text-muted-foreground underline cursor-pointer text-sm">
                         {reviews?.length} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
                       </span>
                       <span className="text-muted-foreground">·</span>
                     </>
                   )}
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                  <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                    <MapPin className="h-3.5 w-3.5" />
                     <span>{city}</span>
                   </div>
                   {hotelName && (
                     <>
                       <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground text-sm">
                         {lang === 'he' ? 'מאת' : lang === 'en' ? 'Hosted by' : 'Hôte :'} {hotelName}
                       </span>
                     </>
@@ -175,53 +203,85 @@ const ExperienceTest = () => {
                 </div>
               </div>
 
-              {/* Featured Review - Airbnb style */}
+              {/* Featured Review - Compact */}
               {reviews && reviews.length > 0 && (
-                <div className="py-6">
+                <div className="py-4">
                   <FeaturedReview reviews={reviews} lang={lang} />
                 </div>
               )}
 
-              {/* Description */}
+              {/* Description - Compact */}
               {longCopy && (
-                <div className="py-6 border-b border-border">
-                  <h2 className="text-xl font-bold mb-4">
+                <div className="py-4 border-b border-border">
+                  <h2 className="text-lg font-bold mb-2">
                     {lang === 'he' ? 'על החוויה' : lang === 'en' ? 'About this experience' : 'À propos'}
                   </h2>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                  <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
                     {longCopy}
                   </p>
                 </div>
               )}
 
-              {/* Program Timeline - Airbnb style */}
+              {/* Program Timeline - Compact */}
               {includes && includes.length > 0 && (
                 <ProgramTimeline includes={includes} lang={lang} />
               )}
 
-              {/* Host Section - Airbnb style */}
+              {/* Extras Section - NEW */}
+              {extras && extras.length > 0 && (
+                <div className="py-6 border-b border-border">
+                  <ExtrasSection 
+                    extras={extras} 
+                    selectedExtras={selectedExtras} 
+                    onUpdateQuantity={handleUpdateQuantity} 
+                  />
+                </div>
+              )}
+
+              {/* Host Section - Compact */}
               <HostSection hotel={experience.hotels} lang={lang} />
 
-              {/* Practical Info - Airbnb style */}
+              {/* Practical Info - Compact */}
               <PracticalInfo experience={experience} lang={lang} />
 
-              {/* Reviews Grid - Airbnb style */}
+              {/* Reviews Grid */}
               {reviews && reviews.length > 0 && (
                 <ReviewsGrid reviews={reviews} lang={lang} />
               )}
+
+              {/* Location Map - NEW */}
+              <LocationMap 
+                latitude={experience.hotels?.latitude} 
+                longitude={experience.hotels?.longitude}
+                hotelName={hotelName}
+                lang={lang}
+              />
+
+              {/* Other Experiences - NEW */}
+              {experience.hotels && (
+                <div className="py-6">
+                  <OtherExperiencesFromHotel 
+                    hotelId={experience.hotel_id}
+                    currentExperienceId={experience.id}
+                    hotelName={hotelName}
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Right Column - Sticky Booking Panel (your current design) */}
+            {/* Right Column - Sticky Booking Panel */}
             <div className="md:col-span-1 hidden md:block">
-              <BookingPanel 
-                experienceId={experience.id} 
-                hotelId={experience.hotel_id} 
-                basePrice={experience.base_price} 
-                basePriceType={experience.base_price_type || "per_person"} 
-                currency={experience.currency || "USD"} 
-                minParty={experience.min_party || 2} 
-                maxParty={experience.max_party || 4} 
-              />
+              <div className="sticky top-4">
+                <BookingPanel 
+                  experienceId={experience.id} 
+                  hotelId={experience.hotel_id} 
+                  basePrice={experience.base_price} 
+                  basePriceType={experience.base_price_type || "per_person"} 
+                  currency={experience.currency || "USD"} 
+                  minParty={experience.min_party || 2} 
+                  maxParty={experience.max_party || 4} 
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -231,13 +291,13 @@ const ExperienceTest = () => {
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
             <Sheet open={isBookingSheetOpen} onOpenChange={setIsBookingSheetOpen}>
               <SheetTrigger asChild>
-                <button className="w-full p-4 flex items-center justify-between">
+                <button className="w-full p-3 flex items-center justify-between">
                   <div className="flex flex-col items-start">
                     <div className="flex items-baseline gap-2">
-                      <span className="font-bold text-2xl text-foreground">
+                      <span className="font-bold text-xl text-foreground">
                         {experience.base_price}€
                       </span>
-                      <span className="text-sm line-through text-muted-foreground">
+                      <span className="text-xs line-through text-muted-foreground">
                         {Math.round(experience.base_price * 1.26)}€
                       </span>
                     </div>
@@ -245,13 +305,13 @@ const ExperienceTest = () => {
                       / {experience.base_price_type === 'per_person' ? (lang === 'he' ? 'אדם' : 'person') : (lang === 'he' ? 'הזמנה' : 'booking')} · -26%
                     </span>
                   </div>
-                  <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
+                  <Button size="default" className="bg-foreground text-background hover:bg-foreground/90">
                     {t(lang, 'bookItNow')}
                   </Button>
                 </button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
-                <div className="p-6">
+                <div className="p-4">
                   <BookingPanel 
                     experienceId={experience.id} 
                     hotelId={experience.hotel_id} 
