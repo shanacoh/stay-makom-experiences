@@ -32,7 +32,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-smooth" />
         
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <h3 className="font-sans text-2xl md:text-3xl font-bold text-white text-center uppercase tracking-tight flex flex-col">
+          <h3 className="font-sans text-lg md:text-xl font-bold text-white text-center uppercase tracking-tighter flex flex-col leading-[0.9]">
             {title.split(' ').map((word, index) => (
               <span key={index}>{word}</span>
             ))}
