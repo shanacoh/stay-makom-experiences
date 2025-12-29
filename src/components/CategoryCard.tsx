@@ -38,7 +38,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-smooth" />
         
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight leading-[0.75]">
+          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight leading-[0.55]">
             <span className="block">{line1}</span>
             {line2 && <span className="block">{line2}</span>}
           </h3>
