@@ -18,6 +18,12 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
   const title = getLocalizedField(category, 'name', lang) as string;
   const image = category.hero_image || '';
   
+  // Split title into exactly 2 lines
+  const words = title.split(' ');
+  const midpoint = Math.ceil(words.length / 2);
+  const line1 = words.slice(0, midpoint).join(' ');
+  const line2 = words.slice(midpoint).join(' ');
+  
   return (
     <Link 
       to={`/category/${category.slug}?lang=${lang}`}
@@ -32,10 +38,9 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-smooth" />
         
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <h3 className="font-sans text-lg md:text-xl font-bold text-white text-center uppercase tracking-tighter flex flex-col leading-[0.9]">
-            {title.split(' ').map((word, index) => (
-              <span key={index}>{word}</span>
-            ))}
+          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight leading-[0.85]">
+            <span className="block">{line1}</span>
+            {line2 && <span className="block">{line2}</span>}
           </h3>
         </div>
       </div>
