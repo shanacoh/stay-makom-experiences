@@ -1,6 +1,87 @@
 import { Button } from "@/components/ui/button";
 import { Check, Plus } from "lucide-react";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import {
+  Wine,
+  Car,
+  Coffee,
+  Flower,
+  Sparkle,
+  Gift,
+  Heart,
+  Camera,
+  MusicNotes,
+  Champagne,
+  Bed,
+  Cake,
+  Drop,
+  Leaf,
+  HandHeart,
+  Star,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
+
+// Map Lucide icon names (stored in DB) to Phosphor icons
+const iconNameMapping: Record<string, PhosphorIcon> = {
+  Wine: Wine,
+  Champagne: Champagne,
+  Car: Car,
+  Coffee: Coffee,
+  Flower: Flower,
+  Flower2: Flower,
+  Sparkles: Sparkle,
+  Sparkle: Sparkle,
+  Gift: Gift,
+  Heart: Heart,
+  Camera: Camera,
+  Music: MusicNotes,
+  MusicNotes: MusicNotes,
+  Bed: Bed,
+  Cake: Cake,
+  Drop: Drop,
+  Droplets: Drop,
+  Leaf: Leaf,
+  HandHeart: HandHeart,
+  Star: Star,
+};
+
+// Keyword-based fallback mapping
+const keywordMapping: Array<{ keywords: string[]; icon: PhosphorIcon }> = [
+  { keywords: ['wine', 'vin', 'יין'], icon: Wine },
+  { keywords: ['champagne', 'שמפניה'], icon: Champagne },
+  { keywords: ['car', 'transport', 'taxi', 'ride', 'הסעה', 'רכב'], icon: Car },
+  { keywords: ['coffee', 'breakfast', 'café', 'ארוחת בוקר', 'קפה'], icon: Coffee },
+  { keywords: ['flower', 'fleur', 'פרח', 'bouquet', 'זר'], icon: Flower },
+  { keywords: ['spa', 'massage', 'wellness', 'ספא', 'עיסוי'], icon: Drop },
+  { keywords: ['gift', 'cadeau', 'surprise', 'מתנה', 'הפתעה'], icon: Gift },
+  { keywords: ['romance', 'romantic', 'love', 'רומנטי', 'אהבה'], icon: Heart },
+  { keywords: ['photo', 'camera', 'צילום', 'מצלמה'], icon: Camera },
+  { keywords: ['music', 'dj', 'מוזיקה'], icon: MusicNotes },
+  { keywords: ['cake', 'birthday', 'anniversary', 'עוגה', 'יום הולדת'], icon: Cake },
+  { keywords: ['room', 'upgrade', 'suite', 'חדר', 'שדרוג'], icon: Bed },
+  { keywords: ['nature', 'eco', 'green', 'טבע'], icon: Leaf },
+];
+
+// Get appropriate Phosphor icon for an extra
+const getPhosphorIcon = (imageUrl?: string, name?: string): PhosphorIcon => {
+  // Check if imageUrl is a Lucide icon name
+  if (imageUrl && iconNameMapping[imageUrl]) {
+    return iconNameMapping[imageUrl];
+  }
+
+  // Try keyword matching on name
+  if (name) {
+    const lowerName = name.toLowerCase();
+    for (const { keywords, icon } of keywordMapping) {
+      if (keywords.some((kw) => lowerName.includes(kw))) {
+        return icon;
+      }
+    }
+  }
+
+  // Default fallback
+  return Sparkle;
+};
 
 interface Extra {
   id: string;
@@ -80,6 +161,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
           const name = getLocalizedField(extra, 'name', lang) as string || extra.name;
           const description = getLocalizedField(extra, 'description', lang) as string || extra.description;
           const hasImage = isImageUrl(extra.image_url);
+          const IconComponent = !hasImage ? getPhosphorIcon(extra.image_url, extra.name) : null;
           
           return (
             <div
@@ -97,7 +179,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
               {/* Image banner */}
               <div className={`
                 w-full h-20 overflow-hidden
-                ${hasImage ? '' : 'bg-gradient-to-br from-muted to-muted/50'}
+                ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
                 flex items-center justify-center
               `}>
                 {hasImage ? (
@@ -106,11 +188,13 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                     alt={name}
                     className="w-full h-full object-cover"
                   />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary text-lg">✦</span>
-                  </div>
-                )}
+                ) : IconComponent ? (
+                  <IconComponent 
+                    size={32} 
+                    weight="duotone" 
+                    className="text-primary/60"
+                  />
+                ) : null}
               </div>
 
               {/* Content */}
