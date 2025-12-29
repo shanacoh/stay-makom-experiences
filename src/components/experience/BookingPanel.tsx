@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Calendar, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Users, Calendar, Loader2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import RoomOptions from "./RoomOptions";
@@ -25,7 +32,6 @@ interface BookingPanelProps {
   currency: string;
   minParty: number;
   maxParty: number;
-  adultOnly?: boolean;
 }
 
 interface DateOption {
@@ -47,18 +53,13 @@ const BookingPanel = ({
   currency,
   minParty,
   maxParty,
-  adultOnly = false,
 }: BookingPanelProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { lang } = useLanguage();
   
-  // Separate adult and children counters
-  const [adults, setAdults] = useState(Math.max(minParty, 2));
-  const [children, setChildren] = useState(0);
-  const partySize = adults + children;
-  
+  const [partySize, setPartySize] = useState(minParty);
   const [selectedNights, setSelectedNights] = useState<1 | 2 | 3>(1);
   const [selectedDateId, setSelectedDateId] = useState<string | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
@@ -283,83 +284,42 @@ const BookingPanel = ({
     createBookingMutation.mutate();
   };
 
-  return (
-    <Card className="p-4 lg:p-6 shadow-strong h-[calc(100vh-2rem)] flex flex-col">
-      {/* Fixed top section: Guests & Nights selector */}
-      <div className="space-y-3 lg:space-y-4 flex-shrink-0 pb-3 lg:pb-4 border-b border-border">
-        {/* Guests Section - Adults & Children */}
-        <div className="space-y-3">
-          <Label className="text-xs lg:text-sm font-medium">
-            {lang === 'he' ? 'מספר אורחים' : lang === 'en' ? 'Guests' : 'Voyageurs'}
-          </Label>
-          
-          {/* Adults Counter */}
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="font-medium text-sm">
-                {lang === 'he' ? 'מבוגרים' : lang === 'en' ? 'Adults' : 'Adultes'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {lang === 'he' ? '13 שנים ומעלה' : lang === 'en' ? '13 years and over' : '13 ans et plus'}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8 rounded-full"
-                onClick={() => setAdults(Math.max(1, adults - 1))}
-                disabled={adults <= 1}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="w-6 text-center font-medium">{adults}</span>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8 rounded-full"
-                onClick={() => setAdults(Math.min(maxParty - children, adults + 1))}
-                disabled={adults + children >= maxParty}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+  // Generate party size options
+  const partySizeOptions = Array.from(
+    { length: maxParty - minParty + 1 },
+    (_, i) => minParty + i
+  );
 
-          {/* Children Counter - hidden if adultOnly */}
-          {!adultOnly && (
-            <div className="flex items-center justify-between py-2 border-t border-border/50">
-              <div>
-                <p className="font-medium text-sm">
-                  {lang === 'he' ? 'ילדים' : lang === 'en' ? 'Children' : 'Enfants'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {lang === 'he' ? '2-12 שנים' : lang === 'en' ? '2-12 years' : '2-12 ans'}
-                </p>
+  return (
+    <Card className="p-4 lg:p-6 sticky top-4 shadow-strong max-h-[calc(100vh-2rem)] flex flex-col">
+      {/* Fixed top section: Party size & Nights selector */}
+      <div className="space-y-3 lg:space-y-4 flex-shrink-0">
+        {/* Party Size Selector */}
+        <div className="space-y-1.5 lg:space-y-2">
+          <Label className="text-xs lg:text-sm font-medium">
+            {lang === 'he' ? 'מספר אנשים' : lang === 'en' ? 'Number of guests' : 'Nombre de personnes'}
+          </Label>
+          <Select
+            value={partySize.toString()}
+            onValueChange={(value) => setPartySize(parseInt(value))}
+          >
+            <SelectTrigger className="w-full">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <SelectValue />
               </div>
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => setChildren(Math.max(0, children - 1))}
-                  disabled={children <= 0}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-6 text-center font-medium">{children}</span>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => setChildren(Math.min(maxParty - adults, children + 1))}
-                  disabled={adults + children >= maxParty}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+            </SelectTrigger>
+            <SelectContent>
+              {partySizeOptions.map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size} {size === 1 
+                    ? (lang === 'he' ? 'מבוגר' : lang === 'en' ? 'adult' : 'adulte')
+                    : (lang === 'he' ? 'מבוגרים' : lang === 'en' ? 'adults' : 'adultes')
+                  }
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Nights Selector */}
