@@ -584,6 +584,7 @@ export type Database = {
           accessibility_info_he: string | null
           address: string | null
           address_he: string | null
+          adult_only: boolean | null
           base_price: number
           base_price_type: Database["public"]["Enums"]["base_price_type"] | null
           cancellation_policy: string | null
@@ -642,6 +643,7 @@ export type Database = {
           accessibility_info_he?: string | null
           address?: string | null
           address_he?: string | null
+          adult_only?: boolean | null
           base_price: number
           base_price_type?:
             | Database["public"]["Enums"]["base_price_type"]
@@ -702,6 +704,7 @@ export type Database = {
           accessibility_info_he?: string | null
           address?: string | null
           address_he?: string | null
+          adult_only?: boolean | null
           base_price?: number
           base_price_type?:
             | Database["public"]["Enums"]["base_price_type"]
