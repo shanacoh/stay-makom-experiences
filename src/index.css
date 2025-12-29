@@ -32,6 +32,13 @@ All colors MUST be HSL.
     --accent: 29 48% 55%;
     --accent-foreground: 40 33% 93%;
 
+    /* CTA Premium - Terracotta/Clay tone */
+    --cta: 15 45% 52%;
+    --cta-hover: 15 50% 48%;
+    --cta-foreground: 0 0% 100%;
+    --cta-border: 15 40% 42%;
+    --cta-shadow: 15 45% 35%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 40 33% 93%;
 
@@ -88,6 +95,13 @@ All colors MUST be HSL.
 
     --accent: 29 48% 55%;
     --accent-foreground: 40 33% 93%;
+
+    /* CTA Premium - Terracotta/Clay tone */
+    --cta: 15 45% 52%;
+    --cta-hover: 15 50% 48%;
+    --cta-foreground: 0 0% 100%;
+    --cta-border: 15 40% 42%;
+    --cta-shadow: 15 45% 35%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 40 33% 93%;

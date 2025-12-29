@@ -304,8 +304,9 @@ const ExperienceTest = () => {
                     </span>
                   </div>
                   <Button 
+                    variant="cta"
                     onClick={scrollToBooking}
-                    className="rounded-lg px-6 py-3 font-medium"
+                    className="px-8 py-3 font-medium text-sm"
                   >
                     {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
                   </Button>
@@ -356,8 +357,9 @@ const ExperienceTest = () => {
                     </span>
                   </div>
                   <Button 
+                    variant="cta"
                     size="default" 
-                    className="rounded-lg px-6 font-medium"
+                    className="px-8 font-medium text-sm"
                   >
                     {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
                   </Button>
