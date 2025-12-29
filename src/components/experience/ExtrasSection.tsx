@@ -153,8 +153,8 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
         </p>
       </div>
       
-      {/* Grid layout - 2 cols mobile, 3 cols desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {/* Grid layout - 2 cols mobile, 4 cols desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {extras.map((extra) => {
           const quantity = selectedExtras[extra.id] || 0;
           const isAdded = quantity > 0;
