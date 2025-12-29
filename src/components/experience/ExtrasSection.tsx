@@ -72,8 +72,8 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
         </p>
       </div>
       
-      {/* Compact horizontal cards */}
-      <div className="space-y-3">
+      {/* Grid layout - 2 cols mobile, 3 cols desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {extras.map((extra) => {
           const quantity = selectedExtras[extra.id] || 0;
           const isAdded = quantity > 0;
@@ -85,7 +85,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
             <div
               key={extra.id}
               className={`
-                group flex items-center gap-4 p-3 rounded-xl
+                group flex flex-col rounded-xl overflow-hidden
                 transition-all duration-200 ease-out
                 border
                 ${isAdded 
@@ -94,9 +94,9 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                 }
               `}
             >
-              {/* Image or decorative element */}
+              {/* Image banner */}
               <div className={`
-                flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden
+                w-full h-20 overflow-hidden
                 ${hasImage ? '' : 'bg-gradient-to-br from-muted to-muted/50'}
                 flex items-center justify-center
               `}>
@@ -114,51 +114,47 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="font-medium text-sm text-foreground leading-snug line-clamp-1">
-                      {name}
-                    </h3>
-                    {description && (
-                      <p className="text-muted-foreground text-xs leading-relaxed line-clamp-1 mt-0.5">
-                        {description}
-                      </p>
-                    )}
-                    <span className="text-xs text-muted-foreground/70 mt-1 inline-block">
-                      {formatPrice(extra.price, extra.currency)}
-                    </span>
-                  </div>
+              <div className="p-3 flex flex-col flex-1">
+                <h3 className="font-medium text-sm text-foreground leading-snug line-clamp-2">
+                  {name}
+                </h3>
+                {description && (
+                  <p className="text-muted-foreground text-xs leading-relaxed line-clamp-1 mt-0.5">
+                    {description}
+                  </p>
+                )}
+                <span className="text-xs text-muted-foreground/70 mt-1">
+                  {formatPrice(extra.price, extra.currency)}
+                </span>
 
-                  {/* CTA Button - compact */}
-                  <div className="flex-shrink-0">
-                    {!isAdded ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={`
-                          h-8 px-4 text-xs font-medium rounded-full
-                          border-foreground/20 
-                          hover:bg-foreground hover:text-background hover:border-foreground
-                          transition-all duration-200
-                        `}
-                        onClick={() => onUpdateQuantity(extra.id, 1)}
-                      >
-                        <Plus className="w-3 h-3 me-1" />
-                        {getText('add')}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="h-8 px-4 text-xs font-medium rounded-full"
-                        onClick={() => onUpdateQuantity(extra.id, 0)}
-                      >
-                        <Check className="w-3 h-3 me-1" />
-                        {getText('added')}
-                      </Button>
-                    )}
-                  </div>
+                {/* CTA Button - full width */}
+                <div className="mt-auto pt-2">
+                  {!isAdded ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`
+                        w-full h-7 text-xs font-medium rounded-full
+                        border-foreground/20 
+                        hover:bg-foreground hover:text-background hover:border-foreground
+                        transition-all duration-200
+                      `}
+                      onClick={() => onUpdateQuantity(extra.id, 1)}
+                    >
+                      <Plus className="w-3 h-3 me-1" />
+                      {getText('add')}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full h-7 text-xs font-medium rounded-full"
+                      onClick={() => onUpdateQuantity(extra.id, 0)}
+                    >
+                      <Check className="w-3 h-3 me-1" />
+                      {getText('added')}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
