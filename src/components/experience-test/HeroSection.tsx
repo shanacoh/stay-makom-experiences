@@ -81,9 +81,9 @@ const HeroSection = ({
 
   return (
     <>
-      <div className="pt-20 lg:pt-24">
+      <div className="pt-20 md:pt-24">
         {/* MOBILE: Full-width carousel */}
-        <div className="block lg:hidden">
+        <div className="block md:hidden">
           <div className="relative">
             <Carousel 
               className="w-full"
@@ -178,9 +178,9 @@ const HeroSection = ({
           </div>
         </div>
 
-        {/* DESKTOP: Airbnb-style 2-column layout */}
-        <div className="hidden lg:block container px-6 xl:px-8">
-          <div className="grid grid-cols-[55fr_45fr] gap-8 items-start">
+        {/* DESKTOP & TABLET: Airbnb-style 2-column layout */}
+        <div className="hidden md:block container px-4 md:px-6 xl:px-8">
+          <div className="grid grid-cols-[55fr_45fr] gap-4 md:gap-6 xl:gap-8 items-start">
             
             {/* LEFT: Photo Grid - 2x2 photos with reasonable height to see content */}
             <div className="relative h-[calc(100vh-12rem)]">

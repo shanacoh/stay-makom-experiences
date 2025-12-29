@@ -217,7 +217,7 @@ const ExperienceTest = () => {
 
         {/* CONTENT - 2-column layout with sticky booking panel */}
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24">
-          <div className={`grid lg:grid-cols-[55fr_45fr] gap-8 lg:gap-12 ${isMobile ? 'pb-24' : ''}`}>
+          <div className={`grid md:grid-cols-[55fr_45fr] gap-6 md:gap-10 ${isMobile ? 'pb-24' : ''}`}>
             
             {/* LEFT COLUMN - Story content (progressive disclosure) */}
             <div className="space-y-0">
@@ -285,7 +285,7 @@ const ExperienceTest = () => {
             </div>
 
             {/* RIGHT COLUMN - Sticky Booking Panel */}
-            <div className="hidden lg:block" ref={bookingRef}>
+            <div className="hidden md:block" ref={bookingRef}>
               <div className="sticky top-24">
                 {/* Airbnb-style price header with CTA */}
                 <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
