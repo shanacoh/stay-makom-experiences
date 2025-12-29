@@ -142,7 +142,7 @@ export default function ExperienceCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Photo section */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-xl mb-2">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1.5">
         {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
         <img
           src={experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
@@ -151,19 +151,19 @@ export default function ExperienceCard({
         />
         
         {/* Bottom gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
         {/* Experience name - bottom left */}
-        <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="font-sans text-base sm:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
+        <div className="absolute bottom-2 left-2 right-2">
+          <h3 className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
             {title}
           </h3>
         </div>
         
         {/* Optional badge - top left */}
         {badge && (
-          <div className="absolute top-2 left-2">
-            <span className="inline-block px-2 py-0.5 bg-black rounded-md text-white text-[10px] font-semibold uppercase tracking-wider">
+          <div className="absolute top-1.5 left-1.5">
+            <span className="inline-block px-1.5 py-0.5 bg-black rounded text-white text-[9px] font-semibold uppercase tracking-wide">
               {badge === "NEW" ? t(lang, 'badgeNew') : badge === "ON SALE" ? t(lang, 'badgeOnSale') : badge === "POPULAR" ? t(lang, 'badgePopular') : badge}
             </span>
           </div>
@@ -173,13 +173,13 @@ export default function ExperienceCard({
         <button
           onClick={handleHeartClick}
           disabled={wishlistMutation.isPending}
-          className={`absolute top-2 right-2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm transition-opacity duration-300 hover:bg-white ${
+          className={`absolute top-1.5 right-1.5 p-1 rounded-full bg-white/90 backdrop-blur-sm transition-opacity duration-300 hover:bg-white ${
             isHovered || isInWishlist ? 'opacity-100' : 'opacity-0'
           }`}
           aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
-            className={`h-4 w-4 transition-colors ${
+            className={`h-3.5 w-3.5 transition-colors ${
               isInWishlist ? 'fill-primary text-primary' : 'text-foreground'
             }`}
           />
@@ -187,16 +187,16 @@ export default function ExperienceCard({
       </div>
 
       {/* Content under image */}
-      <div className="space-y-0.5">
+      <div className="space-y-0">
         {/* Line 1: Location and Rating */}
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-[10px] text-muted-foreground truncate">
             {distance && userCity
               ? `${city} · ${distance} km`
               : city}
           </p>
           {rating && (
-            <div className="flex items-center gap-0.5 text-xs whitespace-nowrap flex-shrink-0">
+            <div className="flex items-center gap-0.5 text-[10px] whitespace-nowrap flex-shrink-0">
               <span className="text-foreground">★</span>
               <span className="font-semibold">{rating.toFixed(1)}</span>
               {reviewCount && (
@@ -207,32 +207,32 @@ export default function ExperienceCard({
         </div>
 
         {/* Line 2: Hotel name */}
-        <h4 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
+        <h4 className="font-semibold text-xs text-foreground leading-tight line-clamp-1">
           {hotelName}
         </h4>
 
         {/* Line 3: Highlights */}
         {highlights && (
-          <p className="text-xs text-muted-foreground line-clamp-1">
+          <p className="text-[10px] text-muted-foreground line-clamp-1">
             {highlights}
           </p>
         )}
 
         {/* Line 4: Price */}
-        <div className="flex items-baseline gap-1.5 pt-0.5">
-          <span className="font-bold text-base">
+        <div className="flex items-baseline gap-1 pt-0.5">
+          <span className="font-bold text-sm">
             {currencySymbol}{displayPrice}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[10px] text-muted-foreground">
             / {lang === 'he' ? 'לילה' : 'nuit'}
           </span>
           {originalPrice && originalPrice > displayPrice && (
-            <span className="text-xs text-muted-foreground line-through">
+            <span className="text-[10px] text-muted-foreground line-through">
               {currencySymbol}{originalPrice}
             </span>
           )}
           {discountPercent && (
-            <span className="inline-block px-1.5 py-0.5 bg-black text-white text-[10px] font-semibold rounded">
+            <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded">
               -{discountPercent} %
             </span>
           )}
