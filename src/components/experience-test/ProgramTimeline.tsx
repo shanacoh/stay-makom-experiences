@@ -34,41 +34,46 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
         </p>
       )}
 
-      {/* Program items - Airbnb style with image + title + description */}
-      <div className="space-y-6">
-        {sortedIncludes.map((item) => {
-          const title = getLocalizedField(item, "title", lang) as string || item.title;
-          const description = getLocalizedField(item, "description", lang) as string || item.description;
+      {/* Program items - Airbnb style with vertical timeline */}
+      <div className="relative">
+        {/* Vertical timeline line */}
+        <div className="absolute left-[60px] top-4 bottom-4 w-px bg-border" />
+        
+        <div className="space-y-6">
+          {sortedIncludes.map((item, index) => {
+            const title = getLocalizedField(item, "title", lang) as string || item.title;
+            const description = getLocalizedField(item, "description", lang) as string || item.description;
 
-          return (
-            <div key={item.id} className="flex gap-4">
-              {/* Square image on the left */}
-              {item.icon_url && item.icon_url.startsWith("http") ? (
-                <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-muted">
-                  <img
-                    src={item.icon_url}
-                    alt={title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex-shrink-0 w-24 h-24 rounded-lg bg-muted flex items-center justify-center">
-                  <span className="text-2xl text-muted-foreground">📋</span>
-                </div>
-              )}
-
-              {/* Content on the right */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-                {description && (
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {description}
-                  </p>
+            return (
+              <div key={item.id} className="flex items-center gap-6">
+                {/* Square image on the left */}
+                {item.icon_url && item.icon_url.startsWith("http") ? (
+                  <div className="relative flex-shrink-0 w-[120px] h-[120px] rounded-xl overflow-hidden bg-muted z-10">
+                    <img
+                      src={item.icon_url}
+                      alt={title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative flex-shrink-0 w-[120px] h-[120px] rounded-xl bg-muted flex items-center justify-center z-10">
+                    <span className="text-3xl text-muted-foreground">📋</span>
+                  </div>
                 )}
+
+                {/* Content on the right - centered vertically, max 3 lines */}
+                <div className="flex-1 max-w-md">
+                  <h3 className="font-semibold text-foreground text-base mb-1">{title}</h3>
+                  {description && (
+                    <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+                      {description}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </section>
   );
