@@ -253,9 +253,6 @@ const ExperienceTest = () => {
               {/* 4. YOUR STAY - Hotel integration (the anchor) */}
               <YourStaySection hotel={experience.hotels} lang={lang} />
 
-              {/* 5. HOST - Trust building */}
-              <HostSection hotel={experience.hotels} lang={lang} />
-
               {/* 6. REVIEWS - Social proof */}
               {reviews && reviews.length > 0 && (
                 <ReviewsGrid reviews={reviews} lang={lang} />
@@ -286,7 +283,7 @@ const ExperienceTest = () => {
 
             {/* RIGHT COLUMN - Sticky Booking Panel */}
             <div className="hidden md:block" ref={bookingRef}>
-              <div className="sticky top-24">
+              <div className="sticky top-4">
                 {/* Airbnb-style price header with CTA */}
                 <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
                   <div className="flex flex-col">
