@@ -23,7 +23,7 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
 
   return (
     <section className="py-6 border-b border-border">
-      <h2 className="text-lg font-serif font-bold mb-3">
+      <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-3">
         {lang === "he" ? "מה בתכנית" : lang === "fr" ? "Au programme" : "What's on the program"}
       </h2>
 

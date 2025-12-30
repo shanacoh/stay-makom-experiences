@@ -230,7 +230,7 @@ const ExperienceTest = () => {
               {/* 2. ABOUT - The story hook */}
               {longCopy && (
                 <section className="py-6 border-b border-border">
-                  <h2 className="text-lg font-serif font-bold mb-3">
+                  <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-3">
                     {lang === 'he' ? 'על החוויה' : lang === 'fr' ? 'À propos de cette expérience' : 'About this experience'}
                   </h2>
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
