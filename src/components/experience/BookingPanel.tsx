@@ -291,7 +291,7 @@ const BookingPanel = ({
   );
 
   return (
-    <Card className="p-3 lg:p-4 sticky top-4 shadow-strong max-h-[calc(100vh-2rem)] flex flex-col">
+    <Card className="p-3 lg:p-4 shadow-strong max-h-[calc(100vh-10rem)] flex flex-col overflow-hidden">
       {/* Fixed top section: Party size & Nights selector */}
       <div className="space-y-2 lg:space-y-3 flex-shrink-0">
         {/* Party Size Selector */}

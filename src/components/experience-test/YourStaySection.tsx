@@ -48,11 +48,11 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
   const hotelPhotos = [hotel.hero_image, ...(hotel.photos || [])].filter(Boolean).slice(0, 3);
 
   return (
-    <section className="py-8 border-b border-border">
+    <section className="py-6 border-b border-border">
       <div className="space-y-6">
         {/* Section Header */}
         <div>
-          <h2 className="text-xl md:text-2xl font-bold mb-1">
+          <h2 className="text-lg md:text-xl font-serif font-bold mb-1">
             {lang === "he" ? "המלון שלך" : lang === "fr" ? "Votre hébergement" : "Your stay"}
           </h2>
           <p className="text-muted-foreground text-sm">

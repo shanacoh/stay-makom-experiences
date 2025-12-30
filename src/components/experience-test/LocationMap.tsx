@@ -62,7 +62,7 @@ const LocationMap = ({ latitude, longitude, hotelName, lang = "en" }: LocationMa
 
   return (
     <section className="py-6 border-b border-border">
-      <h2 className="text-lg font-bold mb-4">
+      <h2 className="text-lg font-serif font-bold mb-4">
         {lang === "he" ? "איפה זה קורה" : lang === "en" ? "Where you'll be" : "Où ça se passe"}
       </h2>
       <div className="h-[280px] rounded-lg overflow-hidden border border-border">
