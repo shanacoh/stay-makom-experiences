@@ -198,7 +198,7 @@ const ExperienceTest = () => {
             hotelName={hotelName}
             hotelImage={experience.hotels?.hero_image}
             city={city}
-            categoryName={experience.category_id ? undefined : undefined}
+            region={getLocalizedField(experience.hotels, 'region', lang) as string || experience.hotels?.region}
             address={experience.address || experience.hotels?.city}
             averageRating={averageRating}
             reviewsCount={reviews?.length || 0}
@@ -284,8 +284,8 @@ const ExperienceTest = () => {
             {/* RIGHT COLUMN - Sticky Booking Panel */}
             <div className="hidden md:block" ref={bookingRef}>
               <div className="sticky top-4">
-                {/* Airbnb-style price header with CTA */}
-                <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
+                {/* Airbnb-style price header with CTA - with relief/shadow effect */}
+                <div className="flex items-center justify-between mb-4 p-4 bg-card border border-border rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_24px_-4px_rgba(0,0,0,0.18)] transition-shadow">
                   <div className="flex flex-col">
                     <span className="text-base">
                       {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}

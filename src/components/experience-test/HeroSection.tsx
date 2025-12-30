@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, X, Star, MapPin, Share, Heart, CheckCircle } from "lucide-react";
+import { Star, Share, Heart } from "lucide-react";
+import { Grid3X3 } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import BookingPanel from "@/components/experience/BookingPanel";
+import GalleryModal from "@/components/experience/GalleryModal";
 
 interface Review {
   id: string;
@@ -22,7 +22,7 @@ interface HeroSectionProps {
   hotelName?: string;
   hotelImage?: string;
   city?: string;
-  categoryName?: string;
+  region?: string;
   address?: string;
   averageRating?: number | null;
   reviewsCount?: number;
@@ -46,7 +46,7 @@ const HeroSection = ({
   hotelName,
   hotelImage,
   city,
-  categoryName,
+  region,
   address,
   averageRating,
   reviewsCount = 0,
@@ -188,7 +188,9 @@ const HeroSection = ({
                 {displayPhotos.map((photo, index) => (
                   <div
                     key={index}
-                    className={`relative cursor-pointer overflow-hidden ${
+                    className={`relative overflow-hidden ${
+                      index === 3 ? '' : 'cursor-pointer'
+                    } ${
                       index === 0 ? 'rounded-tl-xl' : ''
                     } ${
                       index === 1 ? 'rounded-tr-xl' : ''
@@ -197,7 +199,7 @@ const HeroSection = ({
                     } ${
                       index === 3 ? 'rounded-br-xl' : ''
                     }`}
-                    onClick={() => {
+                    onClick={index === 3 ? undefined : () => {
                       setCurrentPhotoIndex(index);
                       setIsGalleryOpen(true);
                     }}
@@ -205,19 +207,20 @@ const HeroSection = ({
                     <img
                       src={photo || "/placeholder.svg"}
                       alt={`${title} - ${index + 1}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      className={`w-full h-full object-cover transition-transform duration-300 ${index !== 3 ? 'hover:scale-105' : ''}`}
                     />
-                    {/* View all photos overlay on last photo */}
+                    {/* Small logo icon on 4th photo to open gallery */}
                     {index === 3 && photos.length > 4 && (
                       <button
-                        className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-sm font-medium hover:bg-black/40 transition-colors"
+                        className="absolute bottom-3 right-3 z-10 p-2 rounded-lg bg-white/90 hover:bg-white shadow-md transition-all flex items-center gap-1.5"
                         onClick={(e) => {
                           e.stopPropagation();
                           setCurrentPhotoIndex(0);
                           setIsGalleryOpen(true);
                         }}
                       >
-                        {lang === 'he' ? 'כל התמונות' : lang === 'en' ? 'View all photos' : 'Voir toutes les photos'}
+                        <Grid3X3 className="h-4 w-4 text-foreground" />
+                        <span className="text-xs font-medium text-foreground">{photos.length}</span>
                       </button>
                     )}
                   </div>
@@ -265,20 +268,13 @@ const HeroSection = ({
                   )}
                 </div>
 
-                {/* Location - centered */}
-                <div className="text-sm text-muted-foreground text-center">
-                  {city}
-                  {city && categoryName && <span className="mx-1">·</span>}
-                  {categoryName}
-                </div>
-
                 {/* Separator */}
                 <div className="border-t border-border" />
 
-                {/* Host section */}
+                {/* Host section - Hotel name only, no "Host:" label */}
                 {hotelName && (
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-base font-medium text-muted-foreground overflow-hidden flex-shrink-0">
                       {hotelImage ? (
                         <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />
                       ) : (
@@ -286,30 +282,24 @@ const HeroSection = ({
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">
-                        {lang === 'he' ? `מארח: ${hotelName}` : lang === 'en' ? `Host: ${hotelName}` : `Hôte : ${hotelName}`}
-                      </p>
+                      <p className="font-medium text-foreground">{hotelName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {lang === 'he' ? 'חוויה מקומית' : lang === 'en' ? 'Local experience' : 'Expérience locale'}
+                        {city}{city && region && <span className="mx-1">•</span>}{region}
                       </p>
                     </div>
                   </div>
                 )}
 
-                {/* Location with icon - NO separator above */}
-                {(address || city) && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-foreground">
-                      {address || city}
-                    </p>
-                  </div>
-                )}
-
-                {/* Recent review - NO separator above */}
+                {/* Recent review with rectangular image matching hotel photo */}
                 {recentReview && (
                   <div className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {hotelImage ? (
+                        <img src={hotelImage} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">★</span>
+                      )}
+                    </div>
                     <div>
                       <p className="text-sm text-foreground italic line-clamp-2">
                         "{recentReview.text.substring(0, 80)}{recentReview.text.length > 80 ? '...' : ''}"
@@ -326,46 +316,13 @@ const HeroSection = ({
         </div>
       </div>
 
-      {/* Gallery Modal */}
-      <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
-        <DialogContent className="max-w-7xl w-full h-[90vh] p-0 bg-black border-none">
-          <div className="relative w-full h-full flex items-center justify-center">
-            {/* Close button */}
-            <button
-              onClick={() => setIsGalleryOpen(false)}
-              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            {/* Photo counter */}
-            <div className="absolute top-4 left-4 z-50 text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-              {currentPhotoIndex + 1} / {photos.length}
-            </div>
-
-            {/* Navigation arrows */}
-            <button
-              onClick={handlePrevious}
-              className="absolute left-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="absolute right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-
-            {/* Current photo */}
-            <img
-              src={photos[currentPhotoIndex]}
-              alt={`${title} - ${currentPhotoIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Gallery Modal - Scrollable vertical layout */}
+      <GalleryModal
+        open={isGalleryOpen}
+        onOpenChange={setIsGalleryOpen}
+        photos={photos}
+        title={title}
+      />
     </>
   );
 };
