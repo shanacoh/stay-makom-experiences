@@ -68,8 +68,8 @@ const PracticalInfo = ({ experience, lang = "en" }: PracticalInfoProps) => {
   if (infoItems.length === 0) return null;
 
   return (
-    <section className="py-8 border-b border-border">
-      <h2 className="text-2xl font-bold mb-6">
+    <section className="py-6 border-b border-border">
+      <h2 className="text-lg font-serif font-bold mb-4">
         {lang === "he" ? "חשוב לדעת" : lang === "en" ? "Things to know" : "À savoir"}
       </h2>
 

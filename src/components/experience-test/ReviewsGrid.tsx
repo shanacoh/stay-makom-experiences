@@ -45,15 +45,15 @@ const ReviewsGrid = ({ reviews, lang = "en" }: ReviewsGridProps) => {
   const displayedReviews = showAll ? reviews : reviews.slice(0, 6);
 
   return (
-    <section className="py-8 border-b border-border">
+    <section className="py-6 border-b border-border">
       {/* Header with rating */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <Star className="h-6 w-6 fill-foreground text-foreground" />
-          <span className="text-2xl font-bold">{averageRating.toFixed(2)}</span>
+          <Star className="h-5 w-5 fill-foreground text-foreground" />
+          <span className="text-xl font-serif font-bold">{averageRating.toFixed(2)}</span>
         </div>
         <span className="text-muted-foreground">·</span>
-        <span className="text-lg">
+        <span className="text-base">
           {reviews.length} {lang === "he" ? "ביקורות" : lang === "en" ? "reviews" : "avis"}
         </span>
       </div>
