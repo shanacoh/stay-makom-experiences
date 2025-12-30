@@ -89,13 +89,13 @@ const Header = () => {
     <header className={headerClasses} dir="ltr">
       <div
         className={`container flex items-center justify-between bg-transparent ${
-          isTransparentPage && !isScrolled ? "h-16" : "h-12"
+          isTransparentPage && !isScrolled ? "h-14" : "h-10"
         }`}
       >
         <Link to={getLocalizedPath("/")} className="flex items-center space-x-2">
           <span
             className={`font-sans font-bold tracking-[-0.04em] uppercase ${
-              isTransparentPage && !isScrolled ? "text-2xl" : "text-xl"
+              isTransparentPage && !isScrolled ? "text-xl" : "text-lg"
             } ${logoClasses}`}
           >
             STAYMAKOM
@@ -148,7 +148,7 @@ const Header = () => {
           <Button
             variant="outline"
             size="sm"
-            className={`hidden md:flex text-xs h-7 px-3 ${
+            className={`hidden md:flex text-[11px] h-6 px-2.5 ${
               isTransparentPage && !isScrolled
                 ? "border-white/30 text-white hover:bg-white/10 hover:text-white"
                 : "border-border/60"

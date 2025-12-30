@@ -142,7 +142,7 @@ export default function ExperienceCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Photo section */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1.5">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1">
         {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
         <img
           src={experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
@@ -154,8 +154,8 @@ export default function ExperienceCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
         {/* Experience name - bottom left */}
-        <div className="absolute bottom-2 left-2 right-2">
-          <h3 className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
+        <div className="absolute bottom-1.5 left-1.5 right-1.5">
+          <h3 className="font-sans text-xs sm:text-sm font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
             {title}
           </h3>
         </div>
@@ -220,10 +220,10 @@ export default function ExperienceCard({
 
         {/* Line 4: Price */}
         <div className="flex items-baseline gap-1 pt-0.5">
-          <span className="font-bold text-sm">
+          <span className="font-bold text-xs">
             {currencySymbol}{displayPrice}
           </span>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-[9px] text-muted-foreground">
             / {lang === 'he' ? 'לילה' : 'nuit'}
           </span>
           {originalPrice && originalPrice > displayPrice && (

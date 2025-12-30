@@ -224,15 +224,15 @@ const Index = () => {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[85vh] min-h-[500px] flex items-center justify-center md:items-end md:justify-start">
+        <section className="relative h-[80vh] min-h-[450px] flex items-center justify-center md:items-end md:justify-start">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
           <div className="absolute inset-0 bg-black/30" />
           
-          <div className={`relative z-10 container text-white px-4 sm:px-6 pb-8 md:pb-16 flex flex-col items-center text-center md:items-start md:text-left ${isRTL ? 'md:mr-0 md:mr-4 lg:mr-[1cm] md:text-right' : 'md:ml-0 md:ml-4 lg:ml-[1cm] md:text-left'}`}>
-            <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-5xl text-slate-50 pt-6">
+          <div className={`relative z-10 container text-white px-4 sm:px-6 pb-6 md:pb-12 flex flex-col items-center text-center md:items-start md:text-left ${isRTL ? 'md:mr-0 md:mr-4 lg:mr-[1cm] md:text-right' : 'md:ml-0 md:ml-4 lg:ml-[1cm] md:text-left'}`}>
+            <h1 className="font-sans text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-4xl text-slate-50 pt-4">
               {/* Mobile: "MORE THAN A STAY, IT'S A" on one line */}
               <span className="md:hidden">
                 {t(lang, 'heroTitle1')} {t(lang, 'heroTitle2')}
@@ -256,7 +256,7 @@ const Index = () => {
                 const element = document.getElementById('choose-escape');
                 element?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="mt-4 sm:mt-6 px-6 sm:px-8 py-3 sm:py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm sm:text-base rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
+              className="mt-3 sm:mt-4 px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-foreground font-semibold uppercase tracking-wide text-xs sm:text-sm rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
             >
               {t(lang, 'heroCTA')}
             </button>
@@ -265,7 +265,7 @@ const Index = () => {
                 const element = document.getElementById('ai-assistant');
                 element?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="mt-3 text-white/90 text-sm font-medium hover:text-white transition-colors duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 group"
+              className="mt-2 text-white/90 text-xs font-medium hover:text-white transition-colors duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 group"
             >
               <span className="relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[1px] after:bottom-0 after:left-0 after:bg-white after:origin-bottom-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 group-hover:after:origin-bottom-left">
                 {t(lang, 'heroAIHelp')}
@@ -278,12 +278,12 @@ const Index = () => {
         <MarqueeBanner />
 
         {/* Categories Section */}
-        <section id="choose-escape" className="container py-6 sm:py-8 md:py-10 px-4 scroll-mt-20">
-          <div className="text-center mb-4 sm:mb-6">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-[-0.02em] mb-2">
+        <section id="choose-escape" className="container py-4 sm:py-6 md:py-8 px-4 scroll-mt-16">
+          <div className="text-center mb-3 sm:mb-4">
+            <h2 className="font-sans text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-[-0.02em] mb-1.5">
               {t(lang, 'chooseCityTitle')}<br />{t(lang, 'chooseEscapeTitle')}
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
               {t(lang, 'chooseCitySubtitle')}
             </p>
           </div>
@@ -293,8 +293,8 @@ const Index = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+            <div className="max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2">
                 {categories?.map(category => (
                   <CategoryCard key={category.slug} category={category} />
                 ))}
@@ -307,18 +307,18 @@ const Index = () => {
         <AIExperienceAssistant />
 
         {/* Handpicked Hotels Hero Section */}
-        <section className="relative py-14 sm:py-18 md:py-24 overflow-hidden">
+        <section className="relative py-10 sm:py-14 md:py-18 overflow-hidden">
           <div className="absolute inset-0">
             <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
-          <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4 text-white">
+          <div className="container max-w-2xl relative z-10 px-4 text-center">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
               {t(lang, 'handpickedTitle1')}<br />
               {t(lang, 'handpickedTitle2')}
             </h2>
-            <div className="text-xs sm:text-sm md:text-base leading-relaxed text-white/95 max-w-2xl mx-auto space-y-3">
+            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-xl mx-auto space-y-2">
               <p>{t(lang, 'handpickedP1')}</p>
               <p>{t(lang, 'handpickedP2')}</p>
               <p>{t(lang, 'handpickedP3')}</p>
@@ -327,38 +327,38 @@ const Index = () => {
         </section>
 
         {/* Category Experiences Section */}
-        <section className="container py-12 sm:py-16 md:py-20 px-4">
-          <div className="text-center mb-8 sm:mb-12">
-            <p className="text-xs sm:text-sm font-medium tracking-widest uppercase text-muted-foreground mb-2">
+        <section className="container py-8 sm:py-12 md:py-16 px-4">
+          <div className="text-center mb-6 sm:mb-8">
+            <p className="text-[10px] sm:text-xs font-medium tracking-widest uppercase text-muted-foreground mb-1.5">
               {t(lang, 'yourExperiences')}
             </p>
-            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium mb-8 sm:mb-12">
+            <h2 className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium mb-6 sm:mb-8">
               {t(lang, 'followHeart')}
             </h2>
             
             {/* Category Tabs */}
             {!isLoading && categories && (
-              <div className={`flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-3 mb-6 sm:mb-12 overflow-x-auto overflow-y-visible py-2 px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-nowrap justify-start sm:justify-center gap-1 sm:gap-2 mb-4 sm:mb-8 overflow-x-auto overflow-y-visible py-1.5 px-2 sm:px-0 -mx-4 sm:mx-0 scrollbar-hide ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {categories.map(category => (
                   <button
                     key={category.slug}
                     onClick={() => setSelectedCategoryId(category.id)}
-                    className={`flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer flex-shrink-0 w-14 sm:w-20 transition-all ${selectedCategoryId === category.id ? 'text-primary scale-105' : ''}`}
+                    className={`flex flex-col items-center gap-1 sm:gap-1.5 group cursor-pointer flex-shrink-0 w-12 sm:w-16 transition-all ${selectedCategoryId === category.id ? 'text-primary scale-105' : ''}`}
                   >
                     {/* Icon with circular hover background */}
-                    <div className={`p-2 sm:p-3 rounded-full transition-all group-hover:bg-muted ${selectedCategoryId === category.id ? 'bg-primary/10' : ''}`}>
+                    <div className={`p-1.5 sm:p-2 rounded-full transition-all group-hover:bg-muted ${selectedCategoryId === category.id ? 'bg-primary/10' : ''}`}>
                       {(() => {
                         const IconComponent = category.icon ? iconMap[category.icon] : null;
                         return IconComponent ? (
-                          <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
+                          <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
                         ) : (
-                          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
+                          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
                         );
                       })()}
                     </div>
                     
                     {/* 2-line text with fixed height */}
-                    <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wide text-center h-7 sm:h-8 leading-[14px] sm:leading-4 whitespace-pre-line transition-colors ${selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'}`}>
+                    <span className={`text-[9px] sm:text-[10px] font-medium uppercase tracking-wide text-center h-6 sm:h-7 leading-[12px] sm:leading-[14px] whitespace-pre-line transition-colors ${selectedCategoryId === category.id ? 'text-primary' : 'group-hover:text-primary'}`}>
                       {getCategoryDisplay(category.slug)}
                     </span>
                   </button>

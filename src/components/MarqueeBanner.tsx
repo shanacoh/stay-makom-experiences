@@ -21,14 +21,14 @@ const MarqueeBanner = () => {
 
   return (
     <section 
-      className="bg-white py-3 sm:py-4 overflow-hidden"
+      className="bg-white py-2 sm:py-3 overflow-hidden"
       aria-hidden="true"
     >
       <div className={`flex whitespace-nowrap ${isRTL ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
-        <div className="flex text-foreground text-xs sm:text-sm tracking-[0.05em] uppercase">
+        <div className="flex text-foreground text-[10px] sm:text-xs tracking-[0.05em] uppercase">
           {repeatedContent}
         </div>
-        <div className="flex text-foreground text-xs sm:text-sm tracking-[0.05em] uppercase">
+        <div className="flex text-foreground text-[10px] sm:text-xs tracking-[0.05em] uppercase">
           {repeatedContent}
         </div>
       </div>

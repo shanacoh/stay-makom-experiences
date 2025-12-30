@@ -148,27 +148,27 @@ const Category = () => {
       
       <main className="flex-1">
         {/* Immersive Hero Section */}
-        <section className="relative h-[70vh] min-h-[600px] flex items-end">
+        <section className="relative h-[55vh] min-h-[450px] flex items-end">
           <div 
             className="absolute inset-0 bg-cover bg-center" 
             style={{ backgroundImage: `url(${category.hero_image || '/placeholder.svg'})` }} 
           />
           
-          <div className="relative z-10 container text-white px-4 py-12">
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end max-w-7xl mx-auto">
+          <div className="relative z-10 container text-white px-4 py-8">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-end max-w-6xl mx-auto">
               {/* Left side - Category name and Title */}
-              <div className="space-y-4">
-                <p className="text-xs sm:text-sm uppercase tracking-widest text-white/90 font-bold">
+              <div className="space-y-3">
+                <p className="text-[10px] sm:text-xs uppercase tracking-widest text-white/90 font-bold">
                   {categoryName}
                 </p>
-                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl font-bold leading-tight uppercase text-white">
+                <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold leading-tight uppercase text-white">
                   {presentationTitle}
                 </h1>
               </div>
               
               {/* Right side - Description only */}
               <div>
-                <p className="text-sm sm:text-base md:text-lg leading-relaxed text-white">
+                <p className="text-xs sm:text-sm md:text-base leading-relaxed text-white">
                   {introText}
                 </p>
               </div>
@@ -185,15 +185,15 @@ const Category = () => {
         />
 
         {/* Experiences List with Optional Map */}
-        <section className="container py-8">
-          <div className={`grid ${showMap ? 'lg:grid-cols-[1fr_500px]' : 'grid-cols-1'} gap-8`}>
+        <section className="container py-6">
+          <div className={`grid ${showMap ? 'lg:grid-cols-[1fr_500px]' : 'grid-cols-1'} gap-6`}>
             {/* Experiences List */}
             <div>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-1">
+              <div className="mb-4">
+                <h2 className="text-xl font-bold mb-1">
                   {t(lang, 'experiencesAvailable')(filteredExperiences.length)}
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {t(lang, 'discoverExtraordinaryStays')}
                 </p>
               </div>
@@ -217,7 +217,7 @@ const Category = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredExperiences.map(experience => {
                     const originalPrice = Number(experience.base_price);
                     const discountPercent = Math.floor(Math.random() * 30) + 10;

@@ -216,8 +216,8 @@ const ExperienceTest = () => {
         </section>
 
         {/* CONTENT - 2-column layout with sticky booking panel */}
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24">
-          <div className={`grid md:grid-cols-[55fr_45fr] gap-6 md:gap-10 ${isMobile ? 'pb-24' : ''}`}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
+          <div className={`grid md:grid-cols-[55fr_45fr] gap-4 md:gap-8 ${isMobile ? 'pb-20' : ''}`}>
             
             {/* LEFT COLUMN - Story content (progressive disclosure) */}
             <div className="space-y-0">
@@ -229,11 +229,11 @@ const ExperienceTest = () => {
 
               {/* 2. ABOUT - The story hook */}
               {longCopy && (
-                <section className="py-8 border-b border-border">
-                  <h2 className="text-xl font-bold mb-4">
+                <section className="py-6 border-b border-border">
+                  <h2 className="text-lg font-bold mb-3">
                     {lang === 'he' ? 'על החוויה' : lang === 'fr' ? 'À propos de cette expérience' : 'About this experience'}
                   </h2>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                     {longCopy}
                   </p>
                 </section>
@@ -241,7 +241,7 @@ const ExperienceTest = () => {
 
               {/* 3. EXTRAS - Optional upgrades */}
               {extras && extras.length > 0 && (
-                <section className="py-8 border-b border-border">
+                <section className="py-6 border-b border-border">
                   <ExtrasSection 
                     extras={extras} 
                     selectedExtras={selectedExtras} 
@@ -274,7 +274,7 @@ const ExperienceTest = () => {
 
               {/* 9. OTHER EXPERIENCES - Keep exploring */}
               {experience.hotels && (
-                <section className="py-8">
+                <section className="py-6">
                   <OtherExperiencesFromHotel 
                     hotelId={experience.hotel_id}
                     currentExperienceId={experience.id}
