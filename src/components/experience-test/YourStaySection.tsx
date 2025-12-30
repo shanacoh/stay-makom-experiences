@@ -52,7 +52,7 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
       <div className="space-y-6">
         {/* Section Header */}
         <div>
-          <h2 className="text-lg md:text-xl font-serif font-bold mb-1">
+          <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-1">
             {lang === "he" ? "המלון שלך" : lang === "fr" ? "Votre hébergement" : "Your stay"}
           </h2>
           <p className="text-muted-foreground text-sm">
