@@ -271,7 +271,7 @@ const ExperienceTest = () => {
 
               {/* 9. OTHER EXPERIENCES - Keep exploring */}
               {experience.hotels && (
-                <section className="py-6">
+                <section className="py-6 pb-24">
                   <OtherExperiencesFromHotel 
                     hotelId={experience.hotel_id}
                     currentExperienceId={experience.id}
