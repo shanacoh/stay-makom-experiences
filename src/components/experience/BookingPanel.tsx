@@ -291,21 +291,21 @@ const BookingPanel = ({
   );
 
   return (
-    <Card className="p-4 lg:p-6 sticky top-4 shadow-strong max-h-[calc(100vh-2rem)] flex flex-col">
+    <Card className="p-3 lg:p-4 sticky top-4 shadow-strong max-h-[calc(100vh-2rem)] flex flex-col">
       {/* Fixed top section: Party size & Nights selector */}
-      <div className="space-y-3 lg:space-y-4 flex-shrink-0">
+      <div className="space-y-2 lg:space-y-3 flex-shrink-0">
         {/* Party Size Selector */}
-        <div className="space-y-1.5 lg:space-y-2">
-          <Label className="text-xs lg:text-sm font-medium">
+        <div className="space-y-1 lg:space-y-1.5">
+          <Label className="text-[11px] lg:text-xs font-medium">
             {lang === 'he' ? 'מספר אנשים' : lang === 'en' ? 'Number of guests' : 'Nombre de personnes'}
           </Label>
           <Select
             value={partySize.toString()}
             onValueChange={(value) => setPartySize(parseInt(value))}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-9">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3.5 w-3.5 text-muted-foreground" />
                 <SelectValue />
               </div>
             </SelectTrigger>
@@ -323,11 +323,11 @@ const BookingPanel = ({
         </div>
 
         {/* Nights Selector */}
-        <div className="space-y-1.5 lg:space-y-2">
-          <Label className="text-xs lg:text-sm font-medium">
+        <div className="space-y-1 lg:space-y-1.5">
+          <Label className="text-[11px] lg:text-xs font-medium">
             {lang === 'he' ? 'משך השהייה' : lang === 'en' ? 'Stay duration' : 'Durée du séjour'}
           </Label>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {([1, 2, 3] as const).map((nights) => (
               <button
                 key={nights}
@@ -337,8 +337,8 @@ const BookingPanel = ({
                   setSelectedDateId(null);
                 }}
                 className={cn(
-                  "flex-1 px-1.5 lg:px-2 py-1.5 lg:py-2 rounded-lg border-2 transition-all",
-                  "hover:border-primary/50 text-xs whitespace-nowrap",
+                  "flex-1 px-1 lg:px-1.5 py-1 lg:py-1.5 rounded-lg border-2 transition-all",
+                  "hover:border-primary/50 text-[11px] whitespace-nowrap",
                   selectedNights === nights
                     ? "border-primary bg-primary/5 font-medium"
                     : "border-border"
@@ -355,23 +355,23 @@ const BookingPanel = ({
       </div>
 
       {/* Scrollable middle section: Dates, Rooms, Extras, Price breakdown */}
-      <div className="flex-1 overflow-y-auto min-h-0 mt-3 lg:mt-4 space-y-3 lg:space-y-4 pr-1">
+      <div className="flex-1 overflow-y-auto min-h-0 mt-2 lg:mt-3 space-y-2 lg:space-y-3 pr-1">
         {/* Date Options */}
-        <div className="space-y-1.5 lg:space-y-2">
-          <Label className="text-xs lg:text-sm font-medium">
+        <div className="space-y-1 lg:space-y-1.5">
+          <Label className="text-[11px] lg:text-xs font-medium">
             {lang === 'he' ? 'בחרו תאריכים' : lang === 'en' ? 'Select your dates' : 'Sélectionnez vos dates'}
           </Label>
           <RadioGroup
             value={selectedDateId || ""}
             onValueChange={setSelectedDateId}
           >
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {dateOptions.map((option) => (
                 <label
                   key={option.id}
                   htmlFor={option.id}
                   className={cn(
-                    "flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg border-2 cursor-pointer transition-all",
+                    "flex items-center gap-2 p-1.5 lg:p-2 rounded-lg border-2 cursor-pointer transition-all",
                     "hover:border-primary/50",
                     selectedDateId === option.id
                       ? "border-primary bg-primary/5"
@@ -380,23 +380,23 @@ const BookingPanel = ({
                 >
                   <RadioGroupItem value={option.id} id={option.id} />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-xs lg:text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                    <div className="font-medium text-[11px] lg:text-xs whitespace-nowrap overflow-hidden text-ellipsis">
                       {format(option.checkin, "EEE. dd MMM", { locale: fr })}
                       {" → "}
                       {format(option.checkout, "EEE. dd MMM", { locale: fr })}
                     </div>
-                    <div className="flex items-center gap-1.5 lg:gap-2 mt-0.5 lg:mt-1">
-                      <span className="font-bold text-sm lg:text-base">
+                    <div className="flex items-center gap-1 lg:gap-1.5 mt-0.5">
+                      <span className="font-bold text-xs lg:text-sm">
                         {option.price}€
                       </span>
-                      <span className="text-xs lg:text-sm text-muted-foreground line-through">
+                      <span className="text-[10px] lg:text-xs text-muted-foreground line-through">
                         {option.originalPrice}€
                       </span>
-                      <span className="text-[10px] lg:text-xs font-medium text-primary">
+                      <span className="text-[9px] lg:text-[10px] font-medium text-primary">
                         -{option.discount}%
                       </span>
                       {option.featured && (
-                        <span className="text-xs font-medium bg-foreground text-background px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-medium bg-foreground text-background px-1.5 py-0.5 rounded">
                           {lang === 'he' ? 'רק 2 נותרו' : lang === 'en' ? 'Only 2 left' : 'Plus que 2 restantes'}
                         </span>
                       )}
@@ -444,39 +444,39 @@ const BookingPanel = ({
         )}
 
         {selectedDateId && !selectedRoom && (
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center">
             {lang === 'he' ? 'בחרו חדר להמשך' : lang === 'en' ? 'Select a room to continue' : 'Sélectionnez une chambre pour continuer'}
           </p>
         )}
       </div>
 
       {/* Fixed bottom section: CTA Button */}
-      <div className="flex-shrink-0 pt-3 lg:pt-4 mt-3 lg:mt-4 border-t">
+      <div className="flex-shrink-0 pt-2 lg:pt-3 mt-2 lg:mt-3 border-t">
         {!selectedDateId ? (
-          <Button size="default" className="w-full lg:h-11 text-sm lg:text-base" disabled>
+          <Button size="default" className="w-full h-9 lg:h-10 text-xs lg:text-sm" disabled>
             {lang === 'he' ? 'בחרו תאריך' : lang === 'en' ? 'Choose a date' : 'Choisissez une date'}
           </Button>
         ) : canBook ? (
           <Button 
             size="default" 
-            className="w-full lg:h-11 text-sm lg:text-base" 
+            className="w-full h-9 lg:h-10 text-xs lg:text-sm" 
             onClick={handleBooking}
             disabled={createBookingMutation.isPending}
           >
             {createBookingMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 lg:h-5 lg:w-5 animate-spin" />
+                <Loader2 className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4 animate-spin" />
                 {lang === 'he' ? 'יוצר הזמנה...' : lang === 'en' ? 'Creating booking...' : 'Création de la réservation...'}
               </>
             ) : (
               <>
-                <Calendar className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                <Calendar className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                 {lang === 'he' ? 'הזמן ושלם' : lang === 'en' ? 'Book & Pay' : 'Réserver & Payer'}
               </>
             )}
           </Button>
         ) : (
-          <Button size="default" className="w-full lg:h-11 text-sm lg:text-base" disabled>
+          <Button size="default" className="w-full h-9 lg:h-10 text-xs lg:text-sm" disabled>
             {lang === 'he' ? 'בחרו חדר' : lang === 'en' ? 'Select a room' : 'Sélectionnez une chambre'}
           </Button>
         )}
