@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Share, Heart } from "lucide-react";
+import { Star, Share, Heart, MessageCircle } from "lucide-react";
 import { Grid3X3 } from "lucide-react";
 import {
   Carousel,
@@ -293,12 +293,8 @@ const HeroSection = ({
                 {/* Recent review with rectangular image matching hotel photo */}
                 {recentReview && (
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {hotelImage ? (
-                        <img src={hotelImage} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-xs text-muted-foreground">★</span>
-                      )}
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <MessageCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm text-foreground italic line-clamp-2">
