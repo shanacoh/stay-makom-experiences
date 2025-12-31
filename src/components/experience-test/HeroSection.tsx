@@ -229,7 +229,7 @@ const HeroSection = ({
             </div>
 
             {/* RIGHT: Content + Booking Panel integrated */}
-            <div className="flex flex-col">
+            <div className="flex flex-col justify-center h-[calc(100vh-12rem)]">
               {/* Content info section */}
               <div className="space-y-4 pb-5">
                 {/* Title - centered */}
