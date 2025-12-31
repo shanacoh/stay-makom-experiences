@@ -179,7 +179,7 @@ const HeroSection = ({
         </div>
 
         {/* DESKTOP & TABLET: Airbnb-style 2-column layout */}
-        <div className="hidden md:block container px-4 md:px-6 xl:px-8">
+        <div className="hidden md:block max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
           <div className="grid grid-cols-[55fr_45fr] gap-4 md:gap-6 xl:gap-8 items-start">
             
             {/* LEFT: Photo Grid - 2x2 photos with reasonable height to see content */}
