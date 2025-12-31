@@ -274,8 +274,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Marquee Banner */}
-        <MarqueeBanner />
 
         {/* Categories Section */}
         <section id="choose-escape" className="container py-4 sm:py-6 md:py-8 px-4 scroll-mt-16">
@@ -305,6 +303,9 @@ const Index = () => {
 
         {/* AI Experience Assistant */}
         <AIExperienceAssistant />
+
+        {/* Marquee Banner */}
+        <MarqueeBanner />
 
         {/* Handpicked Hotels Hero Section */}
         <section className="relative py-10 sm:py-14 md:py-18 overflow-hidden">
