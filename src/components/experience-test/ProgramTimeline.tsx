@@ -1,4 +1,6 @@
 import { getLocalizedField, type Language } from "@/hooks/useLanguage";
+import { icons, Sparkles } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface IncludeItem {
   id: string;
@@ -21,59 +23,69 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
 
   const sortedIncludes = [...includes].sort((a, b) => a.order_index - b.order_index);
 
+  const isImageUrl = (url?: string | null): boolean => {
+    return !!url && (url.startsWith('http://') || url.startsWith('https://'));
+  };
+
+  const getIconComponent = (iconName?: string | null): LucideIcon => {
+    if (!iconName || isImageUrl(iconName)) return Sparkles;
+    const IconComponent = icons[iconName as keyof typeof icons];
+    return (IconComponent as LucideIcon) || Sparkles;
+  };
+
   return (
-    <section className="py-6 border-b border-border">
+    <section className="py-6 border-b border-border" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-3">
         {lang === "he" ? "מה בתכנית" : lang === "fr" ? "Au programme" : "What's on the program"}
       </h2>
 
       {/* Introduction text */}
       {introText && (
-        <p className="text-foreground text-sm leading-relaxed mb-4">
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4 whitespace-pre-line">
           {introText}
         </p>
       )}
 
-      {/* Program items - Airbnb style with vertical timeline */}
-      <div className="relative">
-        {/* Vertical timeline line */}
-        <div className="absolute left-[40px] top-3 bottom-3 w-px bg-border" />
-        
-        <div className="space-y-4">
-          {sortedIncludes.map((item, index) => {
-            const title = getLocalizedField(item, "title", lang) as string || item.title;
-            const description = getLocalizedField(item, "description", lang) as string || item.description;
+      {/* Grid layout - 4 columns like original WhatsIncludedPhotos */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {sortedIncludes.map((item) => {
+          const title = getLocalizedField(item, "title", lang) as string || item.title;
+          const description = getLocalizedField(item, "description", lang) as string || item.description;
+          const hasImageUrl = isImageUrl(item.icon_url);
+          const IconComponent = getIconComponent(item.icon_url);
 
-            return (
-              <div key={item.id} className="flex items-center gap-4">
-                {/* Square image on the left - SMALLER */}
-                {item.icon_url && item.icon_url.startsWith("http") ? (
-                  <div className="relative flex-shrink-0 w-[80px] h-[80px] rounded-lg overflow-hidden bg-muted z-10">
-                    <img
-                      src={item.icon_url}
-                      alt={title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+          return (
+            <div key={item.id} className="group flex flex-col">
+              {/* Image or Icon Container */}
+              <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                {hasImageUrl ? (
+                  <img 
+                    src={item.icon_url!} 
+                    alt={title} 
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="relative flex-shrink-0 w-[80px] h-[80px] rounded-lg bg-muted flex items-center justify-center z-10">
-                    <span className="text-2xl text-muted-foreground">📋</span>
-                  </div>
+                  <IconComponent className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary" />
                 )}
-
-                {/* Content on the right - centered vertically, max 3 lines */}
-                <div className="flex-1 max-w-md">
-                  <h3 className="font-semibold text-foreground text-sm mb-0.5">{title}</h3>
-                  {description && (
-                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">
-                      {description}
-                    </p>
-                  )}
-                </div>
               </div>
-            );
-          })}
-        </div>
+              
+              {/* Content Container */}
+              <div className="flex flex-col flex-1">
+                {/* Title - Fixed 2-line height */}
+                <h3 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-2 h-8 sm:h-9">
+                  {title}
+                </h3>
+                
+                {/* Description */}
+                {description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                    {description}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
