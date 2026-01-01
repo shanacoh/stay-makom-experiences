@@ -199,15 +199,15 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
 
               {/* Content */}
               <div className="p-3 flex flex-col flex-1">
-                <h3 className="font-medium text-sm text-foreground leading-snug line-clamp-2">
+                <h3 className="font-medium text-xs text-foreground leading-snug line-clamp-2">
                   {name}
                 </h3>
                 {description && (
-                  <p className="text-muted-foreground text-xs leading-relaxed line-clamp-1 mt-0.5">
+                  <p className="text-muted-foreground text-[10px] leading-relaxed line-clamp-1 mt-0.5">
                     {description}
                   </p>
                 )}
-                <span className="text-xs text-muted-foreground/70 mt-1">
+                <span className="text-[10px] text-muted-foreground/70 mt-1">
                   {formatPrice(extra.price, extra.currency)}
                 </span>
 

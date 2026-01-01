@@ -41,7 +41,7 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
 
       {/* Introduction text */}
       {introText && (
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4 whitespace-pre-line">
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 whitespace-pre-line">
           {introText}
         </p>
       )}
@@ -72,13 +72,13 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
               {/* Content Container */}
               <div className="flex flex-col flex-1">
                 {/* Title - Fixed 2-line height */}
-                <h3 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-2 h-8 sm:h-9">
+                <h3 className="font-semibold text-[11px] sm:text-xs leading-tight line-clamp-2 h-7 sm:h-8">
                   {title}
                 </h3>
                 
                 {/* Description */}
                 {description && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">
                     {description}
                   </p>
                 )}
