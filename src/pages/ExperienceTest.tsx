@@ -217,7 +217,7 @@ const ExperienceTest = () => {
 
         {/* CONTENT - 2-column layout with sticky booking panel */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
-          <div className={`grid md:grid-cols-[55fr_45fr] gap-4 md:gap-8 ${isMobile ? 'pb-20' : ''}`}>
+          <div className={`grid md:grid-cols-[65fr_35fr] gap-4 md:gap-8 ${isMobile ? 'pb-20' : ''}`}>
             
             {/* LEFT COLUMN - Story content (progressive disclosure) */}
             <div className="space-y-0">
