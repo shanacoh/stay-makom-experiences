@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Brain, Search, Globe, TrendingUp, Trash2, MousePointer, ShoppingCart, ArrowRight, RotateCcw, Flame, Tag, Cloud } from "lucide-react";
+import { Brain, Search, Globe, TrendingUp, Trash2, MousePointer, ShoppingCart, ArrowRight, RotateCcw, Flame, Tag, Cloud, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -123,6 +123,70 @@ const AIInsights = () => {
       toast.success("Old queries deleted");
       refetchQueries();
     }
+  };
+
+  const handleExportCSV = () => {
+    if (!queries?.length) {
+      toast.error("Aucune donnée à exporter");
+      return;
+    }
+
+    // Build CSV data with all queries and their events
+    const csvRows: string[] = [];
+    
+    // Header row
+    const headers = [
+      "ID",
+      "Requête",
+      "Langue",
+      "Nb Résultats",
+      "Session ID",
+      "Appareil",
+      "A cliqué",
+      "Position clic",
+      "Converti",
+      "Rebond",
+      "Date"
+    ];
+    csvRows.push(headers.join(","));
+
+    // Data rows
+    queries.forEach(q => {
+      const queryEvents = events?.filter(e => e.search_id === q.id) || [];
+      const clickEvent = queryEvents.find(e => e.event_type === 'click');
+      const hasBooking = queryEvents.some(e => e.event_type === 'booking') || q.converted;
+      const hasBounce = queryEvents.some(e => e.event_type === 'bounce');
+      const deviceType = isMobile(q.user_agent) ? "Mobile" : "Desktop";
+      
+      const row = [
+        q.id,
+        `"${q.query.replace(/"/g, '""')}"`, // Escape quotes in CSV
+        q.lang || "unknown",
+        q.recommendation_count ?? 0,
+        q.session_id || "",
+        deviceType,
+        clickEvent ? "Oui" : "Non",
+        clickEvent?.position ?? "",
+        hasBooking ? "Oui" : "Non",
+        hasBounce ? "Oui" : "Non",
+        q.created_at ? format(new Date(q.created_at), "yyyy-MM-dd HH:mm:ss") : ""
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    // Create and download CSV file
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" }); // BOM for Excel UTF-8
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ai-insights-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success(`${queries.length} requêtes exportées`);
   };
 
   const isMobile = (userAgent: string | null) => {
@@ -258,10 +322,16 @@ const AIInsights = () => {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={handleClearOldQueries}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Nettoyer +30j
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={!queries?.length}>
+            <Download className="h-4 w-4 mr-2" />
+            Exporter CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleClearOldQueries}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Nettoyer +30j
+          </Button>
+        </div>
       </div>
 
       {/* Funnel Metrics */}
