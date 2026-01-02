@@ -148,7 +148,7 @@ const AIInsights = () => {
       "Rebond",
       "Date"
     ];
-    csvRows.push(headers.join(","));
+    csvRows.push(headers.join(";"));
 
     // Data rows
     queries.forEach(q => {
@@ -159,19 +159,19 @@ const AIInsights = () => {
       const deviceType = isMobile(q.user_agent) ? "Mobile" : "Desktop";
       
       const row = [
-        q.id,
-        `"${q.query.replace(/"/g, '""')}"`, // Escape quotes in CSV
-        q.lang || "unknown",
+        `"${q.id}"`,
+        `"${(q.query || '').replace(/"/g, '""')}"`,
+        `"${q.lang || 'unknown'}"`,
         q.recommendation_count ?? 0,
-        q.session_id || "",
-        deviceType,
-        clickEvent ? "Oui" : "Non",
+        `"${q.session_id || ''}"`,
+        `"${deviceType}"`,
+        `"${clickEvent ? 'Oui' : 'Non'}"`,
         clickEvent?.position ?? "",
-        hasBooking ? "Oui" : "Non",
-        hasBounce ? "Oui" : "Non",
-        q.created_at ? format(new Date(q.created_at), "yyyy-MM-dd HH:mm:ss") : ""
+        `"${hasBooking ? 'Oui' : 'Non'}"`,
+        `"${hasBounce ? 'Oui' : 'Non'}"`,
+        `"${q.created_at ? format(new Date(q.created_at), 'yyyy-MM-dd HH:mm:ss') : ''}"`
       ];
-      csvRows.push(row.join(","));
+      csvRows.push(row.join(";"));
     });
 
     // Create and download CSV file
