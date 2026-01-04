@@ -192,4 +192,14 @@ All colors MUST be HSL.
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Fix for empty paragraphs in prose content (journal articles) */
+  .prose p:empty {
+    min-height: 1.5em;
+  }
+
+  /* Also handle paragraphs with only a br tag */
+  .prose p:has(br:only-child) {
+    min-height: 1.5em;
+  }
 }

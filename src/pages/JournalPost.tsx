@@ -165,11 +165,15 @@ const JournalPost = () => {
 
       case "text":
         // Rich text content - render as sanitized HTML
-        return block.content ? (
+        // Transform empty paragraphs to have visible height
+        const processedTextContent = block.content
+          ? block.content.replace(/<p><\/p>/g, '<p>&nbsp;</p>').replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>')
+          : '';
+        return processedTextContent ? (
           <div 
             className="text-lg leading-relaxed mb-6 prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(block.content, {
+              __html: DOMPurify.sanitize(processedTextContent, {
                 ALLOWED_TAGS: [
                   "p", "br", "strong", "em", "u", "s", "h1", "h2", "h3",
                   "ul", "ol", "li", "a", "span",
@@ -352,23 +356,31 @@ const JournalPost = () => {
             </div>
           ) : html ? (
             // Fallback to legacy HTML content
-            <div
-              className="prose prose-lg max-w-none"
-              style={{ fontSize: "1.125rem", lineHeight: "1.75rem" }}
-            >
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(html, {
-                    ALLOWED_TAGS: [
-                      "p", "br", "strong", "em", "u", "h1", "h2", "h3", "h4", "h5", "h6",
-                      "ul", "ol", "li", "a", "blockquote", "img", "pre", "code", "span", "div",
-                    ],
-                    ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "title", "class", "style"],
-                  }),
-                }}
-                className="whitespace-pre-wrap"
-              />
-            </div>
+            // Transform empty paragraphs to have visible height
+            (() => {
+              const processedHtml = html
+                .replace(/<p><\/p>/g, '<p>&nbsp;</p>')
+                .replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+              return (
+                <div
+                  className="prose prose-lg max-w-none"
+                  style={{ fontSize: "1.125rem", lineHeight: "1.75rem" }}
+                >
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(processedHtml, {
+                        ALLOWED_TAGS: [
+                          "p", "br", "strong", "em", "u", "h1", "h2", "h3", "h4", "h5", "h6",
+                          "ul", "ol", "li", "a", "blockquote", "img", "pre", "code", "span", "div",
+                        ],
+                        ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "title", "class", "style"],
+                      }),
+                    }}
+                    className="whitespace-pre-wrap"
+                  />
+                </div>
+              );
+            })()
           ) : null}
         </article>
 
