@@ -277,22 +277,6 @@ const HeroSection = ({
                   </div>
                 )}
 
-                {/* Recent review with rectangular image matching hotel photo */}
-                {recentReview && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <MessageCircle className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground italic line-clamp-2">
-                        "{recentReview.text.substring(0, 80)}{recentReview.text.length > 80 ? '...' : ''}"
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(recentReview.created_at).toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'fr' ? 'fr-FR' : 'en-US', { month: 'long', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
