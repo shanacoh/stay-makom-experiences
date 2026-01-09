@@ -284,7 +284,7 @@ const ExperienceTest = () => {
                         ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person') 
                         : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
                     </span>
-                    <span className="text-sm text-primary font-medium">
+                    <span className="text-sm text-cta font-medium">
                       {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
                     </span>
                   </div>
