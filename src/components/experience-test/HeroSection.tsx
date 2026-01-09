@@ -81,7 +81,7 @@ const HeroSection = ({
 
   return (
     <>
-      <div className="pt-20 md:pt-24">
+      <div className="pt-16 md:pt-18">
         {/* MOBILE: Full-width carousel */}
         <div className="block md:hidden">
           <div className="relative">
