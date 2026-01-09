@@ -196,35 +196,22 @@ const HeroSection = ({
                   alt={title}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 />
-                {/* Bottom overlay with gallery button and pricing info */}
-                <div className="absolute bottom-4 left-4 right-4 z-10 flex items-end justify-between">
-                  {/* Pricing info */}
-                  <div className="px-3 py-2 rounded-lg bg-white/90 shadow-md">
-                    <p className="text-sm font-medium text-foreground">
-                      {lang === 'he' ? 'לילה' : lang === 'fr' ? 'par nuit' : 'per night'}
-                    </p>
-                    <p className="text-xs text-cta font-medium">
-                      {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
-                    </p>
-                  </div>
-                  
-                  {/* Button to open gallery */}
-                  {photos.length > 1 && (
-                    <button
-                      className="px-3 py-2 rounded-lg bg-white/90 hover:bg-white shadow-md transition-all flex items-center gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentPhotoIndex(0);
-                        setIsGalleryOpen(true);
-                      }}
-                    >
-                      <Grid3X3 className="h-4 w-4 text-foreground" />
-                      <span className="text-sm font-medium text-foreground">
-                        {lang === 'he' ? `הצג את כל ${photos.length} התמונות` : lang === 'fr' ? `Voir les ${photos.length} photos` : `View all ${photos.length} photos`}
-                      </span>
-                    </button>
-                  )}
-                </div>
+                {/* Button to open gallery */}
+                {photos.length > 1 && (
+                  <button
+                    className="absolute bottom-4 right-4 z-10 px-3 py-2 rounded-lg bg-white/90 hover:bg-white shadow-md transition-all flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentPhotoIndex(0);
+                      setIsGalleryOpen(true);
+                    }}
+                  >
+                    <Grid3X3 className="h-4 w-4 text-foreground" />
+                    <span className="text-sm font-medium text-foreground">
+                      {lang === 'he' ? `הצג את כל ${photos.length} התמונות` : lang === 'fr' ? `Voir les ${photos.length} photos` : `View all ${photos.length} photos`}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
 
