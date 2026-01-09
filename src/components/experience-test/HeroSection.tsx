@@ -178,53 +178,40 @@ const HeroSection = ({
           </div>
         </div>
 
-        {/* DESKTOP & TABLET: Airbnb-style 2-column layout */}
+        {/* DESKTOP & TABLET: 2-column layout with single large photo */}
         <div className="hidden md:block max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
           <div className="grid grid-cols-[65fr_35fr] gap-4 md:gap-6 xl:gap-8 items-start">
             
-            {/* LEFT: Photo Grid - 2x2 photos with reasonable height to see content */}
+            {/* LEFT: Single large photo */}
             <div className="relative h-[calc(100vh-12rem)]">
-              <div className="grid grid-cols-2 grid-rows-2 gap-2 rounded-xl overflow-hidden h-full">
-                {displayPhotos.map((photo, index) => (
-                  <div
-                    key={index}
-                    className={`relative overflow-hidden ${
-                      index === 3 ? '' : 'cursor-pointer'
-                    } ${
-                      index === 0 ? 'rounded-tl-xl' : ''
-                    } ${
-                      index === 1 ? 'rounded-tr-xl' : ''
-                    } ${
-                      index === 2 ? 'rounded-bl-xl' : ''
-                    } ${
-                      index === 3 ? 'rounded-br-xl' : ''
-                    }`}
-                    onClick={index === 3 ? undefined : () => {
-                      setCurrentPhotoIndex(index);
+              <div 
+                className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer"
+                onClick={() => {
+                  setCurrentPhotoIndex(0);
+                  setIsGalleryOpen(true);
+                }}
+              >
+                <img
+                  src={photos[0] || "/placeholder.svg"}
+                  alt={title}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                />
+                {/* Button to open gallery */}
+                {photos.length > 1 && (
+                  <button
+                    className="absolute bottom-4 right-4 z-10 px-3 py-2 rounded-lg bg-white/90 hover:bg-white shadow-md transition-all flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentPhotoIndex(0);
                       setIsGalleryOpen(true);
                     }}
                   >
-                    <img
-                      src={photo || "/placeholder.svg"}
-                      alt={`${title} - ${index + 1}`}
-                      className={`w-full h-full object-cover transition-transform duration-300 ${index !== 3 ? 'hover:scale-105' : ''}`}
-                    />
-                    {/* Small logo icon on 4th photo to open gallery */}
-                    {index === 3 && photos.length > 4 && (
-                      <button
-                        className="absolute bottom-3 right-3 z-10 p-2 rounded-lg bg-white/90 hover:bg-white shadow-md transition-all flex items-center gap-1.5"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentPhotoIndex(0);
-                          setIsGalleryOpen(true);
-                        }}
-                      >
-                        <Grid3X3 className="h-4 w-4 text-foreground" />
-                        <span className="text-xs font-medium text-foreground">{photos.length}</span>
-                      </button>
-                    )}
-                  </div>
-                ))}
+                    <Grid3X3 className="h-4 w-4 text-foreground" />
+                    <span className="text-sm font-medium text-foreground">
+                      {lang === 'he' ? `הצג את כל ${photos.length} התמונות` : lang === 'fr' ? `Voir les ${photos.length} photos` : `View all ${photos.length} photos`}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
 
