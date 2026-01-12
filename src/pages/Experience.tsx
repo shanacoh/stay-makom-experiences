@@ -183,21 +183,12 @@ const Experience = () => {
           <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
             {/* Left Column - Content */}
             <div className="space-y-10 md:space-y-12">
-              {/* Description / Long Copy */}
-              {longCopy && (
-                <section className="prose max-w-none">
-                  <div 
-                    className="text-sm md:text-base text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: longCopy }}
-                  />
-                </section>
-              )}
-
               {/* What's on the Program */}
               {includes && includes.length > 0 && (
                 <ProgramTimeline 
                   includes={includes} 
                   lang={lang}
+                  introText={longCopy}
                 />
               )}
 
