@@ -41,9 +41,10 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
 
       {/* Introduction text */}
       {introText && (
-        <p className="text-xs text-muted-foreground leading-relaxed mb-4 whitespace-pre-line">
-          {introText}
-        </p>
+        <div 
+          className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-6 prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: introText }}
+        />
       )}
 
       {/* Grid layout - 4 columns like original WhatsIncludedPhotos */}
