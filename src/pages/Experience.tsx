@@ -1,32 +1,35 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ExperienceHero from "@/components/experience/ExperienceHero";
-import TitleBlock from "@/components/experience/TitleBlock";
-import BookingPanel from "@/components/experience/BookingPanel";
-import ExperienceDetails from "@/components/experience/ExperienceDetails";
-import WhatsIncludedPhotos from "@/components/experience/WhatsIncludedPhotos";
-import ExtrasSection from "@/components/experience/ExtrasSection";
-import GoodToKnow from "@/components/experience/GoodToKnow";
-import ReviewsSection from "@/components/experience/ReviewsSection";
-import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
 import { Loader2 } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { SEOHead } from "@/components/SEOHead";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
+
+// New template components
+import HeroSection from "@/components/experience-test/HeroSection";
+import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
+import YourStaySection from "@/components/experience-test/YourStaySection";
+import LocationMap from "@/components/experience-test/LocationMap";
+import ReviewsGrid from "@/components/experience-test/ReviewsGrid";
+import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
+
+// Keep existing components that are still needed
+import BookingPanel from "@/components/experience/BookingPanel";
+import ExtrasSection from "@/components/experience/ExtrasSection";
 
 const Experience = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
   const [selectedExtras, setSelectedExtras] = useState<{ [key: string]: number }>({});
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
-  const isMobile = useIsMobile();
+  
+  const heroRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
 
   const { data: experience, isLoading } = useQuery({
     queryKey: ["experience", slug],
@@ -119,10 +122,10 @@ const Experience = () => {
   // Get localized content
   const title = getLocalizedField(experience, 'title', lang) as string || experience.title;
   const subtitle = getLocalizedField(experience, 'subtitle', lang) as string || experience.subtitle;
+  const longCopy = getLocalizedField(experience, 'long_copy', lang) as string || experience.long_copy;
   const hotelName = getLocalizedField(experience.hotels, 'name', lang) as string || experience.hotels?.name;
   const city = getLocalizedField(experience.hotels, 'city', lang) as string || experience.hotels?.city;
-  const address = getLocalizedField(experience, 'address', lang) as string || (experience as any).address;
-  const goodToKnowItems = getLocalizedField(experience, 'good_to_know', lang) as string[] || experience.good_to_know;
+  const region = getLocalizedField(experience.hotels, 'region', lang) as string || experience.hotels?.region;
 
   // Hero image: prioritize experience hero, then hotel hero
   const heroImage = experience.hero_image || experience.hotels?.hero_image || '/placeholder.svg';
@@ -133,6 +136,11 @@ const Experience = () => {
   if (experience.photos?.length) galleryPhotos.push(...experience.photos.filter((p: string) => p !== experience.hero_image));
   if (experience.hotels?.hero_image && !galleryPhotos.includes(experience.hotels.hero_image)) galleryPhotos.push(experience.hotels.hero_image);
   if (experience.hotels?.photos?.length) galleryPhotos.push(...experience.hotels.photos.filter((p: string) => !galleryPhotos.includes(p)));
+
+  // Calculate average rating
+  const averageRating = reviews && reviews.length > 0 
+    ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length 
+    : undefined;
 
   return (
     <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
@@ -152,65 +160,116 @@ const Experience = () => {
       <Header />
 
       <main className="flex-1">
-        <ExperienceHero 
-          title={title} 
-          subtitle={subtitle} 
-          hotelName={hotelName} 
-          heroImage={heroImage} 
-          galleryPhotos={galleryPhotos} 
-        />
+        {/* Hero Section with 65/35 layout */}
+        <section ref={heroRef}>
+          <HeroSection
+            photos={galleryPhotos}
+            title={title}
+            hotelName={hotelName || ''}
+            hotelImage={experience.hotels?.hero_image}
+            city={city}
+            region={region}
+            averageRating={averageRating}
+            reviewsCount={reviews?.length || 0}
+            lang={lang}
+          />
+        </section>
 
-        <div className="container pb-16 px-4 sm:px-6 my-[26px]">
-          <div className={`grid md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 xl:gap-12 ${isMobile ? 'pb-24' : ''}`}>
+        <div className="container pb-16 px-4 sm:px-6 my-8">
+          <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
             {/* Left Column - Content */}
-            <div className="md:col-span-2 space-y-8 sm:space-y-10 md:space-y-12">
-              {/* Title Block */}
-              <TitleBlock
-                title={title}
-                hotelName={hotelName || ''}
-                hotelSlug={experience.hotels?.slug}
-                isNew={false}
-                rating={reviews && reviews.length > 0 ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length : undefined}
-                reviewCount={reviews?.length}
-                city={city}
-                address={address}
-                googleMapsLink={(experience as any).google_maps_link}
+            <div className="space-y-10 md:space-y-12">
+              {/* Description / Long Copy */}
+              {longCopy && (
+                <section className="prose prose-lg max-w-none">
+                  <div 
+                    className="text-muted-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: longCopy }}
+                  />
+                </section>
+              )}
+
+              {/* What's on the Program */}
+              {includes && includes.length > 0 && (
+                <ProgramTimeline 
+                  includes={includes} 
+                  lang={lang}
+                />
+              )}
+
+              {/* Extras Section */}
+              {extras && extras.length > 0 && (
+                <ExtrasSection 
+                  extras={extras} 
+                  selectedExtras={selectedExtras} 
+                  onUpdateQuantity={(extraId, quantity) => {
+                    setSelectedExtras(prev => ({
+                      ...prev,
+                      [extraId]: quantity
+                    }));
+                  }} 
+                />
+              )}
+
+              {/* Your Stay - Hotel Section */}
+              <YourStaySection 
+                hotel={experience.hotels} 
+                lang={lang}
               />
 
-              {/* Description */}
-              <ExperienceDetails experience={experience} />
+              {/* Location Map */}
+              {experience.hotels?.latitude && experience.hotels?.longitude && (
+                <LocationMap 
+                  latitude={experience.hotels.latitude}
+                  longitude={experience.hotels.longitude}
+                  hotelName={hotelName || ''}
+                  lang={lang}
+                />
+              )}
 
-              {/* What's Included */}
-              <WhatsIncludedPhotos includes={includes} />
-
-              {/* Spice It Up (Extras) */}
-              <ExtrasSection 
-                extras={extras || []} 
-                selectedExtras={selectedExtras} 
-                onUpdateQuantity={(extraId, quantity) => {
-                  setSelectedExtras(prev => ({
-                    ...prev,
-                    [extraId]: quantity
-                  }));
-                }} 
-              />
-
-              {/* Reviews */}
-              <ReviewsSection experienceId={experience.id} />
-
-              {/* Good to Know */}
-              <GoodToKnow items={goodToKnowItems} />
-
-              {/* Other Experiences from This Hotel */}
-              <OtherExperiencesFromHotel 
-                hotelId={experience.hotel_id}
-                currentExperienceId={experience.id}
-                hotelName={hotelName || ''}
-              />
+              {/* Reviews Grid */}
+              {reviews && reviews.length > 0 && (
+                <ReviewsGrid 
+                  reviews={reviews}
+                  lang={lang}
+                />
+              )}
             </div>
 
-            {/* Right Column - Sticky Booking Panel */}
-            <div className="md:col-span-1 hidden md:block">
+            {/* Right Column - Sticky Booking Panel (Desktop) */}
+            <div className="hidden md:block">
+              <div className="sticky top-4">
+                <BookingPanel 
+                  experienceId={experience.id} 
+                  hotelId={experience.hotel_id} 
+                  basePrice={experience.base_price} 
+                  basePriceType={experience.base_price_type || "per_person"} 
+                  currency={experience.currency || "USD"} 
+                  minParty={experience.min_party || 2} 
+                  maxParty={experience.max_party || 4} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Sticky Price Bar */}
+        <StickyPriceBar
+          basePrice={experience.base_price}
+          basePriceType={experience.base_price_type || "per_person"}
+          currency={experience.currency || "EUR"}
+          lang={lang}
+          onViewDates={() => setIsBookingSheetOpen(true)}
+          heroRef={heroRef}
+          footerRef={footerRef}
+          averageRating={averageRating}
+          reviewsCount={reviews?.length || 0}
+        />
+
+        {/* Mobile Booking Sheet */}
+        <Sheet open={isBookingSheetOpen} onOpenChange={setIsBookingSheetOpen}>
+          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
+            <div className="p-6">
               <BookingPanel 
                 experienceId={experience.id} 
                 hotelId={experience.hotel_id} 
@@ -221,52 +280,13 @@ const Experience = () => {
                 maxParty={experience.max_party || 4} 
               />
             </div>
-          </div>
-        </div>
-
-        {/* Mobile Sticky Bottom Bar */}
-        {isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
-            <Sheet open={isBookingSheetOpen} onOpenChange={setIsBookingSheetOpen}>
-              <SheetTrigger asChild>
-                <button className="w-full p-4 flex items-center justify-between">
-                  <div className="flex flex-col items-start">
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-bold text-2xl text-foreground">
-                        {experience.base_price}€
-                      </span>
-                      <span className="text-sm line-through text-muted-foreground">
-                        {Math.round(experience.base_price * 1.26)}€
-                      </span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      / {experience.base_price_type === 'per_person' ? (lang === 'he' ? 'אדם' : 'person') : (lang === 'he' ? 'הזמנה' : 'booking')} · -26%
-                    </span>
-                  </div>
-                  <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
-                    {t(lang, 'bookItNow')}
-                  </Button>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
-                <div className="p-6">
-                  <BookingPanel 
-                    experienceId={experience.id} 
-                    hotelId={experience.hotel_id} 
-                    basePrice={experience.base_price} 
-                    basePriceType={experience.base_price_type || "per_person"} 
-                    currency={experience.currency || "USD"} 
-                    minParty={experience.min_party || 2} 
-                    maxParty={experience.max_party || 4} 
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        )}
+          </SheetContent>
+        </Sheet>
       </main>
 
-      <Footer />
+      <footer ref={footerRef as React.RefObject<HTMLElement>}>
+        <Footer />
+      </footer>
     </div>
   );
 };
