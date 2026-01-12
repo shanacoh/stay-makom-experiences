@@ -180,7 +180,7 @@ const HeroSection = ({
 
         {/* DESKTOP & TABLET: 2-column layout with single large photo */}
         <div className="hidden md:block max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
-          <div className="grid grid-cols-[65fr_35fr] gap-4 md:gap-6 xl:gap-8 items-start">
+          <div className="grid grid-cols-[65fr_35fr] gap-4 md:gap-6 xl:gap-8 items-center">
             
             {/* LEFT: Single large photo */}
             <div className="relative h-[calc(100vh-12rem)]">

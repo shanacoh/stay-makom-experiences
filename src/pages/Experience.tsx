@@ -263,12 +263,8 @@ const Experience = () => {
                   basePrice={experience.base_price}
                   basePriceType={experience.base_price_type || "per_person"}
                   currency={experience.currency || "EUR"}
-                  averageRating={averageRating}
-                  reviewsCount={reviews?.length || 0}
-                  featuredReview={reviews && reviews.length > 0 ? reviews[0] : null}
                   lang={lang}
                   onViewDates={() => {
-                    // Scroll to booking panel
                     const bookingPanel = document.getElementById('booking-panel');
                     if (bookingPanel) {
                       bookingPanel.scrollIntoView({ behavior: 'smooth' });
