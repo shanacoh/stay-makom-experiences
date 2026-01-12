@@ -219,20 +219,20 @@ const HeroSection = ({
             <div className="flex flex-col justify-center h-[calc(100vh-12rem)]">
               {/* Content info section */}
               <div className="space-y-4 pb-5">
-                {/* Title - centered */}
-                <h1 className="text-2xl font-semibold text-foreground leading-tight text-center">
+                {/* Title - left aligned */}
+                <h1 className="text-2xl font-semibold text-foreground leading-tight">
                   {title}
                 </h1>
 
-                {/* Subtitle / Description - centered */}
+                {/* Subtitle / Description - left aligned */}
                 {subtitle && (
-                  <p className="text-muted-foreground text-sm leading-relaxed text-center">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     {subtitle}
                   </p>
                 )}
 
-                {/* Share and Save buttons - centered, icons only */}
-                <div className="flex items-center justify-center gap-3">
+                {/* Share and Save buttons - left aligned */}
+                <div className="flex items-center gap-3">
                   <button className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" aria-label="Share">
                     <Share className="h-5 w-5" />
                   </button>
@@ -241,8 +241,8 @@ const HeroSection = ({
                   </button>
                 </div>
 
-                {/* Rating row - centered */}
-                <div className="flex items-center justify-center gap-2">
+                {/* Rating row - left aligned */}
+                <div className="flex items-center gap-2">
                   {averageRating && (
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-foreground text-foreground" />

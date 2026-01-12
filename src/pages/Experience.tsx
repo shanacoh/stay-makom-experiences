@@ -17,10 +17,13 @@ import YourStaySection from "@/components/experience-test/YourStaySection";
 import LocationMap from "@/components/experience-test/LocationMap";
 import ReviewsGrid from "@/components/experience-test/ReviewsGrid";
 import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
+import PracticalInfo from "@/components/experience-test/PracticalInfo";
+import HeroBookingPreview from "@/components/experience-test/HeroBookingPreview";
 
 // Keep existing components that are still needed
 import BookingPanel from "@/components/experience/BookingPanel";
 import ExtrasSection from "@/components/experience/ExtrasSection";
+import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
 
 const Experience = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -165,6 +168,7 @@ const Experience = () => {
           <HeroSection
             photos={galleryPhotos}
             title={title}
+            subtitle={subtitle}
             hotelName={hotelName || ''}
             hotelImage={experience.hotels?.hero_image}
             city={city}
@@ -175,15 +179,15 @@ const Experience = () => {
           />
         </section>
 
-        <div className="container pb-16 px-4 sm:px-6 my-8">
+        <div className="max-w-6xl mx-auto pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
           <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
             {/* Left Column - Content */}
             <div className="space-y-10 md:space-y-12">
               {/* Description / Long Copy */}
               {longCopy && (
-                <section className="prose prose-lg max-w-none">
+                <section className="prose max-w-none">
                   <div 
-                    className="text-muted-foreground leading-relaxed"
+                    className="text-sm md:text-base text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: longCopy }}
                   />
                 </section>
@@ -234,20 +238,55 @@ const Experience = () => {
                   lang={lang}
                 />
               )}
+
+              {/* Things to Know */}
+              <PracticalInfo 
+                experience={experience}
+                lang={lang}
+              />
+
+              {/* Other experiences from this hotel */}
+              {experience.hotel_id && (
+                <OtherExperiencesFromHotel 
+                  hotelId={experience.hotel_id}
+                  currentExperienceId={experience.id}
+                  hotelName={hotelName || ''}
+                />
+              )}
             </div>
 
             {/* Right Column - Sticky Booking Panel (Desktop) */}
             <div className="hidden md:block">
-              <div className="sticky top-4">
-                <BookingPanel 
-                  experienceId={experience.id} 
-                  hotelId={experience.hotel_id} 
-                  basePrice={experience.base_price} 
-                  basePriceType={experience.base_price_type || "per_person"} 
-                  currency={experience.currency || "USD"} 
-                  minParty={experience.min_party || 2} 
-                  maxParty={experience.max_party || 4} 
+              <div className="sticky top-4 space-y-4">
+                {/* Price Callout CTA */}
+                <HeroBookingPreview 
+                  basePrice={experience.base_price}
+                  basePriceType={experience.base_price_type || "per_person"}
+                  currency={experience.currency || "EUR"}
+                  averageRating={averageRating}
+                  reviewsCount={reviews?.length || 0}
+                  featuredReview={reviews && reviews.length > 0 ? reviews[0] : null}
+                  lang={lang}
+                  onViewDates={() => {
+                    // Scroll to booking panel
+                    const bookingPanel = document.getElementById('booking-panel');
+                    if (bookingPanel) {
+                      bookingPanel.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                 />
+                
+                <div id="booking-panel">
+                  <BookingPanel 
+                    experienceId={experience.id} 
+                    hotelId={experience.hotel_id} 
+                    basePrice={experience.base_price} 
+                    basePriceType={experience.base_price_type || "per_person"} 
+                    currency={experience.currency || "USD"} 
+                    minParty={experience.min_party || 2} 
+                    maxParty={experience.max_party || 4} 
+                  />
+                </div>
               </div>
             </div>
           </div>
