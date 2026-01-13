@@ -26,20 +26,20 @@ const HeroBookingPreview = ({
 
   return (
     <div className="hidden md:block">
-      <div className="bg-muted/30 rounded-xl p-5 space-y-3">
-        <div className="flex items-center justify-between gap-4">
+      <div className="bg-muted/30 rounded-xl p-3 lg:p-4">
+        <div className="flex items-center justify-between gap-3">
           {/* Left: Price info */}
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-base text-foreground">
+              <span className="text-sm text-foreground">
                 {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
               </span>
-              <span className="text-lg font-semibold text-foreground underline">
+              <span className="text-base lg:text-lg font-semibold text-foreground underline">
                 {formattedPrice}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">{priceLabel}</p>
-            <p className="text-sm text-cta font-medium">
+            <p className="text-xs text-muted-foreground">{priceLabel}</p>
+            <p className="text-xs text-cta font-medium">
               {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
             </p>
           </div>
@@ -48,7 +48,7 @@ const HeroBookingPreview = ({
           <Button 
             onClick={onViewDates}
             variant="cta"
-            className="px-6 uppercase tracking-wide"
+            className="px-4 text-sm uppercase tracking-wide"
           >
             {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
           </Button>
