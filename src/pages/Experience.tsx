@@ -247,7 +247,7 @@ const Experience = () => {
             </div>
 
             {/* Right Column - Sticky Booking Panel (Desktop) */}
-            <div className="hidden md:block">
+            <div className="hidden md:block pr-1">
               <div className="sticky top-4 space-y-4">
                 {/* Price Callout CTA */}
                 <HeroBookingPreview 

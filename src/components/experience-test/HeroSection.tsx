@@ -82,87 +82,96 @@ const HeroSection = ({
   return (
     <>
       <div className="pt-16 md:pt-18">
-        {/* MOBILE: Full-width carousel */}
+        {/* MOBILE: Full-width carousel with rounded corners */}
         <div className="block md:hidden">
-          <div className="relative">
-            <Carousel 
-              className="w-full"
-              opts={{ loop: true }}
-              setApi={(api) => {
-                api?.on("select", () => {
-                  setCarouselIndex(api.selectedScrollSnap());
-                });
-              }}
-            >
-              <CarouselContent>
-                {photos.slice(0, 8).map((photo, index) => (
-                  <CarouselItem key={index}>
-                    <div 
-                      className="aspect-[4/3] w-full cursor-pointer"
-                      onClick={() => {
-                        setCurrentPhotoIndex(index);
-                        setIsGalleryOpen(true);
-                      }}
-                    >
-                      <img
-                        src={photo || "/placeholder.svg"}
-                        alt={`${title} - ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </CarouselItem>
+          <div className="px-4 pt-3">
+            <div className="relative">
+              <Carousel 
+                className="w-full"
+                opts={{ loop: true }}
+                setApi={(api) => {
+                  api?.on("select", () => {
+                    setCarouselIndex(api.selectedScrollSnap());
+                  });
+                }}
+              >
+                <CarouselContent>
+                  {photos.slice(0, 8).map((photo, index) => (
+                    <CarouselItem key={index}>
+                      <div 
+                        className="aspect-[4/3] w-full cursor-pointer rounded-2xl overflow-hidden"
+                        onClick={() => {
+                          setCurrentPhotoIndex(index);
+                          setIsGalleryOpen(true);
+                        }}
+                      >
+                        <img
+                          src={photo || "/placeholder.svg"}
+                          alt={`${title} - ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+              
+              {/* Dots indicator */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {photos.slice(0, 8).map((_, index) => (
+                  <div 
+                    key={index}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                      index === carouselIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                  />
                 ))}
-              </CarouselContent>
-            </Carousel>
-            
-            {/* Dots indicator */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {photos.slice(0, 8).map((_, index) => (
-                <div 
-                  key={index}
-                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                    index === carouselIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
+              </div>
 
-            {/* Photo counter */}
-            <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-              {carouselIndex + 1} / {Math.min(photos.length, 8)}
+              {/* Photo counter */}
+              <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                {carouselIndex + 1} / {Math.min(photos.length, 8)}
+              </div>
             </div>
           </div>
 
-          {/* Mobile: Content below photos */}
-          <div className="px-4 pt-4 space-y-3">
-            {/* Title */}
-            <h1 className="text-lg font-semibold text-foreground leading-tight">
+          {/* Mobile: Content below photos - centered */}
+          <div className="px-4 pt-5 space-y-3 text-center">
+            {/* Title - centered */}
+            <h1 className="text-xl font-semibold text-foreground leading-tight">
               {title}
             </h1>
 
-            {/* Rating, Reviews, Location row */}
-            <div className="flex items-center gap-1.5 text-xs flex-wrap">
+            {/* Subtitle/Description - centered */}
+            {subtitle && (
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {subtitle}
+              </p>
+            )}
+
+            {/* Rating, Reviews row - centered */}
+            <div className="flex items-center justify-center gap-1.5 text-sm">
               {averageRating && (
                 <>
-                  <div className="flex items-center gap-0.5">
-                    <Star className="h-3 w-3 fill-foreground text-foreground" />
-                    <span className="font-medium">{averageRating.toFixed(1)}</span>
-                  </div>
+                  <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
+                  <span className="font-medium">{averageRating.toFixed(1)}</span>
                   <span className="text-muted-foreground">·</span>
                   <span className="text-muted-foreground underline">
                     {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
                   </span>
-                  <span className="text-muted-foreground">·</span>
                 </>
               )}
               {city && (
-                <span className="text-muted-foreground">{city}</span>
+                <>
+                  {averageRating && <span className="text-muted-foreground">·</span>}
+                  <span className="text-muted-foreground">{city}</span>
+                </>
               )}
             </div>
 
-            {/* Host info - compact */}
+            {/* Host info - centered */}
             {hotelName && (
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center justify-center gap-2 pt-1">
                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground overflow-hidden">
                   {hotelImage ? (
                     <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />

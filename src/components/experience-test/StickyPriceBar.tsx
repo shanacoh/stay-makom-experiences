@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StickyPriceBarProps {
@@ -69,39 +68,29 @@ const StickyPriceBar = ({
         isSticky && !isHidden ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
       )}
     >
-      <div className="container px-6">
-        <div className="flex items-center justify-between py-4">
+      <div className="container px-4">
+        <div className="flex items-center justify-between py-3">
           {/* Left: Price info */}
-          <div className="flex items-center gap-6">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-lg font-semibold">
-                  {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
-                  <span className="underline">{formattedPrice}</span>
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">{priceLabel}</p>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm">
+                {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
+              </span>
+              <span className="text-base font-semibold underline">{formattedPrice}</span>
+              <span className="text-xs text-muted-foreground ml-1">{priceLabel}</span>
             </div>
-
-            {/* Rating */}
-            {averageRating && (
-              <div className="flex items-center gap-1.5 text-sm">
-                <Star className="h-4 w-4 fill-foreground text-foreground" />
-                <span className="font-medium">{averageRating.toFixed(1)}</span>
-                <span className="text-muted-foreground">
-                  ({reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'fr' ? 'avis' : 'reviews'})
-                </span>
-              </div>
-            )}
+            <p className="text-sm text-cta font-medium">
+              {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
+            </p>
           </div>
 
-          {/* Right: CTA */}
+          {/* Right: CTA - rounded style */}
           <Button 
             onClick={onViewDates}
-            size="lg"
-            className="px-8 font-medium"
+            variant="cta"
+            className="px-6 rounded-full font-medium"
           >
-            {lang === 'he' ? 'בחרו תאריכים' : lang === 'fr' ? 'Voir les disponibilités' : 'Check availability'}
+            {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
           </Button>
         </div>
       </div>
