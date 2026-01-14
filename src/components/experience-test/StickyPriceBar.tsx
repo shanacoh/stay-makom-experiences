@@ -10,7 +10,6 @@ interface StickyPriceBarProps {
   reviewsCount?: number;
   lang: 'en' | 'he' | 'fr';
   onViewDates: () => void;
-  heroRef: React.RefObject<HTMLElement>;
   footerRef: React.RefObject<HTMLElement>;
 }
 
@@ -18,26 +17,14 @@ const StickyPriceBar = ({
   basePrice,
   basePriceType,
   currency,
-  averageRating,
-  reviewsCount = 0,
   lang,
   onViewDates,
-  heroRef,
   footerRef
 }: StickyPriceBarProps) => {
-  const [isSticky, setIsSticky] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!heroRef.current) return;
-
-      const heroRect = heroRef.current.getBoundingClientRect();
-      const heroBottom = heroRect.bottom;
-      
-      // Show sticky bar when hero price is scrolled out of view
-      setIsSticky(heroBottom < 100);
-
       // Hide when footer is in view
       if (footerRef.current) {
         const footerRect = footerRef.current.getBoundingClientRect();
@@ -49,7 +36,7 @@ const StickyPriceBar = ({
     handleScroll(); // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [heroRef, footerRef]);
+  }, [footerRef]);
 
   const priceLabel = basePriceType === 'per_person' 
     ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
@@ -65,10 +52,10 @@ const StickyPriceBar = ({
     <div
       className={cn(
         "md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-all duration-300",
-        isSticky && !isHidden ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+        isHidden ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
       )}
     >
-      <div className="container px-4">
+      <div className="container px-4 pb-safe">
         <div className="flex items-center justify-between py-3">
           {/* Left: Price info */}
           <div>
