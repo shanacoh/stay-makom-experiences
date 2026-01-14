@@ -166,21 +166,21 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
             <div
               key={extra.id}
               className={`
-                group rounded-xl p-2.5 md:p-3
+                group rounded-xl p-3
                 transition-all duration-200 ease-out
                 border
                 ${isAdded 
                   ? 'border-primary/40 bg-primary/5' 
-                  : 'border-border/60 hover:border-border hover:bg-muted/30'
+                  : 'border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40'
                 }
               `}
             >
-              {/* Row 1: Icon + Name */}
-              <div className="flex items-start gap-2 mb-2">
+              {/* Row 1: Icon (left) + Price Button (right) */}
+              <div className="flex items-center justify-between mb-3">
                 <div className={`
-                  w-8 h-8 md:w-10 md:h-10 rounded-lg flex-shrink-0
+                  w-11 h-11 md:w-12 md:h-12 rounded-xl flex-shrink-0
                   flex items-center justify-center overflow-hidden
-                  ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
+                  ${hasImage ? '' : 'bg-muted'}
                 `}>
                   {hasImage ? (
                     <img 
@@ -190,42 +190,39 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                     />
                   ) : IconComponent ? (
                     <IconComponent 
-                      size={20} 
+                      size={24} 
                       weight="duotone" 
-                      className="text-primary/60"
+                      className="text-foreground/50"
                     />
                   ) : null}
                 </div>
-                <h3 className="font-medium text-xs md:text-sm text-foreground leading-tight line-clamp-2 flex-1">
-                  {name}
-                </h3>
-              </div>
-
-              {/* Row 2: Price + Button */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-medium text-foreground/70">
-                  {formatPrice(extra.price, extra.currency)}
-                </span>
+                
                 {!isAdded ? (
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 md:h-7 text-[10px] md:text-xs font-medium rounded-full px-2.5 md:px-3 border-foreground/20 hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                    className="h-7 md:h-8 text-[10px] md:text-xs font-medium rounded-full px-2.5 md:px-3 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
                     onClick={() => onUpdateQuantity(extra.id, 1)}
                   >
-                    {getText('add')}
+                    {formatPrice(extra.price, extra.currency)} {getText('add')}
                   </Button>
                 ) : (
                   <Button
                     variant="default"
                     size="sm"
-                    className="h-6 md:h-7 text-[10px] md:text-xs font-medium rounded-full px-2 md:px-2.5"
+                    className="h-7 md:h-8 text-[10px] md:text-xs font-medium rounded-full px-2.5 md:px-3"
                     onClick={() => onUpdateQuantity(extra.id, 0)}
                   >
-                    <Check className="w-3 h-3" />
+                    <Check className="w-3 h-3 mr-1" />
+                    {getText('added')}
                   </Button>
                 )}
               </div>
+
+              {/* Row 2: Name/Description - full width */}
+              <p className="text-sm text-foreground/80 leading-snug line-clamp-2">
+                {name}
+              </p>
             </div>
           );
         })}
