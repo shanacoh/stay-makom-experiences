@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Check, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import {
   Wine,
@@ -154,12 +154,11 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
       </div>
       
       {/* Grid layout - 2 cols mobile, 4 cols desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         {extras.map((extra) => {
           const quantity = selectedExtras[extra.id] || 0;
           const isAdded = quantity > 0;
           const name = getLocalizedField(extra, 'name', lang) as string || extra.name;
-          const description = getLocalizedField(extra, 'description', lang) as string || extra.description;
           const hasImage = isImageUrl(extra.image_url);
           const IconComponent = !hasImage ? getPhosphorIcon(extra.image_url, extra.name) : null;
           
@@ -167,7 +166,7 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
             <div
               key={extra.id}
               className={`
-                group flex flex-col rounded-xl overflow-hidden
+                group rounded-xl p-2.5 md:p-3
                 transition-all duration-200 ease-out
                 border
                 ${isAdded 
@@ -176,70 +175,56 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                 }
               `}
             >
-              {/* Image banner */}
-              <div className={`
-                w-full h-20 overflow-hidden
-                ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
-                flex items-center justify-center
-              `}>
-                {hasImage ? (
-                  <img 
-                    src={extra.image_url} 
-                    alt={name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : IconComponent ? (
-                  <IconComponent 
-                    size={32} 
-                    weight="duotone" 
-                    className="text-primary/60"
-                  />
-                ) : null}
-              </div>
-
-              {/* Content */}
-              <div className="p-3 flex flex-col flex-1">
-                <h3 className="font-medium text-xs text-foreground leading-snug line-clamp-2">
+              {/* Row 1: Icon + Name */}
+              <div className="flex items-start gap-2 mb-2">
+                <div className={`
+                  w-8 h-8 md:w-10 md:h-10 rounded-lg flex-shrink-0
+                  flex items-center justify-center overflow-hidden
+                  ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
+                `}>
+                  {hasImage ? (
+                    <img 
+                      src={extra.image_url} 
+                      alt={name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : IconComponent ? (
+                    <IconComponent 
+                      size={20} 
+                      weight="duotone" 
+                      className="text-primary/60"
+                    />
+                  ) : null}
+                </div>
+                <h3 className="font-medium text-xs md:text-sm text-foreground leading-tight line-clamp-2 flex-1">
                   {name}
                 </h3>
-                {description && (
-                  <p className="text-muted-foreground text-[10px] leading-relaxed line-clamp-1 mt-0.5">
-                    {description}
-                  </p>
-                )}
-                <span className="text-[10px] text-muted-foreground/70 mt-1">
+              </div>
+
+              {/* Row 2: Price + Button */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-foreground/70">
                   {formatPrice(extra.price, extra.currency)}
                 </span>
-
-                {/* CTA Button - full width */}
-                <div className="mt-auto pt-2">
-                  {!isAdded ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={`
-                        w-full h-7 text-xs font-medium rounded-full
-                        border-foreground/20 
-                        hover:bg-foreground hover:text-background hover:border-foreground
-                        transition-all duration-200
-                      `}
-                      onClick={() => onUpdateQuantity(extra.id, 1)}
-                    >
-                      <Plus className="w-3 h-3 me-1" />
-                      {getText('add')}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="w-full h-7 text-xs font-medium rounded-full"
-                      onClick={() => onUpdateQuantity(extra.id, 0)}
-                    >
-                      <Check className="w-3 h-3 me-1" />
-                      {getText('added')}
-                    </Button>
-                  )}
-                </div>
+                {!isAdded ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 md:h-7 text-[10px] md:text-xs font-medium rounded-full px-2.5 md:px-3 border-foreground/20 hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                    onClick={() => onUpdateQuantity(extra.id, 1)}
+                  >
+                    {getText('add')}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-6 md:h-7 text-[10px] md:text-xs font-medium rounded-full px-2 md:px-2.5"
+                    onClick={() => onUpdateQuantity(extra.id, 0)}
+                  >
+                    <Check className="w-3 h-3" />
+                  </Button>
+                )}
               </div>
             </div>
           );
