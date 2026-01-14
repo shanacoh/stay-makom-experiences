@@ -4,10 +4,6 @@
 
 @import 'leaflet/dist/leaflet.css';
 
-@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
-
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap");
-
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -33,7 +29,7 @@ All colors MUST be HSL.
     --muted: 36 38% 78%;
     --muted-foreground: 23 10% 15%;
 
-    --accent: 15 79.0698% 33.7255%;
+    --accent: 29 48% 55%;
     --accent-foreground: 40 33% 93%;
 
     /* CTA Premium - Terracotta/Clay tone */
@@ -43,7 +39,7 @@ All colors MUST be HSL.
     --cta-border: 15 40% 42%;
     --cta-shadow: 15 45% 35%;
 
-    --destructive: 2 81% 36%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 40 33% 93%;
 
     --border: 23 10% 15% / 0.12;
@@ -72,7 +68,7 @@ All colors MUST be HSL.
     --shadow-medium: 0 4px 16px -4px hsl(23 10% 15% / 0.08);
     --shadow-strong: 0 8px 32px -8px hsl(23 10% 15% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
+    
     /* Hebrew input background */
     --input-hebrew-bg: 211 100% 96%;
   }
@@ -129,7 +125,7 @@ All colors MUST be HSL.
     --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
     --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
     --shadow-strong: 0 8px 32px -8px hsl(0 0% 0% / 0.5);
-
+    
     /* Hebrew input background */
     --input-hebrew-bg: 211 100% 96%;
   }
@@ -157,42 +153,42 @@ All colors MUST be HSL.
   .gradient-primary {
     background: var(--gradient-primary);
   }
-
+  
   .gradient-warm {
     background: var(--gradient-warm);
   }
-
+  
   .gradient-hero {
     background: var(--gradient-hero);
   }
-
+  
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
-
+  
   .shadow-medium {
     box-shadow: var(--shadow-medium);
   }
-
+  
   .shadow-strong {
     box-shadow: var(--shadow-strong);
   }
-
+  
   .transition-smooth {
     transition: var(--transition-smooth);
   }
-
+  
   /* Hebrew input background utility */
   .hebrew-input {
     background-color: hsl(var(--input-hebrew-bg));
   }
-
+  
   /* Hide scrollbar for carousel */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
+  
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
