@@ -31,7 +31,6 @@ const Experience = () => {
   const [selectedExtras, setSelectedExtras] = useState<{ [key: string]: number }>({});
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
   
-  const heroRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
 
   const { data: experience, isLoading } = useQuery({
@@ -164,7 +163,7 @@ const Experience = () => {
 
       <main className="flex-1">
         {/* Hero Section with 65/35 layout */}
-        <section ref={heroRef}>
+        <section>
           <HeroSection
             photos={galleryPhotos}
             title={title}
@@ -179,7 +178,7 @@ const Experience = () => {
           />
         </section>
 
-        <div className="max-w-6xl mx-auto pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
+        <div className="max-w-6xl mx-auto pb-24 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
           <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
             {/* Left Column - Content */}
             <div className="space-y-10 md:space-y-12">
@@ -286,10 +285,7 @@ const Experience = () => {
           currency={experience.currency || "EUR"}
           lang={lang}
           onViewDates={() => setIsBookingSheetOpen(true)}
-          heroRef={heroRef}
           footerRef={footerRef}
-          averageRating={averageRating}
-          reviewsCount={reviews?.length || 0}
         />
 
         {/* Mobile Booking Sheet */}
