@@ -166,63 +166,62 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
             <div
               key={extra.id}
               className={`
-                group rounded-xl p-3
+                group rounded-xl p-4
                 transition-all duration-200 ease-out
-                border
+                border flex flex-col items-center text-center
                 ${isAdded 
                   ? 'border-primary/40 bg-primary/5' 
                   : 'border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40'
                 }
               `}
             >
-              {/* Row 1: Icon (left) + Price Button (right) */}
-              <div className="flex items-center justify-between mb-3">
-                <div className={`
-                  w-11 h-11 md:w-12 md:h-12 rounded-xl flex-shrink-0
-                  flex items-center justify-center overflow-hidden
-                  ${hasImage ? '' : 'bg-muted'}
-                `}>
-                  {hasImage ? (
-                    <img 
-                      src={extra.image_url} 
-                      alt={name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : IconComponent ? (
-                    <IconComponent 
-                      size={24} 
-                      weight="duotone" 
-                      className="text-foreground/50"
-                    />
-                  ) : null}
-                </div>
-                
-                {!isAdded ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 md:h-8 text-[10px] md:text-xs font-medium rounded-full px-2.5 md:px-3 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
-                    onClick={() => onUpdateQuantity(extra.id, 1)}
-                  >
-                    {formatPrice(extra.price, extra.currency)} {getText('add')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-7 md:h-8 text-[10px] md:text-xs font-medium rounded-full px-2.5 md:px-3"
-                    onClick={() => onUpdateQuantity(extra.id, 0)}
-                  >
-                    <Check className="w-3 h-3 mr-1" />
-                    {getText('added')}
-                  </Button>
-                )}
+              {/* Icon - centered with gradient colors */}
+              <div className={`
+                w-12 h-12 rounded-xl mb-3
+                flex items-center justify-center overflow-hidden
+                ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
+              `}>
+                {hasImage ? (
+                  <img 
+                    src={extra.image_url} 
+                    alt={name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : IconComponent ? (
+                  <IconComponent 
+                    size={26} 
+                    weight="duotone" 
+                    className="text-primary/60"
+                  />
+                ) : null}
               </div>
 
-              {/* Row 2: Name/Description - full width */}
-              <p className="text-sm text-foreground/80 leading-snug line-clamp-2">
+              {/* Name - centered, 2 lines max */}
+              <p className="text-sm text-foreground/80 leading-snug line-clamp-2 mb-3">
                 {name}
               </p>
+
+              {/* Button - centered */}
+              {!isAdded ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                  onClick={() => onUpdateQuantity(extra.id, 1)}
+                >
+                  {formatPrice(extra.price, extra.currency)} {getText('add')}
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-8 text-xs font-medium rounded-full px-4"
+                  onClick={() => onUpdateQuantity(extra.id, 0)}
+                >
+                  <Check className="w-3 h-3 mr-1" />
+                  {getText('added')}
+                </Button>
+              )}
             </div>
           );
         })}
