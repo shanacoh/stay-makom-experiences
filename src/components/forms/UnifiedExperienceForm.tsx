@@ -218,7 +218,7 @@ export function UnifiedExperienceForm({
       setValue("title_he", existingExperience.title_he || "");
       setValue("subtitle", existingExperience.subtitle || "");
       setValue("subtitle_he", existingExperience.subtitle_he || "");
-      setValue("category_id", existingExperience.category_id || "");
+      setValue("category_id", existingExperience.category_id || "", { shouldValidate: true });
       setValue("long_copy", existingExperience.long_copy || "");
       setValue("long_copy_he", existingExperience.long_copy_he || "");
       setValue("min_nights", existingExperience.min_nights || 1);
@@ -486,6 +486,37 @@ export function UnifiedExperienceForm({
     setShowDeleteDialog(false);
   };
 
+  // Handler for validation errors - shows toast and scrolls to first error
+  const onInvalidSubmit = (errors: Record<string, any>) => {
+    console.error("Form validation errors:", errors);
+    
+    // Create readable field names
+    const fieldNames: Record<string, string> = {
+      title: "Title (EN)",
+      category_id: "Category",
+      long_copy: "Description (EN)",
+      base_price: "Base Price",
+      hotel_id: "Hotel",
+      min_party: "Min Party Size",
+      max_party: "Max Party Size",
+    };
+    
+    // Get all error messages
+    const errorFields = Object.keys(errors).map(field => fieldNames[field] || field);
+    
+    if (errorFields.length > 0) {
+      toast.error(`Please fill required fields: ${errorFields.join(", ")}`);
+    }
+    
+    // Scroll to first error field
+    const firstErrorField = Object.keys(errors)[0];
+    const element = document.querySelector(`[name="${firstErrorField}"]`) || 
+                    document.getElementById(firstErrorField);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   const canPublish = title && longCopy && basePrice > 0 && longCopy.length >= 100;
 
   if (isLoadingExperience) {
@@ -498,7 +529,7 @@ export function UnifiedExperienceForm({
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit(handlePublish)} className="space-y-6">
+      <form onSubmit={handleSubmit(handlePublish, onInvalidSubmit)} className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -516,7 +547,7 @@ export function UnifiedExperienceForm({
             </div>
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={handleSubmit(handleSaveDraft)} disabled={isSaving}>
+            <Button type="button" variant="outline" onClick={handleSubmit(handleSaveDraft, onInvalidSubmit)} disabled={isSaving}>
               <Save className="h-4 w-4 mr-2" />
               Save Draft
             </Button>
@@ -658,21 +689,27 @@ export function UnifiedExperienceForm({
 
               <div>
                 <Label htmlFor="category_id">Category *</Label>
-                <Select
-                  value={watch("category_id") || ""}
-                  onValueChange={(value) => setValue("category_id", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="category_id"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value || ""}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories?.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
                 {errors.category_id && (
                   <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>
                 )}
