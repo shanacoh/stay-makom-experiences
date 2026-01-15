@@ -11,6 +11,7 @@ import {
   Sparkles,
   Gift,
   Brain,
+  Mail,
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,6 +32,7 @@ const menuItems = [
   { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
   { title: "Bookings", url: "/admin/bookings", icon: Calendar },
   { title: "Gift Cards", url: "/admin/gift-cards", icon: Gift },
+  { title: "Leads", url: "/admin/leads", icon: Mail },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Customers", url: "/admin/customers", icon: UserCircle },
   { title: "Journal", url: "/admin/journal", icon: BookOpen },

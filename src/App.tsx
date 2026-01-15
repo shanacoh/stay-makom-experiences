@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
+import ComingSoon from "./pages/ComingSoon";
 import Category from "./pages/Category";
 import Experience from "./pages/Experience";
 import Hotel from "./pages/Hotel";
@@ -55,9 +56,13 @@ import AdminGiftCards from "./pages/admin/GiftCards";
 import AdminGiftCardDetails from "./pages/admin/GiftCardDetails";
 import AdminSettings from "./pages/admin/Settings";
 import AdminAIInsights from "./pages/admin/AIInsights";
+import AdminLeads from "./pages/admin/Leads";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Set to false to show the full site instead of the Coming Soon page
+const LAUNCH_MODE = true;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -68,7 +73,7 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={LAUNCH_MODE ? <ComingSoon /> : <Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
             <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
@@ -126,6 +131,7 @@ const App = () => (
               <Route path="journal/new" element={<JournalEditor />} />
               <Route path="journal/edit/:id" element={<JournalEditor />} />
               <Route path="ai-insights" element={<AdminAIInsights />} />
+              <Route path="leads" element={<AdminLeads />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
             <Route
