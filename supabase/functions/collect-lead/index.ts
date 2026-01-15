@@ -155,8 +155,8 @@ serve(async (req) => {
     const requestData = await req.json();
     console.log('Received lead data:', { ...requestData, email: '***' });
 
-    // Handle simple email collection from AI assistant or coming soon page
-    if (requestData.source === 'ai_assistant_save' || requestData.source === 'coming_soon') {
+    // Handle simple email collection from AI assistant
+    if (requestData.source === 'ai_assistant_save') {
       if (!requestData.email || !validateEmail(requestData.email)) {
         return new Response(
           JSON.stringify({ success: false, error: 'Valid email is required' }),
@@ -167,7 +167,7 @@ serve(async (req) => {
       const { data, error } = await supabase
         .from('leads')
         .insert([{
-          source: requestData.source,
+          source: 'ai_assistant_save',
           email: requestData.email.toLowerCase().trim(),
           metadata: requestData.metadata || {},
           marketing_opt_in: true,
@@ -184,7 +184,7 @@ serve(async (req) => {
         );
       }
 
-      console.log(`${requestData.source} lead saved:`, data.id);
+      console.log('AI assistant lead saved:', data.id);
       return new Response(
         JSON.stringify({ success: true, leadId: data.id }),
         { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
