@@ -17,7 +17,7 @@ const OtherExperiencesFromHotel = ({ hotelId, currentExperienceId, hotelName }: 
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("*")
+        .select("*, hotels(hero_image)")
         .eq("hotel_id", hotelId)
         .eq("status", "published")
         .neq("id", currentExperienceId)
@@ -43,7 +43,7 @@ const OtherExperiencesFromHotel = ({ hotelId, currentExperienceId, hotelName }: 
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {experiences.map((exp) => {
           const title = getLocalizedField(exp, 'title', lang) as string;
-          const heroImage = exp.hero_image || exp.photos?.[0] || '/placeholder.svg';
+          const heroImage = exp.hero_image || exp.photos?.[0] || (exp.hotels as any)?.hero_image || '/placeholder.svg';
 
           return (
             <a
