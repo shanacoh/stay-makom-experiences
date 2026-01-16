@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Star, Share, Heart, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Star, Share, Heart, ChevronRight } from "lucide-react";
 import { Grid3X3 } from "lucide-react";
 import {
   Carousel,
@@ -7,6 +8,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import GalleryModal from "@/components/experience/GalleryModal";
+import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 interface Review {
   id: string;
@@ -37,6 +39,9 @@ interface HeroSectionProps {
   hotelId?: string;
   minParty?: number;
   maxParty?: number;
+  // Category props
+  categoryName?: string;
+  categorySlug?: string;
 }
 
 const HeroSection = ({ 
@@ -59,11 +64,14 @@ const HeroSection = ({
   experienceId,
   hotelId,
   minParty = 2,
-  maxParty = 4
+  maxParty = 4,
+  categoryName,
+  categorySlug
 }: HeroSectionProps) => {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const { getLocalizedPath } = useLocalizedNavigation();
 
   // 4 photos for the 2x2 grid
   const displayPhotos = photos.slice(0, 4);
@@ -82,6 +90,30 @@ const HeroSection = ({
   return (
     <>
       <div className="pt-16 md:pt-18">
+        {/* Breadcrumb Navigation */}
+        <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link to={getLocalizedPath("/")} className="hover:text-foreground transition-colors">
+              {lang === 'he' ? 'בית' : 'Home'}
+            </Link>
+            {categoryName && categorySlug && (
+              <>
+                <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                <Link 
+                  to={getLocalizedPath(`/category/${categorySlug}`)} 
+                  className="hover:text-foreground transition-colors"
+                >
+                  {categoryName}
+                </Link>
+              </>
+            )}
+            <ChevronRight className="h-3 w-3 flex-shrink-0" />
+            <span className="text-foreground font-medium truncate max-w-[180px] sm:max-w-none">
+              {title}
+            </span>
+          </div>
+        </nav>
+
         {/* MOBILE: Full-width carousel with rounded corners */}
         <div className="block md:hidden">
           <div className="px-4 pt-3">
@@ -137,6 +169,16 @@ const HeroSection = ({
 
           {/* Mobile: Content below photos - centered */}
           <div className="px-4 pt-5 space-y-3 text-center">
+            {/* Category Badge - centered */}
+            {categoryName && categorySlug && (
+              <Link 
+                to={getLocalizedPath(`/category/${categorySlug}`)}
+                className="inline-block text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {categoryName}
+              </Link>
+            )}
+            
             {/* Title - centered */}
             <h1 className="text-xl font-semibold text-foreground leading-tight">
               {title}
@@ -226,8 +268,18 @@ const HeroSection = ({
 
             {/* RIGHT: Content + Booking Panel integrated */}
             <div className="flex flex-col justify-center items-center h-[calc(100vh-12rem)] text-center">
-              {/* Content info section */}
+            {/* Content info section */}
               <div className="space-y-4 pb-5">
+                {/* Category Badge - centered */}
+                {categoryName && categorySlug && (
+                  <Link 
+                    to={getLocalizedPath(`/category/${categorySlug}`)}
+                    className="inline-block text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {categoryName}
+                  </Link>
+                )}
+                
                 {/* Title - centered */}
                 <h1 className="text-2xl font-semibold text-foreground leading-tight">
                   {title}

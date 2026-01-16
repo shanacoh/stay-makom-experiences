@@ -17,7 +17,6 @@ import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
-  const isExperiencePage = location.pathname.startsWith("/experience/");
   const isDarkHeroPage = [
     "/gift-card",
     "/companies",
@@ -26,7 +25,8 @@ const Header = () => {
     "/partners",
     "/about",
   ].includes(location.pathname);
-  const isTransparentPage = isHomePage || isExperiencePage || isDarkHeroPage;
+  // Experience pages should NOT be transparent (no dark hero background)
+  const isTransparentPage = isHomePage || isDarkHeroPage;
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
