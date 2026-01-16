@@ -196,32 +196,36 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
                 ) : null}
               </div>
 
-              {/* Name - centered, 2 lines max */}
-              <p className="text-sm text-foreground/80 leading-snug line-clamp-2 mb-3">
-                {name}
-              </p>
+              {/* Name - centered, 2 lines max, flex-1 to push button down */}
+              <div className="flex-1 flex items-start">
+                <p className="text-sm text-foreground/80 leading-snug line-clamp-2">
+                  {name}
+                </p>
+              </div>
 
-              {/* Button - centered */}
-              {!isAdded ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
-                  onClick={() => onUpdateQuantity(extra.id, 1)}
-                >
-                  {formatPrice(extra.price, extra.currency)} {getText('add')}
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="h-8 text-xs font-medium rounded-full px-4"
-                  onClick={() => onUpdateQuantity(extra.id, 0)}
-                >
-                  <Check className="w-3 h-3 mr-1" />
-                  {getText('added')}
-                </Button>
-              )}
+              {/* Button - centered, always at bottom */}
+              <div className="mt-3">
+                {!isAdded ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                    onClick={() => onUpdateQuantity(extra.id, 1)}
+                  >
+                    {formatPrice(extra.price, extra.currency)} {getText('add')}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-8 text-xs font-medium rounded-full px-4"
+                    onClick={() => onUpdateQuantity(extra.id, 0)}
+                  >
+                    <Check className="w-3 h-3 mr-1" />
+                    {getText('added')}
+                  </Button>
+                )}
+              </div>
             </div>
           );
         })}
