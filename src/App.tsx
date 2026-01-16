@@ -61,9 +61,6 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Set to false to show the full site instead of the Coming Soon page
-const LAUNCH_MODE = true;
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -73,7 +70,8 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <Routes>
-            <Route path="/" element={LAUNCH_MODE ? <ComingSoon /> : <Index />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
             <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
