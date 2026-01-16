@@ -40,7 +40,8 @@ const Experience = () => {
         .from("experiences")
         .select(`
           *,
-          hotels (*)
+          hotels (*),
+          categories (id, name, name_he, slug)
         `)
         .eq("slug", slug)
         .eq("status", "published")
@@ -128,6 +129,10 @@ const Experience = () => {
   const hotelName = getLocalizedField(experience.hotels, 'name', lang) as string || experience.hotels?.name;
   const city = getLocalizedField(experience.hotels, 'city', lang) as string || experience.hotels?.city;
   const region = getLocalizedField(experience.hotels, 'region', lang) as string || experience.hotels?.region;
+  
+  // Get category info
+  const categoryName = getLocalizedField(experience.categories, 'name', lang) as string || experience.categories?.name;
+  const categorySlug = experience.categories?.slug;
 
   // Hero image: prioritize experience hero, then hotel hero
   const heroImage = experience.hero_image || experience.hotels?.hero_image || '/placeholder.svg';
@@ -175,6 +180,8 @@ const Experience = () => {
             averageRating={averageRating}
             reviewsCount={reviews?.length || 0}
             lang={lang}
+            categoryName={categoryName}
+            categorySlug={categorySlug}
           />
         </section>
 
