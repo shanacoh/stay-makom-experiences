@@ -5,36 +5,32 @@ import comingSoonHero from "@/assets/coming-soon-hero.jpg";
 import comingSoonRoad from "@/assets/coming-soon-road.png";
 import MarqueeBanner from "@/components/MarqueeBanner";
 import { Check, Gift, Star, Calendar, Sparkles } from "lucide-react";
-
 const ComingSoon = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [lang, setLang] = useState<'en' | 'he'>('en');
-
   const isRTL = lang === 'he';
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast.error(lang === 'en' ? "Please enter a valid email" : "נא להזין כתובת אימייל תקינה");
       return;
     }
-
     setIsSubmitting(true);
-
     try {
-      const { error } = await supabase.functions.invoke('collect-lead', {
+      const {
+        error
+      } = await supabase.functions.invoke('collect-lead', {
         body: {
           source: 'coming_soon',
           email: email.toLowerCase().trim(),
-          metadata: { lang }
+          metadata: {
+            lang
+          }
         }
       });
-
       if (error) throw error;
-
       setIsSubmitted(true);
       toast.success(lang === 'en' ? "You're on the list!" : "נרשמת בהצלחה!");
     } catch (error) {
@@ -44,32 +40,38 @@ const ComingSoon = () => {
       setIsSubmitting(false);
     }
   };
-
-  const benefits = lang === 'en' 
-    ? [
-        { icon: Star, text: "First look" },
-        { icon: Gift, text: "Exclusive offers" },
-        { icon: Calendar, text: "Private events" },
-        { icon: Sparkles, text: "Priority access" }
-      ]
-    : [
-        { icon: Star, text: "הצצה ראשונה" },
-        { icon: Gift, text: "הצעות בלעדיות" },
-        { icon: Calendar, text: "אירועים פרטיים" },
-        { icon: Sparkles, text: "גישה עדיפה" }
-      ];
-
-  return (
-    <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+  const benefits = lang === 'en' ? [{
+    icon: Star,
+    text: "First look"
+  }, {
+    icon: Gift,
+    text: "Exclusive offers"
+  }, {
+    icon: Calendar,
+    text: "Private events"
+  }, {
+    icon: Sparkles,
+    text: "Priority access"
+  }] : [{
+    icon: Star,
+    text: "הצצה ראשונה"
+  }, {
+    icon: Gift,
+    text: "הצעות בלעדיות"
+  }, {
+    icon: Calendar,
+    text: "אירועים פרטיים"
+  }, {
+    icon: Sparkles,
+    text: "גישה עדיפה"
+  }];
+  return <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Hero Section - reduced height to show marquee on load */}
-      <section 
-        className="relative h-[85vh] min-h-[500px] flex flex-col"
-        style={{
-          backgroundImage: `url(${comingSoonHero})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
+      <section className="relative h-[85vh] min-h-[500px] flex flex-col" style={{
+      backgroundImage: `url(${comingSoonHero})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
 
@@ -78,20 +80,17 @@ const ComingSoon = () => {
           <div className="text-white font-bold text-xl sm:text-2xl tracking-tight">
             STAYMAKOM
           </div>
-          <button 
-            onClick={() => setLang(lang === 'en' ? 'he' : 'en')}
-            className="text-white/90 hover:text-white text-sm font-medium transition-colors px-3 py-1 rounded border border-white/30 hover:border-white/50"
-          >
+          <button onClick={() => setLang(lang === 'en' ? 'he' : 'en')} className="text-white/90 hover:text-white text-sm font-medium transition-colors px-3 py-1 rounded border border-white/30 hover:border-white/50">
             {lang === 'en' ? 'עב' : 'EN'}
           </button>
         </header>
 
         {/* Main Content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-3">
+          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-3 font-sans">
             {lang === 'en' ? 'A New Way of Travelling' : 'דרך חדשה לטייל'}
           </h1>
-          <h2 className="text-white/90 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-tight mb-4">
+          <h2 className="text-white/90 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-tight mb-4 font-sans">
             {lang === 'en' ? 'is coming to Israel' : 'מגיעה לישראל'}
           </h2>
           <p className="text-white/60 text-sm sm:text-base font-medium tracking-widest uppercase mb-10">
@@ -110,46 +109,26 @@ const ComingSoon = () => {
               {lang === 'en' ? 'Be the first to know' : 'היו הראשונים לדעת'}
             </p>
 
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit}>
+            {!isSubmitted ? <form onSubmit={handleSubmit}>
                 <div className="flex gap-2">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={lang === 'en' ? 'Your email' : 'האימייל שלך'}
-                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-                    disabled={isSubmitting}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
-                  >
-                    {isSubmitting 
-                      ? (lang === 'en' ? '...' : '...') 
-                      : (lang === 'en' ? 'Notify Me' : 'עדכנו אותי')
-                    }
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={lang === 'en' ? 'Your email' : 'האימייל שלך'} className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm" disabled={isSubmitting} />
+                  <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap">
+                    {isSubmitting ? lang === 'en' ? '...' : '...' : lang === 'en' ? 'Notify Me' : 'עדכנו אותי'}
                   </button>
                 </div>
-              </form>
-            ) : (
-              <div className="flex items-center justify-center gap-2 py-2 text-green-600">
+              </form> : <div className="flex items-center justify-center gap-2 py-2 text-green-600">
                 <Check className="w-4 h-4" />
                 <span className="font-medium text-sm">
                   {lang === 'en' ? "You're on the list!" : 'נרשמת בהצלחה!'}
                 </span>
-              </div>
-            )}
+              </div>}
 
             {/* Benefits - horizontal compact */}
             <div className="mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1.5">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-1 text-muted-foreground text-xs">
+              {benefits.map((benefit, index) => <div key={index} className="flex items-center gap-1 text-muted-foreground text-xs">
                   <benefit.icon className="w-3 h-3 text-primary flex-shrink-0" />
                   <span>{benefit.text}</span>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
@@ -168,14 +147,11 @@ const ComingSoon = () => {
       <MarqueeBanner />
 
       {/* Immersive Description Section - Text on Image */}
-      <section 
-        className="relative h-[70vh] min-h-[450px] flex items-center justify-center"
-        style={{
-          backgroundImage: `url(${comingSoonRoad})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
+      <section className="relative h-[70vh] min-h-[450px] flex items-center justify-center" style={{
+      backgroundImage: `url(${comingSoonRoad})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
         
@@ -189,17 +165,11 @@ const ComingSoon = () => {
           </p>
           
           <h3 className="text-white text-2xl sm:text-3xl md:text-4xl font-serif tracking-tight mb-5">
-            {lang === 'en' 
-              ? 'STAYMAKOM is about experiences first.' 
-              : 'STAYMAKOM זה קודם כל חוויות.'
-            }
+            {lang === 'en' ? 'STAYMAKOM is about experiences first.' : 'STAYMAKOM זה קודם כל חוויות.'}
           </h3>
           
           <p className="text-white/80 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            {lang === 'en' 
-              ? "A platform that brings together Israel's most inspiring hotels with curated immersive experiences."
-              : 'פלטפורמה שמחברת בין המלונות המעוררי ההשראה בישראל לבין חוויות סוחפות ואוצרות בקפידה.'
-            }
+            {lang === 'en' ? "A platform that brings together Israel's most inspiring hotels with curated immersive experiences." : 'פלטפורמה שמחברת בין המלונות המעוררי ההשראה בישראל לבין חוויות סוחפות ואוצרות בקפידה.'}
           </p>
         </div>
       </section>
@@ -208,10 +178,7 @@ const ComingSoon = () => {
       <footer className="py-10 sm:py-14 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-xl sm:text-2xl font-serif tracking-tight mb-5">
-            {lang === 'en' 
-              ? 'Handpicked hotels. Unforgettable experiences.' 
-              : 'מלונות נבחרים. חוויות בלתי נשכחות.'
-            }
+            {lang === 'en' ? 'Handpicked hotels. Unforgettable experiences.' : 'מלונות נבחרים. חוויות בלתי נשכחות.'}
           </p>
           <div className="w-16 h-px bg-primary-foreground/30 mx-auto mb-5" />
           <p className="text-xs text-primary-foreground/60">
@@ -219,8 +186,6 @@ const ComingSoon = () => {
           </p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default ComingSoon;
