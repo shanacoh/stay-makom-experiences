@@ -61,6 +61,9 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Détection automatique du domaine custom vs preview Lovable
+const isCustomDomain = () => !window.location.hostname.includes('lovable.app');
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -70,7 +73,8 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* Affiche Coming Soon sur domaine custom, sinon le site complet */}
+            <Route path="/" element={isCustomDomain() ? <ComingSoon /> : <Index />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
