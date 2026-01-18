@@ -158,25 +158,25 @@ const ComingSoon = () => {
             {lang === 'en' ? 'Not another booking website.' : 'לא עוד אתר הזמנות.'}
           </h3>
           
-          <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-2">
+          <p className="text-white text-sm sm:text-base leading-relaxed mb-2">
             {lang === 'en' ? 'You already know how to book a hotel.' : 'אתם כבר יודעים איך להזמין מלון.'}
           </p>
-          <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-8">
+          <p className="text-white text-sm sm:text-base leading-relaxed mb-8">
             {lang === 'en' ? "What you don't know is what to live once you're there." : 'מה שאתם לא יודעים זה מה לחוות כשאתם שם.'}
           </p>
           
-          <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-2">
+          <p className="text-white text-sm sm:text-base leading-relaxed mb-2">
             {lang === 'en' ? "Whether you're staying two weeks in Tel Aviv and don't know where to start," : 'בין אם אתם נשארים שבועיים בתל אביב ולא יודעים מאיפה להתחיל,'}
           </p>
-          <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-6">
-            {lang === 'en' ? 'or living in Israel and craving meaningful escapes —' : 'או גרים בישראל ומשתוקקים לבריחות משמעותיות —'}
+          <p className="text-white text-sm sm:text-base leading-relaxed mb-6">
+            {lang === 'en' ? 'or living in Israel and craving meaningful escapes' : 'או גרים בישראל ומשתוקקים לבריחות משמעותיות'}
           </p>
           
           <p className="text-white text-base sm:text-lg font-medium mb-8">
             {lang === 'en' ? 'STAYMAKOM curates hotels with experiences, in one place.' : 'STAYMAKOM אוצרת מלונות עם חוויות, במקום אחד.'}
           </p>
           
-          <p className="text-secondary text-sm sm:text-base font-semibold tracking-wide uppercase">
+          <p className="text-secondary text-base sm:text-lg font-semibold tracking-wide uppercase">
             {lang === 'en' ? 'Coming soon.' : 'בקרוב.'}
           </p>
         </div>
