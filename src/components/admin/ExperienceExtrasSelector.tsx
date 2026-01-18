@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 
 interface ExperienceExtrasSelectorProps {
   experienceId: string;
@@ -185,112 +185,75 @@ const ExperienceExtrasSelector = ({ experienceId, hotelId }: ExperienceExtrasSel
 
   return (
     <>
-      <div className="space-y-3">
-        {hotelExtras.map((extra) => {
-          const isChecked = selectedExtras?.includes(extra.id) || false;
-          
-          return (
-            <div
-              key={extra.id}
-              className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
-                extra.is_available 
-                  ? "border-border hover:bg-muted/30" 
-                  : "border-muted bg-muted/20 opacity-60"
-              }`}
-            >
-              {/* Checkbox to link/unlink */}
-              <Checkbox
-                id={`extra-${extra.id}`}
-                checked={isChecked}
-                onCheckedChange={(checked) => 
-                  toggleExtraMutation.mutate({ extraId: extra.id, isChecked: checked as boolean })
-                }
-                disabled={toggleExtraMutation.isPending || !extra.is_available}
-              />
-              
-              {/* Extra details */}
-              <div className="flex-1 min-w-0">
-                <Label 
-                  htmlFor={`extra-${extra.id}`}
-                  className="cursor-pointer font-medium flex items-center gap-2 flex-wrap"
-                >
-                  {extra.name}
-                  {!extra.is_available && (
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">Hidden</span>
-                  )}
-                </Label>
-                {extra.name_he && (
-                  <span className="text-muted-foreground text-sm block" dir="rtl">{extra.name_he}</span>
-                )}
-                <div className="text-sm font-semibold text-primary mt-1">
-                  {extra.price} {extra.currency} / {extra.pricing_type?.replace("_", " ") || "per booking"}
+      <div className="space-y-2">
+        {hotelExtras.map((extra) => (
+          <div
+            key={extra.id}
+            className={`flex items-start gap-3 p-3 border border-border rounded-lg bg-card ${
+              !extra.is_available ? "opacity-60" : ""
+            }`}
+          >
+            {/* Grip handle for reordering */}
+            <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1 flex-shrink-0" />
+            
+            {/* Extra details */}
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm">{extra.name}</div>
+              {extra.name_he && (
+                <div className="text-xs text-muted-foreground" dir="rtl">
+                  {extra.name_he}
                 </div>
-                {extra.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{extra.description}</p>
-                )}
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex items-center gap-1 shrink-0">
-                {/* Toggle visibility */}
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => toggleAvailableMutation.mutate({ 
-                    id: extra.id, 
-                    is_available: !extra.is_available 
-                  })}
-                  disabled={toggleAvailableMutation.isPending}
-                  title={extra.is_available ? "Hide extra" : "Show extra"}
-                >
-                  {extra.is_available ? (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-
-                {/* Edit button */}
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleEditClick(extra)}
-                  title="Edit extra"
-                >
-                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                </Button>
-
-                {/* Delete button with confirmation */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button type="button" size="icon" variant="ghost" title="Delete extra">
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Extra?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete "{extra.name}" and remove it from all experiences. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={() => deleteMutation.mutate(extra.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+              )}
+              <div className="text-xs font-semibold text-primary mt-0.5">
+                {extra.price} {extra.currency} / {extra.pricing_type?.replace("_", " ") || "per booking"}
               </div>
             </div>
-          );
-        })}
+
+            {/* Actions: Switch + Edit + Delete */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Switch
+                checked={extra.is_available ?? true}
+                onCheckedChange={() => toggleAvailableMutation.mutate({
+                  id: extra.id,
+                  is_available: !extra.is_available
+                })}
+                disabled={toggleAvailableMutation.isPending}
+              />
+              <Button 
+                type="button" 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => handleEditClick(extra)}
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" size="icon" variant="ghost">
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Extra?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete "{extra.name}" and remove it from all experiences. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => deleteMutation.mutate(extra.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Edit Dialog */}
