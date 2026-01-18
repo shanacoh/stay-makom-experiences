@@ -47,16 +47,16 @@ const ComingSoon = () => {
 
   const benefits = lang === 'en' 
     ? [
-        { icon: Star, text: "First look at new experiences" },
-        { icon: Gift, text: "Exclusive pre-launch offers" },
-        { icon: Calendar, text: "Invitations to private events" },
-        { icon: Sparkles, text: "Priority access at launch" }
+        { icon: Star, text: "First look" },
+        { icon: Gift, text: "Exclusive offers" },
+        { icon: Calendar, text: "Private events" },
+        { icon: Sparkles, text: "Priority access" }
       ]
     : [
-        { icon: Star, text: "הצצה ראשונה לחוויות חדשות" },
-        { icon: Gift, text: "הצעות בלעדיות לפני ההשקה" },
-        { icon: Calendar, text: "הזמנות לאירועים פרטיים" },
-        { icon: Sparkles, text: "גישה עדיפה בהשקה" }
+        { icon: Star, text: "הצצה ראשונה" },
+        { icon: Gift, text: "הצעות בלעדיות" },
+        { icon: Calendar, text: "אירועים פרטיים" },
+        { icon: Sparkles, text: "גישה עדיפה" }
       ];
 
   return (
@@ -70,8 +70,8 @@ const ComingSoon = () => {
           backgroundPosition: 'center'
         }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
 
         {/* Header */}
         <header className="relative z-10 flex justify-between items-center p-4 sm:p-6 md:p-8">
@@ -88,80 +88,76 @@ const ComingSoon = () => {
 
         {/* Main Content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-wide mb-4">
-            {lang === 'en' ? 'A NEW WAY OF TRAVELLING' : 'דרך חדשה לטייל'}
+          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-3">
+            {lang === 'en' ? 'A New Way of Travelling' : 'דרך חדשה לטייל'}
           </h1>
-          <h2 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-wide mb-6">
-            {lang === 'en' ? 'IS COMING TO ISRAEL' : 'מגיעה לישראל'}
+          <h2 className="text-white/90 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-tight mb-4">
+            {lang === 'en' ? 'is coming to Israel' : 'מגיעה לישראל'}
           </h2>
-          <p className="text-white/80 text-lg sm:text-xl md:text-2xl font-light tracking-widest mb-12">
-            {lang === 'en' ? 'LAUNCHING 2026' : 'השקה 2026'}
+          <p className="text-white/60 text-sm sm:text-base font-medium tracking-widest uppercase mb-10">
+            {lang === 'en' ? 'Launching 2026' : 'השקה 2026'}
           </p>
 
-          {/* Join the Club Card */}
-          <div className="w-full max-w-lg bg-white/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-2xl">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Gift className="w-5 h-5 text-primary" />
-              <h3 className="text-foreground text-lg sm:text-xl font-semibold tracking-wide">
+          {/* Compact Join the Club Card */}
+          <div className="w-full max-w-sm bg-white/85 backdrop-blur-md rounded-xl p-4 sm:p-5 shadow-lg border border-white/20">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Gift className="w-4 h-4 text-primary" />
+              <h3 className="text-foreground text-sm sm:text-base font-semibold tracking-wide">
                 {lang === 'en' ? 'JOIN THE CLUB' : 'הצטרפו למועדון'}
               </h3>
             </div>
-            <p className="text-muted-foreground text-sm sm:text-base mb-6">
+            <p className="text-muted-foreground text-xs mb-3">
               {lang === 'en' ? 'Be the first to know' : 'היו הראשונים לדעת'}
             </p>
 
             {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-3">
+              <form onSubmit={handleSubmit}>
+                <div className="flex gap-2">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={lang === 'en' ? 'Your email' : 'האימייל שלך'}
-                    className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-base"
+                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                     disabled={isSubmitting}
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base whitespace-nowrap"
+                    className="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
                   >
                     {isSubmitting 
-                      ? (lang === 'en' ? 'Joining...' : 'מצטרף...') 
+                      ? (lang === 'en' ? '...' : '...') 
                       : (lang === 'en' ? 'Notify Me' : 'עדכנו אותי')
                     }
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="flex items-center justify-center gap-2 py-3 text-green-600">
-                <Check className="w-5 h-5" />
-                <span className="font-medium">
+              <div className="flex items-center justify-center gap-2 py-2 text-green-600">
+                <Check className="w-4 h-4" />
+                <span className="font-medium text-sm">
                   {lang === 'en' ? "You're on the list!" : 'נרשמת בהצלחה!'}
                 </span>
               </div>
             )}
 
-            {/* Benefits */}
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Benefits - horizontal compact */}
+            <div className="mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1.5">
               {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <benefit.icon className="w-4 h-4 text-primary flex-shrink-0" />
+                <div key={index} className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <benefit.icon className="w-3 h-3 text-primary flex-shrink-0" />
                   <span>{benefit.text}</span>
                 </div>
               ))}
             </div>
-
-            <p className="text-muted-foreground text-xs mt-6">
-              {lang === 'en' ? "We'll never spam. Promise." : 'לא נשלח ספאם. מבטיחים.'}
-            </p>
           </div>
         </div>
 
         {/* Scroll indicator */}
         <div className="relative z-10 pb-8 flex justify-center">
           <div className="animate-bounce">
-            <svg className="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </div>
@@ -171,60 +167,54 @@ const ComingSoon = () => {
       {/* Marquee Banner */}
       <MarqueeBanner />
 
-      {/* Description Section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-background">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Image */}
-            <div className={`${isRTL ? 'lg:order-2' : 'lg:order-1'}`}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src={comingSoonRoad} 
-                  alt="Desert road" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* Text */}
-            <div className={`${isRTL ? 'lg:order-1' : 'lg:order-2'} space-y-6`}>
-              <div className="space-y-4">
-                <p className="text-muted-foreground text-lg sm:text-xl">
-                  {lang === 'en' ? 'Not another booking site.' : 'לא עוד אתר הזמנות.'}
-                </p>
-                <p className="text-muted-foreground text-lg sm:text-xl">
-                  {lang === 'en' ? 'Not a comparison tool.' : 'לא כלי השוואה.'}
-                </p>
-              </div>
-              
-              <h3 className="text-foreground text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">
-                {lang === 'en' 
-                  ? 'STAYMAKOM is about experiences first.' 
-                  : 'STAYMAKOM זה קודם כל חוויות.'
-                }
-              </h3>
-
-              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                {lang === 'en' 
-                  ? "A platform that brings together Israel's most inspiring hotels with curated immersive experiences."
-                  : 'פלטפורמה שמחברת בין המלונות המעוררי ההשראה בישראל לבין חוויות סוחפות ואוצרות בקפידה.'
-                }
-              </p>
-            </div>
-          </div>
+      {/* Immersive Description Section - Text on Image */}
+      <section 
+        className="relative h-[70vh] min-h-[450px] flex items-center justify-center"
+        style={{
+          backgroundImage: `url(${comingSoonRoad})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+        
+        {/* Centered content */}
+        <div className="relative z-10 text-center px-4 sm:px-6 max-w-3xl mx-auto">
+          <p className="text-white/60 text-sm sm:text-base font-light mb-1">
+            {lang === 'en' ? 'Not another booking site.' : 'לא עוד אתר הזמנות.'}
+          </p>
+          <p className="text-white/60 text-sm sm:text-base font-light mb-6">
+            {lang === 'en' ? 'Not a comparison tool.' : 'לא כלי השוואה.'}
+          </p>
+          
+          <h3 className="text-white text-2xl sm:text-3xl md:text-4xl font-serif tracking-tight mb-5">
+            {lang === 'en' 
+              ? 'STAYMAKOM is about experiences first.' 
+              : 'STAYMAKOM זה קודם כל חוויות.'
+            }
+          </h3>
+          
+          <p className="text-white/80 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+            {lang === 'en' 
+              ? "A platform that brings together Israel's most inspiring hotels with curated immersive experiences."
+              : 'פלטפורמה שמחברת בין המלונות המעוררי ההשראה בישראל לבין חוויות סוחפות ואוצרות בקפידה.'
+            }
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 sm:py-12 bg-foreground text-background">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-lg sm:text-xl font-light tracking-wide mb-4">
+      <footer className="py-10 sm:py-14 bg-primary text-primary-foreground">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <p className="text-xl sm:text-2xl font-serif tracking-tight mb-5">
             {lang === 'en' 
               ? 'Handpicked hotels. Unforgettable experiences.' 
               : 'מלונות נבחרים. חוויות בלתי נשכחות.'
             }
           </p>
-          <p className="text-sm text-background/60">
+          <div className="w-16 h-px bg-primary-foreground/30 mx-auto mb-5" />
+          <p className="text-xs text-primary-foreground/60">
             © 2026 StayMakom. {lang === 'en' ? 'All rights reserved.' : 'כל הזכויות שמורות.'}
           </p>
         </div>
