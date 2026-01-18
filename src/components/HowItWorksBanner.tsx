@@ -16,38 +16,24 @@ const HowItWorksBanner = () => {
         { number: "3", text: "Book your hotel" }
       ];
 
-  const createContent = () => (
-    <>
-      {steps.map((step, index) => (
-        <span key={index} className="inline-flex items-center">
-          <span className="font-bold text-primary">{step.number}</span>
-          <span className="font-medium ml-1.5 mr-6">{step.text}</span>
-          {index < steps.length - 1 && (
-            <span className="text-primary/60 mr-6">•</span>
-          )}
-        </span>
-      ))}
-    </>
-  );
-
-  // Repeat the content for seamless loop
-  const repeatedContent = Array(8).fill(null).map((_, i) => (
-    <span key={i} className="mx-4 sm:mx-6">
-      {createContent()}
-    </span>
-  ));
-
   return (
     <section 
-      className="bg-foreground py-2.5 sm:py-3 overflow-hidden"
-      aria-hidden="true"
+      className="bg-foreground py-3 sm:py-4"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className={`flex whitespace-nowrap ${isRTL ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
-        <div className="flex text-white text-xs sm:text-sm md:text-base tracking-wide uppercase">
-          {repeatedContent}
-        </div>
-        <div className="flex text-white text-xs sm:text-sm md:text-base tracking-wide uppercase">
-          {repeatedContent}
+      <div className="container px-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 md:gap-12">
+          {steps.map((step, index) => (
+            <div key={index} className="flex items-center gap-4 sm:gap-8 md:gap-12">
+              <span className="inline-flex items-center gap-2">
+                <span className="font-bold text-primary text-lg sm:text-xl">{step.number}</span>
+                <span className="font-medium text-white text-sm sm:text-base uppercase tracking-wide">{step.text}</span>
+              </span>
+              {index < steps.length - 1 && (
+                <span className="hidden sm:block text-primary/60 text-lg">•</span>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>
