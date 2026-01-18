@@ -54,6 +54,7 @@ import JournalSection from "@/components/JournalSection";
 import AIExperienceAssistant from "@/components/AIExperienceAssistant";
 import StickyAIButton from "@/components/StickyAIButton";
 import MarqueeBanner from "@/components/MarqueeBanner";
+import HowItWorksBanner from "@/components/HowItWorksBanner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import desertHero from "@/assets/desert-hero.jpg";
 import desertKioskHero from "@/assets/desert-kiosk-hero.png";
@@ -274,6 +275,8 @@ const Index = () => {
           </div>
         </section>
 
+        {/* How It Works Banner */}
+        <HowItWorksBanner />
 
         {/* Categories Section */}
         <section id="choose-escape" className="container py-4 sm:py-6 md:py-8 px-4 scroll-mt-16">
