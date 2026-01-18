@@ -154,31 +154,42 @@ const ComingSoon = () => {
         
         {/* Centered content */}
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-3xl mx-auto">
-          <p className="text-white/60 text-sm sm:text-base font-light mb-1">
-            {lang === 'en' ? 'Not another booking site.' : 'לא עוד אתר הזמנות.'}
-          </p>
-          <p className="text-white/60 text-sm sm:text-base font-light mb-6">
-            {lang === 'en' ? 'Not a comparison tool.' : 'לא כלי השוואה.'}
-          </p>
-          
-          <h3 className="text-white text-2xl sm:text-3xl md:text-4xl font-serif tracking-tight mb-5">
-            {lang === 'en' ? 'STAYMAKOM is about experiences first.' : 'STAYMAKOM זה קודם כל חוויות.'}
+          <h3 className="text-white text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mb-4">
+            {lang === 'en' ? 'Not another booking website.' : 'לא עוד אתר הזמנות.'}
           </h3>
           
-          <p className="text-white/80 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            {lang === 'en' ? "A platform that brings together Israel's most inspiring hotels with curated immersive experiences." : 'פלטפורמה שמחברת בין המלונות המעוררי ההשראה בישראל לבין חוויות סוחפות ואוצרות בקפידה.'}
+          <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-2">
+            {lang === 'en' ? 'You already know how to book a hotel.' : 'אתם כבר יודעים איך להזמין מלון.'}
+          </p>
+          <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-8">
+            {lang === 'en' ? "What you don't know is what to live once you're there." : 'מה שאתם לא יודעים זה מה לחוות כשאתם שם.'}
+          </p>
+          
+          <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-2">
+            {lang === 'en' ? "Whether you're staying two weeks in Tel Aviv and don't know where to start," : 'בין אם אתם נשארים שבועיים בתל אביב ולא יודעים מאיפה להתחיל,'}
+          </p>
+          <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-6">
+            {lang === 'en' ? 'or living in Israel and craving meaningful escapes —' : 'או גרים בישראל ומשתוקקים לבריחות משמעותיות —'}
+          </p>
+          
+          <p className="text-white text-base sm:text-lg font-medium mb-8">
+            {lang === 'en' ? 'STAYMAKOM curates hotels with experiences, in one place.' : 'STAYMAKOM אוצרת מלונות עם חוויות, במקום אחד.'}
+          </p>
+          
+          <p className="text-secondary text-sm sm:text-base font-semibold tracking-wide uppercase">
+            {lang === 'en' ? 'Coming soon.' : 'בקרוב.'}
           </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-10 sm:py-14 bg-primary text-primary-foreground">
+      <footer className="py-10 sm:py-14 bg-muted text-muted-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-xl sm:text-2xl font-serif tracking-tight mb-5">
+          <p className="text-xl sm:text-2xl font-serif tracking-tight mb-5 text-foreground">
             {lang === 'en' ? 'Handpicked hotels. Unforgettable experiences.' : 'מלונות נבחרים. חוויות בלתי נשכחות.'}
           </p>
-          <div className="w-16 h-px bg-primary-foreground/30 mx-auto mb-5" />
-          <p className="text-xs text-primary-foreground/60">
+          <div className="w-16 h-px bg-foreground/20 mx-auto mb-5" />
+          <p className="text-xs text-muted-foreground/60">
             © 2026 StayMakom. {lang === 'en' ? 'All rights reserved.' : 'כל הזכויות שמורות.'}
           </p>
         </div>
