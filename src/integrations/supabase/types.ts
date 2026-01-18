@@ -959,7 +959,6 @@ export type Database = {
           site_name: string | null
           site_tagline: string | null
           stripe_publishable_key: string | null
-          stripe_secret_key: string | null
           updated_at: string | null
         }
         Insert: {
@@ -987,7 +986,6 @@ export type Database = {
           site_name?: string | null
           site_tagline?: string | null
           stripe_publishable_key?: string | null
-          stripe_secret_key?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1015,7 +1013,6 @@ export type Database = {
           site_name?: string | null
           site_tagline?: string | null
           stripe_publishable_key?: string | null
-          stripe_secret_key?: string | null
           updated_at?: string | null
         }
         Relationships: []
