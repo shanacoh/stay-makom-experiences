@@ -87,12 +87,13 @@ const ComingSoon = () => {
 
         {/* Main Content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-3 font-sans">
-            {lang === 'en' ? 'A New Way of Travelling' : 'דרך חדשה לטייל'}
+          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-6 font-sans uppercase">
+            {lang === 'en' ? (
+              <>A NEW WAY OF TRAVELLING<br />IS COMING TO ISRAEL</>
+            ) : (
+              <>דרך חדשה לטייל<br />מגיעה לישראל</>
+            )}
           </h1>
-          <h2 className="text-white/90 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-tight mb-4 font-sans">
-            {lang === 'en' ? 'is coming to Israel' : 'מגיעה לישראל'}
-          </h2>
           <p className="text-white/60 text-sm sm:text-base font-medium tracking-widest uppercase mb-10">
             {lang === 'en' ? 'Launching 2026' : 'השקה 2026'}
           </p>
