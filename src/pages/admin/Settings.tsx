@@ -20,7 +20,6 @@ const AdminSettings = () => {
     default_commission_rate: 18,
     default_currency: "USD",
     stripe_publishable_key: "",
-    stripe_secret_key: "",
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -48,7 +47,6 @@ const AdminSettings = () => {
         default_commission_rate: settings.default_commission_rate || 18,
         default_currency: settings.default_currency || "USD",
         stripe_publishable_key: settings.stripe_publishable_key || "",
-        stripe_secret_key: settings.stripe_secret_key || "",
       });
     }
   }, [settings]);
@@ -98,13 +96,6 @@ const AdminSettings = () => {
         <p className="text-muted-foreground">Manage site configuration</p>
       </div>
 
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Note:</strong> Stripe API keys should be stored as Supabase secrets for better security. 
-          The fields below are for reference only and shouldn't store sensitive keys directly.
-        </AlertDescription>
-      </Alert>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -202,25 +193,21 @@ const AdminSettings = () => {
               <Label htmlFor="stripe-key">Stripe Publishable Key</Label>
               <Input
                 id="stripe-key"
-                type="password"
                 placeholder="pk_..."
                 value={formData.stripe_publishable_key}
                 onChange={(e) => setFormData({ ...formData, stripe_publishable_key: e.target.value })}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stripe-secret">Stripe Secret Key</Label>
-              <Input
-                id="stripe-secret"
-                type="password"
-                placeholder="sk_..."
-                value={formData.stripe_secret_key}
-                onChange={(e) => setFormData({ ...formData, stripe_secret_key: e.target.value })}
-              />
               <p className="text-xs text-muted-foreground">
-                ⚠️ Consider using Supabase secrets for sensitive keys
+                Publishable keys (pk_...) are safe for client-side use.
               </p>
             </div>
+            <Alert className="mt-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Stripe secret keys must be stored as backend secrets for security reasons. 
+                Contact your administrator to configure the STRIPE_SECRET_KEY in the backend environment.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
       </div>
