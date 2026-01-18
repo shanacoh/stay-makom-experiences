@@ -73,8 +73,8 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <Routes>
-            {/* Affiche Coming Soon sur domaine custom, sinon le site complet */}
-            <Route path="/" element={isCustomDomain() ? <ComingSoon /> : <Index />} />
+            {/* Page principale */}
+            <Route path="/" element={<Index />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
