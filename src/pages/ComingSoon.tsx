@@ -44,26 +44,26 @@ const ComingSoon = () => {
     icon: Star,
     text: "First look"
   }, {
-    icon: Gift,
-    text: "Exclusive offers"
+    icon: Sparkles,
+    text: "Priority access"
   }, {
     icon: Calendar,
     text: "Private events"
   }, {
-    icon: Sparkles,
-    text: "Priority access"
+    icon: Gift,
+    text: "Exclusive offers"
   }] : [{
     icon: Star,
     text: "הצצה ראשונה"
   }, {
-    icon: Gift,
-    text: "הצעות בלעדיות"
+    icon: Sparkles,
+    text: "גישה עדיפה"
   }, {
     icon: Calendar,
     text: "אירועים פרטיים"
   }, {
-    icon: Sparkles,
-    text: "גישה עדיפה"
+    icon: Gift,
+    text: "הצעות בלעדיות"
   }];
   return <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Hero Section - reduced height to show marquee on load */}
