@@ -61,9 +61,9 @@ const ComingSoon = () => {
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Hero Section */}
+      {/* Hero Section - reduced height to show marquee on load */}
       <section 
-        className="relative min-h-screen flex flex-col"
+        className="relative h-[85vh] min-h-[500px] flex flex-col"
         style={{
           backgroundImage: `url(${comingSoonHero})`,
           backgroundSize: 'cover',
@@ -74,13 +74,13 @@ const ComingSoon = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
 
         {/* Header */}
-        <header className="relative z-10 flex justify-between items-center p-4 sm:p-6 md:p-8">
-          <div className="text-white font-bold text-xl sm:text-2xl tracking-wider">
+        <header className="relative z-10 flex justify-between items-center p-4 sm:p-6 md:p-8" dir="ltr">
+          <div className="text-white font-bold text-xl sm:text-2xl tracking-tight">
             STAYMAKOM
           </div>
           <button 
             onClick={() => setLang(lang === 'en' ? 'he' : 'en')}
-            className="text-white/90 hover:text-white text-sm sm:text-base font-medium transition-colors px-3 py-1.5 rounded-full border border-white/30 hover:border-white/50"
+            className="text-white/90 hover:text-white text-sm font-medium transition-colors px-3 py-1 rounded border border-white/30 hover:border-white/50"
           >
             {lang === 'en' ? 'עב' : 'EN'}
           </button>
