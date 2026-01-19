@@ -1,18 +1,12 @@
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 
 type Lang = "en" | "fr" | "he";
 
@@ -44,7 +38,8 @@ function copyFor(lang: Lang) {
   switch (lang) {
     case "fr":
       return {
-        title: "Connectez-vous pour ajouter aux favoris",
+        title: "Sauvegarder dans vos favoris",
+        subtitle: "Connectez-vous pour sauvegarder vos expériences préférées et y accéder depuis n'importe quel appareil.",
         tabs: { login: "Connexion", signup: "Inscription" },
         fields: {
           email: "Email",
@@ -52,7 +47,7 @@ function copyFor(lang: Lang) {
           confirm: "Confirmer le mot de passe",
           name: "Nom (optionnel)",
         },
-        actions: { login: "Se connecter", signup: "Créer un compte" },
+        actions: { login: "Continuer", signup: "Créer un compte" },
         toasts: {
           okLogin: "Connecté !",
           okSignup: "Compte créé ! Vous pouvez vous connecter.",
@@ -61,7 +56,8 @@ function copyFor(lang: Lang) {
       };
     case "he":
       return {
-        title: "התחברו כדי להוסיף למועדפים",
+        title: "שמרו לרשימת המועדפים",
+        subtitle: "התחברו כדי לשמור חוויות שאהבתם ולגשת אליהן מכל מכשיר.",
         tabs: { login: "התחברות", signup: "הרשמה" },
         fields: {
           email: "אימייל",
@@ -69,7 +65,7 @@ function copyFor(lang: Lang) {
           confirm: "אימות סיסמה",
           name: "שם (אופציונלי)",
         },
-        actions: { login: "התחבר", signup: "צור חשבון" },
+        actions: { login: "המשך", signup: "צור חשבון" },
         toasts: {
           okLogin: "התחברת!",
           okSignup: "החשבון נוצר! אפשר להתחבר עכשיו.",
@@ -78,7 +74,8 @@ function copyFor(lang: Lang) {
       };
     default:
       return {
-        title: "Sign in to save to wishlist",
+        title: "Save to your wishlist",
+        subtitle: "Sign in to save experiences you love and access them from any device.",
         tabs: { login: "Sign In", signup: "Sign Up" },
         fields: {
           email: "Email",
@@ -86,7 +83,7 @@ function copyFor(lang: Lang) {
           confirm: "Confirm password",
           name: "Name (optional)",
         },
-        actions: { login: "Sign In", signup: "Create account" },
+        actions: { login: "Continue", signup: "Create account" },
         toasts: {
           okLogin: "Signed in!",
           okSignup: "Account created! You can sign in now.",
@@ -104,6 +101,7 @@ export default function AuthPromptDialog({
 }: Props) {
   const c = useMemo(() => copyFor(lang), [lang]);
   const { signIn, signUp } = useAuth();
+  const isRTL = lang === "he";
 
   const [tab, setTab] = useState<"login" | "signup">(defaultTab);
   const [loading, setLoading] = useState(false);
@@ -165,21 +163,57 @@ export default function AuthPromptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{c.title}</DialogTitle>
-        </DialogHeader>
+      <DialogContent 
+        className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl p-0 overflow-hidden border-0 shadow-2xl"
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
+        {/* Header with decorative icon */}
+        <div className="pt-8 pb-4 px-6 text-center bg-gradient-to-b from-muted/50 to-transparent">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
+            <Heart className="h-6 w-6 text-primary" />
+          </div>
+          <h2 className="font-serif text-2xl text-foreground mb-2">
+            {c.title}
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+            {c.subtitle}
+          </p>
+        </div>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">{c.tabs.login}</TabsTrigger>
-            <TabsTrigger value="signup">{c.tabs.signup}</TabsTrigger>
-          </TabsList>
+        <div className="px-6 pb-6">
+          {/* Tabs - Pill style */}
+          <div className="flex p-1 bg-muted/60 rounded-full mb-6">
+            <button
+              type="button"
+              onClick={() => setTab("login")}
+              className={`flex-1 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                tab === "login"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {c.tabs.login}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("signup")}
+              className={`flex-1 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                tab === "signup"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {c.tabs.signup}
+            </button>
+          </div>
 
-          <TabsContent value="login" className="mt-4">
-            <form onSubmit={handleLogin} className="space-y-4">
+          {/* Login Form */}
+          {tab === "login" && (
+            <form onSubmit={handleLogin} className="space-y-4 animate-fade-in">
               <div className="space-y-2">
-                <Label htmlFor="auth-dialog-login-email">{c.fields.email}</Label>
+                <Label htmlFor="auth-dialog-login-email" className="text-sm font-medium">
+                  {c.fields.email}
+                </Label>
                 <Input
                   id="auth-dialog-login-email"
                   type="email"
@@ -188,11 +222,14 @@ export default function AuthPromptDialog({
                     setLoginData((p) => ({ ...p, email: e.target.value }))
                   }
                   disabled={loading}
+                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="auth-dialog-login-password">{c.fields.password}</Label>
+                <Label htmlFor="auth-dialog-login-password" className="text-sm font-medium">
+                  {c.fields.password}
+                </Label>
                 <Input
                   id="auth-dialog-login-password"
                   type="password"
@@ -201,20 +238,29 @@ export default function AuthPromptDialog({
                     setLoginData((p) => ({ ...p, password: e.target.value }))
                   }
                   disabled={loading}
+                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                variant="cta"
+                className="w-full h-12 text-base mt-2" 
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {c.actions.login}
               </Button>
             </form>
-          </TabsContent>
+          )}
 
-          <TabsContent value="signup" className="mt-4">
-            <form onSubmit={handleSignup} className="space-y-4">
+          {/* Signup Form */}
+          {tab === "signup" && (
+            <form onSubmit={handleSignup} className="space-y-4 animate-fade-in">
               <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-name">{c.fields.name}</Label>
+                <Label htmlFor="auth-dialog-signup-name" className="text-sm font-medium">
+                  {c.fields.name}
+                </Label>
                 <Input
                   id="auth-dialog-signup-name"
                   type="text"
@@ -223,11 +269,14 @@ export default function AuthPromptDialog({
                     setSignupData((p) => ({ ...p, displayName: e.target.value }))
                   }
                   disabled={loading}
+                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-email">{c.fields.email}</Label>
+                <Label htmlFor="auth-dialog-signup-email" className="text-sm font-medium">
+                  {c.fields.email}
+                </Label>
                 <Input
                   id="auth-dialog-signup-email"
                   type="email"
@@ -236,11 +285,14 @@ export default function AuthPromptDialog({
                     setSignupData((p) => ({ ...p, email: e.target.value }))
                   }
                   disabled={loading}
+                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-password">{c.fields.password}</Label>
+                <Label htmlFor="auth-dialog-signup-password" className="text-sm font-medium">
+                  {c.fields.password}
+                </Label>
                 <Input
                   id="auth-dialog-signup-password"
                   type="password"
@@ -249,11 +301,14 @@ export default function AuthPromptDialog({
                     setSignupData((p) => ({ ...p, password: e.target.value }))
                   }
                   disabled={loading}
+                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-confirm">{c.fields.confirm}</Label>
+                <Label htmlFor="auth-dialog-signup-confirm" className="text-sm font-medium">
+                  {c.fields.confirm}
+                </Label>
                 <Input
                   id="auth-dialog-signup-confirm"
                   type="password"
@@ -262,16 +317,22 @@ export default function AuthPromptDialog({
                     setSignupData((p) => ({ ...p, confirmPassword: e.target.value }))
                   }
                   disabled={loading}
+                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                variant="cta"
+                className="w-full h-12 text-base mt-2" 
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {c.actions.signup}
               </Button>
             </form>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
