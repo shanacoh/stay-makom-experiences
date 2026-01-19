@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
+import LocationMap from "@/components/experience-test/LocationMap";
 
 const Hotel = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -177,6 +178,16 @@ const Hotel = () => {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {/* Location Map */}
+              {hotel.latitude && hotel.longitude && (
+                <LocationMap
+                  latitude={hotel.latitude}
+                  longitude={hotel.longitude}
+                  hotelName={hotelName}
+                  lang={lang}
+                />
               )}
             </div>
 
