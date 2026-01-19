@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Heart, Loader2 } from "lucide-react";
+import OAuthButtons from "./OAuthButtons";
 
 type Lang = "en" | "fr" | "he";
 
@@ -200,6 +201,9 @@ export default function AuthPromptDialog({
             </button>
           </div>
 
+          {/* OAuth Buttons */}
+          <OAuthButtons lang={lang} disabled={loading} />
+
           {/* Login Form */}
           {tab === "login" && (
             <form onSubmit={handleLogin} className="space-y-4 animate-fade-in">
@@ -297,7 +301,6 @@ export default function AuthPromptDialog({
                   className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
-
 
               <Button 
                 type="submit" 

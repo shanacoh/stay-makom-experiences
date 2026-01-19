@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Loader2, ArrowLeft, Eye, EyeOff, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import OAuthButtons from "@/components/auth/OAuthButtons";
 
 import heroImage from "@/assets/desert-hotel-pool.jpg";
 
@@ -48,7 +49,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/account");
     }
   }, [user, navigate]);
 
@@ -70,7 +71,7 @@ const Auth = () => {
         }
       } else {
         toast.success("Welcome back!");
-        navigate("/");
+        navigate("/account");
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -217,11 +218,11 @@ const Auth = () => {
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     disabled={resetLoading}
-                    className="h-12"
+                    className="h-12 rounded-xl"
                   />
                 </div>
 
-                <Button type="submit" className="w-full h-12" disabled={resetLoading}>
+                <Button type="submit" variant="cta" className="w-full h-12" disabled={resetLoading}>
                   {resetLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Send Reset Link
                 </Button>
@@ -240,13 +241,26 @@ const Auth = () => {
           ) : (
             /* Login/Signup Tabs */
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login" className="text-sm">Sign In</TabsTrigger>
-                <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/60 rounded-full h-12">
+                <TabsTrigger 
+                  value="login" 
+                  className="rounded-full text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup" 
+                  className="rounded-full text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  Sign Up
+                </TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
               <TabsContent value="login" className="space-y-4 mt-0">
+                {/* OAuth Buttons */}
+                <OAuthButtons disabled={loading} />
+
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
@@ -257,7 +271,7 @@ const Auth = () => {
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       disabled={loading}
-                      className="h-12"
+                      className="h-12 rounded-xl"
                     />
                     {errors.email && (
                       <p className="text-sm text-destructive">{errors.email}</p>
@@ -274,7 +288,7 @@ const Auth = () => {
                         value={loginData.password}
                         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                         disabled={loading}
-                        className="h-12 pr-10"
+                        className="h-12 pr-10 rounded-xl"
                       />
                       <button
                         type="button"
@@ -299,22 +313,13 @@ const Auth = () => {
                     </button>
                   </div>
 
-                  <Button type="submit" className="w-full h-12" disabled={loading}>
+                  <Button type="submit" variant="cta" className="w-full h-12" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In
                   </Button>
                 </form>
 
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">or</span>
-                  </div>
-                </div>
-
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-center text-sm text-muted-foreground pt-4">
                   Don't have an account?{" "}
                   <button
                     type="button"
@@ -328,6 +333,9 @@ const Auth = () => {
 
               {/* Signup Tab */}
               <TabsContent value="signup" className="space-y-4 mt-0">
+                {/* OAuth Buttons */}
+                <OAuthButtons disabled={loading} />
+
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Display Name <span className="text-muted-foreground">(Optional)</span></Label>
@@ -338,7 +346,7 @@ const Auth = () => {
                       value={signupData.displayName}
                       onChange={(e) => setSignupData({ ...signupData, displayName: e.target.value })}
                       disabled={loading}
-                      className="h-12"
+                      className="h-12 rounded-xl"
                     />
                   </div>
 
@@ -351,7 +359,7 @@ const Auth = () => {
                       value={signupData.email}
                       onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                       disabled={loading}
-                      className="h-12"
+                      className="h-12 rounded-xl"
                     />
                     {errors.email && (
                       <p className="text-sm text-destructive">{errors.email}</p>
@@ -368,7 +376,7 @@ const Auth = () => {
                         value={signupData.password}
                         onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                         disabled={loading}
-                        className="h-12 pr-10"
+                        className="h-12 pr-10 rounded-xl"
                       />
                       <button
                         type="button"
@@ -382,7 +390,6 @@ const Auth = () => {
                       <p className="text-sm text-destructive">{errors.password}</p>
                     )}
                   </div>
-
 
                   <div className="flex items-start space-x-2">
                     <Checkbox
@@ -408,22 +415,13 @@ const Auth = () => {
                     <p className="text-sm text-destructive">{errors.tosAccepted}</p>
                   )}
 
-                  <Button type="submit" className="w-full h-12" disabled={loading}>
+                  <Button type="submit" variant="cta" className="w-full h-12" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
                   </Button>
                 </form>
 
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">or</span>
-                  </div>
-                </div>
-
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-center text-sm text-muted-foreground pt-4">
                   Already have an account?{" "}
                   <button
                     type="button"

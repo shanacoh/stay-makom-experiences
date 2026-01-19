@@ -1376,6 +1376,39 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_points: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string | null
+          id: string
+          points: number
+          reference_id: string | null
+          reference_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          points: number
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          points?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       packages: {
         Row: {
           created_at: string
@@ -1442,10 +1475,15 @@ export type Database = {
           created_at: string
           display_name: string | null
           gdpr_consent_at: string | null
+          interests: string[] | null
           locale: Database["public"]["Enums"]["locale"]
+          loyalty_tier: string | null
           marketing_opt_in: boolean
+          onboarding_completed_at: string | null
           phone: string | null
+          referral_source: string | null
           tos_accepted_at: string
+          total_points: number | null
           updated_at: string
           user_id: string
         }
@@ -1454,10 +1492,15 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           gdpr_consent_at?: string | null
+          interests?: string[] | null
           locale?: Database["public"]["Enums"]["locale"]
+          loyalty_tier?: string | null
           marketing_opt_in?: boolean
+          onboarding_completed_at?: string | null
           phone?: string | null
+          referral_source?: string | null
           tos_accepted_at?: string
+          total_points?: number | null
           updated_at?: string
           user_id: string
         }
@@ -1466,10 +1509,15 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           gdpr_consent_at?: string | null
+          interests?: string[] | null
           locale?: Database["public"]["Enums"]["locale"]
+          loyalty_tier?: string | null
           marketing_opt_in?: boolean
+          onboarding_completed_at?: string | null
           phone?: string | null
+          referral_source?: string | null
           tos_accepted_at?: string
+          total_points?: number | null
           updated_at?: string
           user_id?: string
         }
