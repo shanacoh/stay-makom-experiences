@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.recommend-experiences]
 verify_jwt = false
+
+[functions.geocode-hotel]
+verify_jwt = false

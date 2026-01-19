@@ -1057,6 +1057,8 @@ export type Database = {
       }
       hotels: {
         Row: {
+          address: string | null
+          address_he: string | null
           amenities: string[] | null
           amenities_he: string[] | null
           city: string | null
@@ -1100,6 +1102,8 @@ export type Database = {
           visibility: string | null
         }
         Insert: {
+          address?: string | null
+          address_he?: string | null
           amenities?: string[] | null
           amenities_he?: string[] | null
           city?: string | null
@@ -1143,6 +1147,8 @@ export type Database = {
           visibility?: string | null
         }
         Update: {
+          address?: string | null
+          address_he?: string | null
           amenities?: string[] | null
           amenities_he?: string[] | null
           city?: string | null
