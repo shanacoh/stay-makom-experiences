@@ -317,12 +317,12 @@ const Index = () => {
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
-          <div className="container max-w-2xl relative z-10 px-4 text-center">
+          <div className="container max-w-3xl relative z-10 px-4 text-center">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
               {t(lang, 'handpickedTitle1')}<br />
               {t(lang, 'handpickedTitle2')}
             </h2>
-            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-xl mx-auto space-y-2">
+            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-2xl mx-auto space-y-2">
               <p>{t(lang, 'handpickedP1')}</p>
               <p>{t(lang, 'handpickedP2')}</p>
               <p>{t(lang, 'handpickedP3')}</p>
