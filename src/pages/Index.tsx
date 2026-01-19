@@ -67,6 +67,9 @@ import natureImg from "@/assets/nature-category.jpg";
 import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
+import giftCardHero from "@/assets/gift-card-hero.jpg";
+import { ArrowRight } from "lucide-react";
+import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 const fallbackImages: Record<string, string> = {
   "romantic": romanticImg,
@@ -82,6 +85,7 @@ const Index = () => {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const { lang } = useLanguage();
+  const { getLocalizedPath } = useLocalizedNavigation();
   const carouselRef = useRef<HTMLDivElement>(null);
   const latestCarouselRef = useRef<HTMLDivElement>(null);
   const isRTL = lang === 'he';
@@ -304,9 +308,6 @@ const Index = () => {
           )}
         </section>
 
-        {/* AI Experience Assistant */}
-        <AIExperienceAssistant />
-
         {/* Marquee Banner */}
         <MarqueeBanner />
 
@@ -470,6 +471,42 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Gift Card Section */}
+        <section className="container py-12 md:py-16 px-4">
+          <div className={`grid md:grid-cols-2 gap-8 items-center max-w-5xl mx-auto ${isRTL ? 'md:grid-flow-col-dense' : ''}`}>
+            {/* Image */}
+            <div className={`relative overflow-hidden rounded-2xl ${isRTL ? 'md:order-2' : ''}`}>
+              <img 
+                src={giftCardHero} 
+                alt="Gift Card" 
+                className="w-full h-64 md:h-80 object-cover hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            
+            {/* Content */}
+            <div className={`space-y-4 ${isRTL ? 'text-right md:order-1' : ''}`}>
+              <div className={`inline-flex items-center gap-2 text-primary ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <Gift className="h-5 w-5" />
+                <span className="text-xs font-medium uppercase tracking-wider">
+                  {t(lang, 'giftCardSectionTag')}
+                </span>
+              </div>
+              <h2 className="font-sans text-2xl md:text-3xl font-bold tracking-[-0.02em]">
+                {t(lang, 'giftCardSectionTitle')}
+              </h2>
+              <p className="text-muted-foreground text-sm md:text-base">
+                {t(lang, 'giftCardSectionDesc')}
+              </p>
+              <Button asChild className="group">
+                <Link to={getLocalizedPath('/gift-card')}>
+                  {t(lang, 'giftCardSectionCTA')}
+                  <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'mr-2 rotate-180 group-hover:-translate-x-1' : 'ml-2'}`} />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Latest Experiences Section */}
         <section className="container py-8 sm:py-12 md:py-16 lg:py-20 px-4">
           <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
@@ -523,6 +560,9 @@ const Index = () => {
 
         {/* Journal Section */}
         <JournalSection lang={lang} />
+
+        {/* AI Experience Assistant */}
+        <AIExperienceAssistant />
 
         {/* Desert Kiosk Hero Section */}
         <section className="relative min-h-[280px] sm:h-[320px] md:h-[380px] flex items-center justify-center">
