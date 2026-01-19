@@ -8,11 +8,11 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import GalleryModal from "@/components/experience/GalleryModal";
+import ShareDialog from "@/components/experience/ShareDialog";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 interface Review {
@@ -79,6 +79,7 @@ const HeroSection = ({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
@@ -115,13 +116,13 @@ const HeroSection = ({
       }
     }
 
-    // Desktop or mobile fallback: copy to clipboard
+    // Desktop: copy to clipboard and open share dialog
     try {
       await navigator.clipboard.writeText(url);
-      toast.success(lang === 'he' ? 'הקישור הועתק' : lang === 'fr' ? 'Lien copié !' : 'Link copied!');
     } catch {
-      toast.error(lang === 'he' ? 'לא ניתן להעתיק' : lang === 'fr' ? 'Impossible de copier' : 'Could not copy link');
+      // Clipboard failed, still open dialog
     }
+    setShareDialogOpen(true);
   };
 
   // Wishlist functionality
@@ -481,6 +482,15 @@ const HeroSection = ({
         photos={photos}
         title={title}
         initialIndex={carouselIndex}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        url={window.location.href}
+        title={title}
+        lang={lang}
       />
     </>
   );
