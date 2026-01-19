@@ -294,8 +294,8 @@ const Index = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
           ) : (
-            <div className="max-w-2xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2">
+            <div className="max-w-4xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                 {categories?.map(category => (
                   <CategoryCard key={category.slug} category={category} />
                 ))}
