@@ -22,17 +22,11 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-const signupSchema = z
-  .object({
-    email: z.string().email(),
-    password: z.string().min(6),
-    confirmPassword: z.string().min(6),
-    displayName: z.string().optional(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords don't match",
-  });
+const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  displayName: z.string().optional(),
+});
 
 function copyFor(lang: Lang) {
   switch (lang) {
@@ -109,7 +103,6 @@ export default function AuthPromptDialog({
   const [signupData, setSignupData] = useState({
     email: "",
     password: "",
-    confirmPassword: "",
     displayName: "",
   });
 
@@ -305,21 +298,6 @@ export default function AuthPromptDialog({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-confirm" className="text-sm font-medium">
-                  {c.fields.confirm}
-                </Label>
-                <Input
-                  id="auth-dialog-signup-confirm"
-                  type="password"
-                  value={signupData.confirmPassword}
-                  onChange={(e) =>
-                    setSignupData((p) => ({ ...p, confirmPassword: e.target.value }))
-                  }
-                  disabled={loading}
-                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
-                />
-              </div>
 
               <Button 
                 type="submit" 

@@ -21,14 +21,10 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  confirmPassword: z.string(),
   displayName: z.string().optional(),
   tosAccepted: z.boolean().refine(val => val === true, {
     message: "You must accept the terms of service",
   }),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
 });
 
 const Auth = () => {
@@ -37,7 +33,6 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -46,7 +41,6 @@ const Auth = () => {
   const [signupData, setSignupData] = useState({
     email: "",
     password: "",
-    confirmPassword: "",
     displayName: "",
     tosAccepted: false,
   });
@@ -389,30 +383,6 @@ const Auth = () => {
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-confirm"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={signupData.confirmPassword}
-                        onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-                        disabled={loading}
-                        className="h-12 pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    {errors.confirmPassword && (
-                      <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-                    )}
-                  </div>
 
                   <div className="flex items-start space-x-2">
                     <Checkbox
