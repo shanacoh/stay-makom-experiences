@@ -32,6 +32,11 @@ const Experience = () => {
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
   
   const footerRef = useRef<HTMLElement>(null);
+  const reviewsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const { data: experience, isLoading } = useQuery({
     queryKey: ["experience", slug],
@@ -182,6 +187,8 @@ const Experience = () => {
             lang={lang}
             categoryName={categoryName}
             categorySlug={categorySlug}
+            experienceId={experience.id}
+            onScrollToReviews={scrollToReviews}
           />
         </section>
 
@@ -230,10 +237,12 @@ const Experience = () => {
 
               {/* Reviews Grid */}
               {reviews && reviews.length > 0 && (
-                <ReviewsGrid 
-                  reviews={reviews}
-                  lang={lang}
-                />
+                <div ref={reviewsRef}>
+                  <ReviewsGrid 
+                    reviews={reviews}
+                    lang={lang}
+                  />
+                </div>
               )}
 
               {/* Things to Know */}
