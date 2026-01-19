@@ -9,7 +9,11 @@ import {
 } from "@/components/ui/carousel";
 import GalleryModal from "@/components/experience/GalleryModal";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
-
+import { useAuth } from "@/contexts/AuthContext";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 interface Review {
   id: string;
   text: string;
@@ -34,6 +38,7 @@ interface HeroSectionProps {
   currency?: string;
   lang: 'en' | 'he' | 'fr';
   onViewDates?: () => void;
+  onScrollToReviews?: () => void;
   // Booking panel props
   experienceId?: string;
   hotelId?: string;
@@ -61,6 +66,7 @@ const HeroSection = ({
   currency = 'EUR',
   lang,
   onViewDates,
+  onScrollToReviews,
   experienceId,
   hotelId,
   minParty = 2,
@@ -71,6 +77,8 @@ const HeroSection = ({
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
 
   // 4 photos for the 2x2 grid
@@ -86,6 +94,86 @@ const HeroSection = ({
 
   // Get most recent review for the preview
   const recentReview = reviews[0];
+
+  // Share functionality
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          url: window.location.href,
+        });
+      } catch (err) {
+        // User cancelled share
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success(lang === 'he' ? 'הקישור הועתק' : lang === 'fr' ? 'Lien copié !' : 'Link copied!');
+    }
+  };
+
+  // Wishlist functionality
+  const { data: wishlistStatus } = useQuery({
+    queryKey: ["wishlist-status", experienceId, user?.id],
+    queryFn: async () => {
+      if (!user?.id || !experienceId) return null;
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select("id, deleted_at")
+        .eq("user_id", user.id)
+        .eq("experience_id", experienceId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id && !!experienceId,
+  });
+
+  const isInWishlist = wishlistStatus && !wishlistStatus.deleted_at;
+
+  const wishlistMutation = useMutation({
+    mutationFn: async ({ isAdding }: { isAdding: boolean }) => {
+      if (!user?.id || !experienceId) throw new Error("Not authenticated");
+      
+      if (isAdding) {
+        // Check if row exists with soft delete
+        if (wishlistStatus?.deleted_at) {
+          // Reactivate existing row
+          const { error } = await supabase
+            .from("wishlist")
+            .update({ deleted_at: null })
+            .eq("id", wishlistStatus.id);
+          if (error) throw error;
+        } else {
+          // Insert new row
+          const { error } = await supabase
+            .from("wishlist")
+            .insert({ user_id: user.id, experience_id: experienceId });
+          if (error) throw error;
+        }
+      } else {
+        // Soft delete
+        const { error } = await supabase
+          .from("wishlist")
+          .update({ deleted_at: new Date().toISOString() })
+          .eq("user_id", user.id)
+          .eq("experience_id", experienceId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wishlist-status", experienceId, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+    },
+  });
+
+  const handleFavorite = () => {
+    if (!user) {
+      toast.error(lang === 'he' ? 'התחבר כדי לשמור' : lang === 'fr' ? 'Connectez-vous pour sauvegarder' : 'Please log in to save');
+      return;
+    }
+    wishlistMutation.mutate({ isAdding: !isInWishlist });
+  };
 
   return (
     <>
@@ -291,11 +379,19 @@ const HeroSection = ({
 
                 {/* Share and Save buttons - centered */}
                 <div className="flex items-center justify-center gap-3">
-                  <button className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" aria-label="Share">
+                  <button 
+                    onClick={handleShare}
+                    className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+                    aria-label="Share"
+                  >
                     <Share className="h-5 w-5" />
                   </button>
-                  <button className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" aria-label="Save">
-                    <Heart className="h-5 w-5" />
+                  <button 
+                    onClick={handleFavorite}
+                    className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+                    aria-label="Save"
+                  >
+                    <Heart className={cn("h-5 w-5", isInWishlist && "fill-cta text-cta")} />
                   </button>
                 </div>
 
@@ -306,7 +402,10 @@ const HeroSection = ({
                       <Star className="h-4 w-4 fill-foreground text-foreground" />
                       <span className="font-semibold">{averageRating.toFixed(2)}</span>
                       <span className="text-muted-foreground mx-1">·</span>
-                      <button className="text-muted-foreground underline text-sm hover:text-foreground transition-colors">
+                      <button 
+                        onClick={onScrollToReviews}
+                        className="text-muted-foreground underline text-sm hover:text-foreground transition-colors"
+                      >
                         {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
                       </button>
                     </div>
