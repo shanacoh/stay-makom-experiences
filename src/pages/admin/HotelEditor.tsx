@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
 import { Link } from "react-router-dom";
@@ -21,6 +21,7 @@ interface HotelEditorProps {
 
 export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
   const queryClient = useQueryClient();
+  const [isGeocoding, setIsGeocoding] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
@@ -35,6 +36,12 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
     contact_email: "",
     contact_phone: "",
     status: "draft" as "draft" | "published" | "pending" | "archived",
+    // Location fields
+    address: "",
+    address_he: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
+    // SEO fields
     seo_title_en: "",
     seo_title_he: "",
     seo_title_fr: "",
@@ -81,6 +88,12 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
         contact_email: hotel.contact_email || "",
         contact_phone: hotel.contact_phone || "",
         status: hotel.status || "draft",
+        // Location fields
+        address: (hotel as any).address || "",
+        address_he: (hotel as any).address_he || "",
+        latitude: hotel.latitude || null,
+        longitude: hotel.longitude || null,
+        // SEO fields
         seo_title_en: hotel.seo_title_en || "",
         seo_title_he: hotel.seo_title_he || "",
         seo_title_fr: hotel.seo_title_fr || "",
@@ -97,6 +110,43 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
       });
     }
   }, [hotel]);
+
+  const handleGeocode = async () => {
+    const addressToGeocode = formData.address || `${formData.name}, ${formData.city}, ${formData.region}`;
+    
+    if (!addressToGeocode.trim()) {
+      toast.error("Please enter an address or hotel name/city/region first");
+      return;
+    }
+
+    setIsGeocoding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode-hotel", {
+        body: { address: addressToGeocode },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setFormData({
+        ...formData,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        address: formData.address || data.displayName,
+      });
+      
+      toast.success(`Location found: ${data.displayName}`);
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      toast.error("Failed to find location. Try a more specific address.");
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -301,6 +351,99 @@ export const HotelEditor = ({ hotelId, onClose }: HotelEditorProps) => {
                   onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
                 />
               </div>
+            </div>
+
+            {/* Location Section */}
+            <div className="border-t pt-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Location</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Set the hotel address and coordinates for map display
+              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address (English)</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="e.g., 123 Hotel Street, Ayyelet HaShahar, Israel"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address_he">כתובת (עברית)</Label>
+                  <Input
+                    id="address_he"
+                    value={formData.address_he}
+                    onChange={(e) => setFormData({ ...formData, address_he: e.target.value })}
+                    placeholder="כתובת בעברית"
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="latitude">Latitude</Label>
+                  <Input
+                    id="latitude"
+                    type="number"
+                    step="any"
+                    value={formData.latitude ?? ""}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      latitude: e.target.value ? parseFloat(e.target.value) : null 
+                    })}
+                    placeholder="e.g., 33.0742"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="longitude">Longitude</Label>
+                  <Input
+                    id="longitude"
+                    type="number"
+                    step="any"
+                    value={formData.longitude ?? ""}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      longitude: e.target.value ? parseFloat(e.target.value) : null 
+                    })}
+                    placeholder="e.g., 35.5585"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>&nbsp;</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleGeocode}
+                    disabled={isGeocoding}
+                    className="w-full"
+                  >
+                    {isGeocoding ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Finding...
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Auto-detect coordinates
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              {formData.latitude && formData.longitude && (
+                <p className="text-sm text-green-600">
+                  ✓ Coordinates set: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                </p>
+              )}
             </div>
 
             {/* Bilingual Content - Side by Side */}
