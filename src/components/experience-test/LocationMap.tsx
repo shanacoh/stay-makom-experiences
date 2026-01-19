@@ -84,8 +84,7 @@ const LocationMap = ({
   const sectionTitle = lang === "he" ? "איפה זה קורה" : lang === "fr" ? "Où ça se passe" : "Where you'll be";
 
   return (
-    <section className="py-6 border-b border-border">
-      <h2 className="text-lg font-serif font-bold mb-4">{sectionTitle}</h2>
+    <section className="pb-6">
       <div className="h-[280px] rounded-lg overflow-hidden border border-border">
         <div ref={mapContainer} className="w-full h-full" />
       </div>
