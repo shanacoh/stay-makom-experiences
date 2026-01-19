@@ -265,17 +265,6 @@ const Index = () => {
             >
               {t(lang, 'heroCTA')}
             </button>
-            <button
-              onClick={() => {
-                const element = document.getElementById('ai-assistant');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="mt-2 text-white/90 text-xs font-medium hover:text-white transition-colors duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 group"
-            >
-              <span className="relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[1px] after:bottom-0 after:left-0 after:bg-white after:origin-bottom-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 group-hover:after:origin-bottom-left">
-                {t(lang, 'heroAIHelp')}
-              </span>
-            </button>
           </div>
         </section>
 
