@@ -57,6 +57,7 @@ import AdminGiftCardDetails from "./pages/admin/GiftCardDetails";
 import AdminSettings from "./pages/admin/Settings";
 import AdminAIInsights from "./pages/admin/AIInsights";
 import AdminLeads from "./pages/admin/Leads";
+import AdminFavorites from "./pages/admin/Favorites";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -134,6 +135,7 @@ const App = () => (
               <Route path="journal/edit/:id" element={<JournalEditor />} />
               <Route path="ai-insights" element={<AdminAIInsights />} />
               <Route path="leads" element={<AdminLeads />} />
+              <Route path="favorites" element={<AdminFavorites />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
             <Route
