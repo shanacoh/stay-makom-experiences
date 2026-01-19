@@ -283,9 +283,12 @@ const HeroSection = ({
                   <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
                   <span className="font-medium">{averageRating.toFixed(1)}</span>
                   <span className="text-muted-foreground">·</span>
-                  <span className="text-muted-foreground underline">
+                  <button 
+                    onClick={onScrollToReviews}
+                    className="text-muted-foreground underline hover:text-foreground transition-colors"
+                  >
                     {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
-                  </span>
+                  </button>
                 </>
               )}
               {city && (
@@ -294,6 +297,24 @@ const HeroSection = ({
                   <span className="text-muted-foreground">{city}</span>
                 </>
               )}
+            </div>
+
+            {/* Share and Save buttons - centered - MOBILE */}
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button 
+                onClick={handleShare}
+                className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+                aria-label="Share"
+              >
+                <Share className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={handleFavorite}
+                className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+                aria-label="Save"
+              >
+                <Heart className={cn("h-5 w-5", isInWishlist && "fill-cta text-cta")} />
+              </button>
             </div>
 
             {/* Host info - centered */}
