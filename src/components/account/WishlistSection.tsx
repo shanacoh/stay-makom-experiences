@@ -32,12 +32,14 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
             title_he,
             subtitle,
             hero_image,
+            photos,
             base_price,
             currency,
             hotel_id,
             hotels (
               name,
-              city
+              city,
+              hero_image
             )
           )
         `)
