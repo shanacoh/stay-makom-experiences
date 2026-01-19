@@ -132,10 +132,7 @@ const HeroSection = ({
                     <CarouselItem key={index}>
                       <div 
                         className="aspect-[4/3] w-full cursor-pointer rounded-2xl overflow-hidden"
-                        onClick={() => {
-                          setCurrentPhotoIndex(index);
-                          setIsGalleryOpen(true);
-                        }}
+                        onClick={() => setIsGalleryOpen(true)}
                       >
                         <img
                           src={photo || "/placeholder.svg"}
@@ -344,12 +341,13 @@ const HeroSection = ({
         </div>
       </div>
 
-      {/* Gallery Modal - Scrollable vertical layout */}
+      {/* Gallery Modal - Horizontal carousel */}
       <GalleryModal
         open={isGalleryOpen}
         onOpenChange={setIsGalleryOpen}
         photos={photos}
         title={title}
+        initialIndex={carouselIndex}
       />
     </>
   );
