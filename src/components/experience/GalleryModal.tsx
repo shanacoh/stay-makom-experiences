@@ -48,12 +48,18 @@ const GalleryModal = ({ open, onOpenChange, photos, title, initialIndex = 0 }: G
     }
   }, [open, emblaApi, initialIndex]);
 
-  // Reset loaded images when modal opens
+  // Reset loaded images when modal opens and preload first images
   useEffect(() => {
     if (open) {
       setLoadedImages(new Set());
+      // Preload first 3 images
+      photos.slice(0, 3).forEach((photo, index) => {
+        const img = new Image();
+        img.onload = () => handleImageLoad(index);
+        img.src = photo;
+      });
     }
-  }, [open]);
+  }, [open, photos]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -114,15 +120,15 @@ const GalleryModal = ({ open, onOpenChange, photos, title, initialIndex = 0 }: G
         {/* Carousel Container */}
         <div className="w-full h-full flex items-center justify-center">
           <div className="overflow-hidden w-full h-full" ref={emblaRef}>
-            <div className="flex h-full">
+            <div className="flex h-full touch-pan-y">
               {photos.map((photo, index) => (
                 <div
                   key={index}
-                  className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center px-4 md:px-16"
+                  className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center relative"
                 >
                   {/* Loading placeholder */}
                   {!loadedImages.has(index) && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
                       <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     </div>
                   )}
