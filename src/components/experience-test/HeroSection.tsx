@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, Share, Heart, ChevronRight } from "lucide-react";
 import { Grid3X3 } from "lucide-react";
@@ -14,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 interface Review {
   id: string;
   text: string;
@@ -77,6 +78,7 @@ const HeroSection = ({
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
@@ -97,18 +99,23 @@ const HeroSection = ({
 
   // Share functionality
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title,
-          url: window.location.href,
-        });
-      } catch (err) {
-        // User cancelled share
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+        return;
       }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
+
+      if (!navigator.clipboard?.writeText) {
+        toast.error(lang === 'he' ? 'לא ניתן לשתף במכשיר זה' : lang === 'fr' ? 'Partage indisponible sur cet appareil' : 'Sharing unavailable on this device');
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
       toast.success(lang === 'he' ? 'הקישור הועתק' : lang === 'fr' ? 'Lien copié !' : 'Link copied!');
+    } catch {
+      toast.error(lang === 'he' ? 'שגיאה בשיתוף' : lang === 'fr' ? 'Erreur lors du partage' : 'Could not share');
     }
   };
 
@@ -169,7 +176,7 @@ const HeroSection = ({
 
   const handleFavorite = () => {
     if (!user) {
-      toast.error(lang === 'he' ? 'התחבר כדי לשמור' : lang === 'fr' ? 'Connectez-vous pour sauvegarder' : 'Please log in to save');
+      setAuthDialogOpen(true);
       return;
     }
     wishlistMutation.mutate({ isAdding: !isInWishlist });
@@ -177,6 +184,7 @@ const HeroSection = ({
 
   return (
     <>
+      <AuthPromptDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} lang={lang} defaultTab="login" />
       <div className="pt-16 md:pt-18">
         {/* Breadcrumb Navigation */}
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
