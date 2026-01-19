@@ -6,8 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, User, Sparkles, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Heart, User, Sparkles, Building2, Mail, Phone, Copy, Download, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
+
+interface WishlistUser {
+  user_id: string;
+  user_email: string;
+  display_name: string | null;
+  phone: string | null;
+  marketing_opt_in: boolean;
+  created_at: string;
+}
 
 const AdminFavorites = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,15 +52,13 @@ const AdminFavorites = () => {
     },
   });
 
-  // Fetch user emails for display
-  const { data: userProfiles } = useQuery({
-    queryKey: ["admin-user-profiles-for-wishlist"],
+  // Fetch user profiles with emails using the secure RPC function
+  const { data: wishlistUsers } = useQuery({
+    queryKey: ["admin-wishlist-users-with-emails"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("user_id, display_name");
+      const { data, error } = await supabase.rpc("get_wishlist_users_with_emails");
       if (error) throw error;
-      return data;
+      return data as WishlistUser[];
     },
   });
 
@@ -75,6 +84,10 @@ const AdminFavorites = () => {
 
   interface UserStat {
     userId: string;
+    email: string;
+    displayName: string | null;
+    phone: string | null;
+    marketingOptIn: boolean;
     experiences: any[];
     lastAdded: string;
   }
@@ -100,12 +113,18 @@ const AdminFavorites = () => {
     (a, b) => b.count - a.count
   );
 
-  // Group by user for the "By User" view
+  // Group by user for the "By User" view - now with enriched data
   const userStats = wishlistItems?.reduce((acc, item) => {
     const userId = item.user_id;
+    const userProfile = wishlistUsers?.find((u) => u.user_id === userId);
+    
     if (!acc[userId]) {
       acc[userId] = {
         userId,
+        email: userProfile?.user_email || "",
+        displayName: userProfile?.display_name || null,
+        phone: userProfile?.phone || null,
+        marketingOptIn: userProfile?.marketing_opt_in || false,
         experiences: [],
         lastAdded: item.created_at,
       };
@@ -131,14 +150,43 @@ const AdminFavorites = () => {
     return matchesSearch && matchesHotel;
   });
 
-  const getUserDisplayName = (userId: string) => {
-    const profile = userProfiles?.find((p) => p.user_id === userId);
-    return profile?.display_name || `User ${userId.slice(0, 8)}...`;
+  const filteredUserStats = userStatsList.filter((stat) => {
+    const matchesSearch =
+      stat.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stat.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  const copyEmail = (email: string) => {
+    navigator.clipboard.writeText(email);
+    toast.success("Email copié !");
+  };
+
+  const exportCSV = () => {
+    const headers = ["Email", "Nom", "Téléphone", "Marketing OK", "Nb Favoris", "Expériences Favorites"];
+    const rows = userStatsList.map((stat) => [
+      stat.email,
+      stat.displayName || "",
+      stat.phone || "",
+      stat.marketingOptIn ? "Oui" : "Non",
+      stat.experiences.length.toString(),
+      stat.experiences.map((e) => e?.title || "").join("; "),
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.map((c) => `"${c}"`).join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `favorites_users_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+    toast.success("Export CSV téléchargé !");
   };
 
   const totalFavorites = wishlistItems?.length || 0;
   const uniqueUsers = new Set(wishlistItems?.map((w) => w.user_id)).size;
   const uniqueExperiences = new Set(wishlistItems?.map((w) => w.experience_id)).size;
+  const marketingOptInCount = userStatsList.filter((u) => u.marketingOptIn).length;
 
   return (
     <div className="space-y-6">
@@ -153,7 +201,7 @@ const AdminFavorites = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Favorites</CardTitle>
@@ -185,6 +233,19 @@ const AdminFavorites = () => {
             <div className="text-2xl font-bold">{uniqueExperiences}</div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Marketing Opt-in</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{marketingOptInCount}</div>
+            <p className="text-xs text-muted-foreground">
+              {uniqueUsers > 0 ? Math.round((marketingOptInCount / uniqueUsers) * 100) : 0}% des utilisateurs
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -192,7 +253,7 @@ const AdminFavorites = () => {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              placeholder="Search experiences..."
+              placeholder="Search experiences or users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -215,10 +276,12 @@ const AdminFavorites = () => {
 
       {/* Tabs for different views */}
       <Tabs defaultValue="by-experience" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="by-experience">By Experience</TabsTrigger>
-          <TabsTrigger value="by-user">By User</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="by-experience">By Experience</TabsTrigger>
+            <TabsTrigger value="by-user">By User</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="by-experience">
           {isLoading ? (
@@ -268,9 +331,16 @@ const AdminFavorites = () => {
         </TabsContent>
 
         <TabsContent value="by-user">
+          <div className="flex justify-end mb-4">
+            <Button variant="outline" size="sm" onClick={exportCSV} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
+
           {isLoading ? (
             <div className="text-center py-12">Loading favorites...</div>
-          ) : !userStatsList?.length ? (
+          ) : !filteredUserStats?.length ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 No favorites found
@@ -278,25 +348,52 @@ const AdminFavorites = () => {
             </Card>
           ) : (
             <div className="space-y-3">
-              {userStatsList.map((stat) => (
+              {filteredUserStats.map((stat) => (
                 <Card key={stat.userId}>
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                           <Badge
                             variant="secondary"
-                            className="bg-blue-100 text-blue-700 flex items-center gap-1"
+                            className="bg-red-100 text-red-700 flex items-center gap-1"
                           >
                             <Heart className="h-3 w-3" />
                             {stat.experiences.length}
                           </Badge>
                           <h3 className="font-semibold flex items-center gap-2">
                             <User className="h-4 w-4" />
-                            {getUserDisplayName(stat.userId)}
+                            {stat.displayName || "Unknown User"}
                           </h3>
+                          {stat.marketingOptIn && (
+                            <Badge className="bg-green-100 text-green-700 text-xs">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Marketing OK
+                            </Badge>
+                          )}
                         </div>
-                        <div className="mt-2 flex flex-wrap gap-1">
+
+                        {/* Contact info */}
+                        <div className="flex items-center gap-4 mt-2 text-sm">
+                          {stat.email && (
+                            <a
+                              href={`mailto:${stat.email}`}
+                              className="flex items-center gap-1 text-primary hover:underline"
+                            >
+                              <Mail className="h-3 w-3" />
+                              {stat.email}
+                            </a>
+                          )}
+                          {stat.phone && (
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              <Phone className="h-3 w-3" />
+                              {stat.phone}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Favorited experiences */}
+                        <div className="mt-3 flex flex-wrap gap-1">
                           {stat.experiences.slice(0, 5).map((exp, i) => (
                             <Badge key={i} variant="outline" className="text-xs">
                               {exp?.title || "Unknown"}
@@ -308,11 +405,24 @@ const AdminFavorites = () => {
                             </Badge>
                           )}
                         </div>
+
                         <p className="text-xs text-muted-foreground mt-2">
                           Last activity:{" "}
                           {format(new Date(stat.lastAdded), "MMM d, yyyy")}
                         </p>
                       </div>
+
+                      {/* Copy email button */}
+                      {stat.email && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => copyEmail(stat.email)}
+                          title="Copier l'email"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

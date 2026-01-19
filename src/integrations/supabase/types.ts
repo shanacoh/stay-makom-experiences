@@ -1646,6 +1646,17 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_wishlist_users_with_emails: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          marketing_opt_in: boolean
+          phone: string
+          user_email: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
