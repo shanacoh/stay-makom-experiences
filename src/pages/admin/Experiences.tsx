@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Eye, EyeOff, Copy, Trash2 } from "lucide-react";
+import { Plus, Edit, Eye, EyeOff, Copy, Trash2, Heart } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +85,26 @@ const AdminExperiences = () => {
       
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Fetch wishlist counts per experience
+  const { data: wishlistCounts } = useQuery({
+    queryKey: ["admin-wishlist-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select("experience_id")
+        .is("deleted_at", null);
+      
+      if (error) throw error;
+      
+      // Count per experience
+      const counts: Record<string, number> = {};
+      data?.forEach((item) => {
+        counts[item.experience_id] = (counts[item.experience_id] || 0) + 1;
+      });
+      return counts;
     },
   });
 
@@ -450,6 +470,12 @@ const AdminExperiences = () => {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-xl font-semibold">{experience.title}</h3>
                       {getStatusBadge(experience.status || "draft")}
+                      {wishlistCounts && wishlistCounts[experience.id] > 0 && (
+                        <Badge variant="secondary" className="bg-red-100 text-red-700 flex items-center gap-1">
+                          <Heart className="h-3 w-3 fill-current" />
+                          {wishlistCounts[experience.id]}
+                        </Badge>
+                      )}
                     </div>
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <p>
