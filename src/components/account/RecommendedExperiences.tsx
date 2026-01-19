@@ -66,10 +66,11 @@ export default function RecommendedExperiences({
           title_he,
           subtitle,
           hero_image,
+          photos,
           base_price,
           currency,
           category_id,
-          hotels (name, city)
+          hotels (name, city, hero_image)
         `)
         .eq("status", "published")
         .limit(limit + excludeIds.length);
