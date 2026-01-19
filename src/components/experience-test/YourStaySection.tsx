@@ -48,7 +48,7 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
   const hotelPhotos = [hotel.hero_image, ...(hotel.photos || [])].filter(Boolean).slice(0, 3);
 
   return (
-    <section className="py-6 border-b border-border">
+    <section className="py-6">
       <div className="space-y-6">
         {/* Section Header */}
         <div>
