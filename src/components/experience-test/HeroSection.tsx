@@ -222,6 +222,13 @@ const HeroSection = ({
             <Link to={getLocalizedPath("/")} className="hover:text-foreground transition-colors">
               {lang === 'he' ? 'בית' : 'Home'}
             </Link>
+            <ChevronRight className="h-3 w-3 flex-shrink-0" />
+            <Link 
+              to={getLocalizedPath("/#choose-escape")} 
+              className="hover:text-foreground transition-colors"
+            >
+              {lang === 'he' ? 'קטגוריות' : 'Categories'}
+            </Link>
             {categoryName && categorySlug && (
               <>
                 <ChevronRight className="h-3 w-3 flex-shrink-0" />
