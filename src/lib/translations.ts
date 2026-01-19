@@ -346,6 +346,12 @@ export const translations = {
     stickyAIFind: "Find experiences",
     stickyAISaveEmail: "💾 Save these recommendations",
     stickyAIEmailPrompt: "Enter your email to receive these recommendations:",
+    
+    // Gift Card Section (Homepage)
+    giftCardSectionTag: "Perfect Gift",
+    giftCardSectionTitle: "Give the Gift of Escape",
+    giftCardSectionDesc: "Make someone's day unforgettable with a gift card for our handpicked hotels and unique experiences.",
+    giftCardSectionCTA: "Send a Gift Card",
   },
   he: {
     // Category page
@@ -693,6 +699,12 @@ export const translations = {
     stickyAIFind: "מצא חוויות",
     stickyAISaveEmail: "💾 שמרו את ההמלצות האלה",
     stickyAIEmailPrompt: "הזינו אימייל כדי לקבל את ההמלצות:",
+    
+    // Gift Card Section (Homepage)
+    giftCardSectionTag: "מתנה מושלמת",
+    giftCardSectionTitle: "תנו את מתנת הבריחה",
+    giftCardSectionDesc: "הפכו את היום של מישהו לבלתי נשכח עם כרטיס מתנה למלונות הנבחרים ולחוויות הייחודיות שלנו.",
+    giftCardSectionCTA: "שלחו כרטיס מתנה",
   },
 };
 
