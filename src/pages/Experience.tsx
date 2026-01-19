@@ -14,7 +14,7 @@ import { t } from "@/lib/translations";
 import HeroSection from "@/components/experience-test/HeroSection";
 import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
 import YourStaySection from "@/components/experience-test/YourStaySection";
-
+import LocationMap from "@/components/experience-test/LocationMap";
 import ReviewsGrid from "@/components/experience-test/ReviewsGrid";
 import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
 import PracticalInfo from "@/components/experience-test/PracticalInfo";
@@ -212,12 +212,21 @@ const Experience = () => {
                 />
               )}
 
-              {/* Your Stay - Hotel Section with integrated map */}
+              {/* Your Stay - Hotel Section */}
               <YourStaySection 
                 hotel={experience.hotels} 
                 lang={lang}
-                googleMapsLink={experience.google_maps_link}
               />
+
+              {/* Location Map */}
+              {experience.hotels?.latitude && experience.hotels?.longitude && (
+                <LocationMap 
+                  latitude={experience.hotels.latitude}
+                  longitude={experience.hotels.longitude}
+                  hotelName={hotelName || ''}
+                  lang={lang}
+                />
+              )}
 
               {/* Reviews Grid */}
               {reviews && reviews.length > 0 && (
