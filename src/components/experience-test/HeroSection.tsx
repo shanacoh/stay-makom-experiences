@@ -100,22 +100,27 @@ const HeroSection = ({
   // Share functionality
   const handleShare = async () => {
     const url = window.location.href;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    try {
-      if (navigator.share) {
+    // On mobile, try native share first
+    if (isMobile && navigator.share) {
+      try {
         await navigator.share({ title, url });
-        return;
+        return; // Success, exit
+      } catch (err) {
+        // User cancelled or share failed - fall through to clipboard
+        if (err instanceof Error && err.name === 'AbortError') {
+          return; // User cancelled, don't show any message
+        }
       }
+    }
 
-      if (!navigator.clipboard?.writeText) {
-        toast.error(lang === 'he' ? 'לא ניתן לשתף במכשיר זה' : lang === 'fr' ? 'Partage indisponible sur cet appareil' : 'Sharing unavailable on this device');
-        return;
-      }
-
+    // Desktop or mobile fallback: copy to clipboard
+    try {
       await navigator.clipboard.writeText(url);
       toast.success(lang === 'he' ? 'הקישור הועתק' : lang === 'fr' ? 'Lien copié !' : 'Link copied!');
     } catch {
-      toast.error(lang === 'he' ? 'שגיאה בשיתוף' : lang === 'fr' ? 'Erreur lors du partage' : 'Could not share');
+      toast.error(lang === 'he' ? 'לא ניתן להעתיק' : lang === 'fr' ? 'Impossible de copier' : 'Could not copy link');
     }
   };
 
