@@ -120,6 +120,30 @@ export default {
             transform: "translateX(0%)",
           },
         },
+        "heart-pop": {
+          "0%": {
+            transform: "scale(1)",
+          },
+          "25%": {
+            transform: "scale(1.35)",
+          },
+          "50%": {
+            transform: "scale(0.9)",
+          },
+          "100%": {
+            transform: "scale(1)",
+          },
+        },
+        "heart-float": {
+          "0%": {
+            opacity: "1",
+            transform: "translate(-50%, -50%) translateY(0) translateX(0) scale(1)",
+          },
+          "100%": {
+            opacity: "0",
+            transform: "translate(-50%, -50%) translateY(-35px) translateX(var(--float-x, 0px)) scale(0.4)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -127,6 +151,8 @@ export default {
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
         "marquee": "marquee 30s linear infinite",
         "marquee-rtl": "marquee-rtl 30s linear infinite",
+        "heart-pop": "heart-pop 0.4s ease-out",
+        "heart-float": "heart-float 0.6s ease-out forwards",
       },
     },
   },

@@ -14,7 +14,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import HeartBurst from "@/components/ui/HeartBurst";
+
 interface Review {
   id: string;
   text: string;
@@ -80,6 +83,8 @@ const HeroSection = ({
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [showBurst, setShowBurst] = useState(false);
+  const [animateHeart, setAnimateHeart] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
@@ -174,9 +179,28 @@ const HeroSection = ({
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wishlist-status", experienceId, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      
+      if (variables.isAdding) {
+        // Trigger animations
+        setAnimateHeart(true);
+        setShowBurst(true);
+        setTimeout(() => setAnimateHeart(false), 400);
+        
+        // Show success toast
+        const messages = {
+          en: { title: "Added to favorites", desc: "You can find it in your account" },
+          fr: { title: "Ajouté aux favoris", desc: "Retrouvez-le dans votre compte" },
+          he: { title: "נוסף למועדפים", desc: "תוכל למצוא אותו בחשבון שלך" },
+        };
+        const msg = messages[lang] || messages.en;
+        toast.success(msg.title, { description: msg.desc });
+      } else {
+        const removed = lang === 'he' ? 'הוסר מהמועדפים' : lang === 'fr' ? 'Retiré des favoris' : 'Removed from favorites';
+        toast.success(removed);
+      }
     },
   });
 
@@ -324,10 +348,15 @@ const HeroSection = ({
               </button>
               <button 
                 onClick={handleFavorite}
-                className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+                className="relative p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
                 aria-label="Save"
               >
-                <Heart className={cn("h-5 w-5", isInWishlist && "fill-cta text-cta")} />
+                <Heart className={cn(
+                  "h-5 w-5 transition-all",
+                  isInWishlist && "fill-cta text-cta",
+                  animateHeart && "animate-heart-pop"
+                )} />
+                <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
               </button>
             </div>
 
@@ -423,10 +452,15 @@ const HeroSection = ({
                   </button>
                   <button 
                     onClick={handleFavorite}
-                    className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+                    className="relative p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
                     aria-label="Save"
                   >
-                    <Heart className={cn("h-5 w-5", isInWishlist && "fill-cta text-cta")} />
+                    <Heart className={cn(
+                      "h-5 w-5 transition-all",
+                      isInWishlist && "fill-cta text-cta",
+                      animateHeart && "animate-heart-pop"
+                    )} />
+                    <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
                   </button>
                 </div>
 
