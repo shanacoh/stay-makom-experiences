@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
-import { Heart, Star } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
+import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import HeartBurst from "@/components/ui/HeartBurst";
 
 interface ExperienceCardProps {
   experience: {
@@ -55,12 +59,14 @@ export default function ExperienceCard({
   userCity,
   isInWishlist: initialIsInWishlist = false,
   onWishlistToggle,
-  userId,
 }: ExperienceCardProps) {
   const { lang } = useLanguage();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [isInWishlist, setIsInWishlist] = useState(initialIsInWishlist);
   const [isHovered, setIsHovered] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [showBurst, setShowBurst] = useState(false);
+  const [animateHeart, setAnimateHeart] = useState(false);
 
   const title = getLocalizedField(experience, 'title', lang) as string;
   const hotelName = experience.hotels ? (getLocalizedField(experience.hotels, 'name', lang) as string) : '';
@@ -70,29 +76,56 @@ export default function ExperienceCard({
   // Currency symbol mapping
   const currencySymbol = experience.currency === 'ILS' ? '₪' : experience.currency === 'USD' ? '$' : '€';
 
+  // Query wishlist status
+  const { data: wishlistStatus } = useQuery({
+    queryKey: ["wishlist-status", experience.id, user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select("id, deleted_at")
+        .eq("user_id", user.id)
+        .eq("experience_id", experience.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+    initialData: initialIsInWishlist ? { id: '', deleted_at: null } : null,
+  });
+
+  const isInWishlist = wishlistStatus && !wishlistStatus.deleted_at;
+
   // Toggle wishlist mutation
   const wishlistMutation = useMutation({
     mutationFn: async ({ isAdding }: { isAdding: boolean }) => {
-      if (!userId) {
-        throw new Error("Please log in to add to wishlist");
+      if (!user?.id) {
+        throw new Error("Not authenticated");
       }
 
       if (isAdding) {
-        // Add to wishlist
-        const { error } = await supabase
-          .from("wishlist")
-          .insert({
-            user_id: userId,
-            experience_id: experience.id,
-          });
-        
-        if (error) throw error;
+        // Check if row exists with soft delete
+        if (wishlistStatus?.deleted_at) {
+          const { error } = await supabase
+            .from("wishlist")
+            .update({ deleted_at: null })
+            .eq("id", wishlistStatus.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("wishlist")
+            .insert({
+              user_id: user.id,
+              experience_id: experience.id,
+            });
+          if (error) throw error;
+        }
       } else {
-        // Remove from wishlist (soft delete)
+        // Soft delete
         const { error } = await supabase
           .from("wishlist")
           .update({ deleted_at: new Date().toISOString() })
-          .eq("user_id", userId)
+          .eq("user_id", user.id)
           .eq("experience_id", experience.id)
           .is("deleted_at", null);
         
@@ -100,9 +133,28 @@ export default function ExperienceCard({
       }
     },
     onSuccess: (_, variables) => {
-      setIsInWishlist(variables.isAdding);
-      toast.success(variables.isAdding ? "Added to wishlist" : "Removed from wishlist");
-      queryClient.invalidateQueries({ queryKey: ["wishlist", userId] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist-status", experience.id, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      
+      if (variables.isAdding) {
+        // Trigger animations
+        setAnimateHeart(true);
+        setShowBurst(true);
+        setTimeout(() => setAnimateHeart(false), 400);
+        
+        // Show success toast
+        const messages = {
+          en: { title: "Added to favorites", desc: "You can find it in your account" },
+          fr: { title: "Ajouté aux favoris", desc: "Retrouvez-le dans votre compte" },
+          he: { title: "נוסף למועדפים", desc: "תוכל למצוא אותו בחשבון שלך" },
+        };
+        const msg = messages[lang] || messages.en;
+        toast.success(msg.title, { description: msg.desc });
+      } else {
+        const removed = lang === 'he' ? 'הוסר מהמועדפים' : lang === 'fr' ? 'Retiré des favoris' : 'Removed from favorites';
+        toast.success(removed);
+      }
+      
       onWishlistToggle?.(experience.id, variables.isAdding);
     },
     onError: (error: any) => {
@@ -114,8 +166,8 @@ export default function ExperienceCard({
     e.preventDefault();
     e.stopPropagation();
     
-    if (!userId) {
-      toast.error("Please log in to add to wishlist");
+    if (!user) {
+      setAuthDialogOpen(true);
       return;
     }
 
@@ -135,109 +187,122 @@ export default function ExperienceCard({
     : experience.base_price;
 
   return (
-    <Link
-      to={`/experience/${experience.slug}?lang=${lang}`}
-      className="group block"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Photo section */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1">
-        {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
-        <img
-          src={experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        
-        {/* Bottom gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        
-        {/* Experience name - bottom left */}
-        <div className="absolute bottom-1.5 left-1.5 right-1.5">
-          <h3 className="font-sans text-xs sm:text-sm font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
-            {title}
-          </h3>
-        </div>
-        
-        {/* Optional badge - top left */}
-        {badge && (
-          <div className="absolute top-1.5 left-1.5">
-            <span className="inline-block px-1.5 py-0.5 bg-black rounded text-white text-[9px] font-semibold uppercase tracking-wide">
-              {badge === "NEW" ? t(lang, 'badgeNew') : badge === "ON SALE" ? t(lang, 'badgeOnSale') : badge === "POPULAR" ? t(lang, 'badgePopular') : badge}
-            </span>
-          </div>
-        )}
-        
-        {/* Heart button - top right (appears on hover) */}
-        <button
-          onClick={handleHeartClick}
-          disabled={wishlistMutation.isPending}
-          className={`absolute top-1.5 right-1.5 p-1 rounded-full bg-white/90 backdrop-blur-sm transition-opacity duration-300 hover:bg-white ${
-            isHovered || isInWishlist ? 'opacity-100' : 'opacity-0'
-          }`}
-          aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          <Heart
-            className={`h-3.5 w-3.5 transition-colors ${
-              isInWishlist ? 'fill-primary text-primary' : 'text-foreground'
-            }`}
+    <>
+      <AuthPromptDialog 
+        open={authDialogOpen} 
+        onOpenChange={setAuthDialogOpen} 
+        lang={lang} 
+        defaultTab="login" 
+      />
+      
+      <Link
+        to={`/experience/${experience.slug}?lang=${lang}`}
+        className="group block"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Photo section */}
+        <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1">
+          {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
+          <img
+            src={experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-        </button>
-      </div>
-
-      {/* Content under image */}
-      <div className="space-y-0">
-        {/* Line 1: Location and Rating */}
-        <div className="flex items-center justify-between gap-1">
-          <p className="text-[10px] text-muted-foreground truncate">
-            {distance && userCity
-              ? `${city} · ${distance} km`
-              : city}
-          </p>
-          {rating && (
-            <div className="flex items-center gap-0.5 text-[10px] whitespace-nowrap flex-shrink-0">
-              <span className="text-foreground">★</span>
-              <span className="font-semibold">{rating.toFixed(1)}</span>
-              {reviewCount && (
-                <span className="text-muted-foreground">({reviewCount})</span>
-              )}
+          
+          {/* Bottom gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          
+          {/* Experience name - bottom left */}
+          <div className="absolute bottom-1.5 left-1.5 right-1.5">
+            <h3 className="font-sans text-xs sm:text-sm font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
+              {title}
+            </h3>
+          </div>
+          
+          {/* Optional badge - top left */}
+          {badge && (
+            <div className="absolute top-1.5 left-1.5">
+              <span className="inline-block px-1.5 py-0.5 bg-black rounded text-white text-[9px] font-semibold uppercase tracking-wide">
+                {badge === "NEW" ? t(lang, 'badgeNew') : badge === "ON SALE" ? t(lang, 'badgeOnSale') : badge === "POPULAR" ? t(lang, 'badgePopular') : badge}
+              </span>
             </div>
           )}
+          
+          {/* Heart button - top right (appears on hover) */}
+          <button
+            onClick={handleHeartClick}
+            disabled={wishlistMutation.isPending}
+            className={cn(
+              "absolute top-1.5 right-1.5 p-1 rounded-full bg-white/90 backdrop-blur-sm transition-all duration-300 hover:bg-white",
+              isHovered || isInWishlist ? 'opacity-100' : 'opacity-0'
+            )}
+            aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Heart
+              className={cn(
+                "h-3.5 w-3.5 transition-all",
+                isInWishlist ? 'fill-cta text-cta' : 'text-foreground',
+                animateHeart && 'animate-heart-pop'
+              )}
+            />
+            <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
+          </button>
         </div>
 
-        {/* Line 2: Hotel name */}
-        <h4 className="font-semibold text-xs text-foreground leading-tight line-clamp-1">
-          {hotelName}
-        </h4>
+        {/* Content under image */}
+        <div className="space-y-0">
+          {/* Line 1: Location and Rating */}
+          <div className="flex items-center justify-between gap-1">
+            <p className="text-[10px] text-muted-foreground truncate">
+              {distance && userCity
+                ? `${city} · ${distance} km`
+                : city}
+            </p>
+            {rating && (
+              <div className="flex items-center gap-0.5 text-[10px] whitespace-nowrap flex-shrink-0">
+                <span className="text-foreground">★</span>
+                <span className="font-semibold">{rating.toFixed(1)}</span>
+                {reviewCount && (
+                  <span className="text-muted-foreground">({reviewCount})</span>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* Line 3: Highlights */}
-        {highlights && (
-          <p className="text-[10px] text-muted-foreground line-clamp-1">
-            {highlights}
-          </p>
-        )}
+          {/* Line 2: Hotel name */}
+          <h4 className="font-semibold text-xs text-foreground leading-tight line-clamp-1">
+            {hotelName}
+          </h4>
 
-        {/* Line 4: Price */}
-        <div className="flex items-baseline gap-1 pt-0.5">
-          <span className="font-bold text-xs">
-            {currencySymbol}{displayPrice}
-          </span>
-          <span className="text-[9px] text-muted-foreground">
-            / {lang === 'he' ? 'לילה' : 'nuit'}
-          </span>
-          {originalPrice && originalPrice > displayPrice && (
-            <span className="text-[10px] text-muted-foreground line-through">
-              {currencySymbol}{originalPrice}
-            </span>
+          {/* Line 3: Highlights */}
+          {highlights && (
+            <p className="text-[10px] text-muted-foreground line-clamp-1">
+              {highlights}
+            </p>
           )}
-          {discountPercent && (
-            <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded">
-              -{discountPercent} %
+
+          {/* Line 4: Price */}
+          <div className="flex items-baseline gap-1 pt-0.5">
+            <span className="font-bold text-xs">
+              {currencySymbol}{displayPrice}
             </span>
-          )}
+            <span className="text-[9px] text-muted-foreground">
+              / {lang === 'he' ? 'לילה' : 'nuit'}
+            </span>
+            {originalPrice && originalPrice > displayPrice && (
+              <span className="text-[10px] text-muted-foreground line-through">
+                {currencySymbol}{originalPrice}
+              </span>
+            )}
+            {discountPercent && (
+              <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded">
+                -{discountPercent} %
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </>
   );
 }
