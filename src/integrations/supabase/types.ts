@@ -487,6 +487,42 @@ export type Database = {
           },
         ]
       }
+      experience_highlight_tags: {
+        Row: {
+          created_at: string
+          experience_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          experience_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          experience_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_highlight_tags_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_highlight_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "highlight_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experience_includes: {
         Row: {
           created_at: string
@@ -1014,6 +1050,42 @@ export type Database = {
           site_tagline?: string | null
           stripe_publishable_key?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      highlight_tags: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon: string | null
+          id: string
+          is_common: boolean
+          label_en: string
+          label_he: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_common?: boolean
+          label_en: string
+          label_he?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_common?: boolean
+          label_en?: string
+          label_he?: string | null
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
