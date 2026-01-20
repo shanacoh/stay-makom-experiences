@@ -176,7 +176,7 @@ const Header = () => {
                   className={`${
                     isTransparentPage && !isScrolled
                       ? "text-white hover:bg-white/10"
-                      : ""
+                      : "hover:bg-foreground/5"
                   }`}
                 >
                   <User className="h-5 w-5" />
@@ -184,7 +184,7 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-52 p-0 bg-background border border-border/50 shadow-lg rounded-md overflow-hidden"
+                className="w-52 p-0 bg-white border border-border/30 shadow-lg rounded-xl overflow-hidden"
               >
                 <div className="px-3 py-2.5 border-b border-border/30">
                   <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/70">
@@ -202,7 +202,7 @@ const Header = () => {
                 <div className="py-1">
                   <DropdownMenuItem
                     onClick={() => navigate(getDashboardLink())}
-                    className="px-3 py-2 cursor-pointer"
+                    className="px-3 py-2 cursor-pointer hover:bg-black/[0.03] focus:bg-black/[0.03]"
                   >
                     {role === "admin" ? (
                       <LayoutDashboard className="h-4 w-4 mr-2.5 text-muted-foreground" />
@@ -224,7 +224,7 @@ const Header = () => {
 
                   <DropdownMenuItem
                     onClick={handleSignOut}
-                    className="px-3 py-2 cursor-pointer text-muted-foreground"
+                    className="px-3 py-2 cursor-pointer text-muted-foreground hover:bg-black/[0.03] focus:bg-black/[0.03]"
                   >
                     <LogOut className="h-4 w-4 mr-2.5" />
                     <span className="text-sm">Sign Out</span>
@@ -240,7 +240,7 @@ const Header = () => {
               className={`${
                 isTransparentPage && !isScrolled
                   ? "text-white hover:bg-white/10"
-                  : ""
+                  : "hover:bg-foreground/5"
               }`}
             >
               <Link to={getLocalizedPath("/auth")}>
