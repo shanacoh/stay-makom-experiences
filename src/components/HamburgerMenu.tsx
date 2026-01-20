@@ -38,7 +38,7 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className={`${!isScrolled ? "text-white hover:bg-white/10" : ""}`}
+          className={`${!isScrolled ? "text-white hover:bg-white/10" : "hover:bg-foreground/5"}`}
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -55,7 +55,7 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
               key={item.to}
               to={getLocalizedPath(item.to)}
               onClick={handleNavClick}
-              className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors"
+              className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
             >
               {item.label}
             </Link>
@@ -65,7 +65,7 @@ const HamburgerMenu = ({ isScrolled = false }: HamburgerMenuProps) => {
             <Link
               to={getLocalizedPath("/auth")}
               onClick={handleNavClick}
-              className="px-4 py-3 text-[15px] text-[#111111] hover:bg-[#F5F5F5] rounded-lg transition-colors"
+              className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
             >
               {t(lang, "hamburgerSignIn")}
             </Link>
