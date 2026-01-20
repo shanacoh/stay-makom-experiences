@@ -151,7 +151,7 @@ const Header = () => {
             className={`hidden md:flex text-[11px] h-6 px-2.5 ${
               isTransparentPage && !isScrolled
                 ? "border-white/30 text-white hover:bg-white/10 hover:text-white"
-                : "border-border/60"
+                : "border-border/60 hover:bg-foreground/5 hover:border-border"
             }`}
             onClick={() => {
               if (location.pathname !== "/") {
