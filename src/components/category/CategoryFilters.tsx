@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { SlidersHorizontal, MapPin, Calendar as CalendarIcon } from "lucide-react";
+import { SlidersHorizontal, MapPin, Calendar as CalendarIcon, ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -24,6 +24,13 @@ export interface FilterState {
   region?: string;
   dateRange?: DateRange;
 }
+
+const sortOptions = [
+  { value: "recommended", label: "Recommended" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "duration", label: "Duration" },
+];
 
 const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false, className }: CategoryFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
@@ -47,75 +54,56 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false, cla
   };
 
   return (
-    <div className={cn("sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border py-3 sm:py-4 mt-16", className)}>
-      <div className="container flex items-center justify-between gap-2 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-4 flex-1">
-          {/* Date Range Picker */}
+    <div className={cn(
+      "sticky top-14 z-40 py-3 sm:py-4",
+      "bg-gradient-to-b from-background via-background to-background/95",
+      "backdrop-blur-sm",
+      className
+    )}>
+      <div className="container flex items-center justify-between gap-3">
+        {/* Left side: Compact icon buttons */}
+        <div className="flex items-center gap-2">
+          {/* Sort Button with Popover */}
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal flex-1 sm:flex-none sm:min-w-[280px]",
-                  !dateRange && "text-muted-foreground"
-                )}
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted"
+                title="Sort"
               >
-                <CalendarIcon className="mr-1 sm:mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {dateRange?.from ? (
-                    dateRange.to ? (
-                      <>
-                        {format(dateRange.from, "d MMM", { locale: fr })} -{" "}
-                        {format(dateRange.to, "d MMM yyyy", { locale: fr })}
-                      </>
-                    ) : (
-                      format(dateRange.from, "d MMM yyyy", { locale: fr })
-                    )
-                  ) : (
-                    "When?"
-                  )}
-                </span>
-                <span className="sm:hidden">
-                  When?
-                </span>
+                <ArrowUpDown className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={dateRange?.from}
-                selected={dateRange}
-                onSelect={handleDateRangeChange}
-                numberOfMonths={2}
-                disabled={(date) => date < new Date()}
-                locale={fr}
-                className={cn("p-3 pointer-events-auto")}
-              />
+            <PopoverContent className="w-48 p-1" align="start">
+              <div className="flex flex-col">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleFilterUpdate("sortBy", option.value)}
+                    className={cn(
+                      "px-3 py-2 text-sm text-left rounded-md transition-colors",
+                      "hover:bg-muted",
+                      filters.sortBy === option.value && "bg-muted font-medium"
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </PopoverContent>
           </Popover>
 
-          <Select
-            value={filters.sortBy}
-            onValueChange={(value) => handleFilterUpdate("sortBy", value)}
-          >
-            <SelectTrigger className="w-[180px] hidden sm:flex">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recommended">Recommended</SelectItem>
-              <SelectItem value="price_asc">Price: Low to High</SelectItem>
-              <SelectItem value="price_desc">Price: High to Low</SelectItem>
-              <SelectItem value="duration">Duration</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Filters Popover */}
+          {/* Filters Button */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="default" className="sm:px-4 px-2">
-                <SlidersHorizontal className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Filters</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted"
+                title="Filters"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80" align="start">
@@ -158,16 +146,74 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false, cla
               </div>
             </PopoverContent>
           </Popover>
+
+          {/* Map Toggle Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onShowMapToggle?.(!showMap)}
+            className={cn(
+              "h-9 w-9 rounded-full transition-colors",
+              showMap 
+                ? "bg-foreground text-background hover:bg-foreground/90" 
+                : "bg-muted/50 hover:bg-muted"
+            )}
+            title={showMap ? "Hide map" : "Show map"}
+          >
+            <MapPin className="h-4 w-4" />
+          </Button>
         </div>
 
-        <Button
-          variant={showMap ? "default" : "outline"}
-          onClick={() => onShowMapToggle?.(!showMap)}
-          className="sm:px-4 px-2"
-        >
-          <MapPin className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">{showMap ? "Hide map" : "Show map"}</span>
-        </Button>
+        {/* Right side: Premium Calendar */}
+        <div className="flex-shrink-0">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "justify-start text-left font-medium",
+                  "min-w-[160px] sm:min-w-[280px]",
+                  "bg-white rounded-xl shadow-md border-0",
+                  "hover:shadow-lg hover:scale-[1.02] transition-all duration-200",
+                  "py-3 px-4 h-auto",
+                  !dateRange && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
+                <span className="truncate">
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "d MMM", { locale: fr })} -{" "}
+                        {format(dateRange.to, "d MMM", { locale: fr })}
+                      </>
+                    ) : (
+                      format(dateRange.from, "d MMM yyyy", { locale: fr })
+                    )
+                  ) : (
+                    <span className="hidden sm:inline">Select dates</span>
+                  )}
+                  <span className="sm:hidden">
+                    {dateRange?.from ? "" : "Dates"}
+                  </span>
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={handleDateRangeChange}
+                numberOfMonths={2}
+                disabled={(date) => date < new Date()}
+                locale={fr}
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
     </div>
   );
