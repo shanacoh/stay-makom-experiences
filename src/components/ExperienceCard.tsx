@@ -222,7 +222,7 @@ export default function ExperienceCard({
           
           {/* Experience name - bottom left */}
           <div className="absolute bottom-1.5 left-1.5 right-1.5">
-            <h3 className="font-sans text-xs sm:text-sm font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
+            <h3 className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
               {title}
             </h3>
           </div>
@@ -259,9 +259,9 @@ export default function ExperienceCard({
 
         {/* Content under image */}
         <div className="space-y-0.5">
-          {/* Line 1: Rating - bigger with yellow star */}
+          {/* Line 1: Rating - aligned right */}
           {rating && (
-            <div className="flex items-center gap-1 text-sm">
+            <div className="flex items-center justify-end gap-1 text-sm">
               <span className="text-yellow-500">★</span>
               <span className="font-bold">{rating.toFixed(1)}</span>
               {reviewCount && (
@@ -271,7 +271,7 @@ export default function ExperienceCard({
           )}
 
           {/* Line 2: Hotel name • Region */}
-          <h4 className="font-semibold text-xs text-foreground leading-tight line-clamp-1">
+          <h4 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
             {hotelName}{region ? ` • ${region}` : ''}
           </h4>
 
@@ -281,13 +281,13 @@ export default function ExperienceCard({
               {highlightTags.slice(0, 4).map((tag) => (
                 <span
                   key={tag.id}
-                  className="inline-block px-1.5 py-0.5 bg-muted rounded-full text-[9px] font-medium uppercase tracking-wide text-muted-foreground"
+                  className="inline-block px-2 py-0.5 bg-muted rounded-full text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
                 >
                   {lang === 'he' && tag.label_he ? tag.label_he : tag.label_en}
                 </span>
               ))}
               {highlightTags.length > 4 && (
-                <span className="inline-block px-1.5 py-0.5 text-[9px] text-muted-foreground">
+                <span className="inline-block px-2 py-0.5 text-[10px] text-muted-foreground">
                   +{highlightTags.length - 4}
                 </span>
               )}
@@ -296,11 +296,11 @@ export default function ExperienceCard({
 
           {/* Line 4: Price */}
           <div className="flex items-baseline gap-1 pt-0.5">
-            <span className="font-bold text-xs">
+            <span className="font-bold text-sm">
               {currencySymbol}{displayPrice}
             </span>
-            <span className="text-[9px] text-muted-foreground">
-              / {lang === 'he' ? 'לילה' : 'nuit'}
+            <span className="text-[10px] text-muted-foreground">
+              / {lang === 'he' ? 'לילה' : 'night'}
             </span>
             {originalPrice && originalPrice > displayPrice && (
               <span className="text-[10px] text-muted-foreground line-through">
