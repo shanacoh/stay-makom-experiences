@@ -24,7 +24,6 @@ const Header = () => {
     "/contact",
     "/partners",
     "/about",
-    "/journal",
   ].includes(location.pathname);
   // Experience pages should NOT be transparent (no dark hero background)
   const isTransparentPage = isHomePage || isDarkHeroPage;
@@ -88,16 +87,10 @@ const Header = () => {
 
   return (
     <header className={headerClasses} dir="ltr">
-      <div
-        className={`container flex items-center justify-between bg-transparent ${
-          isTransparentPage && !isScrolled ? "h-14" : "h-10"
-        }`}
-      >
+      <div className="container flex items-center justify-between bg-transparent h-14">
         <Link to={getLocalizedPath("/")} className="flex items-center space-x-2">
           <span
-            className={`font-sans font-bold tracking-[-0.04em] uppercase ${
-              isTransparentPage && !isScrolled ? "text-xl" : "text-lg"
-            } ${logoClasses}`}
+            className={`font-sans font-bold tracking-[-0.04em] uppercase text-xl ${logoClasses}`}
           >
             STAYMAKOM
           </span>
