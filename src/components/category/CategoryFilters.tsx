@@ -179,7 +179,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false, cla
                   !dateRange && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
+                <CalendarIcon className="mr-2 h-5 w-5 text-primary flex-shrink-0" />
                 <span className="truncate">
                   {dateRange?.from ? (
                     dateRange.to ? (
