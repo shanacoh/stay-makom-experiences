@@ -222,7 +222,7 @@ export default function ExperienceCard({
           
           {/* Experience name - bottom left */}
           <div className="absolute bottom-1.5 left-1.5 right-1.5">
-            <h3 className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
+            <h3 className="font-sans text-base sm:text-lg font-bold text-white uppercase tracking-tight leading-tight line-clamp-2">
               {title}
             </h3>
           </div>
@@ -259,21 +259,21 @@ export default function ExperienceCard({
 
         {/* Content under image */}
         <div className="space-y-0.5">
-          {/* Line 1: Rating - aligned right */}
-          {rating && (
-            <div className="flex items-center justify-end gap-1 text-sm">
-              <span className="text-yellow-500">★</span>
-              <span className="font-bold">{rating.toFixed(1)}</span>
-              {reviewCount && (
-                <span className="text-muted-foreground text-xs">({reviewCount})</span>
-              )}
-            </div>
-          )}
-
-          {/* Line 2: Hotel name • Region */}
-          <h4 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
-            {hotelName}{region ? ` • ${region}` : ''}
-          </h4>
+          {/* Line 1: Hotel name (left) + Rating (right) */}
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="font-semibold text-sm text-foreground leading-tight line-clamp-1 flex-1 min-w-0">
+              {hotelName}{region ? ` • ${region}` : ''}
+            </h4>
+            {rating && (
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-yellow-500 text-sm">★</span>
+                <span className="font-bold text-sm">{rating.toFixed(1)}</span>
+                {reviewCount && (
+                  <span className="text-muted-foreground text-xs">({reviewCount})</span>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Line 3: Highlight Tags as badges */}
           {highlightTags.length > 0 && (
