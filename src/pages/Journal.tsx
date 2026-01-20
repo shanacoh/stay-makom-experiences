@@ -40,13 +40,27 @@ const Journal = () => {
     <div className="min-h-screen bg-[#FAF8F5]">
       <Header />
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <div className="text-center mb-10">
-          <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Journal</h1>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
+      {/* Hero Section */}
+      <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] flex items-center justify-center">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=1920&q=80" 
+            alt="Journal" 
+            className="w-full h-full object-cover" 
+          />
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+        <div className="relative z-10 text-center text-white px-6 animate-fade-in max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold">
+            Journal
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg text-slate-100 mt-4">
             Stories, places, and insights from extraordinary stays across Israel
           </p>
         </div>
+      </section>
+
+      <main className="max-w-6xl mx-auto px-6 py-12">
 
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
