@@ -24,6 +24,7 @@ const Header = () => {
     "/contact",
     "/partners",
     "/about",
+    "/journal",
   ].includes(location.pathname);
   // Experience pages should NOT be transparent (no dark hero background)
   const isTransparentPage = isHomePage || isDarkHeroPage;
