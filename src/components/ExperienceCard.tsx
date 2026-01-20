@@ -11,6 +11,13 @@ import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
 
+interface HighlightTag {
+  id: string;
+  slug: string;
+  label_en: string;
+  label_he?: string | null;
+}
+
 interface ExperienceCardProps {
   experience: {
     id: string;
@@ -27,6 +34,8 @@ interface ExperienceCardProps {
       name_he?: string | null;
       city: string;
       city_he?: string | null;
+      region?: string | null;
+      region_he?: string | null;
       hero_image?: string | null;
     } | null;
     includes?: string[] | null;
@@ -35,6 +44,9 @@ interface ExperienceCardProps {
     max_nights?: number | null;
     min_party?: number | null;
     max_party?: number | null;
+    experience_highlight_tags?: Array<{
+      highlight_tags: HighlightTag;
+    }> | null;
   };
   badge?: string | null;
   originalPrice?: number | null;
@@ -70,8 +82,10 @@ export default function ExperienceCard({
 
   const title = getLocalizedField(experience, 'title', lang) as string;
   const hotelName = experience.hotels ? (getLocalizedField(experience.hotels, 'name', lang) as string) : '';
-  const city = experience.hotels ? (getLocalizedField(experience.hotels, 'city', lang) as string) : '';
-  const includes = (getLocalizedField(experience, 'includes', lang) as string[] | null) || [];
+  const region = experience.hotels ? (getLocalizedField(experience.hotels, 'region', lang) as string || getLocalizedField(experience.hotels, 'city', lang) as string) : '';
+
+  // Get highlight tags
+  const highlightTags = experience.experience_highlight_tags?.map(eht => eht.highlight_tags) || [];
 
   // Currency symbol mapping
   const currencySymbol = experience.currency === 'ILS' ? '₪' : experience.currency === 'USD' ? '$' : '€';
@@ -174,13 +188,6 @@ export default function ExperienceCard({
     wishlistMutation.mutate({ isAdding: !isInWishlist });
   };
 
-  // Format highlights - max 3-4 items
-  const highlights = includes.length > 0 
-    ? includes.slice(0, 4).join(' • ')
-    : experience.min_nights && experience.max_nights
-    ? `${experience.min_nights}-${experience.max_nights} ${lang === 'he' ? 'לילות' : 'nights'} • ${experience.min_party}-${experience.max_party} ${lang === 'he' ? 'אורחים' : 'guests'}`
-    : '';
-
   // Calculate display price
   const displayPrice = originalPrice && discountPercent 
     ? Math.floor(experience.base_price * (1 - discountPercent / 100))
@@ -251,35 +258,40 @@ export default function ExperienceCard({
         </div>
 
         {/* Content under image */}
-        <div className="space-y-0">
-          {/* Line 1: Location and Rating */}
-          <div className="flex items-center justify-between gap-1">
-            <p className="text-[10px] text-muted-foreground truncate">
-              {distance && userCity
-                ? `${city} · ${distance} km`
-                : city}
-            </p>
-            {rating && (
-              <div className="flex items-center gap-0.5 text-[10px] whitespace-nowrap flex-shrink-0">
-                <span className="text-foreground">★</span>
-                <span className="font-semibold">{rating.toFixed(1)}</span>
-                {reviewCount && (
-                  <span className="text-muted-foreground">({reviewCount})</span>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="space-y-0.5">
+          {/* Line 1: Rating - bigger with yellow star */}
+          {rating && (
+            <div className="flex items-center gap-1 text-sm">
+              <span className="text-yellow-500">★</span>
+              <span className="font-bold">{rating.toFixed(1)}</span>
+              {reviewCount && (
+                <span className="text-muted-foreground text-xs">({reviewCount})</span>
+              )}
+            </div>
+          )}
 
-          {/* Line 2: Hotel name */}
+          {/* Line 2: Hotel name • Region */}
           <h4 className="font-semibold text-xs text-foreground leading-tight line-clamp-1">
-            {hotelName}
+            {hotelName}{region ? ` • ${region}` : ''}
           </h4>
 
-          {/* Line 3: Highlights */}
-          {highlights && (
-            <p className="text-[10px] text-muted-foreground line-clamp-1">
-              {highlights}
-            </p>
+          {/* Line 3: Highlight Tags as badges */}
+          {highlightTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-0.5">
+              {highlightTags.slice(0, 4).map((tag) => (
+                <span
+                  key={tag.id}
+                  className="inline-block px-1.5 py-0.5 bg-muted rounded-full text-[9px] font-medium uppercase tracking-wide text-muted-foreground"
+                >
+                  {lang === 'he' && tag.label_he ? tag.label_he : tag.label_en}
+                </span>
+              ))}
+              {highlightTags.length > 4 && (
+                <span className="inline-block px-1.5 py-0.5 text-[9px] text-muted-foreground">
+                  +{highlightTags.length - 4}
+                </span>
+              )}
+            </div>
           )}
 
           {/* Line 4: Price */}

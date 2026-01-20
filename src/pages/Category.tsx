@@ -53,9 +53,18 @@ const Category = () => {
             city,
             city_he,
             region,
+            region_he,
             latitude,
             longitude,
             hero_image
+          ),
+          experience_highlight_tags (
+            highlight_tags (
+              id,
+              slug,
+              label_en,
+              label_he
+            )
           )
         `)
         .eq("category_id", category?.id)

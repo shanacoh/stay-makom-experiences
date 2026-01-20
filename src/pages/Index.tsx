@@ -108,7 +108,18 @@ const Index = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("*, hotels(name, name_he, city, city_he, region, hero_image)")
+        .select(`
+          *, 
+          hotels(name, name_he, city, city_he, region, region_he, hero_image),
+          experience_highlight_tags (
+            highlight_tags (
+              id,
+              slug,
+              label_en,
+              label_he
+            )
+          )
+        `)
         .eq("status", "published")
         .order("created_at", { ascending: false })
         .limit(4);
@@ -122,7 +133,19 @@ const Index = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("experiences")
-        .select("*, hotels(name, name_he, city, city_he, region, hero_image), experience_reviews(rating)")
+        .select(`
+          *, 
+          hotels(name, name_he, city, city_he, region, region_he, hero_image), 
+          experience_reviews(rating),
+          experience_highlight_tags (
+            highlight_tags (
+              id,
+              slug,
+              label_en,
+              label_he
+            )
+          )
+        `)
         .eq("status", "published");
       if (error) throw error;
       return data;

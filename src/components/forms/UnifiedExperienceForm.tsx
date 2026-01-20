@@ -53,6 +53,7 @@ import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import IncludesManager from "@/components/admin/IncludesManager";
 import ExperienceExtrasSelector from "@/components/admin/ExperienceExtrasSelector";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import { HighlightTagsSelector } from "@/components/admin/HighlightTagsSelector";
 import { generateSlug } from "@/lib/utils";
 
 const experienceSchema = z.object({
@@ -885,6 +886,9 @@ export function UnifiedExperienceForm({
             )}
           </CardContent>
         </Card>
+
+        {/* Highlight Tags (badges on cards) */}
+        <HighlightTagsSelector experienceId={experienceId} />
 
         {/* Spice It Up (Extras) */}
         <Card>
