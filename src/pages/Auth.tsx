@@ -51,10 +51,11 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (user) {
+    // Don't redirect if onboarding is in progress
+    if (user && !showOnboarding && !newUserId) {
       navigate("/account");
     }
-  }, [user, navigate]);
+  }, [user, navigate, showOnboarding, newUserId]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
