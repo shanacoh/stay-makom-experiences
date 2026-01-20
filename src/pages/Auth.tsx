@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Loader2, ArrowLeft, Eye, EyeOff, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import OAuthButtons from "@/components/auth/OAuthButtons";
+import OnboardingFlow from "@/components/auth/OnboardingFlow";
 
 import heroImage from "@/assets/desert-hotel-pool.jpg";
 
@@ -37,6 +38,8 @@ const Auth = () => {
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [newUserId, setNewUserId] = useState<string | null>(null);
   
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
@@ -96,7 +99,7 @@ const Auth = () => {
       const validated = signupSchema.parse(signupData);
       setLoading(true);
 
-      const { error } = await signUp(
+      const { error, data } = await signUp(
         validated.email,
         validated.password,
         validated.displayName
@@ -108,7 +111,13 @@ const Auth = () => {
         } else {
           toast.error(error.message);
         }
+      } else if (data?.user?.id) {
+        // Account created, open onboarding flow
+        setNewUserId(data.user.id);
+        setShowOnboarding(true);
+        toast.success("Account created! Let's complete your profile.");
       } else {
+        // Fallback if no user ID returned
         toast.success("Account created! You can now sign in.");
         setActiveTab("login");
       }
@@ -156,15 +165,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Hero Section - Left Side */}
-      <div className="relative w-full lg:w-1/2 h-[30vh] sm:h-[35vh] lg:h-screen">
-        <img
-          src={heroImage}
-          alt="Luxury desert retreat"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+    <>
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        {/* Hero Section - Left Side */}
+        <div className="relative w-full lg:w-1/2 h-[30vh] sm:h-[35vh] lg:h-screen">
+          <img
+            src={heroImage}
+            alt="Luxury desert retreat"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         
         {/* Back to Home - Mobile/Tablet */}
         <Link 
@@ -437,6 +447,20 @@ const Auth = () => {
         </div>
       </div>
     </div>
+
+      {/* Onboarding Dialog */}
+      {newUserId && (
+        <OnboardingFlow
+          open={showOnboarding}
+          onComplete={() => {
+            setShowOnboarding(false);
+            navigate("/account");
+          }}
+          userId={newUserId}
+          lang="en"
+        />
+      )}
+    </>
   );
 };
 
