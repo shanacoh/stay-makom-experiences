@@ -55,7 +55,7 @@ const CategoryFilters = ({ onFilterChange, onShowMapToggle, showMap = false, cla
 
   return (
     <div className={cn(
-      "sticky top-14 z-40 py-3 sm:py-4",
+      "sticky top-0 z-40 py-3 sm:py-4",
       "bg-gradient-to-b from-background via-background to-background/95",
       "backdrop-blur-sm",
       className
