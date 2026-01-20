@@ -42,7 +42,7 @@ export function HighlightTagsSelector({ experienceId }: HighlightTagsSelectorPro
     },
   });
 
-  // Fetch existing experience tags
+  // Fetch existing experience tags (tag IDs)
   const { data: experienceTags, isLoading: isLoadingExpTags } = useQuery({
     queryKey: ["experience-highlight-tags", experienceId],
     queryFn: async () => {
@@ -57,7 +57,28 @@ export function HighlightTagsSelector({ experienceId }: HighlightTagsSelectorPro
     enabled: !!experienceId,
   });
 
+  // Fetch custom tags linked to this experience (is_common = false)
+  const { data: customTags, isLoading: isLoadingCustomTags } = useQuery({
+    queryKey: ["highlight-tags-custom", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return [];
+      const { data, error } = await supabase
+        .from("experience_highlight_tags")
+        .select("tag_id, highlight_tags(*)")
+        .eq("experience_id", experienceId);
+      if (error) throw error;
+      // Filter to only custom tags (is_common = false)
+      return data
+        .map(eht => eht.highlight_tags)
+        .filter((tag): tag is NonNullable<typeof tag> => tag !== null && !tag.is_common);
+    },
+    enabled: !!experienceId,
+  });
+
   const selectedTagIds = experienceTags || [];
+  
+  // Combine common + custom tags for display
+  const allAvailableTags = [...(commonTags || []), ...(customTags || [])];
 
   // Add tag mutation
   const addTagMutation = useMutation({
@@ -114,7 +135,7 @@ export function HighlightTagsSelector({ experienceId }: HighlightTagsSelectorPro
       return data;
     },
     onSuccess: (newTag) => {
-      queryClient.invalidateQueries({ queryKey: ["highlight-tags-common"] });
+      queryClient.invalidateQueries({ queryKey: ["highlight-tags-custom", experienceId] });
       // Also add it to the experience
       if (experienceId) {
         addTagMutation.mutate(newTag.id);
@@ -166,7 +187,7 @@ export function HighlightTagsSelector({ experienceId }: HighlightTagsSelectorPro
     );
   }
 
-  if (isLoadingTags || isLoadingExpTags) {
+  if (isLoadingTags || isLoadingExpTags || isLoadingCustomTags) {
     return (
       <Card>
         <CardHeader>
@@ -179,8 +200,8 @@ export function HighlightTagsSelector({ experienceId }: HighlightTagsSelectorPro
     );
   }
 
-  // Get selected tags details for preview
-  const selectedTagsDetails = commonTags?.filter(t => selectedTagIds.includes(t.id)) || [];
+  // Get selected tags details for preview (from both common and custom)
+  const selectedTagsDetails = allAvailableTags.filter(t => selectedTagIds.includes(t.id));
 
   return (
     <>
