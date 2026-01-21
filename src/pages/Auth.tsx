@@ -112,15 +112,13 @@ const Auth = () => {
         } else {
           toast.error(error.message);
         }
-      } else if (data?.user?.id) {
-        // Account created, open onboarding flow
-        setNewUserId(data.user.id);
+      } else {
+        // Signup successful → open onboarding IMMEDIATELY
+        // Even if data.user.id is not available yet, we show onboarding
+        const userId = data?.user?.id || null;
+        setNewUserId(userId);
         setShowOnboarding(true);
         toast.success("Account created! Let's complete your profile.");
-      } else {
-        // Fallback if no user ID returned
-        toast.success("Account created! You can now sign in.");
-        setActiveTab("login");
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
