@@ -15,7 +15,6 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
-import OnboardingFlow from "@/components/auth/OnboardingFlow";
 
 const Header = () => {
   const location = useLocation();
@@ -28,16 +27,14 @@ const Header = () => {
     "/partners",
     "/about",
   ].includes(location.pathname);
-  // Experience pages should NOT be transparent (no dark hero background)
   const isTransparentPage = isHomePage || isDarkHeroPage;
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   
-  // Auth popup states
+  // Auth popup state
   const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup" }>({ open: false, tab: "login" });
-  const [onboarding, setOnboarding] = useState<{ open: boolean; userId: string }>({ open: false, userId: "" });
 
   const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
@@ -60,15 +57,11 @@ const Header = () => {
       const currentScrollY = window.scrollY;
       const scrolled = currentScrollY > 80;
 
-      // Show/hide header based on scroll direction
       if (currentScrollY < 10) {
-        // Always show at top
         setIsVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down & past threshold - hide
         setIsVisible(false);
       } else if (currentScrollY < lastScrollY) {
-        // Scrolling up - show immediately
         setIsVisible(true);
       }
 
@@ -156,7 +149,6 @@ const Header = () => {
             }`}
             onClick={() => {
               if (location.pathname !== "/") {
-                // keep language when navigating with hash
                 navigate(getLocalizedPath("/#choose-escape"));
               } else {
                 document
@@ -246,26 +238,14 @@ const Header = () => {
         </div>
       </div>
       
-      {/* Auth Dialog */}
-      {/* Auth Dialog */}
+      {/* Auth Dialog - All-in-one signup */}
       <AuthPromptDialog
         open={authDialog.open}
         onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
         lang={lang as "en" | "fr" | "he"}
         defaultTab={authDialog.tab}
-        onSignupSuccess={(userId) => {
+        onSignupSuccess={() => {
           setAuthDialog({ open: false, tab: "login" });
-          setOnboarding({ open: true, userId });
-        }}
-      />
-      
-      {/* Onboarding Flow */}
-      <OnboardingFlow
-        open={onboarding.open}
-        userId={onboarding.userId}
-        lang={lang as "en" | "fr" | "he"}
-        onComplete={() => {
-          setOnboarding({ open: false, userId: "" });
           navigateLocalized("/account");
         }}
       />
