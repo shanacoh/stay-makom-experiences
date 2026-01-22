@@ -67,6 +67,16 @@ const INTERESTS = [
   { id: "work", label: { en: "Work Unplugged", fr: "Travail Déconnecté", he: "עבודה מנותקת" } },
 ];
 
+const REFERRAL_SOURCES = [
+  { id: "instagram", label: { en: "Instagram", fr: "Instagram", he: "אינסטגרם" } },
+  { id: "tiktok", label: { en: "TikTok", fr: "TikTok", he: "טיקטוק" } },
+  { id: "facebook", label: { en: "Facebook Ads", fr: "Publicité Facebook", he: "פרסומת פייסבוק" } },
+  { id: "google", label: { en: "Google", fr: "Google", he: "גוגל" } },
+  { id: "friend", label: { en: "Friend/Family", fr: "Ami/Famille", he: "חבר/משפחה" } },
+  { id: "press", label: { en: "Press/Blog", fr: "Presse/Blog", he: "עיתונות/בלוג" } },
+  { id: "other", label: { en: "Other", fr: "Autre", he: "אחר" } },
+];
+
 function copyFor(lang: Lang) {
   switch (lang) {
     case "fr":
@@ -82,6 +92,7 @@ function copyFor(lang: Lang) {
           country: "Nationalité",
           password: "Mot de passe",
           interests: "Qu'est-ce qui vous intéresse ?",
+          referralSource: "Comment nous avez-vous connu ?",
         },
         actions: { login: "Continuer", signup: "Créer mon compte" },
         toasts: {
@@ -103,6 +114,7 @@ function copyFor(lang: Lang) {
           country: "לאום",
           password: "סיסמה",
           interests: "מה מעניין אותך?",
+          referralSource: "איך שמעת עלינו?",
         },
         actions: { login: "המשך", signup: "צור חשבון" },
         toasts: {
@@ -124,6 +136,7 @@ function copyFor(lang: Lang) {
           country: "Nationality",
           password: "Password",
           interests: "What interests you?",
+          referralSource: "How did you hear about us?",
         },
         actions: { login: "Continue", signup: "Create my account" },
         toasts: {
@@ -157,6 +170,7 @@ export default function AuthPromptDialog({
     country: "",
     password: "",
     interests: [] as string[],
+    referralSource: "",
   });
 
   const toggleInterest = (id: string) => {
@@ -218,6 +232,7 @@ export default function AuthPromptDialog({
           display_name: displayName,
           phone: parsed.data.phone || null,
           interests: parsed.data.interests,
+          referral_source: signupData.referralSource || null,
         }).eq("user_id", userId);
 
         // Create customer record
@@ -444,6 +459,33 @@ export default function AuthPromptDialog({
                       >
                         {selected && <Check className="h-3 w-3" />}
                         {interest.label[lang]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Referral Source */}
+              <div className="space-y-2 pt-2">
+                <Label className="text-xs font-medium">{c.fields.referralSource}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {REFERRAL_SOURCES.map((source) => {
+                    const selected = signupData.referralSource === source.id;
+                    return (
+                      <button
+                        key={source.id}
+                        type="button"
+                        onClick={() => setSignupData((p) => ({ ...p, referralSource: source.id }))}
+                        disabled={loading}
+                        className={cn(
+                          "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                          selected
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted/50 text-foreground border-border/50 hover:bg-muted"
+                        )}
+                      >
+                        {selected && <Check className="h-3 w-3" />}
+                        {source.label[lang]}
                       </button>
                     );
                   })}
