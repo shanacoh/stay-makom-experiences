@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, Check } from "lucide-react";
 import OAuthButtons from "./OAuthButtons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 type Lang = "en" | "fr" | "he";
 
@@ -26,64 +34,101 @@ const loginSchema = z.object({
 });
 
 const signupSchema = z.object({
+  firstName: z.string().min(1, "Required"),
+  lastName: z.string().min(1, "Required"),
+  phone: z.string().optional(),
   email: z.string().email(),
+  country: z.string().min(1, "Required"),
   password: z.string().min(6),
-  displayName: z.string().optional(),
+  interests: z.array(z.string()).optional(),
 });
+
+const COUNTRIES = [
+  { value: "IL", label: { en: "Israel", fr: "Israël", he: "ישראל" } },
+  { value: "FR", label: { en: "France", fr: "France", he: "צרפת" } },
+  { value: "US", label: { en: "United States", fr: "États-Unis", he: "ארה״ב" } },
+  { value: "GB", label: { en: "United Kingdom", fr: "Royaume-Uni", he: "בריטניה" } },
+  { value: "DE", label: { en: "Germany", fr: "Allemagne", he: "גרמניה" } },
+  { value: "IT", label: { en: "Italy", fr: "Italie", he: "איטליה" } },
+  { value: "ES", label: { en: "Spain", fr: "Espagne", he: "ספרד" } },
+  { value: "CA", label: { en: "Canada", fr: "Canada", he: "קנדה" } },
+  { value: "AU", label: { en: "Australia", fr: "Australie", he: "אוסטרליה" } },
+  { value: "OTHER", label: { en: "Other", fr: "Autre", he: "אחר" } },
+];
+
+const INTERESTS = [
+  { id: "romantic", label: { en: "Romantic Escape", fr: "Escapade Romantique", he: "בריחה רומנטית" } },
+  { id: "nature", label: { en: "Nature & Outdoor", fr: "Nature & Plein Air", he: "טבע ושטח" } },
+  { id: "gastronomy", label: { en: "Foody Discovery", fr: "Découverte Culinaire", he: "גילוי קולינרי" } },
+  { id: "wellness", label: { en: "Mindful Reset", fr: "Reset Bien-être", he: "איפוס מודע" } },
+  { id: "family", label: { en: "Family Fun", fr: "Fun en Famille", he: "כיף משפחתי" } },
+  { id: "golden", label: { en: "Golden Age", fr: "Âge d'Or", he: "גיל הזהב" } },
+  { id: "active", label: { en: "Active Adventure", fr: "Aventure Active", he: "הרפתקה פעילה" } },
+  { id: "work", label: { en: "Work Unplugged", fr: "Travail Déconnecté", he: "עבודה מנותקת" } },
+];
 
 function copyFor(lang: Lang) {
   switch (lang) {
     case "fr":
       return {
         title: "Sauvegarder dans vos favoris",
-        subtitle: "Connectez-vous pour sauvegarder vos expériences préférées et y accéder depuis n'importe quel appareil.",
+        subtitle: "Connectez-vous pour sauvegarder vos expériences préférées.",
         tabs: { login: "Connexion", signup: "Inscription" },
         fields: {
+          firstName: "Prénom",
+          lastName: "Nom",
+          phone: "Téléphone (optionnel)",
           email: "Email",
+          country: "Nationalité",
           password: "Mot de passe",
-          confirm: "Confirmer le mot de passe",
-          name: "Nom (optionnel)",
+          interests: "Qu'est-ce qui vous intéresse ?",
         },
-        actions: { login: "Continuer", signup: "Créer un compte" },
+        actions: { login: "Continuer", signup: "Créer mon compte" },
         toasts: {
           okLogin: "Connecté !",
-          okSignup: "Compte créé ! Vous pouvez vous connecter.",
+          okSignup: "Compte créé !",
           invalid: "Vérifiez vos informations.",
         },
       };
     case "he":
       return {
         title: "שמרו לרשימת המועדפים",
-        subtitle: "התחברו כדי לשמור חוויות שאהבתם ולגשת אליהן מכל מכשיר.",
+        subtitle: "התחברו כדי לשמור חוויות שאהבתם.",
         tabs: { login: "התחברות", signup: "הרשמה" },
         fields: {
+          firstName: "שם פרטי",
+          lastName: "שם משפחה",
+          phone: "טלפון (אופציונלי)",
           email: "אימייל",
+          country: "לאום",
           password: "סיסמה",
-          confirm: "אימות סיסמה",
-          name: "שם (אופציונלי)",
+          interests: "מה מעניין אותך?",
         },
         actions: { login: "המשך", signup: "צור חשבון" },
         toasts: {
           okLogin: "התחברת!",
-          okSignup: "החשבון נוצר! אפשר להתחבר עכשיו.",
+          okSignup: "החשבון נוצר!",
           invalid: "בדקו את הפרטים.",
         },
       };
     default:
       return {
         title: "Save to your wishlist",
-        subtitle: "Sign in to save experiences you love and access them from any device.",
+        subtitle: "Sign in to save experiences you love.",
         tabs: { login: "Sign In", signup: "Sign Up" },
         fields: {
+          firstName: "First Name",
+          lastName: "Last Name",
+          phone: "Phone (optional)",
           email: "Email",
+          country: "Nationality",
           password: "Password",
-          confirm: "Confirm password",
-          name: "Name (optional)",
+          interests: "What interests you?",
         },
-        actions: { login: "Continue", signup: "Create account" },
+        actions: { login: "Continue", signup: "Create my account" },
         toasts: {
           okLogin: "Signed in!",
-          okSignup: "Account created! You can sign in now.",
+          okSignup: "Account created!",
           invalid: "Please check your details.",
         },
       };
@@ -105,10 +150,23 @@ export default function AuthPromptDialog({
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
     email: "",
+    country: "",
     password: "",
-    displayName: "",
+    interests: [] as string[],
   });
+
+  const toggleInterest = (id: string) => {
+    setSignupData((prev) => ({
+      ...prev,
+      interests: prev.interests.includes(id)
+        ? prev.interests.filter((i) => i !== id)
+        : [...prev.interests, id],
+    }));
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,35 +200,40 @@ export default function AuthPromptDialog({
 
     setLoading(true);
     try {
+      const displayName = `${parsed.data.firstName} ${parsed.data.lastName}`;
       const { error, data } = await signUp(
         parsed.data.email,
         parsed.data.password,
-        parsed.data.displayName || undefined
+        displayName
       );
       if (error) {
         toast.error(error.message);
         return;
       }
-      
-      // If we have a callback and a userId, trigger onboarding
-      if (onSignupSuccess && data?.user?.id) {
-        toast.success(c.toasts.okSignup);
-        onOpenChange(false);
-        onSignupSuccess(data.user.id);
-      } else if (onSignupSuccess) {
-        // Try to get the user from the session
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.id) {
-          toast.success(c.toasts.okSignup);
-          onOpenChange(false);
-          onSignupSuccess(user.id);
-        } else {
-          toast.success(c.toasts.okSignup);
-          setTab("login");
-        }
-      } else {
-        toast.success(c.toasts.okSignup);
-        setTab("login");
+
+      const userId = data?.user?.id;
+      if (userId) {
+        // Update user_profiles with additional data
+        await supabase.from("user_profiles").update({
+          display_name: displayName,
+          phone: parsed.data.phone || null,
+          interests: parsed.data.interests,
+        }).eq("user_id", userId);
+
+        // Create customer record
+        await supabase.from("customers").upsert({
+          user_id: userId,
+          first_name: parsed.data.firstName,
+          last_name: parsed.data.lastName,
+          phone: parsed.data.phone || null,
+          address_country: parsed.data.country,
+        }, { onConflict: "user_id" });
+      }
+
+      toast.success(c.toasts.okSignup);
+      onOpenChange(false);
+      if (onSignupSuccess && userId) {
+        onSignupSuccess(userId);
       }
     } finally {
       setLoading(false);
@@ -179,30 +242,27 @@ export default function AuthPromptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl p-0 overflow-hidden border-0 shadow-2xl"
-        dir={isRTL ? 'rtl' : 'ltr'}
+      <DialogContent
+        className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl p-0 overflow-hidden border-0 shadow-2xl max-h-[min(90vh,700px)] flex flex-col"
+        dir={isRTL ? "rtl" : "ltr"}
       >
-        {/* Header with decorative icon */}
-        <div className="pt-8 pb-4 px-6 text-center bg-gradient-to-b from-muted/50 to-transparent">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
-            <Heart className="h-6 w-6 text-primary" />
+        {/* Header - compact */}
+        <div className="pt-5 pb-3 px-5 text-center bg-gradient-to-b from-muted/50 to-transparent shrink-0">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
+            <Heart className="h-5 w-5 text-primary" />
           </div>
-          <h2 className="font-serif text-2xl text-foreground mb-2">
-            {c.title}
-          </h2>
-          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-            {c.subtitle}
-          </p>
+          <h2 className="font-serif text-xl text-foreground">{c.title}</h2>
+          <p className="text-xs text-muted-foreground mt-1">{c.subtitle}</p>
         </div>
 
-        <div className="px-6 pb-6">
-          {/* Tabs - Pill style */}
-          <div className="flex p-1 bg-muted/60 rounded-full mb-6">
+        {/* Scrollable content */}
+        <div className="px-5 pb-5 overflow-y-auto flex-1">
+          {/* Tabs */}
+          <div className="flex p-1 bg-muted/60 rounded-full mb-4">
             <button
               type="button"
               onClick={() => setTab("login")}
-              className={`flex-1 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+              className={`flex-1 py-2 text-xs font-medium rounded-full transition-all ${
                 tab === "login"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -213,7 +273,7 @@ export default function AuthPromptDialog({
             <button
               type="button"
               onClick={() => setTab("signup")}
-              className={`flex-1 py-2.5 text-sm font-medium rounded-full transition-all duration-200 ${
+              className={`flex-1 py-2 text-xs font-medium rounded-full transition-all ${
                 tab === "signup"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -223,50 +283,39 @@ export default function AuthPromptDialog({
             </button>
           </div>
 
-          {/* OAuth Buttons */}
+          {/* OAuth */}
           <OAuthButtons lang={lang} disabled={loading} />
 
           {/* Login Form */}
           {tab === "login" && (
-            <form onSubmit={handleLogin} className="space-y-4 animate-fade-in">
-              <div className="space-y-2">
-                <Label htmlFor="auth-dialog-login-email" className="text-sm font-medium">
+            <form onSubmit={handleLogin} className="space-y-3 animate-fade-in">
+              <div className="space-y-1">
+                <Label htmlFor="login-email" className="text-xs font-medium">
                   {c.fields.email}
                 </Label>
                 <Input
-                  id="auth-dialog-login-email"
+                  id="login-email"
                   type="email"
                   value={loginData.email}
-                  onChange={(e) =>
-                    setLoginData((p) => ({ ...p, email: e.target.value }))
-                  }
+                  onChange={(e) => setLoginData((p) => ({ ...p, email: e.target.value }))}
                   disabled={loading}
-                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="auth-dialog-login-password" className="text-sm font-medium">
+              <div className="space-y-1">
+                <Label htmlFor="login-password" className="text-xs font-medium">
                   {c.fields.password}
                 </Label>
                 <Input
-                  id="auth-dialog-login-password"
+                  id="login-password"
                   type="password"
                   value={loginData.password}
-                  onChange={(e) =>
-                    setLoginData((p) => ({ ...p, password: e.target.value }))
-                  }
+                  onChange={(e) => setLoginData((p) => ({ ...p, password: e.target.value }))}
                   disabled={loading}
-                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
                 />
               </div>
-
-              <Button 
-                type="submit" 
-                variant="cta"
-                className="w-full h-12 text-base mt-2" 
-                disabled={loading}
-              >
+              <Button type="submit" variant="cta" className="w-full h-10 text-sm mt-2" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {c.actions.login}
               </Button>
@@ -275,61 +324,133 @@ export default function AuthPromptDialog({
 
           {/* Signup Form */}
           {tab === "signup" && (
-            <form onSubmit={handleSignup} className="space-y-4 animate-fade-in">
-              <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-name" className="text-sm font-medium">
-                  {c.fields.name}
-                </Label>
-                <Input
-                  id="auth-dialog-signup-name"
-                  type="text"
-                  value={signupData.displayName}
-                  onChange={(e) =>
-                    setSignupData((p) => ({ ...p, displayName: e.target.value }))
-                  }
-                  disabled={loading}
-                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
-                />
+            <form onSubmit={handleSignup} className="space-y-3 animate-fade-in">
+              {/* Row 1: First + Last Name */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="signup-firstname" className="text-xs font-medium">
+                    {c.fields.firstName} *
+                  </Label>
+                  <Input
+                    id="signup-firstname"
+                    type="text"
+                    value={signupData.firstName}
+                    onChange={(e) => setSignupData((p) => ({ ...p, firstName: e.target.value }))}
+                    disabled={loading}
+                    className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="signup-lastname" className="text-xs font-medium">
+                    {c.fields.lastName} *
+                  </Label>
+                  <Input
+                    id="signup-lastname"
+                    type="text"
+                    value={signupData.lastName}
+                    onChange={(e) => setSignupData((p) => ({ ...p, lastName: e.target.value }))}
+                    disabled={loading}
+                    className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-email" className="text-sm font-medium">
-                  {c.fields.email}
+              {/* Row 2: Phone + Country */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="signup-phone" className="text-xs font-medium">
+                    {c.fields.phone}
+                  </Label>
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    value={signupData.phone}
+                    onChange={(e) => setSignupData((p) => ({ ...p, phone: e.target.value }))}
+                    disabled={loading}
+                    className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="signup-country" className="text-xs font-medium">
+                    {c.fields.country} *
+                  </Label>
+                  <Select
+                    value={signupData.country}
+                    onValueChange={(v) => setSignupData((p) => ({ ...p, country: v }))}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label[lang]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="space-y-1">
+                <Label htmlFor="signup-email" className="text-xs font-medium">
+                  {c.fields.email} *
                 </Label>
                 <Input
-                  id="auth-dialog-signup-email"
+                  id="signup-email"
                   type="email"
                   value={signupData.email}
-                  onChange={(e) =>
-                    setSignupData((p) => ({ ...p, email: e.target.value }))
-                  }
+                  onChange={(e) => setSignupData((p) => ({ ...p, email: e.target.value }))}
                   disabled={loading}
-                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="auth-dialog-signup-password" className="text-sm font-medium">
-                  {c.fields.password}
+              {/* Password */}
+              <div className="space-y-1">
+                <Label htmlFor="signup-password" className="text-xs font-medium">
+                  {c.fields.password} *
                 </Label>
                 <Input
-                  id="auth-dialog-signup-password"
+                  id="signup-password"
                   type="password"
                   value={signupData.password}
-                  onChange={(e) =>
-                    setSignupData((p) => ({ ...p, password: e.target.value }))
-                  }
+                  onChange={(e) => setSignupData((p) => ({ ...p, password: e.target.value }))}
                   disabled={loading}
-                  className="h-12 rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  className="h-10 rounded-lg bg-muted/50 border-border/50 text-sm"
                 />
               </div>
 
-              <Button 
-                type="submit" 
-                variant="cta"
-                className="w-full h-12 text-base mt-2" 
-                disabled={loading}
-              >
+              {/* Interests */}
+              <div className="space-y-2 pt-2">
+                <Label className="text-xs font-medium">{c.fields.interests}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {INTERESTS.map((interest) => {
+                    const selected = signupData.interests.includes(interest.id);
+                    return (
+                      <button
+                        key={interest.id}
+                        type="button"
+                        onClick={() => toggleInterest(interest.id)}
+                        disabled={loading}
+                        className={cn(
+                          "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                          selected
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted/50 text-foreground border-border/50 hover:bg-muted"
+                        )}
+                      >
+                        {selected && <Check className="h-3 w-3" />}
+                        {interest.label[lang]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <Button type="submit" variant="cta" className="w-full h-10 text-sm mt-3" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {c.actions.signup}
               </Button>
