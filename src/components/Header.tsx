@@ -13,6 +13,9 @@ import { useState, useEffect } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
+import AccountBubble from "@/components/auth/AccountBubble";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import OnboardingFlow from "@/components/auth/OnboardingFlow";
 
 const Header = () => {
   const location = useLocation();
@@ -31,6 +34,10 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  
+  // Auth popup states
+  const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup" }>({ open: false, tab: "login" });
+  const [onboarding, setOnboarding] = useState<{ open: boolean; userId: string }>({ open: false, userId: "" });
 
   const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
@@ -227,28 +234,43 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className={`${
-                isTransparentPage && !isScrolled
-                  ? "text-white hover:bg-white/10"
-                  : "hover:bg-foreground/5"
-              }`}
-            >
-              <Link to={getLocalizedPath("/auth")}>
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
+            <AccountBubble
+              lang={lang as "en" | "fr" | "he"}
+              isTransparent={isTransparentPage && !isScrolled}
+              onSignIn={() => setAuthDialog({ open: true, tab: "login" })}
+              onSignUp={() => setAuthDialog({ open: true, tab: "signup" })}
+            />
           )}
 
           <HamburgerMenu isScrolled={isScrolled} />
         </div>
       </div>
+      
+      {/* Auth Dialog */}
+      {/* Auth Dialog */}
+      <AuthPromptDialog
+        open={authDialog.open}
+        onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
+        lang={lang as "en" | "fr" | "he"}
+        defaultTab={authDialog.tab}
+        onSignupSuccess={(userId) => {
+          setAuthDialog({ open: false, tab: "login" });
+          setOnboarding({ open: true, userId });
+        }}
+      />
+      
+      {/* Onboarding Flow */}
+      <OnboardingFlow
+        open={onboarding.open}
+        userId={onboarding.userId}
+        lang={lang as "en" | "fr" | "he"}
+        onComplete={() => {
+          setOnboarding({ open: false, userId: "" });
+          navigateLocalized("/account");
+        }}
+      />
     </header>
   );
 };
 
 export default Header;
-
