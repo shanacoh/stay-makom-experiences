@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   lang: Lang;
   defaultTab?: "login" | "signup";
+  onSignupSuccess?: (userId: string) => void;
 };
 
 const loginSchema = z.object({
@@ -93,6 +95,7 @@ export default function AuthPromptDialog({
   onOpenChange,
   lang,
   defaultTab = "login",
+  onSignupSuccess,
 }: Props) {
   const c = useMemo(() => copyFor(lang), [lang]);
   const { signIn, signUp } = useAuth();
@@ -139,7 +142,7 @@ export default function AuthPromptDialog({
 
     setLoading(true);
     try {
-      const { error } = await signUp(
+      const { error, data } = await signUp(
         parsed.data.email,
         parsed.data.password,
         parsed.data.displayName || undefined
@@ -148,8 +151,27 @@ export default function AuthPromptDialog({
         toast.error(error.message);
         return;
       }
-      toast.success(c.toasts.okSignup);
-      setTab("login");
+      
+      // If we have a callback and a userId, trigger onboarding
+      if (onSignupSuccess && data?.user?.id) {
+        toast.success(c.toasts.okSignup);
+        onOpenChange(false);
+        onSignupSuccess(data.user.id);
+      } else if (onSignupSuccess) {
+        // Try to get the user from the session
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) {
+          toast.success(c.toasts.okSignup);
+          onOpenChange(false);
+          onSignupSuccess(user.id);
+        } else {
+          toast.success(c.toasts.okSignup);
+          setTab("login");
+        }
+      } else {
+        toast.success(c.toasts.okSignup);
+        setTab("login");
+      }
     } finally {
       setLoading(false);
     }
