@@ -1,13 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, LayoutDashboard, Hotel, UserCircle } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
@@ -15,6 +8,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import UserDropdown from "@/components/auth/UserDropdown";
 
 const Header = () => {
   const location = useLocation();
@@ -36,7 +30,7 @@ const Header = () => {
   // Auth popup state
   const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup" }>({ open: false, tab: "login" });
 
-  const { user, role, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { lang, setLanguage } = useLanguage();
   const { getLocalizedPath, navigateLocalized } = useLocalizedNavigation();
@@ -46,10 +40,12 @@ const Header = () => {
     navigateLocalized("/");
   };
 
-  const getDashboardLink = () => {
-    if (role === "admin") return "/admin";
-    if (role === "hotel_admin") return "/hotel-admin";
-    return "/account";
+  const handleFavoritesClick = () => {
+    if (user) {
+      navigate("/account?tab=wishlist");
+    } else {
+      setAuthDialog({ open: true, tab: "login" });
+    }
   };
 
   useEffect(() => {
@@ -161,70 +157,11 @@ const Header = () => {
           </Button>
 
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`${
-                    isTransparentPage && !isScrolled
-                      ? "text-white hover:bg-white/10"
-                      : "hover:bg-foreground/5"
-                  }`}
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-52 p-0 bg-white border border-border/30 shadow-lg rounded-xl overflow-hidden"
-              >
-                <div className="px-3 py-2.5 border-b border-border/30">
-                  <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/70">
-                    {role === "admin"
-                      ? "Administrator"
-                      : role === "hotel_admin"
-                        ? "Hotel Partner"
-                        : "Member"}
-                  </p>
-                  <p className="text-sm text-foreground truncate mt-0.5">
-                    {user?.email}
-                  </p>
-                </div>
-
-                <div className="py-1">
-                  <DropdownMenuItem
-                    onClick={() => navigate(getDashboardLink())}
-                    className="px-3 py-2 cursor-pointer hover:bg-black/[0.03] focus:bg-black/[0.03]"
-                  >
-                    {role === "admin" ? (
-                      <LayoutDashboard className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                    ) : role === "hotel_admin" ? (
-                      <Hotel className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                    ) : (
-                      <UserCircle className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                    )}
-                    <span className="text-sm">
-                      {role === "admin"
-                        ? "Dashboard"
-                        : role === "hotel_admin"
-                          ? "Hotel Dashboard"
-                          : "My Account"}
-                    </span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="my-1" />
-
-                  <DropdownMenuItem
-                    onClick={handleSignOut}
-                    className="px-3 py-2 cursor-pointer text-muted-foreground hover:bg-black/[0.03] focus:bg-black/[0.03]"
-                  >
-                    <LogOut className="h-4 w-4 mr-2.5" />
-                    <span className="text-sm">Sign Out</span>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserDropdown
+              user={user}
+              isTransparent={isTransparentPage && !isScrolled}
+              onSignOut={handleSignOut}
+            />
           ) : (
             <AccountBubble
               lang={lang as "en" | "fr" | "he"}
@@ -233,6 +170,20 @@ const Header = () => {
               onSignUp={() => setAuthDialog({ open: true, tab: "signup" })}
             />
           )}
+
+          {/* Favorites Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleFavoritesClick}
+            className={`h-8 w-8 ${
+              isTransparentPage && !isScrolled
+                ? "text-white hover:bg-white/10"
+                : "hover:bg-foreground/5"
+            }`}
+          >
+            <Heart className="h-5 w-5" />
+          </Button>
 
           <HamburgerMenu isScrolled={isScrolled} />
         </div>

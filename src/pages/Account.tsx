@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Calendar, User, Loader2 } from "lucide-react";
+import { Heart, Calendar, User, Gift, Loader2 } from "lucide-react";
 import WishlistSection from "@/components/account/WishlistSection";
 import MyStaymakomSection from "@/components/account/MyStaymakomSection";
 import MyAccountSection from "@/components/account/MyAccountSection";
@@ -14,13 +14,24 @@ import AccountHeader from "@/components/account/AccountHeader";
 import RecommendedExperiences from "@/components/account/RecommendedExperiences";
 import RecommendedJournal from "@/components/account/RecommendedJournal";
 import SpecialNeedsSection from "@/components/account/SpecialNeedsSection";
+import GiftCardsSection from "@/components/account/GiftCardsSection";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 
 const Account = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+  
   const [activeTab, setActiveTab] = useState("wishlist");
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Sync tab with URL query param
+  useEffect(() => {
+    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile"].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
 
   // Check if onboarding is needed
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -72,7 +83,7 @@ const Account = () => {
         <AccountHeader userId={user.id} userEmail={user.email} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-muted/60 rounded-full h-12">
+          <TabsList className="grid w-full grid-cols-4 mb-8 p-1 bg-muted/60 rounded-full h-12">
             <TabsTrigger 
               value="wishlist" 
               className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
@@ -85,7 +96,14 @@ const Account = () => {
               className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
             >
               <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">MyStayMakom</span>
+              <span className="hidden sm:inline">Bookings</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="giftcards" 
+              className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+            >
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline">Gift Cards</span>
             </TabsTrigger>
             <TabsTrigger 
               value="profile" 
@@ -112,6 +130,10 @@ const Account = () => {
               title="Your next adventure awaits"
               subtitle="Discover more extraordinary experiences"
             />
+          </TabsContent>
+
+          <TabsContent value="giftcards">
+            <GiftCardsSection userId={user.id} userEmail={user.email} />
           </TabsContent>
 
           <TabsContent value="profile">
