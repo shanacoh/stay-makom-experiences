@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Sparkles } from "lucide-react";
 import ExperienceCard from "@/components/ExperienceCard";
+import CompactExperienceCard from "@/components/account/CompactExperienceCard";
 
 interface RecommendedExperiencesProps {
   userId?: string;
@@ -10,6 +11,7 @@ interface RecommendedExperiencesProps {
   title?: string;
   subtitle?: string;
   excludeIds?: string[];
+  compact?: boolean;
 }
 
 export default function RecommendedExperiences({
@@ -18,6 +20,7 @@ export default function RecommendedExperiences({
   title = "You might also like",
   subtitle = "Based on your favorites and interests",
   excludeIds = [],
+  compact = false,
 }: RecommendedExperiencesProps) {
   const navigate = useNavigate();
 
@@ -55,7 +58,7 @@ export default function RecommendedExperiences({
 
   // Fetch recommended experiences
   const { data: recommendations, isLoading } = useQuery({
-    queryKey: ["recommended-experiences", userId, userPreferences, excludeIds],
+    queryKey: ["recommended-experiences", userId, userPreferences, excludeIds, limit],
     queryFn: async () => {
       let query = supabase
         .from("experiences")
@@ -118,25 +121,41 @@ export default function RecommendedExperiences({
   }
 
   return (
-    <div className="mt-12 pt-8 border-t border-border/50">
-      <div className="flex items-center gap-2 mb-2">
-        <Sparkles className="h-5 w-5 text-accent" />
-        <h3 className="font-serif text-xl text-foreground">{title}</h3>
+    <div className="mt-10 pt-6 border-t border-border/50">
+      <div className="flex items-center gap-2 mb-1">
+        <Sparkles className="h-4 w-4 text-accent" />
+        <h3 className="font-serif text-lg text-foreground">{title}</h3>
       </div>
-      <p className="text-sm text-muted-foreground mb-6">{subtitle}</p>
+      <p className="text-xs text-muted-foreground mb-4">{subtitle}</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recommendations.map((exp) => (
-          <ExperienceCard
-            key={exp.id}
-            experience={exp}
-            isInWishlist={wishlistIds?.includes(exp.id)}
-            userId={userId}
-            rating={8.5 + Math.random() * 0.5}
-            reviewCount={50 + Math.floor(Math.random() * 950)}
-          />
-        ))}
-      </div>
+      {compact ? (
+        // Compact grid layout
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-muted/30 rounded-xl p-2">
+          {recommendations.map((exp) => (
+            <CompactExperienceCard
+              key={exp.id}
+              experience={exp}
+              isInWishlist={wishlistIds?.includes(exp.id)}
+              userId={userId}
+              rating={8.5 + Math.random() * 0.5}
+            />
+          ))}
+        </div>
+      ) : (
+        // Standard grid layout
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {recommendations.map((exp) => (
+            <ExperienceCard
+              key={exp.id}
+              experience={exp}
+              isInWishlist={wishlistIds?.includes(exp.id)}
+              userId={userId}
+              rating={8.5 + Math.random() * 0.5}
+              reviewCount={50 + Math.floor(Math.random() * 950)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

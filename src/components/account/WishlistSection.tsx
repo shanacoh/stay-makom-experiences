@@ -89,17 +89,19 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
 
   if (!wishlist || wishlist.length === 0) {
     return (
-      <Card>
+      <Card className="border-dashed">
         <CardContent className="py-16">
           <div className="text-center space-y-4">
-            <Heart className="h-16 w-16 text-muted-foreground mx-auto" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2">
+              <Heart className="h-10 w-10 text-primary" />
+            </div>
             <div>
-              <h3 className="font-semibold text-lg mb-2">Your wishlist is empty</h3>
-              <p className="text-muted-foreground">
-                Start exploring extraordinary stays and add your favorites here!
+              <h3 className="font-serif text-xl mb-2">Your wishlist is empty</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                Explore our curated experiences and save your favorites to plan your next extraordinary getaway.
               </p>
             </div>
-            <Button onClick={() => navigate("/")}>
+            <Button onClick={() => navigate("/")} variant="cta" className="mt-2">
               Discover Experiences
             </Button>
           </div>
