@@ -34,6 +34,11 @@ const Account = () => {
     }
   }, [tabFromUrl]);
 
+  // Scroll to top when tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
   // Check if onboarding is needed and get user profile
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile-onboarding", user?.id],
@@ -146,10 +151,10 @@ const Account = () => {
         {/* Account Header with Welcome & Points */}
         <AccountHeader userId={user.id} userEmail={user.email} />
 
-        {/* Desktop Layout with Sidebar */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar - hidden on mobile */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
+        {/* Desktop/Tablet Layout with Sidebar */}
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar - visible on tablet and desktop */}
+          <aside className="hidden md:block w-64 flex-shrink-0">
             <AccountSidebar 
               activeTab={activeTab} 
               onTabChange={setActiveTab} 
@@ -157,7 +162,7 @@ const Account = () => {
           </aside>
 
           {/* Mobile Tabs - visible on mobile only */}
-          <div className="lg:hidden">
+          <div className="md:hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-4 mb-6 p-1 bg-muted/60 rounded-full h-12">
                 <TabsTrigger 
