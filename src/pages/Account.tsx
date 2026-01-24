@@ -13,8 +13,9 @@ import MyAccountSection from "@/components/account/MyAccountSection";
 import AccountHeader from "@/components/account/AccountHeader";
 import RecommendedExperiences from "@/components/account/RecommendedExperiences";
 import RecommendedJournal from "@/components/account/RecommendedJournal";
-import SpecialNeedsSection from "@/components/account/SpecialNeedsSection";
+import PersonalizedRequestSection from "@/components/account/PersonalizedRequestSection";
 import GiftCardsSection from "@/components/account/GiftCardsSection";
+import AccountSidebar from "@/components/account/AccountSidebar";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 
 const Account = () => {
@@ -33,7 +34,7 @@ const Account = () => {
     }
   }, [tabFromUrl]);
 
-  // Check if onboarding is needed
+  // Check if onboarding is needed and get user profile
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile-onboarding", user?.id],
     queryFn: async () => {
@@ -74,6 +75,69 @@ const Account = () => {
     return null;
   }
 
+  // Render the active section content
+  const renderContent = () => {
+    switch (activeTab) {
+      case "wishlist":
+        return (
+          <>
+            <WishlistSection userId={user.id} />
+            <RecommendedExperiences 
+              userId={user.id} 
+              title="You might also like"
+              subtitle="Based on your favorites and interests"
+              compact
+              limit={4}
+            />
+            <PersonalizedRequestSection 
+              userName={profile?.display_name || undefined}
+              userEmail={user.email}
+            />
+          </>
+        );
+      case "bookings":
+        return (
+          <>
+            <MyStaymakomSection userId={user.id} />
+            <RecommendedExperiences 
+              userId={user.id} 
+              title="Your next adventure awaits"
+              subtitle="Discover more extraordinary experiences"
+              compact
+              limit={4}
+            />
+            <PersonalizedRequestSection 
+              userName={profile?.display_name || undefined}
+              userEmail={user.email}
+            />
+          </>
+        );
+      case "giftcards":
+        return (
+          <>
+            <GiftCardsSection userId={user.id} userEmail={user.email} />
+            <PersonalizedRequestSection 
+              userName={profile?.display_name || undefined}
+              userEmail={user.email}
+            />
+          </>
+        );
+      case "profile":
+        return (
+          <>
+            <MyAccountSection userId={user.id} userEmail={user.email} />
+            <PersonalizedRequestSection 
+              userName={profile?.display_name || undefined}
+              userEmail={user.email}
+            />
+            <RecommendedJournal userId={user.id} />
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -82,66 +146,57 @@ const Account = () => {
         {/* Account Header with Welcome & Points */}
         <AccountHeader userId={user.id} userEmail={user.email} />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 p-1 bg-muted/60 rounded-full h-12">
-            <TabsTrigger 
-              value="wishlist" 
-              className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-            >
-              <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">Wishlist</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="bookings" 
-              className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Bookings</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="giftcards" 
-              className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-            >
-              <Gift className="h-4 w-4" />
-              <span className="hidden sm:inline">Gift Cards</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="profile" 
-              className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-            >
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">My Account</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="wishlist">
-            <WishlistSection userId={user.id} />
-            <RecommendedExperiences 
-              userId={user.id} 
-              title="You might also like"
-              subtitle="Based on your favorites and interests"
+        {/* Desktop Layout with Sidebar */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar - hidden on mobile */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <AccountSidebar 
+              activeTab={activeTab} 
+              onTabChange={setActiveTab} 
             />
-          </TabsContent>
+          </aside>
 
-          <TabsContent value="bookings">
-            <MyStaymakomSection userId={user.id} />
-            <RecommendedExperiences 
-              userId={user.id} 
-              title="Your next adventure awaits"
-              subtitle="Discover more extraordinary experiences"
-            />
-          </TabsContent>
+          {/* Mobile Tabs - visible on mobile only */}
+          <div className="lg:hidden">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-6 p-1 bg-muted/60 rounded-full h-12">
+                <TabsTrigger 
+                  value="wishlist" 
+                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span className="hidden sm:inline">Wishlist</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="bookings" 
+                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span className="hidden sm:inline">Bookings</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="giftcards" 
+                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  <Gift className="h-4 w-4" />
+                  <span className="hidden sm:inline">Gift Cards</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="profile" 
+                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">Account</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-          <TabsContent value="giftcards">
-            <GiftCardsSection userId={user.id} userEmail={user.email} />
-          </TabsContent>
-
-          <TabsContent value="profile">
-            <MyAccountSection userId={user.id} userEmail={user.email} />
-            <SpecialNeedsSection />
-            <RecommendedJournal userId={user.id} />
-          </TabsContent>
-        </Tabs>
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {renderContent()}
+          </div>
+        </div>
       </main>
 
       <Footer />
