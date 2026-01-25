@@ -51,11 +51,11 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
   return (
     <>
       <section className="py-4">
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center justify-start gap-2 text-sm text-foreground/60">
           <span>{getText('prompt')}</span>
           <button 
             onClick={handleShare}
-            className="inline-flex items-center gap-1.5 text-primary/80 hover:text-primary font-medium transition-colors"
+            className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 font-medium transition-colors"
           >
             <Share2 className="h-3.5 w-3.5" />
             {getText('shareLink')}
