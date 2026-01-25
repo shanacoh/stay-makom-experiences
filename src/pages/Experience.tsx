@@ -23,6 +23,7 @@ import HeroBookingPreview from "@/components/experience-test/HeroBookingPreview"
 // Keep existing components that are still needed
 import BookingPanel from "@/components/experience/BookingPanel";
 import ExtrasSection from "@/components/experience/ExtrasSection";
+import ShareWithFriendsSection from "@/components/experience/ShareWithFriendsSection";
 import OtherExperiencesFromHotel from "@/components/experience/OtherExperiencesFromHotel";
 
 const Experience = () => {
@@ -218,6 +219,12 @@ const Experience = () => {
                   }} 
                 />
               )}
+
+              {/* Share with Friends Section */}
+              <ShareWithFriendsSection 
+                title={title}
+                lang={lang as 'en' | 'he' | 'fr'}
+              />
 
               {/* Your Stay - Hotel Section */}
               <YourStaySection 
