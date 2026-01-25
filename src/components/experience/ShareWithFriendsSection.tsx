@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ShareDialog from "./ShareDialog";
 import { toast } from "@/hooks/use-toast";
 
@@ -14,20 +13,15 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
 
   const getText = (key: string) => {
     const texts: { [key: string]: { en: string; fr: string; he: string } } = {
-      sectionTitle: {
-        en: "Share with friends",
-        fr: "Partagez avec vos amis",
-        he: "שתפו עם חברים"
+      prompt: {
+        en: "Know someone who'd love this?",
+        fr: "Quelqu'un aimerait cette expérience ?",
+        he: "מכירים מישהו שיאהב?"
       },
-      sectionSubtitle: {
-        en: "Know someone who would love this experience?",
-        fr: "Vous connaissez quelqu'un qui aimerait cette expérience ?",
-        he: "מכירים מישהו שיאהב את החוויה הזאת?"
-      },
-      shareButton: {
-        en: "Share this experience",
-        fr: "Partager cette expérience",
-        he: "שתפו את החוויה"
+      shareLink: {
+        en: "Share",
+        fr: "Partager",
+        he: "שתפו"
       }
     };
     return texts[key]?.[lang] || texts[key]?.en || key;
@@ -56,37 +50,19 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
 
   return (
     <>
-      <section className="py-8">
-        <div className="rounded-2xl bg-gradient-to-br from-muted/40 via-background to-muted/30 border border-border/40 p-6 md:p-8 text-center">
-          {/* Icon */}
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 via-muted/40 to-primary/5 mb-4">
-            <Share2 className="h-6 w-6 text-primary/70" />
-          </div>
-          
-          {/* Title */}
-          <h3 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-2">
-            {getText('sectionTitle')}
-          </h3>
-          
-          {/* Subtitle */}
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            {getText('sectionSubtitle')}
-          </p>
-          
-          {/* Share Button */}
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="rounded-full gap-2 px-6"
+      <section className="py-4">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <span>{getText('prompt')}</span>
+          <button 
             onClick={handleShare}
+            className="inline-flex items-center gap-1.5 text-primary/80 hover:text-primary font-medium transition-colors"
           >
-            <Share2 className="h-4 w-4" />
-            {getText('shareButton')}
-          </Button>
+            <Share2 className="h-3.5 w-3.5" />
+            {getText('shareLink')}
+          </button>
         </div>
       </section>
 
-      {/* Share Dialog */}
       <ShareDialog
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
