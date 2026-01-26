@@ -121,12 +121,13 @@ async function searchHotels(params: SearchParams) {
   
   const data = await response.json();
   console.log('✅ Search successful, results count:', data.results?.length || 0);
+  // Return data directly - HyperGuest returns { results: [...] }
   return data;
 }
 
 // Pre-book (verification before booking)
 async function preBook(bookingData: BookingData) {
-  console.log('📋 Pre-booking:', JSON.stringify(bookingData));
+  console.log('📋 Pre-booking for property:', bookingData.propertyId);
   
   const url = `${BOOKING_DOMAIN}booking/pre-book`;
   
@@ -143,13 +144,14 @@ async function preBook(bookingData: BookingData) {
   }
   
   const data = await response.json();
-  console.log('✅ Pre-book successful');
-  return data;
+  console.log('✅ Pre-book successful, id:', data.id || data.content?.id);
+  // HyperGuest returns data in content field
+  return data.content || data;
 }
 
 // Create booking
 async function createBooking(bookingData: BookingData) {
-  console.log('🎫 Creating booking:', JSON.stringify(bookingData));
+  console.log('🎫 Creating booking for property:', bookingData.propertyId, 'isTest:', bookingData.isTest || false);
   
   const url = `${BOOKING_DOMAIN}booking/create`;
   
@@ -166,8 +168,9 @@ async function createBooking(bookingData: BookingData) {
   }
   
   const data = await response.json();
-  console.log('✅ Booking created successfully');
-  return data;
+  console.log('✅ Booking created successfully, id:', data.id || data.content?.id);
+  // HyperGuest returns data in content field
+  return data.content || data;
 }
 
 // Get booking details
@@ -189,19 +192,28 @@ async function getBookingDetails(bookingId: string) {
   
   const data = await response.json();
   console.log('✅ Booking details retrieved');
-  return data;
+  // HyperGuest returns data in content field
+  return data.content || data;
 }
 
 // List bookings
 async function listBookings(params: { dates?: { from: string; to: string }; agencyReference?: string; customerEmail?: string; limit?: number; page?: number }) {
-  console.log('📋 Listing bookings:', JSON.stringify(params));
+  console.log('📋 Listing bookings with params:', JSON.stringify(params));
   
   const url = `${BOOKING_DOMAIN}booking/list`;
+  
+  // Build body only with provided params
+  const body: Record<string, any> = {};
+  if (params.dates) body.dates = params.dates;
+  if (params.agencyReference) body.agencyReference = params.agencyReference;
+  if (params.customerEmail) body.customerEmail = params.customerEmail;
+  if (params.limit) body.limit = params.limit;
+  if (params.page) body.page = params.page;
   
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify(params),
+    body: JSON.stringify(body),
   });
   
   if (!response.ok) {
@@ -212,12 +224,14 @@ async function listBookings(params: { dates?: { from: string; to: string }; agen
   
   const data = await response.json();
   console.log('✅ Bookings listed successfully');
-  return data;
+  // HyperGuest returns data in content field
+  return data.content || data;
 }
 
 // Cancel booking
 async function cancelBooking(bookingId: string, options: { reason?: string; simulation?: boolean } = {}) {
-  console.log('🚫 Cancelling booking:', bookingId, options);
+  const isSimulation = options.simulation || false;
+  console.log(isSimulation ? '🔍 Simulating cancellation:' : '🚫 Cancelling booking:', bookingId);
   
   const url = `${BOOKING_DOMAIN}booking/cancel`;
   
@@ -226,7 +240,8 @@ async function cancelBooking(bookingId: string, options: { reason?: string; simu
     headers: getAuthHeaders(),
     body: JSON.stringify({
       bookingId,
-      ...options,
+      simulation: isSimulation,
+      ...(options.reason && { reason: options.reason }),
     }),
   });
   
@@ -237,8 +252,9 @@ async function cancelBooking(bookingId: string, options: { reason?: string; simu
   }
   
   const data = await response.json();
-  console.log('✅ Booking cancelled successfully');
-  return data;
+  console.log('✅', isSimulation ? 'Cancellation simulated' : 'Booking cancelled');
+  // HyperGuest returns data in content field
+  return data.content || data;
 }
 
 // Get all hotels (static data)
