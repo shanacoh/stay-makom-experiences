@@ -1,114 +1,147 @@
 
 
-## Plan: Privacy Policy Acceptance + Login/Signup Toggle Links
+## Plan: Titres contextuels pour Login, Signup et Favoris
 
-Add legal acceptance text for signup and a toggle link below the buttons for both login and signup forms, inspired by the example screenshot.
-
----
-
-### Design Preview
-
-**Signup Form (after fields, before button):**
-```text
-By continuing, I accept the Terms of Use of Staymakom 
-and acknowledge the Privacy Policy.
-
-      [ Create my account ]
-
-Don't have an account? Sign up
-```
-
-**Login Form (after button):**
-```text
-      [ Continue ]
-
-No account yet? Sign up
-```
+Afficher un titre et sous-titre différents dans le popup d'authentification selon 3 contextes :
+- **Favoris** → Icône cœur + "Save to your wishlist"
+- **Sign In** → Icône utilisateur + "Welcome back"  
+- **Sign Up** → Icône étoile/utilisateur + "Join Staymakom"
 
 ---
 
-### Changes
+### Aperçu visuel
 
-**File:** `src/components/auth/AuthPromptDialog.tsx`
+| Contexte | Icône | Titre (EN) | Sous-titre (EN) |
+|----------|-------|------------|-----------------|
+| ❤️ Favoris | Heart | Save to your wishlist | Sign in to save experiences you love. |
+| 👤 Sign In | User | Welcome back | Sign in to access your account. |
+| ✨ Sign Up | UserPlus | Join Staymakom | Create an account to unlock exclusive experiences. |
 
-#### 1. Add translations to the `copyFor` function
+---
 
-Add new translation keys:
+### Modifications
+
+**Fichier:** `src/components/auth/AuthPromptDialog.tsx`
+
+#### 1. Ajouter une prop `context`
+
 ```typescript
-legal: {
-  prefix: "By continuing, I accept the",
-  terms: "Terms of Use",
-  and: "and acknowledge the",
-  privacy: "Privacy Policy",
-},
-toggle: {
-  noAccount: "No account yet?",
-  hasAccount: "Already have an account?",
-  signUp: "Sign up",
-  signIn: "Sign in",
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  lang: Lang;
+  defaultTab?: "login" | "signup";
+  onSignupSuccess?: (userId: string) => void;
+  context?: "favorites" | "account" | "signup";  // NOUVEAU
+};
+```
+
+#### 2. Ajouter les traductions contextuelles
+
+```typescript
+// Dans copyFor()
+headers: {
+  favorites: {
+    title: "Save to your wishlist",
+    subtitle: "Sign in to save experiences you love.",
+  },
+  account: {
+    title: "Welcome back",
+    subtitle: "Sign in to access your account.",
+  },
+  signup: {
+    title: "Join Staymakom",
+    subtitle: "Create an account to unlock exclusive experiences.",
+  },
 }
 ```
 
-With French and Hebrew versions:
-- **FR**: "En continuant, j'accepte les Conditions d'utilisation de Staymakom et reconnais la Politique de confidentialité."
-- **HE**: "בהמשך, אני מקבל/ת את תנאי השימוש ומאשר/ת את מדיניות הפרטיות."
+**Versions FR :**
+- Favorites: "Sauvegarder dans vos favoris" / "Connectez-vous pour sauvegarder vos expériences préférées."
+- Account: "Bon retour" / "Connectez-vous pour accéder à votre compte."
+- Signup: "Rejoignez Staymakom" / "Créez un compte pour accéder à des expériences exclusives."
 
-#### 2. Add legal acceptance text above the signup button
+**Versions HE :**
+- Favorites: "שמרו לרשימת המועדפים" / "התחברו לשמור חוויות שאהבתם."
+- Account: "ברוכים השבים" / "התחברו לגשת לחשבון שלכם."
+- Signup: "הצטרפו ל-Staymakom" / "צרו חשבון לגישה לחוויות בלעדיות."
 
-Insert before the submit button in the signup form (around line 494):
+#### 3. Afficher le titre et icône selon le contexte
+
 ```tsx
-{/* Legal acceptance text */}
-<p className="text-xs text-muted-foreground text-center leading-relaxed pt-2">
-  {c.legal.prefix}{" "}
-  <Link to="/terms" className="text-primary hover:underline">{c.legal.terms}</Link>
-  {" "}{c.legal.and}{" "}
-  <Link to="/privacy" className="text-primary hover:underline">{c.legal.privacy}</Link>.
-</p>
-```
+import { Heart, User, UserPlus } from "lucide-react";
 
-#### 3. Add toggle links below the buttons
+// Déterminer le header basé sur le contexte
+const headerKey = context || (tab === "signup" ? "signup" : "account");
+const header = c.headers[headerKey];
 
-**After the login button (line 337):**
-```tsx
-<p className="text-xs text-muted-foreground text-center pt-3">
-  {c.toggle.noAccount}{" "}
-  <button 
-    type="button" 
-    onClick={() => setTab("signup")} 
-    className="text-foreground font-medium underline hover:no-underline"
-  >
-    {c.toggle.signUp}
-  </button>
-</p>
-```
+// Icône dynamique
+const HeaderIcon = context === "favorites" 
+  ? Heart 
+  : tab === "signup" 
+    ? UserPlus 
+    : User;
 
-**After the signup button (line 498):**
-```tsx
-<p className="text-xs text-muted-foreground text-center pt-3">
-  {c.toggle.hasAccount}{" "}
-  <button 
-    type="button" 
-    onClick={() => setTab("login")} 
-    className="text-foreground font-medium underline hover:no-underline"
-  >
-    {c.toggle.signIn}
-  </button>
-</p>
-```
-
-#### 4. Import Link from react-router-dom
-
-Add to imports:
-```tsx
-import { Link } from "react-router-dom";
+// Dans le JSX
+<div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
+  <HeaderIcon className="h-5 w-5 text-primary" />
+</div>
+<h2 className="font-serif text-xl text-foreground">{header.title}</h2>
+<p className="text-xs text-muted-foreground mt-1">{header.subtitle}</p>
 ```
 
 ---
 
-### Result
+**Fichier:** `src/components/Header.tsx`
 
-- **Signup form**: Displays legal text with clickable Terms and Privacy links above the submit button, plus a "Already have an account? Sign in" link below
-- **Login form**: Displays "No account yet? Sign up" link below the button
-- Clean, elegant styling matching the premium design language
-- Fully translated in English, French, and Hebrew
+#### 4. Étendre le state pour inclure le contexte
+
+```typescript
+const [authDialog, setAuthDialog] = useState<{ 
+  open: boolean; 
+  tab: "login" | "signup";
+  context: "favorites" | "account" | "signup";
+}>({ open: false, tab: "login", context: "account" });
+```
+
+#### 5. Passer le bon contexte selon l'action
+
+```tsx
+// Clic sur Favoris (heart)
+const handleFavoritesClick = () => {
+  if (user) {
+    navigate("/account?tab=wishlist");
+  } else {
+    setAuthDialog({ open: true, tab: "login", context: "favorites" });
+  }
+};
+
+// AccountBubble
+onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
+onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
+```
+
+#### 6. Passer la prop au composant
+
+```tsx
+<AuthPromptDialog
+  open={authDialog.open}
+  onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
+  lang={lang as "en" | "fr" | "he"}
+  defaultTab={authDialog.tab}
+  context={authDialog.context}
+  onSignupSuccess={...}
+/>
+```
+
+---
+
+### Résultat
+
+Le popup affichera maintenant :
+- **Clic ❤️ Favoris** → Icône cœur + titre wishlist
+- **Clic Sign In** → Icône utilisateur + titre "Welcome back"
+- **Clic Sign Up** → Icône UserPlus + titre "Join Staymakom"
+
+Le titre s'adapte aussi quand l'utilisateur bascule entre les onglets Login/Signup dans le popup.
 
