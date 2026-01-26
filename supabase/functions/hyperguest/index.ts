@@ -279,43 +279,35 @@ async function getAllHotels(countryCode?: string) {
     throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
   }
   
-  // Log first item structure for debugging - critical for understanding API response
+  // Log first item structure for debugging
   if (Array.isArray(data) && data.length > 0) {
     const firstHotel = data[0];
-    console.log('📋 First hotel ALL keys:', JSON.stringify(Object.keys(firstHotel)));
-    console.log('📋 Sample hotel FULL:', JSON.stringify(firstHotel));
+    console.log('📋 First hotel keys:', JSON.stringify(Object.keys(firstHotel)));
+    console.log('📋 Sample hotel:', JSON.stringify(firstHotel).substring(0, 400));
   }
   
-  // If no filter requested, limit results to avoid massive response
-  if (!countryCode && Array.isArray(data)) {
-    console.log('⚠️ No country filter, returning first 1000 hotels only');
-    data = data.slice(0, 1000);
-  }
-  
-  // Filter by country if specified
+  // Filter by country if specified - based on working code, field is 'country' not 'countryCode'
   if (countryCode && Array.isArray(data)) {
     const upperCountryCode = countryCode.toUpperCase();
     const originalCount = data.length;
     
-    // Get actual field names from first item
-    const sampleHotel = data[0];
-    console.log('🔎 Looking for country in fields:', JSON.stringify(sampleHotel).substring(0, 300));
-    
     data = data.filter((hotel: any) => {
-      // Check all possible variations of country field
-      for (const key of Object.keys(hotel)) {
-        const lowerKey = key.toLowerCase();
-        if (lowerKey.includes('country') || lowerKey === 'cc') {
-          const value = String(hotel[key] || '').toUpperCase();
-          if (value === upperCountryCode) {
-            return true;
-          }
-        }
-      }
-      return false;
+      // Check multiple possible formats (from working StaticService code)
+      return hotel.country === countryCode || 
+             hotel.country === upperCountryCode ||
+             hotel.countryCode === countryCode ||
+             hotel.countryCode === upperCountryCode ||
+             hotel.country_code === countryCode ||
+             (hotel.country && String(hotel.country).toUpperCase() === upperCountryCode);
     });
     
     console.log('🔍 Filtered by country', upperCountryCode, ':', data.length, 'of', originalCount, 'hotels');
+  }
+  
+  // If no filter, limit to avoid massive response (9MB+)
+  if (!countryCode && Array.isArray(data)) {
+    console.log('⚠️ No country filter, returning first 2000 hotels');
+    data = data.slice(0, 2000);
   }
   
   console.log('✅ Hotels retrieved, count:', Array.isArray(data) ? data.length : 'N/A');
