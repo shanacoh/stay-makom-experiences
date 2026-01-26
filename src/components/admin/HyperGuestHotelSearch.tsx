@@ -4,22 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Building2, MapPin, Star, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getAllHotels, type HyperGuestHotel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
-
-interface HyperGuestHotel {
-  id: number;
-  name: string;
-  countryCode: string;
-  cityName?: string;
-  regionName?: string;
-  starRating?: number;
-  propertyType?: string;
-  propertyTypeName?: string;
-  longitude?: number;
-  latitude?: number;
-  address?: string;
-}
 
 interface HyperGuestHotelSearchProps {
   onSelect: (hotel: HyperGuestHotel) => void;
@@ -33,16 +19,16 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch all hotels from HyperGuest (filtered to Israel for performance)
+  // Fetch all hotels from HyperGuest without country filter to debug
   const { data: hotels, isLoading, error } = useQuery({
-    queryKey: ["hyperguest-hotels-il"],
+    queryKey: ["hyperguest-hotels-debug"],
     queryFn: async () => {
-      // Use fetch directly with query params for GET request
+      // Direct fetch without country filter to see all data
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/hyperguest?action=get-hotels&countryCode=IL`,
+        `${supabaseUrl}/functions/v1/hyperguest?action=get-hotels`,
         {
           method: 'GET',
           headers: {
@@ -58,11 +44,19 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
       }
       
       const result = await response.json();
+      console.log('🏨 HyperGuest API Response:', result);
+      
       if (!result.success) throw new Error(result.error);
+      
+      // Log first hotel structure for debugging
+      if (result.data && result.data.length > 0) {
+        console.log('📋 First hotel structure:', result.data[0]);
+        console.log('📋 All keys:', Object.keys(result.data[0]));
+      }
       
       return result.data as HyperGuestHotel[];
     },
-    staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    staleTime: 1000 * 60 * 30,
     retry: 2,
   });
 
@@ -188,9 +182,9 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  {hotel.propertyTypeName && (
+                  {hotel.propertyType && (
                     <Badge variant="secondary" className="text-xs">
-                      {hotel.propertyTypeName}
+                      {hotel.propertyType}
                     </Badge>
                   )}
                   <Badge variant="outline" className="text-xs">
