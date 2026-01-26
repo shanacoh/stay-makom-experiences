@@ -61,7 +61,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     og_image: "",
   });
 
-  // Download HyperGuest images to Supabase storage
+  // Download HyperGuest images via edge function (bypasses CORS)
   const downloadHyperGuestImages = async (imageUrls: string[], heroUrl?: string | null) => {
     if (imageUrls.length === 0 && !heroUrl) return;
     
@@ -70,40 +70,35 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     let uploadedHeroUrl = "";
 
     try {
-      // Download and upload each image
+      // Download and upload each image via edge function
       const imagesToProcess = heroUrl ? [heroUrl, ...imageUrls.slice(0, 7)] : imageUrls.slice(0, 8);
       
       for (let i = 0; i < imagesToProcess.length; i++) {
         const url = imagesToProcess[i];
         try {
-          // Fetch the image
-          const response = await fetch(url);
-          if (!response.ok) continue;
-          
-          const blob = await response.blob();
           const fileExt = url.split('.').pop()?.split('?')[0] || 'jpg';
           const fileName = `hyperguest-${Date.now()}-${i}.${fileExt}`;
           
-          // Upload to Supabase storage
-          const { error: uploadError } = await supabase.storage
-            .from('hotel-images')
-            .upload(fileName, blob, {
-              contentType: blob.type || 'image/jpeg',
-            });
+          // Use edge function to download and upload (bypasses CORS)
+          const { data, error } = await supabase.functions.invoke('download-image', {
+            body: {
+              imageUrl: url,
+              bucket: 'hotel-images',
+              path: fileName,
+            },
+          });
           
-          if (uploadError) {
-            console.error('Upload error:', uploadError);
+          if (error) {
+            console.error('Edge function error:', error);
             continue;
           }
           
-          const { data: { publicUrl } } = supabase.storage
-            .from('hotel-images')
-            .getPublicUrl(fileName);
-          
-          if (i === 0 && heroUrl) {
-            uploadedHeroUrl = publicUrl;
-          } else {
-            uploadedUrls.push(publicUrl);
+          if (data?.publicUrl) {
+            if (i === 0 && heroUrl) {
+              uploadedHeroUrl = data.publicUrl;
+            } else {
+              uploadedUrls.push(data.publicUrl);
+            }
           }
         } catch (err) {
           console.error(`Failed to download image ${i}:`, err);
