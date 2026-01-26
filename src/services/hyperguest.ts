@@ -1,83 +1,87 @@
 /**
  * HyperGuest API Service
  * Complete integration with Search, Booking, and Static APIs
+ * Uses HyperGuest models for data transformation
  */
+
+import { 
+  Hotel, 
+  SearchResult, 
+  formatGuests as modelFormatGuests,
+  calculateCheckout as modelCalculateCheckout,
+  calculateNights as modelCalculateNights,
+  getBoardTypeLabel as modelGetBoardTypeLabel,
+  BOARD_LABELS,
+} from '@/models/hyperguest';
+
+// Re-export utilities from models
+export const formatGuests = modelFormatGuests;
+export const calculateCheckout = modelCalculateCheckout;
+export const calculateNights = modelCalculateNights;
+export const getBoardTypeLabel = modelGetBoardTypeLabel;
+export const BOARD_TYPES = BOARD_LABELS;
 
 // =====================
 // TYPES
 // =====================
 
-// Search Types
 export interface HyperGuestSearchParams {
-  checkIn: string; // YYYY-MM-DD
+  checkIn: string;
   nights: number;
-  guests: string; // Format: "2" or "2-5,7" (adults-children ages) or "2.1" (two rooms)
+  guests: string;
   hotelIds?: number[];
-  customerNationality?: string; // ISO 2-letter code
-  currency?: string; // USD, EUR, ILS
+  customerNationality?: string;
+  currency?: string;
 }
 
-export interface HyperGuestPropertyInfo {
+export interface HyperGuestHotel {
+  id: number;
   name: string;
-  starRating: number;
-  cityName: string;
-  cityId: number;
-  countryCode: string;
-  regionName: string;
-  longitude: number;
-  latitude: number;
-  propertyType: number;
-  propertyTypeName: string;
+  country?: string;
+  countryCode?: string;
+  regionName?: string;
+  cityName?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  starRating?: number;
+  propertyType?: string;
 }
 
-export interface HyperGuestRatePlan {
-  ratePlanId: number;
-  ratePlanCode: string;
-  ratePlanName: string;
-  prices: {
-    sell: { amount: number; currency: string };
-    net: { amount: number; currency: string };
+export interface HyperGuestPropertyDetails {
+  id: number;
+  name: string;
+  description?: string;
+  address?: string;
+  cityName?: string;
+  regionName?: string;
+  countryCode?: string;
+  latitude?: number;
+  longitude?: number;
+  starRating?: number;
+  contact?: {
+    email?: string;
+    phone?: string;
+    website?: string;
   };
-  cancellationPolicy: {
-    type: string;
-    deadline: string;
+  facilities?: Array<{ id: number; name: string; category?: string }>;
+  images?: Array<{ uri: string; type?: string; priority?: number }>;
+  photos?: Array<{ url: string; caption?: string }>;
+  rooms?: Array<{
+    roomId: number;
+    roomName: string;
+    description?: string;
+    photos?: string[];
+  }>;
+  settings?: {
+    checkIn?: string;
+    checkOut?: string;
+    currency?: string;
   };
-  paymentInfo: {
-    type: string;
-    required: boolean;
-  };
-  board: string;
+  descriptions?: Array<{ language: string; type: string; description: string }>;
+  [key: string]: any;
 }
 
-export interface HyperGuestRoomResult {
-  roomId: number;
-  roomName: string;
-  roomTypeCode: string;
-  numberOfAvailableRooms: number;
-  settings: {
-    numberOfBedrooms: number;
-    roomSize: number | null;
-    maxAdultsNumber: number;
-    maxChildrenNumber: number;
-    maxOccupancy: number;
-    numberOfBeds: number;
-    beddingConfigurations: Array<{
-      type: string;
-      size: string;
-      quantity: number;
-    }>;
-  };
-  ratePlans: HyperGuestRatePlan[];
-}
-
-export interface HyperGuestSearchResult {
-  propertyId: number;
-  propertyInfo: HyperGuestPropertyInfo;
-  rooms: HyperGuestRoomResult[];
-  remarks: string[];
-}
-
-// Booking Types
 export interface HyperGuestLeadGuest {
   firstName: string;
   lastName: string;
@@ -114,43 +118,6 @@ export interface HyperGuestBookingResponse {
   [key: string]: any;
 }
 
-// Static Types
-export interface HyperGuestHotel {
-  id: number;
-  name: string;
-  country?: string;
-  countryCode?: string;
-  regionName?: string;
-  cityName?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  starRating?: number;
-  propertyType?: string;
-}
-
-export interface HyperGuestPropertyDetails {
-  id: number;
-  name: string;
-  description?: string;
-  address?: string;
-  cityName?: string;
-  regionName?: string;
-  countryCode?: string;
-  latitude?: number;
-  longitude?: number;
-  starRating?: number;
-  facilities?: Array<{ id: number; name: string }>;
-  photos?: Array<{ url: string; caption?: string }>;
-  rooms?: Array<{
-    roomId: number;
-    roomName: string;
-    description?: string;
-    photos?: string[];
-  }>;
-  [key: string]: any;
-}
-
 export interface HyperGuestListBookingsParams {
   dates?: { from: string; to: string };
   agencyReference?: string;
@@ -179,7 +146,6 @@ const getSupabaseConfig = () => {
   return { supabaseUrl, supabaseKey };
 };
 
-// GET request helper
 async function callHyperGuestGet<T>(action: string, queryParams: Record<string, string> = {}): Promise<T> {
   const { supabaseUrl, supabaseKey } = getSupabaseConfig();
   
@@ -209,7 +175,6 @@ async function callHyperGuestGet<T>(action: string, queryParams: Record<string, 
   return result.data as T;
 }
 
-// POST request helper
 async function callHyperGuestPost<T>(action: string, body: Record<string, any> = {}): Promise<T> {
   const { supabaseUrl, supabaseKey } = getSupabaseConfig();
   
@@ -239,28 +204,32 @@ async function callHyperGuestPost<T>(action: string, body: Record<string, any> =
 }
 
 // =====================
-// SEARCH API
+// SEARCH API (with Models)
 // =====================
 
 /**
- * Search for available hotels
- * @param params Search parameters (checkIn, nights, guests, etc.)
- * @returns Search results with available rooms and rates
+ * Search for available hotels and return parsed SearchResult
  */
-export async function searchHotels(params: HyperGuestSearchParams): Promise<{ results: HyperGuestSearchResult[] }> {
+export async function searchHotels(params: HyperGuestSearchParams): Promise<SearchResult> {
+  const rawData = await callHyperGuestPost<any>('search', params);
+  return new SearchResult(rawData);
+}
+
+/**
+ * Search for available hotels (raw response)
+ */
+export async function searchHotelsRaw(params: HyperGuestSearchParams): Promise<{ results: any[] }> {
   return callHyperGuestPost('search', params);
 }
 
 /**
  * Get property availability for a specific hotel
- * @param propertyId Hotel ID
- * @param params Search parameters
  */
 export async function getPropertyAvailability(
   propertyId: number, 
   params: Omit<HyperGuestSearchParams, 'hotelIds'>
-): Promise<HyperGuestSearchResult | null> {
-  const results = await searchHotels({ ...params, hotelIds: [propertyId] });
+): Promise<any | null> {
+  const results = await searchHotelsRaw({ ...params, hotelIds: [propertyId] });
   return results.results?.[0] || null;
 }
 
@@ -268,73 +237,54 @@ export async function getPropertyAvailability(
 // BOOKING API
 // =====================
 
-/**
- * Pre-book verification (optional step before creating booking)
- * @param bookingData Booking details
- */
 export async function preBook(bookingData: HyperGuestBookingData): Promise<HyperGuestBookingResponse> {
   return callHyperGuestPost('pre-book', bookingData);
 }
 
-/**
- * Create a new booking
- * @param bookingData Booking details including guest info, rooms, dates
- */
 export async function createBooking(bookingData: HyperGuestBookingData): Promise<HyperGuestBookingResponse> {
   return callHyperGuestPost('create-booking', bookingData);
 }
 
-/**
- * Get booking details by ID
- * @param bookingId HyperGuest booking ID
- */
 export async function getBookingDetails(bookingId: string): Promise<HyperGuestBookingResponse> {
   return callHyperGuestGet('get-booking', { bookingId });
 }
 
-/**
- * List bookings with optional filters
- * @param params Filter parameters (dates, agencyReference, customerEmail, etc.)
- */
 export async function listBookings(params: HyperGuestListBookingsParams = {}): Promise<HyperGuestBookingResponse[]> {
   return callHyperGuestPost('list-bookings', params);
 }
 
-/**
- * Simulate a booking cancellation (without actually cancelling)
- * @param bookingId HyperGuest booking ID
- */
 export async function simulateCancellation(bookingId: string): Promise<any> {
   return callHyperGuestPost('cancel-booking', { bookingId, simulation: true });
 }
 
-/**
- * Cancel a booking
- * @param bookingId HyperGuest booking ID
- * @param options Optional cancellation reason
- */
 export async function cancelBooking(bookingId: string, options: HyperGuestCancelOptions = {}): Promise<any> {
   return callHyperGuestPost('cancel-booking', { bookingId, ...options });
 }
 
 // =====================
-// STATIC API
+// STATIC API (with Models)
 // =====================
 
 /**
  * Get all available hotels (static data)
- * @param countryCode Optional country filter (e.g., 'IL' for Israel)
  */
 export async function getAllHotels(countryCode?: string): Promise<HyperGuestHotel[]> {
   return callHyperGuestGet('get-hotels', countryCode ? { countryCode } : {});
 }
 
 /**
- * Get detailed property information
- * @param propertyId Hotel ID
+ * Get detailed property information (raw)
  */
-export async function getPropertyDetails(propertyId: number): Promise<HyperGuestPropertyDetails> {
+export async function getPropertyDetailsRaw(propertyId: number): Promise<HyperGuestPropertyDetails> {
   return callHyperGuestGet('get-property', { propertyId: propertyId.toString() });
+}
+
+/**
+ * Get detailed property information as Hotel model
+ */
+export async function getPropertyDetails(propertyId: number): Promise<Hotel> {
+  const rawData = await getPropertyDetailsRaw(propertyId);
+  return new Hotel(rawData);
 }
 
 /**
@@ -345,57 +295,24 @@ export async function getFacilities(): Promise<Array<{ id: number; name: string 
 }
 
 // =====================
-// UTILITIES
+// IMAGE UTILITIES
 // =====================
 
 /**
- * Format guests parameter for search API
- * @example formatGuests([{ adults: 2, children: [5, 7] }]) => "2-5,7"
- * @example formatGuests([{ adults: 2, children: [] }, { adults: 1, children: [] }]) => "2.1"
+ * Extract all image URLs from a Hotel model
  */
-export function formatGuests(rooms: Array<{ adults: number; children: number[] }>): string {
-  return rooms.map(room => {
-    let str = room.adults.toString();
-    if (room.children && room.children.length > 0) {
-      str += '-' + room.children.join(',');
-    }
-    return str;
-  }).join('.');
+export function extractHotelImages(hotel: Hotel): string[] {
+  return hotel.images
+    .filter(img => img.type === 'photo')
+    .map(img => img.uri || img.large)
+    .filter(Boolean);
 }
 
 /**
- * Calculate checkout date from checkin and nights
+ * Get the main/hero image from a Hotel model
  */
-export function calculateCheckout(checkIn: string, nights: number): string {
-  const date = new Date(checkIn);
-  date.setDate(date.getDate() + nights);
-  return date.toISOString().split('T')[0];
-}
-
-/**
- * Calculate number of nights between two dates
- */
-export function calculateNights(checkIn: string, checkOut: string): number {
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
-/**
- * Board type labels
- */
-export const BOARD_TYPES = {
-  RO: 'Room Only',
-  BB: 'Bed & Breakfast',
-  HB: 'Half Board',
-  FB: 'Full Board',
-  AI: 'All Inclusive',
-} as const;
-
-/**
- * Get human-readable board type label
- */
-export function getBoardTypeLabel(code: string): string {
-  return BOARD_TYPES[code as keyof typeof BOARD_TYPES] || code;
+export function getHotelMainImage(hotel: Hotel): string | null {
+  const mainImage = hotel.getMainImage();
+  if (!mainImage) return null;
+  return mainImage.uri || mainImage.large || null;
 }

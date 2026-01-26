@@ -3,19 +3,48 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Building2, MapPin, Star, Check } from "lucide-react";
-import { getAllHotels, type HyperGuestHotel } from "@/services/hyperguest";
+import { Loader2, Search, Building2, MapPin, Star, Check, Image } from "lucide-react";
+import { 
+  getAllHotels, 
+  getPropertyDetails,
+  extractHotelImages,
+  getHotelMainImage,
+  type HyperGuestHotel 
+} from "@/services/hyperguest";
+import { Hotel } from "@/models/hyperguest";
 import { cn } from "@/lib/utils";
 
-interface HyperGuestHotelSearchProps {
-  onSelect: (hotel: HyperGuestHotel) => void;
-  disabled?: boolean;
+export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
+  // Extended with full Hotel model data
+  hotelModel?: Hotel;
+  images?: string[];
+  heroImage?: string | null;
+  description?: string;
+  contact?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+  };
+  facilities?: string[];
+  checkIn?: string;
+  checkOut?: string;
 }
 
-export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSearchProps) {
+interface HyperGuestHotelSearchProps {
+  onSelect: (hotel: HyperGuestHotelWithDetails) => void;
+  disabled?: boolean;
+  fetchFullDetails?: boolean; // If true, fetches complete hotel details on selection
+}
+
+export function HyperGuestHotelSearch({ 
+  onSelect, 
+  disabled,
+  fetchFullDetails = true 
+}: HyperGuestHotelSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState<HyperGuestHotel | null>(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -55,11 +84,52 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (hotel: HyperGuestHotel) => {
+  const handleSelect = async (hotel: HyperGuestHotel) => {
     setSelectedHotel(hotel);
     setSearchTerm(hotel.name);
     setIsOpen(false);
-    onSelect(hotel);
+
+    if (fetchFullDetails) {
+      setIsLoadingDetails(true);
+      try {
+        // Fetch complete hotel details using the model
+        const hotelModel = await getPropertyDetails(hotel.id);
+        
+        // Extract images and other data
+        const images = extractHotelImages(hotelModel);
+        const heroImage = getHotelMainImage(hotelModel);
+        
+        const enrichedHotel: HyperGuestHotelWithDetails = {
+          ...hotel,
+          hotelModel,
+          images,
+          heroImage,
+          description: hotelModel.descriptions.general,
+          contact: hotelModel.contact ? {
+            email: hotelModel.contact.email || undefined,
+            phone: hotelModel.contact.phone || undefined,
+            website: hotelModel.contact.website || undefined,
+          } : undefined,
+          facilities: hotelModel.facilities.popular.slice(0, 10).map(f => f.name),
+          checkIn: hotelModel.settings.checkIn,
+          checkOut: hotelModel.settings.checkOut,
+          // Update coordinates from full data if available
+          latitude: hotelModel.coordinates?.latitude || hotel.latitude,
+          longitude: hotelModel.coordinates?.longitude || hotel.longitude,
+          address: hotelModel.location.fullAddress || hotel.address,
+        };
+        
+        onSelect(enrichedHotel);
+      } catch (error) {
+        console.error("Failed to fetch hotel details:", error);
+        // Fallback to basic hotel data
+        onSelect(hotel);
+      } finally {
+        setIsLoadingDetails(false);
+      }
+    } else {
+      onSelect(hotel);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,16 +158,16 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
           value={searchTerm}
           onChange={handleInputChange}
           onFocus={() => searchTerm.length >= 2 && setIsOpen(true)}
-          disabled={disabled || isLoading}
+          disabled={disabled || isLoading || isLoadingDetails}
           className={cn(
             "pl-10 pr-10",
             selectedHotel && "border-green-500 bg-green-50/50"
           )}
         />
-        {isLoading && (
+        {(isLoading || isLoadingDetails) && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
         )}
-        {selectedHotel && (
+        {selectedHotel && !isLoadingDetails && (
           <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
         )}
       </div>
@@ -108,7 +178,14 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
         </p>
       )}
 
-      {!isLoading && hotels && (
+      {isLoadingDetails && (
+        <p className="text-xs text-primary mt-1 flex items-center gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Loading hotel details and images...
+        </p>
+      )}
+
+      {!isLoading && !isLoadingDetails && hotels && (
         <p className="text-xs text-muted-foreground mt-1">
           {hotels.length} hotels available • Type at least 2 characters to search
         </p>
@@ -157,6 +234,12 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
                   <Badge variant="outline" className="text-xs">
                     ID: {hotel.id}
                   </Badge>
+                  {fetchFullDetails && (
+                    <Badge variant="outline" className="text-xs flex items-center gap-1">
+                      <Image className="h-2.5 w-2.5" />
+                      + Details
+                    </Badge>
+                  )}
                 </div>
               </div>
             </button>

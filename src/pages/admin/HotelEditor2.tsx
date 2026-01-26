@@ -9,25 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MapPin, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
 import { Link } from "react-router-dom";
-import { HyperGuestHotelSearch } from "@/components/admin/HyperGuestHotelSearch";
-
-interface HyperGuestHotel {
-  id: number;
-  name: string;
-  countryCode: string;
-  cityName?: string;
-  regionName?: string;
-  starRating?: number;
-  propertyType?: string;
-  propertyTypeName?: string;
-  longitude?: number;
-  latitude?: number;
-  address?: string;
-}
+import { HyperGuestHotelSearch, type HyperGuestHotelWithDetails } from "@/components/admin/HyperGuestHotelSearch";
 
 interface HotelEditor2Props {
   hotelId?: string;
@@ -37,7 +23,9 @@ interface HotelEditor2Props {
 export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const queryClient = useQueryClient();
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isDownloadingImages, setIsDownloadingImages] = useState(false);
   const [hyperguestId, setHyperguestId] = useState<number | null>(null);
+  const [pendingImages, setPendingImages] = useState<string[]>([]); // HyperGuest image URLs to download
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
@@ -73,9 +61,84 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     og_image: "",
   });
 
-  // Handle HyperGuest hotel selection - prefill form
-  const handleHyperGuestSelect = (hotel: HyperGuestHotel) => {
+  // Download HyperGuest images to Supabase storage
+  const downloadHyperGuestImages = async (imageUrls: string[], heroUrl?: string | null) => {
+    if (imageUrls.length === 0 && !heroUrl) return;
+    
+    setIsDownloadingImages(true);
+    const uploadedUrls: string[] = [];
+    let uploadedHeroUrl = "";
+
+    try {
+      // Download and upload each image
+      const imagesToProcess = heroUrl ? [heroUrl, ...imageUrls.slice(0, 7)] : imageUrls.slice(0, 8);
+      
+      for (let i = 0; i < imagesToProcess.length; i++) {
+        const url = imagesToProcess[i];
+        try {
+          // Fetch the image
+          const response = await fetch(url);
+          if (!response.ok) continue;
+          
+          const blob = await response.blob();
+          const fileExt = url.split('.').pop()?.split('?')[0] || 'jpg';
+          const fileName = `hyperguest-${Date.now()}-${i}.${fileExt}`;
+          
+          // Upload to Supabase storage
+          const { error: uploadError } = await supabase.storage
+            .from('hotel-images')
+            .upload(fileName, blob, {
+              contentType: blob.type || 'image/jpeg',
+            });
+          
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            continue;
+          }
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from('hotel-images')
+            .getPublicUrl(fileName);
+          
+          if (i === 0 && heroUrl) {
+            uploadedHeroUrl = publicUrl;
+          } else {
+            uploadedUrls.push(publicUrl);
+          }
+        } catch (err) {
+          console.error(`Failed to download image ${i}:`, err);
+        }
+      }
+
+      // Update form with uploaded images
+      setFormData(prev => ({
+        ...prev,
+        hero_image: uploadedHeroUrl || prev.hero_image,
+        photos: [...prev.photos, ...uploadedUrls].slice(0, 8),
+      }));
+
+      if (uploadedHeroUrl || uploadedUrls.length > 0) {
+        toast.success(`${uploadedUrls.length + (uploadedHeroUrl ? 1 : 0)} images imported successfully!`);
+      }
+    } catch (error) {
+      console.error('Error downloading images:', error);
+      toast.error('Failed to download some images');
+    } finally {
+      setIsDownloadingImages(false);
+      setPendingImages([]);
+    }
+  };
+
+  // Handle HyperGuest hotel selection - prefill form with full details
+  const handleHyperGuestSelect = (hotel: HyperGuestHotelWithDetails) => {
     setHyperguestId(hotel.id);
+    
+    // Store images for later download (user can choose to import them)
+    if (hotel.images && hotel.images.length > 0) {
+      setPendingImages(hotel.images);
+    }
+    
+    // Pre-fill form with all available data
     setFormData((prev) => ({
       ...prev,
       name: hotel.name || prev.name,
@@ -84,9 +147,21 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       latitude: hotel.latitude ?? prev.latitude,
       longitude: hotel.longitude ?? prev.longitude,
       address: hotel.address || `${hotel.cityName || ""}, ${hotel.regionName || ""}, ${hotel.countryCode || ""}`.replace(/^, |, $/g, ""),
+      // Description/Story from HyperGuest
+      story: hotel.description || prev.story,
+      // Contact info
+      contact_email: hotel.contact?.email || prev.contact_email,
+      contact_phone: hotel.contact?.phone || prev.contact_phone,
+      // SEO defaults from hotel name
+      seo_title_en: hotel.name ? `${hotel.name} | Staymakom` : prev.seo_title_en,
+      meta_description_en: hotel.description?.slice(0, 155) || prev.meta_description_en,
     }));
+    
+    const imageCount = hotel.images?.length || 0;
     toast.success(`Hotel "${hotel.name}" imported from HyperGuest!`, {
-      description: "Form pre-filled with available data. You can edit before saving.",
+      description: imageCount > 0 
+        ? `Form pre-filled. ${imageCount} images available to import.`
+        : "Form pre-filled with available data. You can edit before saving.",
     });
   };
 
@@ -255,12 +330,52 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Search and import hotel data directly from HyperGuest to pre-fill the form.
                 </p>
-                <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} />
+                <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} fetchFullDetails={true} />
+                
                 {hyperguestId && (
-                  <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
-                      ✓ Linked to HyperGuest ID: {hyperguestId}
-                    </span>
+                  <div className="mt-3 space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
+                        ✓ Linked to HyperGuest ID: {hyperguestId}
+                      </span>
+                    </div>
+                    
+                    {/* Import images button */}
+                    {pendingImages.length > 0 && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <ImageIcon className="h-5 w-5 text-blue-600" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-blue-900">
+                            {pendingImages.length} images available from HyperGuest
+                          </p>
+                          <p className="text-xs text-blue-700">
+                            Click to download and add to gallery
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="default"
+                          disabled={isDownloadingImages}
+                          onClick={() => downloadHyperGuestImages(
+                            pendingImages.slice(1), 
+                            pendingImages[0]
+                          )}
+                        >
+                          {isDownloadingImages ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Importing...
+                            </>
+                          ) : (
+                            <>
+                              <ImageIcon className="mr-2 h-4 w-4" />
+                              Import Images
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
