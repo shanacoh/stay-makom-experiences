@@ -85,20 +85,23 @@ export function HyperGuestHotelSearch({
   }, []);
 
   const handleSelect = async (hotel: HyperGuestHotel) => {
+    // HyperGuest API returns hotel_id, not id
+    const hotelId = hotel.id ?? hotel.hotel_id;
+    
     console.log("[HyperGuest] Selected hotel from list:", hotel);
-    console.log("[HyperGuest] Hotel ID:", hotel.id, "Type:", typeof hotel.id);
+    console.log("[HyperGuest] Hotel ID (resolved):", hotelId, "Type:", typeof hotelId);
     
     setSelectedHotel(hotel);
     setSearchTerm(hotel.name || "");
     setIsOpen(false);
 
-    if (fetchFullDetails && hotel.id) {
+    if (fetchFullDetails && hotelId) {
       setIsLoadingDetails(true);
       try {
-        console.log("[HyperGuest] Fetching full details for hotel ID:", hotel.id);
+        console.log("[HyperGuest] Fetching full details for hotel ID:", hotelId);
         
         // Fetch complete hotel details using the model
-        const hotelModel = await getPropertyDetails(hotel.id);
+        const hotelModel = await getPropertyDetails(hotelId);
         
         console.log("[HyperGuest] Received hotelModel:", hotelModel);
         console.log("[HyperGuest] hotelModel.descriptions:", hotelModel?.descriptions);
@@ -116,6 +119,7 @@ export function HyperGuestHotelSearch({
         
         const enrichedHotel: HyperGuestHotelWithDetails = {
           ...hotel,
+          id: hotelId, // Normalize to id
           hotelModel,
           images,
           heroImage,
@@ -138,15 +142,15 @@ export function HyperGuestHotelSearch({
         onSelect(enrichedHotel);
       } catch (error) {
         console.error("[HyperGuest] Failed to fetch hotel details:", error);
-        // Fallback to basic hotel data
+        // Fallback to basic hotel data with normalized id
         console.log("[HyperGuest] Falling back to basic hotel data");
-        onSelect(hotel);
+        onSelect({ ...hotel, id: hotelId });
       } finally {
         setIsLoadingDetails(false);
       }
     } else {
       console.log("[HyperGuest] Skipping full details fetch, using basic data");
-      onSelect(hotel);
+      onSelect({ ...hotel, id: hotelId });
     }
   };
 
@@ -215,9 +219,11 @@ export function HyperGuestHotelSearch({
           ref={dropdownRef}
           className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-[320px] overflow-y-auto"
         >
-          {filteredHotels.map((hotel, index) => (
+          {filteredHotels.map((hotel, index) => {
+            const hotelId = hotel.id ?? hotel.hotel_id;
+            return (
             <button
-              key={hotel.id ?? `hotel-${index}`}
+              key={hotelId ?? `hotel-${index}`}
               type="button"
               onClick={() => handleSelect(hotel)}
               className="w-full px-4 py-3 text-left hover:bg-accent transition-colors border-b last:border-b-0 flex items-start gap-3"
@@ -238,7 +244,7 @@ export function HyperGuestHotelSearch({
                 <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
                   <span className="truncate">
-                    {[hotel.cityName, hotel.regionName, hotel.countryCode]
+                    {[hotel.cityName || hotel.city, hotel.regionName || hotel.region, hotel.countryCode || hotel.country]
                       .filter(Boolean)
                       .join(", ")}
                   </span>
@@ -250,7 +256,7 @@ export function HyperGuestHotelSearch({
                     </Badge>
                   )}
                   <Badge variant="outline" className="text-xs">
-                    ID: {hotel.id}
+                    ID: {hotelId}
                   </Badge>
                   {fetchFullDetails && (
                     <Badge variant="outline" className="text-xs flex items-center gap-1">
@@ -261,7 +267,8 @@ export function HyperGuestHotelSearch({
                 </div>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
 
