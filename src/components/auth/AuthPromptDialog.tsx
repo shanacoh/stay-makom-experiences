@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Heart, Loader2, Check } from "lucide-react";
+import { Heart, Loader2, Check, User, UserPlus } from "lucide-react";
 import OAuthButtons from "./OAuthButtons";
 import {
   Select,
@@ -27,6 +27,7 @@ type Props = {
   lang: Lang;
   defaultTab?: "login" | "signup";
   onSignupSuccess?: (userId: string) => void;
+  context?: "favorites" | "account" | "signup";
 };
 
 const loginSchema = z.object({
@@ -82,8 +83,20 @@ function copyFor(lang: Lang) {
   switch (lang) {
     case "fr":
       return {
-        title: "Sauvegarder dans vos favoris",
-        subtitle: "Connectez-vous pour sauvegarder vos expériences préférées.",
+        headers: {
+          favorites: {
+            title: "Sauvegarder dans vos favoris",
+            subtitle: "Connectez-vous pour sauvegarder vos expériences préférées.",
+          },
+          account: {
+            title: "Bon retour",
+            subtitle: "Connectez-vous pour accéder à votre compte.",
+          },
+          signup: {
+            title: "Rejoignez Staymakom",
+            subtitle: "Créez un compte pour accéder à des expériences exclusives.",
+          },
+        },
         tabs: { login: "Connexion", signup: "Inscription" },
         fields: {
           firstName: "Prénom",
@@ -116,8 +129,20 @@ function copyFor(lang: Lang) {
       };
     case "he":
       return {
-        title: "שמרו לרשימת המועדפים",
-        subtitle: "התחברו כדי לשמור חוויות שאהבתם.",
+        headers: {
+          favorites: {
+            title: "שמרו לרשימת המועדפים",
+            subtitle: "התחברו לשמור חוויות שאהבתם.",
+          },
+          account: {
+            title: "ברוכים השבים",
+            subtitle: "התחברו לגשת לחשבון שלכם.",
+          },
+          signup: {
+            title: "הצטרפו ל-Staymakom",
+            subtitle: "צרו חשבון לגישה לחוויות בלעדיות.",
+          },
+        },
         tabs: { login: "התחברות", signup: "הרשמה" },
         fields: {
           firstName: "שם פרטי",
@@ -150,8 +175,20 @@ function copyFor(lang: Lang) {
       };
     default:
       return {
-        title: "Save to your wishlist",
-        subtitle: "Sign in to save experiences you love.",
+        headers: {
+          favorites: {
+            title: "Save to your wishlist",
+            subtitle: "Sign in to save experiences you love.",
+          },
+          account: {
+            title: "Welcome back",
+            subtitle: "Sign in to access your account.",
+          },
+          signup: {
+            title: "Join Staymakom",
+            subtitle: "Create an account to unlock exclusive experiences.",
+          },
+        },
         tabs: { login: "Sign In", signup: "Sign Up" },
         fields: {
           firstName: "First Name",
@@ -191,6 +228,7 @@ export default function AuthPromptDialog({
   lang,
   defaultTab = "login",
   onSignupSuccess,
+  context,
 }: Props) {
   const c = useMemo(() => copyFor(lang), [lang]);
   const { signIn, signUp } = useAuth();
@@ -299,13 +337,22 @@ export default function AuthPromptDialog({
         dir={isRTL ? "rtl" : "ltr"}
       >
         {/* Header - compact */}
-        <div className="pt-5 pb-3 px-5 text-center bg-gradient-to-b from-muted/50 to-transparent shrink-0">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
-            <Heart className="h-5 w-5 text-primary" />
-          </div>
-          <h2 className="font-serif text-xl text-foreground">{c.title}</h2>
-          <p className="text-xs text-muted-foreground mt-1">{c.subtitle}</p>
-        </div>
+        {(() => {
+          // Determine header content based on context and current tab
+          const headerKey = context === "favorites" ? "favorites" : tab === "signup" ? "signup" : "account";
+          const header = c.headers[headerKey];
+          const HeaderIcon = context === "favorites" ? Heart : tab === "signup" ? UserPlus : User;
+          
+          return (
+            <div className="pt-5 pb-3 px-5 text-center bg-gradient-to-b from-muted/50 to-transparent shrink-0">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
+                <HeaderIcon className="h-5 w-5 text-primary" />
+              </div>
+              <h2 className="font-serif text-xl text-foreground">{header.title}</h2>
+              <p className="text-xs text-muted-foreground mt-1">{header.subtitle}</p>
+            </div>
+          );
+        })()}
 
         {/* Scrollable content */}
         <div className="px-5 pb-5 overflow-y-auto flex-1">
