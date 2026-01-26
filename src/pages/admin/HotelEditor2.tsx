@@ -159,23 +159,33 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       meta_description_en: hotel.description?.slice(0, 155) || prev.meta_description_en,
     }));
     
-    // Translate city and region to Hebrew
-    if (city || region) {
+    // Translate city, region, address AND story to Hebrew
+    const story = hotel.description || "";
+    const textsToTranslate = [city, region, address, story].filter(Boolean);
+    
+    if (textsToTranslate.length > 0) {
       try {
-        const textsToTranslate = [city, region, address].filter(Boolean);
         const { data, error } = await supabase.functions.invoke('translate-text', {
           body: { texts: textsToTranslate, targetLang: 'he' },
         });
         
         if (!error && data?.translations) {
-          const [cityHe, regionHe, addressHe] = data.translations;
-          console.log("[HotelEditor2] Hebrew translations:", { cityHe, regionHe, addressHe });
+          // Map translations back based on which fields were included
+          const translations = data.translations as string[];
+          let idx = 0;
+          const cityHe = city ? translations[idx++] : "";
+          const regionHe = region ? translations[idx++] : "";
+          const addressHe = address ? translations[idx++] : "";
+          const storyHe = story ? translations[idx++] : "";
+          
+          console.log("[HotelEditor2] Hebrew translations:", { cityHe, regionHe, addressHe, storyHe: storyHe?.slice(0, 50) + "..." });
           
           setFormData((prev) => ({
             ...prev,
             city_he: cityHe || prev.city_he,
             region_he: regionHe || prev.region_he,
             address_he: addressHe || prev.address_he,
+            story_he: storyHe || prev.story_he,
           }));
         }
       } catch (err) {

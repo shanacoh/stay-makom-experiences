@@ -117,9 +117,29 @@ export function HyperGuestHotelSearch({
         console.log("[HyperGuest] Extracted images:", images);
         console.log("[HyperGuest] Hero image:", heroImage);
         
-        // Extract city and region from location data
-        const city = hotelModel?.location?.city?.name || hotel.cityName || hotel.city || "";
-        const region = hotelModel?.location?.region || hotel.regionName || hotel.region || "";
+        // Extract city and region from location data - ensure they are DIFFERENT values
+        // City is the specific city name, region is the broader area (e.g., "Tel Aviv District")
+        let city = hotelModel?.location?.city?.name || "";
+        let region = hotelModel?.location?.region || "";
+        
+        // If city and region are the same, try to differentiate or clear region
+        if (city && region && city.toLowerCase() === region.toLowerCase()) {
+          // Keep city, clear region since it's redundant
+          region = "";
+        }
+        
+        // Fallback to hotel basic data if needed
+        if (!city) {
+          city = hotel.cityName || hotel.city || "";
+        }
+        if (!region) {
+          region = hotel.regionName || hotel.region || "";
+          // If still same as city after fallback, clear it
+          if (region.toLowerCase() === city.toLowerCase()) {
+            region = "";
+          }
+        }
+        
         const fullAddress = hotelModel?.location?.fullAddress || hotelModel?.location?.address || hotel.address || "";
         
         console.log("[HyperGuest] Extracted location - city:", city, "region:", region, "address:", fullAddress);
