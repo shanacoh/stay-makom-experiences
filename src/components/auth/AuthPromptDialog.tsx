@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { z } from "zod";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -100,6 +101,18 @@ function copyFor(lang: Lang) {
           okSignup: "Compte créé !",
           invalid: "Vérifiez vos informations.",
         },
+        legal: {
+          prefix: "En continuant, j'accepte les",
+          terms: "Conditions d'utilisation",
+          and: "et reconnais la",
+          privacy: "Politique de confidentialité",
+        },
+        toggle: {
+          noAccount: "Pas encore de compte ?",
+          hasAccount: "Déjà un compte ?",
+          signUp: "S'inscrire",
+          signIn: "Se connecter",
+        },
       };
     case "he":
       return {
@@ -122,6 +135,18 @@ function copyFor(lang: Lang) {
           okSignup: "החשבון נוצר!",
           invalid: "בדקו את הפרטים.",
         },
+        legal: {
+          prefix: "בהמשך, אני מקבל/ת את",
+          terms: "תנאי השימוש",
+          and: "ומאשר/ת את",
+          privacy: "מדיניות הפרטיות",
+        },
+        toggle: {
+          noAccount: "אין לך חשבון?",
+          hasAccount: "כבר יש לך חשבון?",
+          signUp: "הרשמה",
+          signIn: "התחברות",
+        },
       };
     default:
       return {
@@ -143,6 +168,18 @@ function copyFor(lang: Lang) {
           okLogin: "Signed in!",
           okSignup: "Account created!",
           invalid: "Please check your details.",
+        },
+        legal: {
+          prefix: "By continuing, I accept the",
+          terms: "Terms of Use",
+          and: "and acknowledge the",
+          privacy: "Privacy Policy",
+        },
+        toggle: {
+          noAccount: "No account yet?",
+          hasAccount: "Already have an account?",
+          signUp: "Sign up",
+          signIn: "Sign in",
         },
       };
   }
@@ -334,6 +371,18 @@ export default function AuthPromptDialog({
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {c.actions.login}
               </Button>
+              
+              {/* Toggle to signup */}
+              <p className="text-xs text-muted-foreground text-center pt-3">
+                {c.toggle.noAccount}{" "}
+                <button 
+                  type="button" 
+                  onClick={() => setTab("signup")} 
+                  className="text-foreground font-medium underline hover:no-underline"
+                >
+                  {c.toggle.signUp}
+                </button>
+              </p>
             </form>
           )}
 
@@ -492,10 +541,30 @@ export default function AuthPromptDialog({
                 </div>
               </div>
 
+              {/* Legal acceptance text */}
+              <p className="text-xs text-muted-foreground text-center leading-relaxed pt-3">
+                {c.legal.prefix}{" "}
+                <Link to="/terms" className="text-primary hover:underline">{c.legal.terms}</Link>
+                {" "}{c.legal.and}{" "}
+                <Link to="/privacy" className="text-primary hover:underline">{c.legal.privacy}</Link>.
+              </p>
+
               <Button type="submit" variant="cta" className="w-full h-10 text-sm mt-3" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {c.actions.signup}
               </Button>
+              
+              {/* Toggle to login */}
+              <p className="text-xs text-muted-foreground text-center pt-3">
+                {c.toggle.hasAccount}{" "}
+                <button 
+                  type="button" 
+                  onClick={() => setTab("login")} 
+                  className="text-foreground font-medium underline hover:no-underline"
+                >
+                  {c.toggle.signIn}
+                </button>
+              </p>
             </form>
           )}
         </div>
