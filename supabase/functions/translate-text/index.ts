@@ -120,6 +120,11 @@ function translateToHebrewDictionary(text: string): string | null {
 // Use Lovable AI to translate longer texts
 async function translateWithAI(texts: string[], targetLang: string): Promise<string[]> {
   const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    console.error("LOVABLE_API_KEY is not configured");
+    return texts;
+  }
   
   const languageNames: Record<string, string> = {
     he: "Hebrew",
@@ -140,10 +145,11 @@ Return format example: ["translated text 1", "translated text 2"]`;
     const response = await fetch(LOVABLE_AI_URL, {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           {
             role: "system",
@@ -159,7 +165,8 @@ Return format example: ["translated text 1", "translated text 2"]`;
     });
 
     if (!response.ok) {
-      console.error("AI translation failed:", response.status, await response.text());
+      const bodyText = await response.text();
+      console.error("AI translation failed:", response.status, bodyText);
       return texts; // Return original on error
     }
 
