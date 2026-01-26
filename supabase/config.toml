@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.geocode-hotel]
 verify_jwt = false
+
+[functions.hyperguest]
+verify_jwt = false
