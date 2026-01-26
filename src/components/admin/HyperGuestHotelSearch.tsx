@@ -86,10 +86,10 @@ export function HyperGuestHotelSearch({
 
   const handleSelect = async (hotel: HyperGuestHotel) => {
     setSelectedHotel(hotel);
-    setSearchTerm(hotel.name);
+    setSearchTerm(hotel.name || "");
     setIsOpen(false);
 
-    if (fetchFullDetails) {
+    if (fetchFullDetails && hotel.id) {
       setIsLoadingDetails(true);
       try {
         // Fetch complete hotel details using the model
@@ -104,19 +104,19 @@ export function HyperGuestHotelSearch({
           hotelModel,
           images,
           heroImage,
-          description: hotelModel.descriptions.general,
+          description: hotelModel.descriptions?.general || undefined,
           contact: hotelModel.contact ? {
             email: hotelModel.contact.email || undefined,
             phone: hotelModel.contact.phone || undefined,
             website: hotelModel.contact.website || undefined,
           } : undefined,
-          facilities: hotelModel.facilities.popular.slice(0, 10).map(f => f.name),
-          checkIn: hotelModel.settings.checkIn,
-          checkOut: hotelModel.settings.checkOut,
+          facilities: hotelModel.facilities?.popular?.slice(0, 10).map(f => f.name) || [],
+          checkIn: hotelModel.settings?.checkIn,
+          checkOut: hotelModel.settings?.checkOut,
           // Update coordinates from full data if available
           latitude: hotelModel.coordinates?.latitude || hotel.latitude,
           longitude: hotelModel.coordinates?.longitude || hotel.longitude,
-          address: hotelModel.location.fullAddress || hotel.address,
+          address: hotelModel.location?.fullAddress || hotel.address,
         };
         
         onSelect(enrichedHotel);
@@ -197,9 +197,9 @@ export function HyperGuestHotelSearch({
           ref={dropdownRef}
           className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-[320px] overflow-y-auto"
         >
-          {filteredHotels.map((hotel) => (
+          {filteredHotels.map((hotel, index) => (
             <button
-              key={hotel.id}
+              key={hotel.id ?? `hotel-${index}`}
               type="button"
               onClick={() => handleSelect(hotel)}
               className="w-full px-4 py-3 text-left hover:bg-accent transition-colors border-b last:border-b-0 flex items-start gap-3"
