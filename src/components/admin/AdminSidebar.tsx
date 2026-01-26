@@ -30,6 +30,7 @@ const menuItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "Categories", url: "/admin/categories", icon: FolderKanban },
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
+  { title: "Hotels 2", url: "/admin/hotels2", icon: Building2 },
   { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
   { title: "Bookings", url: "/admin/bookings", icon: Calendar },
   { title: "Gift Cards", url: "/admin/gift-cards", icon: Gift },
