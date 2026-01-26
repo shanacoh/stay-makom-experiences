@@ -97,6 +97,20 @@ export interface HyperGuestSearchResult {
   remarks: string[];
 }
 
+export interface HyperGuestHotel {
+  id: number;
+  name: string;
+  countryCode?: string;
+  country?: string;
+  regionName?: string;
+  cityName?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  starRating?: number;
+  propertyType?: string;
+}
+
 // Helper to format guests parameter
 export function formatGuests(rooms: Array<{ adults: number; children: number[] }>): string {
   return rooms.map(room => {
@@ -108,49 +122,83 @@ export function formatGuests(rooms: Array<{ adults: number; children: number[] }
   }).join('.');
 }
 
-// API client functions
-async function callHyperGuest<T>(action: string, params: Record<string, any> = {}, queryParams: Record<string, string> = {}): Promise<T> {
+// API client functions - uses fetch for GET with query params
+async function callHyperGuestGet<T>(action: string, queryParams: Record<string, string> = {}): Promise<T> {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  
   const searchParams = new URLSearchParams({ action, ...queryParams });
   
-  const { data, error } = await supabase.functions.invoke('hyperguest', {
-    body: params,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  // The function is called without query params in the body, we need to add action
-  const response = await supabase.functions.invoke(`hyperguest?${searchParams.toString()}`, {
-    body: Object.keys(params).length > 0 ? params : undefined,
-  });
-
-  if (response.error) {
-    throw new Error(response.error.message);
+  const response = await fetch(
+    `${supabaseUrl}/functions/v1/hyperguest?${searchParams.toString()}`,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`HyperGuest API error: ${response.status} - ${errorText}`);
   }
-
-  if (!response.data.success) {
-    throw new Error(response.data.error || 'Unknown error');
+  
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Unknown error');
   }
+  
+  return result.data as T;
+}
 
-  return response.data.data as T;
+// API client functions - uses supabase.functions.invoke for POST
+async function callHyperGuestPost<T>(action: string, body: Record<string, any> = {}): Promise<T> {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  
+  const response = await fetch(
+    `${supabaseUrl}/functions/v1/hyperguest?action=${action}`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`HyperGuest API error: ${response.status} - ${errorText}`);
+  }
+  
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Unknown error');
+  }
+  
+  return result.data as T;
 }
 
 // Search API
 export async function searchHotels(params: HyperGuestSearchParams): Promise<{ results: HyperGuestSearchResult[] }> {
-  return callHyperGuest('search', params);
+  return callHyperGuestPost('search', params);
 }
 
 // Booking API
 export async function preBookHotel(bookingData: HyperGuestBookingData) {
-  return callHyperGuest('pre-book', bookingData);
+  return callHyperGuestPost('pre-book', bookingData);
 }
 
 export async function createBooking(bookingData: HyperGuestBookingData) {
-  return callHyperGuest('create-booking', bookingData);
+  return callHyperGuestPost('create-booking', bookingData);
 }
 
 export async function getBookingDetails(bookingId: string) {
-  return callHyperGuest('get-booking', {}, { bookingId });
+  return callHyperGuestGet('get-booking', { bookingId });
 }
 
 export async function listBookings(params: {
@@ -160,24 +208,24 @@ export async function listBookings(params: {
   limit?: number;
   page?: number;
 }) {
-  return callHyperGuest('list-bookings', params);
+  return callHyperGuestPost('list-bookings', params);
 }
 
 export async function cancelBooking(bookingId: string, options: { reason?: string; simulation?: boolean } = {}) {
-  return callHyperGuest('cancel-booking', { bookingId, ...options });
+  return callHyperGuestPost('cancel-booking', { bookingId, ...options });
 }
 
 // Static API
-export async function getAllHotels(countryCode?: string) {
-  return callHyperGuest('get-hotels', {}, countryCode ? { countryCode } : {});
+export async function getAllHotels(countryCode?: string): Promise<HyperGuestHotel[]> {
+  return callHyperGuestGet('get-hotels', countryCode ? { countryCode } : {});
 }
 
 export async function getPropertyDetails(propertyId: number) {
-  return callHyperGuest('get-property', {}, { propertyId: propertyId.toString() });
+  return callHyperGuestGet('get-property', { propertyId: propertyId.toString() });
 }
 
 export async function getFacilities() {
-  return callHyperGuest('get-facilities');
+  return callHyperGuestGet('get-facilities');
 }
 
 // Utility: Calculate checkout date from checkin and nights

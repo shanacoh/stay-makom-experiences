@@ -1,3 +1,4 @@
+// HyperGuest API Edge Function v2
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -278,9 +279,43 @@ async function getAllHotels(countryCode?: string) {
     throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
   }
   
+  // Log first item structure for debugging - critical for understanding API response
+  if (Array.isArray(data) && data.length > 0) {
+    const firstHotel = data[0];
+    console.log('📋 First hotel ALL keys:', JSON.stringify(Object.keys(firstHotel)));
+    console.log('📋 Sample hotel FULL:', JSON.stringify(firstHotel));
+  }
+  
+  // If no filter requested, limit results to avoid massive response
+  if (!countryCode && Array.isArray(data)) {
+    console.log('⚠️ No country filter, returning first 1000 hotels only');
+    data = data.slice(0, 1000);
+  }
+  
   // Filter by country if specified
   if (countryCode && Array.isArray(data)) {
-    data = data.filter((hotel: any) => hotel.countryCode === countryCode);
+    const upperCountryCode = countryCode.toUpperCase();
+    const originalCount = data.length;
+    
+    // Get actual field names from first item
+    const sampleHotel = data[0];
+    console.log('🔎 Looking for country in fields:', JSON.stringify(sampleHotel).substring(0, 300));
+    
+    data = data.filter((hotel: any) => {
+      // Check all possible variations of country field
+      for (const key of Object.keys(hotel)) {
+        const lowerKey = key.toLowerCase();
+        if (lowerKey.includes('country') || lowerKey === 'cc') {
+          const value = String(hotel[key] || '').toUpperCase();
+          if (value === upperCountryCode) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+    
+    console.log('🔍 Filtered by country', upperCountryCode, ':', data.length, 'of', originalCount, 'hotels');
   }
   
   console.log('✅ Hotels retrieved, count:', Array.isArray(data) ? data.length : 'N/A');
