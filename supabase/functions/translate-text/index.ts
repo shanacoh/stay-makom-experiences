@@ -10,11 +10,12 @@ interface TranslateRequest {
   targetLang: "he" | "en" | "fr";
 }
 
-// Common city/region translations for Israel
+// Common city/region translations for Israel (short terms only)
 const hebrewTranslations: Record<string, string> = {
   // Cities
   "tel aviv": "תל אביב",
   "tel aviv-yafo": "תל אביב-יפו",
+  "tel-aviv": "תל אביב",
   "jerusalem": "ירושלים",
   "haifa": "חיפה",
   "eilat": "אילת",
@@ -95,39 +96,92 @@ const hebrewTranslations: Record<string, string> = {
   
   // Common terms
   "israel": "ישראל",
-  "beach": "חוף",
-  "hotel": "מלון",
-  "boutique": "בוטיק",
-  "resort": "ריזורט",
-  "spa": "ספא",
-  "desert": "מדבר",
-  "sea": "ים",
-  "mountain": "הר",
-  "lake": "אגם",
-  "river": "נהר",
-  "forest": "יער",
-  "national park": "פארק לאומי",
 };
 
-function translateToHebrew(text: string): string {
+// Check if text is a short term that can use dictionary lookup
+function isShortTerm(text: string): boolean {
+  // Consider it short if it's less than 50 characters and likely a city/region name
+  return text.length < 50;
+}
+
+function translateToHebrewDictionary(text: string): string | null {
   if (!text) return "";
   
   const lowerText = text.toLowerCase().trim();
   
-  // Direct match
+  // Direct match only for short terms
   if (hebrewTranslations[lowerText]) {
     return hebrewTranslations[lowerText];
   }
   
-  // Try partial matches for compound names
-  for (const [eng, heb] of Object.entries(hebrewTranslations)) {
-    if (lowerText.includes(eng)) {
-      return heb;
-    }
-  }
+  return null; // No dictionary match
+}
+
+// Use Lovable AI to translate longer texts
+async function translateWithAI(texts: string[], targetLang: string): Promise<string[]> {
+  const LOVABLE_AI_URL = "https://ai-gateway.lovable.dev/v1/chat/completions";
   
-  // Return original if no translation found
-  return text;
+  const languageNames: Record<string, string> = {
+    he: "Hebrew",
+    en: "English",
+    fr: "French",
+  };
+  
+  const targetLanguage = languageNames[targetLang] || "Hebrew";
+  
+  const prompt = `Translate the following texts to ${targetLanguage}. Return ONLY a JSON array of translated strings, in the same order as the input. Do not include any explanation or markdown formatting.
+
+Input texts:
+${JSON.stringify(texts, null, 2)}
+
+Return format example: ["translated text 1", "translated text 2"]`;
+
+  try {
+    const response = await fetch(LOVABLE_AI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional translator specializing in ${targetLanguage}. Translate accurately while maintaining the original meaning and tone. For hotel/tourism content, use appropriate hospitality terminology.`,
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("AI translation failed:", response.status, await response.text());
+      return texts; // Return original on error
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    
+    // Parse the JSON array from the response
+    // Try to extract JSON array from the response
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const translations = JSON.parse(jsonMatch[0]);
+      if (Array.isArray(translations) && translations.length === texts.length) {
+        return translations;
+      }
+    }
+    
+    console.error("Failed to parse AI translation response:", content);
+    return texts; // Return original on parse error
+  } catch (error) {
+    console.error("AI translation error:", error);
+    return texts; // Return original on error
+  }
 }
 
 serve(async (req) => {
@@ -149,9 +203,8 @@ serve(async (req) => {
       );
     }
 
-    if (targetLang !== "he") {
-      // For non-Hebrew translations, just return original texts
-      // Could integrate with a translation API later if needed
+    if (targetLang !== "he" && targetLang !== "fr") {
+      // For English or unsupported languages, just return original texts
       return new Response(
         JSON.stringify({ translations: texts }),
         { 
@@ -161,10 +214,47 @@ serve(async (req) => {
       );
     }
 
-    // Translate each text to Hebrew
-    const translations = texts.map(text => translateToHebrew(text));
+    // Separate texts into short (dictionary) and long (AI) translation
+    const translations: string[] = new Array(texts.length);
+    const textsNeedingAI: { index: number; text: string }[] = [];
+    
+    for (let i = 0; i < texts.length; i++) {
+      const text = texts[i];
+      
+      if (!text || text.trim() === "") {
+        translations[i] = "";
+        continue;
+      }
+      
+      // For Hebrew target, try dictionary first for short terms
+      if (targetLang === "he" && isShortTerm(text)) {
+        const dictTranslation = translateToHebrewDictionary(text);
+        if (dictTranslation !== null) {
+          translations[i] = dictTranslation;
+          continue;
+        }
+      }
+      
+      // Queue for AI translation
+      textsNeedingAI.push({ index: i, text });
+    }
+    
+    // If there are texts needing AI translation, do it in one batch
+    if (textsNeedingAI.length > 0) {
+      console.log(`Translating ${textsNeedingAI.length} texts with AI to ${targetLang}`);
+      const aiTexts = textsNeedingAI.map(t => t.text);
+      const aiTranslations = await translateWithAI(aiTexts, targetLang);
+      
+      // Map AI translations back to their original positions
+      for (let i = 0; i < textsNeedingAI.length; i++) {
+        translations[textsNeedingAI[i].index] = aiTranslations[i];
+      }
+    }
 
-    console.log(`Translated ${texts.length} texts to Hebrew:`, { original: texts, translated: translations });
+    console.log(`Translated ${texts.length} texts to ${targetLang}:`, { 
+      original: texts.map(t => t?.slice(0, 30) + (t?.length > 30 ? "..." : "")), 
+      translated: translations.map(t => t?.slice(0, 30) + (t?.length > 30 ? "..." : "")) 
+    });
 
     return new Response(
       JSON.stringify({ translations }),
