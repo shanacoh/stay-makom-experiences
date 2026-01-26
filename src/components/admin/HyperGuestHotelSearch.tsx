@@ -85,6 +85,9 @@ export function HyperGuestHotelSearch({
   }, []);
 
   const handleSelect = async (hotel: HyperGuestHotel) => {
+    console.log("[HyperGuest] Selected hotel from list:", hotel);
+    console.log("[HyperGuest] Hotel ID:", hotel.id, "Type:", typeof hotel.id);
+    
     setSelectedHotel(hotel);
     setSearchTerm(hotel.name || "");
     setIsOpen(false);
@@ -92,42 +95,57 @@ export function HyperGuestHotelSearch({
     if (fetchFullDetails && hotel.id) {
       setIsLoadingDetails(true);
       try {
+        console.log("[HyperGuest] Fetching full details for hotel ID:", hotel.id);
+        
         // Fetch complete hotel details using the model
         const hotelModel = await getPropertyDetails(hotel.id);
+        
+        console.log("[HyperGuest] Received hotelModel:", hotelModel);
+        console.log("[HyperGuest] hotelModel.descriptions:", hotelModel?.descriptions);
+        console.log("[HyperGuest] hotelModel.images:", hotelModel?.images);
+        console.log("[HyperGuest] hotelModel.contact:", hotelModel?.contact);
+        console.log("[HyperGuest] hotelModel.location:", hotelModel?.location);
+        console.log("[HyperGuest] hotelModel.coordinates:", hotelModel?.coordinates);
         
         // Extract images and other data
         const images = extractHotelImages(hotelModel);
         const heroImage = getHotelMainImage(hotelModel);
+        
+        console.log("[HyperGuest] Extracted images:", images);
+        console.log("[HyperGuest] Hero image:", heroImage);
         
         const enrichedHotel: HyperGuestHotelWithDetails = {
           ...hotel,
           hotelModel,
           images,
           heroImage,
-          description: hotelModel.descriptions?.general || undefined,
-          contact: hotelModel.contact ? {
+          description: hotelModel?.descriptions?.general || undefined,
+          contact: hotelModel?.contact ? {
             email: hotelModel.contact.email || undefined,
             phone: hotelModel.contact.phone || undefined,
             website: hotelModel.contact.website || undefined,
           } : undefined,
-          facilities: hotelModel.facilities?.popular?.slice(0, 10).map(f => f.name) || [],
-          checkIn: hotelModel.settings?.checkIn,
-          checkOut: hotelModel.settings?.checkOut,
+          facilities: hotelModel?.facilities?.popular?.slice(0, 10).map(f => f.name) || [],
+          checkIn: hotelModel?.settings?.checkIn,
+          checkOut: hotelModel?.settings?.checkOut,
           // Update coordinates from full data if available
-          latitude: hotelModel.coordinates?.latitude || hotel.latitude,
-          longitude: hotelModel.coordinates?.longitude || hotel.longitude,
-          address: hotelModel.location?.fullAddress || hotel.address,
+          latitude: hotelModel?.coordinates?.latitude || hotel.latitude,
+          longitude: hotelModel?.coordinates?.longitude || hotel.longitude,
+          address: hotelModel?.location?.fullAddress || hotel.address,
         };
         
+        console.log("[HyperGuest] Enriched hotel to return:", enrichedHotel);
         onSelect(enrichedHotel);
       } catch (error) {
-        console.error("Failed to fetch hotel details:", error);
+        console.error("[HyperGuest] Failed to fetch hotel details:", error);
         // Fallback to basic hotel data
+        console.log("[HyperGuest] Falling back to basic hotel data");
         onSelect(hotel);
       } finally {
         setIsLoadingDetails(false);
       }
     } else {
+      console.log("[HyperGuest] Skipping full details fetch, using basic data");
       onSelect(hotel);
     }
   };
