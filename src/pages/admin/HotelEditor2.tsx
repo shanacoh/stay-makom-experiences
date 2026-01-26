@@ -159,9 +159,10 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       meta_description_en: hotel.description?.slice(0, 155) || prev.meta_description_en,
     }));
     
-    // Translate city, region, address AND story to Hebrew
+    // Translate name, city, region, address AND story to Hebrew
+    const hotelName = hotel.name || "";
     const story = hotel.description || "";
-    const textsToTranslate = [city, region, address, story].filter(Boolean);
+    const textsToTranslate = [hotelName, city, region, address, story].filter(Boolean);
     
     if (textsToTranslate.length > 0) {
       try {
@@ -173,15 +174,17 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           // Map translations back based on which fields were included
           const translations = data.translations as string[];
           let idx = 0;
+          const nameHe = hotelName ? translations[idx++] : "";
           const cityHe = city ? translations[idx++] : "";
           const regionHe = region ? translations[idx++] : "";
           const addressHe = address ? translations[idx++] : "";
           const storyHe = story ? translations[idx++] : "";
           
-          console.log("[HotelEditor2] Hebrew translations:", { cityHe, regionHe, addressHe, storyHe: storyHe?.slice(0, 50) + "..." });
+          console.log("[HotelEditor2] Hebrew translations:", { nameHe, cityHe, regionHe, addressHe, storyHe: storyHe?.slice(0, 50) + "..." });
           
           setFormData((prev) => ({
             ...prev,
+            name_he: nameHe || prev.name_he,
             city_he: cityHe || prev.city_he,
             region_he: regionHe || prev.region_he,
             address_he: addressHe || prev.address_he,
