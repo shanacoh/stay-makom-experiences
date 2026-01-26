@@ -35,12 +35,15 @@ export interface HyperGuestSearchParams {
 }
 
 export interface HyperGuestHotel {
-  id: number;
+  id?: number;
+  hotel_id?: number;
   name: string;
   country?: string;
   countryCode?: string;
   regionName?: string;
+  region?: string;
   cityName?: string;
+  city?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
