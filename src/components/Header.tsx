@@ -28,7 +28,7 @@ const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   
   // Auth popup state
-  const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup" }>({ open: false, tab: "login" });
+  const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup"; context: "favorites" | "account" | "signup" }>({ open: false, tab: "login", context: "account" });
 
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const Header = () => {
     if (user) {
       navigate("/account?tab=wishlist");
     } else {
-      setAuthDialog({ open: true, tab: "login" });
+      setAuthDialog({ open: true, tab: "login", context: "favorites" });
     }
   };
 
@@ -166,8 +166,8 @@ const Header = () => {
             <AccountBubble
               lang={lang as "en" | "fr" | "he"}
               isTransparent={isTransparentPage && !isScrolled}
-              onSignIn={() => setAuthDialog({ open: true, tab: "login" })}
-              onSignUp={() => setAuthDialog({ open: true, tab: "signup" })}
+              onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
+              onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
             />
           )}
 
@@ -195,8 +195,9 @@ const Header = () => {
         onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
         lang={lang as "en" | "fr" | "he"}
         defaultTab={authDialog.tab}
+        context={authDialog.context}
         onSignupSuccess={() => {
-          setAuthDialog({ open: false, tab: "login" });
+          setAuthDialog({ open: false, tab: "login", context: "account" });
           navigateLocalized("/account");
         }}
       />
