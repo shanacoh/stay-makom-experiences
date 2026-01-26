@@ -19,43 +19,10 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch all hotels from HyperGuest without country filter to debug
+  // Fetch hotels from HyperGuest filtered by Israel
   const { data: hotels, isLoading, error } = useQuery({
-    queryKey: ["hyperguest-hotels-debug"],
-    queryFn: async () => {
-      // Direct fetch without country filter to see all data
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/hyperguest?action=get-hotels`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${supabaseKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch hotels: ${response.status} - ${errorText}`);
-      }
-      
-      const result = await response.json();
-      console.log('🏨 HyperGuest API Response:', result);
-      
-      if (!result.success) throw new Error(result.error);
-      
-      // Log first hotel structure for debugging
-      if (result.data && result.data.length > 0) {
-        console.log('📋 First hotel structure:', result.data[0]);
-        console.log('📋 All keys:', Object.keys(result.data[0]));
-      }
-      
-      return result.data as HyperGuestHotel[];
-    },
+    queryKey: ["hyperguest-hotels-il"],
+    queryFn: () => getAllHotels('IL'),
     staleTime: 1000 * 60 * 30,
     retry: 2,
   });
