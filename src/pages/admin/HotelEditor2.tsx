@@ -24,6 +24,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const queryClient = useQueryClient();
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isDownloadingImages, setIsDownloadingImages] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [hyperguestId, setHyperguestId] = useState<number | null>(null);
   const [pendingImages, setPendingImages] = useState<string[]>([]); // HyperGuest image URLs to download
   const [formData, setFormData] = useState({
@@ -165,6 +166,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     const textsToTranslate = [hotelName, city, region, address, story].filter(Boolean);
     
     if (textsToTranslate.length > 0) {
+      setIsTranslating(true);
       try {
         const { data, error } = await supabase.functions.invoke('translate-text', {
           body: { texts: textsToTranslate, targetLang: 'he' },
@@ -193,6 +195,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         }
       } catch (err) {
         console.error("[HotelEditor2] Translation error:", err);
+        toast.error("Translation failed", { description: "Hebrew fields could not be auto-translated." });
+      } finally {
+        setIsTranslating(false);
       }
     }
     
@@ -583,14 +588,22 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address_he">כתובת (עברית)</Label>
-                  <Input
-                    id="address_he"
-                    value={formData.address_he}
-                    onChange={(e) => setFormData({ ...formData, address_he: e.target.value })}
-                    placeholder="כתובת בעברית"
-                    dir="rtl"
-                    className="bg-hebrew-input"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="address_he"
+                      value={formData.address_he}
+                      onChange={(e) => setFormData({ ...formData, address_he: e.target.value })}
+                      placeholder="כתובת בעברית"
+                      dir="rtl"
+                      className="bg-hebrew-input"
+                      disabled={isTranslating}
+                    />
+                    {isTranslating && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -712,47 +725,79 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
 
                   <div className="space-y-2">
                     <Label htmlFor="name_he">שם המלון</Label>
-                    <Input
-                      id="name_he"
-                      value={formData.name_he}
-                      onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="name_he"
+                        value={formData.name_he}
+                        onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
+                        dir="rtl"
+                        className="bg-hebrew-input"
+                        disabled={isTranslating}
+                      />
+                      {isTranslating && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="region_he">אזור</Label>
-                    <Input
-                      id="region_he"
-                      value={formData.region_he}
-                      onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="region_he"
+                        value={formData.region_he}
+                        onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
+                        dir="rtl"
+                        className="bg-hebrew-input"
+                        disabled={isTranslating}
+                      />
+                      {isTranslating && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="city_he">עיר</Label>
-                    <Input
-                      id="city_he"
-                      value={formData.city_he}
-                      onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="city_he"
+                        value={formData.city_he}
+                        onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
+                        dir="rtl"
+                        className="bg-hebrew-input"
+                        disabled={isTranslating}
+                      />
+                      {isTranslating && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="story_he">סיפור</Label>
-                    <Textarea
-                      id="story_he"
-                      value={formData.story_he}
-                      onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
-                      rows={6}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                    />
+                    <div className="relative">
+                      <Textarea
+                        id="story_he"
+                        value={formData.story_he}
+                        onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
+                        rows={6}
+                        dir="rtl"
+                        className="bg-hebrew-input"
+                        disabled={isTranslating}
+                      />
+                      {isTranslating && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
