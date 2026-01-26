@@ -119,7 +119,7 @@ function translateToHebrewDictionary(text: string): string | null {
 
 // Use Lovable AI to translate longer texts
 async function translateWithAI(texts: string[], targetLang: string): Promise<string[]> {
-  const LOVABLE_AI_URL = "https://ai-gateway.lovable.dev/v1/chat/completions";
+  const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
   
   const languageNames: Record<string, string> = {
     he: "Hebrew",
