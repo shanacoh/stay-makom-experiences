@@ -33,16 +33,34 @@ export function HyperGuestHotelSearch({ onSelect, disabled }: HyperGuestHotelSea
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch all hotels from HyperGuest
+  // Fetch all hotels from HyperGuest (filtered to Israel for performance)
   const { data: hotels, isLoading, error } = useQuery({
-    queryKey: ["hyperguest-hotels"],
+    queryKey: ["hyperguest-hotels-il"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("hyperguest?action=get-hotels");
+      // Use fetch directly with query params for GET request
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       
-      if (error) throw error;
-      if (!data.success) throw new Error(data.error);
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/hyperguest?action=get-hotels&countryCode=IL`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       
-      return data.data as HyperGuestHotel[];
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch hotels: ${response.status} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error);
+      
+      return result.data as HyperGuestHotel[];
     },
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
     retry: 2,

@@ -245,19 +245,38 @@ async function getAllHotels(countryCode?: string) {
   console.log('🏨 Getting all hotels, country filter:', countryCode);
   
   const url = `${STATIC_DOMAIN}hotels.json`;
+  console.log('📡 Static API URL:', url);
+  
+  const headers = getAuthHeaders();
+  console.log('🔑 Using auth headers');
   
   const response = await fetch(url, {
     method: 'GET',
-    headers: getAuthHeaders(),
+    headers: headers,
   });
   
+  console.log('📥 Response status:', response.status, response.statusText);
+  
+  const responseText = await response.text();
+  console.log('📝 Response length:', responseText.length, 'chars');
+  
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error('❌ Get hotels failed:', response.status, errorText);
-    throw new Error(`Get hotels failed: ${response.status} - ${errorText}`);
+    console.error('❌ Get hotels failed:', response.status, responseText.substring(0, 500));
+    throw new Error(`Get hotels failed: ${response.status} - ${responseText.substring(0, 200)}`);
   }
   
-  let data = await response.json();
+  if (!responseText || responseText.trim() === '') {
+    console.error('❌ Empty response from API');
+    throw new Error('Empty response from HyperGuest API');
+  }
+  
+  let data;
+  try {
+    data = JSON.parse(responseText);
+  } catch (parseError) {
+    console.error('❌ Failed to parse JSON:', responseText.substring(0, 500));
+    throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
+  }
   
   // Filter by country if specified
   if (countryCode && Array.isArray(data)) {
@@ -322,12 +341,27 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
     
-    let body = {};
+    console.log('🚀 HyperGuest API request:', action, 'method:', req.method);
+    
+    // Parse body only for POST with actual content
+    let body: Record<string, any> = {};
     if (req.method === 'POST') {
-      body = await req.json();
+      const contentType = req.headers.get('content-type') || '';
+      const contentLength = req.headers.get('content-length');
+      
+      if (contentType.includes('application/json') && contentLength && parseInt(contentLength) > 0) {
+        try {
+          const text = await req.text();
+          if (text && text.trim()) {
+            body = JSON.parse(text);
+          }
+        } catch (parseErr) {
+          console.log('⚠️ No JSON body or parse error, using empty object');
+        }
+      }
     }
     
-    console.log('🚀 HyperGuest API request:', action);
+    console.log('📦 Body:', JSON.stringify(body));
     
     let result;
     
