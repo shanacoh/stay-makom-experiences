@@ -117,6 +117,13 @@ export function HyperGuestHotelSearch({
         console.log("[HyperGuest] Extracted images:", images);
         console.log("[HyperGuest] Hero image:", heroImage);
         
+        // Extract city and region from location data
+        const city = hotelModel?.location?.city?.name || hotel.cityName || hotel.city || "";
+        const region = hotelModel?.location?.region || hotel.regionName || hotel.region || "";
+        const fullAddress = hotelModel?.location?.fullAddress || hotelModel?.location?.address || hotel.address || "";
+        
+        console.log("[HyperGuest] Extracted location - city:", city, "region:", region, "address:", fullAddress);
+        
         const enrichedHotel: HyperGuestHotelWithDetails = {
           ...hotel,
           id: hotelId, // Normalize to id
@@ -135,7 +142,10 @@ export function HyperGuestHotelSearch({
           // Update coordinates from full data if available
           latitude: hotelModel?.coordinates?.latitude || hotel.latitude,
           longitude: hotelModel?.coordinates?.longitude || hotel.longitude,
-          address: hotelModel?.location?.fullAddress || hotel.address,
+          address: fullAddress,
+          // Normalized location fields
+          cityName: city,
+          regionName: region,
         };
         
         console.log("[HyperGuest] Enriched hotel to return:", enrichedHotel);

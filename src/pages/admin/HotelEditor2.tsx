@@ -125,7 +125,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   };
 
   // Handle HyperGuest hotel selection - prefill form with full details
-  const handleHyperGuestSelect = (hotel: HyperGuestHotelWithDetails) => {
+  const handleHyperGuestSelect = async (hotel: HyperGuestHotelWithDetails) => {
     setHyperguestId(hotel.id);
     
     // Store images for later download (user can choose to import them)
@@ -133,15 +133,22 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       setPendingImages(hotel.images);
     }
     
-    // Pre-fill form with all available data
+    // Extract location data properly
+    const city = hotel.cityName || hotel.city || "";
+    const region = hotel.regionName || hotel.region || "";
+    const address = hotel.address || `${city}, ${region}, Israel`.replace(/^, |, $/g, "").replace(/, $/g, "");
+    
+    console.log("[HotelEditor2] Extracted location - city:", city, "region:", region, "address:", address);
+    
+    // Pre-fill form with all available data (English)
     setFormData((prev) => ({
       ...prev,
       name: hotel.name || prev.name,
-      region: hotel.regionName || prev.region,
-      city: hotel.cityName || prev.city,
+      region: region,
+      city: city,
       latitude: hotel.latitude ?? prev.latitude,
       longitude: hotel.longitude ?? prev.longitude,
-      address: hotel.address || `${hotel.cityName || ""}, ${hotel.regionName || ""}, ${hotel.countryCode || ""}`.replace(/^, |, $/g, ""),
+      address: address,
       // Description/Story from HyperGuest
       story: hotel.description || prev.story,
       // Contact info
@@ -152,11 +159,35 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       meta_description_en: hotel.description?.slice(0, 155) || prev.meta_description_en,
     }));
     
+    // Translate city and region to Hebrew
+    if (city || region) {
+      try {
+        const textsToTranslate = [city, region, address].filter(Boolean);
+        const { data, error } = await supabase.functions.invoke('translate-text', {
+          body: { texts: textsToTranslate, targetLang: 'he' },
+        });
+        
+        if (!error && data?.translations) {
+          const [cityHe, regionHe, addressHe] = data.translations;
+          console.log("[HotelEditor2] Hebrew translations:", { cityHe, regionHe, addressHe });
+          
+          setFormData((prev) => ({
+            ...prev,
+            city_he: cityHe || prev.city_he,
+            region_he: regionHe || prev.region_he,
+            address_he: addressHe || prev.address_he,
+          }));
+        }
+      } catch (err) {
+        console.error("[HotelEditor2] Translation error:", err);
+      }
+    }
+    
     const imageCount = hotel.images?.length || 0;
     toast.success(`Hotel "${hotel.name}" imported from HyperGuest!`, {
       description: imageCount > 0 
-        ? `Form pre-filled. ${imageCount} images available to import.`
-        : "Form pre-filled with available data. You can edit before saving.",
+        ? `Form pre-filled with Hebrew translations. ${imageCount} images available to import.`
+        : "Form pre-filled with Hebrew translations. You can edit before saving.",
     });
   };
 
