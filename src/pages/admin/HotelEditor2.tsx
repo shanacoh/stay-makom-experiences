@@ -9,10 +9,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Sparkles } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
 import { Link } from "react-router-dom";
+import { HyperGuestHotelSearch } from "@/components/admin/HyperGuestHotelSearch";
+
+interface HyperGuestHotel {
+  id: number;
+  name: string;
+  countryCode: string;
+  cityName?: string;
+  regionName?: string;
+  starRating?: number;
+  propertyType?: string;
+  propertyTypeName?: string;
+  longitude?: number;
+  latitude?: number;
+  address?: string;
+}
 
 interface HotelEditor2Props {
   hotelId?: string;
@@ -22,6 +37,7 @@ interface HotelEditor2Props {
 export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const queryClient = useQueryClient();
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [hyperguestId, setHyperguestId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
@@ -56,6 +72,23 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     og_description_fr: "",
     og_image: "",
   });
+
+  // Handle HyperGuest hotel selection - prefill form
+  const handleHyperGuestSelect = (hotel: HyperGuestHotel) => {
+    setHyperguestId(hotel.id);
+    setFormData((prev) => ({
+      ...prev,
+      name: hotel.name || prev.name,
+      region: hotel.regionName || prev.region,
+      city: hotel.cityName || prev.city,
+      latitude: hotel.latitude ?? prev.latitude,
+      longitude: hotel.longitude ?? prev.longitude,
+      address: hotel.address || `${hotel.cityName || ""}, ${hotel.regionName || ""}, ${hotel.countryCode || ""}`.replace(/^, |, $/g, ""),
+    }));
+    toast.success(`Hotel "${hotel.name}" imported from HyperGuest!`, {
+      description: "Form pre-filled with available data. You can edit before saving.",
+    });
+  };
 
   const { data: hotel, isLoading } = useQuery({
     queryKey: ["hotel2", hotelId],
@@ -212,6 +245,27 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
             <CardTitle>Hotel Details - Bilingual</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* HyperGuest Import Section - Only for new hotels */}
+            {!hotelId && (
+              <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold text-primary">Quick Import</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Search and import hotel data directly from HyperGuest to pre-fill the form.
+                </p>
+                <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} />
+                {hyperguestId && (
+                  <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
+                      ✓ Linked to HyperGuest ID: {hyperguestId}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Basic Fields */}
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
