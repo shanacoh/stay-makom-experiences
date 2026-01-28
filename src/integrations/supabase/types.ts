@@ -614,6 +614,62 @@ export type Database = {
           },
         ]
       }
+      experience2_addons: {
+        Row: {
+          calculation_order: number | null
+          created_at: string | null
+          description: string | null
+          description_he: string | null
+          experience_id: string
+          id: string
+          is_active: boolean | null
+          is_percentage: boolean | null
+          name: string
+          name_he: string | null
+          type: Database["public"]["Enums"]["addon_type"]
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          calculation_order?: number | null
+          created_at?: string | null
+          description?: string | null
+          description_he?: string | null
+          experience_id: string
+          id?: string
+          is_active?: boolean | null
+          is_percentage?: boolean | null
+          name: string
+          name_he?: string | null
+          type: Database["public"]["Enums"]["addon_type"]
+          updated_at?: string | null
+          value: number
+        }
+        Update: {
+          calculation_order?: number | null
+          created_at?: string | null
+          description?: string | null
+          description_he?: string | null
+          experience_id?: string
+          id?: string
+          is_active?: boolean | null
+          is_percentage?: boolean | null
+          name?: string
+          name_he?: string | null
+          type?: Database["public"]["Enums"]["addon_type"]
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_addons_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           accessibility_info: string | null
@@ -2138,6 +2194,7 @@ export type Database = {
       }
     }
     Enums: {
+      addon_type: "commission" | "per_night" | "tax"
       app_role: "admin" | "hotel_admin" | "customer"
       base_price_type: "fixed" | "per_person" | "per_booking"
       booking_extra_status: "pending" | "done" | "unavailable"
@@ -2280,6 +2337,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      addon_type: ["commission", "per_night", "tax"],
       app_role: ["admin", "hotel_admin", "customer"],
       base_price_type: ["fixed", "per_person", "per_booking"],
       booking_extra_status: ["pending", "done", "unavailable"],
