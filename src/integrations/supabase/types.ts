@@ -813,6 +813,205 @@ export type Database = {
           },
         ]
       }
+      experiences2: {
+        Row: {
+          accessibility_info: string | null
+          accessibility_info_he: string | null
+          address: string | null
+          address_he: string | null
+          adult_only: boolean | null
+          base_price: number
+          base_price_type: Database["public"]["Enums"]["base_price_type"] | null
+          cancellation_policy: string | null
+          cancellation_policy_he: string | null
+          category_id: string | null
+          checkin_time: string | null
+          checkout_time: string | null
+          created_at: string | null
+          currency: string | null
+          duration: string | null
+          duration_he: string | null
+          good_to_know: string[] | null
+          good_to_know_he: string[] | null
+          google_maps_link: string | null
+          hero_image: string | null
+          hotel_id: string
+          id: string
+          includes: string[] | null
+          includes_he: string[] | null
+          lead_time_days: number | null
+          long_copy: string | null
+          long_copy_he: string | null
+          max_nights: number | null
+          max_party: number | null
+          meta_description_en: string | null
+          meta_description_fr: string | null
+          meta_description_he: string | null
+          min_nights: number | null
+          min_party: number | null
+          not_includes: string[] | null
+          not_includes_he: string[] | null
+          og_description_en: string | null
+          og_description_fr: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_fr: string | null
+          og_title_he: string | null
+          photos: string[] | null
+          region_type: string | null
+          seo_title_en: string | null
+          seo_title_fr: string | null
+          seo_title_he: string | null
+          services: string[] | null
+          services_he: string[] | null
+          slug: string
+          status: Database["public"]["Enums"]["hotel_status"] | null
+          subtitle: string | null
+          subtitle_he: string | null
+          title: string
+          title_he: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accessibility_info?: string | null
+          accessibility_info_he?: string | null
+          address?: string | null
+          address_he?: string | null
+          adult_only?: boolean | null
+          base_price: number
+          base_price_type?:
+            | Database["public"]["Enums"]["base_price_type"]
+            | null
+          cancellation_policy?: string | null
+          cancellation_policy_he?: string | null
+          category_id?: string | null
+          checkin_time?: string | null
+          checkout_time?: string | null
+          created_at?: string | null
+          currency?: string | null
+          duration?: string | null
+          duration_he?: string | null
+          good_to_know?: string[] | null
+          good_to_know_he?: string[] | null
+          google_maps_link?: string | null
+          hero_image?: string | null
+          hotel_id: string
+          id?: string
+          includes?: string[] | null
+          includes_he?: string[] | null
+          lead_time_days?: number | null
+          long_copy?: string | null
+          long_copy_he?: string | null
+          max_nights?: number | null
+          max_party?: number | null
+          meta_description_en?: string | null
+          meta_description_fr?: string | null
+          meta_description_he?: string | null
+          min_nights?: number | null
+          min_party?: number | null
+          not_includes?: string[] | null
+          not_includes_he?: string[] | null
+          og_description_en?: string | null
+          og_description_fr?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_fr?: string | null
+          og_title_he?: string | null
+          photos?: string[] | null
+          region_type?: string | null
+          seo_title_en?: string | null
+          seo_title_fr?: string | null
+          seo_title_he?: string | null
+          services?: string[] | null
+          services_he?: string[] | null
+          slug: string
+          status?: Database["public"]["Enums"]["hotel_status"] | null
+          subtitle?: string | null
+          subtitle_he?: string | null
+          title: string
+          title_he?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accessibility_info?: string | null
+          accessibility_info_he?: string | null
+          address?: string | null
+          address_he?: string | null
+          adult_only?: boolean | null
+          base_price?: number
+          base_price_type?:
+            | Database["public"]["Enums"]["base_price_type"]
+            | null
+          cancellation_policy?: string | null
+          cancellation_policy_he?: string | null
+          category_id?: string | null
+          checkin_time?: string | null
+          checkout_time?: string | null
+          created_at?: string | null
+          currency?: string | null
+          duration?: string | null
+          duration_he?: string | null
+          good_to_know?: string[] | null
+          good_to_know_he?: string[] | null
+          google_maps_link?: string | null
+          hero_image?: string | null
+          hotel_id?: string
+          id?: string
+          includes?: string[] | null
+          includes_he?: string[] | null
+          lead_time_days?: number | null
+          long_copy?: string | null
+          long_copy_he?: string | null
+          max_nights?: number | null
+          max_party?: number | null
+          meta_description_en?: string | null
+          meta_description_fr?: string | null
+          meta_description_he?: string | null
+          min_nights?: number | null
+          min_party?: number | null
+          not_includes?: string[] | null
+          not_includes_he?: string[] | null
+          og_description_en?: string | null
+          og_description_fr?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_fr?: string | null
+          og_title_he?: string | null
+          photos?: string[] | null
+          region_type?: string | null
+          seo_title_en?: string | null
+          seo_title_fr?: string | null
+          seo_title_he?: string | null
+          services?: string[] | null
+          services_he?: string[] | null
+          slug?: string
+          status?: Database["public"]["Enums"]["hotel_status"] | null
+          subtitle?: string | null
+          subtitle_he?: string | null
+          title?: string
+          title_he?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiences2_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiences2_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       extras: {
         Row: {
           created_at: string | null
