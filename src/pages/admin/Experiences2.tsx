@@ -27,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { formatAddonValue, getAddonTypeLabelEn, type AddonType } from "@/types/experience2_addons";
 
 const AdminExperiences2 = () => {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ const AdminExperiences2 = () => {
     },
   });
 
-  // Fetch all experiences2 with hotel and category info
+  // Fetch all experiences2 with hotel, category and addons info
   const { data: experiences, isLoading } = useQuery({
     queryKey: ["admin-experiences2"],
     queryFn: async () => {
@@ -79,7 +80,8 @@ const AdminExperiences2 = () => {
         .select(`
           *,
           hotels2 (id, name),
-          categories (id, name)
+          categories (id, name),
+          experience2_addons (id, type, name, value, is_percentage)
         `)
         .order("updated_at", { ascending: false });
       
@@ -364,9 +366,20 @@ const AdminExperiences2 = () => {
                       <p>
                         <strong>Category:</strong> {(experience as any).categories?.name || "No category"}
                       </p>
-                      <p>
-                        <strong>Price:</strong> {experience.base_price} {experience.currency}
-                      </p>
+                      <div>
+                        <strong>Pricing Rules:</strong>{" "}
+                        {(experience as any).experience2_addons?.length > 0 ? (
+                          <span className="inline-flex flex-wrap gap-1 ml-1">
+                            {(experience as any).experience2_addons.map((addon: any) => (
+                              <Badge key={addon.id} variant="outline" className="text-xs">
+                                {getAddonTypeLabelEn(addon.type as AddonType)}: {formatAddonValue(addon)}
+                              </Badge>
+                            ))}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground/60">No rules configured</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
