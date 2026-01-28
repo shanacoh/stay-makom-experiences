@@ -214,7 +214,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     queryFn: async () => {
       if (!hotelId) return null;
       const { data, error } = await supabase
-        .from("hotels")
+        .from("hotels2")
         .select("*")
         .eq("id", hotelId)
         .single();
@@ -305,17 +305,19 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       const dataWithSlug = {
         ...data,
         slug: hotelId ? hotel?.slug : generateSlug(data.name),
+        hyperguest_property_id: hyperguestId ? String(hyperguestId) : null,
+        hyperguest_imported_at: hyperguestId ? new Date().toISOString() : null,
       };
       
       if (hotelId) {
         const { error } = await supabase
-          .from("hotels")
+          .from("hotels2")
           .update(dataWithSlug)
           .eq("id", hotelId);
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from("hotels")
+          .from("hotels2")
           .insert([dataWithSlug]);
         if (error) throw error;
       }

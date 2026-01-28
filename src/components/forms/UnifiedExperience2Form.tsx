@@ -94,12 +94,12 @@ export function UnifiedExperience2Form({
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // Fetch hotels
+  // Fetch hotels2
   const { data: hotels } = useQuery({
-    queryKey: ["admin-hotels"],
+    queryKey: ["admin-hotels2-list"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("hotels")
+        .from("hotels2")
         .select("id, name")
         .order("name");
       if (error) throw error;
