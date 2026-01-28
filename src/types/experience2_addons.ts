@@ -58,6 +58,21 @@ export const ADDON_TYPES: Record<AddonType, { label: string; labelHe?: string; d
   }
 };
 
+export const ADDON_TYPES_EN: Record<AddonType, { label: string; description: string }> = {
+  commission: {
+    label: 'Fixed Commission',
+    description: 'Fixed amount added to the hotel price'
+  },
+  per_night: {
+    label: 'Per Night',
+    description: 'Amount multiplied by the number of nights'
+  },
+  tax: {
+    label: 'Tax',
+    description: 'Tax applied on the total (after commissions)'
+  }
+};
+
 export const DEFAULT_CALCULATION_ORDER: Record<AddonType, number> = {
   commission: 0,
   per_night: 0,
@@ -71,7 +86,7 @@ export const DEFAULT_CALCULATION_ORDER: Record<AddonType, number> = {
 /**
  * Formate la valeur d'un ajout pour l'affichage
  */
-export function formatAddonValue(addon: ExperienceAddon | AddonFormData, currency = '€'): string {
+export function formatAddonValue(addon: ExperienceAddon | AddonFormData, currency = '₪'): string {
   if (addon.is_percentage) {
     return `+${addon.value}%`;
   }
@@ -87,6 +102,13 @@ export function getAddonTypeLabel(type: AddonType, locale: 'en' | 'he' = 'en'): 
     return typeInfo.labelHe;
   }
   return typeInfo.label;
+}
+
+/**
+ * Obtient le label anglais d'un type d'ajout
+ */
+export function getAddonTypeLabelEn(type: AddonType): string {
+  return ADDON_TYPES_EN[type].label;
 }
 
 /**
