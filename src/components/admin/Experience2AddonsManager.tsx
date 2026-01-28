@@ -297,17 +297,27 @@ export function Experience2AddonsManager({
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button
+                        type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleOpenDialog(addon.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleOpenDialog(addon.id);
+                        }}
                         disabled={disabled}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => setDeleteConfirmId(addon.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteConfirmId(addon.id);
+                        }}
                         disabled={disabled}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -333,7 +343,14 @@ export function Experience2AddonsManager({
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit(onSubmit)(e);
+            }} 
+            className="space-y-4"
+          >
             {/* Type */}
             <div className="space-y-2">
               <Label htmlFor="type">Type *</Label>
@@ -482,7 +499,14 @@ export function Experience2AddonsManager({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (deleteConfirmId) {
+                  handleDelete(deleteConfirmId);
+                }
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteMutation.isPending && (
