@@ -47,6 +47,7 @@ import CategoryEditor from "./pages/admin/CategoryEditor";
 import AdminHotels from "./pages/admin/Hotels";
 import AdminHotels2 from "./pages/admin/Hotels2";
 import AdminExperiences from "./pages/admin/Experiences";
+import AdminExperiences2 from "./pages/admin/Experiences2";
 import AdminBookings from "./pages/admin/Reservations";
 import AdminReservationDetails from "./pages/admin/ReservationDetails";
 import AdminUsers from "./pages/admin/Users";
@@ -127,6 +128,10 @@ const App = () => (
               <Route path="experiences" element={<AdminExperiences />} />
               <Route path="experiences/new" element={<AdminExperiences key="new" />} />
               <Route path="experiences/edit/:experienceId" element={<AdminExperiences key="edit" />} />
+              <Route path="experiences2" element={<AdminExperiences2 />} />
+              <Route path="experiences2/new" element={<AdminExperiences2 key="new" />} />
+              <Route path="experiences2/edit/:experienceId" element={<AdminExperiences2 key="edit" />} />
+              <Route path="bookings" element={<AdminBookings />} />
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="reservations" element={<AdminBookings />} />
               <Route path="reservations/:bookingId" element={<AdminReservationDetails />} />

@@ -32,6 +32,7 @@ const menuItems = [
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
   { title: "Hotels 2", url: "/admin/hotels2", icon: Building2 },
   { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
+  { title: "Experiences 2", url: "/admin/experiences2", icon: Sparkles },
   { title: "Bookings", url: "/admin/bookings", icon: Calendar },
   { title: "Gift Cards", url: "/admin/gift-cards", icon: Gift },
   { title: "Leads", url: "/admin/leads", icon: Mail },
