@@ -43,39 +43,11 @@ const AdminHotels2 = () => {
     queryKey: ["admin-hotels2"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("hotels")
-        .select(`
-          *,
-          hotel_admins(user_id)
-        `)
+        .from("hotels2")
+        .select("*")
         .order("updated_at", { ascending: false });
 
       if (error) throw error;
-
-      // Fetch user profiles for hotel admins
-      if (data && data.length > 0) {
-        const userIds = data
-          .flatMap((hotel: any) => hotel.hotel_admins || [])
-          .map((admin: any) => admin.user_id)
-          .filter(Boolean);
-
-        if (userIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from("user_profiles")
-            .select("user_id, display_name")
-            .in("user_id", userIds);
-
-          // Map profiles to hotels
-          return data.map((hotel: any) => ({
-            ...hotel,
-            hotel_admins: hotel.hotel_admins?.map((admin: any) => ({
-              ...admin,
-              user_profiles: profiles?.find((p) => p.user_id === admin.user_id),
-            })),
-          }));
-        }
-      }
-
       return data as any[];
     },
   });
@@ -84,7 +56,7 @@ const AdminHotels2 = () => {
     queryKey: ["hotel2-experience-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select("hotel_id, status");
 
       if (error) throw error;
@@ -120,18 +92,18 @@ const AdminHotels2 = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Check for bookings first
+      // Check for experiences2 linked to this hotel
       const { count } = await supabase
-        .from("bookings")
+        .from("experiences2")
         .select("*", { count: "exact", head: true })
         .eq("hotel_id", id);
       
       if (count && count > 0) {
-        throw new Error(`BOOKINGS_EXIST:${count}`);
+        throw new Error(`EXPERIENCES_EXIST:${count}`);
       }
       
-      // No bookings, proceed with deletion
-      const { error } = await supabase.from("hotels" as any).delete().eq("id", id);
+      // No experiences, proceed with deletion
+      const { error } = await supabase.from("hotels2").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -140,10 +112,10 @@ const AdminHotels2 = () => {
       setDeleteId(null);
     },
     onError: (error: Error) => {
-      if (error.message.startsWith("BOOKINGS_EXIST:")) {
+      if (error.message.startsWith("EXPERIENCES_EXIST:")) {
         const count = error.message.split(":")[1];
         toast.error(
-          `Cannot delete: This hotel has ${count} existing booking(s). Archive it instead.`,
+          `Cannot delete: This hotel has ${count} linked experience(s). Delete them first or archive the hotel.`,
           { duration: 5000 }
         );
       } else {
@@ -155,7 +127,7 @@ const AdminHotels2 = () => {
   const archiveMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("hotels" as any)
+        .from("hotels2")
         .update({ status: 'archived' })
         .eq("id", id);
       
@@ -175,7 +147,7 @@ const AdminHotels2 = () => {
     mutationFn: async ({ id, currentStatus }: { id: string; currentStatus: string }) => {
       const newStatus = currentStatus === "published" ? "draft" : "published";
       const { error } = await supabase
-        .from("hotels" as any)
+        .from("hotels2")
         .update({ status: newStatus })
         .eq("id", id);
 
@@ -246,9 +218,8 @@ const AdminHotels2 = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Hotel</TableHead>
-                <TableHead className="text-center">Experiences Live</TableHead>
-                <TableHead className="text-center">Experiences Draft / Pending</TableHead>
-                <TableHead>Hotel Admin</TableHead>
+                <TableHead>HyperGuest ID</TableHead>
+                <TableHead className="text-center">Experiences V2</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -257,7 +228,6 @@ const AdminHotels2 = () => {
             <TableBody>
               {filteredHotels.map((hotel) => {
                 const stats = experienceStats?.[hotel.id] || { published: 0, draft: 0 };
-                const draftPending = stats.draft;
                 
                 return (
                   <TableRow key={hotel.id}>
@@ -280,15 +250,19 @@ const AdminHotels2 = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-semibold text-lg">{stats.published}</span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-semibold text-lg text-muted-foreground">{draftPending}</span>
-                    </TableCell>
                     <TableCell>
-                      {hotel.hotel_admins?.[0]?.user_profiles?.display_name || (
-                        <span className="text-muted-foreground">None</span>
+                      {hotel.hyperguest_property_id ? (
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {hotel.hyperguest_property_id}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-semibold">{stats.published}</span>
+                      {stats.draft > 0 && (
+                        <span className="text-muted-foreground text-sm"> / {stats.draft} draft</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -331,13 +305,8 @@ const AdminHotels2 = () => {
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Link to={`/admin/experiences?hotel=${hotel.id}`}>
-                          <Button variant="ghost" size="sm" title="Edit Experiences">
+                        <Button variant="ghost" size="sm" title="Manage Experiences V2">
                             <ExternalLink className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                        <Link to={`/hotel/${hotel.slug}`} target="_blank">
-                          <Button variant="ghost" size="sm" title="Preview">
-                            <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
                         <Button

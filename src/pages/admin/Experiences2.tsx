@@ -42,12 +42,12 @@ const AdminExperiences2 = () => {
   
   const isFormView = window.location.pathname.includes("/new") || window.location.pathname.includes("/edit");
 
-  // Fetch all hotels for dropdown
+  // Fetch all hotels2 for dropdown
   const { data: hotels } = useQuery({
-    queryKey: ["admin-hotels"],
+    queryKey: ["admin-hotels2-list"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("hotels")
+        .from("hotels2")
         .select("id, name")
         .order("name");
       
@@ -78,7 +78,7 @@ const AdminExperiences2 = () => {
         .from("experiences2")
         .select(`
           *,
-          hotels (id, name),
+          hotels2 (id, name),
           categories (id, name)
         `)
         .order("updated_at", { ascending: false });
@@ -359,10 +359,10 @@ const AdminExperiences2 = () => {
                     </div>
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <p>
-                        <strong>Hotel:</strong> {experience.hotels?.name || "Unknown"}
+                        <strong>Hotel:</strong> {(experience as any).hotels2?.name || "Unknown"}
                       </p>
                       <p>
-                        <strong>Category:</strong> {experience.categories?.name || "No category"}
+                        <strong>Category:</strong> {(experience as any).categories?.name || "No category"}
                       </p>
                       <p>
                         <strong>Price:</strong> {experience.base_price} {experience.currency}

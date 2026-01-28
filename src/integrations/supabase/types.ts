@@ -1007,7 +1007,7 @@ export type Database = {
             foreignKeyName: "experiences2_hotel_id_fkey"
             columns: ["hotel_id"]
             isOneToOne: false
-            referencedRelation: "hotels"
+            referencedRelation: "hotels2"
             referencedColumns: ["id"]
           },
         ]
@@ -1434,6 +1434,150 @@ export type Database = {
           hero_image?: string | null
           highlights?: string[] | null
           highlights_he?: string[] | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          meta_description_en?: string | null
+          meta_description_fr?: string | null
+          meta_description_he?: string | null
+          name?: string
+          name_he?: string | null
+          og_description_en?: string | null
+          og_description_fr?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_fr?: string | null
+          og_title_he?: string | null
+          photos?: string[] | null
+          region?: string | null
+          region_he?: string | null
+          seo_title_en?: string | null
+          seo_title_fr?: string | null
+          seo_title_he?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["hotel_status"] | null
+          story?: string | null
+          story_he?: string | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Relationships: []
+      }
+      hotels2: {
+        Row: {
+          address: string | null
+          address_he: string | null
+          amenities: string[] | null
+          amenities_he: string[] | null
+          city: string | null
+          city_he: string | null
+          commission_rate: number | null
+          contact_email: string | null
+          contact_instagram: string | null
+          contact_phone: string | null
+          contact_website: string | null
+          created_at: string | null
+          faqs: Json | null
+          hero_image: string | null
+          highlights: string[] | null
+          highlights_he: string[] | null
+          hyperguest_imported_at: string | null
+          hyperguest_property_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          meta_description_en: string | null
+          meta_description_fr: string | null
+          meta_description_he: string | null
+          name: string
+          name_he: string | null
+          og_description_en: string | null
+          og_description_fr: string | null
+          og_description_he: string | null
+          og_image: string | null
+          og_title_en: string | null
+          og_title_fr: string | null
+          og_title_he: string | null
+          photos: string[] | null
+          region: string | null
+          region_he: string | null
+          seo_title_en: string | null
+          seo_title_fr: string | null
+          seo_title_he: string | null
+          slug: string
+          status: Database["public"]["Enums"]["hotel_status"] | null
+          story: string | null
+          story_he: string | null
+          updated_at: string | null
+          visibility: string | null
+        }
+        Insert: {
+          address?: string | null
+          address_he?: string | null
+          amenities?: string[] | null
+          amenities_he?: string[] | null
+          city?: string | null
+          city_he?: string | null
+          commission_rate?: number | null
+          contact_email?: string | null
+          contact_instagram?: string | null
+          contact_phone?: string | null
+          contact_website?: string | null
+          created_at?: string | null
+          faqs?: Json | null
+          hero_image?: string | null
+          highlights?: string[] | null
+          highlights_he?: string[] | null
+          hyperguest_imported_at?: string | null
+          hyperguest_property_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          meta_description_en?: string | null
+          meta_description_fr?: string | null
+          meta_description_he?: string | null
+          name: string
+          name_he?: string | null
+          og_description_en?: string | null
+          og_description_fr?: string | null
+          og_description_he?: string | null
+          og_image?: string | null
+          og_title_en?: string | null
+          og_title_fr?: string | null
+          og_title_he?: string | null
+          photos?: string[] | null
+          region?: string | null
+          region_he?: string | null
+          seo_title_en?: string | null
+          seo_title_fr?: string | null
+          seo_title_he?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["hotel_status"] | null
+          story?: string | null
+          story_he?: string | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          address?: string | null
+          address_he?: string | null
+          amenities?: string[] | null
+          amenities_he?: string[] | null
+          city?: string | null
+          city_he?: string | null
+          commission_rate?: number | null
+          contact_email?: string | null
+          contact_instagram?: string | null
+          contact_phone?: string | null
+          contact_website?: string | null
+          created_at?: string | null
+          faqs?: Json | null
+          hero_image?: string | null
+          highlights?: string[] | null
+          highlights_he?: string[] | null
+          hyperguest_imported_at?: string | null
+          hyperguest_property_id?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
