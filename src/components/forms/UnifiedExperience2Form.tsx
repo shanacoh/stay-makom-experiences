@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
+import { Experience2AddonsManager } from "@/components/admin/Experience2AddonsManager";
 
 const experience2Schema = z.object({
   title: z.string().min(1, "English title is required"),
@@ -827,6 +828,22 @@ export function UnifiedExperience2Form({
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Addons Section */}
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle>Ajouts de prix</CardTitle>
+            <CardDescription>
+              Configurez les commissions, prix par nuit et taxes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Experience2AddonsManager
+              experienceId={experienceId || null}
+              disabled={isSaving}
+            />
           </CardContent>
         </Card>
 
