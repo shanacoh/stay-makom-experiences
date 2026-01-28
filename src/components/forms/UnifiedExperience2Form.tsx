@@ -38,6 +38,8 @@ import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
 import { Experience2AddonsManager } from "@/components/admin/Experience2AddonsManager";
+import { useExperienceAddons } from "@/hooks/useExperience2Addons";
+import { formatAddonValue, getAddonTypeLabelEn, type AddonType } from "@/types/experience2_addons";
 
 const experience2Schema = z.object({
   title: z.string().min(1, "English title is required"),
@@ -96,7 +98,9 @@ export function UnifiedExperience2Form({
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
 
-  
+  // Fetch pricing rules for summary display
+  const { data: pricingRules = [] } = useExperienceAddons(currentExperienceId);
+
 
   // Fetch hotels2 with photos
   const { data: hotels } = useQuery({
@@ -828,9 +832,30 @@ export function UnifiedExperience2Form({
         {/* Pricing Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Pricing</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              <span>Pricing Rules</span>
+              {pricingRules.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {pricingRules.length} rule{pricingRules.length > 1 ? 's' : ''} configured
+                </span>
+              )}
+            </CardTitle>
             <CardDescription>
-              Configure commissions, per-night fees and taxes for this experience
+              {pricingRules.length === 0 ? (
+                'Configure commissions, per-night fees and taxes for this experience'
+              ) : (
+                <div className="mt-2 space-y-1">
+                  {pricingRules.map((rule) => (
+                    <div key={rule.id} className="flex items-center gap-2 text-sm">
+                      <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
+                        {getAddonTypeLabelEn(rule.type as AddonType)}
+                      </span>
+                      <span className="text-foreground">{rule.name}</span>
+                      <span className="font-mono text-primary">{formatAddonValue(rule)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
