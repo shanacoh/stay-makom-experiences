@@ -53,9 +53,6 @@ const experience2Schema = z.object({
   max_party: z.number().min(1).max(100),
   cancellation_policy: z.string().optional(),
   cancellation_policy_he: z.string().optional(),
-  base_price: z.number().min(0.01, "Price must be greater than 0"),
-  currency: z.string(),
-  base_price_type: z.enum(["fixed", "per_booking", "per_person"]),
   hotel_id: z.string().min(1, "Hotel is required"),
   seo_title_en: z.string().optional(),
   seo_title_he: z.string().optional(),
@@ -94,6 +91,10 @@ export function UnifiedExperience2Form({
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [createdExperienceId, setCreatedExperienceId] = useState<string | null>(null);
+  
+  // Use either the prop experienceId or the newly created one
+  const currentExperienceId = experienceId || createdExperienceId;
 
   // Fetch hotels2
   const { data: hotels } = useQuery({
@@ -159,9 +160,6 @@ export function UnifiedExperience2Form({
       max_nights: 4,
       min_party: 2,
       max_party: 4,
-      base_price: 0,
-      currency: "ILS",
-      base_price_type: "per_person",
       cancellation_policy: "",
       cancellation_policy_he: "",
       seo_title_en: "",
@@ -184,7 +182,6 @@ export function UnifiedExperience2Form({
   const longCopyHe = watch("long_copy_he");
   const minNights = watch("min_nights");
   const maxNights = watch("max_nights");
-  const basePrice = watch("base_price");
   const title = watch("title");
 
   // Pre-fill form when editing
@@ -201,9 +198,6 @@ export function UnifiedExperience2Form({
       setValue("max_nights", existingExperience.max_nights || 4);
       setValue("min_party", existingExperience.min_party || 2);
       setValue("max_party", existingExperience.max_party || 4);
-      setValue("base_price", Number(existingExperience.base_price) || 0);
-      setValue("currency", existingExperience.currency || "ILS");
-      setValue("base_price_type", existingExperience.base_price_type || "per_person");
       setValue("hotel_id", existingExperience.hotel_id || propHotelId || "");
       setValue("cancellation_policy", existingExperience.cancellation_policy || "");
       setValue("cancellation_policy_he", existingExperience.cancellation_policy_he || "");
@@ -305,16 +299,16 @@ export function UnifiedExperience2Form({
         max_nights: data.max_nights,
         min_party: data.min_party,
         max_party: data.max_party,
-        base_price: data.base_price,
-        currency: data.currency,
-        base_price_type: data.base_price_type,
+        base_price: 0, // Price is managed via addons
+        currency: "ILS",
+        base_price_type: "per_person" as const,
         hotel_id: data.hotel_id,
         cancellation_policy: data.cancellation_policy || null,
         cancellation_policy_he: data.cancellation_policy_he || null,
         hero_image: heroImageUrl || null,
         photos: photoUrls,
         status: "draft" as const,
-        slug: experienceId ? existingExperience?.slug : generateSlug(title),
+        slug: currentExperienceId ? existingExperience?.slug : generateSlug(title),
         seo_title_en: data.seo_title_en || null,
         seo_title_he: data.seo_title_he || null,
         seo_title_fr: data.seo_title_fr || null,
@@ -330,23 +324,25 @@ export function UnifiedExperience2Form({
         og_image: data.og_image || null,
       };
 
-      if (experienceId) {
+      if (currentExperienceId) {
         const { error } = await supabase
           .from("experiences2")
           .update(experienceData)
-          .eq("id", experienceId);
+          .eq("id", currentExperienceId);
         if (error) throw error;
         toast.success("Draft saved successfully");
       } else {
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from("experiences2")
-          .insert([experienceData]);
+          .insert([experienceData])
+          .select("id")
+          .single();
         if (error) throw error;
-        toast.success("Draft created successfully");
+        setCreatedExperienceId(insertedData.id);
+        toast.success("Draft created! You can now add price addons.");
       }
 
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
-      onClose?.();
     } catch (error: any) {
       console.error("Save error:", error);
       toast.error(error.message || "Failed to save draft");
@@ -381,16 +377,16 @@ export function UnifiedExperience2Form({
         max_nights: data.max_nights,
         min_party: data.min_party,
         max_party: data.max_party,
-        base_price: data.base_price,
-        currency: data.currency,
-        base_price_type: data.base_price_type,
+        base_price: 0, // Price is managed via addons
+        currency: "ILS",
+        base_price_type: "per_person" as const,
         hotel_id: data.hotel_id,
         cancellation_policy: data.cancellation_policy || null,
         cancellation_policy_he: data.cancellation_policy_he || null,
         hero_image: heroImageUrl || null,
         photos: photoUrls,
         status: "published" as const,
-        slug: experienceId ? existingExperience?.slug : generateSlug(title),
+        slug: currentExperienceId ? existingExperience?.slug : generateSlug(title),
         seo_title_en: data.seo_title_en || null,
         seo_title_he: data.seo_title_he || null,
         seo_title_fr: data.seo_title_fr || null,
@@ -406,18 +402,21 @@ export function UnifiedExperience2Form({
         og_image: data.og_image || null,
       };
 
-      if (experienceId) {
+      if (currentExperienceId) {
         const { error } = await supabase
           .from("experiences2")
           .update(experienceData)
-          .eq("id", experienceId);
+          .eq("id", currentExperienceId);
         if (error) throw error;
         toast.success("Published successfully");
       } else {
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from("experiences2")
-          .insert([experienceData]);
+          .insert([experienceData])
+          .select("id")
+          .single();
         if (error) throw error;
+        setCreatedExperienceId(insertedData.id);
         toast.success("Published successfully");
       }
 
@@ -466,7 +465,6 @@ export function UnifiedExperience2Form({
       title: "Title (EN)",
       category_id: "Category",
       long_copy: "Description (EN)",
-      base_price: "Base Price",
       hotel_id: "Hotel",
       min_party: "Min Party Size",
       max_party: "Max Party Size",
@@ -486,7 +484,7 @@ export function UnifiedExperience2Form({
     }
   };
 
-  const canPublish = title && longCopy && basePrice > 0 && longCopy.length >= 100;
+  const canPublish = title && longCopy && longCopy.length >= 100;
 
   if (isLoadingExperience) {
     return (
@@ -738,60 +736,6 @@ export function UnifiedExperience2Form({
           </CardContent>
         </Card>
 
-        {/* Pricing */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pricing</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="base_price">Base Price *</Label>
-                <Input
-                  id="base_price"
-                  type="number"
-                  step="0.01"
-                  {...register("base_price", { valueAsNumber: true })}
-                />
-                {errors.base_price && (
-                  <p className="text-sm text-destructive mt-1">{errors.base_price.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="currency">Currency</Label>
-                <Select value={watch("currency")} onValueChange={(value) => setValue("currency", value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ILS">ILS</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="base_price_type">Pricing Type</Label>
-                <Select
-                  value={watch("base_price_type")}
-                  onValueChange={(value: any) => setValue("base_price_type", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="per_person">Per Person</SelectItem>
-                    <SelectItem value="per_booking">Per Booking</SelectItem>
-                    <SelectItem value="fixed">Fixed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Capacity */}
         <Card>
           <CardHeader>
@@ -841,7 +785,7 @@ export function UnifiedExperience2Form({
           </CardHeader>
           <CardContent>
             <Experience2AddonsManager
-              experienceId={experienceId || null}
+              experienceId={currentExperienceId}
               disabled={isSaving}
             />
           </CardContent>
