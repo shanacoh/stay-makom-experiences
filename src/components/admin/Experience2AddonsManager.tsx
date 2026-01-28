@@ -56,9 +56,9 @@ import {
   type AddonFormSchemaData,
 } from '@/schemas/experience2_addon_validation';
 import {
-  ADDON_TYPES,
+  ADDON_TYPES_EN,
   formatAddonValue,
-  getAddonTypeLabel,
+  getAddonTypeLabelEn,
   getDefaultCalculationOrder,
   type AddonType,
 } from '@/types/experience2_addons';
@@ -137,8 +137,8 @@ export function Experience2AddonsManager({
   const onSubmit = async (data: AddonFormSchemaData) => {
     if (!experienceId) {
       toast({
-        title: 'Erreur',
-        description: 'ID d\'expérience manquant',
+        title: 'Error',
+        description: 'Experience ID is missing',
         variant: 'destructive',
       });
       return;
@@ -160,8 +160,8 @@ export function Experience2AddonsManager({
           },
         });
         toast({
-          title: 'Succès',
-          description: 'Ajout modifié avec succès',
+          title: 'Success',
+          description: 'Pricing rule updated',
         });
       } else {
         await createMutation.mutateAsync({
@@ -176,15 +176,15 @@ export function Experience2AddonsManager({
           experience_id: experienceId,
         });
         toast({
-          title: 'Succès',
-          description: 'Ajout créé avec succès',
+          title: 'Success',
+          description: 'Pricing rule created',
         });
       }
       handleCloseDialog();
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: error instanceof Error ? error.message : 'Une erreur est survenue',
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'An error occurred',
         variant: 'destructive',
       });
     }
@@ -194,14 +194,14 @@ export function Experience2AddonsManager({
     try {
       await deleteMutation.mutateAsync(id);
       toast({
-        title: 'Succès',
-        description: 'Ajout supprimé avec succès',
+        title: 'Success',
+        description: 'Pricing rule deleted',
       });
       setDeleteConfirmId(null);
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: error instanceof Error ? error.message : 'Une erreur est survenue',
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'An error occurred',
         variant: 'destructive',
       });
     }
@@ -214,20 +214,14 @@ export function Experience2AddonsManager({
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">Chargement des ajouts...</span>
+        <span className="ml-2 text-sm text-muted-foreground">Loading pricing...</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Ajouts de prix</h3>
-          <p className="text-sm text-muted-foreground">
-            Configurez les commissions, prix par nuit et taxes pour cette expérience
-          </p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button
           type="button"
           onClick={() => handleOpenDialog()}
@@ -235,16 +229,16 @@ export function Experience2AddonsManager({
           size="sm"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Ajouter un ajout
+          Add Pricing Rule
         </Button>
       </div>
 
-      {/* Liste des ajouts */}
+      {/* Pricing list */}
       {addons.length === 0 ? (
         <div className="text-center py-8 text-sm text-muted-foreground border rounded-lg bg-muted/20">
           {experienceId 
-            ? 'Aucun ajout configuré. Cliquez sur "Ajouter un ajout" pour commencer.'
-            : 'Sauvegardez l\'expérience d\'abord pour pouvoir ajouter des ajouts de prix.'
+            ? 'No pricing configured yet. Click "Add Pricing Rule" to get started.'
+            : 'Save the experience first to configure pricing.'
           }
         </div>
       ) : (
@@ -253,10 +247,10 @@ export function Experience2AddonsManager({
             <TableHeader>
               <TableRow>
                 <TableHead>Type</TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead>Valeur</TableHead>
-                <TableHead>Ordre</TableHead>
-                <TableHead>Actif</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Value</TableHead>
+                <TableHead>Order</TableHead>
+                <TableHead>Active</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -265,7 +259,7 @@ export function Experience2AddonsManager({
                 <TableRow key={addon.id}>
                   <TableCell>
                     <Badge variant="outline">
-                      {getAddonTypeLabel(addon.type as AddonType)}
+                      {getAddonTypeLabelEn(addon.type as AddonType)}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -288,7 +282,7 @@ export function Experience2AddonsManager({
                   </TableCell>
                   <TableCell>
                     <Badge variant={addon.is_active ? 'default' : 'secondary'}>
-                      {addon.is_active ? 'Oui' : 'Non'}
+                      {addon.is_active ? 'Yes' : 'No'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -318,22 +312,22 @@ export function Experience2AddonsManager({
         </div>
       )}
 
-      {/* Dialog de création/modification */}
+      {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {editingAddonId ? 'Modifier l\'ajout' : 'Nouvel ajout'}
+              {editingAddonId ? 'Edit Pricing Rule' : 'New Pricing Rule'}
             </DialogTitle>
             <DialogDescription>
-              {ADDON_TYPES[watchedType]?.description}
+              {ADDON_TYPES_EN[watchedType]?.description}
             </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Type */}
             <div className="space-y-2">
-              <Label htmlFor="type">Type d'ajout *</Label>
+              <Label htmlFor="type">Type *</Label>
               <Select
                 value={form.watch('type')}
                 onValueChange={(value) => {
@@ -342,10 +336,10 @@ export function Experience2AddonsManager({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un type" />
+                  <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(ADDON_TYPES).map(([key, { label }]) => (
+                  {Object.entries(ADDON_TYPES_EN).map(([key, { label }]) => (
                     <SelectItem key={key} value={key}>
                       {label}
                     </SelectItem>
@@ -359,13 +353,13 @@ export function Experience2AddonsManager({
               )}
             </div>
 
-            {/* Nom */}
+            {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Nom *</Label>
+              <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
                 {...form.register('name')}
-                placeholder="Ex: Commission de service"
+                placeholder="e.g. Service Fee"
               />
               {form.formState.errors.name && (
                 <p className="text-sm text-destructive">
@@ -374,14 +368,15 @@ export function Experience2AddonsManager({
               )}
             </div>
 
-            {/* Nom hébreu */}
+            {/* Hebrew Name */}
             <div className="space-y-2">
-              <Label htmlFor="name_he">Nom (hébreu)</Label>
+              <Label htmlFor="name_he">Name (Hebrew)</Label>
               <Input
                 id="name_he"
                 {...form.register('name_he')}
                 placeholder="שם בעברית"
                 dir="rtl"
+                className="bg-hebrew-input"
               />
             </div>
 
@@ -391,15 +386,15 @@ export function Experience2AddonsManager({
               <Textarea
                 id="description"
                 {...form.register('description')}
-                placeholder="Description optionnelle de l'ajout"
+                placeholder="Optional description"
                 rows={2}
               />
             </div>
 
-            {/* Valeur et type */}
+            {/* Value and type */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="value">Valeur *</Label>
+                <Label htmlFor="value">Value *</Label>
                 <Input
                   id="value"
                   type="number"
@@ -414,7 +409,7 @@ export function Experience2AddonsManager({
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="is_percentage">Type de valeur</Label>
+                <Label htmlFor="is_percentage">Value Type</Label>
                 <div className="flex items-center space-x-2 pt-2">
                   <Switch
                     id="is_percentage"
@@ -422,15 +417,15 @@ export function Experience2AddonsManager({
                     onCheckedChange={(checked) => form.setValue('is_percentage', checked)}
                   />
                   <Label htmlFor="is_percentage" className="cursor-pointer text-sm">
-                    {form.watch('is_percentage') ? 'Pourcentage (%)' : 'Montant fixe (€)'}
+                    {form.watch('is_percentage') ? 'Percentage (%)' : 'Fixed Amount (₪)'}
                   </Label>
                 </div>
               </div>
             </div>
 
-            {/* Ordre de calcul */}
+            {/* Calculation Order */}
             <div className="space-y-2">
-              <Label htmlFor="calculation_order">Ordre de calcul</Label>
+              <Label htmlFor="calculation_order">Calculation Order</Label>
               <Input
                 id="calculation_order"
                 type="number"
@@ -439,8 +434,8 @@ export function Experience2AddonsManager({
               />
               <p className="text-xs text-muted-foreground">
                 {watchedType === 'tax'
-                  ? 'Les taxes s\'appliquent généralement après les commissions (ordre ≥ 1)'
-                  : 'Les commissions s\'appliquent avant les taxes (ordre 0)'}
+                  ? 'Taxes are typically applied after commissions (order ≥ 1)'
+                  : 'Commissions are applied before taxes (order 0)'}
               </p>
             </div>
 
@@ -451,7 +446,7 @@ export function Experience2AddonsManager({
                 variant="outline"
                 onClick={handleCloseDialog}
               >
-                Annuler
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -460,24 +455,24 @@ export function Experience2AddonsManager({
                 {(createMutation.isPending || updateMutation.isPending) && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {editingAddonId ? 'Modifier' : 'Créer'}
+                {editingAddonId ? 'Update' : 'Create'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de confirmation de suppression */}
+      {/* Delete confirmation dialog */}
       <AlertDialog open={deleteConfirmId !== null} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer l'ajout ?</AlertDialogTitle>
+            <AlertDialogTitle>Delete pricing rule?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. L'ajout sera définitivement supprimé.
+              This action cannot be undone. The pricing rule will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -485,7 +480,7 @@ export function Experience2AddonsManager({
               {deleteMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Supprimer
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

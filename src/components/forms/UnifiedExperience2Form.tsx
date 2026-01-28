@@ -96,13 +96,15 @@ export function UnifiedExperience2Form({
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
 
-  // Fetch hotels2
+  
+
+  // Fetch hotels2 with photos
   const { data: hotels } = useQuery({
     queryKey: ["admin-hotels2-list"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("hotels2")
-        .select("id, name")
+        .select("id, name, hero_image, photos")
         .order("name");
       if (error) throw error;
       return data;
@@ -183,6 +185,11 @@ export function UnifiedExperience2Form({
   const minNights = watch("min_nights");
   const maxNights = watch("max_nights");
   const title = watch("title");
+  const selectedHotelId = watch("hotel_id");
+
+  // Get selected hotel's images
+  const selectedHotel = hotels?.find((h) => h.id === selectedHotelId);
+  const hotelImages = selectedHotel ? [selectedHotel.hero_image, ...(selectedHotel.photos || [])].filter(Boolean) as string[] : [];
 
   // Pre-fill form when editing
   useEffect(() => {
@@ -682,14 +689,57 @@ export function UnifiedExperience2Form({
         <Card>
           <CardHeader>
             <CardTitle>Images & Media</CardTitle>
-            <CardDescription>Upload hero image and gallery photos</CardDescription>
+            <CardDescription>Upload hero image and gallery photos, or use images from the hotel</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+            {/* Hotel Images Section */}
+            {hotelImages.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Hotel Images (click to add)</Label>
+                <div className="grid grid-cols-6 gap-2 p-3 bg-muted/30 rounded-lg border">
+                  {hotelImages.map((img, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        if (index === 0 && !heroImagePreview) {
+                          setHeroImagePreview(img);
+                        } else if (!galleryPreviews.includes(img) && galleryPreviews.length < 8) {
+                          setGalleryPreviews((prev) => [...prev, img]);
+                        }
+                      }}
+                      className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all hover:border-primary ${
+                        heroImagePreview === img || galleryPreviews.includes(img)
+                          ? 'border-primary opacity-50'
+                          : 'border-transparent'
+                      }`}
+                    >
+                      <img src={img} alt={`Hotel ${index + 1}`} className="w-full h-full object-cover" />
+                      {(heroImagePreview === img || galleryPreviews.includes(img)) && (
+                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                          <span className="text-xs font-medium text-primary-foreground bg-primary px-1.5 py-0.5 rounded">Added</span>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <Label>Hero Image</Label>
               <div className="border-2 border-dashed rounded-lg p-4">
                 {heroImagePreview && (
-                  <img src={heroImagePreview} alt="Hero preview" className="w-full h-64 object-cover rounded-lg mb-2" />
+                  <div className="relative mb-2">
+                    <img src={heroImagePreview} alt="Hero preview" className="w-full h-64 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => { setHeroImage(null); setHeroImagePreview(null); }}
+                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 )}
                 <input
                   type="file"
@@ -775,12 +825,12 @@ export function UnifiedExperience2Form({
           </CardContent>
         </Card>
 
-        {/* Addons Section */}
-        <Card className="bg-muted/30">
+        {/* Pricing Section */}
+        <Card>
           <CardHeader>
-            <CardTitle>Ajouts de prix</CardTitle>
+            <CardTitle>Pricing</CardTitle>
             <CardDescription>
-              Configurez les commissions, prix par nuit et taxes
+              Configure commissions, per-night fees and taxes for this experience
             </CardDescription>
           </CardHeader>
           <CardContent>
