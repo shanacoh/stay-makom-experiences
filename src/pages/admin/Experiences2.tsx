@@ -366,14 +366,20 @@ const AdminExperiences2 = () => {
                       <p>
                         <strong>Category:</strong> {(experience as any).categories?.name || "No category"}
                       </p>
-                      <p>
+                      <div>
                         <strong>Pricing:</strong>{" "}
                         {(experience as any).experience2_addons?.length > 0 ? (
-                          <span>{(experience as any).experience2_addons.length} rule{(experience as any).experience2_addons.length > 1 ? 's' : ''}</span>
+                          <span className="inline-flex flex-wrap gap-1 ml-1">
+                            {(experience as any).experience2_addons.map((addon: any) => (
+                              <Badge key={addon.id} variant="outline" className="text-xs">
+                                {getAddonTypeLabelEn(addon.type as AddonType)}: {formatAddonValue(addon)}
+                              </Badge>
+                            ))}
+                          </span>
                         ) : (
                           <span className="text-muted-foreground/60">Not configured</span>
                         )}
-                      </p>
+                      </div>
                     </div>
                   </div>
 
