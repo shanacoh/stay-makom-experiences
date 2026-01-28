@@ -1,6 +1,8 @@
 /**
- * Hook personnalisé pour gérer les ajouts d'expérience
- * Utilise TanStack Query pour le cache et la synchronisation
+ * Custom hook for managing experience addons
+ * Uses TanStack Query for caching and sync
+ * 
+ * IMPORTANT: Addons are your commissions and taxes, not the experience price
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -20,11 +22,11 @@ export const experienceAddonsKeys = {
 };
 
 // =====================
-// FONCTIONS API
+// API FUNCTIONS
 // =====================
 
 /**
- * Récupère tous les ajouts d'une expérience
+ * Fetch all addons for an experience
  */
 async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAddon[]> {
   const { data, error } = await supabase
@@ -35,14 +37,14 @@ async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAd
     .order('created_at', { ascending: true });
 
   if (error) {
-    throw new Error(`Erreur lors de la récupération des ajouts: ${error.message}`);
+    throw new Error(`Error fetching addons: ${error.message}`);
   }
 
   return data || [];
 }
 
 /**
- * Crée un nouvel ajout
+ * Create a new addon
  */
 async function createExperienceAddon(addon: ExperienceAddonInsert): Promise<ExperienceAddon> {
   const { data, error } = await supabase
@@ -52,14 +54,14 @@ async function createExperienceAddon(addon: ExperienceAddonInsert): Promise<Expe
     .single();
 
   if (error) {
-    throw new Error(`Erreur lors de la création de l'ajout: ${error.message}`);
+    throw new Error(`Error creating addon: ${error.message}`);
   }
 
   return data;
 }
 
 /**
- * Met à jour un ajout existant
+ * Update an existing addon
  */
 async function updateExperienceAddon(
   id: string,
@@ -73,14 +75,14 @@ async function updateExperienceAddon(
     .single();
 
   if (error) {
-    throw new Error(`Erreur lors de la mise à jour de l'ajout: ${error.message}`);
+    throw new Error(`Error updating addon: ${error.message}`);
   }
 
   return data;
 }
 
 /**
- * Supprime un ajout
+ * Delete an addon
  */
 async function deleteExperienceAddon(id: string): Promise<void> {
   const { error } = await supabase
@@ -89,7 +91,7 @@ async function deleteExperienceAddon(id: string): Promise<void> {
     .eq('id', id);
 
   if (error) {
-    throw new Error(`Erreur lors de la suppression de l'ajout: ${error.message}`);
+    throw new Error(`Error deleting addon: ${error.message}`);
   }
 }
 
@@ -98,7 +100,7 @@ async function deleteExperienceAddon(id: string): Promise<void> {
 // =====================
 
 /**
- * Hook pour récupérer les ajouts d'une expérience
+ * Hook to fetch addons for an experience
  */
 export function useExperienceAddons(experienceId: string | null) {
   return useQuery({
@@ -110,7 +112,7 @@ export function useExperienceAddons(experienceId: string | null) {
 }
 
 /**
- * Hook pour créer un ajout
+ * Hook to create an addon
  */
 export function useCreateExperienceAddon() {
   const queryClient = useQueryClient();
@@ -118,7 +120,6 @@ export function useCreateExperienceAddon() {
   return useMutation({
     mutationFn: createExperienceAddon,
     onSuccess: (data) => {
-      // Invalider la liste des ajouts pour cette expérience
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.byExperience(data.experience_id)
       });
@@ -127,7 +128,7 @@ export function useCreateExperienceAddon() {
 }
 
 /**
- * Hook pour mettre à jour un ajout
+ * Hook to update an addon
  */
 export function useUpdateExperienceAddon() {
   const queryClient = useQueryClient();
@@ -136,11 +137,9 @@ export function useUpdateExperienceAddon() {
     mutationFn: ({ id, updates }: { id: string; updates: ExperienceAddonUpdate }) =>
       updateExperienceAddon(id, updates),
     onSuccess: (data) => {
-      // Invalider la liste des ajouts pour cette expérience
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.byExperience(data.experience_id)
       });
-      // Invalider aussi le détail de cet ajout
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.detail(data.id)
       });
@@ -149,7 +148,7 @@ export function useUpdateExperienceAddon() {
 }
 
 /**
- * Hook pour supprimer un ajout
+ * Hook to delete an addon
  */
 export function useDeleteExperienceAddon() {
   const queryClient = useQueryClient();
@@ -157,7 +156,6 @@ export function useDeleteExperienceAddon() {
   return useMutation({
     mutationFn: deleteExperienceAddon,
     onSuccess: () => {
-      // Invalider toutes les queries liées aux ajouts
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.all
       });

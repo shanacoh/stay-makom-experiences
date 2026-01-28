@@ -1,11 +1,14 @@
 /**
- * Composant pour gérer les ajouts d'expérience dans le formulaire admin
+ * Experience Pricing Addons Manager
+ * 
+ * IMPORTANT: Addons represent your COMMISSIONS and TAXES, not the experience price.
+ * Final price = HyperGuest price (dynamic based on dates) + Your addons
  */
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, Edit2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, Loader2, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -138,7 +141,7 @@ export function Experience2AddonsManager({
     if (!experienceId) {
       toast({
         title: 'Error',
-        description: 'Experience ID is missing',
+        description: 'Experience ID is missing. Please save the experience first.',
         variant: 'destructive',
       });
       return;
@@ -161,7 +164,7 @@ export function Experience2AddonsManager({
         });
         toast({
           title: 'Success',
-          description: 'Pricing rule updated',
+          description: 'Pricing rule updated successfully',
         });
       } else {
         await createMutation.mutateAsync({
@@ -177,7 +180,7 @@ export function Experience2AddonsManager({
         });
         toast({
           title: 'Success',
-          description: 'Pricing rule created',
+          description: 'Pricing rule created successfully',
         });
       }
       handleCloseDialog();
@@ -195,7 +198,7 @@ export function Experience2AddonsManager({
       await deleteMutation.mutateAsync(id);
       toast({
         title: 'Success',
-        description: 'Pricing rule deleted',
+        description: 'Pricing rule deleted successfully',
       });
       setDeleteConfirmId(null);
     } catch (error) {
@@ -207,21 +210,27 @@ export function Experience2AddonsManager({
     }
   };
 
-  // Mettre à jour l'ordre de calcul par défaut quand le type change
   const watchedType = form.watch('type');
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">Loading pricing...</span>
+        <span className="ml-2 text-sm text-muted-foreground">Loading pricing rules...</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      {/* Header with explanation */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <DollarSign className="h-4 w-4" />
+            <span>Final Price = HyperGuest (hotel) + Your Commissions + Taxes</span>
+          </div>
+        </div>
         <Button
           type="button"
           onClick={() => handleOpenDialog()}
@@ -237,8 +246,8 @@ export function Experience2AddonsManager({
       {addons.length === 0 ? (
         <div className="text-center py-8 text-sm text-muted-foreground border rounded-lg bg-muted/20">
           {experienceId 
-            ? 'No pricing configured yet. Click "Add Pricing Rule" to get started.'
-            : 'Save the experience first to configure pricing.'
+            ? 'No pricing rules configured yet. Click "Add Pricing Rule" to set up commissions and taxes.'
+            : 'Save the experience as a draft first to configure pricing rules.'
           }
         </div>
       ) : (
@@ -320,7 +329,7 @@ export function Experience2AddonsManager({
               {editingAddonId ? 'Edit Pricing Rule' : 'New Pricing Rule'}
             </DialogTitle>
             <DialogDescription>
-              {ADDON_TYPES_EN[watchedType]?.description}
+              {ADDON_TYPES_EN[watchedType]?.description || 'Configure a commission, fee or tax'}
             </DialogDescription>
           </DialogHeader>
           
@@ -359,7 +368,7 @@ export function Experience2AddonsManager({
               <Input
                 id="name"
                 {...form.register('name')}
-                placeholder="e.g. Service Fee"
+                placeholder="e.g. Service Fee, VAT, etc."
               />
               {form.formState.errors.name && (
                 <p className="text-sm text-destructive">
@@ -376,7 +385,6 @@ export function Experience2AddonsManager({
                 {...form.register('name_he')}
                 placeholder="שם בעברית"
                 dir="rtl"
-                className="bg-hebrew-input"
               />
             </div>
 
