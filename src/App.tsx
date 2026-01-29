@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import ComingSoon from "./pages/ComingSoon";
 import Category from "./pages/Category";
 import Experience from "./pages/Experience";
+import Experience2 from "./pages/Experience2";
 import Hotel from "./pages/Hotel";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
@@ -97,6 +98,7 @@ const App = () => (
             <Route path="/experiences" element={<Experiences />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/experience/:slug" element={<Experience />} />
+            <Route path="/experience2/:slug" element={<Experience2 />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
             <Route path="/hotels/:slug" element={<Hotel />} />
             <Route
