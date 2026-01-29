@@ -39,8 +39,13 @@ interface Property {
   rooms: Room[];
 }
 
+// Le hook useHyperGuestAvailability retourne directement une propriété (results[0])
+// ou un objet avec `results` selon la source des données
 interface SearchResult {
+  // Structure brute (si passé directement depuis l'API)
   results?: Property[];
+  // Ou structure de propriété unique (si passé depuis getPropertyAvailability)
+  rooms?: Room[];
 }
 
 interface RoomOptionsV2Props {
@@ -100,21 +105,17 @@ export function RoomOptionsV2({
   }
 
   // Parse HyperGuest response structure
-  const properties = searchResult?.results || [];
-  if (properties.length === 0) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground text-center">
-            {t.noRooms}
-          </p>
-        </CardContent>
-      </Card>
-    );
+  // Le hook useHyperGuestAvailability retourne directement une propriété (results[0])
+  // donc searchResult peut être soit { results: [...] } soit directement { rooms: [...] }
+  let rooms: Room[] = [];
+  
+  if (searchResult?.results && searchResult.results.length > 0) {
+    // Structure avec results[] (réponse complète API)
+    rooms = searchResult.results[0]?.rooms || [];
+  } else if (searchResult?.rooms) {
+    // Structure propriété directe (depuis getPropertyAvailability)
+    rooms = searchResult.rooms;
   }
-
-  const property = properties[0];
-  const rooms = property.rooms || [];
 
   if (rooms.length === 0) {
     return (
