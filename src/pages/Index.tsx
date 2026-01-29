@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop, Brain, Mountain, Utensils, Plane, Camera, Music, Book, Coffee, Sun, Moon, Star, Compass, Map, Globe, Briefcase, Award, Gift, Gem, Crown, Shield, Flame, Droplet, Wind, Cloud, TreePine, Flower2, type LucideIcon } from "lucide-react";
+import { Loader2, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop, Brain, Mountain, Utensils, Plane, Camera, Music, Book, Coffee, Sun, Moon, Star, Compass, Map, Globe, Briefcase, Award, Gift, Gem, Crown, Shield, Flame, Droplet, Wind, Cloud, TreePine, Flower2, MapPin, Building, type LucideIcon } from "lucide-react";
 
 // Icon mapping for dynamic category icons
 const iconMap: Record<string, LucideIcon> = {
@@ -68,6 +68,7 @@ import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
+import whoIsForBg from "@/assets/who-is-for-bg.jpg";
 import { ArrowRight } from "lucide-react";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
@@ -453,31 +454,72 @@ const Index = () => {
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className="relative py-10 sm:py-12 md:py-16 overflow-hidden">
+        {/* Who STAYMAKOM is for Section */}
+        <section className="relative py-16 sm:py-20 md:py-24 overflow-hidden">
+          {/* Background Image */}
           <div className="absolute inset-0">
-            <img src={desertJourney} alt="Desert journey" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
+            <img 
+              src={whoIsForBg} 
+              alt="Israeli roadside" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
           </div>
           
-          <div className="container max-w-5xl relative z-10 px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
-              {/* Block 1 */}
-              <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-white/80 font-light">1</span>
-                <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">{t(lang, 'step1')}</h3>
+          <div className="container max-w-6xl relative z-10 px-4">
+            {/* Title */}
+            <h2 className="text-center font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-white mb-12 md:mb-16">
+              {lang === 'he' ? 'למי STAYMAKOM מיועד' : 'Who STAYMAKOM is for'}
+            </h2>
+            
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {/* Card 1 - Travelers */}
+              <div className="group backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-6 md:p-8 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-5">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white mb-3">
+                  {lang === 'he' ? 'מטיילים שמחפשים יותר ממלון' : 'Travelers looking for more than a hotel'}
+                </h3>
+                <p className="text-white/70 text-sm md:text-base leading-relaxed">
+                  {lang === 'he' 
+                    ? 'לאנשים שרוצים שהשהות שלהם תהיה משמעותית. זוגות, משפחות, מטיילים יחידים ואנשי מקצוע שמחפשים אווירה, משמעות ואיכות ולא חבילות מלונאיות סטנדרטיות.'
+                    : 'For people who want their stay to feel intentional. Couples, families, solo travelers, and professionals who care about atmosphere, meaning, and quality rather than standard hotel packages.'
+                  }
+                </p>
               </div>
               
-              {/* Block 2 */}
-              <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-white/80 font-light">2</span>
-                <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">{t(lang, 'step2')}</h3>
+              {/* Card 2 - Israelis */}
+              <div className="group backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-6 md:p-8 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-5">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white mb-3">
+                  {lang === 'he' ? 'ישראלים שמגלים מחדש את הארץ' : 'Israelis rediscovering their own country'}
+                </h3>
+                <p className="text-white/70 text-sm md:text-base leading-relaxed">
+                  {lang === 'he'
+                    ? 'למקומיים שמחפשים דרך קלה להזמין סטייקיישנים מעוררי השראה, בריחות באמצע השבוע או הפסקות קצרות שמרגישות אחרת לגמרי מהצעות המלון הרגילות.'
+                    : 'For locals looking for an easy way to book inspiring staycations, midweek escapes, or short breaks that feel genuinely different from typical hotel offers.'
+                  }
+                </p>
               </div>
               
-              {/* Block 3 */}
-              <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-white/80 font-light">3</span>
-                <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-medium text-white">{t(lang, 'step3')}</h3>
+              {/* Card 3 - Hotels */}
+              <div className="group backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-6 md:p-8 hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-5">
+                  <Building className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-serif text-xl md:text-2xl font-medium text-white mb-3">
+                  {lang === 'he' ? 'מלונות עם נקודת מבט' : 'Hotels with a point of view'}
+                </h3>
+                <p className="text-white/70 text-sm md:text-base leading-relaxed">
+                  {lang === 'he'
+                    ? 'למלונות בוטיק ונכסים ייחודיים שרוצים להתגלות על מה שהופך אותם למיוחדים, ולא להיות מצומצמים להשוואות מחיר או רישומים אנונימיים.'
+                    : 'For boutique hotels and unique properties that want to be discovered for what makes them special, not reduced to price comparisons or anonymous listings.'
+                  }
+                </p>
               </div>
             </div>
           </div>
