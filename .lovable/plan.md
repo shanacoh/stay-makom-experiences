@@ -1,147 +1,111 @@
 
+# Plan : Réduction et Harmonisation de la Section "Who STAYMAKOM is for"
 
-## Plan: Titres contextuels pour Login, Signup et Favoris
+## Problèmes Identifiés
 
-Afficher un titre et sous-titre différents dans le popup d'authentification selon 3 contextes :
-- **Favoris** → Icône cœur + "Save to your wishlist"
-- **Sign In** → Icône utilisateur + "Welcome back"  
-- **Sign Up** → Icône étoile/utilisateur + "Join Staymakom"
+| Élément | Actuel | Problème |
+|---------|--------|----------|
+| Padding section | `py-16 sm:py-20 md:py-24` | Beaucoup trop grand vs autres sections |
+| Police titre | `font-serif text-3xl sm:text-4xl md:text-5xl` | Trop gros, mauvaise police |
+| Icônes | `text-primary` (bleu foncé) sur fond sombre | Invisibles |
+| Padding cartes | `p-6 md:p-8` | Trop espacé |
+| Titres cartes | `text-xl md:text-2xl font-serif` | Trop gros, mauvaise police |
 
----
+## Comparaison avec Sections Adjacentes
 
-### Aperçu visuel
-
-| Contexte | Icône | Titre (EN) | Sous-titre (EN) |
-|----------|-------|------------|-----------------|
-| ❤️ Favoris | Heart | Save to your wishlist | Sign in to save experiences you love. |
-| 👤 Sign In | User | Welcome back | Sign in to access your account. |
-| ✨ Sign Up | UserPlus | Join Staymakom | Create an account to unlock exclusive experiences. |
-
----
-
-### Modifications
-
-**Fichier:** `src/components/auth/AuthPromptDialog.tsx`
-
-#### 1. Ajouter une prop `context`
-
-```typescript
-type Props = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  lang: Lang;
-  defaultTab?: "login" | "signup";
-  onSignupSuccess?: (userId: string) => void;
-  context?: "favorites" | "account" | "signup";  // NOUVEAU
-};
+```text
+Section Gift Card (après) : py-12 md:py-16, titre text-2xl md:text-3xl font-sans
+Section Handpicked (avant): py-10 sm:py-14, titre text-xl sm:text-2xl md:text-3xl font-sans
+Section Categories        : py-4 sm:py-6 md:py-8, titre text-lg sm:text-xl md:text-2xl lg:text-3xl
 ```
 
-#### 2. Ajouter les traductions contextuelles
+## Modifications Prévues
 
-```typescript
-// Dans copyFor()
-headers: {
-  favorites: {
-    title: "Save to your wishlist",
-    subtitle: "Sign in to save experiences you love.",
-  },
-  account: {
-    title: "Welcome back",
-    subtitle: "Sign in to access your account.",
-  },
-  signup: {
-    title: "Join Staymakom",
-    subtitle: "Create an account to unlock exclusive experiences.",
-  },
-}
+### Fichier : `src/pages/Index.tsx`
+
+#### 1. Réduction du Padding Section
+```
+Avant : py-16 sm:py-20 md:py-24
+Après : py-10 sm:py-12 md:py-14
 ```
 
-**Versions FR :**
-- Favorites: "Sauvegarder dans vos favoris" / "Connectez-vous pour sauvegarder vos expériences préférées."
-- Account: "Bon retour" / "Connectez-vous pour accéder à votre compte."
-- Signup: "Rejoignez Staymakom" / "Créez un compte pour accéder à des expériences exclusives."
+#### 2. Titre avec Police INTER (font-sans)
+```
+Avant : font-serif text-3xl sm:text-4xl md:text-5xl
+Après : font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]
+```
 
-**Versions HE :**
-- Favorites: "שמרו לרשימת המועדפים" / "התחברו לשמור חוויות שאהבתם."
-- Account: "ברוכים השבים" / "התחברו לגשת לחשבון שלכם."
-- Signup: "הצטרפו ל-Staymakom" / "צרו חשבון לגישה לחוויות בלעדיות."
+#### 3. Icônes Claires (Visibles)
+```
+Avant : bg-primary/20 + text-primary (foncé sur foncé)
+Après : bg-white/20 + text-white (clair sur foncé)
+```
+Réduction taille icônes : `w-10 h-10` au lieu de `w-12 h-12`
 
-#### 3. Afficher le titre et icône selon le contexte
+#### 4. Cartes Plus Compactes
+```
+Avant : p-6 md:p-8, gap-6 md:gap-8
+Après : p-4 md:p-5, gap-4 md:gap-5
+```
 
-```tsx
-import { Heart, User, UserPlus } from "lucide-react";
+#### 5. Titres Cartes Plus Petits
+```
+Avant : font-serif text-xl md:text-2xl
+Après : font-sans text-base md:text-lg font-semibold
+```
 
-// Déterminer le header basé sur le contexte
-const headerKey = context || (tab === "signup" ? "signup" : "account");
-const header = c.headers[headerKey];
+#### 6. Descriptions Plus Petites
+```
+Avant : text-sm md:text-base
+Après : text-xs md:text-sm
+```
 
-// Icône dynamique
-const HeaderIcon = context === "favorites" 
-  ? Heart 
-  : tab === "signup" 
-    ? UserPlus 
-    : User;
-
-// Dans le JSX
-<div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
-  <HeaderIcon className="h-5 w-5 text-primary" />
-</div>
-<h2 className="font-serif text-xl text-foreground">{header.title}</h2>
-<p className="text-xs text-muted-foreground mt-1">{header.subtitle}</p>
+#### 7. Margins Ajustés
+```
+Avant : mb-12 md:mb-16 (titre)
+Après : mb-6 md:mb-8
 ```
 
 ---
 
-**Fichier:** `src/components/Header.tsx`
+## Résultat Visuel Attendu
 
-#### 4. Étendre le state pour inclure le contexte
-
-```typescript
-const [authDialog, setAuthDialog] = useState<{ 
-  open: boolean; 
-  tab: "login" | "signup";
-  context: "favorites" | "account" | "signup";
-}>({ open: false, tab: "login", context: "account" });
-```
-
-#### 5. Passer le bon contexte selon l'action
-
-```tsx
-// Clic sur Favoris (heart)
-const handleFavoritesClick = () => {
-  if (user) {
-    navigate("/account?tab=wishlist");
-  } else {
-    setAuthDialog({ open: true, tab: "login", context: "favorites" });
-  }
-};
-
-// AccountBubble
-onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
-onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
-```
-
-#### 6. Passer la prop au composant
-
-```tsx
-<AuthPromptDialog
-  open={authDialog.open}
-  onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
-  lang={lang as "en" | "fr" | "he"}
-  defaultTab={authDialog.tab}
-  context={authDialog.context}
-  onSignupSuccess={...}
-/>
+```text
+┌────────────────────────────────────────────────────────────┐
+│                     SECTION PRÉCÉDENTE                     │
+│              (Visible en haut de l'écran)                  │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│         Who STAYMAKOM is for                               │  ← font-sans, plus petit
+│                                                            │
+│   ┌─────────┐   ┌─────────┐   ┌─────────┐                 │
+│   │ ○ icon  │   │ ○ icon  │   │ ○ icon  │  ← icônes blanches
+│   │ Titre   │   │ Titre   │   │ Titre   │  ← plus compact
+│   │ desc... │   │ desc... │   │ desc... │                  │
+│   └─────────┘   └─────────┘   └─────────┘                 │
+│                                                            │
+├────────────────────────────────────────────────────────────┤
+│                     SECTION SUIVANTE                       │
+│              (Visible en bas de l'écran)                   │
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### Résultat
+## Tableau Récapitulatif des Changements
 
-Le popup affichera maintenant :
-- **Clic ❤️ Favoris** → Icône cœur + titre wishlist
-- **Clic Sign In** → Icône utilisateur + titre "Welcome back"
-- **Clic Sign Up** → Icône UserPlus + titre "Join Staymakom"
-
-Le titre s'adapte aussi quand l'utilisateur bascule entre les onglets Login/Signup dans le popup.
+| Élément | Avant | Après |
+|---------|-------|-------|
+| Padding section | `py-16 sm:py-20 md:py-24` | `py-10 sm:py-12 md:py-14` |
+| Police titre | `font-serif` | `font-sans` |
+| Taille titre | `text-3xl sm:text-4xl md:text-5xl` | `text-xl sm:text-2xl md:text-3xl` |
+| Margin titre | `mb-12 md:mb-16` | `mb-6 md:mb-8` |
+| Couleur icônes | `text-primary` + `bg-primary/20` | `text-white` + `bg-white/20` |
+| Taille cercle icône | `w-12 h-12` | `w-10 h-10` |
+| Padding cartes | `p-6 md:p-8` | `p-4 md:p-5` |
+| Gap grille | `gap-6 md:gap-8` | `gap-4 md:gap-5` |
+| Titres cartes | `font-serif text-xl md:text-2xl` | `font-sans text-base md:text-lg font-semibold` |
+| Descriptions | `text-sm md:text-base` | `text-xs md:text-sm` |
+| Margin titres cartes | `mb-3` | `mb-2` |
+| Margin icônes | `mb-5` | `mb-3` |
 
