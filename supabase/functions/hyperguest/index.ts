@@ -1,6 +1,4 @@
-// HyperGuest API Edge Function v2
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
+// HyperGuest API Edge Function v4
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -121,7 +119,6 @@ async function searchHotels(params: SearchParams) {
   
   const data = await response.json();
   console.log('✅ Search successful, results count:', data.results?.length || 0);
-  // Return data directly - HyperGuest returns { results: [...] }
   return data;
 }
 
@@ -145,7 +142,6 @@ async function preBook(bookingData: BookingData) {
   
   const data = await response.json();
   console.log('✅ Pre-book successful, id:', data.id || data.content?.id);
-  // HyperGuest returns data in content field
   return data.content || data;
 }
 
@@ -169,7 +165,6 @@ async function createBooking(bookingData: BookingData) {
   
   const data = await response.json();
   console.log('✅ Booking created successfully, id:', data.id || data.content?.id);
-  // HyperGuest returns data in content field
   return data.content || data;
 }
 
@@ -192,7 +187,6 @@ async function getBookingDetails(bookingId: string) {
   
   const data = await response.json();
   console.log('✅ Booking details retrieved');
-  // HyperGuest returns data in content field
   return data.content || data;
 }
 
@@ -202,8 +196,7 @@ async function listBookings(params: { dates?: { from: string; to: string }; agen
   
   const url = `${BOOKING_DOMAIN}booking/list`;
   
-  // Build body only with provided params
-  const body: Record<string, any> = {};
+  const body: Record<string, unknown> = {};
   if (params.dates) body.dates = params.dates;
   if (params.agencyReference) body.agencyReference = params.agencyReference;
   if (params.customerEmail) body.customerEmail = params.customerEmail;
@@ -224,7 +217,6 @@ async function listBookings(params: { dates?: { from: string; to: string }; agen
   
   const data = await response.json();
   console.log('✅ Bookings listed successfully');
-  // HyperGuest returns data in content field
   return data.content || data;
 }
 
@@ -253,7 +245,6 @@ async function cancelBooking(bookingId: string, options: { reason?: string; simu
   
   const data = await response.json();
   console.log('✅', isSimulation ? 'Cancellation simulated' : 'Booking cancelled');
-  // HyperGuest returns data in content field
   return data.content || data;
 }
 
@@ -290,25 +281,22 @@ async function getAllHotels(countryCode?: string) {
   let data;
   try {
     data = JSON.parse(responseText);
-  } catch (parseError) {
+  } catch (_parseError) {
     console.error('❌ Failed to parse JSON:', responseText.substring(0, 500));
     throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
   }
   
-  // Log first item structure for debugging
   if (Array.isArray(data) && data.length > 0) {
     const firstHotel = data[0];
     console.log('📋 First hotel keys:', JSON.stringify(Object.keys(firstHotel)));
     console.log('📋 Sample hotel:', JSON.stringify(firstHotel).substring(0, 400));
   }
   
-  // Filter by country if specified - based on working code, field is 'country' not 'countryCode'
   if (countryCode && Array.isArray(data)) {
     const upperCountryCode = countryCode.toUpperCase();
     const originalCount = data.length;
     
-    data = data.filter((hotel: any) => {
-      // Check multiple possible formats (from working StaticService code)
+    data = data.filter((hotel: { country?: string; countryCode?: string; country_code?: string }) => {
       return hotel.country === countryCode || 
              hotel.country === upperCountryCode ||
              hotel.countryCode === countryCode ||
@@ -320,7 +308,6 @@ async function getAllHotels(countryCode?: string) {
     console.log('🔍 Filtered by country', upperCountryCode, ':', data.length, 'of', originalCount, 'hotels');
   }
   
-  // If no filter, limit to avoid massive response (9MB+)
   if (!countryCode && Array.isArray(data)) {
     console.log('⚠️ No country filter, returning first 2000 hotels');
     data = data.slice(0, 2000);
@@ -374,7 +361,7 @@ async function getFacilities() {
   return data;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -387,7 +374,7 @@ serve(async (req) => {
     console.log('🚀 HyperGuest API request:', action, 'method:', req.method);
     
     // Parse body only for POST with actual content
-    let body: Record<string, any> = {};
+    let body: Record<string, unknown> = {};
     if (req.method === 'POST') {
       const contentType = req.headers.get('content-type') || '';
       const contentLength = req.headers.get('content-length');
@@ -398,7 +385,7 @@ serve(async (req) => {
           if (text && text.trim()) {
             body = JSON.parse(text);
           }
-        } catch (parseErr) {
+        } catch (_parseErr) {
           console.log('⚠️ No JSON body or parse error, using empty object');
         }
       }
@@ -409,47 +396,48 @@ serve(async (req) => {
     let result;
     
     switch (action) {
-      // Search API
       case 'search':
-        result = await searchHotels(body as SearchParams);
+        result = await searchHotels(body as unknown as SearchParams);
         break;
       
-      // Booking API
       case 'pre-book':
-        result = await preBook(body as BookingData);
+        result = await preBook(body as unknown as BookingData);
         break;
       
       case 'create-booking':
-        result = await createBooking(body as BookingData);
+        result = await createBooking(body as unknown as BookingData);
         break;
       
-      case 'get-booking':
+      case 'get-booking': {
         const bookingId = url.searchParams.get('bookingId');
         if (!bookingId) throw new Error('bookingId is required');
         result = await getBookingDetails(bookingId);
         break;
+      }
       
       case 'list-bookings':
-        result = await listBookings(body as any);
+        result = await listBookings(body as { dates?: { from: string; to: string }; agencyReference?: string; customerEmail?: string; limit?: number; page?: number });
         break;
       
-      case 'cancel-booking':
-        const cancelBookingId = (body as any).bookingId;
+      case 'cancel-booking': {
+        const cancelBookingId = (body as { bookingId?: string }).bookingId;
         if (!cancelBookingId) throw new Error('bookingId is required');
-        result = await cancelBooking(cancelBookingId, body as any);
+        result = await cancelBooking(cancelBookingId, body as { reason?: string; simulation?: boolean });
         break;
+      }
       
-      // Static API
-      case 'get-hotels':
+      case 'get-hotels': {
         const countryCode = url.searchParams.get('countryCode') || undefined;
         result = await getAllHotels(countryCode);
         break;
+      }
       
-      case 'get-property':
+      case 'get-property': {
         const propertyId = url.searchParams.get('propertyId');
         if (!propertyId) throw new Error('propertyId is required');
         result = await getPropertyDetails(parseInt(propertyId));
         break;
+      }
       
       case 'get-facilities':
         result = await getFacilities();
