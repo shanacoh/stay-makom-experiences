@@ -1,147 +1,150 @@
 
+# Plan : Amélioration Premium des Cartes de Catégories
 
-## Plan: Titres contextuels pour Login, Signup et Favoris
+## Analyse de l'existant
 
-Afficher un titre et sous-titre différents dans le popup d'authentification selon 3 contextes :
-- **Favoris** → Icône cœur + "Save to your wishlist"
-- **Sign In** → Icône utilisateur + "Welcome back"  
-- **Sign Up** → Icône étoile/utilisateur + "Join Staymakom"
+Les cartes de catégories actuelles (`CategoryCard.tsx`) ont :
+- Un zoom léger de l'image au hover (`scale-105`)
+- Un changement d'overlay (`bg-black/20` → `bg-black/30`)
+- Une transition d'ombre (`shadow-soft` → `shadow-strong`)
 
----
-
-### Aperçu visuel
-
-| Contexte | Icône | Titre (EN) | Sous-titre (EN) |
-|----------|-------|------------|-----------------|
-| ❤️ Favoris | Heart | Save to your wishlist | Sign in to save experiences you love. |
-| 👤 Sign In | User | Welcome back | Sign in to access your account. |
-| ✨ Sign Up | UserPlus | Join Staymakom | Create an account to unlock exclusive experiences. |
+Ces effets sont fonctionnels mais manquent de "wow factor" pour un élément aussi crucial de votre parcours utilisateur.
 
 ---
 
-### Modifications
+## Proposition : Effets Premium Multi-couches
 
-**Fichier:** `src/components/auth/AuthPromptDialog.tsx`
+### 1. **Shimmer Effect (Reflet de lumière)**
+Un effet de brillance qui traverse la carte au hover, comme un reflet sur du verre premium.
 
-#### 1. Ajouter une prop `context`
-
-```typescript
-type Props = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  lang: Lang;
-  defaultTab?: "login" | "signup";
-  onSignupSuccess?: (userId: string) => void;
-  context?: "favorites" | "account" | "signup";  // NOUVEAU
-};
+```text
+┌─────────────────┐
+│     ░░░░░░░     │  ← Trait de lumière diagonal
+│   ░░░░░░░       │    qui traverse au hover
+│ ░░░░░░░         │
+│                 │
+│   ROMANTIC      │
+│   ESCAPE        │
+└─────────────────┘
 ```
 
-#### 2. Ajouter les traductions contextuelles
+### 2. **Lift Effect (Élévation 3D)**
+La carte "décolle" légèrement avec une ombre portée qui s'agrandit, créant une impression de profondeur.
+
+### 3. **Border Glow (Bordure lumineuse)**
+Une fine bordure dorée/terracotta qui apparaît progressivement au hover.
+
+### 4. **Text Animation**
+Le texte fait un léger mouvement vers le haut avec un effet de tracking plus espacé.
+
+---
+
+## Modifications techniques
+
+### Fichier 1 : `tailwind.config.ts`
+Ajout de nouvelles keyframes :
+- `shimmer` : animation du reflet lumineux
+- `card-lift` : élévation douce de la carte
+- `text-reveal` : animation du texte
+
+### Fichier 2 : `src/index.css`
+Ajout de styles CSS pour :
+- Le gradient shimmer
+- Les pseudo-éléments `::before` et `::after` pour les effets de bordure
+
+### Fichier 3 : `src/components/CategoryCard.tsx`
+Refonte des classes CSS pour intégrer :
+- Nouvelles animations au groupe hover
+- Effet shimmer en overlay
+- Bordure premium avec transition
+- Élévation 3D avec ombre dynamique
+- Animation du texte
+
+---
+
+## Aperçu du rendu final
+
+```text
+État normal :                    État hover :
+┌─────────────────┐              ╔═══════════════════╗  ← Bordure dorée
+│                 │              ║    ░░░░░░░        ║  ← Shimmer
+│     IMAGE       │   ────►      ║       IMAGE       ║  ← Légèrement zoomé
+│                 │              ║                   ║
+│   ROMANTIC      │              ║    R O M A N T I C║  ← Tracking élargi
+│   ESCAPE        │              ║    E S C A P E    ║    + décalé vers haut
+└─────────────────┘              ╚═══════════════════╝
+    shadow-soft                      shadow-strong + lift
+```
+
+---
+
+## Options à considérer
+
+| Option | Description | Impact |
+|--------|-------------|--------|
+| A - Shimmer seul | Juste l'effet de reflet | Subtil, élégant |
+| B - Shimmer + Lift | Reflet + élévation 3D | Premium, moderne |
+| C - Full package | Shimmer + Lift + Border + Text | Très premium, effet "wow" |
+
+**Recommandation** : Option C pour maximiser l'impact sur cette section clé.
+
+---
+
+## Détails d'implémentation
+
+### Nouvelles animations Tailwind
 
 ```typescript
-// Dans copyFor()
-headers: {
-  favorites: {
-    title: "Save to your wishlist",
-    subtitle: "Sign in to save experiences you love.",
+// tailwind.config.ts
+keyframes: {
+  "shimmer": {
+    "0%": { transform: "translateX(-100%) rotate(25deg)" },
+    "100%": { transform: "translateX(200%) rotate(25deg)" }
   },
-  account: {
-    title: "Welcome back",
-    subtitle: "Sign in to access your account.",
-  },
-  signup: {
-    title: "Join Staymakom",
-    subtitle: "Create an account to unlock exclusive experiences.",
-  },
+  "lift-up": {
+    "0%": { transform: "translateY(0)" },
+    "100%": { transform: "translateY(-4px)" }
+  }
 }
 ```
 
-**Versions FR :**
-- Favorites: "Sauvegarder dans vos favoris" / "Connectez-vous pour sauvegarder vos expériences préférées."
-- Account: "Bon retour" / "Connectez-vous pour accéder à votre compte."
-- Signup: "Rejoignez Staymakom" / "Créez un compte pour accéder à des expériences exclusives."
+### Structure CSS du shimmer
 
-**Versions HE :**
-- Favorites: "שמרו לרשימת המועדפים" / "התחברו לשמור חוויות שאהבתם."
-- Account: "ברוכים השבים" / "התחברו לגשת לחשבון שלכם."
-- Signup: "הצטרפו ל-Staymakom" / "צרו חשבון לגישה לחוויות בלעדיות."
+```css
+.category-card::before {
+  content: '';
+  position: absolute;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.3),
+    transparent
+  );
+  transform: translateX(-100%) rotate(25deg);
+  transition: transform 0.7s;
+}
 
-#### 3. Afficher le titre et icône selon le contexte
-
-```tsx
-import { Heart, User, UserPlus } from "lucide-react";
-
-// Déterminer le header basé sur le contexte
-const headerKey = context || (tab === "signup" ? "signup" : "account");
-const header = c.headers[headerKey];
-
-// Icône dynamique
-const HeaderIcon = context === "favorites" 
-  ? Heart 
-  : tab === "signup" 
-    ? UserPlus 
-    : User;
-
-// Dans le JSX
-<div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
-  <HeaderIcon className="h-5 w-5 text-primary" />
-</div>
-<h2 className="font-serif text-xl text-foreground">{header.title}</h2>
-<p className="text-xs text-muted-foreground mt-1">{header.subtitle}</p>
+.category-card:hover::before {
+  transform: translateX(200%) rotate(25deg);
+}
 ```
+
+### Composant CategoryCard mis à jour
+
+Le composant utilisera une combinaison de :
+- `group` pour coordonner les animations
+- `relative overflow-hidden` pour contenir le shimmer
+- Classes conditionnelles pour les effets au hover
+- CSS custom properties pour les timings
 
 ---
 
-**Fichier:** `src/components/Header.tsx`
+## Bénéfices attendus
 
-#### 4. Étendre le state pour inclure le contexte
-
-```typescript
-const [authDialog, setAuthDialog] = useState<{ 
-  open: boolean; 
-  tab: "login" | "signup";
-  context: "favorites" | "account" | "signup";
-}>({ open: false, tab: "login", context: "account" });
-```
-
-#### 5. Passer le bon contexte selon l'action
-
-```tsx
-// Clic sur Favoris (heart)
-const handleFavoritesClick = () => {
-  if (user) {
-    navigate("/account?tab=wishlist");
-  } else {
-    setAuthDialog({ open: true, tab: "login", context: "favorites" });
-  }
-};
-
-// AccountBubble
-onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
-onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
-```
-
-#### 6. Passer la prop au composant
-
-```tsx
-<AuthPromptDialog
-  open={authDialog.open}
-  onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
-  lang={lang as "en" | "fr" | "he"}
-  defaultTab={authDialog.tab}
-  context={authDialog.context}
-  onSignupSuccess={...}
-/>
-```
-
----
-
-### Résultat
-
-Le popup affichera maintenant :
-- **Clic ❤️ Favoris** → Icône cœur + titre wishlist
-- **Clic Sign In** → Icône utilisateur + titre "Welcome back"
-- **Clic Sign Up** → Icône UserPlus + titre "Join Staymakom"
-
-Le titre s'adapte aussi quand l'utilisateur bascule entre les onglets Login/Signup dans le popup.
+1. **Perception de qualité** : Les micro-animations communiquent un niveau de finition élevé
+2. **Feedback visuel clair** : L'utilisateur comprend immédiatement que c'est cliquable
+3. **Mémorabilité** : L'effet "wow" renforce l'identité de marque
+4. **Guidage** : Attire l'attention sur cette section cruciale du parcours
 
