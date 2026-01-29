@@ -1,79 +1,147 @@
 
-# Correction du Shimmer Effect - Plus Naturel et Précis
 
-## Problème Identifié
+## Plan: Titres contextuels pour Login, Signup et Favoris
 
-Le shimmer se déclenche sur 2 cartes en même temps car :
-1. Les cartes sont très proches (gap de 2-3)
-2. Le pseudo-élément `::before` avec `inset: 0` peut créer des chevauchements visuels
-3. La transition est trop "mécanique" - elle démarre immédiatement au hover
-
-## Solution : Shimmer Plus Naturel et Isolé
-
-### Approche
-
-1. **Délai au hover** : Ajouter un léger délai (150ms) avant que le shimmer ne démarre pour éviter les déclenchements accidentels
-2. **Containment CSS** : Ajouter `contain: layout` pour isoler chaque carte
-3. **Animation plus organique** : Varier légèrement la vitesse et l'angle pour un effet moins "robot"
-4. **Trigger plus précis** : S'assurer que le shimmer ne se déclenche que quand la souris est vraiment SUR la carte
+Afficher un titre et sous-titre différents dans le popup d'authentification selon 3 contextes :
+- **Favoris** → Icône cœur + "Save to your wishlist"
+- **Sign In** → Icône utilisateur + "Welcome back"  
+- **Sign Up** → Icône étoile/utilisateur + "Join Staymakom"
 
 ---
 
-## Modifications Techniques
+### Aperçu visuel
 
-### Fichier : `src/index.css`
+| Contexte | Icône | Titre (EN) | Sous-titre (EN) |
+|----------|-------|------------|-----------------|
+| ❤️ Favoris | Heart | Save to your wishlist | Sign in to save experiences you love. |
+| 👤 Sign In | User | Welcome back | Sign in to access your account. |
+| ✨ Sign Up | UserPlus | Join Staymakom | Create an account to unlock exclusive experiences. |
 
-```css
-.category-card {
-  position: relative;
-  overflow: hidden;
-  contain: layout;  /* Isole le rendu de chaque carte */
-}
+---
 
-.category-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  width: 60%;
-  height: 200%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.35) 50%,
-    transparent 100%
-  );
-  transform: translateX(-150%) rotate(25deg);
-  /* Transition avec délai de 100ms au départ */
-  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s;
-  pointer-events: none;
-  opacity: 0;
-}
+### Modifications
 
-.category-card:hover::before {
-  transform: translateX(250%) rotate(25deg);
-  opacity: 1;
-  /* Pas de délai à la sortie pour une transition fluide */
-  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s,
-              opacity 0.1s ease-out;
+**Fichier:** `src/components/auth/AuthPromptDialog.tsx`
+
+#### 1. Ajouter une prop `context`
+
+```typescript
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  lang: Lang;
+  defaultTab?: "login" | "signup";
+  onSignupSuccess?: (userId: string) => void;
+  context?: "favorites" | "account" | "signup";  // NOUVEAU
+};
+```
+
+#### 2. Ajouter les traductions contextuelles
+
+```typescript
+// Dans copyFor()
+headers: {
+  favorites: {
+    title: "Save to your wishlist",
+    subtitle: "Sign in to save experiences you love.",
+  },
+  account: {
+    title: "Welcome back",
+    subtitle: "Sign in to access your account.",
+  },
+  signup: {
+    title: "Join Staymakom",
+    subtitle: "Create an account to unlock exclusive experiences.",
+  },
 }
 ```
 
-### Points clés :
+**Versions FR :**
+- Favorites: "Sauvegarder dans vos favoris" / "Connectez-vous pour sauvegarder vos expériences préférées."
+- Account: "Bon retour" / "Connectez-vous pour accéder à votre compte."
+- Signup: "Rejoignez Staymakom" / "Créez un compte pour accéder à des expériences exclusives."
 
-| Changement | Effet |
-|------------|-------|
-| `contain: layout` | Isole le rendu, empêche les interférences entre cartes |
-| `transition-delay: 0.1s` | Évite les déclenchements parasites lors du passage rapide |
-| `opacity: 0` → `1` | Le shimmer apparaît progressivement, plus naturel |
-| Courbe `cubic-bezier(0.25, 0.1, 0.25, 1)` | Mouvement plus fluide et naturel |
-| Opacité réduite à 0.35 | Reflet plus subtil, moins "effet spécial" |
+**Versions HE :**
+- Favorites: "שמרו לרשימת המועדפים" / "התחברו לשמור חוויות שאהבתם."
+- Account: "ברוכים השבים" / "התחברו לגשת לחשבון שלכם."
+- Signup: "הצטרפו ל-Staymakom" / "צרו חשבון לגישה לחוויות בלעדיות."
+
+#### 3. Afficher le titre et icône selon le contexte
+
+```tsx
+import { Heart, User, UserPlus } from "lucide-react";
+
+// Déterminer le header basé sur le contexte
+const headerKey = context || (tab === "signup" ? "signup" : "account");
+const header = c.headers[headerKey];
+
+// Icône dynamique
+const HeaderIcon = context === "favorites" 
+  ? Heart 
+  : tab === "signup" 
+    ? UserPlus 
+    : User;
+
+// Dans le JSX
+<div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
+  <HeaderIcon className="h-5 w-5 text-primary" />
+</div>
+<h2 className="font-serif text-xl text-foreground">{header.title}</h2>
+<p className="text-xs text-muted-foreground mt-1">{header.subtitle}</p>
+```
 
 ---
 
-## Résultat Attendu
+**Fichier:** `src/components/Header.tsx`
 
-- Le shimmer ne se déclenche que sur UNE seule carte à la fois
-- Un court délai évite les "faux" hovers lors du déplacement de souris
-- L'effet est plus doux et naturel (opacity fade-in + timing ajusté)
-- Visuellement plus premium et moins "jeu vidéo"
+#### 4. Étendre le state pour inclure le contexte
+
+```typescript
+const [authDialog, setAuthDialog] = useState<{ 
+  open: boolean; 
+  tab: "login" | "signup";
+  context: "favorites" | "account" | "signup";
+}>({ open: false, tab: "login", context: "account" });
+```
+
+#### 5. Passer le bon contexte selon l'action
+
+```tsx
+// Clic sur Favoris (heart)
+const handleFavoritesClick = () => {
+  if (user) {
+    navigate("/account?tab=wishlist");
+  } else {
+    setAuthDialog({ open: true, tab: "login", context: "favorites" });
+  }
+};
+
+// AccountBubble
+onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
+onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
+```
+
+#### 6. Passer la prop au composant
+
+```tsx
+<AuthPromptDialog
+  open={authDialog.open}
+  onOpenChange={(open) => setAuthDialog((prev) => ({ ...prev, open }))}
+  lang={lang as "en" | "fr" | "he"}
+  defaultTab={authDialog.tab}
+  context={authDialog.context}
+  onSignupSuccess={...}
+/>
+```
+
+---
+
+### Résultat
+
+Le popup affichera maintenant :
+- **Clic ❤️ Favoris** → Icône cœur + titre wishlist
+- **Clic Sign In** → Icône utilisateur + titre "Welcome back"
+- **Clic Sign Up** → Icône UserPlus + titre "Join Staymakom"
+
+Le titre s'adapte aussi quand l'utilisateur bascule entre les onglets Login/Signup dans le popup.
+
