@@ -45,14 +45,14 @@ async function fetchExperience2BySlug(slug: string) {
     `)
     .eq('slug', slug)
     .eq('status', 'published')
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(`Erreur lors de la récupération de l'expérience: ${error.message}`);
   }
 
   if (!data) {
-    throw new Error('Expérience non trouvée');
+    throw new Error('Expérience non trouvée ou non publiée');
   }
 
   return data;
