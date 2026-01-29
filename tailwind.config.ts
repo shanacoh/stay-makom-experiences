@@ -144,6 +144,14 @@ export default {
             transform: "translate(-50%, -50%) translateY(-35px) translateX(var(--float-x, 0px)) scale(0.4)",
           },
         },
+        "shimmer": {
+          "0%": { transform: "translateX(-100%) rotate(25deg)" },
+          "100%": { transform: "translateX(200%) rotate(25deg)" },
+        },
+        "card-lift": {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-6px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

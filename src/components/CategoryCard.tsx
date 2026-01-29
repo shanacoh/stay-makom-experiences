@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 
 interface CategoryCardProps {
@@ -27,20 +26,20 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
   return (
     <Link 
       to={`/category/${category.slug}?lang=${lang}`}
-      className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-smooth"
+      className="category-card group relative rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 ease-out hover:-translate-y-1.5"
     >
-      <div className="aspect-square relative">
+      <div className="aspect-square relative overflow-hidden rounded-xl">
         <img 
           src={image} 
           alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-smooth" />
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-all duration-300" />
         
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
-            <span className="block">{line1}</span>
-            {line2 && <span className="block -mt-1.5">{line2}</span>}
+          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase transition-all duration-300 ease-out group-hover:tracking-widest group-hover:-translate-y-1">
+            <span className="block tracking-tight group-hover:tracking-widest transition-all duration-300">{line1}</span>
+            {line2 && <span className="block -mt-1.5 tracking-tight group-hover:tracking-widest transition-all duration-300">{line2}</span>}
           </h3>
         </div>
       </div>

@@ -202,4 +202,47 @@ All colors MUST be HSL.
   .prose p:has(br:only-child) {
     min-height: 1.5em;
   }
+
+  /* Category Card Premium Effects */
+  .category-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    width: 60%;
+    height: 200%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    transform: translateX(-150%) rotate(25deg);
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .category-card:hover::before {
+    transform: translateX(250%) rotate(25deg);
+  }
+
+  .category-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: inherit;
+    border: 2px solid transparent;
+    transition: border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .category-card:hover::after {
+    border-color: hsl(var(--cta) / 0.6);
+  }
 }
