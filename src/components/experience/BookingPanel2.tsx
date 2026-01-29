@@ -111,11 +111,15 @@ export function BookingPanel2({
       return null;
     }
 
-    const properties = searchResult.results || [];
-    if (properties.length === 0) return null;
+    // searchResult peut être soit { results: [...] } soit directement { rooms: [...] }
+    let rooms: any[] = [];
+    if (searchResult.results && searchResult.results.length > 0) {
+      rooms = searchResult.results[0]?.rooms || [];
+    } else if (searchResult.rooms) {
+      rooms = searchResult.rooms;
+    }
 
-    const property = properties[0];
-    const room = property.rooms?.find((r: any) => r.roomId === selectedRoomId);
+    const room = rooms.find((r: any) => r.roomId === selectedRoomId);
     return room?.ratePlans?.find((rp: any) => rp.ratePlanId === selectedRatePlanId) || null;
   }, [searchResult, selectedRoomId, selectedRatePlanId]);
 
@@ -133,9 +137,16 @@ export function BookingPanel2({
   // Auto-sélectionner la première chambre/rate plan si disponible
   useEffect(() => {
     if (searchResult && !selectedRoomId) {
-      const properties = searchResult.results || [];
-      if (properties.length > 0 && properties[0].rooms?.length > 0) {
-        const firstRoom = properties[0].rooms[0];
+      // searchResult peut être soit { results: [...] } soit directement { rooms: [...] }
+      let rooms: any[] = [];
+      if (searchResult.results && searchResult.results.length > 0) {
+        rooms = searchResult.results[0]?.rooms || [];
+      } else if (searchResult.rooms) {
+        rooms = searchResult.rooms;
+      }
+
+      if (rooms.length > 0) {
+        const firstRoom = rooms[0];
         if (firstRoom.ratePlans?.length > 0) {
           const firstRatePlan = firstRoom.ratePlans[0];
           setSelectedRoomId(firstRoom.roomId);
