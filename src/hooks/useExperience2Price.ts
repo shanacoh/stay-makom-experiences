@@ -166,14 +166,16 @@ export function useExperience2Price(
       return null;
     }
 
-    const hyperguestPrice = safeNumber(sellAmount, NaN) || safeNumber(netAmount, NaN) || safeNumber(basePrice, 0);
+    const rawAmount = sellAmount ?? netAmount ?? basePrice ?? 0;
+    const hyperguestPrice = safeNumber(rawAmount, 0);
     const priceCurrency = ratePlanPrices?.sell?.currency || ratePlanPrices?.net?.currency || currency;
 
-    if (Number.isNaN(hyperguestPrice)) {
-      console.warn("[useExperience2Price] hyperguestPrice is NaN after extraction", {
+    if (hyperguestPrice === 0 && (sellAmount != null || netAmount != null || basePrice != null)) {
+      console.warn("[useExperience2Price] hyperguestPrice forced to 0 (invalid numbers)", {
         sellAmount,
         netAmount,
         basePrice,
+        rawAmount,
       });
     }
 
