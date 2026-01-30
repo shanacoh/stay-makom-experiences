@@ -134,11 +134,16 @@ export function BookingPanel2({
   const nights = searchParams?.nights || 0;
   const ratePlanPrices = selectedRatePlan?.prices || null;
 
+  if (ratePlanPrices) {
+    console.log("[BookingPanel2] ratePlanPrices (structure API)", {
+      keys: Object.keys(ratePlanPrices),
+      full: ratePlanPrices,
+    });
+  }
   console.log("[BookingPanel2] before useExperience2Price", {
     experienceId,
     currency,
     nights,
-    ratePlanPrices,
     ratePlanPricesKeys: ratePlanPrices ? Object.keys(ratePlanPrices) : null,
   });
 
