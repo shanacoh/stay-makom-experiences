@@ -138,58 +138,79 @@ export interface RatePlanPrices {
   [key: string]: unknown;
 }
 
+/** Convertit une valeur en nombre (accepte string "123.45") */
+function toNumber(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed === "") return null;
+    const n = Number(trimmed);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
 /**
  * Extrait le montant et la devise depuis l'objet prices de l'API HyperGuest.
- * L'API peut utiliser sell.amount, net.amount, total, amount, ou d'autres clés.
+ * Accepte: sell.amount, net.amount, total, amount, strings "123.45", objets imbriqués avec .amount/.value/.total
  */
 function extractPriceFromRatePlanPrices(
   ratePlanPrices: RatePlanPrices | null,
 ): { amount: number; currency: string } | null {
   if (!ratePlanPrices || typeof ratePlanPrices !== "object") return null;
 
-  const sellAmount = ratePlanPrices?.sell?.amount;
-  const netAmount = ratePlanPrices?.net?.amount;
-  const total = ratePlanPrices?.total;
-  const amount = ratePlanPrices?.amount;
+  const R = ratePlanPrices as Record<string, unknown>;
 
-  const rawAmount = sellAmount ?? netAmount ?? total ?? amount;
-  const num = rawAmount != null ? Number(rawAmount) : NaN;
-  if (!Number.isFinite(num)) {
-    // Essayer toute clé numérique au premier niveau (ex: totalPrice, sellPrice)
-    const keys = Object.keys(ratePlanPrices);
-    for (const k of keys) {
-      const v = (ratePlanPrices as Record<string, unknown>)[k];
-      if (typeof v === "number" && Number.isFinite(v)) {
-        console.log("[useExperience2Price] extracted amount from key", k, v);
-        const currency =
-          ratePlanPrices?.sell?.currency ||
-          ratePlanPrices?.net?.currency ||
-          ((ratePlanPrices as Record<string, unknown>).currency as string) ||
-          "ILS";
-        return { amount: v, currency: typeof currency === "string" ? currency : "ILS" };
-      }
-      if (v && typeof v === "object" && "amount" in (v as object)) {
-        const nested = (v as { amount?: number }).amount;
-        if (typeof nested === "number" && Number.isFinite(nested)) {
-          console.log("[useExperience2Price] extracted amount from nested", k, nested);
-          const currency =
-            ratePlanPrices?.sell?.currency ||
-            ratePlanPrices?.net?.currency ||
-            ((ratePlanPrices as Record<string, unknown>).currency as string) ||
-            "ILS";
-          return { amount: nested, currency: typeof currency === "string" ? currency : "ILS" };
-        }
-      }
-    }
-    console.warn("[useExperience2Price] no numeric price found in ratePlanPrices", {
-      keys: Object.keys(ratePlanPrices),
-      ratePlanPrices,
-    });
-    return null;
+  const tryAmount = (val: unknown): number | null => toNumber(val);
+  const getCurrency = (): string => {
+    const c =
+      (ratePlanPrices?.sell as { currency?: string } | undefined)?.currency ||
+      (ratePlanPrices?.net as { currency?: string } | undefined)?.currency ||
+      (R.currency as string) ||
+      "ILS";
+    return typeof c === "string" ? c : "ILS";
+  };
+
+  // 1) Chemins connus (y compris string)
+  const sellAmount = tryAmount((ratePlanPrices?.sell as { amount?: unknown } | undefined)?.amount);
+  const netAmount = tryAmount((ratePlanPrices?.net as { amount?: unknown } | undefined)?.amount);
+  const total = tryAmount(R.total);
+  const amount = tryAmount(R.amount);
+  const first = sellAmount ?? netAmount ?? total ?? amount;
+  if (first != null && first >= 0) {
+    console.log("[useExperience2Price] extracted amount (known path)", { first, currency: getCurrency() });
+    return { amount: first, currency: getCurrency() };
   }
 
-  const currency = ratePlanPrices?.sell?.currency || ratePlanPrices?.net?.currency || "ILS";
-  return { amount: num, currency: typeof currency === "string" ? currency : "ILS" };
+  // 2) Toute valeur numérique ou string numérique au premier niveau
+  for (const k of Object.keys(R)) {
+    const v = R[k];
+    const n = tryAmount(v);
+    if (n != null && n >= 0) {
+      console.log("[useExperience2Price] extracted amount from key", k, n);
+      return { amount: n, currency: getCurrency() };
+    }
+  }
+
+  // 3) Objets imbriqués: .amount, .value, .total (number ou string)
+  for (const k of Object.keys(R)) {
+    const v = R[k];
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      const obj = v as Record<string, unknown>;
+      const nestedAmount = tryAmount(obj.amount ?? obj.value ?? obj.total);
+      if (nestedAmount != null && nestedAmount >= 0) {
+        console.log("[useExperience2Price] extracted amount from nested", k, nestedAmount);
+        return { amount: nestedAmount, currency: getCurrency() };
+      }
+    }
+  }
+
+  console.warn("[useExperience2Price] no numeric price found in ratePlanPrices", {
+    keys: Object.keys(ratePlanPrices),
+    structure: JSON.stringify(ratePlanPrices),
+  });
+  return null;
 }
 
 /**
