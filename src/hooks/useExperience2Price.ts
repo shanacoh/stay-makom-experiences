@@ -129,10 +129,13 @@ function calculatePriceWithAddons(
   return result;
 }
 
-/** Structure possible des prix HyperGuest (sell/net ou autres clés) */
+/**
+ * Structure des prix HyperGuest (API Search).
+ * L'API utilise "price" (pas "amount") dans sell/net — voir api-response-*.json et DOC_SUPPLEMENTS_HYPERGUEST.md
+ */
 export interface RatePlanPrices {
-  sell?: { amount?: number; currency?: string };
-  net?: { amount?: number; currency?: string };
+  sell?: { price?: number; amount?: number; currency?: string; [key: string]: unknown };
+  net?: { price?: number; amount?: number; currency?: string; [key: string]: unknown };
   total?: number;
   amount?: number;
   [key: string]: unknown;
@@ -164,17 +167,17 @@ function extractPriceFromRatePlanPrices(
 
   const tryAmount = (val: unknown): number | null => toNumber(val);
   const getCurrency = (): string => {
-    const c =
-      (ratePlanPrices?.sell as { currency?: string } | undefined)?.currency ||
-      (ratePlanPrices?.net as { currency?: string } | undefined)?.currency ||
-      (R.currency as string) ||
-      "ILS";
+    const sell = ratePlanPrices?.sell as { currency?: string } | undefined;
+    const net = ratePlanPrices?.net as { currency?: string } | undefined;
+    const c = sell?.currency || net?.currency || (R.currency as string) || "ILS";
     return typeof c === "string" ? c : "ILS";
   };
 
-  // 1) Chemins connus (y compris string)
-  const sellAmount = tryAmount((ratePlanPrices?.sell as { amount?: unknown } | undefined)?.amount);
-  const netAmount = tryAmount((ratePlanPrices?.net as { amount?: unknown } | undefined)?.amount);
+  // 1) Chemins connus — HyperGuest API utilise "price" dans sell/net (pas "amount")
+  const sellObj = ratePlanPrices?.sell as { price?: unknown; amount?: unknown } | undefined;
+  const netObj = ratePlanPrices?.net as { price?: unknown; amount?: unknown } | undefined;
+  const sellAmount = tryAmount(sellObj?.price ?? sellObj?.amount);
+  const netAmount = tryAmount(netObj?.price ?? netObj?.amount);
   const total = tryAmount(R.total);
   const amount = tryAmount(R.amount);
   const first = sellAmount ?? netAmount ?? total ?? amount;
@@ -193,12 +196,12 @@ function extractPriceFromRatePlanPrices(
     }
   }
 
-  // 3) Objets imbriqués: .amount, .value, .total (number ou string)
+  // 3) Objets imbriqués: .price, .amount, .value, .total (HyperGuest utilise "price")
   for (const k of Object.keys(R)) {
     const v = R[k];
     if (v && typeof v === "object" && !Array.isArray(v)) {
       const obj = v as Record<string, unknown>;
-      const nestedAmount = tryAmount(obj.amount ?? obj.value ?? obj.total);
+      const nestedAmount = tryAmount(obj.price ?? obj.amount ?? obj.value ?? obj.total);
       if (nestedAmount != null && nestedAmount >= 0) {
         console.log("[useExperience2Price] extracted amount from nested", k, nestedAmount);
         return { amount: nestedAmount, currency: getCurrency() };
