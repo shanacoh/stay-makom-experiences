@@ -68,7 +68,7 @@ import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
-import whoIsForBg from "@/assets/who-is-for-bg.jpg";
+
 import { ArrowRight } from "lucide-react";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
@@ -455,34 +455,24 @@ const Index = () => {
         </section>
 
         {/* Who STAYMAKOM is for Section */}
-        <section className="relative py-10 sm:py-12 md:py-14 overflow-hidden">
-          {/* Background Image */}
-          <div className="absolute inset-0">
-            <img 
-              src={whoIsForBg} 
-              alt="Israeli roadside" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-          </div>
-          
-          <div className="container max-w-5xl relative z-10 px-4">
+        <section className="py-12 md:py-16 bg-[#FAF8F5]">
+          <div className="container max-w-4xl px-4">
             {/* Title */}
-            <h2 className="text-center font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] text-white mb-6 md:mb-8">
+            <h2 className="text-center font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] text-foreground mb-8 md:mb-10">
               {lang === 'he' ? 'למי STAYMAKOM מיועד' : 'Who STAYMAKOM is for'}
             </h2>
             
-            {/* Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-              {/* Card 1 - Travelers */}
-              <div className="group backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-4 md:p-5 hover:bg-white/15 transition-all duration-300">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-3">
-                  <Users className="h-5 w-5 text-white" />
+            {/* Cards Grid - 2 columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              {/* Card 1 - International Travelers */}
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Plane className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-sans text-base md:text-lg font-semibold text-white mb-2">
+                <h3 className="font-sans text-lg md:text-xl font-semibold text-foreground mb-3">
                   {lang === 'he' ? 'מטיילים שמחפשים יותר ממלון' : 'Travelers looking for more than a hotel'}
                 </h3>
-                <p className="text-white/70 text-xs md:text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
                   {lang === 'he' 
                     ? 'לאנשים שרוצים שהשהות שלהם תהיה משמעותית. זוגות, משפחות, מטיילים יחידים ואנשי מקצוע שמחפשים אווירה, משמעות ואיכות ולא חבילות מלונאיות סטנדרטיות.'
                     : 'For people who want their stay to feel intentional. Couples, families, solo travelers, and professionals who care about atmosphere, meaning, and quality rather than standard hotel packages.'
@@ -491,33 +481,17 @@ const Index = () => {
               </div>
               
               {/* Card 2 - Israelis */}
-              <div className="group backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-4 md:p-5 hover:bg-white/15 transition-all duration-300">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-3">
-                  <MapPin className="h-5 w-5 text-white" />
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <MapPin className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-sans text-base md:text-lg font-semibold text-white mb-2">
+                <h3 className="font-sans text-lg md:text-xl font-semibold text-foreground mb-3">
                   {lang === 'he' ? 'ישראלים שמגלים מחדש את הארץ' : 'Israelis rediscovering their own country'}
                 </h3>
-                <p className="text-white/70 text-xs md:text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
                   {lang === 'he'
                     ? 'למקומיים שמחפשים דרך קלה להזמין סטייקיישנים מעוררי השראה, בריחות באמצע השבוע או הפסקות קצרות שמרגישות אחרת לגמרי מהצעות המלון הרגילות.'
                     : 'For locals looking for an easy way to book inspiring staycations, midweek escapes, or short breaks that feel genuinely different from typical hotel offers.'
-                  }
-                </p>
-              </div>
-              
-              {/* Card 3 - Hotels */}
-              <div className="group backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-4 md:p-5 hover:bg-white/15 transition-all duration-300">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-3">
-                  <Building className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="font-sans text-base md:text-lg font-semibold text-white mb-2">
-                  {lang === 'he' ? 'מלונות עם נקודת מבט' : 'Hotels with a point of view'}
-                </h3>
-                <p className="text-white/70 text-xs md:text-sm leading-relaxed">
-                  {lang === 'he'
-                    ? 'למלונות בוטיק ונכסים ייחודיים שרוצים להתגלות על מה שהופך אותם למיוחדים, ולא להיות מצומצמים להשוואות מחיר או רישומים אנונימיים.'
-                    : 'For boutique hotels and unique properties that want to be discovered for what makes them special, not reduced to price comparisons or anonymous listings.'
                   }
                 </p>
               </div>
