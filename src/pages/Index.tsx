@@ -68,6 +68,7 @@ import tasteImg from "@/assets/taste-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
+import whoIsForRoad from "@/assets/who-is-for-road.png";
 
 import { ArrowRight } from "lucide-react";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
@@ -455,17 +456,26 @@ const Index = () => {
         </section>
 
         {/* Who STAYMAKOM is for Section */}
-        <section className="py-12 md:py-16 bg-[#FAF8F5]">
-          <div className="container max-w-4xl px-4">
+        <section className="relative py-12 md:py-16 overflow-hidden">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${whoIsForRoad})` }}
+          />
+          
+          {/* Light warm overlay - keeps image visible but ensures readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/60 to-white/70" />
+          
+          <div className="container relative z-10 max-w-4xl px-4">
             {/* Title */}
             <h2 className="text-center font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] text-foreground mb-8 md:mb-10">
               {lang === 'he' ? 'למי STAYMAKOM מיועד' : 'Who STAYMAKOM is for'}
             </h2>
             
-            {/* Cards Grid - 2 columns */}
+            {/* Cards Grid - 2 columns with frosted glass effect */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {/* Card 1 - International Travelers */}
-              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="backdrop-blur-sm bg-white/80 rounded-2xl p-6 md:p-8 shadow-md hover:shadow-lg transition-shadow duration-300 border border-white/50">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Plane className="h-6 w-6 text-primary" />
                 </div>
@@ -481,7 +491,7 @@ const Index = () => {
               </div>
               
               {/* Card 2 - Israelis */}
-              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="backdrop-blur-sm bg-white/80 rounded-2xl p-6 md:p-8 shadow-md hover:shadow-lg transition-shadow duration-300 border border-white/50">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
