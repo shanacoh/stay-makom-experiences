@@ -463,8 +463,6 @@ const Index = () => {
             style={{ backgroundImage: `url(${whoIsForRoad})` }}
           />
           
-          {/* Light warm overlay - keeps image visible but ensures readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/60 to-white/70" />
           
           <div className="container relative z-10 max-w-4xl px-4">
             {/* Title */}
