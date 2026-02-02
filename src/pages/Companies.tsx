@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, Gift, Users, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,16 +18,19 @@ import Footer from "@/components/Footer";
 import corporateHero from "@/assets/corporate-hero.jpg";
 import { useLanguage } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
+import { Link } from "react-router-dom";
 
 const formSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
-  companyName: z.string().trim().max(100, "Company name must be less than 100 characters").optional(),
+  companyName: z.string().trim().min(1, "Company name is required").max(100, "Company name must be less than 100 characters"),
   email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
-  phone: z.string().trim().max(20, "Phone must be less than 20 characters").optional(),
-  requestType: z.enum(["corporate_gift_cards", "team_building", "corporate_retreat", "employee_reward", "customized_incentive", "other"]),
-  groupSize: z.string().trim().max(50, "Group size must be less than 50 characters").optional(),
+  phone: z.string().trim().min(1, "Phone is required").max(50, "Phone must be less than 50 characters"),
+  requestType: z.enum(["corporate_retreat", "team_building", "employee_reward", "corporate_gift_cards", "customized_incentive", "not_sure"]),
+  mainObjective: z.enum(["team_bonding", "celebration", "motivation", "leadership", "client_partner", "other"]),
+  groupSize: z.enum(["5-10", "10-25", "25-50", "50+"]),
   preferredDates: z.string().trim().max(200, "Preferred dates must be less than 200 characters").optional(),
-  message: z.string().trim().max(1000, "Message must be less than 1000 characters").optional()
+  message: z.string().trim().max(1000, "Message must be less than 1000 characters").optional(),
+  consent: z.literal(true, { errorMap: () => ({ message: "You must agree to continue" }) })
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -41,12 +46,13 @@ export default function Companies() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
     reset
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      requestType: "corporate_gift_cards"
+      requestType: "corporate_retreat"
     }
   });
   
@@ -70,18 +76,25 @@ export default function Companies() {
         source: "corporate",
         name: data.fullName,
         email: data.email,
-        phone: data.phone || null,
-        company_name: data.companyName || null,
+        phone: data.phone,
+        company_name: data.companyName,
         request_type: data.requestType,
-        group_size: data.groupSize || null,
+        group_size: data.groupSize,
         preferred_dates: data.preferredDates || null,
         message: data.message || null,
-        is_b2b: true
+        is_b2b: true,
+        marketing_opt_in: data.consent,
+        metadata: {
+          main_objective: data.mainObjective
+        }
       });
       if (leadsError) throw leadsError;
 
       await supabase.functions.invoke("send-corporate-request", {
-        body: data
+        body: {
+          ...data,
+          mainObjective: data.mainObjective
+        }
       });
       setShowSuccess(true);
       reset();
@@ -100,6 +113,8 @@ export default function Companies() {
   };
 
   const requestTypeLabels = t(lang, 'companiesRequestTypeLabels') as Record<string, string>;
+  const mainObjectiveOptions = t(lang, 'companiesMainObjectiveOptions') as Record<string, string>;
+  const groupSizeOptions = t(lang, 'companiesGroupSizeOptions') as Record<string, string>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -304,13 +319,13 @@ export default function Companies() {
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <Label htmlFor="fullName" className="text-sm">{t(lang, 'companiesFullName')} *</Label>
-                        <Input id="fullName" {...register("fullName")} placeholder={lang === 'he' ? "השם שלכם" : "Your name"} />
+                        <Input id="fullName" {...register("fullName")} placeholder={t(lang, 'companiesFullNamePlaceholder') as string} />
                         {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="companyName" className="text-sm">{t(lang, 'companiesCompanyName')}</Label>
-                        <Input id="companyName" {...register("companyName")} placeholder={lang === 'he' ? "שם החברה" : "Your company"} />
+                        <Label htmlFor="companyName" className="text-sm">{t(lang, 'companiesCompanyName')} *</Label>
+                        <Input id="companyName" {...register("companyName")} placeholder={t(lang, 'companiesCompanyNamePlaceholder') as string} />
                         {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
                       </div>
                     </div>
@@ -318,13 +333,14 @@ export default function Companies() {
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <Label htmlFor="email" className="text-sm">{t(lang, 'companiesWorkEmail')} *</Label>
-                        <Input id="email" type="email" {...register("email")} placeholder="you@company.com" />
+                        <Input id="email" type="email" {...register("email")} placeholder={t(lang, 'companiesEmailPlaceholder') as string} />
                         {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="phone" className="text-sm">{t(lang, 'companiesPhoneOptional')}</Label>
+                        <Label htmlFor="phone" className="text-sm">{t(lang, 'companiesPhone')} *</Label>
                         <Input id="phone" {...register("phone")} placeholder="+972 XX XXX XXXX" />
+                        <p className="text-xs text-muted-foreground">{t(lang, 'companiesPhoneHelper')}</p>
                         {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
                       </div>
                     </div>
@@ -333,7 +349,7 @@ export default function Companies() {
                       <Label className="text-sm">{t(lang, 'companiesRequestType')} *</Label>
                       <RadioGroup value={requestType} onValueChange={value => setValue("requestType", value as any)} className="space-y-1">
                         {Object.entries(requestTypeLabels).map(([value, label]) => (
-                          <div key={value} className="flex items-center space-x-2">
+                          <div key={value} className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
                             <RadioGroupItem value={value} id={value} />
                             <Label htmlFor={value} className="font-normal cursor-pointer text-sm">
                               {label}
@@ -344,29 +360,97 @@ export default function Companies() {
                       {errors.requestType && <p className="text-xs text-destructive">{errors.requestType.message}</p>}
                     </div>
 
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">{t(lang, 'companiesMainObjective')} *</Label>
+                      <Controller
+                        name="mainObjective"
+                        control={control}
+                        render={({ field }) => (
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t(lang, 'companiesMainObjectivePlaceholder') as string} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(mainObjectiveOptions).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>{label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.mainObjective && <p className="text-xs text-destructive">{errors.mainObjective.message}</p>}
+                    </div>
+
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label htmlFor="groupSize" className="text-sm">{t(lang, 'companiesGroupSize')}</Label>
-                        <Input id="groupSize" {...register("groupSize")} placeholder={t(lang, 'companiesGroupSizePlaceholder')} />
+                        <Label className="text-sm">{t(lang, 'companiesGroupSize')} *</Label>
+                        <Controller
+                          name="groupSize"
+                          control={control}
+                          render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={t(lang, 'companiesGroupSizePlaceholder') as string} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.entries(groupSizeOptions).map(([value, label]) => (
+                                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
                         {errors.groupSize && <p className="text-xs text-destructive">{errors.groupSize.message}</p>}
                       </div>
 
                       <div className="space-y-1.5">
                         <Label htmlFor="preferredDates" className="text-sm">{t(lang, 'companiesPreferredDates')}</Label>
-                        <Input id="preferredDates" {...register("preferredDates")} placeholder={t(lang, 'companiesPreferredDatesPlaceholder')} />
+                        <Input id="preferredDates" {...register("preferredDates")} placeholder={t(lang, 'companiesPreferredDatesPlaceholder') as string} />
                         {errors.preferredDates && <p className="text-xs text-destructive">{errors.preferredDates.message}</p>}
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="message" className="text-sm">{t(lang, 'companiesMessageOptional')}</Label>
-                      <Textarea id="message" {...register("message")} placeholder={t(lang, 'companiesMessagePlaceholder')} className="min-h-[80px]" />
+                      <Label htmlFor="message" className="text-sm">{t(lang, 'companiesAdditionalInfo')}</Label>
+                      <Textarea id="message" {...register("message")} placeholder={t(lang, 'companiesAdditionalInfoPlaceholder') as string} className="min-h-[80px]" />
                       {errors.message && <p className="text-xs text-destructive">{errors.message.message}</p>}
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? t(lang, 'companiesSending') : t(lang, 'companiesSendRequest')}
-                    </Button>
+                    <div className="space-y-2">
+                      <div className={`flex items-start ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                        <Controller
+                          name="consent"
+                          control={control}
+                          render={({ field }) => (
+                            <Checkbox
+                              id="consent"
+                              checked={field.value === true}
+                              onCheckedChange={field.onChange}
+                              className="mt-0.5"
+                            />
+                          )}
+                        />
+                        <Label htmlFor="consent" className="font-normal text-sm leading-snug cursor-pointer">
+                          {t(lang, 'companiesConsent')}
+                        </Label>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t(lang, 'companiesConsentHelper')}{' '}
+                        <Link to={`/privacy${lang !== 'en' ? `?lang=${lang}` : ''}`} className="underline hover:text-foreground">
+                          {t(lang, 'footerPrivacy')}
+                        </Link>
+                      </p>
+                      {errors.consent && <p className="text-xs text-destructive">{errors.consent.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Button type="submit" className="w-full" disabled={isSubmitting}>
+                        {isSubmitting ? t(lang, 'companiesSending') : t(lang, 'companiesSubmitButton')}
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center">
+                        {t(lang, 'companiesSubmitHelper')}
+                      </p>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
