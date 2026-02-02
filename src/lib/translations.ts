@@ -181,7 +181,7 @@ export const translations = {
     companiesFlexible: "Flexible & Scalable",
     companiesFlexibleDesc: "From one employee to an entire department.",
     companiesSeamless: "Seamless",
-    companiesSeamlessDesc: "We handle everything — you simply choose.",
+    companiesSeamlessDesc: "We handle everything, you simply decide.",
     companiesHowItWorks: "How It Works",
     companiesStep1: "Choose the package",
     companiesStep1Desc: "Gift card, themed experience, or tailor-made escape.",
