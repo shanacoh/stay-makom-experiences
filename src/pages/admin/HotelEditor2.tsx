@@ -18,6 +18,7 @@ import type {
   HyperGuestHotelWithDetails,
   RoomCapacitySummary,
   TaxFeeExtra,
+  FacilityItem,
 } from "@/components/admin/HyperGuestHotelSearch";
 
 interface HotelEditor2Props {
@@ -76,6 +77,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     check_out_time: "",
     /** Extras / taxes / frais proposés par l'hôtel (HyperGuest taxesFees) */
     hyperguest_extras: [] as TaxFeeExtra[],
+    /** Équipements & services (WiFi, piscine, etc. – HyperGuest facilities, sans prix) */
+    hyperguest_facilities: [] as FacilityItem[],
   });
 
   const downloadHyperGuestImages = async (imageUrls: string[], heroUrl?: string | null) => {
@@ -156,6 +159,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       check_in_time: hotel.checkIn ?? "",
       check_out_time: hotel.checkOut ?? "",
       hyperguest_extras: hotel.taxesFeesExtras ?? [],
+      hyperguest_facilities: hotel.facilitiesDetail ?? [],
     }));
 
     const hotelName = hotel.name || "";
@@ -260,6 +264,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         check_in_time: (h.check_in_time as string) ?? "",
         check_out_time: (h.check_out_time as string) ?? "",
         hyperguest_extras: Array.isArray(h.hyperguest_extras) ? (h.hyperguest_extras as TaxFeeExtra[]) : [],
+        hyperguest_facilities: Array.isArray(h.hyperguest_facilities)
+          ? (h.hyperguest_facilities as FacilityItem[])
+          : [],
       });
     }
   }, [hotel]);
@@ -313,6 +320,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         check_in_time: data.check_in_time || null,
         check_out_time: data.check_out_time || null,
         hyperguest_extras: data.hyperguest_extras?.length ? data.hyperguest_extras : null,
+        hyperguest_facilities: data.hyperguest_facilities?.length ? data.hyperguest_facilities : null,
       };
 
       if (hotelId) {
@@ -799,10 +807,67 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   />
                 </div>
 
+                <div className="space-y-4">
+                  <Label>Équipements & services (HyperGuest)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Tout ce que l&apos;hôtel propose (WiFi, piscine, champagne, room service…) – sans prix, importé
+                    depuis HyperGuest. Les &quot;Services&quot; regroupent prestations type champagne, minibar, room
+                    service.
+                  </p>
+                  {formData.hyperguest_facilities && formData.hyperguest_facilities.length > 0 ? (
+                    <>
+                      {formData.hyperguest_facilities.some((f) => f.classification === "Service") && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Services (champagne, room service, minibar…)
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {formData.hyperguest_facilities
+                              .filter((f) => f.classification === "Service")
+                              .map((fac, i) => (
+                                <span
+                                  key={fac.name + String(i)}
+                                  className="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium"
+                                >
+                                  {fac.name}
+                                  {fac.category && (
+                                    <span className="ml-1.5 text-muted-foreground">({fac.category})</span>
+                                  )}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="space-y-1.5">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Équipements / commodités (Amenity)
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {formData.hyperguest_facilities
+                            .filter((f) => f.classification !== "Service")
+                            .map((fac, i) => (
+                              <span
+                                key={fac.name + String(i)}
+                                className="inline-flex items-center rounded-md border bg-muted/50 px-2.5 py-1 text-xs font-medium"
+                              >
+                                {fac.name}
+                                {fac.category && <span className="ml-1.5 text-muted-foreground">({fac.category})</span>}
+                              </span>
+                            ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-3 bg-muted/30">
+                      Aucun équipement ni service importé. Importez un hôtel depuis HyperGuest pour remplir cette liste.
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label>Extras / taxes / frais proposés par l&apos;hôtel (HyperGuest)</Label>
                   <p className="text-xs text-muted-foreground">
-                    Données importées depuis HyperGuest, en lecture seule. Appliqués au moment du checkout.
+                    Taxes et frais avec montants – en lecture seule. Appliqués au moment du checkout.
                   </p>
                   {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 ? (
                     <ul className="rounded-lg border divide-y text-sm">
