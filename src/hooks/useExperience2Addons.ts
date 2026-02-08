@@ -6,8 +6,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ExperienceAddon, ExperienceAddonInsert, ExperienceAddonUpdate } from "@/types/experience_addons";
-import { ADDON_TYPES, DEFAULT_CALCULATION_ORDER, type AddonType } from "@/types/experience_addons";
+import type { ExperienceAddon, ExperienceAddonInsert, ExperienceAddonUpdate } from "@/types/experience2_addons";
+import { ADDON_TYPES, DEFAULT_CALCULATION_ORDER, type AddonType } from "@/types/experience2_addons";
 
 // =====================
 // QUERY KEYS
@@ -28,7 +28,7 @@ export const experienceAddonsKeys = {
  */
 async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAddon[]> {
   const { data, error } = await supabase
-    .from("experience_addons")
+    .from("experience2_addons")
     .select("*")
     .eq("experience_id", experienceId)
     .order("calculation_order", { ascending: true })
@@ -45,7 +45,7 @@ async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAd
  * Crée un nouvel ajout
  */
 async function createExperienceAddon(addon: ExperienceAddonInsert): Promise<ExperienceAddon> {
-  const { data, error } = await supabase.from("experience_addons").insert(addon).select().single();
+  const { data, error } = await supabase.from("experience2_addons").insert(addon).select().single();
 
   if (error) {
     throw new Error(`Erreur lors de la création de l'ajout: ${error.message}`);
@@ -74,7 +74,7 @@ async function createAllDefaultAddons(experienceId: string): Promise<ExperienceA
     is_active: true,
   }));
 
-  const { data, error } = await supabase.from("experience_addons").insert(rows).select();
+  const { data, error } = await supabase.from("experience2_addons").insert(rows).select();
 
   if (error) {
     throw new Error(`Erreur lors de la création des ajouts: ${error.message}`);
@@ -87,7 +87,7 @@ async function createAllDefaultAddons(experienceId: string): Promise<ExperienceA
  * Met à jour un ajout existant
  */
 async function updateExperienceAddon(id: string, updates: ExperienceAddonUpdate): Promise<ExperienceAddon> {
-  const { data, error } = await supabase.from("experience_addons").update(updates).eq("id", id).select().single();
+  const { data, error } = await supabase.from("experience2_addons").update(updates).eq("id", id).select().single();
 
   if (error) {
     throw new Error(`Erreur lors de la mise à jour de l'ajout: ${error.message}`);
@@ -100,7 +100,7 @@ async function updateExperienceAddon(id: string, updates: ExperienceAddonUpdate)
  * Supprime un ajout
  */
 async function deleteExperienceAddon(id: string): Promise<void> {
-  const { error } = await supabase.from("experience_addons").delete().eq("id", id);
+  const { error } = await supabase.from("experience2_addons").delete().eq("id", id);
 
   if (error) {
     throw new Error(`Erreur lors de la suppression de l'ajout: ${error.message}`);
