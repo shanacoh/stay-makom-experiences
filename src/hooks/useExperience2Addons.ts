@@ -6,7 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ExperienceAddon, ExperienceAddonInsert, ExperienceAddonUpdate } from "@/types/experience2_addons";
+import type { ExperienceAddon, ExperienceAddonInsert, ExperienceAddonUpdate, AddonFormData } from "@/types/experience2_addons";
 import { ADDON_TYPES, DEFAULT_CALCULATION_ORDER, type AddonType } from "@/types/experience2_addons";
 
 // =====================
@@ -107,6 +107,30 @@ async function deleteExperienceAddon(id: string): Promise<void> {
   }
 }
 
+/** Crée les 3 add-ons (commission, per_night, tax) avec les valeurs fournies. */
+async function createAddonsWithValues(experienceId: string, addons: AddonFormData[]): Promise<ExperienceAddon[]> {
+  const rows: ExperienceAddonInsert[] = addons.map((a) => ({
+    experience_id: experienceId,
+    type: a.type,
+    name: a.name,
+    name_he: a.name_he ?? null,
+    description: a.description ?? null,
+    description_he: a.description_he ?? null,
+    value: a.value,
+    is_percentage: a.is_percentage,
+    calculation_order: a.calculation_order ?? 0,
+    is_active: true,
+  }));
+
+  const { data, error } = await supabase.from("experience2_addons").insert(rows).select();
+
+  if (error) {
+    throw new Error(`Erreur lors de la création des ajouts: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
 /**
  * Active/désactive un ajout
  */
@@ -155,6 +179,21 @@ export function useCreateAllDefaultAddons() {
   return useMutation({
     mutationFn: createAllDefaultAddons,
     onSuccess: (_, experienceId) => {
+      queryClient.invalidateQueries({
+        queryKey: experienceAddonsKeys.byExperience(experienceId),
+      });
+    },
+  });
+}
+
+/** Crée les 3 add-ons avec les valeurs saisies. */
+export function useCreateAddonsWithValues() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ experienceId, addons }: { experienceId: string; addons: AddonFormData[] }) =>
+      createAddonsWithValues(experienceId, addons),
+    onSuccess: (_, { experienceId }) => {
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.byExperience(experienceId),
       });
