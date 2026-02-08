@@ -40,6 +40,19 @@ export interface CancellationRule {
   description?: string;
 }
 
+/** Extra / taxe / frais proposé par l'hôtel (HyperGuest taxesFees) */
+export interface TaxFeeExtra {
+  id?: number;
+  title: string;
+  category?: "tax" | "fee";
+  chargeType?: "percent" | "currency";
+  chargeValue?: number;
+  scope?: string;
+  frequency?: string;
+  /** Description lisible ex. "18% par nuit" */
+  chargeDisplay?: string;
+}
+
 export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
   hotelModel?: Hotel;
   images?: string[];
@@ -74,6 +87,8 @@ export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
   policiesGeneral?: string[];
   /** Taxes & frais (titres depuis taxesFees, pour info) */
   taxesFeesSummary?: string[];
+  /** Extras / taxes / frais détaillés (property-static taxesFees) */
+  taxesFeesExtras?: TaxFeeExtra[];
 }
 
 export interface HyperGuestHotelSearchProps {
@@ -232,6 +247,29 @@ export function HyperGuestHotelSearch({
         const taxesFeesSummary = Array.isArray(taxesFeesAll)
           ? (taxesFeesAll as any[]).slice(0, 15).map((t: any) => t.title ?? t.name ?? "")
           : undefined;
+        const taxesFeesExtras: TaxFeeExtra[] = Array.isArray(taxesFeesAll)
+          ? (taxesFeesAll as any[]).slice(0, 30).map((t: any) => {
+              const charge = t.charge ?? {};
+              const type = charge.type ?? t.chargeType;
+              const value = charge.value ?? t.chargeValue ?? t.value;
+              let chargeDisplay = "";
+              if (type === "percent" && value != null) chargeDisplay = `${value}%`;
+              else if (type === "currency" && value != null) chargeDisplay = `${value}`;
+              if (t.scope || t.frequency) {
+                chargeDisplay = [chargeDisplay, t.scope, t.frequency].filter(Boolean).join(" · ");
+              }
+              return {
+                id: t.id,
+                title: t.title ?? t.name ?? "",
+                category: t.category === "fee" ? "fee" : "tax",
+                chargeType: type,
+                chargeValue: value,
+                scope: t.scope,
+                frequency: t.frequency,
+                chargeDisplay: chargeDisplay || undefined,
+              };
+            })
+          : [];
 
         const enrichedHotel: HyperGuestHotelWithDetails = {
           ...hotel,
@@ -290,6 +328,7 @@ export function HyperGuestHotelSearch({
           numberOfRooms: settings?.numberOfRooms ?? raw?.numberOfRooms ?? null,
           policiesGeneral: policiesGeneral.length ? policiesGeneral : undefined,
           taxesFeesSummary: taxesFeesSummary?.length ? taxesFeesSummary : undefined,
+          taxesFeesExtras: taxesFeesExtras.length ? taxesFeesExtras : undefined,
         };
         onSelect(enrichedHotel);
       } catch (err) {

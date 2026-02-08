@@ -17,6 +17,7 @@ import {
   HyperGuestHotelSearch,
   type HyperGuestHotelWithDetails,
   type RoomCapacitySummary,
+  type TaxFeeExtra,
 } from "@/components/admin/HyperGuestHotelSearch";
 
 interface HotelEditor2Props {
@@ -73,6 +74,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     number_of_rooms: null as number | null,
     check_in_time: "",
     check_out_time: "",
+    /** Extras / taxes / frais proposés par l'hôtel (HyperGuest taxesFees) */
+    hyperguest_extras: [] as TaxFeeExtra[],
   });
 
   const downloadHyperGuestImages = async (imageUrls: string[], heroUrl?: string | null) => {
@@ -152,6 +155,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       number_of_rooms: hotel.numberOfRooms ?? null,
       check_in_time: hotel.checkIn ?? "",
       check_out_time: hotel.checkOut ?? "",
+      hyperguest_extras: hotel.taxesFeesExtras ?? [],
     }));
 
     const hotelName = hotel.name || "";
@@ -255,6 +259,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         number_of_rooms: (h.number_of_rooms as number) ?? null,
         check_in_time: (h.check_in_time as string) ?? "",
         check_out_time: (h.check_out_time as string) ?? "",
+        hyperguest_extras: Array.isArray(h.hyperguest_extras) ? (h.hyperguest_extras as TaxFeeExtra[]) : [],
       });
     }
   }, [hotel]);
@@ -307,6 +312,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         number_of_rooms: data.number_of_rooms,
         check_in_time: data.check_in_time || null,
         check_out_time: data.check_out_time || null,
+        hyperguest_extras: data.hyperguest_extras?.length ? data.hyperguest_extras : null,
       };
 
       if (hotelId) {
@@ -792,6 +798,32 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     rows={4}
                   />
                 </div>
+
+                {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Extras / taxes / frais proposés par l&apos;hôtel (HyperGuest)</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Données importées depuis HyperGuest, en lecture seule. Appliqués au moment du checkout.
+                    </p>
+                    <ul className="rounded-lg border divide-y text-sm">
+                      {formData.hyperguest_extras.map((extra, i) => (
+                        <li key={extra.id ?? i} className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <span className="font-medium">{extra.title}</span>
+                          <span className="text-muted-foreground capitalize">
+                            {extra.category === "fee" ? "Frais" : "Taxe"}
+                          </span>
+                          {extra.chargeDisplay && <span className="text-muted-foreground">{extra.chargeDisplay}</span>}
+                          {extra.scope && (
+                            <span className="text-xs text-muted-foreground">
+                              {extra.scope}
+                              {extra.frequency ? ` · ${extra.frequency}` : ""}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
