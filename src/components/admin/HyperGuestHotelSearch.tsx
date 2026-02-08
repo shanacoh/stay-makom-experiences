@@ -20,6 +20,26 @@ import { Hotel } from "@/models/hyperguest";
 import { Loader2, Search, Building2, MapPin, Star, Check, ChevronDown, Image } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Résumé capacité d'une chambre (property-static) */
+export interface RoomCapacitySummary {
+  name: string;
+  maxAdultsNumber?: number;
+  maxChildrenNumber?: number;
+  maxOccupancy?: number;
+  roomSize?: number | null;
+  numberOfBeds?: number;
+  numberOfBedrooms?: number;
+  beddingSummary?: string;
+}
+
+/** Règle d'annulation (percent ou montant) */
+export interface CancellationRule {
+  daysBefore?: number;
+  penaltyType?: string;
+  amount?: number;
+  description?: string;
+}
+
 export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
   hotelModel?: Hotel;
   images?: string[];
@@ -33,6 +53,27 @@ export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
   facilities?: string[];
   checkIn?: string;
   checkOut?: string;
+  /** Nombre d'étoiles (liste ou property-static rating) */
+  starRating?: number;
+  /** Type de propriété (Hotel, Apartment, etc.) */
+  propertyTypeName?: string;
+  /** Capacités par chambre (max adultes, enfants, occupancy, surface, lits) */
+  roomsSummary?: RoomCapacitySummary[];
+  /** Politique d'annulation formatée (texte lisible) */
+  cancellationPolicyText?: string;
+  /** Règles d'annulation brutes pour affichage détaillé */
+  cancellationPolicies?: CancellationRule[];
+  /** Conditions générales / remarques (ex: animaux, âge min, taxes) */
+  remarks?: string[];
+  /** Séjour min/max (nombre de nuits) */
+  minStay?: number | null;
+  maxStay?: number | null;
+  /** Nombre total de chambres (property-static settings) */
+  numberOfRooms?: number | null;
+  /** Texte des politiques générales (hors annulation) */
+  policiesGeneral?: string[];
+  /** Taxes & frais (titres depuis taxesFees, pour info) */
+  taxesFeesSummary?: string[];
 }
 
 export interface HyperGuestHotelSearchProps {
@@ -95,11 +136,12 @@ export function HyperGuestHotelSearch({
       setIsLoadingDetails(true);
       try {
         const hotelModel = await getPropertyDetails(hotelId);
+        const raw = (hotelModel as any)?.raw ?? hotelModel;
         const images = extractHotelImages(hotelModel);
         const heroImage = getHotelMainImage(hotelModel);
 
-        let city = hotelModel?.location?.city?.name || "";
-        let region = hotelModel?.location?.region || "";
+        let city = hotelModel?.location?.city?.name ?? raw?.location?.city?.name ?? "";
+        let region = hotelModel?.location?.region ?? raw?.location?.region ?? "";
         if (city && region && city.toLowerCase() === region.toLowerCase()) {
           region = "";
         }
@@ -109,7 +151,87 @@ export function HyperGuestHotelSearch({
           if (region.toLowerCase() === city.toLowerCase()) region = "";
         }
 
-        const fullAddress = hotelModel?.location?.fullAddress || hotelModel?.location?.address || hotel.address || "";
+        const fullAddress =
+          hotelModel?.location?.fullAddress ??
+          hotelModel?.location?.address ??
+          raw?.location?.fullAddress ??
+          raw?.location?.address ??
+          hotel.address ??
+          "";
+
+        const rooms = raw?.rooms ?? hotelModel?.rooms ?? [];
+        const roomsSummary: HyperGuestHotelWithDetails["roomsSummary"] = Array.isArray(rooms)
+          ? rooms.map((room: any) => {
+              const s = room.settings ?? room;
+              const beds = room.beds ?? s?.beddingConfigurations ?? [];
+              const beddingSummary = Array.isArray(beds)
+                ? beds.map((b: any) => `${b.quantity ?? 1}× ${b.type ?? b.size ?? "Bed"}`).join(", ")
+                : undefined;
+              return {
+                name: room.name ?? s?.name ?? "",
+                maxAdultsNumber: s?.maxAdultsNumber ?? s?.adultsNumber ?? room.maxAdultsNumber,
+                maxChildrenNumber: s?.maxChildrenNumber ?? s?.childrenNumber ?? room.maxChildrenNumber,
+                maxOccupancy: s?.maxOccupancy ?? room.maxOccupancy,
+                roomSize: s?.roomSize ?? room.roomSize ?? undefined,
+                numberOfBeds: s?.numberOfBeds ?? room.numberOfBeds,
+                numberOfBedrooms: s?.numberOfBedrooms ?? room.numberOfBedrooms,
+                beddingSummary,
+              };
+            })
+          : undefined;
+
+        const policies = raw?.policies ?? hotelModel?.policies;
+        const policiesArr = Array.isArray(policies) ? policies : (policies?.all ?? []);
+        const cancellationPolicy = !Array.isArray(policies)
+          ? policies?.cancellation
+          : policiesArr.find((p: any) => p.type === "cancellation" || p.type === "Cancellation");
+        const cancellationPolicies: CancellationRule[] = [];
+        let cancellationPolicyText: string | undefined;
+        if (cancellationPolicy) {
+          const rules =
+            cancellationPolicy.rules ??
+            cancellationPolicy.rule ??
+            (cancellationPolicy.daysBefore != null ? [cancellationPolicy] : []);
+          const ruleList = Array.isArray(rules) ? rules : [rules];
+          ruleList.forEach((r: any) => {
+            cancellationPolicies.push({
+              daysBefore: r.daysBefore ?? r.days,
+              penaltyType: r.penaltyType ?? r.type,
+              amount: r.amount ?? r.value,
+              description:
+                r.description ??
+                (r.penaltyType === "percent" && r.amount != null
+                  ? `${r.amount}%`
+                  : r.amount != null
+                    ? `${r.amount}`
+                    : undefined),
+            });
+          });
+          cancellationPolicyText = cancellationPolicies
+            .map(
+              (r) =>
+                `${r.daysBefore != null ? `J-${r.daysBefore}` : "À tout moment"}: ${r.penaltyType === "percent" ? `${r.amount}%` : `${r.amount}`}`,
+            )
+            .join(" • ");
+        }
+
+        const generalPolicies = Array.isArray(policies)
+          ? policies.filter((p: any) => p.type !== "cancellation" && p.type !== "Cancellation")
+          : (policies?.general ?? []);
+        const policiesGeneral: string[] = [];
+        if (Array.isArray(generalPolicies)) {
+          generalPolicies.forEach((p: any) => {
+            const text = p.description ?? p.text ?? p.content ?? (typeof p === "string" ? p : undefined);
+            if (text) policiesGeneral.push(text);
+          });
+        }
+
+        const settings = raw?.settings ?? hotelModel?.settings ?? {};
+        const taxesFees = raw?.taxesFees ?? hotelModel?.taxesFees;
+        const taxesFeesAll = taxesFees?.all ?? taxesFees?.taxes ?? [];
+        const taxesFeesSummary = Array.isArray(taxesFeesAll)
+          ? (taxesFeesAll as any[]).slice(0, 15).map((t: any) => t.title ?? t.name ?? "")
+          : undefined;
 
         const enrichedHotel: HyperGuestHotelWithDetails = {
           ...hotel,
@@ -117,22 +239,57 @@ export function HyperGuestHotelSearch({
           hotelModel,
           images,
           heroImage,
-          description: hotelModel?.descriptions?.general || undefined,
+          description:
+            hotelModel?.descriptions?.general ??
+            raw?.descriptions?.general ??
+            (typeof raw?.descriptions?.byLanguage === "object"
+              ? (Object.values(raw.descriptions.byLanguage)[0] as any)?.general
+              : undefined),
           contact: hotelModel?.contact
             ? {
                 email: hotelModel.contact.email || undefined,
                 phone: hotelModel.contact.phone || undefined,
                 website: hotelModel.contact.website || undefined,
               }
-            : undefined,
-          facilities: hotelModel?.facilities?.popular?.slice(0, 10).map((f) => f.name) || [],
-          checkIn: hotelModel?.settings?.checkIn,
-          checkOut: hotelModel?.settings?.checkOut,
-          latitude: hotelModel?.coordinates?.latitude || hotel.latitude,
-          longitude: hotelModel?.coordinates?.longitude || hotel.longitude,
+            : raw?.contact
+              ? {
+                  email: raw.contact.email || undefined,
+                  phone: raw.contact.phone || undefined,
+                  website: raw.contact.website || undefined,
+                }
+              : undefined,
+          facilities:
+            hotelModel?.facilities?.popular?.slice(0, 20).map((f: any) => f.name) ??
+            (raw?.facilities?.popular ?? raw?.facilities?.all ?? []).slice(0, 20).map((f: any) => f.name ?? f) ??
+            [],
+          checkIn: hotelModel?.settings?.checkIn ?? settings?.checkIn,
+          checkOut: hotelModel?.settings?.checkOut ?? settings?.checkOut,
+          latitude: hotelModel?.coordinates?.latitude ?? raw?.coordinates?.latitude ?? hotel.latitude,
+          longitude: hotelModel?.coordinates?.longitude ?? raw?.coordinates?.longitude ?? hotel.longitude,
           address: fullAddress,
           cityName: city,
           regionName: region,
+          starRating: hotel.starRating ?? hotelModel?.rating ?? raw?.rating ?? undefined,
+          propertyTypeName: hotel.propertyTypeName ?? raw?.propertyTypeName ?? undefined,
+          roomsSummary: roomsSummary?.length ? roomsSummary : undefined,
+          cancellationPolicyText: cancellationPolicyText || undefined,
+          cancellationPolicies: cancellationPolicies.length ? cancellationPolicies : undefined,
+          remarks: hotel.remarks ?? (Array.isArray(raw?.remarks) ? raw.remarks : undefined),
+          minStay:
+            policies?.minStay ??
+            (Array.isArray(policiesArr)
+              ? policiesArr.find((p: any) => p.type === "min-length-of-stay")?.value
+              : null) ??
+            null,
+          maxStay:
+            policies?.maxStay ??
+            (Array.isArray(policiesArr)
+              ? policiesArr.find((p: any) => p.type === "max-length-of-stay")?.value
+              : null) ??
+            null,
+          numberOfRooms: settings?.numberOfRooms ?? raw?.numberOfRooms ?? null,
+          policiesGeneral: policiesGeneral.length ? policiesGeneral : undefined,
+          taxesFeesSummary: taxesFeesSummary?.length ? taxesFeesSummary : undefined,
         };
         onSelect(enrichedHotel);
       } catch (err) {
