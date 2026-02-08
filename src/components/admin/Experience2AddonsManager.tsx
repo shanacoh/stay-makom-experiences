@@ -33,7 +33,7 @@ import {
   useCreateAddonsWithValues,
   useUpdateExperienceAddon,
   useDeleteExperienceAddon,
-} from "@/hooks/useExperience2Addons";
+} from "../../hooks/useExperience2Addons";
 import {
   ADDON_TYPES_EN,
   formatAddonValue,
