@@ -38,6 +38,7 @@ import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
 import { Experience2AddonsManager } from "@/components/admin/Experience2AddonsManager";
+import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
 
 const experience2Schema = z.object({
   title: z.string().min(1, "English title is required"),
@@ -104,7 +105,7 @@ export function UnifiedExperience2Form({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("hotels2")
-        .select("id, name, hero_image, photos")
+        .select("id, name, hero_image, photos, hyperguest_property_id")
         .order("name");
       if (error) throw error;
       return data;
@@ -834,6 +835,21 @@ export function UnifiedExperience2Form({
             />
           </CardContent>
         </Card>
+
+        {/* Price / Availability Preview */}
+        {selectedHotel && (
+          <ExperienceAvailabilityPreview
+            hyperguestPropertyId={
+              selectedHotel.hyperguest_property_id != null
+                ? String(selectedHotel.hyperguest_property_id)
+                : null
+            }
+            hotelName={selectedHotel.name}
+            experienceId={currentExperienceId ?? null}
+            currency="ILS"
+            lang="en"
+          />
+        )}
 
         {/* SEO Section */}
         <Card className="bg-muted/30">
