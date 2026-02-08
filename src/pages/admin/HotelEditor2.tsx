@@ -810,53 +810,63 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                 <div className="space-y-4">
                   <Label>Équipements & services (HyperGuest)</Label>
                   <p className="text-xs text-muted-foreground">
-                    Tout ce que l&apos;hôtel propose (WiFi, piscine, champagne, room service…) – sans prix, importé
-                    depuis HyperGuest. Les &quot;Services&quot; regroupent prestations type champagne, minibar, room
-                    service.
+                    Tout ce que l&apos;hôtel propose, classé par section (catégorie HyperGuest) – sans prix.
                   </p>
                   {formData.hyperguest_facilities && formData.hyperguest_facilities.length > 0 ? (
-                    <>
-                      {formData.hyperguest_facilities.some((f) => f.classification === "Service") && (
-                        <div className="space-y-1.5">
-                          <span className="text-xs font-medium text-muted-foreground">
-                            Services (champagne, room service, minibar…)
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {formData.hyperguest_facilities
-                              .filter((f) => f.classification === "Service")
-                              .map((fac, i) => (
-                                <span
-                                  key={fac.name + String(i)}
-                                  className="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium"
-                                >
-                                  {fac.name}
-                                  {fac.category && (
-                                    <span className="ml-1.5 text-muted-foreground">({fac.category})</span>
-                                  )}
-                                </span>
-                              ))}
-                          </div>
+                    (() => {
+                      const bySection = formData.hyperguest_facilities.reduce(
+                        (acc, fac) => {
+                          const section =
+                            fac.classification === "Service"
+                              ? "Services"
+                              : (fac.category && fac.category.trim()) || "Autres";
+                          if (!acc[section]) acc[section] = [];
+                          acc[section].push(fac);
+                          return acc;
+                        },
+                        {} as Record<string, FacilityItem[]>,
+                      );
+                      const sectionOrder = [
+                        "Services",
+                        "Pool",
+                        "Spa",
+                        "Food & Beverage",
+                        "Internet",
+                        "Reception",
+                        "Wellness",
+                        "Parking",
+                        "Room Amenities",
+                        "Autres",
+                      ];
+                      const otherSections = Object.keys(bySection)
+                        .filter((s) => !sectionOrder.includes(s))
+                        .sort((a, b) => a.localeCompare(b));
+                      const sections = [...sectionOrder.filter((s) => bySection[s]?.length), ...otherSections];
+
+                      return (
+                        <div className="space-y-4">
+                          {sections.map((sectionName) => (
+                            <div key={sectionName} className="space-y-2">
+                              <span className="text-sm font-medium text-foreground">{sectionName}</span>
+                              <div className="flex flex-wrap gap-2">
+                                {bySection[sectionName].map((fac, i) => (
+                                  <span
+                                    key={fac.name + String(i)}
+                                    className={
+                                      sectionName === "Services"
+                                        ? "inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium"
+                                        : "inline-flex items-center rounded-md border bg-muted/50 px-2.5 py-1 text-xs font-medium"
+                                    }
+                                  >
+                                    {fac.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      )}
-                      <div className="space-y-1.5">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          Équipements / commodités (Amenity)
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {formData.hyperguest_facilities
-                            .filter((f) => f.classification !== "Service")
-                            .map((fac, i) => (
-                              <span
-                                key={fac.name + String(i)}
-                                className="inline-flex items-center rounded-md border bg-muted/50 px-2.5 py-1 text-xs font-medium"
-                              >
-                                {fac.name}
-                                {fac.category && <span className="ml-1.5 text-muted-foreground">({fac.category})</span>}
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-                    </>
+                      );
+                    })()
                   ) : (
                     <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-3 bg-muted/30">
                       Aucun équipement ni service importé. Importez un hôtel depuis HyperGuest pour remplir cette liste.
