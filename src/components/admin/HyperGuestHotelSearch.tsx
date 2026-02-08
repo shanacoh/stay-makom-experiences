@@ -40,6 +40,14 @@ export interface CancellationRule {
   description?: string;
 }
 
+/** Équipement ou service proposé par l'hôtel (HyperGuest facilities) – sans prix */
+export interface FacilityItem {
+  name: string;
+  category?: string;
+  type?: "hotel" | "room";
+  classification?: string;
+}
+
 /** Extra / taxe / frais proposé par l'hôtel (HyperGuest taxesFees) */
 export interface TaxFeeExtra {
   id?: number;
@@ -91,6 +99,8 @@ export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
   taxesFeesSummary?: string[];
   /** Extras / taxes / frais détaillés (property-static taxesFees) */
   taxesFeesExtras?: TaxFeeExtra[];
+  /** Équipements & services (WiFi, piscine, etc.) – property-static facilities, sans prix */
+  facilitiesDetail?: FacilityItem[];
 }
 
 export interface HyperGuestHotelSearchProps {
@@ -305,6 +315,25 @@ export function HyperGuestHotelSearch({
             hotelModel?.facilities?.popular?.slice(0, 20).map((f: any) => f.name) ??
             (raw?.facilities?.popular ?? raw?.facilities?.all ?? []).slice(0, 20).map((f: any) => f.name ?? f) ??
             [],
+          facilitiesDetail: (() => {
+            const facAll =
+              raw?.facilities?.all ??
+              raw?.facilities?.popular ??
+              hotelModel?.facilities?.all ??
+              hotelModel?.facilities?.popular ??
+              [];
+            if (!Array.isArray(facAll)) return undefined;
+            const list = (facAll as any[])
+              .slice(0, 50)
+              .map((f: any) => ({
+                name: f.name ?? "",
+                category: f.category,
+                type: f.type === "room" ? "room" : f.type === "hotel" ? "hotel" : undefined,
+                classification: f.classification,
+              }))
+              .filter((f) => f.name);
+            return list.length ? list : undefined;
+          })(),
           checkIn: hotelModel?.settings?.checkIn ?? settings?.checkIn,
           checkOut: hotelModel?.settings?.checkOut ?? settings?.checkOut,
           latitude: hotelModel?.coordinates?.latitude ?? raw?.coordinates?.latitude ?? hotel.latitude,
