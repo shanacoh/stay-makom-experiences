@@ -47,9 +47,11 @@ export interface TaxFeeExtra {
   category?: "tax" | "fee";
   chargeType?: "percent" | "currency";
   chargeValue?: number;
+  /** Devise (ex. ILS, USD) pour chargeType === "currency" */
+  currency?: string;
   scope?: string;
   frequency?: string;
-  /** Description lisible ex. "18% par nuit" */
+  /** Description lisible ex. "18% par nuit" ou "50 ILS / séjour" */
   chargeDisplay?: string;
 }
 
@@ -247,23 +249,26 @@ export function HyperGuestHotelSearch({
         const taxesFeesSummary = Array.isArray(taxesFeesAll)
           ? (taxesFeesAll as any[]).slice(0, 15).map((t: any) => t.title ?? t.name ?? "")
           : undefined;
+        const propertyCurrency = (raw?.settings?.currency as string) ?? (settings?.currency as string) ?? "ILS";
         const taxesFeesExtras: TaxFeeExtra[] = Array.isArray(taxesFeesAll)
           ? (taxesFeesAll as any[]).slice(0, 30).map((t: any) => {
               const charge = t.charge ?? {};
               const type = charge.type ?? t.chargeType;
               const value = charge.value ?? t.chargeValue ?? t.value;
-              let chargeDisplay = "";
-              if (type === "percent" && value != null) chargeDisplay = `${value}%`;
-              else if (type === "currency" && value != null) chargeDisplay = `${value}`;
-              if (t.scope || t.frequency) {
-                chargeDisplay = [chargeDisplay, t.scope, t.frequency].filter(Boolean).join(" · ");
-              }
+              const currency = (charge.currency ?? t.currency ?? propertyCurrency) as string;
+              const parts: string[] = [];
+              if (type === "percent" && value != null) parts.push(`${value}%`);
+              else if (type === "currency" && value != null) parts.push(`${value} ${currency}`);
+              if (t.scope) parts.push(t.scope);
+              if (t.frequency) parts.push(t.frequency);
+              const chargeDisplay = parts.length ? parts.join(" · ") : undefined;
               return {
                 id: t.id,
                 title: t.title ?? t.name ?? "",
                 category: t.category === "fee" ? "fee" : "tax",
                 chargeType: type,
                 chargeValue: value,
+                currency: type === "currency" ? currency : undefined,
                 scope: t.scope,
                 frequency: t.frequency,
                 chargeDisplay: chargeDisplay || undefined,
@@ -464,3 +469,5 @@ export function HyperGuestHotelSearch({
     </div>
   );
 }
+
+export default HyperGuestHotelSearch;

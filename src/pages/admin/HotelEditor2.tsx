@@ -809,14 +809,22 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       {formData.hyperguest_extras.map((extra, i) => (
                         <li key={extra.id ?? i} className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1">
                           <span className="font-medium">{extra.title}</span>
-                          <span className="text-muted-foreground capitalize">
+                          <span className="capitalize text-muted-foreground">
                             {extra.category === "fee" ? "Frais" : "Taxe"}
                           </span>
-                          {extra.chargeDisplay && <span className="text-muted-foreground">{extra.chargeDisplay}</span>}
-                          {extra.scope && (
+                          {(extra.chargeValue != null || extra.chargeDisplay) && (
+                            <span className="font-medium text-primary">
+                              {extra.chargeDisplay ??
+                                (extra.chargeType === "percent"
+                                  ? `${extra.chargeValue}%`
+                                  : extra.currency
+                                    ? `${extra.chargeValue} ${extra.currency}`
+                                    : String(extra.chargeValue))}
+                            </span>
+                          )}
+                          {(extra.scope || extra.frequency) && (
                             <span className="text-xs text-muted-foreground">
-                              {extra.scope}
-                              {extra.frequency ? ` · ${extra.frequency}` : ""}
+                              {[extra.scope, extra.frequency].filter(Boolean).join(" · ")}
                             </span>
                           )}
                         </li>
