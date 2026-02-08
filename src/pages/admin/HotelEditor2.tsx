@@ -799,12 +799,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   />
                 </div>
 
-                {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Extras / taxes / frais proposés par l&apos;hôtel (HyperGuest)</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Données importées depuis HyperGuest, en lecture seule. Appliqués au moment du checkout.
-                    </p>
+                <div className="space-y-2">
+                  <Label>Extras / taxes / frais proposés par l&apos;hôtel (HyperGuest)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Données importées depuis HyperGuest, en lecture seule. Appliqués au moment du checkout.
+                  </p>
+                  {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 ? (
                     <ul className="rounded-lg border divide-y text-sm">
                       {formData.hyperguest_extras.map((extra, i) => (
                         <li key={extra.id ?? i} className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -822,8 +822,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                         </li>
                       ))}
                     </ul>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-4 bg-muted/30">
+                      Aucun extra / taxe / frais importé. Importez un hôtel depuis HyperGuest pour remplir cette liste.
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
