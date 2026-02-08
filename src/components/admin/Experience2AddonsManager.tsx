@@ -1,42 +1,21 @@
 /**
  * Experience Pricing Addons Manager
- * 
- * IMPORTANT: Addons represent your COMMISSIONS and TAXES, not the experience price.
- * Final price = HyperGuest price (dynamic based on dates) + Your addons
+ *
+ * - Addons = commissions and taxes. Final price = HyperGuest price + Your addons.
+ * - Create experience: one section with all 3 types (commission, per night, tax) inline; parent reads values on submit.
+ * - Existing experience, no add-ons yet: one button opens one form with all 3 types; save creates the 3 at once.
+ * - Existing add-ons: table with edit/delete per row.
  */
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, Edit2, Loader2, DollarSign } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useState, useImperativeHandle, forwardRef } from "react";
+import { Plus, Trash2, Edit2, Loader2, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,149 +25,126 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 import {
   useExperienceAddons,
   useCreateExperienceAddon,
+  useCreateAddonsWithValues,
   useUpdateExperienceAddon,
   useDeleteExperienceAddon,
-} from '@/hooks/useExperience2Addons';
-import {
-  addonFormSchema,
-  type AddonFormSchemaData,
-} from '@/schemas/experience2_addon_validation';
+} from "@/hooks/useExperienceAddons";
 import {
   ADDON_TYPES_EN,
   formatAddonValue,
   getAddonTypeLabelEn,
-  getDefaultCalculationOrder,
+  getDefaultDraftAddons,
   type AddonType,
-} from '@/types/experience2_addons';
+  type AddonFormData,
+  type ExperienceAddon,
+} from "@/types/experience2_addons";
+
+const ADDON_TYPES_ORDER: AddonType[] = ["commission", "per_night", "tax"];
 
 interface Experience2AddonsManagerProps {
   experienceId: string | null;
   disabled?: boolean;
+  /** When creating experience: controlled list of the 3 add-ons. Parent uses getDefaultDraftAddons() and reads on submit. */
+  addonsForCreate?: AddonFormData[];
+  onAddonsForCreateChange?: (addons: AddonFormData[]) => void;
 }
 
-export function Experience2AddonsManager({
-  experienceId,
-  disabled = false,
-}: Experience2AddonsManagerProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+export const Experience2AddonsManager = forwardRef<
+  { getAddonsForCreate: () => AddonFormData[] },
+  Experience2AddonsManagerProps
+>(function Experience2AddonsManager(
+  { experienceId, disabled = false, addonsForCreate: addonsForCreateProp, onAddonsForCreateChange },
+  ref,
+) {
+  const [isAddAllDialogOpen, setIsAddAllDialogOpen] = useState(false);
   const [editingAddonId, setEditingAddonId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [addAllFormValues, setAddAllFormValues] = useState<AddonFormData[]>(() => getDefaultDraftAddons());
+  const [editFormValues, setEditFormValues] = useState<AddonFormData | null>(null);
+  const [internalAddons, setInternalAddons] = useState<AddonFormData[]>(() => getDefaultDraftAddons());
 
   const { toast } = useToast();
   const { data: addons = [], isLoading } = useExperienceAddons(experienceId);
   const createMutation = useCreateExperienceAddon();
+  const createWithValuesMutation = useCreateAddonsWithValues();
   const updateMutation = useUpdateExperienceAddon();
   const deleteMutation = useDeleteExperienceAddon();
 
-  const form = useForm<AddonFormSchemaData>({
-    resolver: zodResolver(addonFormSchema),
-    defaultValues: {
-      type: 'commission',
-      name: '',
-      name_he: '',
-      description: '',
-      description_he: '',
-      value: 0,
-      is_percentage: false,
-      calculation_order: 0,
-    },
-  });
+  const isCreateFlow = experienceId === null;
+  const addonsForCreate = addonsForCreateProp ?? internalAddons;
+  const setAddonsForCreate = onAddonsForCreateChange ?? setInternalAddons;
 
-  const handleOpenDialog = (addonId?: string) => {
-    if (addonId) {
-      const addon = addons.find((a) => a.id === addonId);
-      if (addon) {
-        setEditingAddonId(addonId);
-        form.reset({
-          type: addon.type as AddonType,
-          name: addon.name,
-          name_he: addon.name_he || '',
-          description: addon.description || '',
-          description_he: addon.description_he || '',
-          value: Number(addon.value),
-          is_percentage: addon.is_percentage ?? false,
-          calculation_order: addon.calculation_order ?? 0,
-        });
-      }
-    } else {
-      setEditingAddonId(null);
-      form.reset({
-        type: 'commission',
-        name: '',
-        name_he: '',
-        description: '',
-        description_he: '',
-        value: 0,
-        is_percentage: false,
-        calculation_order: 0,
-      });
-    }
-    setIsDialogOpen(true);
+  useImperativeHandle(
+    ref,
+    () => ({
+      getAddonsForCreate: () => addonsForCreateProp ?? internalAddons,
+    }),
+    [addonsForCreateProp, internalAddons],
+  );
+
+  const updateCreateAddon = (index: number, patch: Partial<AddonFormData>) => {
+    const next = [...addonsForCreate];
+    next[index] = { ...next[index], ...patch };
+    setAddonsForCreate(next);
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setEditingAddonId(null);
-    form.reset();
+  const handleOpenAddAllDialog = () => {
+    setAddAllFormValues(getDefaultDraftAddons());
+    setIsAddAllDialogOpen(true);
   };
 
-  const onSubmit = async (data: AddonFormSchemaData) => {
-    if (!experienceId) {
-      toast({
-        title: 'Error',
-        description: 'Experience ID is missing. Please save the experience first.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  const handleSaveAddAll = async () => {
+    if (!experienceId) return;
     try {
-      if (editingAddonId) {
-        await updateMutation.mutateAsync({
-          id: editingAddonId,
-          updates: {
-            type: data.type,
-            name: data.name,
-            name_he: data.name_he,
-            description: data.description,
-            description_he: data.description_he,
-            value: data.value,
-            is_percentage: data.is_percentage,
-            calculation_order: data.calculation_order,
-          },
-        });
-        toast({
-          title: 'Success',
-          description: 'Pricing rule updated successfully',
-        });
-      } else {
-        await createMutation.mutateAsync({
-          type: data.type,
-          name: data.name,
-          name_he: data.name_he,
-          description: data.description,
-          description_he: data.description_he,
-          value: data.value,
-          is_percentage: data.is_percentage,
-          calculation_order: data.calculation_order,
-          experience_id: experienceId,
-        });
-        toast({
-          title: 'Success',
-          description: 'Pricing rule created successfully',
-        });
-      }
-      handleCloseDialog();
+      await createWithValuesMutation.mutateAsync({ experienceId, addons: addAllFormValues });
+      toast({
+        title: "Success",
+        description: "Pricing rules (commission, per night, tax) created.",
+      });
+      setIsAddAllDialogOpen(false);
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'An error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create pricing rules",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOpenEdit = (addon: ExperienceAddon) => {
+    setEditingAddonId(addon.id);
+    setEditFormValues({
+      type: addon.type as AddonType,
+      name: addon.name,
+      name_he: addon.name_he ?? undefined,
+      description: addon.description ?? undefined,
+      description_he: addon.description_he ?? undefined,
+      value: Number(addon.value),
+      is_percentage: addon.is_percentage ?? false,
+      calculation_order: addon.calculation_order ?? 0,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingAddonId || !editFormValues) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: editingAddonId,
+        updates: editFormValues,
+      });
+      toast({ title: "Success", description: "Pricing rule updated." });
+      setEditingAddonId(null);
+      setEditFormValues(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Update failed",
+        variant: "destructive",
       });
     }
   };
@@ -196,23 +152,18 @@ export function Experience2AddonsManager({
   const handleDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
-      toast({
-        title: 'Success',
-        description: 'Pricing rule deleted successfully',
-      });
+      toast({ title: "Success", description: "Pricing rule deleted." });
       setDeleteConfirmId(null);
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'An error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Delete failed",
+        variant: "destructive",
       });
     }
   };
 
-  const watchedType = form.watch('type');
-
-  if (isLoading) {
+  if (!isCreateFlow && isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -223,34 +174,177 @@ export function Experience2AddonsManager({
 
   return (
     <div className="space-y-4">
-      {/* Header with explanation */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <DollarSign className="h-4 w-4" />
-            <span>Final Price = HyperGuest (hotel) + Your Commissions + Taxes</span>
-          </div>
-        </div>
-        <Button
-          type="button"
-          onClick={() => handleOpenDialog()}
-          disabled={disabled || !experienceId}
-          size="sm"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Pricing Rule
-        </Button>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <DollarSign className="h-4 w-4" />
+        <span>Final Price = HyperGuest (hotel) + Your Commissions + Taxes</span>
       </div>
 
-      {/* Pricing list */}
-      {addons.length === 0 ? (
-        <div className="text-center py-8 text-sm text-muted-foreground border rounded-lg bg-muted/20">
-          {experienceId 
-            ? 'No pricing rules configured yet. Click "Add Pricing Rule" to set up commissions and taxes.'
-            : 'Save the experience as a draft first to configure pricing rules.'
-          }
+      {/* Create experience: all 3 types inline, no dialog */}
+      {isCreateFlow && (
+        <div className="space-y-4 rounded-lg border p-4">
+          <h4 className="text-sm font-medium">Pricing rules (commission, per night, tax)</h4>
+          <p className="text-xs text-muted-foreground">
+            Fill in the 3 rules below. They will be saved when you create the experience.
+          </p>
+          <div className="space-y-4">
+            {ADDON_TYPES_ORDER.map((type, index) => {
+              const addon = addonsForCreate[index] ?? getDefaultDraftAddons()[index];
+              if (!addon) return null;
+              return (
+                <div
+                  key={type}
+                  className="grid gap-3 rounded-md border bg-muted/30 p-3 sm:grid-cols-[120px_1fr_100px_80px_60px]"
+                >
+                  <div className="flex items-center">
+                    <Badge variant="outline">{getAddonTypeLabelEn(type)}</Badge>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Name</Label>
+                    <Input
+                      placeholder="e.g. Service fee"
+                      value={addon.name}
+                      onChange={(e) => updateCreateAddon(index, { name: e.target.value })}
+                      disabled={disabled}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Value</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={addon.value}
+                      onChange={(e) => updateCreateAddon(index, { value: parseFloat(e.target.value) || 0 })}
+                      disabled={disabled}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-6">
+                    <Switch
+                      checked={addon.is_percentage}
+                      onCheckedChange={(checked) => updateCreateAddon(index, { is_percentage: checked })}
+                      disabled={disabled}
+                    />
+                    <Label className="text-xs">%</Label>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Order</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={addon.calculation_order}
+                      onChange={(e) =>
+                        updateCreateAddon(index, {
+                          calculation_order: parseInt(e.target.value, 10) || 0,
+                        })
+                      }
+                      disabled={disabled}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      ) : (
+      )}
+
+      {/* Existing experience: no add-ons → one button, one dialog with all 3 types */}
+      {!isCreateFlow && addons.length === 0 && (
+        <>
+          <Button type="button" onClick={handleOpenAddAllDialog} disabled={disabled} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            Add pricing rules (all 3 types at once)
+          </Button>
+
+          <Dialog open={isAddAllDialogOpen} onOpenChange={setIsAddAllDialogOpen}>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[560px]">
+              <DialogHeader>
+                <DialogTitle>Set up commissions & taxes</DialogTitle>
+                <DialogDescription>
+                  Fill in the 3 rules below. One save creates commission, per night fee and tax.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6 py-4">
+                {ADDON_TYPES_ORDER.map((type, index) => {
+                  const a = addAllFormValues[index];
+                  if (!a) return null;
+                  return (
+                    <div key={type} className="space-y-2 rounded-md border p-3">
+                      <Badge variant="secondary">{getAddonTypeLabelEn(type)}</Badge>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Name</Label>
+                          <Input
+                            value={a.name}
+                            onChange={(e) => {
+                              const next = [...addAllFormValues];
+                              next[index] = { ...next[index], name: e.target.value };
+                              setAddAllFormValues(next);
+                            }}
+                            placeholder="e.g. Service fee"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Value</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={a.value}
+                            onChange={(e) => {
+                              const next = [...addAllFormValues];
+                              next[index] = {
+                                ...next[index],
+                                value: parseFloat(e.target.value) || 0,
+                              };
+                              setAddAllFormValues(next);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={a.is_percentage}
+                          onCheckedChange={(checked) => {
+                            const next = [...addAllFormValues];
+                            next[index] = { ...next[index], is_percentage: checked };
+                            setAddAllFormValues(next);
+                          }}
+                        />
+                        <Label className="text-xs">Percentage (%)</Label>
+                        <span className="ml-2 text-xs text-muted-foreground">Order</span>
+                        <Input
+                          type="number"
+                          min={0}
+                          className="w-16"
+                          value={a.calculation_order}
+                          onChange={(e) => {
+                            const next = [...addAllFormValues];
+                            next[index] = {
+                              ...next[index],
+                              calculation_order: parseInt(e.target.value, 10) || 0,
+                            };
+                            setAddAllFormValues(next);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsAddAllDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="button" onClick={handleSaveAddAll} disabled={createWithValuesMutation.isPending}>
+                  {createWithValuesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save all 3 rules
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+
+      {/* Existing experience: has add-ons → table + edit/delete */}
+      {!isCreateFlow && addons.length > 0 && (
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
@@ -267,44 +361,28 @@ export function Experience2AddonsManager({
               {addons.map((addon) => (
                 <TableRow key={addon.id}>
                   <TableCell>
-                    <Badge variant="outline">
-                      {getAddonTypeLabelEn(addon.type as AddonType)}
-                    </Badge>
+                    <Badge variant="outline">{getAddonTypeLabelEn(addon.type as AddonType)}</Badge>
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <div className="font-medium">{addon.name}</div>
-                      {addon.description && (
-                        <div className="text-xs text-muted-foreground line-clamp-1">
-                          {addon.description}
-                        </div>
-                      )}
-                    </div>
+                    <div className="font-medium">{addon.name}</div>
+                    {addon.description && (
+                      <div className="text-xs text-muted-foreground line-clamp-1">{addon.description}</div>
+                    )}
                   </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-sm">
-                      {formatAddonValue(addon)}
-                    </span>
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{formatAddonValue(addon)}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">{addon.calculation_order}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={addon.is_active ? 'default' : 'secondary'}>
-                      {addon.is_active ? 'Yes' : 'No'}
-                    </Badge>
+                    <Badge variant={addon.is_active ? "default" : "secondary"}>{addon.is_active ? "Yes" : "No"}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end gap-1">
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleOpenDialog(addon.id);
-                        }}
+                        onClick={() => handleOpenEdit(addon)}
                         disabled={disabled}
                       >
                         <Edit2 className="h-4 w-4" />
@@ -313,11 +391,7 @@ export function Experience2AddonsManager({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDeleteConfirmId(addon.id);
-                        }}
+                        onClick={() => setDeleteConfirmId(addon.id)}
                         disabled={disabled}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -331,187 +405,89 @@ export function Experience2AddonsManager({
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+      {/* Edit single addon dialog */}
+      <Dialog
+        open={editingAddonId !== null}
+        onOpenChange={(open) => !open && (setEditingAddonId(null), setEditFormValues(null))}
+      >
+        <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
-            <DialogTitle>
-              {editingAddonId ? 'Edit Pricing Rule' : 'New Pricing Rule'}
-            </DialogTitle>
-            <DialogDescription>
-              {ADDON_TYPES_EN[watchedType]?.description || 'Configure a commission, fee or tax'}
-            </DialogDescription>
+            <DialogTitle>Edit pricing rule</DialogTitle>
           </DialogHeader>
-          
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              form.handleSubmit(onSubmit)(e);
-            }} 
-            className="space-y-4"
-          >
-            {/* Type */}
-            <div className="space-y-2">
-              <Label htmlFor="type">Type *</Label>
-              <Select
-                value={form.watch('type')}
-                onValueChange={(value) => {
-                  form.setValue('type', value as AddonType);
-                  form.setValue('calculation_order', getDefaultCalculationOrder(value as AddonType));
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(ADDON_TYPES_EN).map(([key, { label }]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.type && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.type.message}
-                </p>
-              )}
-            </div>
-
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                {...form.register('name')}
-                placeholder="e.g. Service Fee, VAT, etc."
-              />
-              {form.formState.errors.name && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
-            </div>
-
-            {/* Hebrew Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name_he">Name (Hebrew)</Label>
-              <Input
-                id="name_he"
-                {...form.register('name_he')}
-                placeholder="שם בעברית"
-                dir="rtl"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                {...form.register('description')}
-                placeholder="Optional description"
-                rows={2}
-              />
-            </div>
-
-            {/* Value and type */}
-            <div className="grid grid-cols-2 gap-4">
+          {editFormValues && (
+            <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <Label htmlFor="value">Value *</Label>
+                <Label>Name</Label>
                 <Input
-                  id="value"
-                  type="number"
-                  step="0.01"
-                  {...form.register('value', { valueAsNumber: true })}
-                  placeholder="0.00"
+                  value={editFormValues.name}
+                  onChange={(e) => setEditFormValues({ ...editFormValues, name: e.target.value })}
                 />
-                {form.formState.errors.value && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.value.message}
-                  </p>
-                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="is_percentage">Value Type</Label>
-                <div className="flex items-center space-x-2 pt-2">
-                  <Switch
-                    id="is_percentage"
-                    checked={form.watch('is_percentage')}
-                    onCheckedChange={(checked) => form.setValue('is_percentage', checked)}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Value</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editFormValues.value}
+                    onChange={(e) =>
+                      setEditFormValues({
+                        ...editFormValues,
+                        value: parseFloat(e.target.value) || 0,
+                      })
+                    }
                   />
-                  <Label htmlFor="is_percentage" className="cursor-pointer text-sm">
-                    {form.watch('is_percentage') ? 'Percentage (%)' : 'Fixed Amount (₪)'}
-                  </Label>
+                </div>
+                <div className="flex items-center gap-2 pt-8">
+                  <Switch
+                    checked={editFormValues.is_percentage}
+                    onCheckedChange={(checked) => setEditFormValues({ ...editFormValues, is_percentage: checked })}
+                  />
+                  <Label className="text-sm">%</Label>
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label>Order</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={editFormValues.calculation_order}
+                  onChange={(e) =>
+                    setEditFormValues({
+                      ...editFormValues,
+                      calculation_order: parseInt(e.target.value, 10) || 0,
+                    })
+                  }
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => (setEditingAddonId(null), setEditFormValues(null))}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
+                  {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Update
+                </Button>
+              </div>
             </div>
-
-            {/* Calculation Order */}
-            <div className="space-y-2">
-              <Label htmlFor="calculation_order">Calculation Order</Label>
-              <Input
-                id="calculation_order"
-                type="number"
-                min="0"
-                {...form.register('calculation_order', { valueAsNumber: true })}
-              />
-              <p className="text-xs text-muted-foreground">
-                {watchedType === 'tax'
-                  ? 'Taxes are typically applied after commissions (order ≥ 1)'
-                  : 'Commissions are applied before taxes (order 0)'}
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCloseDialog}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
-              >
-                {(createMutation.isPending || updateMutation.isPending) && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {editingAddonId ? 'Update' : 'Create'}
-              </Button>
-            </div>
-          </form>
+          )}
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog open={deleteConfirmId !== null} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete pricing rule?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The pricing rule will be permanently deleted.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (deleteConfirmId) {
-                  handleDelete(deleteConfirmId);
-                }
-              }}
+              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -519,4 +495,4 @@ export function Experience2AddonsManager({
       </AlertDialog>
     </div>
   );
-}
+});
