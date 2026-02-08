@@ -13,7 +13,11 @@ import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon } from "lucide
 import { generateSlug } from "@/lib/utils";
 import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
 import { Link } from "react-router-dom";
-import { HyperGuestHotelSearch, type HyperGuestHotelWithDetails } from "@/components/admin/HyperGuestHotelSearch";
+import {
+  HyperGuestHotelSearch,
+  type HyperGuestHotelWithDetails,
+  type RoomCapacitySummary,
+} from "@/components/admin/HyperGuestHotelSearch";
 
 interface HotelEditor2Props {
   hotelId?: string;
@@ -26,7 +30,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const [isDownloadingImages, setIsDownloadingImages] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [hyperguestId, setHyperguestId] = useState<number | null>(null);
-  const [pendingImages, setPendingImages] = useState<string[]>([]); // HyperGuest image URLs to download
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
@@ -41,12 +45,10 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     contact_email: "",
     contact_phone: "",
     status: "draft" as "draft" | "published" | "pending" | "archived",
-    // Location fields
     address: "",
     address_he: "",
     latitude: null as number | null,
     longitude: null as number | null,
-    // SEO fields
     seo_title_en: "",
     seo_title_he: "",
     seo_title_fr: "",
@@ -60,120 +62,110 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     og_description_he: "",
     og_description_fr: "",
     og_image: "",
+    // Infos HyperGuest (import ou édition)
+    star_rating: null as number | null,
+    property_type: "",
+    room_capacities: [] as RoomCapacitySummary[],
+    cancellation_policy: "",
+    extra_conditions: "",
+    min_stay: null as number | null,
+    max_stay: null as number | null,
+    number_of_rooms: null as number | null,
+    check_in_time: "",
+    check_out_time: "",
   });
 
-  // Download HyperGuest images via edge function (bypasses CORS)
   const downloadHyperGuestImages = async (imageUrls: string[], heroUrl?: string | null) => {
     if (imageUrls.length === 0 && !heroUrl) return;
-    
     setIsDownloadingImages(true);
     const uploadedUrls: string[] = [];
     let uploadedHeroUrl = "";
 
     try {
-      // Download and upload each image via edge function
       const imagesToProcess = heroUrl ? [heroUrl, ...imageUrls.slice(0, 7)] : imageUrls.slice(0, 8);
-      
       for (let i = 0; i < imagesToProcess.length; i++) {
         const url = imagesToProcess[i];
         try {
-          const fileExt = url.split('.').pop()?.split('?')[0] || 'jpg';
+          const fileExt = url.split(".").pop()?.split("?")[0] || "jpg";
           const fileName = `hyperguest-${Date.now()}-${i}.${fileExt}`;
-          
-          // Use edge function to download and upload (bypasses CORS)
-          const { data, error } = await supabase.functions.invoke('download-image', {
-            body: {
-              imageUrl: url,
-              bucket: 'hotel-images',
-              path: fileName,
-            },
+          const { data, error } = await supabase.functions.invoke("download-image", {
+            body: { imageUrl: url, bucket: "hotel-images", path: fileName },
           });
-          
-          if (error) {
-            console.error('Edge function error:', error);
-            continue;
-          }
-          
+          if (error) continue;
           if (data?.publicUrl) {
-            if (i === 0 && heroUrl) {
-              uploadedHeroUrl = data.publicUrl;
-            } else {
-              uploadedUrls.push(data.publicUrl);
-            }
+            if (i === 0 && heroUrl) uploadedHeroUrl = data.publicUrl;
+            else uploadedUrls.push(data.publicUrl);
           }
         } catch (err) {
           console.error(`Failed to download image ${i}:`, err);
         }
       }
-
-      // Update form with uploaded images
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         hero_image: uploadedHeroUrl || prev.hero_image,
         photos: [...prev.photos, ...uploadedUrls].slice(0, 8),
       }));
-
       if (uploadedHeroUrl || uploadedUrls.length > 0) {
         toast.success(`${uploadedUrls.length + (uploadedHeroUrl ? 1 : 0)} images imported successfully!`);
       }
     } catch (error) {
-      console.error('Error downloading images:', error);
-      toast.error('Failed to download some images');
+      console.error("Error downloading images:", error);
+      toast.error("Failed to download some images");
     } finally {
       setIsDownloadingImages(false);
       setPendingImages([]);
     }
   };
 
-  // Handle HyperGuest hotel selection - prefill form with full details
   const handleHyperGuestSelect = async (hotel: HyperGuestHotelWithDetails) => {
-    setHyperguestId(hotel.id);
-    
-    // Store images for later download (user can choose to import them)
+    setHyperguestId(hotel.id as number);
+
     if (hotel.images && hotel.images.length > 0) {
       setPendingImages(hotel.images);
     }
-    
-    // Extract location data properly
+
     const city = hotel.cityName || hotel.city || "";
     const region = hotel.regionName || hotel.region || "";
     const address = hotel.address || `${city}, ${region}, Israel`.replace(/^, |, $/g, "").replace(/, $/g, "");
-    
-    console.log("[HotelEditor2] Extracted location - city:", city, "region:", region, "address:", address);
-    
-    // Pre-fill form with all available data (English)
+
     setFormData((prev) => ({
       ...prev,
       name: hotel.name || prev.name,
-      region: region,
-      city: city,
+      region,
+      city,
       latitude: hotel.latitude ?? prev.latitude,
       longitude: hotel.longitude ?? prev.longitude,
-      address: address,
-      // Description/Story from HyperGuest
+      address,
       story: hotel.description || prev.story,
-      // Contact info
       contact_email: hotel.contact?.email || prev.contact_email,
       contact_phone: hotel.contact?.phone || prev.contact_phone,
-      // SEO defaults from hotel name
       seo_title_en: hotel.name ? `${hotel.name} | Staymakom` : prev.seo_title_en,
       meta_description_en: hotel.description?.slice(0, 155) || prev.meta_description_en,
+      // Infos HyperGuest
+      star_rating: hotel.starRating ?? null,
+      property_type: hotel.propertyTypeName ?? "",
+      room_capacities: hotel.roomsSummary ?? [],
+      cancellation_policy: hotel.cancellationPolicyText ?? "",
+      extra_conditions: [...(hotel.remarks ?? []), ...(hotel.policiesGeneral ?? [])].filter(Boolean).join("\n\n"),
+      min_stay: hotel.minStay ?? null,
+      max_stay: hotel.maxStay ?? null,
+      number_of_rooms: hotel.numberOfRooms ?? null,
+      check_in_time: hotel.checkIn ?? "",
+      check_out_time: hotel.checkOut ?? "",
     }));
-    
-    // Translate name, city, region, address AND story to Hebrew
+
     const hotelName = hotel.name || "";
     const story = hotel.description || "";
     const textsToTranslate = [hotelName, city, region, address, story].filter(Boolean);
-    
+
     if (textsToTranslate.length > 0) {
       setIsTranslating(true);
       try {
-        const { data, error } = await supabase.functions.invoke('translate-text', {
-          body: { texts: textsToTranslate, targetLang: 'he' },
+        const { data, error } = await supabase.functions.invoke("translate-text", {
+          body: { texts: textsToTranslate, targetLang: "he" },
         });
-        
+
         if (!error && data?.translations) {
-          // Map translations back based on which fields were included
           const translations = data.translations as string[];
           let idx = 0;
           const nameHe = hotelName ? translations[idx++] : "";
@@ -181,9 +173,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           const regionHe = region ? translations[idx++] : "";
           const addressHe = address ? translations[idx++] : "";
           const storyHe = story ? translations[idx++] : "";
-          
-          console.log("[HotelEditor2] Hebrew translations:", { nameHe, cityHe, regionHe, addressHe, storyHe: storyHe?.slice(0, 50) + "..." });
-          
+
           setFormData((prev) => ({
             ...prev,
             name_he: nameHe || prev.name_he,
@@ -200,12 +190,13 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         setIsTranslating(false);
       }
     }
-    
+
     const imageCount = hotel.images?.length || 0;
     toast.success(`Hotel "${hotel.name}" imported from HyperGuest!`, {
-      description: imageCount > 0 
-        ? `Form pre-filled with Hebrew translations. ${imageCount} images available to import.`
-        : "Form pre-filled with Hebrew translations. You can edit before saving.",
+      description:
+        imageCount > 0
+          ? `Form pre-filled with Hebrew translations. ${imageCount} images available to import.`
+          : "Form pre-filled with Hebrew translations. You can edit before saving.",
     });
   };
 
@@ -213,11 +204,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     queryKey: ["hotel2", hotelId],
     queryFn: async () => {
       if (!hotelId) return null;
-      const { data, error } = await supabase
-        .from("hotels2")
-        .select("*")
-        .eq("id", hotelId)
-        .single();
+      const { data, error } = await supabase.from("hotels2").select("*").eq("id", hotelId).single();
       if (error) throw error;
       return data;
     },
@@ -226,71 +213,74 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
 
   useEffect(() => {
     if (hotel) {
+      const h = hotel as Record<string, unknown>;
       setFormData({
-        name: hotel.name || "",
-        name_he: hotel.name_he || "",
-        region: hotel.region || "",
-        region_he: hotel.region_he || "",
-        city: hotel.city || "",
-        city_he: hotel.city_he || "",
-        story: hotel.story || "",
-        story_he: hotel.story_he || "",
-        hero_image: hotel.hero_image || "",
-        photos: hotel.photos || [],
-        contact_email: hotel.contact_email || "",
-        contact_phone: hotel.contact_phone || "",
-        status: hotel.status || "draft",
-        // Location fields
-        address: (hotel as any).address || "",
-        address_he: (hotel as any).address_he || "",
-        latitude: hotel.latitude || null,
-        longitude: hotel.longitude || null,
-        // SEO fields
-        seo_title_en: hotel.seo_title_en || "",
-        seo_title_he: hotel.seo_title_he || "",
-        seo_title_fr: hotel.seo_title_fr || "",
-        meta_description_en: hotel.meta_description_en || "",
-        meta_description_he: hotel.meta_description_he || "",
-        meta_description_fr: hotel.meta_description_fr || "",
-        og_title_en: hotel.og_title_en || "",
-        og_title_he: hotel.og_title_he || "",
-        og_title_fr: hotel.og_title_fr || "",
-        og_description_en: hotel.og_description_en || "",
-        og_description_he: hotel.og_description_he || "",
-        og_description_fr: hotel.og_description_fr || "",
-        og_image: hotel.og_image || "",
+        name: (h.name as string) || "",
+        name_he: (h.name_he as string) || "",
+        region: (h.region as string) || "",
+        region_he: (h.region_he as string) || "",
+        city: (h.city as string) || "",
+        city_he: (h.city_he as string) || "",
+        story: (h.story as string) || "",
+        story_he: (h.story_he as string) || "",
+        hero_image: (h.hero_image as string) || "",
+        photos: (h.photos as string[]) || [],
+        contact_email: (h.contact_email as string) || "",
+        contact_phone: (h.contact_phone as string) || "",
+        status: (h.status as "draft" | "published") || "draft",
+        address: (h.address as string) || "",
+        address_he: (h.address_he as string) || "",
+        latitude: (h.latitude as number) || null,
+        longitude: (h.longitude as number) || null,
+        seo_title_en: (h.seo_title_en as string) || "",
+        seo_title_he: (h.seo_title_he as string) || "",
+        seo_title_fr: (h.seo_title_fr as string) || "",
+        meta_description_en: (h.meta_description_en as string) || "",
+        meta_description_he: (h.meta_description_he as string) || "",
+        meta_description_fr: (h.meta_description_fr as string) || "",
+        og_title_en: (h.og_title_en as string) || "",
+        og_title_he: (h.og_title_he as string) || "",
+        og_title_fr: (h.og_title_fr as string) || "",
+        og_description_en: (h.og_description_en as string) || "",
+        og_description_he: (h.og_description_he as string) || "",
+        og_description_fr: (h.og_description_fr as string) || "",
+        og_image: (h.og_image as string) || "",
+        star_rating: (h.star_rating as number) ?? null,
+        property_type: (h.property_type as string) ?? "",
+        room_capacities: Array.isArray(h.room_capacities) ? (h.room_capacities as RoomCapacitySummary[]) : [],
+        cancellation_policy: (h.cancellation_policy as string) ?? "",
+        extra_conditions: (h.extra_conditions as string) ?? "",
+        min_stay: (h.min_stay as number) ?? null,
+        max_stay: (h.max_stay as number) ?? null,
+        number_of_rooms: (h.number_of_rooms as number) ?? null,
+        check_in_time: (h.check_in_time as string) ?? "",
+        check_out_time: (h.check_out_time as string) ?? "",
       });
     }
   }, [hotel]);
 
   const handleGeocode = async () => {
     const addressToGeocode = formData.address || `${formData.name}, ${formData.city}, ${formData.region}`;
-    
     if (!addressToGeocode.trim()) {
       toast.error("Please enter an address or hotel name/city/region first");
       return;
     }
-
     setIsGeocoding(true);
     try {
       const { data, error } = await supabase.functions.invoke("geocode-hotel", {
         body: { address: addressToGeocode },
       });
-
       if (error) throw error;
-
       if (data.error) {
         toast.error(data.error);
         return;
       }
-
       setFormData({
         ...formData,
         latitude: data.latitude,
         longitude: data.longitude,
         address: formData.address || data.displayName,
       });
-      
       toast.success(`Location found: ${data.displayName}`);
     } catch (error) {
       console.error("Geocoding error:", error);
@@ -304,21 +294,26 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     mutationFn: async (data: typeof formData) => {
       const dataWithSlug = {
         ...data,
-        slug: hotelId ? hotel?.slug : generateSlug(data.name),
+        slug: hotelId ? (hotel as { slug?: string })?.slug : generateSlug(data.name),
         hyperguest_property_id: hyperguestId ? String(hyperguestId) : null,
         hyperguest_imported_at: hyperguestId ? new Date().toISOString() : null,
+        star_rating: data.star_rating,
+        property_type: data.property_type || null,
+        room_capacities: data.room_capacities?.length ? data.room_capacities : null,
+        cancellation_policy: data.cancellation_policy || null,
+        extra_conditions: data.extra_conditions || null,
+        min_stay: data.min_stay,
+        max_stay: data.max_stay,
+        number_of_rooms: data.number_of_rooms,
+        check_in_time: data.check_in_time || null,
+        check_out_time: data.check_out_time || null,
       };
-      
+
       if (hotelId) {
-        const { error } = await supabase
-          .from("hotels2")
-          .update(dataWithSlug)
-          .eq("id", hotelId);
+        const { error } = await supabase.from("hotels2").update(dataWithSlug).eq("id", hotelId);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("hotels2")
-          .insert([dataWithSlug]);
+        const { error } = await supabase.from("hotels2").insert([dataWithSlug]);
         if (error) throw error;
       }
     },
@@ -355,9 +350,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
             Back to Hotels 2
           </Button>
         </Link>
-        <h2 className="text-3xl font-bold">
-          {hotelId ? "Edit Hotel" : "New Hotel"}
-        </h2>
+        <h2 className="text-3xl font-bold">{hotelId ? "Edit Hotel" : "New Hotel"}</h2>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -366,7 +359,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
             <CardTitle>Hotel Details - Bilingual</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* HyperGuest Import Section - Only for new hotels */}
             {!hotelId && (
               <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -377,7 +369,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   Search and import hotel data directly from HyperGuest to pre-fill the form.
                 </p>
                 <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} fetchFullDetails={true} />
-                
+
                 {hyperguestId && (
                   <div className="mt-3 space-y-3">
                     <div className="flex items-center gap-2 text-sm text-green-600">
@@ -385,8 +377,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                         ✓ Linked to HyperGuest ID: {hyperguestId}
                       </span>
                     </div>
-                    
-                    {/* Import images button */}
+
                     {pendingImages.length > 0 && (
                       <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <ImageIcon className="h-5 w-5 text-blue-600" />
@@ -394,19 +385,14 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                           <p className="text-sm font-medium text-blue-900">
                             {pendingImages.length} images available from HyperGuest
                           </p>
-                          <p className="text-xs text-blue-700">
-                            Click to download and add to gallery
-                          </p>
+                          <p className="text-xs text-blue-700">Click to download and add to gallery</p>
                         </div>
                         <Button
                           type="button"
                           size="sm"
                           variant="default"
                           disabled={isDownloadingImages}
-                          onClick={() => downloadHyperGuestImages(
-                            pendingImages.slice(1), 
-                            pendingImages[0]
-                          )}
+                          onClick={() => downloadHyperGuestImages(pendingImages.slice(1), pendingImages[0])}
                         >
                           {isDownloadingImages ? (
                             <>
@@ -427,14 +413,11 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               </div>
             )}
 
-            {/* Basic Fields */}
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value: "draft" | "published") =>
-                  setFormData({ ...formData, status: value })
-                }
+                onValueChange={(value: "draft" | "published") => setFormData({ ...formData, status: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -446,11 +429,10 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               </Select>
             </div>
 
-            {/* Images & Media Section */}
             <div className="border-t pt-6 space-y-4">
               <h3 className="text-lg font-semibold">Images & Media</h3>
               <p className="text-sm text-muted-foreground">Upload hero image and gallery photos</p>
-              
+
               <div className="space-y-2">
                 <ImageUpload
                   label="Hero Image"
@@ -463,20 +445,13 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>Gallery Images (up to 8)</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {formData.photos.length} / 8 images
-                  </span>
+                  <span className="text-sm text-muted-foreground">{formData.photos.length} / 8 images</span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Display uploaded images */}
                   {formData.photos.map((photo, index) => (
                     <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border bg-muted">
-                      <img 
-                        src={photo} 
-                        alt={`Gallery ${index + 1}`} 
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={photo} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
                       <Button
                         type="button"
                         variant="destructive"
@@ -491,47 +466,43 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       </Button>
                     </div>
                   ))}
-                  
-                  {/* Add images button - only show if less than 8 */}
+
                   {formData.photos.length < 8 && (
                     <button
                       type="button"
                       className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
                       onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
+                        const input = document.createElement("input");
+                        input.type = "file";
                         input.multiple = true;
-                        input.accept = 'image/*';
+                        input.accept = "image/*";
                         input.onchange = async (e) => {
                           const files = Array.from((e.target as HTMLInputElement).files || []);
                           const remainingSlots = 8 - formData.photos.length;
                           const filesToUpload = files.slice(0, remainingSlots);
-                          
+
                           toast.promise(
                             Promise.all(
                               filesToUpload.map(async (file) => {
-                                const fileExt = file.name.split('.').pop();
+                                const fileExt = file.name.split(".").pop();
                                 const fileName = `${Math.random()}.${fileExt}`;
                                 const { error: uploadError } = await supabase.storage
-                                  .from('hotel-images')
+                                  .from("hotel-images")
                                   .upload(fileName, file);
-                                
                                 if (uploadError) throw uploadError;
-                                
-                                const { data: { publicUrl } } = supabase.storage
-                                  .from('hotel-images')
-                                  .getPublicUrl(fileName);
-                                
+                                const {
+                                  data: { publicUrl },
+                                } = supabase.storage.from("hotel-images").getPublicUrl(fileName);
                                 return publicUrl;
-                              })
+                              }),
                             ).then((urls) => {
                               setFormData({ ...formData, photos: [...formData.photos, ...urls] });
                             }),
                             {
-                              loading: `Uploading ${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''}...`,
-                              success: `${filesToUpload.length} image${filesToUpload.length > 1 ? 's' : ''} uploaded!`,
-                              error: 'Failed to upload images',
-                            }
+                              loading: `Uploading ${filesToUpload.length} image(s)...`,
+                              success: `${filesToUpload.length} image(s) uploaded!`,
+                              error: "Failed to upload images",
+                            },
                           );
                         };
                         input.click();
@@ -557,7 +528,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="contact_phone">Contact Phone</Label>
                 <Input
@@ -568,15 +538,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               </div>
             </div>
 
-            {/* Location Section */}
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
                 <h3 className="text-lg font-semibold">Location</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Set the hotel address and coordinates for map display
-              </p>
+              <p className="text-sm text-muted-foreground">Set the hotel address and coordinates for map display</p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -617,10 +584,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     type="number"
                     step="any"
                     value={formData.latitude ?? ""}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      latitude: e.target.value ? parseFloat(e.target.value) : null 
-                    })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        latitude: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
                     placeholder="e.g., 33.0742"
                   />
                 </div>
@@ -631,18 +600,20 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     type="number"
                     step="any"
                     value={formData.longitude ?? ""}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      longitude: e.target.value ? parseFloat(e.target.value) : null 
-                    })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        longitude: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
                     placeholder="e.g., 35.5585"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>&nbsp;</Label>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={handleGeocode}
                     disabled={isGeocoding}
                     className="w-full"
@@ -661,7 +632,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   </Button>
                 </div>
               </div>
-              
+
               {formData.latitude && formData.longitude && (
                 <p className="text-sm text-green-600">
                   ✓ Coordinates set: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
@@ -669,17 +640,169 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               )}
             </div>
 
-            {/* Bilingual Content - Side by Side */}
+            {/* Infos HyperGuest */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Infos HyperGuest</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Données importées depuis HyperGuest (étoiles, capacités chambres, annulation, conditions).
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label>Étoiles</Label>
+                    <Select
+                      value={formData.star_rating != null ? String(formData.star_rating) : ""}
+                      onValueChange={(v) =>
+                        setFormData({
+                          ...formData,
+                          star_rating: v === "" ? null : parseInt(v, 10),
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[0, 1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={String(n)}>
+                            {n === 0 ? "0 (non classé)" : "★ ".repeat(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Type de propriété</Label>
+                    <Input
+                      value={formData.property_type}
+                      onChange={(e) => setFormData({ ...formData, property_type: e.target.value })}
+                      placeholder="Hotel, Apartment…"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nombre de chambres</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={formData.number_of_rooms ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          number_of_rooms: e.target.value ? parseInt(e.target.value, 10) : null,
+                        })
+                      }
+                      placeholder="—"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label>Check-in</Label>
+                      <Input
+                        value={formData.check_in_time}
+                        onChange={(e) => setFormData({ ...formData, check_in_time: e.target.value })}
+                        placeholder="14:00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Check-out</Label>
+                      <Input
+                        value={formData.check_out_time}
+                        onChange={(e) => setFormData({ ...formData, check_out_time: e.target.value })}
+                        placeholder="12:00"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nuits min.</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={formData.min_stay ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          min_stay: e.target.value ? parseInt(e.target.value, 10) : null,
+                        })
+                      }
+                      placeholder="—"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nuits max.</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={formData.max_stay ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          max_stay: e.target.value ? parseInt(e.target.value, 10) : null,
+                        })
+                      }
+                      placeholder="—"
+                    />
+                  </div>
+                </div>
+
+                {formData.room_capacities && formData.room_capacities.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Capacités par type de chambre (lecture seule)</Label>
+                    <ul className="rounded-lg border divide-y text-sm">
+                      {formData.room_capacities.map((room, i) => (
+                        <li key={i} className="p-3 flex flex-wrap gap-x-4 gap-y-1">
+                          <span className="font-medium">{room.name}</span>
+                          <span className="text-muted-foreground">
+                            {[
+                              room.maxAdultsNumber != null && `${room.maxAdultsNumber} adultes`,
+                              room.maxChildrenNumber != null && `${room.maxChildrenNumber} enfants`,
+                              room.maxOccupancy != null && `max ${room.maxOccupancy} pers.`,
+                              room.roomSize != null && `${room.roomSize} m²`,
+                              room.beddingSummary,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Politique d&apos;annulation</Label>
+                  <Textarea
+                    value={formData.cancellation_policy}
+                    onChange={(e) => setFormData({ ...formData, cancellation_policy: e.target.value })}
+                    placeholder="Ex: J-2: 100% • À tout moment: 100%"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Conditions générales / remarques</Label>
+                  <Textarea
+                    value={formData.extra_conditions}
+                    onChange={(e) => setFormData({ ...formData, extra_conditions: e.target.value })}
+                    placeholder="Remarques, taxes, âge min, animaux…"
+                    rows={4}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Bilingual Content</h3>
-              
+
               <div className="grid grid-cols-2 gap-6">
-                {/* English Column */}
                 <div className="space-y-4">
                   <div className="bg-muted/30 p-2 rounded">
                     <h4 className="font-medium text-sm">English Version</h4>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="name">Hotel Name *</Label>
                     <Input
@@ -689,7 +812,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       required
                     />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="region">Region</Label>
                     <Input
@@ -698,7 +820,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                     />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>
                     <Input
@@ -707,7 +828,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="story">Story</Label>
                     <Textarea
@@ -719,12 +839,10 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   </div>
                 </div>
 
-                {/* Hebrew Column */}
                 <div className="space-y-4">
                   <div className="bg-muted/30 p-2 rounded">
                     <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="name_he">שם המלון</Label>
                     <div className="relative">
@@ -743,63 +861,39 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       )}
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="region_he">אזור</Label>
-                    <div className="relative">
-                      <Input
-                        id="region_he"
-                        value={formData.region_he}
-                        onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
-                        dir="rtl"
-                        className="bg-hebrew-input"
-                        disabled={isTranslating}
-                      />
-                      {isTranslating && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        </div>
-                      )}
-                    </div>
+                    <Input
+                      id="region_he"
+                      value={formData.region_he}
+                      onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
+                      dir="rtl"
+                      className="bg-hebrew-input"
+                      disabled={isTranslating}
+                    />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="city_he">עיר</Label>
-                    <div className="relative">
-                      <Input
-                        id="city_he"
-                        value={formData.city_he}
-                        onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
-                        dir="rtl"
-                        className="bg-hebrew-input"
-                        disabled={isTranslating}
-                      />
-                      {isTranslating && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        </div>
-                      )}
-                    </div>
+                    <Input
+                      id="city_he"
+                      value={formData.city_he}
+                      onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
+                      dir="rtl"
+                      className="bg-hebrew-input"
+                      disabled={isTranslating}
+                    />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="story_he">סיפור</Label>
-                    <div className="relative">
-                      <Textarea
-                        id="story_he"
-                        value={formData.story_he}
-                        onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
-                        rows={6}
-                        dir="rtl"
-                        className="bg-hebrew-input"
-                        disabled={isTranslating}
-                      />
-                      {isTranslating && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        </div>
-                      )}
-                    </div>
+                    <Textarea
+                      id="story_he"
+                      value={formData.story_he}
+                      onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
+                      rows={6}
+                      dir="rtl"
+                      className="bg-hebrew-input"
+                      disabled={isTranslating}
+                    />
                   </div>
                 </div>
               </div>
@@ -817,8 +911,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           </CardContent>
         </Card>
 
-        {/* SEO Section */}
-        <Card className="bg-muted/30">
+        <Card className="bg-muted/30 mt-6">
           <CardHeader>
             <CardTitle>SEO Configuration</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -827,12 +920,10 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-3 gap-6">
-              {/* English Column */}
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">English SEO</h4>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_en">SEO Title</Label>
                   <Input
@@ -841,11 +932,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     onChange={(e) => setFormData({ ...formData, seo_title_en: e.target.value })}
                     placeholder="Displayed in browser tab and Google results"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: Max ~60 characters
-                  </p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="meta_description_en">Meta Description</Label>
                   <Textarea
@@ -855,39 +942,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     placeholder="Shown in Google search results"
                     rows={3}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: Max ~155 characters
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="og_title_en">Open Graph Title</Label>
-                  <Input
-                    id="og_title_en"
-                    value={formData.og_title_en}
-                    onChange={(e) => setFormData({ ...formData, og_title_en: e.target.value })}
-                    placeholder="Title when shared on social media"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="og_description_en">Open Graph Description</Label>
-                  <Textarea
-                    id="og_description_en"
-                    value={formData.og_description_en}
-                    onChange={(e) => setFormData({ ...formData, og_description_en: e.target.value })}
-                    placeholder="Description when shared on social media"
-                    rows={3}
-                  />
                 </div>
               </div>
-
-              {/* Hebrew Column */}
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">Hebrew SEO (עברית)</h4>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_he">כותרת SEO</Label>
                   <Input
@@ -898,11 +958,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     dir="rtl"
                     className="bg-hebrew-input"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~60 characters
-                  </p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="meta_description_he">תיאור Meta</Label>
                   <Textarea
@@ -914,43 +970,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     dir="rtl"
                     className="bg-hebrew-input"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~155 characters
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="og_title_he">כותרת Open Graph</Label>
-                  <Input
-                    id="og_title_he"
-                    value={formData.og_title_he}
-                    onChange={(e) => setFormData({ ...formData, og_title_he: e.target.value })}
-                    placeholder="כותרת עבור שיתוף ברשתות חברתיות"
-                    dir="rtl"
-                    className="bg-hebrew-input"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="og_description_he">תיאור Open Graph</Label>
-                  <Textarea
-                    id="og_description_he"
-                    value={formData.og_description_he}
-                    onChange={(e) => setFormData({ ...formData, og_description_he: e.target.value })}
-                    placeholder="תיאור עבור שיתוף ברשתות חברתיות"
-                    rows={3}
-                    dir="rtl"
-                    className="bg-hebrew-input"
-                  />
                 </div>
               </div>
-
-              {/* French Column */}
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">French SEO (Français)</h4>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_fr">Titre SEO</Label>
                   <Input
@@ -959,11 +984,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     onChange={(e) => setFormData({ ...formData, seo_title_fr: e.target.value })}
                     placeholder="Titre pour Google et l'onglet"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~60 characters
-                  </p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="meta_description_fr">Description Meta</Label>
                   <Textarea
@@ -973,35 +994,10 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     placeholder="Description pour les résultats Google"
                     rows={3}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~155 characters
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="og_title_fr">Titre Open Graph</Label>
-                  <Input
-                    id="og_title_fr"
-                    value={formData.og_title_fr}
-                    onChange={(e) => setFormData({ ...formData, og_title_fr: e.target.value })}
-                    placeholder="Titre pour les réseaux sociaux"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="og_description_fr">Description Open Graph</Label>
-                  <Textarea
-                    id="og_description_fr"
-                    value={formData.og_description_fr}
-                    onChange={(e) => setFormData({ ...formData, og_description_fr: e.target.value })}
-                    placeholder="Description pour les réseaux sociaux"
-                    rows={3}
-                  />
                 </div>
               </div>
             </div>
 
-            {/* OG Image - Shared */}
             <div className="space-y-2">
               <Label htmlFor="og_image">Open Graph Image</Label>
               <Input
@@ -1010,16 +1006,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                 onChange={(e) => setFormData({ ...formData, og_image: e.target.value })}
                 placeholder="Image URL for social media sharing"
               />
-              <p className="text-xs text-muted-foreground">
-                Recommended: 1200x630px. Leave empty to use hero image.
-              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Hotel Extras Section - Only show when editing existing hotel */}
         {hotelId && (
-          <Card>
+          <Card className="mt-6">
             <CardHeader>
               <CardTitle>Hotel Extras</CardTitle>
               <p className="text-sm text-muted-foreground">
