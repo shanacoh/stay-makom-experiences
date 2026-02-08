@@ -1,6 +1,6 @@
 /**
- * Select avec liste préchargée des hôtels HyperGuest (Israël) + module de recherche
- * Remplace l’ancien champ "taper 2 caractères" par un vrai select + filtre
+ * HyperGuestHotelSearch — Select avec liste préchargée (Israël) + recherche
+ * Liste chargée au montage, filtre par nom / ville / région dans le popover
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -35,7 +35,7 @@ export interface HyperGuestHotelWithDetails extends HyperGuestHotel {
   checkOut?: string;
 }
 
-interface HyperGuestHotelSelectProps {
+export interface HyperGuestHotelSearchProps {
   onSelect: (hotel: HyperGuestHotelWithDetails) => void;
   disabled?: boolean;
   fetchFullDetails?: boolean;
@@ -43,13 +43,13 @@ interface HyperGuestHotelSelectProps {
   className?: string;
 }
 
-export function HyperGuestHotelSelect({
+export function HyperGuestHotelSearch({
   onSelect,
   disabled,
   fetchFullDetails = true,
-  placeholder = "Select a hotel from HyperGuest (Israel)",
+  placeholder = "Search HyperGuest hotels (Israel)...",
   className,
-}: HyperGuestHotelSelectProps) {
+}: HyperGuestHotelSearchProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedHotel, setSelectedHotel] = useState<HyperGuestHotel | null>(null);
