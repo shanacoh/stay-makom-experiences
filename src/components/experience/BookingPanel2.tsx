@@ -1,7 +1,7 @@
 /**
  * Composant BookingPanel V2 avec intégration HyperGuest
  * Récupère les prix/chambres réels et calcule le prix avec les ajouts
- * LOGS: pour diagnostiquer les NaN sur les prix
+ * Limite 30 nuits (API HyperGuest SN.400)
  */
 
 import { useState, useMemo, useEffect } from "react";
@@ -75,17 +75,18 @@ export function BookingPanel2({
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
 
+  /** HyperGuest Search API : nombre de nuits limité à 30 (SN.400) */
+  const MAX_NIGHTS = 30;
+
   const searchParams = useMemo(() => {
-    if (!dateRange.from || !dateRange.to || !hyperguestPropertyId) {
-      console.log("[BookingPanel2] searchParams null", { dateRange, hyperguestPropertyId });
-      return null;
-    }
+    if (!dateRange.from || !dateRange.to || !hyperguestPropertyId) return null;
 
     const checkIn = dateRange.from.toISOString().split("T")[0];
-    const nights = calculateNights(checkIn, dateRange.to.toISOString().split("T")[0]);
+    const rawNights = calculateNights(checkIn, dateRange.to.toISOString().split("T")[0]);
+    const nights = Math.min(rawNights, MAX_NIGHTS);
     const guests = formatGuests([{ adults, children: [] }]);
 
-    const params = {
+    return {
       checkIn,
       nights,
       guests,
@@ -93,8 +94,6 @@ export function BookingPanel2({
       customerNationality: "IL",
       currency,
     };
-    console.log("[BookingPanel2] searchParams", params);
-    return params;
   }, [dateRange, adults, hyperguestPropertyId, currency]);
 
   const {
@@ -104,57 +103,21 @@ export function BookingPanel2({
   } = useHyperGuestAvailability(hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null, searchParams);
 
   const selectedRatePlan = useMemo(() => {
-    if (!searchResult || !selectedRoomId || !selectedRatePlanId) {
-      return null;
-    }
-
+    if (!searchResult || !selectedRoomId || !selectedRatePlanId) return null;
     let rooms: any[] = [];
     if (searchResult.results && searchResult.results.length > 0) {
       rooms = searchResult.results[0]?.rooms || [];
     } else if (searchResult.rooms) {
       rooms = searchResult.rooms;
     }
-
     const room = rooms.find((r: any) => r.roomId === selectedRoomId);
-    const plan = room?.ratePlans?.find((rp: any) => rp.ratePlanId === selectedRatePlanId) || null;
-
-    if (plan) {
-      console.log("[BookingPanel2] selectedRatePlan", {
-        roomId: selectedRoomId,
-        ratePlanId: selectedRatePlanId,
-        plan,
-        prices: plan.prices,
-        sellAmount: plan.prices?.sell?.amount,
-        netAmount: plan.prices?.net?.amount,
-      });
-    }
-    return plan;
+    return room?.ratePlans?.find((rp: any) => rp.ratePlanId === selectedRatePlanId) || null;
   }, [searchResult, selectedRoomId, selectedRatePlanId]);
 
   const nights = searchParams?.nights || 0;
   const ratePlanPrices = selectedRatePlan?.prices || null;
 
-  if (ratePlanPrices) {
-    console.log("[BookingPanel2] ratePlanPrices (structure API)", {
-      keys: Object.keys(ratePlanPrices),
-      full: ratePlanPrices,
-    });
-  }
-  console.log("[BookingPanel2] before useExperience2Price", {
-    experienceId,
-    currency,
-    nights,
-    ratePlanPricesKeys: ratePlanPrices ? Object.keys(ratePlanPrices) : null,
-  });
-
   const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, ratePlanPrices);
-
-  console.log("[BookingPanel2] after useExperience2Price", {
-    priceBreakdown,
-    total: priceBreakdown?.total,
-    totalType: typeof priceBreakdown?.total,
-    isTotalNaN: priceBreakdown != null && Number.isNaN(priceBreakdown.total),
-  });
 
   useEffect(() => {
     if (searchResult && !selectedRoomId) {
@@ -164,13 +127,11 @@ export function BookingPanel2({
       } else if (searchResult.rooms) {
         rooms = searchResult.rooms;
       }
-
       if (rooms.length > 0) {
         const firstRoom = rooms[0];
         if (firstRoom.ratePlans?.length > 0) {
-          const firstRatePlan = firstRoom.ratePlans[0];
           setSelectedRoomId(firstRoom.roomId);
-          setSelectedRatePlanId(firstRatePlan.ratePlanId);
+          setSelectedRatePlanId(firstRoom.ratePlans[0].ratePlanId);
         }
       }
     }
@@ -182,19 +143,7 @@ export function BookingPanel2({
   }, [dateRange.from, dateRange.to]);
 
   const handleBook = () => {
-    if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId) {
-      return;
-    }
-
-    console.log("[BookingPanel2] Réserver avec:", {
-      experienceId,
-      dates: dateRange,
-      roomId: selectedRoomId,
-      ratePlanId: selectedRatePlanId,
-      guests: adults,
-      priceBreakdown,
-    });
-
+    if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId) return;
     toast.info("Booking flow coming soon!");
   };
 
@@ -202,9 +151,6 @@ export function BookingPanel2({
 
   const displayTotal = priceBreakdown?.total ?? 0;
   const totalIsNaN = Number.isNaN(displayTotal);
-  if (totalIsNaN) {
-    console.error("[BookingPanel2] Affichage prix: total is NaN", { priceBreakdown });
-  }
 
   if (!hyperguestPropertyId) {
     return (

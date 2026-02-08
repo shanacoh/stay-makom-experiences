@@ -1,6 +1,5 @@
 /**
  * Détail du prix : Prix HyperGuest + addons (commissions/taxes) = Total
- * Affiche clairement le prix HyperGuest, puis les addons, puis le total pour vérifier que tout fonctionne.
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,7 +100,6 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
         <CardTitle className="text-base">{t.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* 1) Prix HyperGuest (toujours en premier) */}
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground font-medium">{t.hyperguestPrice}</span>
           <span>{formatPrice(breakdown.basePrice)}</span>
@@ -109,7 +107,6 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
 
         <Separator />
 
-        {/* 2) Vos addons (commissions puis taxes) — affiché en second pour vérifier que tout marche */}
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{t.yourAddons}</p>
           {!hasAddons ? (
@@ -135,7 +132,6 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
           )}
         </div>
 
-        {/* Sous-total (base + addons, avant total si on veut détailler) */}
         {hasAddons && (
           <div className="flex justify-between text-sm font-medium">
             <span>{t.subtotal}</span>
@@ -145,7 +141,6 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
 
         <Separator />
 
-        {/* 3) Total final (prix avec addons) */}
         <div className="flex justify-between items-center pt-1">
           <span className="font-semibold">{t.total}</span>
           <span className="text-lg font-bold">{formatPrice(breakdown.total)}</span>

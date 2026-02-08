@@ -1,17 +1,15 @@
 /**
- * Hook personnalisé pour gérer les ajouts d'expérience
- * Utilise TanStack Query pour le cache et la synchronisation
- * À intégrer dans votre projet React
+ * Hook pour gérer les add-ons d'expérience (table experience2_addons)
+ * TanStack Query. Exporte useExperienceAddons (utilisé par Experience2AddonsManager).
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ExperienceAddon, ExperienceAddonInsert, ExperienceAddonUpdate, AddonFormData } from "@/types/experience2_addons";
+import type { ExperienceAddon, ExperienceAddonInsert, ExperienceAddonUpdate } from "@/types/experience2_addons";
+import type { AddonFormData } from "@/types/experience2_addons";
 import { ADDON_TYPES, DEFAULT_CALCULATION_ORDER, type AddonType } from "@/types/experience2_addons";
 
-// =====================
-// QUERY KEYS
-// =====================
+const TABLE = "experience2_addons";
 
 export const experienceAddonsKeys = {
   all: ["experience-addons"] as const,
@@ -19,16 +17,9 @@ export const experienceAddonsKeys = {
   detail: (id: string) => [...experienceAddonsKeys.all, "detail", id] as const,
 };
 
-// =====================
-// FONCTIONS API
-// =====================
-
-/**
- * Récupère tous les ajouts d'une expérience
- */
 async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAddon[]> {
   const { data, error } = await supabase
-    .from("experience2_addons")
+    .from(TABLE)
     .select("*")
     .eq("experience_id", experienceId)
     .order("calculation_order", { ascending: true })
@@ -37,29 +28,20 @@ async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAd
   if (error) {
     throw new Error(`Erreur lors de la récupération des ajouts: ${error.message}`);
   }
-
   return data || [];
 }
 
-/**
- * Crée un nouvel ajout
- */
 async function createExperienceAddon(addon: ExperienceAddonInsert): Promise<ExperienceAddon> {
-  const { data, error } = await supabase.from("experience2_addons").insert(addon).select().single();
+  const { data, error } = await supabase.from(TABLE).insert(addon).select().single();
 
   if (error) {
     throw new Error(`Erreur lors de la création de l'ajout: ${error.message}`);
   }
-
   return data;
 }
 
-/** Types d'add-on à créer par défaut (commission, per_night, tax) */
 const ADDON_TYPES_ORDER: AddonType[] = ["commission", "per_night", "tax"];
 
-/**
- * Crée en une fois les 3 add-ons par défaut (commission, per_night, tax) à 0
- */
 async function createAllDefaultAddons(experienceId: string): Promise<ExperienceAddon[]> {
   const rows: ExperienceAddonInsert[] = ADDON_TYPES_ORDER.map((type) => ({
     experience_id: experienceId,
@@ -74,40 +56,14 @@ async function createAllDefaultAddons(experienceId: string): Promise<ExperienceA
     is_active: true,
   }));
 
-  const { data, error } = await supabase.from("experience2_addons").insert(rows).select();
+  const { data, error } = await supabase.from(TABLE).insert(rows).select();
 
   if (error) {
     throw new Error(`Erreur lors de la création des ajouts: ${error.message}`);
   }
-
   return data ?? [];
 }
 
-/**
- * Met à jour un ajout existant
- */
-async function updateExperienceAddon(id: string, updates: ExperienceAddonUpdate): Promise<ExperienceAddon> {
-  const { data, error } = await supabase.from("experience2_addons").update(updates).eq("id", id).select().single();
-
-  if (error) {
-    throw new Error(`Erreur lors de la mise à jour de l'ajout: ${error.message}`);
-  }
-
-  return data;
-}
-
-/**
- * Supprime un ajout
- */
-async function deleteExperienceAddon(id: string): Promise<void> {
-  const { error } = await supabase.from("experience2_addons").delete().eq("id", id);
-
-  if (error) {
-    throw new Error(`Erreur lors de la suppression de l'ajout: ${error.message}`);
-  }
-}
-
-/** Crée les 3 add-ons (commission, per_night, tax) avec les valeurs fournies. */
 async function createAddonsWithValues(experienceId: string, addons: AddonFormData[]): Promise<ExperienceAddon[]> {
   const rows: ExperienceAddonInsert[] = addons.map((a) => ({
     experience_id: experienceId,
@@ -122,44 +78,45 @@ async function createAddonsWithValues(experienceId: string, addons: AddonFormDat
     is_active: true,
   }));
 
-  const { data, error } = await supabase.from("experience2_addons").insert(rows).select();
-
+  const { data, error } = await supabase.from(TABLE).insert(rows).select();
   if (error) {
     throw new Error(`Erreur lors de la création des ajouts: ${error.message}`);
   }
-
   return data ?? [];
 }
 
-/**
- * Active/désactive un ajout
- */
+async function updateExperienceAddon(id: string, updates: ExperienceAddonUpdate): Promise<ExperienceAddon> {
+  const { data, error } = await supabase.from(TABLE).update(updates).eq("id", id).select().single();
+
+  if (error) {
+    throw new Error(`Erreur lors de la mise à jour de l'ajout: ${error.message}`);
+  }
+  return data;
+}
+
+async function deleteExperienceAddon(id: string): Promise<void> {
+  const { error } = await supabase.from(TABLE).delete().eq("id", id);
+
+  if (error) {
+    throw new Error(`Erreur lors de la suppression de l'ajout: ${error.message}`);
+  }
+}
+
 async function toggleExperienceAddon(id: string, isActive: boolean): Promise<ExperienceAddon> {
   return updateExperienceAddon(id, { is_active: isActive });
 }
 
-// =====================
-// HOOKS
-// =====================
-
-/**
- * Hook pour récupérer les ajouts d'une expérience
- */
 export function useExperienceAddons(experienceId: string | null) {
   return useQuery({
     queryKey: experienceAddonsKeys.byExperience(experienceId || ""),
     queryFn: () => fetchExperienceAddons(experienceId!),
     enabled: !!experienceId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 }
 
-/**
- * Hook pour créer un ajout
- */
 export function useCreateExperienceAddon() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: createExperienceAddon,
     onSuccess: (data) => {
@@ -170,12 +127,8 @@ export function useCreateExperienceAddon() {
   });
 }
 
-/**
- * Hook pour créer en une fois les 3 add-ons par défaut (commission, per_night, tax) à 0
- */
 export function useCreateAllDefaultAddons() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: createAllDefaultAddons,
     onSuccess: (_, experienceId) => {
@@ -186,10 +139,8 @@ export function useCreateAllDefaultAddons() {
   });
 }
 
-/** Crée les 3 add-ons avec les valeurs saisies. */
 export function useCreateAddonsWithValues() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ experienceId, addons }: { experienceId: string; addons: AddonFormData[] }) =>
       createAddonsWithValues(experienceId, addons),
@@ -201,20 +152,14 @@ export function useCreateAddonsWithValues() {
   });
 }
 
-/**
- * Hook pour mettre à jour un ajout
- */
 export function useUpdateExperienceAddon() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: ExperienceAddonUpdate }) => updateExperienceAddon(id, updates),
     onSuccess: (data) => {
-      // Invalider la liste des ajouts pour cette expérience
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.byExperience(data.experience_id),
       });
-      // Invalider aussi le détail de cet ajout
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.detail(data.id),
       });
@@ -222,17 +167,11 @@ export function useUpdateExperienceAddon() {
   });
 }
 
-/**
- * Hook pour supprimer un ajout
- */
 export function useDeleteExperienceAddon() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: deleteExperienceAddon,
-    onSuccess: (_, deletedId) => {
-      // Invalider toutes les queries liées aux ajouts
-      // (on ne connaît pas l'experience_id ici, donc on invalide tout)
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: experienceAddonsKeys.all,
       });
@@ -240,12 +179,8 @@ export function useDeleteExperienceAddon() {
   });
 }
 
-/**
- * Hook pour activer/désactiver un ajout
- */
 export function useToggleExperienceAddon() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => toggleExperienceAddon(id, isActive),
     onSuccess: (data) => {

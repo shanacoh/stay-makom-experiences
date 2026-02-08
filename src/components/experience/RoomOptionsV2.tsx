@@ -1,6 +1,5 @@
 /**
  * Composant pour afficher et sélectionner les chambres HyperGuest
- * Remplace le mock RoomOptions par les vraies données HyperGuest
  * API HyperGuest : prices.sell / prices.net utilisent "price" (pas "amount")
  */
 
@@ -21,19 +20,14 @@ interface RoomRatePlan {
     sell?: { price?: number; amount?: number; currency?: string };
     net?: { price?: number; amount?: number; currency?: string };
   };
-  cancellationPolicy?: {
-    type?: string;
-  };
+  cancellationPolicy?: { type?: string };
 }
 
 interface Room {
   roomId: number;
   roomName: string;
   ratePlans: RoomRatePlan[];
-  settings?: {
-    maxAdultsNumber?: number;
-    maxChildrenNumber?: number;
-  };
+  settings?: { maxAdultsNumber?: number; maxChildrenNumber?: number };
 }
 
 interface Property {
@@ -102,7 +96,6 @@ export function RoomOptionsV2({
   }
 
   let rooms: Room[] = [];
-
   if (searchResult?.results && searchResult.results.length > 0) {
     rooms = searchResult.results[0]?.rooms || [];
   } else if (searchResult?.rooms) {
@@ -122,7 +115,7 @@ export function RoomOptionsV2({
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat(lang === "he" ? "he-IL" : lang === "fr" ? "fr-FR" : "en-US", {
       style: "currency",
-      currency: currency,
+      currency,
     }).format(amount);
   };
 

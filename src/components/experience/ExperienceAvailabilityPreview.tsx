@@ -1,10 +1,10 @@
 /**
- * Admin: Price / availability preview for an experience.
- * Mini calendar + "Check price" button → HyperGuest room search.
- * Shows rooms and price breakdown (HyperGuest + add-ons) as the guest will see it.
+ * Admin : Aperçu prix / disponibilités pour une expérience
+ * Mini calendrier + bouton "Vérifier prix" → recherche chambres HyperGuest
+ * Affiche les chambres et le détail prix (HyperGuest + add-ons) comme le verra l'utilisateur.
  *
- * Integrated into UnifiedExperience2Form (section after Pricing).
- * Reuses: useHyperGuestAvailability, RoomOptionsV2, PriceBreakdownV2, useExperience2Price.
+ * À intégrer dans UnifiedExperience2Form (section "Aperçu prix / disponibilités").
+ * Réutilise : useHyperGuestAvailability, RoomOptionsV2, PriceBreakdownV2, useExperience2Price.
  */
 
 import { useState, useMemo, useEffect } from "react";
@@ -12,75 +12,35 @@ import { Calendar, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import DateRangePicker from "@/components/experience/DateRangePicker";
-import { RoomOptionsV2 } from "@/components/experience/RoomOptionsV2";
-import { PriceBreakdownV2 } from "@/components/experience/PriceBreakdownV2";
+import DateRangePicker from "./DateRangePicker";
+import { RoomOptionsV2 } from "./RoomOptionsV2";
+import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
-import type { RatePlanPrices } from "@/hooks/useExperience2Price";
 import { formatGuests, calculateNights } from "@/services/hyperguest";
 
 export interface ExperienceAvailabilityPreviewProps {
-  /** HyperGuest property ID of the selected hotel (required for search) */
+  /** ID propriété HyperGuest de l'hôtel sélectionné (obligatoire pour la recherche) */
   hyperguestPropertyId: string | null;
-  /** Hotel name (display only) */
+  /** Nom de l'hôtel (affichage) */
   hotelName?: string;
-  /** Experience ID to apply add-ons (optional: if null, only HyperGuest price is shown) */
+  /** ID expérience pour appliquer les add-ons (optionnel : si null, seul le prix HyperGuest est affiché) */
   experienceId: string | null;
   currency?: string;
   lang?: "en" | "he" | "fr";
 }
 
-/** Normalise API response for RoomOptionsV2 (results[0].rooms or .rooms) */
-function toSearchResult(
-  data: unknown
-): { results?: { rooms: unknown[] }[]; rooms?: unknown[] } | null {
+/** Normalise la réponse API pour RoomOptionsV2 (results[0].rooms ou .rooms) */
+function toSearchResult(data: unknown): { results?: { rooms: unknown[] }[]; rooms?: unknown[] } | null {
   if (data == null) return null;
   const d = data as Record<string, unknown>;
   if (Array.isArray(d.results) && d.results.length > 0) {
     const first = d.results[0] as Record<string, unknown>;
-    return {
-      results: [{ rooms: Array.isArray(first.rooms) ? first.rooms : [] }],
-    };
+    return { results: [{ rooms: Array.isArray(first.rooms) ? first.rooms : [] }] };
   }
   if (Array.isArray(d.rooms)) return { rooms: d.rooms };
   return null;
 }
-
-const translations = {
-  en: {
-    title: "Price / availability preview",
-    subtitle: "Check what guests will see for a sample stay",
-    selectDates: "Select dates",
-    checkPrice: "Check price",
-    noHotel: "Select a hotel with HyperGuest to preview prices.",
-    noDates: 'Select check-in and check-out, then click "Check price".',
-    adults: "Adults",
-    errorMsg: "Error loading availability.",
-  },
-  he: {
-    title: "תצוגת מחיר / זמינות",
-    subtitle: "בדוק מה יראו האורחים לדוגמה",
-    selectDates: "בחר תאריכים",
-    checkPrice: "בדוק מחיר",
-    noHotel: "בחר מלון עם HyperGuest לתצוגת מחירים.",
-    noDates: 'בחר תאריכי כניסה ויציאה ולחץ "בדוק מחיר".',
-    adults: "מבוגרים",
-    errorMsg: "שגיאה בטעינת הזמינות.",
-  },
-  fr: {
-    title: "Aperçu prix / disponibilités",
-    subtitle: "Vérifiez ce que verront les voyageurs pour un séjour exemple",
-    selectDates: "Sélectionnez les dates",
-    checkPrice: "Vérifier le prix",
-    noHotel:
-      "Sélectionnez un hôtel avec HyperGuest pour prévisualiser les prix.",
-    noDates:
-      'Sélectionnez arrivée et départ, puis cliquez sur "Vérifier le prix".',
-    adults: "Adultes",
-    errorMsg: "Erreur lors de la récupération des disponibilités.",
-  },
-};
 
 export function ExperienceAvailabilityPreview({
   hyperguestPropertyId,
@@ -89,27 +49,56 @@ export function ExperienceAvailabilityPreview({
   currency = "ILS",
   lang = "en",
 }: ExperienceAvailabilityPreviewProps) {
-  const t = translations[lang];
+  const t = {
+    en: {
+      title: "Price / availability preview",
+      subtitle: "Check what guests will see for a sample stay",
+      selectDates: "Select dates",
+      checkPrice: "Check price",
+      noHotel: "Select a hotel with HyperGuest to preview prices.",
+      noDates: 'Select check-in and check-out, then click "Check price".',
+      maxNights: "Max 30 nights for HyperGuest search; this range was capped.",
+      adults: "Adults",
+    },
+    he: {
+      title: "תצוגת מחיר / זמינות",
+      subtitle: "בדוק מה יראו האורחים לדוגמה",
+      selectDates: "בחר תאריכים",
+      checkPrice: "בדוק מחיר",
+      noHotel: "בחר מלון עם HyperGuest לתצוגת מחירים.",
+      noDates: 'בחר תאריכי כניסה ויציאה ולחץ "בדוק מחיר".',
+      maxNights: "מקסימום 30 לילות לחיפוש HyperGuest; הטווח הוגבל.",
+      adults: "מבוגרים",
+    },
+    fr: {
+      title: "Aperçu prix / disponibilités",
+      subtitle: "Vérifiez ce que verront les voyageurs pour un séjour exemple",
+      selectDates: "Sélectionnez les dates",
+      checkPrice: "Vérifier le prix",
+      noHotel: "Sélectionnez un hôtel avec HyperGuest pour prévisualiser les prix.",
+      noDates: 'Sélectionnez arrivée et départ, puis cliquez sur "Vérifier le prix".',
+      maxNights: "Maximum 30 nuits pour la recherche HyperGuest ; la plage a été plafonnée.",
+      adults: "Adultes",
+    },
+  }[lang];
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [adults] = useState(2);
-  /** Params sent to API only after "Check price" click */
-  const [submittedRange, setSubmittedRange] = useState<{
-    from: Date;
-    to: Date;
-  } | null>(null);
+  /** Params envoyés à l'API uniquement après clic sur "Vérifier prix" */
+  const [submittedRange, setSubmittedRange] = useState<{ from: Date; to: Date } | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
-  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(
-    null
-  );
+  const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+
+  /** HyperGuest Search API : nombre de nuits limité à 30 (SN.400) */
+  const MAX_NIGHTS = 30;
 
   const searchParams = useMemo(() => {
-    if (!submittedRange?.from || !submittedRange?.to || !hyperguestPropertyId)
-      return null;
+    if (!submittedRange?.from || !submittedRange?.to || !hyperguestPropertyId) return null;
     const checkIn = submittedRange.from.toISOString().split("T")[0];
     const checkOut = submittedRange.to.toISOString().split("T")[0];
-    const nights = calculateNights(checkIn, checkOut);
-    if (nights < 1) return null;
+    const rawNights = calculateNights(checkIn, checkOut);
+    if (rawNights < 1) return null;
+    const nights = Math.min(rawNights, MAX_NIGHTS);
     return {
       checkIn,
       nights,
@@ -124,15 +113,19 @@ export function ExperienceAvailabilityPreview({
     data: rawResult,
     isLoading: isLoadingAvailability,
     error: availabilityError,
-  } = useHyperGuestAvailability(
-    hyperguestPropertyId ? parseInt(hyperguestPropertyId, 10) : null,
-    searchParams
-  );
+  } = useHyperGuestAvailability(hyperguestPropertyId ? parseInt(hyperguestPropertyId, 10) : null, searchParams);
 
   const searchResult = useMemo(() => toSearchResult(rawResult), [rawResult]);
   const nights = searchParams?.nights ?? 0;
 
-  /** Get the selected rate plan for price calculation */
+  /** Pour afficher un message si la plage sélectionnée dépassait 30 nuits */
+  const exceededMaxNights =
+    submittedRange?.from &&
+    submittedRange?.to &&
+    calculateNights(submittedRange.from.toISOString().split("T")[0], submittedRange.to.toISOString().split("T")[0]) >
+      MAX_NIGHTS;
+
+  /** Récupère le rate plan sélectionné pour le calcul du prix */
   const selectedRatePlan = useMemo(() => {
     if (!rawResult || !selectedRoomId || !selectedRatePlanId) return null;
     const d = rawResult as Record<string, unknown>;
@@ -143,42 +136,29 @@ export function ExperienceAvailabilityPreview({
     } else if (Array.isArray(d.rooms)) {
       rooms = d.rooms;
     }
-    const room = rooms.find(
-      (r: unknown) => (r as { roomId?: number }).roomId === selectedRoomId
-    ) as
-      | {
-          ratePlans?: {
-            ratePlanId: number;
-            prices?: unknown;
-          }[];
-        }
+    const room = rooms.find((r: unknown) => (r as { roomId?: number }).roomId === selectedRoomId) as
+      | { ratePlans?: { ratePlanId: number; prices?: unknown }[] }
       | undefined;
-    const plan = room?.ratePlans?.find(
-      (rp) => rp.ratePlanId === selectedRatePlanId
-    );
+    const plan = room?.ratePlans?.find((rp) => rp.ratePlanId === selectedRatePlanId);
     return plan ?? null;
   }, [rawResult, selectedRoomId, selectedRatePlanId]);
 
-  const ratePlanPrices = (selectedRatePlan?.prices ?? null) as RatePlanPrices | null;
+  const ratePlanPrices = selectedRatePlan?.prices ?? null;
   const priceBreakdown = useExperience2Price(
     experienceId,
     null,
     currency,
     nights,
-    ratePlanPrices
+    ratePlanPrices as Parameters<typeof useExperience2Price>[4],
   );
 
-  const roomsList =
-    searchResult?.results?.[0]?.rooms ?? searchResult?.rooms ?? [];
+  const roomsList = searchResult?.results?.[0]?.rooms ?? searchResult?.rooms ?? [];
 
-  /** Auto-select the first room when results arrive */
+  /** Sélection auto de la première chambre quand les résultats arrivent */
   useEffect(() => {
     if (!searchResult || selectedRoomId !== null) return;
     if (roomsList.length === 0) return;
-    const first = roomsList[0] as {
-      roomId: number;
-      ratePlans?: { ratePlanId: number }[];
-    };
+    const first = roomsList[0] as { roomId: number; ratePlans?: { ratePlanId: number }[] };
     if (first?.ratePlans?.length) {
       setSelectedRoomId(first.roomId);
       setSelectedRatePlanId(first.ratePlans[0].ratePlanId);
@@ -193,18 +173,13 @@ export function ExperienceAvailabilityPreview({
     }
   };
 
-  const canCheckPrice =
-    !!hyperguestPropertyId &&
-    !!dateRange.from &&
-    !!dateRange.to &&
-    dateRange.from < dateRange.to;
+  const canCheckPrice = !!hyperguestPropertyId && !!dateRange.from && !!dateRange.to && dateRange.from < dateRange.to;
 
-  // No HyperGuest property selected
   if (!hyperguestPropertyId) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="text-base flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             {t.title}
           </CardTitle>
@@ -221,26 +196,23 @@ export function ExperienceAvailabilityPreview({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="text-base flex items-center gap-2">
           <Calendar className="h-4 w-4" />
           {t.title}
         </CardTitle>
-        {hotelName && (
-          <p className="text-sm text-muted-foreground">{hotelName}</p>
-        )}
+        {hotelName && <p className="text-sm text-muted-foreground">{hotelName}</p>}
         <p className="text-xs text-muted-foreground">{t.subtitle}</p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Date picker + check button */}
-        <div className="space-y-3">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
           <p className="text-sm font-medium">{t.selectDates}</p>
           <DateRangePicker value={dateRange} onChange={setDateRange} />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               type="button"
+              variant="default"
               onClick={handleCheckPrice}
               disabled={!canCheckPrice || isLoadingAvailability}
-              size="sm"
             >
               <Search className="h-4 w-4 mr-2" />
               {t.checkPrice}
@@ -251,18 +223,18 @@ export function ExperienceAvailabilityPreview({
           </div>
         </div>
 
-        {/* Prompt before first search */}
-        {!submittedRange && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            {t.noDates}
-          </p>
+        {!submittedRange && <p className="text-sm text-muted-foreground italic">{t.noDates}</p>}
+
+        {exceededMaxNights && (
+          <Alert className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30">
+            <AlertDescription>{t.maxNights}</AlertDescription>
+          </Alert>
         )}
 
-        {/* Results */}
         {searchParams && (
-          <div className="space-y-6">
+          <>
             <RoomOptionsV2
-              searchResult={searchResult as any}
+              searchResult={searchResult}
               isLoading={isLoadingAvailability}
               selectedRoomId={selectedRoomId}
               selectedRatePlanId={selectedRatePlanId}
@@ -273,18 +245,22 @@ export function ExperienceAvailabilityPreview({
               lang={lang}
             />
 
-            <PriceBreakdownV2
-              breakdown={priceBreakdown}
-              isLoading={isLoadingAvailability}
-              lang={lang}
-            />
+            {searchParams && (
+              <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} />
+            )}
 
             {availabilityError && (
               <Alert variant="destructive">
-                <AlertDescription>{t.errorMsg}</AlertDescription>
+                <AlertDescription>
+                  {lang === "fr"
+                    ? "Erreur lors de la récupération des disponibilités."
+                    : lang === "he"
+                      ? "שגיאה בטעינת הזמינות."
+                      : "Error loading availability."}
+                </AlertDescription>
               </Alert>
             )}
-          </div>
+          </>
         )}
       </CardContent>
     </Card>

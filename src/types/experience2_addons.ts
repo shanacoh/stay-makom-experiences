@@ -1,15 +1,7 @@
 /**
- * Types TypeScript pour les add-ons d'expérience (experience2_addons)
- * Compatible Supabase. Si tu utilises les types générés (Database), tu peux
- * remplacer ExperienceAddon / ExperienceAddonInsert / ExperienceAddonUpdate
- * par les alias vers Database['public']['Tables']['experience2_addons'].
- *
- * Addons = commissions et taxes. Prix final = prix HyperGuest + addons.
+ * Types pour les add-ons d'expérience (experience2_addons)
+ * Compatible Supabase. Prix final = prix HyperGuest + addons.
  */
-
-// =====================
-// TYPES DE BASE
-// =====================
 
 export type AddonType = "commission" | "per_night" | "tax";
 
@@ -54,10 +46,6 @@ export interface ExperienceAddonUpdate {
   is_active?: boolean;
 }
 
-// =====================
-// TYPES POUR LE FORMULAIRE
-// =====================
-
 export interface AddonFormData {
   type: AddonType;
   name: string;
@@ -68,10 +56,6 @@ export interface AddonFormData {
   is_percentage: boolean;
   calculation_order: number;
 }
-
-// =====================
-// CONSTANTES
-// =====================
 
 export const ADDON_TYPES: Record<AddonType, { label: string; labelHe?: string; description: string }> = {
   commission: {
@@ -112,10 +96,6 @@ export const DEFAULT_CALCULATION_ORDER: Record<AddonType, number> = {
   tax: 1,
 };
 
-// =====================
-// UTILITAIRES
-// =====================
-
 export function formatAddonValue(addon: ExperienceAddon | AddonFormData, currency = "₪"): string {
   if (addon.is_percentage) {
     return `+${addon.value}%`;
@@ -141,10 +121,6 @@ export function getDefaultCalculationOrder(type: AddonType): number {
 
 const ADDON_TYPES_ORDER: AddonType[] = ["commission", "per_night", "tax"];
 
-/**
- * Retourne les 3 add-ons "brouillon" par défaut (commission, per_night, tax) à 0.
- * À utiliser en mode création d'expérience (avant d'avoir un experience_id).
- */
 export function getDefaultDraftAddons(): AddonFormData[] {
   return ADDON_TYPES_ORDER.map((type) => ({
     type,
