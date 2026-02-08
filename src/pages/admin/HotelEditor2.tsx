@@ -13,11 +13,11 @@ import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon } from "lucide
 import { generateSlug } from "@/lib/utils";
 import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
 import { Link } from "react-router-dom";
-import {
-  HyperGuestHotelSearch,
-  type HyperGuestHotelWithDetails,
-  type RoomCapacitySummary,
-  type TaxFeeExtra,
+import HyperGuestHotelSearch from "@/components/admin/HyperGuestHotelSearch";
+import type {
+  HyperGuestHotelWithDetails,
+  RoomCapacitySummary,
+  TaxFeeExtra,
 } from "@/components/admin/HyperGuestHotelSearch";
 
 interface HotelEditor2Props {
