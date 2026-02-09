@@ -1526,6 +1526,9 @@ export type Database = {
           address_he: string | null
           amenities: string[] | null
           amenities_he: string[] | null
+          cancellation_policy: string | null
+          check_in_time: string | null
+          check_out_time: string | null
           city: string | null
           city_he: string | null
           commission_rate: number | null
@@ -1534,20 +1537,26 @@ export type Database = {
           contact_phone: string | null
           contact_website: string | null
           created_at: string | null
+          extra_conditions: string | null
           faqs: Json | null
           hero_image: string | null
           highlights: string[] | null
           highlights_he: string[] | null
+          hyperguest_extras: Json | null
+          hyperguest_facilities: Json | null
           hyperguest_imported_at: string | null
           hyperguest_property_id: string | null
           id: string
           latitude: number | null
           longitude: number | null
+          max_stay: number | null
           meta_description_en: string | null
           meta_description_fr: string | null
           meta_description_he: string | null
+          min_stay: number | null
           name: string
           name_he: string | null
+          number_of_rooms: number | null
           og_description_en: string | null
           og_description_fr: string | null
           og_description_he: string | null
@@ -1556,12 +1565,15 @@ export type Database = {
           og_title_fr: string | null
           og_title_he: string | null
           photos: string[] | null
+          property_type: string | null
           region: string | null
           region_he: string | null
+          room_capacities: Json | null
           seo_title_en: string | null
           seo_title_fr: string | null
           seo_title_he: string | null
           slug: string
+          star_rating: number | null
           status: Database["public"]["Enums"]["hotel_status"] | null
           story: string | null
           story_he: string | null
@@ -1573,6 +1585,9 @@ export type Database = {
           address_he?: string | null
           amenities?: string[] | null
           amenities_he?: string[] | null
+          cancellation_policy?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
           city?: string | null
           city_he?: string | null
           commission_rate?: number | null
@@ -1581,20 +1596,26 @@ export type Database = {
           contact_phone?: string | null
           contact_website?: string | null
           created_at?: string | null
+          extra_conditions?: string | null
           faqs?: Json | null
           hero_image?: string | null
           highlights?: string[] | null
           highlights_he?: string[] | null
+          hyperguest_extras?: Json | null
+          hyperguest_facilities?: Json | null
           hyperguest_imported_at?: string | null
           hyperguest_property_id?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          max_stay?: number | null
           meta_description_en?: string | null
           meta_description_fr?: string | null
           meta_description_he?: string | null
+          min_stay?: number | null
           name: string
           name_he?: string | null
+          number_of_rooms?: number | null
           og_description_en?: string | null
           og_description_fr?: string | null
           og_description_he?: string | null
@@ -1603,12 +1624,15 @@ export type Database = {
           og_title_fr?: string | null
           og_title_he?: string | null
           photos?: string[] | null
+          property_type?: string | null
           region?: string | null
           region_he?: string | null
+          room_capacities?: Json | null
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
           slug: string
+          star_rating?: number | null
           status?: Database["public"]["Enums"]["hotel_status"] | null
           story?: string | null
           story_he?: string | null
@@ -1620,6 +1644,9 @@ export type Database = {
           address_he?: string | null
           amenities?: string[] | null
           amenities_he?: string[] | null
+          cancellation_policy?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
           city?: string | null
           city_he?: string | null
           commission_rate?: number | null
@@ -1628,20 +1655,26 @@ export type Database = {
           contact_phone?: string | null
           contact_website?: string | null
           created_at?: string | null
+          extra_conditions?: string | null
           faqs?: Json | null
           hero_image?: string | null
           highlights?: string[] | null
           highlights_he?: string[] | null
+          hyperguest_extras?: Json | null
+          hyperguest_facilities?: Json | null
           hyperguest_imported_at?: string | null
           hyperguest_property_id?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          max_stay?: number | null
           meta_description_en?: string | null
           meta_description_fr?: string | null
           meta_description_he?: string | null
+          min_stay?: number | null
           name?: string
           name_he?: string | null
+          number_of_rooms?: number | null
           og_description_en?: string | null
           og_description_fr?: string | null
           og_description_he?: string | null
@@ -1650,12 +1683,15 @@ export type Database = {
           og_title_fr?: string | null
           og_title_he?: string | null
           photos?: string[] | null
+          property_type?: string | null
           region?: string | null
           region_he?: string | null
+          room_capacities?: Json | null
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
           slug?: string
+          star_rating?: number | null
           status?: Database["public"]["Enums"]["hotel_status"] | null
           story?: string | null
           story_he?: string | null

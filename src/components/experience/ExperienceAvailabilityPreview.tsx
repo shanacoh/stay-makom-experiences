@@ -234,7 +234,7 @@ export function ExperienceAvailabilityPreview({
         {searchParams && (
           <>
             <RoomOptionsV2
-              searchResult={searchResult}
+              searchResult={searchResult as any}
               isLoading={isLoadingAvailability}
               selectedRoomId={selectedRoomId}
               selectedRatePlanId={selectedRatePlanId}
