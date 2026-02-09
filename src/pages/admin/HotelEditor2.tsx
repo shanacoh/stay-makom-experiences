@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -311,7 +312,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         hyperguest_imported_at: hyperguestId ? new Date().toISOString() : null,
         star_rating: data.star_rating,
         property_type: data.property_type || null,
-        room_capacities: data.room_capacities?.length ? data.room_capacities : null,
+        room_capacities: data.room_capacities?.length ? (data.room_capacities as unknown as Json) : null,
         cancellation_policy: data.cancellation_policy || null,
         extra_conditions: data.extra_conditions || null,
         min_stay: data.min_stay,
@@ -319,8 +320,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         number_of_rooms: data.number_of_rooms,
         check_in_time: data.check_in_time || null,
         check_out_time: data.check_out_time || null,
-        hyperguest_extras: data.hyperguest_extras?.length ? data.hyperguest_extras : null,
-        hyperguest_facilities: data.hyperguest_facilities?.length ? data.hyperguest_facilities : null,
+        hyperguest_extras: data.hyperguest_extras?.length ? (data.hyperguest_extras as unknown as Json) : null,
+        hyperguest_facilities: data.hyperguest_facilities?.length ? (data.hyperguest_facilities as unknown as Json) : null,
       };
 
       if (hotelId) {

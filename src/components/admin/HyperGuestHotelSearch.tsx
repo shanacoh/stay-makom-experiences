@@ -328,7 +328,7 @@ export function HyperGuestHotelSearch({
               .map((f: any) => ({
                 name: f.name ?? "",
                 category: f.category,
-                type: f.type === "room" ? "room" : f.type === "hotel" ? "hotel" : undefined,
+                type: f.type === "room" ? "room" as const : f.type === "hotel" ? "hotel" as const : undefined,
                 classification: f.classification,
               }))
               .filter((f) => f.name);
@@ -342,11 +342,11 @@ export function HyperGuestHotelSearch({
           cityName: city,
           regionName: region,
           starRating: hotel.starRating ?? hotelModel?.rating ?? raw?.rating ?? undefined,
-          propertyTypeName: hotel.propertyTypeName ?? raw?.propertyTypeName ?? undefined,
+          propertyTypeName: hotel.propertyType ?? raw?.propertyTypeName ?? undefined,
           roomsSummary: roomsSummary?.length ? roomsSummary : undefined,
           cancellationPolicyText: cancellationPolicyText || undefined,
           cancellationPolicies: cancellationPolicies.length ? cancellationPolicies : undefined,
-          remarks: hotel.remarks ?? (Array.isArray(raw?.remarks) ? raw.remarks : undefined),
+          remarks: Array.isArray(raw?.remarks) ? raw.remarks : undefined,
           minStay:
             policies?.minStay ??
             (Array.isArray(policiesArr)
