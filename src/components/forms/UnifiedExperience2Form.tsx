@@ -8,20 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,13 +20,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Save, Rocket, X, Upload, Loader2, Trash2, ArrowLeft } from "lucide-react";
+import { Save, Rocket, X, Upload, Loader2, Trash2, ArrowLeft, Plus, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
 import { Experience2AddonsManager } from "@/components/admin/Experience2AddonsManager";
 import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface ExperienceHotelEntry {
+  hotel_id: string;
+  position: number;
+  nights: number;
+  notes: string;
+  notes_he: string;
+}
+
+// ---------------------------------------------------------------------------
+// Zod schema – hotel_id is now optional (auto-filled from parcours)
+// ---------------------------------------------------------------------------
 
 const experience2Schema = z.object({
   title: z.string().min(1, "English title is required"),
@@ -54,7 +58,7 @@ const experience2Schema = z.object({
   max_party: z.number().min(1).max(100),
   cancellation_policy: z.string().optional(),
   cancellation_policy_he: z.string().optional(),
-  hotel_id: z.string().min(1, "Hotel is required"),
+  hotel_id: z.string().optional(), // now optional – auto-filled from parcours
   seo_title_en: z.string().optional(),
   seo_title_he: z.string().optional(),
   seo_title_fr: z.string().optional(),
@@ -79,6 +83,10 @@ interface UnifiedExperience2FormProps {
   experienceId?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 export function UnifiedExperience2Form({
   hotelId: propHotelId,
   hotelName,
@@ -93,11 +101,17 @@ export function UnifiedExperience2Form({
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [createdExperienceId, setCreatedExperienceId] = useState<string | null>(null);
-  
+
+  // Multi-hotel parcours state
+  const [experienceHotels, setExperienceHotels] = useState<ExperienceHotelEntry[]>([]);
+  const [hotelToAdd, setHotelToAdd] = useState<string>("");
+
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
 
-
+  // -------------------------------------------------------------------------
+  // Queries
+  // -------------------------------------------------------------------------
 
   // Fetch hotels2 with photos
   const { data: hotels } = useQuery({
@@ -130,16 +144,31 @@ export function UnifiedExperience2Form({
   const { data: existingExperience, isLoading: isLoadingExperience } = useQuery({
     queryKey: ["experience2", experienceId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experiences2")
-        .select("*")
-        .eq("id", experienceId)
-        .single();
+      const { data, error } = await supabase.from("experiences2").select("*").eq("id", experienceId).single();
       if (error) throw error;
       return data;
     },
     enabled: !!experienceId,
   });
+
+  // Fetch existing experience hotels (parcours)
+  const { data: existingExperienceHotels } = useQuery({
+    queryKey: ["experience2-hotels", experienceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experience2_hotels")
+        .select("*")
+        .eq("experience_id", experienceId)
+        .order("position");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!experienceId,
+  });
+
+  // -------------------------------------------------------------------------
+  // Form setup
+  // -------------------------------------------------------------------------
 
   const {
     register,
@@ -186,13 +215,34 @@ export function UnifiedExperience2Form({
   const minNights = watch("min_nights");
   const maxNights = watch("max_nights");
   const title = watch("title");
-  const selectedHotelId = watch("hotel_id");
 
-  // Get selected hotel's images
-  const selectedHotel = hotels?.find((h) => h.id === selectedHotelId);
-  const hotelImages = selectedHotel ? [selectedHotel.hero_image, ...(selectedHotel.photos || [])].filter(Boolean) as string[] : [];
+  // Derived: first hotel in the parcours (primary hotel)
+  const firstHotel = experienceHotels.length > 0 ? hotels?.find((h) => h.id === experienceHotels[0].hotel_id) : null;
 
+  // Collect images from ALL hotels in the parcours
+  const allParcoursImages: string[] = [];
+  for (const eh of experienceHotels) {
+    const h = hotels?.find((x) => x.id === eh.hotel_id);
+    if (h) {
+      if (h.hero_image) allParcoursImages.push(h.hero_image);
+      if (Array.isArray(h.photos)) {
+        for (const p of h.photos) {
+          if (p && !allParcoursImages.includes(p as string)) allParcoursImages.push(p as string);
+        }
+      }
+    }
+  }
+
+  // Hotels available to add (not already in the parcours)
+  const availableHotels = hotels?.filter((h) => !experienceHotels.some((eh) => eh.hotel_id === h.id));
+
+  // Total nights in parcours
+  const totalNights = experienceHotels.reduce((sum, h) => sum + (h.nights || 0), 0);
+
+  // -------------------------------------------------------------------------
   // Pre-fill form when editing
+  // -------------------------------------------------------------------------
+
   useEffect(() => {
     if (existingExperience) {
       setValue("title", existingExperience.title || "");
@@ -222,7 +272,7 @@ export function UnifiedExperience2Form({
       setValue("og_description_he", existingExperience.og_description_he || "");
       setValue("og_description_fr", existingExperience.og_description_fr || "");
       setValue("og_image", existingExperience.og_image || "");
-      
+
       if (existingExperience.hero_image) {
         setHeroImagePreview(existingExperience.hero_image);
       }
@@ -232,7 +282,71 @@ export function UnifiedExperience2Form({
     }
   }, [existingExperience, setValue, propHotelId]);
 
-  // Image upload handlers
+  // Load existing experience hotels into local state
+  useEffect(() => {
+    if (existingExperienceHotels && existingExperienceHotels.length > 0) {
+      setExperienceHotels(
+        existingExperienceHotels.map((eh) => ({
+          hotel_id: eh.hotel_id,
+          position: eh.position,
+          nights: eh.nights ?? 1,
+          notes: eh.notes ?? "",
+          notes_he: eh.notes_he ?? "",
+        })),
+      );
+    }
+  }, [existingExperienceHotels]);
+
+  // Seed the parcours with the propHotelId if provided and no existing hotels
+  useEffect(() => {
+    if (propHotelId && !experienceId && experienceHotels.length === 0 && hotels?.some((h) => h.id === propHotelId)) {
+      setExperienceHotels([{ hotel_id: propHotelId, position: 1, nights: 1, notes: "", notes_he: "" }]);
+    }
+  }, [propHotelId, experienceId, experienceHotels.length, hotels]);
+
+  // -------------------------------------------------------------------------
+  // Multi-hotel parcours helpers
+  // -------------------------------------------------------------------------
+
+  const addHotelToParcours = () => {
+    if (!hotelToAdd || experienceHotels.some((h) => h.hotel_id === hotelToAdd)) return;
+    setExperienceHotels((prev) => [
+      ...prev,
+      {
+        hotel_id: hotelToAdd,
+        position: prev.length + 1,
+        nights: 1,
+        notes: "",
+        notes_he: "",
+      },
+    ]);
+    setHotelToAdd("");
+  };
+
+  const removeHotelFromParcours = (index: number) => {
+    setExperienceHotels((prev) => prev.filter((_, i) => i !== index).map((h, i) => ({ ...h, position: i + 1 })));
+  };
+
+  const moveHotel = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= experienceHotels.length) return;
+    const newList = [...experienceHotels];
+    [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
+    setExperienceHotels(newList.map((h, i) => ({ ...h, position: i + 1 })));
+  };
+
+  const updateHotelNights = (index: number, nights: number) => {
+    setExperienceHotels((prev) => prev.map((h, i) => (i === index ? { ...h, nights: Math.max(1, nights) } : h)));
+  };
+
+  const updateHotelNotes = (index: number, notes: string) => {
+    setExperienceHotels((prev) => prev.map((h, i) => (i === index ? { ...h, notes } : h)));
+  };
+
+  // -------------------------------------------------------------------------
+  // Image handlers
+  // -------------------------------------------------------------------------
+
   const handleHeroImageChange = (file: File | null) => {
     setHeroImage(file);
     if (file) {
@@ -248,10 +362,8 @@ export function UnifiedExperience2Form({
 
   const handleGalleryImagesChange = (files: FileList | null) => {
     if (!files) return;
-    
     const newFiles = Array.from(files).slice(0, 8 - galleryImages.length);
     setGalleryImages((prev) => [...prev, ...newFiles]);
-
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -270,74 +382,110 @@ export function UnifiedExperience2Form({
     const fileExt = file.name.split(".").pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${path}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("experience-images")
-      .upload(filePath, file);
-
+    const { error: uploadError } = await supabase.storage.from("experience-images").upload(filePath, file);
     if (uploadError) throw uploadError;
-
     const { data } = supabase.storage.from("experience-images").getPublicUrl(filePath);
     return data.publicUrl;
   };
 
+  // -------------------------------------------------------------------------
+  // Save experience hotels to junction table
+  // -------------------------------------------------------------------------
+
+  const saveExperienceHotels = async (expId: string) => {
+    // Delete existing entries
+    await supabase.from("experience2_hotels").delete().eq("experience_id", expId);
+
+    // Insert new entries
+    if (experienceHotels.length > 0) {
+      const { error } = await supabase.from("experience2_hotels").insert(
+        experienceHotels.map((h) => ({
+          experience_id: expId,
+          hotel_id: h.hotel_id,
+          position: h.position,
+          nights: h.nights,
+          notes: h.notes || null,
+          notes_he: h.notes_he || null,
+        })),
+      );
+      if (error) throw error;
+    }
+  };
+
+  // -------------------------------------------------------------------------
+  // Build experience data object (shared by draft & publish)
+  // -------------------------------------------------------------------------
+
+  const buildExperienceData = async (data: Experience2FormData, status: "draft" | "published") => {
+    let heroImageUrl = existingExperience?.hero_image || "";
+    if (heroImage) {
+      heroImageUrl = await uploadImage(heroImage, "hero");
+    }
+
+    const photoUrls = galleryPreviews.filter((url) => url.startsWith("http"));
+    for (const img of galleryImages) {
+      const url = await uploadImage(img, "gallery");
+      photoUrls.push(url);
+    }
+
+    // Primary hotel_id = first hotel in parcours
+    const primaryHotelId = experienceHotels.length > 0 ? experienceHotels[0].hotel_id : null;
+
+    return {
+      title: data.title,
+      title_he: data.title_he || null,
+      subtitle: data.subtitle || null,
+      subtitle_he: data.subtitle_he || null,
+      category_id: data.category_id,
+      long_copy: data.long_copy || null,
+      long_copy_he: data.long_copy_he || null,
+      min_nights: data.min_nights,
+      max_nights: data.max_nights,
+      min_party: data.min_party,
+      max_party: data.max_party,
+      base_price: 0,
+      currency: "ILS",
+      base_price_type: "per_person" as const,
+      hotel_id: primaryHotelId,
+      cancellation_policy: data.cancellation_policy || null,
+      cancellation_policy_he: data.cancellation_policy_he || null,
+      hero_image: heroImageUrl || null,
+      photos: photoUrls,
+      status,
+      slug: currentExperienceId ? existingExperience?.slug : generateSlug(title),
+      seo_title_en: data.seo_title_en || null,
+      seo_title_he: data.seo_title_he || null,
+      seo_title_fr: data.seo_title_fr || null,
+      meta_description_en: data.meta_description_en || null,
+      meta_description_he: data.meta_description_he || null,
+      meta_description_fr: data.meta_description_fr || null,
+      og_title_en: data.og_title_en || null,
+      og_title_he: data.og_title_he || null,
+      og_title_fr: data.og_title_fr || null,
+      og_description_en: data.og_description_en || null,
+      og_description_he: data.og_description_he || null,
+      og_description_fr: data.og_description_fr || null,
+      og_image: data.og_image || null,
+    };
+  };
+
+  // -------------------------------------------------------------------------
+  // Save Draft
+  // -------------------------------------------------------------------------
+
   const handleSaveDraft = async (data: Experience2FormData) => {
+    if (experienceHotels.length === 0) {
+      toast.error("Ajoutez au moins un hôtel au parcours");
+      return;
+    }
     setIsSaving(true);
     try {
-      let heroImageUrl = existingExperience?.hero_image || "";
-      if (heroImage) {
-        heroImageUrl = await uploadImage(heroImage, "hero");
-      }
-
-      const photoUrls = galleryPreviews.filter(url => url.startsWith('http'));
-      for (const img of galleryImages) {
-        const url = await uploadImage(img, "gallery");
-        photoUrls.push(url);
-      }
-
-      const experienceData = {
-        title: data.title,
-        title_he: data.title_he || null,
-        subtitle: data.subtitle || null,
-        subtitle_he: data.subtitle_he || null,
-        category_id: data.category_id,
-        long_copy: data.long_copy || null,
-        long_copy_he: data.long_copy_he || null,
-        min_nights: data.min_nights,
-        max_nights: data.max_nights,
-        min_party: data.min_party,
-        max_party: data.max_party,
-        base_price: 0, // Price is managed via addons
-        currency: "ILS",
-        base_price_type: "per_person" as const,
-        hotel_id: data.hotel_id,
-        cancellation_policy: data.cancellation_policy || null,
-        cancellation_policy_he: data.cancellation_policy_he || null,
-        hero_image: heroImageUrl || null,
-        photos: photoUrls,
-        status: "draft" as const,
-        slug: currentExperienceId ? existingExperience?.slug : generateSlug(title),
-        seo_title_en: data.seo_title_en || null,
-        seo_title_he: data.seo_title_he || null,
-        seo_title_fr: data.seo_title_fr || null,
-        meta_description_en: data.meta_description_en || null,
-        meta_description_he: data.meta_description_he || null,
-        meta_description_fr: data.meta_description_fr || null,
-        og_title_en: data.og_title_en || null,
-        og_title_he: data.og_title_he || null,
-        og_title_fr: data.og_title_fr || null,
-        og_description_en: data.og_description_en || null,
-        og_description_he: data.og_description_he || null,
-        og_description_fr: data.og_description_fr || null,
-        og_image: data.og_image || null,
-      };
+      const experienceData = await buildExperienceData(data, "draft");
 
       if (currentExperienceId) {
-        const { error } = await supabase
-          .from("experiences2")
-          .update(experienceData)
-          .eq("id", currentExperienceId);
+        const { error } = await supabase.from("experiences2").update(experienceData).eq("id", currentExperienceId);
         if (error) throw error;
+        await saveExperienceHotels(currentExperienceId);
         toast.success("Draft saved successfully");
       } else {
         const { data: insertedData, error } = await supabase
@@ -347,9 +495,9 @@ export function UnifiedExperience2Form({
           .single();
         if (error) throw error;
         setCreatedExperienceId(insertedData.id);
+        await saveExperienceHotels(insertedData.id);
         toast.success("Draft created! You can now add price addons.");
       }
-
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
     } catch (error: any) {
       console.error("Save error:", error);
@@ -359,63 +507,23 @@ export function UnifiedExperience2Form({
     }
   };
 
+  // -------------------------------------------------------------------------
+  // Publish
+  // -------------------------------------------------------------------------
+
   const handlePublish = async (data: Experience2FormData) => {
+    if (experienceHotels.length === 0) {
+      toast.error("Ajoutez au moins un hôtel au parcours");
+      return;
+    }
     setIsSaving(true);
     try {
-      let heroImageUrl = existingExperience?.hero_image || "";
-      if (heroImage) {
-        heroImageUrl = await uploadImage(heroImage, "hero");
-      }
-
-      const photoUrls = galleryPreviews.filter(url => url.startsWith('http'));
-      for (const img of galleryImages) {
-        const url = await uploadImage(img, "gallery");
-        photoUrls.push(url);
-      }
-
-      const experienceData = {
-        title: data.title,
-        title_he: data.title_he || null,
-        subtitle: data.subtitle || null,
-        subtitle_he: data.subtitle_he || null,
-        category_id: data.category_id,
-        long_copy: data.long_copy || null,
-        long_copy_he: data.long_copy_he || null,
-        min_nights: data.min_nights,
-        max_nights: data.max_nights,
-        min_party: data.min_party,
-        max_party: data.max_party,
-        base_price: 0, // Price is managed via addons
-        currency: "ILS",
-        base_price_type: "per_person" as const,
-        hotel_id: data.hotel_id,
-        cancellation_policy: data.cancellation_policy || null,
-        cancellation_policy_he: data.cancellation_policy_he || null,
-        hero_image: heroImageUrl || null,
-        photos: photoUrls,
-        status: "published" as const,
-        slug: currentExperienceId ? existingExperience?.slug : generateSlug(title),
-        seo_title_en: data.seo_title_en || null,
-        seo_title_he: data.seo_title_he || null,
-        seo_title_fr: data.seo_title_fr || null,
-        meta_description_en: data.meta_description_en || null,
-        meta_description_he: data.meta_description_he || null,
-        meta_description_fr: data.meta_description_fr || null,
-        og_title_en: data.og_title_en || null,
-        og_title_he: data.og_title_he || null,
-        og_title_fr: data.og_title_fr || null,
-        og_description_en: data.og_description_en || null,
-        og_description_he: data.og_description_he || null,
-        og_description_fr: data.og_description_fr || null,
-        og_image: data.og_image || null,
-      };
+      const experienceData = await buildExperienceData(data, "published");
 
       if (currentExperienceId) {
-        const { error } = await supabase
-          .from("experiences2")
-          .update(experienceData)
-          .eq("id", currentExperienceId);
+        const { error } = await supabase.from("experiences2").update(experienceData).eq("id", currentExperienceId);
         if (error) throw error;
+        await saveExperienceHotels(currentExperienceId);
         toast.success("Published successfully");
       } else {
         const { data: insertedData, error } = await supabase
@@ -425,9 +533,9 @@ export function UnifiedExperience2Form({
           .single();
         if (error) throw error;
         setCreatedExperienceId(insertedData.id);
+        await saveExperienceHotels(insertedData.id);
         toast.success("Published successfully");
       }
-
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
       onClose?.();
     } catch (error: any) {
@@ -438,13 +546,14 @@ export function UnifiedExperience2Form({
     }
   };
 
+  // -------------------------------------------------------------------------
+  // Delete
+  // -------------------------------------------------------------------------
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       if (!experienceId) throw new Error("No experience ID");
-      const { error } = await supabase
-        .from("experiences2")
-        .delete()
-        .eq("id", experienceId);
+      const { error } = await supabase.from("experiences2").delete().eq("id", experienceId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -466,33 +575,39 @@ export function UnifiedExperience2Form({
     setShowDeleteDialog(false);
   };
 
+  // -------------------------------------------------------------------------
+  // Validation helper
+  // -------------------------------------------------------------------------
+
   const onInvalidSubmit = (errors: Record<string, any>) => {
     console.error("Form validation errors:", errors);
-    
+
     const fieldNames: Record<string, string> = {
       title: "Title (EN)",
       category_id: "Category",
       long_copy: "Description (EN)",
-      hotel_id: "Hotel",
       min_party: "Min Party Size",
       max_party: "Max Party Size",
     };
-    
-    const errorFields = Object.keys(errors).map(field => fieldNames[field] || field);
-    
+
+    const errorFields = Object.keys(errors).map((field) => fieldNames[field] || field);
+
     if (errorFields.length > 0) {
       toast.error(`Please fill required fields: ${errorFields.join(", ")}`);
     }
-    
+
     const firstErrorField = Object.keys(errors)[0];
-    const element = document.querySelector(`[name="${firstErrorField}"]`) || 
-                    document.getElementById(firstErrorField);
+    const element = document.querySelector(`[name="${firstErrorField}"]`) || document.getElementById(firstErrorField);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
-  const canPublish = title && longCopy && longCopy.length >= 100;
+  const canPublish = title && longCopy && longCopy.length >= 100 && experienceHotels.length > 0;
+
+  // -------------------------------------------------------------------------
+  // Loading state
+  // -------------------------------------------------------------------------
 
   if (isLoadingExperience) {
     return (
@@ -501,6 +616,10 @@ export function UnifiedExperience2Form({
       </div>
     );
   }
+
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
 
   return (
     <div className="space-y-6">
@@ -515,14 +634,17 @@ export function UnifiedExperience2Form({
               </Button>
             )}
             <div>
-              <h1 className="text-2xl font-bold">
-                {experienceId ? "Edit Experience 2" : "Create New Experience 2"}
-              </h1>
+              <h1 className="text-2xl font-bold">{experienceId ? "Edit Experience 2" : "Create New Experience 2"}</h1>
               {hotelName && <p className="text-sm text-muted-foreground">Hotel: {hotelName}</p>}
             </div>
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={handleSubmit(handleSaveDraft, onInvalidSubmit)} disabled={isSaving}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSubmit(handleSaveDraft, onInvalidSubmit)}
+              disabled={isSaving}
+            >
               <Save className="h-4 w-4 mr-2" />
               Save Draft
             </Button>
@@ -539,7 +661,9 @@ export function UnifiedExperience2Form({
           </div>
         </div>
 
+        {/* ----------------------------------------------------------------- */}
         {/* Basic Information */}
+        {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
@@ -550,18 +674,16 @@ export function UnifiedExperience2Form({
               {/* English Column */}
               <div className="space-y-4">
                 <div className="font-medium text-sm text-muted-foreground">English Version</div>
-                
+
                 <div>
                   <Label htmlFor="title">Title (EN) *</Label>
                   <Input id="title" {...register("title")} />
                   {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
                 </div>
-
                 <div>
                   <Label htmlFor="subtitle">Subtitle (EN)</Label>
                   <Input id="subtitle" {...register("subtitle")} />
                 </div>
-
                 <div>
                   <Label htmlFor="long_copy">Description (EN) * (min 100 characters)</Label>
                   <Controller
@@ -569,22 +691,19 @@ export function UnifiedExperience2Form({
                     control={control}
                     render={({ field }) => (
                       <RichTextEditor
-                        content={field.value || ''}
+                        content={field.value || ""}
                         onChange={field.onChange}
                         placeholder="Describe the experience in English..."
                       />
                     )}
                   />
                   <div className="flex justify-between mt-1">
-                    {errors.long_copy && (
-                      <p className="text-sm text-destructive">{errors.long_copy.message}</p>
-                    )}
+                    {errors.long_copy && <p className="text-sm text-destructive">{errors.long_copy.message}</p>}
                     <p className="text-sm text-muted-foreground ml-auto">
                       {longCopy?.length || 0} / 100 characters minimum
                     </p>
                   </div>
                 </div>
-
                 <div>
                   <Label htmlFor="cancellation_policy">Cancellation Policy (EN)</Label>
                   <Input id="cancellation_policy" {...register("cancellation_policy")} />
@@ -594,17 +713,15 @@ export function UnifiedExperience2Form({
               {/* Hebrew Column */}
               <div className="space-y-4">
                 <div className="font-medium text-sm text-muted-foreground">Hebrew Version (עברית)</div>
-                
+
                 <div>
                   <Label htmlFor="title_he">Title (HE)</Label>
                   <Input id="title_he" {...register("title_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
-
                 <div>
                   <Label htmlFor="subtitle_he">Subtitle (HE)</Label>
                   <Input id="subtitle_he" {...register("subtitle_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
-
                 <div>
                   <Label htmlFor="long_copy_he">Description (HE)</Label>
                   <Controller
@@ -612,59 +729,36 @@ export function UnifiedExperience2Form({
                     control={control}
                     render={({ field }) => (
                       <RichTextEditor
-                        content={field.value || ''}
+                        content={field.value || ""}
                         onChange={field.onChange}
                         placeholder="תאר את החוויה בעברית..."
                         dir="rtl"
                       />
                     )}
                   />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {longCopyHe?.length || 0} characters
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">{longCopyHe?.length || 0} characters</p>
                 </div>
-
                 <div>
                   <Label htmlFor="cancellation_policy_he">Cancellation Policy (HE)</Label>
-                  <Input id="cancellation_policy_he" {...register("cancellation_policy_he")} dir="rtl" className="bg-hebrew-input" />
+                  <Input
+                    id="cancellation_policy_he"
+                    {...register("cancellation_policy_he")}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Hotel & Category */}
+            {/* Category (hotel selector moved to Parcours card) */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="hotel_id">Hotel *</Label>
-                <Select
-                  value={watch("hotel_id") || ""}
-                  onValueChange={(value) => setValue("hotel_id", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select hotel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {hotels?.map((hotel) => (
-                      <SelectItem key={hotel.id} value={hotel.id}>
-                        {hotel.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.hotel_id && (
-                  <p className="text-sm text-destructive mt-1">{errors.hotel_id.message}</p>
-                )}
-              </div>
-
               <div>
                 <Label htmlFor="category_id">Category *</Label>
                 <Controller
                   name="category_id"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      value={field.value || ""}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value || ""} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -678,32 +772,159 @@ export function UnifiedExperience2Form({
                     </Select>
                   )}
                 />
-                {errors.category_id && (
-                  <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>
-                )}
+                {errors.category_id && <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Images */}
+        {/* ----------------------------------------------------------------- */}
+        {/* Parcours Hôtels (multi-hotel) */}
+        {/* ----------------------------------------------------------------- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Parcours Hôtels</CardTitle>
+            <CardDescription>
+              Ajoutez les hôtels du parcours dans l'ordre du séjour.
+              {totalNights > 0 && (
+                <span className="ml-2 font-medium text-foreground">
+                  Total : {totalNights} nuit{totalNights > 1 ? "s" : ""}
+                </span>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* List of hotels in the parcours */}
+            {experienceHotels.length === 0 && (
+              <p className="text-sm text-muted-foreground italic py-4 text-center">
+                Aucun hôtel dans le parcours. Ajoutez-en au moins un ci-dessous.
+              </p>
+            )}
+
+            {experienceHotels.map((eh, index) => {
+              const hotel = hotels?.find((h) => h.id === eh.hotel_id);
+              return (
+                <div key={eh.hotel_id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                  {/* Position badge */}
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                      {index + 1}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => moveHotel(index, "up")}
+                        className="p-0.5 rounded hover:bg-muted disabled:opacity-30"
+                      >
+                        <ChevronUp className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === experienceHotels.length - 1}
+                        onClick={() => moveHotel(index, "down")}
+                        className="p-0.5 rounded hover:bg-muted disabled:opacity-30"
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Hotel thumbnail */}
+                  {hotel?.hero_image && (
+                    <img
+                      src={hotel.hero_image}
+                      alt={hotel.name || "Hotel"}
+                      className="w-16 h-16 rounded-md object-cover flex-shrink-0"
+                    />
+                  )}
+
+                  {/* Hotel info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{hotel?.name || "Unknown hotel"}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <div className="flex items-center gap-1">
+                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Nuits :</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={eh.nights}
+                          onChange={(e) => updateHotelNights(index, parseInt(e.target.value) || 1)}
+                          className="w-16 h-7 text-sm"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 flex-1">
+                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Notes :</Label>
+                        <Input
+                          value={eh.notes}
+                          onChange={(e) => updateHotelNotes(index, e.target.value)}
+                          placeholder="Ex: Arrivée, détente..."
+                          className="h-7 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    onClick={() => removeHotelFromParcours(index)}
+                    className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })}
+
+            {/* Add hotel */}
+            <div className="flex gap-2 pt-2 border-t">
+              <Select value={hotelToAdd} onValueChange={setHotelToAdd}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Sélectionner un hôtel à ajouter..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableHotels?.map((hotel) => (
+                    <SelectItem key={hotel.id} value={hotel.id}>
+                      {hotel.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="outline" onClick={addHotelToParcours} disabled={!hotelToAdd}>
+                <Plus className="h-4 w-4 mr-1" />
+                Ajouter
+              </Button>
+            </div>
+
+            {experienceHotels.length === 0 && (
+              <p className="text-sm text-destructive">Au moins un hôtel est requis dans le parcours.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Images & Media */}
+        {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
             <CardTitle>Images & Media</CardTitle>
-            <CardDescription>Upload hero image and gallery photos, or use images from the hotel</CardDescription>
+            <CardDescription>Upload hero image and gallery photos, or use images from the hotels</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Hotel Images Section */}
-            {hotelImages.length > 0 && (
+            {/* Hotel Images Section – from ALL hotels in parcours */}
+            {allParcoursImages.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Hotel Images (click to add)</Label>
+                <Label className="text-sm font-medium">
+                  Hotel Images (click to add) — {allParcoursImages.length} image(s)
+                </Label>
                 <div className="grid grid-cols-6 gap-2 p-3 bg-muted/30 rounded-lg border">
-                  {hotelImages.map((img, index) => (
+                  {allParcoursImages.map((img, index) => (
                     <button
                       key={index}
                       type="button"
                       onClick={() => {
-                        if (index === 0 && !heroImagePreview) {
+                        if (!heroImagePreview) {
                           setHeroImagePreview(img);
                         } else if (!galleryPreviews.includes(img) && galleryPreviews.length < 8) {
                           setGalleryPreviews((prev) => [...prev, img]);
@@ -711,14 +932,16 @@ export function UnifiedExperience2Form({
                       }}
                       className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all hover:border-primary ${
                         heroImagePreview === img || galleryPreviews.includes(img)
-                          ? 'border-primary opacity-50'
-                          : 'border-transparent'
+                          ? "border-primary opacity-50"
+                          : "border-transparent"
                       }`}
                     >
-                      <img src={img} alt={`Hotel ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={img} alt={`Hotel image ${index + 1}`} className="w-full h-full object-cover" />
                       {(heroImagePreview === img || galleryPreviews.includes(img)) && (
                         <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                          <span className="text-xs font-medium text-primary-foreground bg-primary px-1.5 py-0.5 rounded">Added</span>
+                          <span className="text-xs font-medium text-primary-foreground bg-primary px-1.5 py-0.5 rounded">
+                            Added
+                          </span>
                         </div>
                       )}
                     </button>
@@ -735,7 +958,10 @@ export function UnifiedExperience2Form({
                     <img src={heroImagePreview} alt="Hero preview" className="w-full h-64 object-cover rounded-lg" />
                     <button
                       type="button"
-                      onClick={() => { setHeroImage(null); setHeroImagePreview(null); }}
+                      onClick={() => {
+                        setHeroImage(null);
+                        setHeroImagePreview(null);
+                      }}
                       className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1"
                     >
                       <X className="h-4 w-4" />
@@ -756,11 +982,7 @@ export function UnifiedExperience2Form({
               <div className="grid grid-cols-4 gap-4">
                 {galleryPreviews.map((preview, index) => (
                   <div key={index} className="relative group">
-                    <img
-                      src={preview}
-                      alt={`Gallery ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
+                    <img src={preview} alt={`Gallery ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(index)}
@@ -787,7 +1009,9 @@ export function UnifiedExperience2Form({
           </CardContent>
         </Card>
 
-        {/* Capacity */}
+        {/* ----------------------------------------------------------------- */}
+        {/* Capacity & Availability */}
+        {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
             <CardTitle>Capacity & Availability</CardTitle>
@@ -801,63 +1025,50 @@ export function UnifiedExperience2Form({
                 onMaxChange={(value) => setValue("max_nights", value)}
               />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="min_party">Min Participants *</Label>
-                <Input
-                  id="min_party"
-                  type="number"
-                  min="1"
-                  {...register("min_party", { valueAsNumber: true })}
-                />
+                <Input id="min_party" type="number" min="1" {...register("min_party", { valueAsNumber: true })} />
               </div>
-
               <div>
                 <Label htmlFor="max_party">Max Participants *</Label>
-                <Input
-                  id="max_party"
-                  type="number"
-                  min="1"
-                  {...register("max_party", { valueAsNumber: true })}
-                />
+                <Input id="max_party" type="number" min="1" {...register("max_party", { valueAsNumber: true })} />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* ----------------------------------------------------------------- */}
         {/* Pricing Section */}
+        {/* ----------------------------------------------------------------- */}
         <Card>
           <CardContent className="pt-6">
-            <Experience2AddonsManager
-              experienceId={currentExperienceId}
-              disabled={isSaving}
-            />
+            <Experience2AddonsManager experienceId={currentExperienceId} disabled={isSaving} />
           </CardContent>
         </Card>
 
-        {/* Price / Availability Preview */}
-        {selectedHotel && (
+        {/* ----------------------------------------------------------------- */}
+        {/* Price / Availability Preview (uses first hotel) */}
+        {/* ----------------------------------------------------------------- */}
+        {firstHotel && (
           <ExperienceAvailabilityPreview
             hyperguestPropertyId={
-              selectedHotel.hyperguest_property_id != null
-                ? String(selectedHotel.hyperguest_property_id)
-                : null
+              firstHotel.hyperguest_property_id != null ? String(firstHotel.hyperguest_property_id) : null
             }
-            hotelName={selectedHotel.name}
+            hotelName={firstHotel.name}
             experienceId={currentExperienceId ?? null}
             currency="ILS"
             lang="en"
           />
         )}
 
-        {/* SEO Section */}
+        {/* ----------------------------------------------------------------- */}
+        {/* SEO Configuration */}
+        {/* ----------------------------------------------------------------- */}
         <Card className="bg-muted/30">
           <CardHeader>
             <CardTitle>SEO Configuration</CardTitle>
-            <CardDescription>
-              Configure SEO metadata for search engines and social media sharing
-            </CardDescription>
+            <CardDescription>Configure SEO metadata for search engines and social media sharing</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-3 gap-6">
@@ -866,7 +1077,6 @@ export function UnifiedExperience2Form({
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">English SEO</h4>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_en">SEO Title</Label>
                   <Input
@@ -874,11 +1084,8 @@ export function UnifiedExperience2Form({
                     {...register("seo_title_en")}
                     placeholder="Displayed in browser tab and Google results"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: Max ~60 characters
-                  </p>
+                  <p className="text-xs text-muted-foreground">Recommended: Max ~60 characters</p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="meta_description_en">Meta Description</Label>
                   <Textarea
@@ -887,11 +1094,8 @@ export function UnifiedExperience2Form({
                     placeholder="Shown in Google search results"
                     rows={3}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: Max ~155 characters
-                  </p>
+                  <p className="text-xs text-muted-foreground">Recommended: Max ~155 characters</p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="og_title_en">Open Graph Title</Label>
                   <Input
@@ -900,7 +1104,6 @@ export function UnifiedExperience2Form({
                     placeholder="Title when shared on social media"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="og_description_en">Open Graph Description</Label>
                   <Textarea
@@ -917,7 +1120,6 @@ export function UnifiedExperience2Form({
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">Hebrew SEO (עברית)</h4>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_he">כותרת SEO</Label>
                   <Input
@@ -927,11 +1129,8 @@ export function UnifiedExperience2Form({
                     dir="rtl"
                     className="bg-hebrew-input"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~60 characters
-                  </p>
+                  <p className="text-xs text-muted-foreground">Max ~60 characters</p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="meta_description_he">תיאור Meta</Label>
                   <Textarea
@@ -942,11 +1141,8 @@ export function UnifiedExperience2Form({
                     dir="rtl"
                     className="bg-hebrew-input"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~155 characters
-                  </p>
+                  <p className="text-xs text-muted-foreground">Max ~155 characters</p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="og_title_he">כותרת Open Graph</Label>
                   <Input
@@ -957,7 +1153,6 @@ export function UnifiedExperience2Form({
                     className="bg-hebrew-input"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="og_description_he">תיאור Open Graph</Label>
                   <Textarea
@@ -976,19 +1171,11 @@ export function UnifiedExperience2Form({
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">French SEO (Français)</h4>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="seo_title_fr">Titre SEO</Label>
-                  <Input
-                    id="seo_title_fr"
-                    {...register("seo_title_fr")}
-                    placeholder="Titre pour Google et l'onglet"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~60 characters
-                  </p>
+                  <Input id="seo_title_fr" {...register("seo_title_fr")} placeholder="Titre pour Google et l'onglet" />
+                  <p className="text-xs text-muted-foreground">Max ~60 characters</p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="meta_description_fr">Description Meta</Label>
                   <Textarea
@@ -997,20 +1184,12 @@ export function UnifiedExperience2Form({
                     placeholder="Description pour les résultats Google"
                     rows={3}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Max ~155 characters
-                  </p>
+                  <p className="text-xs text-muted-foreground">Max ~155 characters</p>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="og_title_fr">Titre Open Graph</Label>
-                  <Input
-                    id="og_title_fr"
-                    {...register("og_title_fr")}
-                    placeholder="Titre pour les réseaux sociaux"
-                  />
+                  <Input id="og_title_fr" {...register("og_title_fr")} placeholder="Titre pour les réseaux sociaux" />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="og_description_fr">Description Open Graph</Label>
                   <Textarea
@@ -1023,17 +1202,11 @@ export function UnifiedExperience2Form({
               </div>
             </div>
 
-            {/* OG Image - Shared */}
+            {/* OG Image – Shared */}
             <div className="space-y-2">
               <Label htmlFor="og_image">Open Graph Image</Label>
-              <Input
-                id="og_image"
-                {...register("og_image")}
-                placeholder="Image URL for social media sharing"
-              />
-              <p className="text-xs text-muted-foreground">
-                Recommended: 1200x630px. Leave empty to use hero image.
-              </p>
+              <Input id="og_image" {...register("og_image")} placeholder="Image URL for social media sharing" />
+              <p className="text-xs text-muted-foreground">Recommended: 1200x630px. Leave empty to use hero image.</p>
             </div>
           </CardContent>
         </Card>
