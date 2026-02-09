@@ -89,7 +89,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     let uploadedHeroUrl = "";
 
     try {
-      const imagesToProcess = heroUrl ? [heroUrl, ...imageUrls.slice(0, 7)] : imageUrls.slice(0, 8);
+      const imagesToProcess = heroUrl ? [heroUrl, ...imageUrls] : imageUrls;
       for (let i = 0; i < imagesToProcess.length; i++) {
         const url = imagesToProcess[i];
         try {
@@ -111,7 +111,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       setFormData((prev) => ({
         ...prev,
         hero_image: uploadedHeroUrl || prev.hero_image,
-        photos: [...prev.photos, ...uploadedUrls].slice(0, 8),
+        photos: [...prev.photos, ...uploadedUrls],
       }));
 
       if (uploadedHeroUrl || uploadedUrls.length > 0) {
@@ -337,7 +337,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       console.log("[DEBUG SAVE] dataWithSlug keys:", Object.keys(dataWithSlug));
       console.log("[DEBUG SAVE] dataWithSlug keys count:", Object.keys(dataWithSlug).length);
       console.log("[DEBUG SAVE] full payload:", JSON.stringify(dataWithSlug, null, 2));
-      // Vérifier les types des champs problématiques
       console.log("[DEBUG SAVE] Types check:", {
         star_rating: typeof dataWithSlug.star_rating,
         star_rating_val: dataWithSlug.star_rating,
@@ -380,7 +379,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       onClose();
     },
     onError: (error: any) => {
-      // ======== DEBUG ERROR ========
       toast.error("Error saving hotel: " + (error?.message || "Unknown error"));
       console.error("[DEBUG SAVE] ===== FULL ERROR =====");
       console.error("[DEBUG SAVE] error object:", error);
@@ -390,7 +388,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       console.error("[DEBUG SAVE] error.code:", error?.code);
       console.error("[DEBUG SAVE] error.statusCode:", error?.statusCode);
       console.error("[DEBUG SAVE] JSON:", JSON.stringify(error, null, 2));
-      // ======== DEBUG ERROR END ========
     },
   });
 
@@ -511,8 +508,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Gallery Images (up to 8)</Label>
-                  <span className="text-sm text-muted-foreground">{formData.photos.length} / 8 images</span>
+                  <Label>Gallery Images</Label>
+                  <span className="text-sm text-muted-foreground">{formData.photos.length} image(s)</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {formData.photos.map((photo, index) => (
@@ -533,7 +530,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                     </div>
                   ))}
 
-                  {formData.photos.length < 8 && (
+                  {formData.photos.length < 50 && (
                     <button
                       type="button"
                       className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
@@ -544,8 +541,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                         input.accept = "image/*";
                         input.onchange = async (e) => {
                           const files = Array.from((e.target as HTMLInputElement).files || []);
-                          const remainingSlots = 8 - formData.photos.length;
-                          const filesToUpload = files.slice(0, remainingSlots);
+                          const filesToUpload = files;
 
                           toast.promise(
                             Promise.all(
