@@ -156,7 +156,7 @@ export function UnifiedExperience2Form({
     queryKey: ["experience2-hotels", experienceId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experience2_hotels")
+        .from("experience2_hotels" as any)
         .select("*")
         .eq("experience_id", experienceId)
         .order("position");
@@ -284,9 +284,9 @@ export function UnifiedExperience2Form({
 
   // Load existing experience hotels into local state
   useEffect(() => {
-    if (existingExperienceHotels && existingExperienceHotels.length > 0) {
+    if (existingExperienceHotels && (existingExperienceHotels as any[]).length > 0) {
       setExperienceHotels(
-        existingExperienceHotels.map((eh) => ({
+        (existingExperienceHotels as any[]).map((eh: any) => ({
           hotel_id: eh.hotel_id,
           position: eh.position,
           nights: eh.nights ?? 1,
@@ -394,11 +394,11 @@ export function UnifiedExperience2Form({
 
   const saveExperienceHotels = async (expId: string) => {
     // Delete existing entries
-    await supabase.from("experience2_hotels").delete().eq("experience_id", expId);
+    await (supabase.from as any)("experience2_hotels").delete().eq("experience_id", expId);
 
     // Insert new entries
     if (experienceHotels.length > 0) {
-      const { error } = await supabase.from("experience2_hotels").insert(
+      const { error } = await (supabase.from as any)("experience2_hotels").insert(
         experienceHotels.map((h) => ({
           experience_id: expId,
           hotel_id: h.hotel_id,
