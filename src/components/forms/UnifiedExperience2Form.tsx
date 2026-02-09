@@ -105,6 +105,8 @@ export function UnifiedExperience2Form({
   // Multi-hotel parcours state
   const [experienceHotels, setExperienceHotels] = useState<ExperienceHotelEntry[]>([]);
   const [hotelToAdd, setHotelToAdd] = useState<string>("");
+  /** Prix chambre HyperGuest par hôtel (clé = hotel_id) */
+  const [hotelRoomPrices, setHotelRoomPrices] = useState<Record<string, number | null>>({});
 
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
@@ -156,7 +158,7 @@ export function UnifiedExperience2Form({
     queryKey: ["experience2-hotels", experienceId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experience2_hotels" as any)
+        .from("experience2_hotels")
         .select("*")
         .eq("experience_id", experienceId)
         .order("position");
@@ -284,9 +286,9 @@ export function UnifiedExperience2Form({
 
   // Load existing experience hotels into local state
   useEffect(() => {
-    if (existingExperienceHotels && (existingExperienceHotels as any[]).length > 0) {
+    if (existingExperienceHotels && existingExperienceHotels.length > 0) {
       setExperienceHotels(
-        (existingExperienceHotels as any[]).map((eh: any) => ({
+        existingExperienceHotels.map((eh) => ({
           hotel_id: eh.hotel_id,
           position: eh.position,
           nights: eh.nights ?? 1,
@@ -394,11 +396,11 @@ export function UnifiedExperience2Form({
 
   const saveExperienceHotels = async (expId: string) => {
     // Delete existing entries
-    await (supabase.from as any)("experience2_hotels").delete().eq("experience_id", expId);
+    await supabase.from("experience2_hotels").delete().eq("experience_id", expId);
 
     // Insert new entries
     if (experienceHotels.length > 0) {
-      const { error } = await (supabase.from as any)("experience2_hotels").insert(
+      const { error } = await supabase.from("experience2_hotels").insert(
         experienceHotels.map((h) => ({
           experience_id: expId,
           hotel_id: h.hotel_id,
@@ -1080,10 +1082,59 @@ export function UnifiedExperience2Form({
                       currency="ILS"
                       lang="en"
                       nights={eh.nights}
+                      hidePriceBreakdown
+                      onRoomPriceSelect={(price) => setHotelRoomPrices((prev) => ({ ...prev, [eh.hotel_id]: price }))}
                     />
                   </div>
                 );
               })}
+
+              {/* Combined total for all hotels */}
+              {(() => {
+                const pricesArr = experienceHotels.map((eh) => hotelRoomPrices[eh.hotel_id]);
+                const validPrices = pricesArr.filter((p): p is number => p != null && p > 0);
+                if (validPrices.length === 0) return null;
+                const combinedTotal = validPrices.reduce((s, p) => s + p, 0);
+                return (
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Prix Total du Parcours</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {experienceHotels.map((eh) => {
+                        const hotel = hotels?.find((h) => h.id === eh.hotel_id);
+                        const price = hotelRoomPrices[eh.hotel_id];
+                        return (
+                          <div key={eh.hotel_id} className="flex justify-between items-center text-sm">
+                            <span>
+                              {hotel?.name ?? "Hôtel"} ({eh.nights} nuit
+                              {eh.nights > 1 ? "s" : ""})
+                            </span>
+                            <span className="font-medium">
+                              {price != null && price > 0
+                                ? `₪${price.toLocaleString("en-IL", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}`
+                                : "—"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <div className="border-t pt-2 flex justify-between items-center font-bold text-base">
+                        <span>Total chambres</span>
+                        <span>
+                          ₪
+                          {combinedTotal.toLocaleString("en-IL", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </CardContent>
           </Card>
         )}
