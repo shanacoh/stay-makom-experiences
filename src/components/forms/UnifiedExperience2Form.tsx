@@ -1048,18 +1048,44 @@ export function UnifiedExperience2Form({
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Price / Availability Preview (uses first hotel) */}
+        {/* Price / Availability Preview — one per hotel in the parcours */}
         {/* ----------------------------------------------------------------- */}
-        {firstHotel && (
-          <ExperienceAvailabilityPreview
-            hyperguestPropertyId={
-              firstHotel.hyperguest_property_id != null ? String(firstHotel.hyperguest_property_id) : null
-            }
-            hotelName={firstHotel.name}
-            experienceId={currentExperienceId ?? null}
-            currency="ILS"
-            lang="en"
-          />
+        {experienceHotels.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Aperçu Prix & Disponibilités</CardTitle>
+              <CardDescription>Vérifiez la disponibilité et le prix pour chaque hôtel du parcours</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {experienceHotels.map((eh, index) => {
+                const hotel = hotels?.find((h) => h.id === eh.hotel_id);
+                if (!hotel) return null;
+                return (
+                  <div key={eh.hotel_id} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                        {index + 1}
+                      </span>
+                      <span className="font-medium">{hotel.name}</span>
+                      <span className="text-sm text-muted-foreground">
+                        — {eh.nights} nuit{eh.nights > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <ExperienceAvailabilityPreview
+                      hyperguestPropertyId={
+                        hotel.hyperguest_property_id != null ? String(hotel.hyperguest_property_id) : null
+                      }
+                      hotelName={hotel.name}
+                      experienceId={currentExperienceId ?? null}
+                      currency="ILS"
+                      lang="en"
+                      nights={eh.nights}
+                    />
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
         )}
 
         {/* ----------------------------------------------------------------- */}
