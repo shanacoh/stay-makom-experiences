@@ -148,16 +148,7 @@ export function ExperienceAvailabilityPreview({
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
 
-  // When `propNights` is provided, auto-set checkout when checkin changes
-  useEffect(() => {
-    if (propNights && propNights > 0 && dateRange.from) {
-      const autoCheckout = addDays(dateRange.from, propNights);
-      // Only update if different to avoid infinite loop
-      if (!dateRange.to || dateRange.to.getTime() !== autoCheckout.getTime()) {
-        setDateRange((prev) => ({ ...prev, to: autoCheckout }));
-      }
-    }
-  }, [dateRange.from, propNights]);
+  // No date override — the user freely picks check-in and check-out
 
   // -----------------------------------------------------------------------
   // Search params
@@ -264,33 +255,14 @@ export function ExperienceAvailabilityPreview({
   // -----------------------------------------------------------------------
 
   const handleCheckPrice = () => {
-    if (!dateRange.from) return;
-
-    // When propNights is provided, compute checkout directly from checkin
-    // (don't rely on useEffect having set dateRange.to — avoids race condition
-    // with DateRangePicker internal state)
-    if (propNights && propNights > 0) {
-      const autoTo = addDays(dateRange.from, propNights);
-      setDateRange((prev) => ({ ...prev, to: autoTo }));
-      setSubmittedRange({ from: dateRange.from, to: autoTo });
-      setSelectedRoomId(null);
-      setSelectedRatePlanId(null);
-      return;
-    }
-
-    // Manual mode: both from and to must be selected
-    if (dateRange.to && dateRange.from < dateRange.to) {
-      setSubmittedRange({ from: dateRange.from, to: dateRange.to });
-      setSelectedRoomId(null);
-      setSelectedRatePlanId(null);
-    }
+    if (!dateRange.from || !dateRange.to) return;
+    if (dateRange.from >= dateRange.to) return;
+    setSubmittedRange({ from: dateRange.from, to: dateRange.to });
+    setSelectedRoomId(null);
+    setSelectedRatePlanId(null);
   };
 
-  // When propNights is set, we only need a checkin date to enable the button
-  const canCheckPrice =
-    !!hyperguestPropertyId &&
-    !!dateRange.from &&
-    (propNights ? propNights > 0 : !!dateRange.to && dateRange.from < dateRange.to);
+  const canCheckPrice = !!hyperguestPropertyId && !!dateRange.from && !!dateRange.to && dateRange.from < dateRange.to;
 
   // -----------------------------------------------------------------------
   // Render: no HyperGuest ID
@@ -336,7 +308,7 @@ export function ExperienceAvailabilityPreview({
 
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <p className="text-sm font-medium">{propNights ? t.selectCheckin : t.selectDates}</p>
+          <p className="text-sm font-medium">{t.selectDates}</p>
           <DateRangePicker value={dateRange} onChange={setDateRange} />
           <div className="flex items-center gap-2">
             <Button
@@ -349,14 +321,12 @@ export function ExperienceAvailabilityPreview({
               {t.checkPrice}
             </Button>
             {!submittedRange && dateRange.from && dateRange.to && (
-              <span className="text-xs text-muted-foreground">{propNights ? t.noDatesNights : t.noDates}</span>
+              <span className="text-xs text-muted-foreground">{t.noDates}</span>
             )}
           </div>
         </div>
 
-        {!submittedRange && (
-          <p className="text-sm text-muted-foreground italic">{propNights ? t.noDatesNights : t.noDates}</p>
-        )}
+        {!submittedRange && <p className="text-sm text-muted-foreground italic">{t.noDates}</p>}
 
         {exceededMaxNights && (
           <Alert className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30">
