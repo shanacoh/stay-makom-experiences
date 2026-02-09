@@ -122,6 +122,11 @@ export default function Experience2() {
     city_he: hotel.city_he || undefined,
     region: hotel.region || undefined,
     region_he: hotel.region_he || undefined,
+    star_rating: hotel.star_rating ?? undefined,
+    check_in_time: hotel.check_in_time || undefined,
+    check_out_time: hotel.check_out_time || undefined,
+    number_of_rooms: hotel.number_of_rooms ?? undefined,
+    property_type: hotel.property_type || undefined,
   } : null;
 
   // Build includes for ProgramTimeline - transform strings to IncludeItem format

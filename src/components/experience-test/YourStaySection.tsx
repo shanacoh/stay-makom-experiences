@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Wifi, Car, Coffee, UtensilsCrossed, Waves, TreePine } from "lucide-react";
+import { MapPin, Star, Wifi, Car, Coffee, UtensilsCrossed, Waves, TreePine, Clock, DoorOpen, Hotel as HotelIcon } from "lucide-react";
 import { getLocalizedField, type Language } from "@/hooks/useLanguage";
 
 interface Hotel {
@@ -19,6 +19,11 @@ interface Hotel {
   amenities?: string[];
   highlights?: string[];
   highlights_he?: string[];
+  star_rating?: number;
+  check_in_time?: string;
+  check_out_time?: string;
+  number_of_rooms?: number;
+  property_type?: string;
 }
 
 interface YourStaySectionProps {
@@ -46,6 +51,35 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
 
   // Get 3 photos for the grid
   const hotelPhotos = [hotel.hero_image, ...(hotel.photos || [])].filter(Boolean).slice(0, 3);
+
+  // Build info chips from new fields
+  const infoChips: { icon: React.ReactNode; label: string }[] = [];
+  if (hotel.star_rating && hotel.star_rating > 0) {
+    infoChips.push({
+      icon: <Star className="h-3.5 w-3.5 fill-primary text-primary" />,
+      label: "★".repeat(hotel.star_rating),
+    });
+  }
+  if (hotel.check_in_time) {
+    const checkInLabel = lang === "he" ? "צ'ק-אין" : lang === "fr" ? "Arrivée" : "Check-in";
+    infoChips.push({
+      icon: <DoorOpen className="h-3.5 w-3.5" />,
+      label: `${checkInLabel} ${hotel.check_in_time}`,
+    });
+  }
+  if (hotel.check_out_time) {
+    const checkOutLabel = lang === "he" ? "צ'ק-אאוט" : lang === "fr" ? "Départ" : "Check-out";
+    infoChips.push({
+      icon: <Clock className="h-3.5 w-3.5" />,
+      label: `${checkOutLabel} ${hotel.check_out_time}`,
+    });
+  }
+  if (hotel.property_type) {
+    infoChips.push({
+      icon: <HotelIcon className="h-3.5 w-3.5" />,
+      label: hotel.property_type,
+    });
+  }
 
   return (
     <section className="py-6">
@@ -101,6 +135,21 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
             </div>
           </div>
         </div>
+
+        {/* Info Chips (star rating, check-in/out, property type) */}
+        {infoChips.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {infoChips.map((chip, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 text-sm text-foreground"
+              >
+                {chip.icon}
+                <span>{chip.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Highlights */}
         {highlights.length > 0 && (
