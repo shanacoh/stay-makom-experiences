@@ -220,13 +220,6 @@ export function ExperienceAvailabilityPreview({
 
   const ratePlanPrices = selectedRatePlan?.prices ?? null;
 
-  // Extraire le prix total chambre HyperGuest et notifier le parent
-  const computedRoomTotal = useMemo(() => extractRoomTotal(ratePlanPrices), [ratePlanPrices]);
-
-  useEffect(() => {
-    onRoomPriceSelect?.(computedRoomTotal);
-  }, [computedRoomTotal, onRoomPriceSelect]);
-
   const priceBreakdown = useExperience2Price(
     experienceId,
     null,
@@ -234,6 +227,24 @@ export function ExperienceAvailabilityPreview({
     effectiveNights,
     ratePlanPrices as Parameters<typeof useExperience2Price>[4],
   );
+
+  // Extraire le prix total et notifier le parent
+  // 1. Essaie extractRoomTotal sur les prix bruts HyperGuest
+  // 2. Fallback : prend le total calculé par useExperience2Price (qui inclut les addons)
+  const computedRoomTotal = useMemo(() => {
+    const fromRaw = extractRoomTotal(ratePlanPrices);
+    if (fromRaw != null) return fromRaw;
+    // Fallback : extraire depuis le price breakdown déjà calculé
+    if (priceBreakdown) {
+      const pb = priceBreakdown as any;
+      return pb.grandTotal ?? pb.total ?? pb.roomTotal ?? pb.totalPrice ?? null;
+    }
+    return null;
+  }, [ratePlanPrices, priceBreakdown]);
+
+  useEffect(() => {
+    onRoomPriceSelect?.(computedRoomTotal);
+  }, [computedRoomTotal, onRoomPriceSelect]);
 
   const roomsList = searchResult?.results?.[0]?.rooms ?? searchResult?.rooms ?? [];
 

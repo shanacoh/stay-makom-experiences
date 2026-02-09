@@ -1082,7 +1082,6 @@ export function UnifiedExperience2Form({
                       currency="ILS"
                       lang="en"
                       nights={eh.nights}
-                      hidePriceBreakdown
                       onRoomPriceSelect={(price) => setHotelRoomPrices((prev) => ({ ...prev, [eh.hotel_id]: price }))}
                     />
                   </div>
