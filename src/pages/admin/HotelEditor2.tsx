@@ -107,11 +107,13 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           console.error(`Failed to download image ${i}:`, err);
         }
       }
+
       setFormData((prev) => ({
         ...prev,
         hero_image: uploadedHeroUrl || prev.hero_image,
         photos: [...prev.photos, ...uploadedUrls].slice(0, 8),
       }));
+
       if (uploadedHeroUrl || uploadedUrls.length > 0) {
         toast.success(`${uploadedUrls.length + (uploadedHeroUrl ? 1 : 0)} images imported successfully!`);
       }
@@ -303,6 +305,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     }
   };
 
+  // ==========================================================================
+  // SAVE MUTATION (avec debug logging)
+  // ==========================================================================
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       const dataWithSlug = {
@@ -321,15 +326,52 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         check_in_time: data.check_in_time || null,
         check_out_time: data.check_out_time || null,
         hyperguest_extras: data.hyperguest_extras?.length ? (data.hyperguest_extras as unknown as Json) : null,
-        hyperguest_facilities: data.hyperguest_facilities?.length ? (data.hyperguest_facilities as unknown as Json) : null,
+        hyperguest_facilities: data.hyperguest_facilities?.length
+          ? (data.hyperguest_facilities as unknown as Json)
+          : null,
       };
 
+      // ======== DEBUG START ========
+      console.log("[DEBUG SAVE] hotelId:", hotelId);
+      console.log("[DEBUG SAVE] isUpdate:", !!hotelId);
+      console.log("[DEBUG SAVE] dataWithSlug keys:", Object.keys(dataWithSlug));
+      console.log("[DEBUG SAVE] dataWithSlug keys count:", Object.keys(dataWithSlug).length);
+      console.log("[DEBUG SAVE] full payload:", JSON.stringify(dataWithSlug, null, 2));
+      // Vérifier les types des champs problématiques
+      console.log("[DEBUG SAVE] Types check:", {
+        star_rating: typeof dataWithSlug.star_rating,
+        star_rating_val: dataWithSlug.star_rating,
+        min_stay: typeof dataWithSlug.min_stay,
+        min_stay_val: dataWithSlug.min_stay,
+        max_stay: typeof dataWithSlug.max_stay,
+        max_stay_val: dataWithSlug.max_stay,
+        number_of_rooms: typeof dataWithSlug.number_of_rooms,
+        number_of_rooms_val: dataWithSlug.number_of_rooms,
+        room_capacities: typeof dataWithSlug.room_capacities,
+        room_capacities_isNull: dataWithSlug.room_capacities === null,
+        hyperguest_extras: typeof dataWithSlug.hyperguest_extras,
+        hyperguest_extras_isNull: dataWithSlug.hyperguest_extras === null,
+        hyperguest_facilities: typeof dataWithSlug.hyperguest_facilities,
+        hyperguest_facilities_isNull: dataWithSlug.hyperguest_facilities === null,
+      });
+      // ======== DEBUG END ========
+
       if (hotelId) {
+        console.log("[DEBUG SAVE] Calling supabase.from('hotels2').update()...");
         const { error } = await supabase.from("hotels2").update(dataWithSlug).eq("id", hotelId);
-        if (error) throw error;
+        if (error) {
+          console.error("[DEBUG SAVE] UPDATE error:", JSON.stringify(error, null, 2));
+          throw error;
+        }
+        console.log("[DEBUG SAVE] UPDATE success!");
       } else {
+        console.log("[DEBUG SAVE] Calling supabase.from('hotels2').insert()...");
         const { error } = await supabase.from("hotels2").insert([dataWithSlug]);
-        if (error) throw error;
+        if (error) {
+          console.error("[DEBUG SAVE] INSERT error:", JSON.stringify(error, null, 2));
+          throw error;
+        }
+        console.log("[DEBUG SAVE] INSERT success!");
       }
     },
     onSuccess: () => {
@@ -337,14 +379,24 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       toast.success(hotelId ? "Hotel updated" : "Hotel created");
       onClose();
     },
-    onError: (error) => {
-      toast.error("Error saving hotel");
-      console.error(error);
+    onError: (error: any) => {
+      // ======== DEBUG ERROR ========
+      toast.error("Error saving hotel: " + (error?.message || "Unknown error"));
+      console.error("[DEBUG SAVE] ===== FULL ERROR =====");
+      console.error("[DEBUG SAVE] error object:", error);
+      console.error("[DEBUG SAVE] error.message:", error?.message);
+      console.error("[DEBUG SAVE] error.details:", error?.details);
+      console.error("[DEBUG SAVE] error.hint:", error?.hint);
+      console.error("[DEBUG SAVE] error.code:", error?.code);
+      console.error("[DEBUG SAVE] error.statusCode:", error?.statusCode);
+      console.error("[DEBUG SAVE] JSON:", JSON.stringify(error, null, 2));
+      // ======== DEBUG ERROR END ========
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[DEBUG SAVE] handleSubmit triggered, formData:", formData);
     saveMutation.mutate(formData);
   };
 
@@ -462,7 +514,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   <Label>Gallery Images (up to 8)</Label>
                   <span className="text-sm text-muted-foreground">{formData.photos.length} / 8 images</span>
                 </div>
-
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {formData.photos.map((photo, index) => (
                     <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border bg-muted">
@@ -688,6 +739,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div className="space-y-2">
                     <Label>Type de propriété</Label>
                     <Input
@@ -696,6 +748,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       placeholder="Hotel, Apartment…"
                     />
                   </div>
+
                   <div className="space-y-2">
                     <Label>Nombre de chambres</Label>
                     <Input
@@ -711,6 +764,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       placeholder="—"
                     />
                   </div>
+
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label>Check-in</Label>
@@ -813,6 +867,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   <p className="text-xs text-muted-foreground">
                     Tout ce que l&apos;hôtel propose, classé par section (catégorie HyperGuest) – sans prix.
                   </p>
+
                   {formData.hyperguest_facilities && formData.hyperguest_facilities.length > 0 ? (
                     (() => {
                       const bySection = formData.hyperguest_facilities.reduce(
@@ -827,6 +882,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                         },
                         {} as Record<string, FacilityItem[]>,
                       );
+
                       const sectionOrder = [
                         "Services",
                         "Pool",
@@ -880,6 +936,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   <p className="text-xs text-muted-foreground">
                     Taxes et frais avec montants – en lecture seule. Appliqués au moment du checkout.
                   </p>
+
                   {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 ? (
                     <ul className="rounded-lg border divide-y text-sm">
                       {formData.hyperguest_extras.map((extra, i) => (
@@ -1064,6 +1121,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   />
                 </div>
               </div>
+
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">Hebrew SEO (עברית)</h4>
@@ -1092,6 +1150,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   />
                 </div>
               </div>
+
               <div className="space-y-4">
                 <div className="bg-background p-2 rounded">
                   <h4 className="font-medium text-sm">French SEO (Français)</h4>
