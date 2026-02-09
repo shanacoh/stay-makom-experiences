@@ -132,7 +132,7 @@ export default function Experience2() {
     notes: string | null;
     notes_he: string | null;
     hotel: any;
-  }[] = (experience.experience2_hotels || []).map((eh: any) => ({
+  }[] = ((experience as any).experience2_hotels || []).map((eh: any) => ({
     position: eh.position ?? 1,
     nights: eh.nights ?? 1,
     notes: eh.notes ?? null,

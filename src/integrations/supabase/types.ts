@@ -670,6 +670,54 @@ export type Database = {
           },
         ]
       }
+      experience2_hotels: {
+        Row: {
+          created_at: string | null
+          experience_id: string
+          hotel_id: string
+          id: string
+          nights: number | null
+          notes: string | null
+          notes_he: string | null
+          position: number
+        }
+        Insert: {
+          created_at?: string | null
+          experience_id: string
+          hotel_id: string
+          id?: string
+          nights?: number | null
+          notes?: string | null
+          notes_he?: string | null
+          position?: number
+        }
+        Update: {
+          created_at?: string | null
+          experience_id?: string
+          hotel_id?: string
+          id?: string
+          nights?: number | null
+          notes?: string | null
+          notes_he?: string | null
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_hotels_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience2_hotels_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           accessibility_info: string | null
@@ -891,7 +939,7 @@ export type Database = {
           good_to_know_he: string[] | null
           google_maps_link: string | null
           hero_image: string | null
-          hotel_id: string
+          hotel_id: string | null
           id: string
           includes: string[] | null
           includes_he: string[] | null
@@ -952,7 +1000,7 @@ export type Database = {
           good_to_know_he?: string[] | null
           google_maps_link?: string | null
           hero_image?: string | null
-          hotel_id: string
+          hotel_id?: string | null
           id?: string
           includes?: string[] | null
           includes_he?: string[] | null
@@ -1013,7 +1061,7 @@ export type Database = {
           good_to_know_he?: string[] | null
           google_maps_link?: string | null
           hero_image?: string | null
-          hotel_id?: string
+          hotel_id?: string | null
           id?: string
           includes?: string[] | null
           includes_he?: string[] | null
