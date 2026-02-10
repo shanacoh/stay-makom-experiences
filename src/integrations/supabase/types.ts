@@ -931,6 +931,8 @@ export type Database = {
           category_id: string | null
           checkin_time: string | null
           checkout_time: string | null
+          commission_addons_pct: number | null
+          commission_room_pct: number | null
           created_at: string | null
           currency: string | null
           duration: string | null
@@ -963,6 +965,9 @@ export type Database = {
           og_title_fr: string | null
           og_title_he: string | null
           photos: string[] | null
+          promo_is_percentage: boolean | null
+          promo_type: string | null
+          promo_value: number | null
           region_type: string | null
           seo_title_en: string | null
           seo_title_fr: string | null
@@ -973,6 +978,7 @@ export type Database = {
           status: Database["public"]["Enums"]["hotel_status"] | null
           subtitle: string | null
           subtitle_he: string | null
+          tax_pct: number | null
           title: string
           title_he: string | null
           updated_at: string | null
@@ -992,6 +998,8 @@ export type Database = {
           category_id?: string | null
           checkin_time?: string | null
           checkout_time?: string | null
+          commission_addons_pct?: number | null
+          commission_room_pct?: number | null
           created_at?: string | null
           currency?: string | null
           duration?: string | null
@@ -1024,6 +1032,9 @@ export type Database = {
           og_title_fr?: string | null
           og_title_he?: string | null
           photos?: string[] | null
+          promo_is_percentage?: boolean | null
+          promo_type?: string | null
+          promo_value?: number | null
           region_type?: string | null
           seo_title_en?: string | null
           seo_title_fr?: string | null
@@ -1034,6 +1045,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["hotel_status"] | null
           subtitle?: string | null
           subtitle_he?: string | null
+          tax_pct?: number | null
           title: string
           title_he?: string | null
           updated_at?: string | null
@@ -1053,6 +1065,8 @@ export type Database = {
           category_id?: string | null
           checkin_time?: string | null
           checkout_time?: string | null
+          commission_addons_pct?: number | null
+          commission_room_pct?: number | null
           created_at?: string | null
           currency?: string | null
           duration?: string | null
@@ -1085,6 +1099,9 @@ export type Database = {
           og_title_fr?: string | null
           og_title_he?: string | null
           photos?: string[] | null
+          promo_is_percentage?: boolean | null
+          promo_type?: string | null
+          promo_value?: number | null
           region_type?: string | null
           seo_title_en?: string | null
           seo_title_fr?: string | null
@@ -1095,6 +1112,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["hotel_status"] | null
           subtitle?: string | null
           subtitle_he?: string | null
+          tax_pct?: number | null
           title?: string
           title_he?: string | null
           updated_at?: string | null
@@ -2278,7 +2296,7 @@ export type Database = {
       }
     }
     Enums: {
-      addon_type: "commission" | "per_night" | "tax"
+      addon_type: "commission" | "per_night" | "tax" | "per_person"
       app_role: "admin" | "hotel_admin" | "customer"
       base_price_type: "fixed" | "per_person" | "per_booking"
       booking_extra_status: "pending" | "done" | "unavailable"
@@ -2421,7 +2439,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      addon_type: ["commission", "per_night", "tax"],
+      addon_type: ["commission", "per_night", "tax", "per_person"],
       app_role: ["admin", "hotel_admin", "customer"],
       base_price_type: ["fixed", "per_person", "per_booking"],
       booking_extra_status: ["pending", "done", "unavailable"],

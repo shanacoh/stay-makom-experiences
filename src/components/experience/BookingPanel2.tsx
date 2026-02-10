@@ -149,7 +149,7 @@ export function BookingPanel2({
 
   const isReadyToBook = dateRange.from && dateRange.to && selectedRoomId && selectedRatePlanId && priceBreakdown;
 
-  const displayTotal = priceBreakdown?.total ?? 0;
+  const displayTotal = priceBreakdown?.finalTotal ?? 0;
   const totalIsNaN = Number.isNaN(displayTotal);
 
   if (!hyperguestPropertyId) {
