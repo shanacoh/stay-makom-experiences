@@ -3,12 +3,13 @@
  * Liste chargée au montage, filtre par nom / ville / région dans le popover
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   getAllHotels,
   getPropertyDetails,
@@ -120,6 +121,7 @@ export function HyperGuestHotelSearch({
 }: HyperGuestHotelSearchProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedHotel, setSelectedHotel] = useState<HyperGuestHotel | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -135,21 +137,38 @@ export function HyperGuestHotelSearch({
     retry: 2,
   });
 
-  const filteredHotels =
-    hotels?.filter((hotel) => {
-      if (!searchTerm.trim()) return true;
-      const term = searchTerm.toLowerCase();
-      return (
-        hotel.name?.toLowerCase().includes(term) ||
-        hotel.cityName?.toLowerCase().includes(term) ||
-        hotel.regionName?.toLowerCase().includes(term) ||
-        hotel.countryCode?.toLowerCase().includes(term)
-      );
-    }) ?? [];
+  const uniqueCities = useMemo(() => {
+    if (!hotels) return [];
+    const cities = hotels
+      .map((hotel) => hotel.cityName || hotel.city)
+      .filter((city): city is string => Boolean(city));
+    return Array.from(new Set(cities)).sort();
+  }, [hotels]);
+
+  const filteredHotels = useMemo(() => {
+    if (!hotels) return [];
+    return hotels.filter((hotel) => {
+      const matchesSearch = !searchTerm.trim() || (() => {
+        const term = searchTerm.toLowerCase();
+        return (
+          hotel.name?.toLowerCase().includes(term) ||
+          hotel.cityName?.toLowerCase().includes(term) ||
+          hotel.city?.toLowerCase().includes(term) ||
+          hotel.regionName?.toLowerCase().includes(term) ||
+          hotel.countryCode?.toLowerCase().includes(term)
+        );
+      })();
+      const matchesCity = !selectedCity ||
+        hotel.cityName === selectedCity ||
+        hotel.city === selectedCity;
+      return matchesSearch && matchesCity;
+    });
+  }, [hotels, searchTerm, selectedCity]);
 
   useEffect(() => {
     if (open) {
       setSearchTerm("");
+      setSelectedCity("");
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
   }, [open]);
@@ -413,6 +432,21 @@ export function HyperGuestHotelSearch({
         </PopoverTrigger>
 
         <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+          {/* City Filter Dropdown */}
+          <div className="border-b px-3 py-2">
+            <Label className="text-xs text-muted-foreground mb-1 block">Filter by City</Label>
+            <Select value={selectedCity || "all"} onValueChange={(v) => setSelectedCity(v === "all" ? "" : v)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="All cities" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">All cities</SelectItem>
+                {uniqueCities.map((city) => (
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex items-center border-b px-2">
             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
             <Input
@@ -488,7 +522,7 @@ export function HyperGuestHotelSearch({
           </div>
           {!isLoading && hotels && (
             <div className="border-t px-3 py-2 text-xs text-muted-foreground">
-              {hotels.length} hotels (Israel) • Use search to filter
+              Showing {filteredHotels.length} of {hotels.length} hotels (Israel)
             </div>
           )}
         </PopoverContent>

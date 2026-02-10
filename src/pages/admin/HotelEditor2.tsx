@@ -12,7 +12,8 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
-import { HotelExtrasManager } from "@/components/admin/HotelExtrasManager";
+import { Hotel2ExtrasManager } from "@/components/admin/Hotel2ExtrasManager";
+import { StickyDraftButton } from "@/components/admin/StickyDraftButton";
 import { Link } from "react-router-dom";
 import HyperGuestHotelSearch from "@/components/admin/HyperGuestHotelSearch";
 import type {
@@ -32,6 +33,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isDownloadingImages, setIsDownloadingImages] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [hyperguestId, setHyperguestId] = useState<number | null>(null);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -376,7 +378,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-hotels2"] });
       toast.success(hotelId ? "Hotel updated" : "Hotel created");
-      onClose();
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2500);
+      if (!hotelId) onClose();
     },
     onError: (error: any) => {
       toast.error("Error saving hotel: " + (error?.message || "Unknown error"));
@@ -1194,11 +1198,22 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               </p>
             </CardHeader>
             <CardContent>
-              <HotelExtrasManager hotelId={hotelId} />
+              <Hotel2ExtrasManager
+                hotelId={hotelId}
+                hyperguestExtras={formData.hyperguest_extras}
+              />
             </CardContent>
           </Card>
         )}
       </form>
+
+      <StickyDraftButton
+        onClick={() => saveMutation.mutate(formData)}
+        isLoading={saveMutation.isPending}
+        isSaved={justSaved}
+        disabled={!formData.name}
+        showPulse={true}
+      />
     </div>
   );
 };
