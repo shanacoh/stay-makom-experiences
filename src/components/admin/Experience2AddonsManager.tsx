@@ -1,9 +1,11 @@
 // =============================================================================
 // src/components/admin/Experience2AddonsManager.tsx
-// Gestionnaire d'addons et pricing V2 — 3 sections :
-//   A. Addons par personne (CRUD depuis experience2_addons)
-//   B. Commissions & Taxe (colonnes experiences2)
-//   C. Promo (colonnes experiences2)
+// Gestionnaire d'addons par personne — V2
+//
+// Supporte deux modes :
+//   - Mode DB (experienceId fourni) : CRUD direct dans experience2_addons
+//   - Mode local (pas d'experienceId) : gère les addons en mémoire,
+//     le parent les sauvegarde après création de l'expérience
 // =============================================================================
 
 import { useState, useEffect } from "react";
@@ -15,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,43 +28,57 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2, Users, Percent, Tag, Loader2, Save } from "lucide-react";
+import { Plus, Trash2, Users, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { ExperienceAddon, PricingConfig, PromoType } from "@/types/experience2_addons";
+import type { ExperienceAddon } from "@/types/experience2_addons";
+
+// ---------------------------------------------------------------------------
+// Local addon type (used when no experienceId yet)
+// ---------------------------------------------------------------------------
+
+export interface LocalAddonEntry {
+  id: string; // temp UUID locally, real UUID from DB
+  name: string;
+  name_he: string | null;
+  value: number;
+  is_active: boolean;
+}
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
 interface Experience2AddonsManagerProps {
+  /** Si fourni, les addons sont lus/écrits directement en base */
   experienceId: string | null | undefined;
   disabled?: boolean;
+  /** Addons en mémoire locale (mode création, avant que l'expérience soit sauvegardée) */
+  localAddons?: LocalAddonEntry[];
+  /** Callback quand les addons locaux changent */
+  onLocalAddonsChange?: (addons: LocalAddonEntry[]) => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function Experience2AddonsManager({ experienceId, disabled = false }: Experience2AddonsManagerProps) {
+export function Experience2AddonsManager({
+  experienceId,
+  disabled = false,
+  localAddons = [],
+  onLocalAddonsChange,
+}: Experience2AddonsManagerProps) {
   const queryClient = useQueryClient();
+  const isLocalMode = !experienceId;
 
-  // ─── State: per-person addons ───
+  // ─── State: new addon form ───
   const [newAddonName, setNewAddonName] = useState("");
   const [newAddonNameHe, setNewAddonNameHe] = useState("");
   const [newAddonValue, setNewAddonValue] = useState<number>(0);
   const [deleteAddonId, setDeleteAddonId] = useState<string | null>(null);
 
-  // ─── State: pricing config ───
-  const [commissionRoomPct, setCommissionRoomPct] = useState(0);
-  const [commissionAddonsPct, setCommissionAddonsPct] = useState(0);
-  const [taxPct, setTaxPct] = useState(0);
-  const [promoType, setPromoType] = useState<PromoType | "none">("none");
-  const [promoValue, setPromoValue] = useState<number>(0);
-  const [promoIsPercentage, setPromoIsPercentage] = useState(true);
-  const [configDirty, setConfigDirty] = useState(false);
-
-  // ─── Query: fetch addons ───
-  const { data: addons, isLoading: isLoadingAddons } = useQuery({
+  // ─── Query: fetch addons from DB (only when experienceId exists) ───
+  const { data: dbAddons, isLoading: isLoadingAddons } = useQuery({
     queryKey: ["experience2-addons", experienceId],
     queryFn: async () => {
       if (!experienceId) return [];
@@ -78,41 +93,28 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
     enabled: !!experienceId,
   });
 
-  // ─── Query: fetch pricing config ───
-  const { data: pricingConfig, isLoading: isLoadingConfig } = useQuery({
-    queryKey: ["experience2-pricing-config", experienceId],
-    queryFn: async () => {
-      if (!experienceId) return null;
-      const { data, error } = await supabase
-        .from("experiences2")
-        .select("commission_room_pct, commission_addons_pct, tax_pct, promo_type, promo_value, promo_is_percentage")
-        .eq("id", experienceId)
-        .single();
-      if (error) throw error;
-      return data as PricingConfig;
-    },
-    enabled: !!experienceId,
-  });
-
-  // Sync config state when data loads
+  // Sync DB addons → local addons when they load (so parent always has the list)
   useEffect(() => {
-    if (pricingConfig) {
-      setCommissionRoomPct(pricingConfig.commission_room_pct ?? 0);
-      setCommissionAddonsPct(pricingConfig.commission_addons_pct ?? 0);
-      setTaxPct(pricingConfig.tax_pct ?? 0);
-      setPromoType(pricingConfig.promo_type ?? "none");
-      setPromoValue(pricingConfig.promo_value ?? 0);
-      setPromoIsPercentage(pricingConfig.promo_is_percentage ?? true);
-      setConfigDirty(false);
+    if (dbAddons && !isLocalMode && onLocalAddonsChange) {
+      const synced: LocalAddonEntry[] = dbAddons
+        .filter((a) => a.type === "per_person")
+        .map((a) => ({
+          id: a.id,
+          name: a.name,
+          name_he: a.name_he ?? null,
+          value: a.value,
+          is_active: a.is_active,
+        }));
+      onLocalAddonsChange(synced);
     }
-  }, [pricingConfig]);
+  }, [dbAddons, isLocalMode]);
 
-  // ─── Mutations: addons ───
+  // ─── Mutations: DB mode ───
 
   const addAddonMutation = useMutation({
     mutationFn: async () => {
       if (!experienceId) throw new Error("No experience ID");
-      const maxOrder = (addons ?? []).reduce((m, a) => Math.max(m, a.calculation_order), 0);
+      const maxOrder = (dbAddons ?? []).reduce((m, a) => Math.max(m, a.calculation_order), 0);
       const { error } = await supabase.from("experience2_addons").insert({
         experience_id: experienceId,
         type: "per_person" as const,
@@ -127,10 +129,10 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
     },
     onSuccess: () => {
       toast.success("Addon ajouté");
-      setNewAddonName("");
-      setNewAddonNameHe("");
-      setNewAddonValue(0);
-      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
+      resetNewForm();
+      queryClient.invalidateQueries({
+        queryKey: ["experience2-addons", experienceId],
+      });
     },
     onError: (err: any) => toast.error(err.message || "Erreur lors de l'ajout"),
   });
@@ -141,7 +143,9 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["experience2-addons", experienceId],
+      });
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -154,54 +158,86 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
     onSuccess: () => {
       toast.success("Addon supprimé");
       setDeleteAddonId(null);
-      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["experience2-addons", experienceId],
+      });
     },
     onError: (err: any) => toast.error(err.message),
   });
 
-  // ─── Mutation: save pricing config ───
+  // ─── Local mode helpers ───
 
-  const saveConfigMutation = useMutation({
-    mutationFn: async () => {
-      if (!experienceId) throw new Error("No experience ID");
-      const { error } = await supabase
-        .from("experiences2")
-        .update({
-          commission_room_pct: commissionRoomPct,
-          commission_addons_pct: commissionAddonsPct,
-          tax_pct: taxPct,
-          promo_type: promoType === "none" ? null : promoType,
-          promo_value: promoType === "none" ? null : promoValue,
-          promo_is_percentage: promoIsPercentage,
-        })
-        .eq("id", experienceId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Configuration pricing sauvegardée");
-      setConfigDirty(false);
-      queryClient.invalidateQueries({
-        queryKey: ["experience2-pricing-config", experienceId],
-      });
-    },
-    onError: (err: any) => toast.error(err.message || "Erreur sauvegarde"),
-  });
-
-  // ─── Filter per-person addons ───
-
-  const perPersonAddons = (addons ?? []).filter((a) => a.type === "per_person");
-
-  // ─── Loading / No experience ───
-
-  if (!experienceId) {
-    return (
-      <div className="text-sm text-muted-foreground italic py-4">
-        Sauvegardez d'abord l'expérience (brouillon) pour configurer le pricing.
-      </div>
-    );
+  function resetNewForm() {
+    setNewAddonName("");
+    setNewAddonNameHe("");
+    setNewAddonValue(0);
   }
 
-  if (isLoadingAddons || isLoadingConfig) {
+  function handleAddLocal() {
+    if (!newAddonName.trim() || newAddonValue <= 0) return;
+    const newEntry: LocalAddonEntry = {
+      id: crypto.randomUUID(),
+      name: newAddonName.trim(),
+      name_he: newAddonNameHe.trim() || null,
+      value: newAddonValue,
+      is_active: true,
+    };
+    onLocalAddonsChange?.([...localAddons, newEntry]);
+    resetNewForm();
+  }
+
+  function handleToggleLocal(id: string, isActive: boolean) {
+    onLocalAddonsChange?.(localAddons.map((a) => (a.id === id ? { ...a, is_active: isActive } : a)));
+  }
+
+  function handleDeleteLocal(id: string) {
+    onLocalAddonsChange?.(localAddons.filter((a) => a.id !== id));
+    setDeleteAddonId(null);
+  }
+
+  // ─── Resolved addons list ───
+
+  const perPersonAddons: LocalAddonEntry[] = isLocalMode
+    ? localAddons
+    : (dbAddons ?? [])
+        .filter((a) => a.type === "per_person")
+        .map((a) => ({
+          id: a.id,
+          name: a.name,
+          name_he: a.name_he ?? null,
+          value: a.value,
+          is_active: a.is_active,
+        }));
+
+  // ─── Handlers (dispatch to local or DB mode) ───
+
+  function handleAdd() {
+    if (isLocalMode) {
+      handleAddLocal();
+    } else {
+      addAddonMutation.mutate();
+    }
+  }
+
+  function handleToggle(id: string, isActive: boolean) {
+    if (isLocalMode) {
+      handleToggleLocal(id, isActive);
+    } else {
+      toggleAddonMutation.mutate({ id, isActive });
+    }
+  }
+
+  function handleDelete(id: string) {
+    if (isLocalMode) {
+      handleDeleteLocal(id);
+    } else {
+      deleteAddonMutation.mutate(id);
+    }
+  }
+
+  // ─── Loading ───
+
+  if (!isLocalMode && isLoadingAddons) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -212,12 +248,7 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
   // ─── Render ───
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Configuration Pricing</h3>
-
-      {/* ================================================================= */}
-      {/* Section A: Addons par personne */}
-      {/* ================================================================= */}
+    <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -238,7 +269,7 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Switch
                       checked={addon.is_active}
-                      onCheckedChange={(checked) => toggleAddonMutation.mutate({ id: addon.id, isActive: checked })}
+                      onCheckedChange={(checked) => handleToggle(addon.id, checked)}
                       disabled={disabled}
                     />
                     <div className="min-w-0 flex-1">
@@ -319,8 +350,10 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => addAddonMutation.mutate()}
-                disabled={disabled || !newAddonName.trim() || newAddonValue <= 0 || addAddonMutation.isPending}
+                onClick={handleAdd}
+                disabled={
+                  disabled || !newAddonName.trim() || newAddonValue <= 0 || (!isLocalMode && addAddonMutation.isPending)
+                }
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Ajouter
@@ -330,196 +363,7 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
         </CardContent>
       </Card>
 
-      {/* ================================================================= */}
-      {/* Section B: Commissions & Taxe */}
-      {/* ================================================================= */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Percent className="h-4 w-4 text-orange-600" />
-            Commissions & Taxe
-          </CardTitle>
-          <CardDescription>Commissions différenciées (chambre vs addons) et taux de taxe</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="comm-room" className="text-xs">
-                Commission chambre (%)
-              </Label>
-              <Input
-                id="comm-room"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={commissionRoomPct || ""}
-                onChange={(e) => {
-                  setCommissionRoomPct(parseFloat(e.target.value) || 0);
-                  setConfigDirty(true);
-                }}
-                placeholder="10"
-                disabled={disabled}
-              />
-              <p className="text-xs text-muted-foreground mt-1">Appliquée sur le prix HyperGuest</p>
-            </div>
-            <div>
-              <Label htmlFor="comm-addons" className="text-xs">
-                Commission addons (%)
-              </Label>
-              <Input
-                id="comm-addons"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={commissionAddonsPct || ""}
-                onChange={(e) => {
-                  setCommissionAddonsPct(parseFloat(e.target.value) || 0);
-                  setConfigDirty(true);
-                }}
-                placeholder="15"
-                disabled={disabled}
-              />
-              <p className="text-xs text-muted-foreground mt-1">Appliquée sur le total des addons par personne</p>
-            </div>
-            <div>
-              <Label htmlFor="tax-pct" className="text-xs">
-                Taxe (%)
-              </Label>
-              <Input
-                id="tax-pct"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={taxPct || ""}
-                onChange={(e) => {
-                  setTaxPct(parseFloat(e.target.value) || 0);
-                  setConfigDirty(true);
-                }}
-                placeholder="18"
-                disabled={disabled}
-              />
-              <p className="text-xs text-muted-foreground mt-1">Appliquée sur chambre + addons + commissions</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ================================================================= */}
-      {/* Section C: Promo */}
-      {/* ================================================================= */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Tag className="h-4 w-4 text-purple-600" />
-            Promo
-          </CardTitle>
-          <CardDescription>Remise réelle ou faux prix barré (marketing)</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label className="text-xs">Type de promo</Label>
-            <Select
-              value={promoType}
-              onValueChange={(val) => {
-                setPromoType(val as PromoType | "none");
-                setConfigDirty(true);
-              }}
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Aucune" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Aucune promo</SelectItem>
-                <SelectItem value="real_discount">Remise réelle</SelectItem>
-                <SelectItem value="fake_markup">Faux prix barré</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {promoType !== "none" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="promo-value" className="text-xs">
-                  {promoType === "real_discount" ? "Valeur de la remise" : "Majoration affichée"}
-                </Label>
-                <Input
-                  id="promo-value"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={promoValue || ""}
-                  onChange={(e) => {
-                    setPromoValue(parseFloat(e.target.value) || 0);
-                    setConfigDirty(true);
-                  }}
-                  placeholder={promoType === "real_discount" ? "10" : "20"}
-                  disabled={disabled}
-                />
-              </div>
-              {promoType === "real_discount" && (
-                <div>
-                  <Label className="text-xs">Mode</Label>
-                  <Select
-                    value={promoIsPercentage ? "percentage" : "fixed"}
-                    onValueChange={(val) => {
-                      setPromoIsPercentage(val === "percentage");
-                      setConfigDirty(true);
-                    }}
-                    disabled={disabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="percentage">Pourcentage (%)</SelectItem>
-                      <SelectItem value="fixed">Montant fixe ($)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-          )}
-
-          {promoType === "real_discount" && promoValue > 0 && (
-            <p className="text-xs text-muted-foreground">
-              {promoIsPercentage
-                ? `Le prix final sera réduit de ${promoValue}%`
-                : `Le prix final sera réduit de $${promoValue.toFixed(2)}`}
-            </p>
-          )}
-
-          {promoType === "fake_markup" && promoValue > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Un prix barré {promoValue}% plus élevé sera affiché à côté du vrai prix. Aucune remise réelle n'est
-              appliquée.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* ================================================================= */}
-      {/* Save config button */}
-      {/* ================================================================= */}
-      {configDirty && (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={() => saveConfigMutation.mutate()}
-            disabled={disabled || saveConfigMutation.isPending}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {saveConfigMutation.isPending ? "Sauvegarde…" : "Sauvegarder le pricing"}
-          </Button>
-        </div>
-      )}
-
-      {/* ================================================================= */}
       {/* Delete confirmation dialog */}
-      {/* ================================================================= */}
       <AlertDialog open={!!deleteAddonId} onOpenChange={() => setDeleteAddonId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -531,7 +375,7 @@ export function Experience2AddonsManager({ experienceId, disabled = false }: Exp
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteAddonId && deleteAddonMutation.mutate(deleteAddonId)}
+              onClick={() => deleteAddonId && handleDelete(deleteAddonId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer

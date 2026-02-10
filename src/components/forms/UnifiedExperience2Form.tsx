@@ -25,8 +25,10 @@ import { toast } from "sonner";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
-import { Experience2AddonsManager } from "@/components/admin/Experience2AddonsManager";
+import { Experience2AddonsManager, type LocalAddonEntry } from "@/components/admin/Experience2AddonsManager";
 import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
+import { Separator } from "@/components/ui/separator";
+import { Percent, Tag } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,6 +74,13 @@ const experience2Schema = z.object({
   og_description_he: z.string().optional(),
   og_description_fr: z.string().optional(),
   og_image: z.string().optional(),
+  // Pricing V2 fields
+  commission_room_pct: z.number().min(0).max(100).optional(),
+  commission_addons_pct: z.number().min(0).max(100).optional(),
+  tax_pct: z.number().min(0).max(100).optional(),
+  promo_type: z.string().optional(), // "real_discount" | "fake_markup" | "none" | ""
+  promo_value: z.number().min(0).optional(),
+  promo_is_percentage: z.boolean().optional(),
 });
 
 type Experience2FormData = z.infer<typeof experience2Schema>;
@@ -107,6 +116,8 @@ export function UnifiedExperience2Form({
   const [hotelToAdd, setHotelToAdd] = useState<string>("");
   /** Prix chambre HyperGuest par hôtel (clé = hotel_id) */
   const [hotelRoomPrices, setHotelRoomPrices] = useState<Record<string, number | null>>({});
+  /** Addons par personne en mode local (avant sauvegarde) */
+  const [localAddons, setLocalAddons] = useState<LocalAddonEntry[]>([]);
 
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
@@ -209,6 +220,13 @@ export function UnifiedExperience2Form({
       og_description_he: "",
       og_description_fr: "",
       og_image: "",
+      // Pricing V2
+      commission_room_pct: 0,
+      commission_addons_pct: 0,
+      tax_pct: 0,
+      promo_type: "none",
+      promo_value: 0,
+      promo_is_percentage: true,
     },
   });
 
@@ -274,6 +292,13 @@ export function UnifiedExperience2Form({
       setValue("og_description_he", existingExperience.og_description_he || "");
       setValue("og_description_fr", existingExperience.og_description_fr || "");
       setValue("og_image", existingExperience.og_image || "");
+      // Pricing V2
+      setValue("commission_room_pct", (existingExperience as any).commission_room_pct ?? 0);
+      setValue("commission_addons_pct", (existingExperience as any).commission_addons_pct ?? 0);
+      setValue("tax_pct", (existingExperience as any).tax_pct ?? 0);
+      setValue("promo_type", (existingExperience as any).promo_type ?? "none");
+      setValue("promo_value", (existingExperience as any).promo_value ?? 0);
+      setValue("promo_is_percentage", (existingExperience as any).promo_is_percentage ?? true);
 
       if (existingExperience.hero_image) {
         setHeroImagePreview(existingExperience.hero_image);
@@ -468,7 +493,37 @@ export function UnifiedExperience2Form({
       og_description_he: data.og_description_he || null,
       og_description_fr: data.og_description_fr || null,
       og_image: data.og_image || null,
+      // Pricing V2
+      commission_room_pct: data.commission_room_pct ?? 0,
+      commission_addons_pct: data.commission_addons_pct ?? 0,
+      tax_pct: data.tax_pct ?? 0,
+      promo_type: data.promo_type === "none" || !data.promo_type ? null : data.promo_type,
+      promo_value: data.promo_type === "none" || !data.promo_type ? null : (data.promo_value ?? null),
+      promo_is_percentage: data.promo_is_percentage ?? true,
     };
+  };
+
+  // -------------------------------------------------------------------------
+  // Save local addons to DB after experience creation
+  // -------------------------------------------------------------------------
+
+  const saveLocalAddons = async (expId: string) => {
+    if (localAddons.length === 0) return;
+    const rows = localAddons.map((addon, index) => ({
+      experience_id: expId,
+      type: "per_person" as const,
+      name: addon.name,
+      name_he: addon.name_he || null,
+      value: addon.value,
+      is_percentage: false,
+      calculation_order: index + 1,
+      is_active: addon.is_active,
+    }));
+    const { error } = await supabase.from("experience2_addons").insert(rows);
+    if (error) {
+      console.error("Error saving addons:", error);
+      toast.error("Addons saved partially — check console");
+    }
   };
 
   // -------------------------------------------------------------------------
@@ -498,7 +553,8 @@ export function UnifiedExperience2Form({
         if (error) throw error;
         setCreatedExperienceId(insertedData.id);
         await saveExperienceHotels(insertedData.id);
-        toast.success("Draft created! You can now add price addons.");
+        await saveLocalAddons(insertedData.id);
+        toast.success("Draft saved!");
       }
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
     } catch (error: any) {
@@ -536,6 +592,7 @@ export function UnifiedExperience2Form({
         if (error) throw error;
         setCreatedExperienceId(insertedData.id);
         await saveExperienceHotels(insertedData.id);
+        await saveLocalAddons(insertedData.id);
         toast.success("Published successfully");
       }
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
@@ -1041,11 +1098,153 @@ export function UnifiedExperience2Form({
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Pricing Section */}
+        {/* Pricing Section — All-in-one (no need to save draft first) */}
         {/* ----------------------------------------------------------------- */}
         <Card>
-          <CardContent className="pt-6">
-            <Experience2AddonsManager experienceId={currentExperienceId} disabled={isSaving} />
+          <CardHeader>
+            <CardTitle>Configuration Pricing</CardTitle>
+            <CardDescription>Commissions, taxe, promo et addons par personne</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* --- Addons par personne (local or DB mode) --- */}
+            <Experience2AddonsManager
+              experienceId={currentExperienceId}
+              disabled={isSaving}
+              localAddons={localAddons}
+              onLocalAddonsChange={setLocalAddons}
+            />
+
+            <Separator />
+
+            {/* --- Commissions & Taxe --- */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Percent className="h-4 w-4 text-orange-600" />
+                Commissions & Taxe
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="commission_room_pct" className="text-xs">
+                    Commission chambre (%)
+                  </Label>
+                  <Input
+                    id="commission_room_pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    {...register("commission_room_pct", { valueAsNumber: true })}
+                    placeholder="10"
+                    disabled={isSaving}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Sur le prix HyperGuest</p>
+                </div>
+                <div>
+                  <Label htmlFor="commission_addons_pct" className="text-xs">
+                    Commission addons (%)
+                  </Label>
+                  <Input
+                    id="commission_addons_pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    {...register("commission_addons_pct", { valueAsNumber: true })}
+                    placeholder="15"
+                    disabled={isSaving}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Sur le total addons par personne</p>
+                </div>
+                <div>
+                  <Label htmlFor="tax_pct" className="text-xs">
+                    Taxe (%)
+                  </Label>
+                  <Input
+                    id="tax_pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    {...register("tax_pct", { valueAsNumber: true })}
+                    placeholder="18"
+                    disabled={isSaving}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Sur chambre + addons + commissions</p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* --- Promo --- */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Tag className="h-4 w-4 text-purple-600" />
+                Promo
+              </h4>
+              <div>
+                <Label className="text-xs">Type de promo</Label>
+                <Controller
+                  name="promo_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Aucune" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Aucune promo</SelectItem>
+                        <SelectItem value="real_discount">Remise réelle</SelectItem>
+                        <SelectItem value="fake_markup">Faux prix barré</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+
+              {watch("promo_type") && watch("promo_type") !== "none" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="promo_value" className="text-xs">
+                      {watch("promo_type") === "real_discount" ? "Valeur de la remise" : "Majoration affichée (%)"}
+                    </Label>
+                    <Input
+                      id="promo_value"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      {...register("promo_value", { valueAsNumber: true })}
+                      placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  {watch("promo_type") === "real_discount" && (
+                    <div>
+                      <Label className="text-xs">Mode</Label>
+                      <Controller
+                        name="promo_is_percentage"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value ? "percentage" : "fixed"}
+                            onValueChange={(val) => field.onChange(val === "percentage")}
+                            disabled={isSaving}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="percentage">Pourcentage (%)</SelectItem>
+                              <SelectItem value="fixed">Montant fixe ($)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
