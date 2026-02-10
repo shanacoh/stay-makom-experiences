@@ -63,16 +63,16 @@ function extractRoomTotal(prices: unknown): number | null {
   if (p.total && typeof (p.total as any).amount === "number") return (p.total as any).amount;
   if (typeof p.totalPrice === "number") return p.totalPrice;
   if (Array.isArray(prices)) {
-    return (prices as any[]).reduce((s, item) => {
+    return (prices as any[]).reduce((s: number, item: any) => {
       if (typeof item === "number") return s + item;
-      return s + (item?.price ?? item?.amount ?? item?.rate ?? 0);
-    }, 0);
+      return s + (Number(item?.price ?? item?.amount ?? item?.rate ?? 0));
+    }, 0) as number;
   }
   const arr = (p.perNight ?? p.dailyPrices) as unknown[];
   if (Array.isArray(arr)) {
-    return arr.reduce((s: number, item: any) => {
+    return arr.reduce<number>((s, item: any) => {
       if (typeof item === "number") return s + item;
-      return s + (item?.price ?? item?.amount ?? item?.rate ?? 0);
+      return s + (Number(item?.price ?? item?.amount ?? item?.rate ?? 0));
     }, 0);
   }
   return null;

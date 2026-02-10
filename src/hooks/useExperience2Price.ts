@@ -11,7 +11,6 @@ import type {
   PricingConfig,
   PriceBreakdownV2,
   PerPersonAddonLine,
-  DEFAULT_PRICING_CONFIG,
 } from "@/types/experience2_addons";
 
 // ---------------------------------------------------------------------------
@@ -123,11 +122,11 @@ export function extractPriceFromRatePlanPrices(ratePlanPrices: unknown): { amoun
 
   // Array of daily prices → sum
   if (Array.isArray(ratePlanPrices)) {
-    const sum = (ratePlanPrices as unknown[]).reduce((s: number, item: unknown) => {
+    const sum = (ratePlanPrices as unknown[]).reduce<number>((s, item: unknown) => {
       if (typeof item === "number") return s + item;
       if (item && typeof item === "object") {
         const i = item as Record<string, unknown>;
-        return s + ((i.price ?? i.amount ?? i.rate ?? 0) as number);
+        return s + (Number(i.price ?? i.amount ?? i.rate ?? 0));
       }
       return s;
     }, 0);
@@ -137,11 +136,11 @@ export function extractPriceFromRatePlanPrices(ratePlanPrices: unknown): { amoun
   // { perNight: [...] } or { dailyPrices: [...] }
   const arr = (p.perNight ?? p.dailyPrices) as unknown[];
   if (Array.isArray(arr)) {
-    const sum = arr.reduce((s: number, item: unknown) => {
+    const sum = arr.reduce<number>((s, item: unknown) => {
       if (typeof item === "number") return s + item;
       if (item && typeof item === "object") {
         const i = item as Record<string, unknown>;
-        return s + ((i.price ?? i.amount ?? i.rate ?? 0) as number);
+        return s + (Number(i.price ?? i.amount ?? i.rate ?? 0));
       }
       return s;
     }, 0);
