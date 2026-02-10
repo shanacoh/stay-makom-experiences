@@ -10,10 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon, Save } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 import { Hotel2ExtrasManager } from "@/components/admin/Hotel2ExtrasManager";
-import { StickyDraftButton } from "@/components/admin/StickyDraftButton";
 import { Link } from "react-router-dom";
 import HyperGuestHotelSearch from "@/components/admin/HyperGuestHotelSearch";
 import type {
@@ -33,7 +32,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isDownloadingImages, setIsDownloadingImages] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
-  const [justSaved, setJustSaved] = useState(false);
+  const [_justSaved, setJustSaved] = useState(false);
   const [hyperguestId, setHyperguestId] = useState<number | null>(null);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -411,14 +410,31 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to="/admin/hotels2">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Hotels 2
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to="/admin/hotels2">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Hotels 2
+            </Button>
+          </Link>
+          <h2 className="text-3xl font-bold">{hotelId ? "Edit Hotel" : "New Hotel"}</h2>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => saveMutation.mutate(formData)}
+            disabled={saveMutation.isPending || !formData.name}
+          >
+            {saveMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Draft
           </Button>
-        </Link>
-        <h2 className="text-3xl font-bold">{hotelId ? "Edit Hotel" : "New Hotel"}</h2>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -1207,13 +1223,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         )}
       </form>
 
-      <StickyDraftButton
-        onClick={() => saveMutation.mutate(formData)}
-        isLoading={saveMutation.isPending}
-        isSaved={justSaved}
-        disabled={!formData.name}
-        showPulse={true}
-      />
     </div>
   );
 };

@@ -120,7 +120,8 @@ export function HyperGuestHotelSearch({
   className,
 }: HyperGuestHotelSearchProps) {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // for city search
+  const [hotelSearchTerm, setHotelSearchTerm] = useState(""); // for hotel search
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedHotel, setSelectedHotel] = useState<HyperGuestHotel | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -148,8 +149,8 @@ export function HyperGuestHotelSearch({
   const filteredHotels = useMemo(() => {
     if (!hotels) return [];
     return hotels.filter((hotel) => {
-      const matchesSearch = !searchTerm.trim() || (() => {
-        const term = searchTerm.toLowerCase();
+      const matchesHotelSearch = !hotelSearchTerm.trim() || (() => {
+        const term = hotelSearchTerm.toLowerCase();
         return (
           hotel.name?.toLowerCase().includes(term) ||
           hotel.cityName?.toLowerCase().includes(term) ||
@@ -161,14 +162,13 @@ export function HyperGuestHotelSearch({
       const matchesCity = !selectedCity ||
         hotel.cityName === selectedCity ||
         hotel.city === selectedCity;
-      return matchesSearch && matchesCity;
+      return matchesHotelSearch && matchesCity;
     });
-  }, [hotels, searchTerm, selectedCity]);
+  }, [hotels, hotelSearchTerm, selectedCity]);
 
   useEffect(() => {
     if (open) {
-      setSearchTerm("");
-      setSelectedCity("");
+      setHotelSearchTerm("");
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
   }, [open]);
@@ -396,137 +396,161 @@ export function HyperGuestHotelSearch({
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-3", className)}>
       <Label className="flex items-center gap-2">
         <Building2 className="h-4 w-4 text-primary" />
         Import from HyperGuest
       </Label>
 
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            disabled={disabled || isLoading || isLoadingDetails}
-            className={cn(
-              "w-full justify-between font-normal h-auto min-h-10",
-              !selectedHotel && "text-muted-foreground",
-            )}
-          >
-            <span className="truncate">
-              {isLoading
-                ? "Loading hotels..."
-                : isLoadingDetails
-                  ? "Loading details..."
-                  : selectedHotel
-                    ? selectedHotel.name
-                    : placeholder}
-            </span>
-            {isLoading || isLoadingDetails ? (
-              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-            ) : (
-              <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
-            )}
-          </Button>
-        </PopoverTrigger>
-
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-          {/* City Filter Dropdown */}
-          <div className="border-b px-3 py-2">
-            <Label className="text-xs text-muted-foreground mb-1 block">Filter by City</Label>
-            <Select value={selectedCity || "all"} onValueChange={(v) => setSelectedCity(v === "all" ? "" : v)}>
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="All cities" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                <SelectItem value="all">All cities</SelectItem>
-                {uniqueCities.map((city) => (
-                  <SelectItem key={city} value={city}>{city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center border-b px-2">
-            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search by name, city, region..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.stopPropagation()}
-              className="h-9 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-          <div className="max-h-[300px] overflow-y-auto p-1">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : error ? (
-              <p className="py-4 text-center text-sm text-destructive">Failed to load hotels. Please try again.</p>
-            ) : filteredHotels.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                {searchTerm.trim() ? `No hotel matching "${searchTerm}"` : "No hotels available"}
-              </p>
-            ) : (
-              filteredHotels.map((hotel, index) => {
-                const hotelId = hotel.id ?? hotel.hotel_id;
-                const isSelected = selectedHotel?.id === hotelId || selectedHotel?.hotel_id === hotelId;
-                return (
-                  <button
-                    key={hotelId ?? `hotel-${index}`}
-                    type="button"
-                    onClick={() => handleSelect(hotel)}
-                    className={cn(
-                      "w-full px-3 py-2 text-left rounded-md flex items-start gap-3 hover:bg-accent transition-colors",
-                      isSelected && "bg-accent",
-                    )}
-                  >
-                    <div className="flex-shrink-0 mt-0.5">
-                      {isSelected ? (
-                        <Check className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium truncate text-sm">{hotel.name}</span>
-                        {hotel.starRating && (
-                          <span className="flex items-center gap-0.5 text-amber-500 text-xs">
-                            <Star className="h-3 w-3 fill-current" />
-                            {hotel.starRating}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        <span className="truncate">
-                          {[hotel.cityName || hotel.city, hotel.regionName || hotel.region].filter(Boolean).join(", ")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[10px] text-muted-foreground">ID: {hotelId}</span>
-                        {fetchFullDetails && (
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                            <Image className="h-2.5 w-2.5" />+ details
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })
-            )}
-          </div>
-          {!isLoading && hotels && (
-            <div className="border-t px-3 py-2 text-xs text-muted-foreground">
-              Showing {filteredHotels.length} of {hotels.length} hotels (Israel)
+      {/* ── City Select ──────────────────────────────────── */}
+      <div className="space-y-1">
+        <Label className="text-xs text-muted-foreground">City</Label>
+        <Select
+          value={selectedCity || "all"}
+          onValueChange={(v) => {
+            setSelectedCity(v === "all" ? "" : v);
+            // Reset hotel when city changes
+            setSelectedHotel(null);
+          }}
+          disabled={disabled || isLoading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All cities" />
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px]">
+            <div className="px-2 pb-2 sticky top-0 bg-popover">
+              <Input
+                placeholder="Search city..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                className="h-8 text-sm"
+              />
             </div>
-          )}
-        </PopoverContent>
-      </Popover>
+            <SelectItem value="all">All cities ({hotels?.length || 0} hotels)</SelectItem>
+            {uniqueCities
+              .filter((city) => !searchTerm.trim() || city.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map((city) => (
+                <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* ── Hotel Select ─────────────────────────────────── */}
+      <div className="space-y-1">
+        <Label className="text-xs text-muted-foreground">Hotel</Label>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled || isLoading || isLoadingDetails}
+              className={cn(
+                "w-full justify-between font-normal h-auto min-h-10",
+                !selectedHotel && "text-muted-foreground",
+              )}
+            >
+              <span className="truncate">
+                {isLoading
+                  ? "Loading hotels..."
+                  : isLoadingDetails
+                    ? "Loading details..."
+                    : selectedHotel
+                      ? selectedHotel.name
+                      : "Select a hotel..."}
+              </span>
+              {isLoading || isLoadingDetails ? (
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+              ) : (
+                <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+              )}
+            </Button>
+          </PopoverTrigger>
+
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+            <div className="flex items-center border-b px-2">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <Input
+                ref={searchInputRef}
+                placeholder="Search by name..."
+                value={hotelSearchTerm}
+                onChange={(e) => setHotelSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                className="h-9 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+            <div className="max-h-[300px] overflow-y-auto p-1">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : error ? (
+                <p className="py-4 text-center text-sm text-destructive">Failed to load hotels. Please try again.</p>
+              ) : filteredHotels.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  {hotelSearchTerm.trim() ? `No hotel matching "${hotelSearchTerm}"` : selectedCity ? "No hotels in this city" : "No hotels available"}
+                </p>
+              ) : (
+                filteredHotels.map((hotel, index) => {
+                  const hotelId = hotel.id ?? hotel.hotel_id;
+                  const isSelected = selectedHotel?.id === hotelId || selectedHotel?.hotel_id === hotelId;
+                  return (
+                    <button
+                      key={hotelId ?? `hotel-${index}`}
+                      type="button"
+                      onClick={() => handleSelect(hotel)}
+                      className={cn(
+                        "w-full px-3 py-2 text-left rounded-md flex items-start gap-3 hover:bg-accent transition-colors",
+                        isSelected && "bg-accent",
+                      )}
+                    >
+                      <div className="flex-shrink-0 mt-0.5">
+                        {isSelected ? (
+                          <Check className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium truncate text-sm">{hotel.name}</span>
+                          {hotel.starRating && (
+                            <span className="flex items-center gap-0.5 text-amber-500 text-xs">
+                              <Star className="h-3 w-3 fill-current" />
+                              {hotel.starRating}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="truncate">
+                            {[hotel.cityName || hotel.city, hotel.regionName || hotel.region].filter(Boolean).join(", ")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-[10px] text-muted-foreground">ID: {hotelId}</span>
+                          {fetchFullDetails && (
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                              <Image className="h-2.5 w-2.5" />+ details
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            {!isLoading && hotels && (
+              <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+                Showing {filteredHotels.length} of {hotels.length} hotels
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
 
       {error && <p className="text-xs text-red-500">Failed to load HyperGuest hotels. Please try again.</p>}
     </div>
