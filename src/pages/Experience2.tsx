@@ -78,6 +78,44 @@ export default function Experience2() {
   };
 
   // ---------------------------------------------------------------------------
+  // Multi-hotel parcours data (must be before any early return for hooks)
+  // ---------------------------------------------------------------------------
+
+  const parcoursHotels: {
+    position: number;
+    nights: number;
+    notes: string | null;
+    notes_he: string | null;
+    hotel: any;
+  }[] = ((experience as any)?.experience2_hotels || []).map((eh: any) => ({
+    position: eh.position ?? 1,
+    nights: eh.nights ?? 1,
+    notes: eh.notes ?? null,
+    notes_he: eh.notes_he ?? null,
+    hotel: eh.hotels2,
+  }));
+
+  const legacyHotel = experience?.hotels2;
+  const hasMultiHotel = parcoursHotels.length > 0;
+
+  const allHotelPhotos = useMemo(() => {
+    if (hasMultiHotel) {
+      const photos: string[] = [];
+      for (const ph of parcoursHotels) {
+        if (ph.hotel?.hero_image) photos.push(ph.hotel.hero_image);
+        if (Array.isArray(ph.hotel?.photos)) {
+          photos.push(...ph.hotel.photos);
+        }
+      }
+      return photos;
+    }
+    if (legacyHotel) {
+      return [legacyHotel.hero_image, ...(legacyHotel.photos || [])].filter(Boolean) as string[];
+    }
+    return [];
+  }, [hasMultiHotel, parcoursHotels, legacyHotel]);
+
+  // ---------------------------------------------------------------------------
   // Loading state
   // ---------------------------------------------------------------------------
 
@@ -122,52 +160,12 @@ export default function Experience2() {
   }
 
   // ---------------------------------------------------------------------------
-  // Multi-hotel parcours data
+  // Derived data (after early returns, no hooks below)
   // ---------------------------------------------------------------------------
 
-  /** Parcours hôtels triés par position (déjà trié dans le hook) */
-  const parcoursHotels: {
-    position: number;
-    nights: number;
-    notes: string | null;
-    notes_he: string | null;
-    hotel: any;
-  }[] = ((experience as any).experience2_hotels || []).map((eh: any) => ({
-    position: eh.position ?? 1,
-    nights: eh.nights ?? 1,
-    notes: eh.notes ?? null,
-    notes_he: eh.notes_he ?? null,
-    hotel: eh.hotels2,
-  }));
-
-  /** Fallback: if no parcours hotels, use the legacy single hotel */
-  const legacyHotel = experience.hotels2;
-  const hasMultiHotel = parcoursHotels.length > 0;
   const primaryHotel = hasMultiHotel ? parcoursHotels[0]?.hotel : legacyHotel;
-
   const category = experience.categories;
   const hyperguestPropertyId = primaryHotel?.hyperguest_property_id;
-
-  // ---------------------------------------------------------------------------
-  // Aggregate photos from all parcours hotels
-  // ---------------------------------------------------------------------------
-
-  const allHotelPhotos = useMemo(() => {
-    if (hasMultiHotel) {
-      const photos: string[] = [];
-      for (const ph of parcoursHotels) {
-        if (ph.hotel?.hero_image) photos.push(ph.hotel.hero_image);
-        if (Array.isArray(ph.hotel?.photos)) {
-          photos.push(...ph.hotel.photos);
-        }
-      }
-      return photos;
-    }
-    if (legacyHotel) {
-      return [legacyHotel.hero_image, ...(legacyHotel.photos || [])].filter(Boolean) as string[];
-    }
-    return [];
-  }, [hasMultiHotel, parcoursHotels, legacyHotel]);
 
   // Use experience photos if available, otherwise hotel photos
   const photos =
