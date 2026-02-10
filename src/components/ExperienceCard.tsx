@@ -58,6 +58,7 @@ interface ExperienceCardProps {
   isInWishlist?: boolean;
   onWishlistToggle?: (experienceId: string, isAdding: boolean) => void;
   userId?: string | null;
+  linkPrefix?: string;
 }
 
 export default function ExperienceCard({
@@ -71,6 +72,7 @@ export default function ExperienceCard({
   userCity,
   isInWishlist: initialIsInWishlist = false,
   onWishlistToggle,
+  linkPrefix = "/experience",
 }: ExperienceCardProps) {
   const { lang } = useLanguage();
   const { user } = useAuth();
@@ -203,7 +205,7 @@ export default function ExperienceCard({
       />
       
       <Link
-        to={`/experience/${experience.slug}?lang=${lang}`}
+        to={`${linkPrefix}/${experience.slug}?lang=${lang}`}
         className="group block"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
