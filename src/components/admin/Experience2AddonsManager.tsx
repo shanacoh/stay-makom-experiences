@@ -1,21 +1,21 @@
-/**
- * Experience Pricing Addons Manager
- *
- * - Addons = commissions and taxes. Final price = HyperGuest price + Your addons.
- * - Create experience: one section with all 3 types (commission, per night, tax) inline; parent reads values on submit.
- * - Existing experience, no add-ons yet: one button opens one form with all 3 types; save creates the 3 at once.
- * - Existing add-ons: table with edit/delete per row.
- */
+// =============================================================================
+// src/components/admin/Experience2AddonsManager.tsx
+// Gestionnaire d'addons et pricing V2 — 3 sections :
+//   A. Addons par personne (CRUD depuis experience2_addons)
+//   B. Commissions & Taxe (colonnes experiences2)
+//   C. Promo (colonnes experiences2)
+// =============================================================================
 
-import { useState, useImperativeHandle, forwardRef } from "react";
-import { Plus, Trash2, Edit2, Loader2, DollarSign } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,473 +26,519 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import {
-  useExperienceAddons,
-  useCreateExperienceAddon,
-  useCreateAddonsWithValues,
-  useUpdateExperienceAddon,
-  useDeleteExperienceAddon,
-} from "../../hooks/useExperience2Addons";
-import {
-  ADDON_TYPES_EN,
-  formatAddonValue,
-  getAddonTypeLabelEn,
-  getDefaultDraftAddons,
-  type AddonType,
-  type AddonFormData,
-  type ExperienceAddon,
-} from "@/types/experience2_addons";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Trash2, Users, Percent, Tag, Loader2, Save } from "lucide-react";
+import { toast } from "sonner";
+import type { ExperienceAddon, PricingConfig, PromoType } from "@/types/experience2_addons";
 
-const ADDON_TYPES_ORDER: AddonType[] = ["commission", "per_night", "tax"];
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
 
 interface Experience2AddonsManagerProps {
-  experienceId: string | null;
+  experienceId: string | null | undefined;
   disabled?: boolean;
-  /** When creating experience: controlled list of the 3 add-ons. Parent uses getDefaultDraftAddons() and reads on submit. */
-  addonsForCreate?: AddonFormData[];
-  onAddonsForCreateChange?: (addons: AddonFormData[]) => void;
 }
 
-export const Experience2AddonsManager = forwardRef<
-  { getAddonsForCreate: () => AddonFormData[] },
-  Experience2AddonsManagerProps
->(function Experience2AddonsManager(
-  { experienceId, disabled = false, addonsForCreate: addonsForCreateProp, onAddonsForCreateChange },
-  ref,
-) {
-  const [isAddAllDialogOpen, setIsAddAllDialogOpen] = useState(false);
-  const [editingAddonId, setEditingAddonId] = useState<string | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [addAllFormValues, setAddAllFormValues] = useState<AddonFormData[]>(() => getDefaultDraftAddons());
-  const [editFormValues, setEditFormValues] = useState<AddonFormData | null>(null);
-  const [internalAddons, setInternalAddons] = useState<AddonFormData[]>(() => getDefaultDraftAddons());
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
-  const { toast } = useToast();
-  const { data: addons = [], isLoading } = useExperienceAddons(experienceId);
-  const createMutation = useCreateExperienceAddon();
-  const createWithValuesMutation = useCreateAddonsWithValues();
-  const updateMutation = useUpdateExperienceAddon();
-  const deleteMutation = useDeleteExperienceAddon();
+export function Experience2AddonsManager({ experienceId, disabled = false }: Experience2AddonsManagerProps) {
+  const queryClient = useQueryClient();
 
-  const isCreateFlow = experienceId === null;
-  const addonsForCreate = addonsForCreateProp ?? internalAddons;
-  const setAddonsForCreate = onAddonsForCreateChange ?? setInternalAddons;
+  // ─── State: per-person addons ───
+  const [newAddonName, setNewAddonName] = useState("");
+  const [newAddonNameHe, setNewAddonNameHe] = useState("");
+  const [newAddonValue, setNewAddonValue] = useState<number>(0);
+  const [deleteAddonId, setDeleteAddonId] = useState<string | null>(null);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      getAddonsForCreate: () => addonsForCreateProp ?? internalAddons,
-    }),
-    [addonsForCreateProp, internalAddons],
-  );
+  // ─── State: pricing config ───
+  const [commissionRoomPct, setCommissionRoomPct] = useState(0);
+  const [commissionAddonsPct, setCommissionAddonsPct] = useState(0);
+  const [taxPct, setTaxPct] = useState(0);
+  const [promoType, setPromoType] = useState<PromoType | "none">("none");
+  const [promoValue, setPromoValue] = useState<number>(0);
+  const [promoIsPercentage, setPromoIsPercentage] = useState(true);
+  const [configDirty, setConfigDirty] = useState(false);
 
-  const updateCreateAddon = (index: number, patch: Partial<AddonFormData>) => {
-    const next = [...addonsForCreate];
-    next[index] = { ...next[index], ...patch };
-    setAddonsForCreate(next);
-  };
+  // ─── Query: fetch addons ───
+  const { data: addons, isLoading: isLoadingAddons } = useQuery({
+    queryKey: ["experience2-addons", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return [];
+      const { data, error } = await supabase
+        .from("experience2_addons")
+        .select("*")
+        .eq("experience_id", experienceId)
+        .order("calculation_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as ExperienceAddon[];
+    },
+    enabled: !!experienceId,
+  });
 
-  const handleOpenAddAllDialog = () => {
-    setAddAllFormValues(getDefaultDraftAddons());
-    setIsAddAllDialogOpen(true);
-  };
+  // ─── Query: fetch pricing config ───
+  const { data: pricingConfig, isLoading: isLoadingConfig } = useQuery({
+    queryKey: ["experience2-pricing-config", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return null;
+      const { data, error } = await supabase
+        .from("experiences2")
+        .select("commission_room_pct, commission_addons_pct, tax_pct, promo_type, promo_value, promo_is_percentage")
+        .eq("id", experienceId)
+        .single();
+      if (error) throw error;
+      return data as PricingConfig;
+    },
+    enabled: !!experienceId,
+  });
 
-  const handleSaveAddAll = async () => {
-    if (!experienceId) return;
-    try {
-      await createWithValuesMutation.mutateAsync({ experienceId, addons: addAllFormValues });
-      toast({
-        title: "Success",
-        description: "Pricing rules (commission, per night, tax) created.",
-      });
-      setIsAddAllDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create pricing rules",
-        variant: "destructive",
-      });
+  // Sync config state when data loads
+  useEffect(() => {
+    if (pricingConfig) {
+      setCommissionRoomPct(pricingConfig.commission_room_pct ?? 0);
+      setCommissionAddonsPct(pricingConfig.commission_addons_pct ?? 0);
+      setTaxPct(pricingConfig.tax_pct ?? 0);
+      setPromoType(pricingConfig.promo_type ?? "none");
+      setPromoValue(pricingConfig.promo_value ?? 0);
+      setPromoIsPercentage(pricingConfig.promo_is_percentage ?? true);
+      setConfigDirty(false);
     }
-  };
+  }, [pricingConfig]);
 
-  const handleOpenEdit = (addon: ExperienceAddon) => {
-    setEditingAddonId(addon.id);
-    setEditFormValues({
-      type: addon.type as AddonType,
-      name: addon.name,
-      name_he: addon.name_he ?? undefined,
-      description: addon.description ?? undefined,
-      description_he: addon.description_he ?? undefined,
-      value: Number(addon.value),
-      is_percentage: addon.is_percentage ?? false,
-      calculation_order: addon.calculation_order ?? 0,
-    });
-  };
+  // ─── Mutations: addons ───
 
-  const handleSaveEdit = async () => {
-    if (!editingAddonId || !editFormValues) return;
-    try {
-      await updateMutation.mutateAsync({
-        id: editingAddonId,
-        updates: editFormValues,
+  const addAddonMutation = useMutation({
+    mutationFn: async () => {
+      if (!experienceId) throw new Error("No experience ID");
+      const maxOrder = (addons ?? []).reduce((m, a) => Math.max(m, a.calculation_order), 0);
+      const { error } = await supabase.from("experience2_addons").insert({
+        experience_id: experienceId,
+        type: "per_person" as const,
+        name: newAddonName.trim(),
+        name_he: newAddonNameHe.trim() || null,
+        value: newAddonValue,
+        is_percentage: false,
+        calculation_order: maxOrder + 1,
+        is_active: true,
       });
-      toast({ title: "Success", description: "Pricing rule updated." });
-      setEditingAddonId(null);
-      setEditFormValues(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Update failed",
-        variant: "destructive",
-      });
-    }
-  };
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Addon ajouté");
+      setNewAddonName("");
+      setNewAddonNameHe("");
+      setNewAddonValue(0);
+      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
+    },
+    onError: (err: any) => toast.error(err.message || "Erreur lors de l'ajout"),
+  });
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast({ title: "Success", description: "Pricing rule deleted." });
-      setDeleteConfirmId(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Delete failed",
-        variant: "destructive",
-      });
-    }
-  };
+  const toggleAddonMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { error } = await supabase.from("experience2_addons").update({ is_active: isActive }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
 
-  if (!isCreateFlow && isLoading) {
+  const deleteAddonMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("experience2_addons").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Addon supprimé");
+      setDeleteAddonId(null);
+      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  // ─── Mutation: save pricing config ───
+
+  const saveConfigMutation = useMutation({
+    mutationFn: async () => {
+      if (!experienceId) throw new Error("No experience ID");
+      const { error } = await supabase
+        .from("experiences2")
+        .update({
+          commission_room_pct: commissionRoomPct,
+          commission_addons_pct: commissionAddonsPct,
+          tax_pct: taxPct,
+          promo_type: promoType === "none" ? null : promoType,
+          promo_value: promoType === "none" ? null : promoValue,
+          promo_is_percentage: promoIsPercentage,
+        })
+        .eq("id", experienceId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Configuration pricing sauvegardée");
+      setConfigDirty(false);
+      queryClient.invalidateQueries({
+        queryKey: ["experience2-pricing-config", experienceId],
+      });
+    },
+    onError: (err: any) => toast.error(err.message || "Erreur sauvegarde"),
+  });
+
+  // ─── Filter per-person addons ───
+
+  const perPersonAddons = (addons ?? []).filter((a) => a.type === "per_person");
+
+  // ─── Loading / No experience ───
+
+  if (!experienceId) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">Loading pricing rules...</span>
+      <div className="text-sm text-muted-foreground italic py-4">
+        Sauvegardez d'abord l'expérience (brouillon) pour configurer le pricing.
       </div>
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <DollarSign className="h-4 w-4" />
-        <span>Final Price = HyperGuest (hotel) + Your Commissions + Taxes</span>
+  if (isLoadingAddons || isLoadingConfig) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin" />
       </div>
+    );
+  }
 
-      {/* Create experience: all 3 types inline, no dialog */}
-      {isCreateFlow && (
-        <div className="space-y-4 rounded-lg border p-4">
-          <h4 className="text-sm font-medium">Pricing rules (commission, per night, tax)</h4>
-          <p className="text-xs text-muted-foreground">
-            Fill in the 3 rules below. They will be saved when you create the experience.
-          </p>
-          <div className="space-y-4">
-            {ADDON_TYPES_ORDER.map((type, index) => {
-              const addon = addonsForCreate[index] ?? getDefaultDraftAddons()[index];
-              if (!addon) return null;
-              return (
+  // ─── Render ───
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold">Configuration Pricing</h3>
+
+      {/* ================================================================= */}
+      {/* Section A: Addons par personne */}
+      {/* ================================================================= */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="h-4 w-4 text-emerald-600" />
+            Addons par personne
+          </CardTitle>
+          <CardDescription>Prestations facturées par voyageur (petit-déjeuner, massage, activités…)</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Existing addons list */}
+          {perPersonAddons.length > 0 && (
+            <div className="space-y-2">
+              {perPersonAddons.map((addon) => (
                 <div
-                  key={type}
-                  className="grid gap-3 rounded-md border bg-muted/30 p-3 sm:grid-cols-[120px_1fr_100px_80px_60px]"
+                  key={addon.id}
+                  className="flex items-center justify-between gap-3 p-2 rounded-md border bg-muted/30"
                 >
-                  <div className="flex items-center">
-                    <Badge variant="outline">{getAddonTypeLabelEn(type)}</Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Name</Label>
-                    <Input
-                      placeholder="e.g. Service fee"
-                      value={addon.name}
-                      onChange={(e) => updateCreateAddon(index, { name: e.target.value })}
-                      disabled={disabled}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Value</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={addon.value}
-                      onChange={(e) => updateCreateAddon(index, { value: parseFloat(e.target.value) || 0 })}
-                      disabled={disabled}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 pt-6">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Switch
-                      checked={addon.is_percentage}
-                      onCheckedChange={(checked) => updateCreateAddon(index, { is_percentage: checked })}
+                      checked={addon.is_active}
+                      onCheckedChange={(checked) => toggleAddonMutation.mutate({ id: addon.id, isActive: checked })}
                       disabled={disabled}
                     />
-                    <Label className="text-xs">%</Label>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{addon.name}</p>
+                      {addon.name_he && (
+                        <p className="text-xs text-muted-foreground truncate" dir="rtl">
+                          {addon.name_he}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Order</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={addon.calculation_order}
-                      onChange={(e) =>
-                        updateCreateAddon(index, {
-                          calculation_order: parseInt(e.target.value, 10) || 0,
-                        })
-                      }
+                  <div className="flex items-center gap-2">
+                    <Badge variant={addon.is_active ? "default" : "secondary"}>${addon.value} / pers.</Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive"
+                      onClick={() => setDeleteAddonId(addon.id)}
                       disabled={disabled}
-                    />
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Existing experience: no add-ons → one button, one dialog with all 3 types */}
-      {!isCreateFlow && addons.length === 0 && (
-        <>
-          <Button type="button" onClick={handleOpenAddAllDialog} disabled={disabled} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Add pricing rules (all 3 types at once)
-          </Button>
-
-          <Dialog open={isAddAllDialogOpen} onOpenChange={setIsAddAllDialogOpen}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[560px]">
-              <DialogHeader>
-                <DialogTitle>Set up commissions & taxes</DialogTitle>
-                <DialogDescription>
-                  Fill in the 3 rules below. One save creates commission, per night fee and tax.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6 py-4">
-                {ADDON_TYPES_ORDER.map((type, index) => {
-                  const a = addAllFormValues[index];
-                  if (!a) return null;
-                  return (
-                    <div key={type} className="space-y-2 rounded-md border p-3">
-                      <Badge variant="secondary">{getAddonTypeLabelEn(type)}</Badge>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Name</Label>
-                          <Input
-                            value={a.name}
-                            onChange={(e) => {
-                              const next = [...addAllFormValues];
-                              next[index] = { ...next[index], name: e.target.value };
-                              setAddAllFormValues(next);
-                            }}
-                            placeholder="e.g. Service fee"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Value</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={a.value}
-                            onChange={(e) => {
-                              const next = [...addAllFormValues];
-                              next[index] = {
-                                ...next[index],
-                                value: parseFloat(e.target.value) || 0,
-                              };
-                              setAddAllFormValues(next);
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={a.is_percentage}
-                          onCheckedChange={(checked) => {
-                            const next = [...addAllFormValues];
-                            next[index] = { ...next[index], is_percentage: checked };
-                            setAddAllFormValues(next);
-                          }}
-                        />
-                        <Label className="text-xs">Percentage (%)</Label>
-                        <span className="ml-2 text-xs text-muted-foreground">Order</span>
-                        <Input
-                          type="number"
-                          min={0}
-                          className="w-16"
-                          value={a.calculation_order}
-                          onChange={(e) => {
-                            const next = [...addAllFormValues];
-                            next[index] = {
-                              ...next[index],
-                              calculation_order: parseInt(e.target.value, 10) || 0,
-                            };
-                            setAddAllFormValues(next);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsAddAllDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="button" onClick={handleSaveAddAll} disabled={createWithValuesMutation.isPending}>
-                  {createWithValuesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save all 3 rules
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
-
-      {/* Existing experience: has add-ons → table + edit/delete */}
-      {!isCreateFlow && addons.length > 0 && (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Order</TableHead>
-                <TableHead>Active</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {addons.map((addon) => (
-                <TableRow key={addon.id}>
-                  <TableCell>
-                    <Badge variant="outline">{getAddonTypeLabelEn(addon.type as AddonType)}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">{addon.name}</div>
-                    {addon.description && (
-                      <div className="text-xs text-muted-foreground line-clamp-1">{addon.description}</div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-sm">{formatAddonValue(addon)}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{addon.calculation_order}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={addon.is_active ? "default" : "secondary"}>{addon.is_active ? "Yes" : "No"}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpenEdit(addon)}
-                        disabled={disabled}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteConfirmId(addon.id)}
-                        disabled={disabled}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
               ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-
-      {/* Edit single addon dialog */}
-      <Dialog
-        open={editingAddonId !== null}
-        onOpenChange={(open) => !open && (setEditingAddonId(null), setEditFormValues(null))}
-      >
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
-            <DialogTitle>Edit pricing rule</DialogTitle>
-          </DialogHeader>
-          {editFormValues && (
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input
-                  value={editFormValues.name}
-                  onChange={(e) => setEditFormValues({ ...editFormValues, name: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Value</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={editFormValues.value}
-                    onChange={(e) =>
-                      setEditFormValues({
-                        ...editFormValues,
-                        value: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
-                <div className="flex items-center gap-2 pt-8">
-                  <Switch
-                    checked={editFormValues.is_percentage}
-                    onCheckedChange={(checked) => setEditFormValues({ ...editFormValues, is_percentage: checked })}
-                  />
-                  <Label className="text-sm">%</Label>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Order</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={editFormValues.calculation_order}
-                  onChange={(e) =>
-                    setEditFormValues({
-                      ...editFormValues,
-                      calculation_order: parseInt(e.target.value, 10) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => (setEditingAddonId(null), setEditFormValues(null))}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
-                  {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Update
-                </Button>
-              </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
 
-      <AlertDialog open={deleteConfirmId !== null} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+          {perPersonAddons.length === 0 && (
+            <p className="text-sm text-muted-foreground italic">Aucun addon par personne configuré.</p>
+          )}
+
+          {/* Add new addon form */}
+          <Separator />
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+            <div className="sm:col-span-1">
+              <Label htmlFor="addon-name" className="text-xs">
+                Nom (EN) *
+              </Label>
+              <Input
+                id="addon-name"
+                value={newAddonName}
+                onChange={(e) => setNewAddonName(e.target.value)}
+                placeholder="Breakfast"
+                disabled={disabled}
+              />
+            </div>
+            <div className="sm:col-span-1">
+              <Label htmlFor="addon-name-he" className="text-xs">
+                Nom (HE)
+              </Label>
+              <Input
+                id="addon-name-he"
+                value={newAddonNameHe}
+                onChange={(e) => setNewAddonNameHe(e.target.value)}
+                placeholder="ארוחת בוקר"
+                dir="rtl"
+                disabled={disabled}
+              />
+            </div>
+            <div className="sm:col-span-1">
+              <Label htmlFor="addon-value" className="text-xs">
+                Prix / personne ($) *
+              </Label>
+              <Input
+                id="addon-value"
+                type="number"
+                min="0"
+                step="0.01"
+                value={newAddonValue || ""}
+                onChange={(e) => setNewAddonValue(parseFloat(e.target.value) || 0)}
+                placeholder="10"
+                disabled={disabled}
+              />
+            </div>
+            <div className="sm:col-span-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => addAddonMutation.mutate()}
+                disabled={disabled || !newAddonName.trim() || newAddonValue <= 0 || addAddonMutation.isPending}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Ajouter
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================================================================= */}
+      {/* Section B: Commissions & Taxe */}
+      {/* ================================================================= */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Percent className="h-4 w-4 text-orange-600" />
+            Commissions & Taxe
+          </CardTitle>
+          <CardDescription>Commissions différenciées (chambre vs addons) et taux de taxe</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="comm-room" className="text-xs">
+                Commission chambre (%)
+              </Label>
+              <Input
+                id="comm-room"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={commissionRoomPct || ""}
+                onChange={(e) => {
+                  setCommissionRoomPct(parseFloat(e.target.value) || 0);
+                  setConfigDirty(true);
+                }}
+                placeholder="10"
+                disabled={disabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Appliquée sur le prix HyperGuest</p>
+            </div>
+            <div>
+              <Label htmlFor="comm-addons" className="text-xs">
+                Commission addons (%)
+              </Label>
+              <Input
+                id="comm-addons"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={commissionAddonsPct || ""}
+                onChange={(e) => {
+                  setCommissionAddonsPct(parseFloat(e.target.value) || 0);
+                  setConfigDirty(true);
+                }}
+                placeholder="15"
+                disabled={disabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Appliquée sur le total des addons par personne</p>
+            </div>
+            <div>
+              <Label htmlFor="tax-pct" className="text-xs">
+                Taxe (%)
+              </Label>
+              <Input
+                id="tax-pct"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={taxPct || ""}
+                onChange={(e) => {
+                  setTaxPct(parseFloat(e.target.value) || 0);
+                  setConfigDirty(true);
+                }}
+                placeholder="18"
+                disabled={disabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Appliquée sur chambre + addons + commissions</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================================================================= */}
+      {/* Section C: Promo */}
+      {/* ================================================================= */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Tag className="h-4 w-4 text-purple-600" />
+            Promo
+          </CardTitle>
+          <CardDescription>Remise réelle ou faux prix barré (marketing)</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="text-xs">Type de promo</Label>
+            <Select
+              value={promoType}
+              onValueChange={(val) => {
+                setPromoType(val as PromoType | "none");
+                setConfigDirty(true);
+              }}
+              disabled={disabled}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Aucune" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Aucune promo</SelectItem>
+                <SelectItem value="real_discount">Remise réelle</SelectItem>
+                <SelectItem value="fake_markup">Faux prix barré</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {promoType !== "none" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="promo-value" className="text-xs">
+                  {promoType === "real_discount" ? "Valeur de la remise" : "Majoration affichée"}
+                </Label>
+                <Input
+                  id="promo-value"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={promoValue || ""}
+                  onChange={(e) => {
+                    setPromoValue(parseFloat(e.target.value) || 0);
+                    setConfigDirty(true);
+                  }}
+                  placeholder={promoType === "real_discount" ? "10" : "20"}
+                  disabled={disabled}
+                />
+              </div>
+              {promoType === "real_discount" && (
+                <div>
+                  <Label className="text-xs">Mode</Label>
+                  <Select
+                    value={promoIsPercentage ? "percentage" : "fixed"}
+                    onValueChange={(val) => {
+                      setPromoIsPercentage(val === "percentage");
+                      setConfigDirty(true);
+                    }}
+                    disabled={disabled}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Pourcentage (%)</SelectItem>
+                      <SelectItem value="fixed">Montant fixe ($)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+
+          {promoType === "real_discount" && promoValue > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {promoIsPercentage
+                ? `Le prix final sera réduit de ${promoValue}%`
+                : `Le prix final sera réduit de $${promoValue.toFixed(2)}`}
+            </p>
+          )}
+
+          {promoType === "fake_markup" && promoValue > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Un prix barré {promoValue}% plus élevé sera affiché à côté du vrai prix. Aucune remise réelle n'est
+              appliquée.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ================================================================= */}
+      {/* Save config button */}
+      {/* ================================================================= */}
+      {configDirty && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={() => saveConfigMutation.mutate()}
+            disabled={disabled || saveConfigMutation.isPending}
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saveConfigMutation.isPending ? "Sauvegarde…" : "Sauvegarder le pricing"}
+          </Button>
+        </div>
+      )}
+
+      {/* ================================================================= */}
+      {/* Delete confirmation dialog */}
+      {/* ================================================================= */}
+      <AlertDialog open={!!deleteAddonId} onOpenChange={() => setDeleteAddonId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete pricing rule?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>Supprimer cet addon ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. L'addon sera définitivement supprimé.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              type="button"
-              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              onClick={() => deleteAddonId && deleteAddonMutation.mutate(deleteAddonId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
   );
-});
+}

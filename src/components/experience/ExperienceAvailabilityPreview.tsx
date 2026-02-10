@@ -3,14 +3,16 @@
  * Mini calendrier + bouton "Vérifier prix" → recherche chambres HyperGuest
  * Affiche les chambres et le détail prix (HyperGuest + add-ons) comme le verra l'utilisateur.
  *
- * Supporte une prop `nights` optionnelle : quand fournie, le checkout est
- * automatiquement calculé (checkin + nights) pour chaque hôtel du parcours.
+ * V2 : Ajoute un input "Nombre de voyageurs" pour le calcul des addons par personne.
+ * Utilise le nouveau hook useExperience2Price avec 6 couches.
  */
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, Search } from "lucide-react";
+import { Calendar, Search, Users, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import DateRangePicker from "./DateRangePicker";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
@@ -27,12 +29,15 @@ export interface ExperienceAvailabilityPreviewProps {
   experienceId: string | null;
   currency?: string;
   lang?: "en" | "he" | "fr";
-  /** Nombre de nuits pré-configuré pour cet hôtel du parcours.
-   *  Quand fourni, le checkout se calcule automatiquement à partir du checkin. */
+  /** Nombre de nuits pré-configuré pour cet hôtel du parcours (affichage uniquement). */
   nights?: number;
-  /** Callback quand le prix chambre sélectionné change (pour le total parcours).
-   *  Reçoit le prix total HyperGuest de la chambre sélectionnée, ou null. */
-  onRoomPriceSelect?: (price: number | null) => void;
+  /** Nombre min de voyageurs (depuis l'expérience) */
+  minParty?: number;
+  /** Nombre max de voyageurs (depuis l'expérience) */
+  maxParty?: number;
+  /** Callback quand le prix total calculé change (pour le total parcours).
+   *  Reçoit le finalTotal du PriceBreakdownV2, ou null. */
+  onPriceChange?: (price: number | null) => void;
   /** Masquer le PriceBreakdownV2 individuel (quand on affiche un total combiné) */
   hidePriceBreakdown?: boolean;
 }
@@ -49,32 +54,20 @@ function toSearchResult(data: unknown): { results?: { rooms: unknown[] }[]; room
   return null;
 }
 
-/** Ajoute N jours à une date */
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
-
 /** Tente d'extraire le prix total chambre depuis les données de prix HyperGuest */
 function extractRoomTotal(prices: unknown): number | null {
   if (prices == null) return null;
   if (typeof prices === "number") return prices;
   const p = prices as Record<string, unknown>;
-  // { total: number }
   if (typeof p.total === "number") return p.total;
-  // { total: { amount: number } }
   if (p.total && typeof (p.total as any).amount === "number") return (p.total as any).amount;
-  // { totalPrice: number }
   if (typeof p.totalPrice === "number") return p.totalPrice;
-  // Array of daily prices → sum
   if (Array.isArray(prices)) {
     return (prices as any[]).reduce((s, item) => {
       if (typeof item === "number") return s + item;
       return s + (item?.price ?? item?.amount ?? item?.rate ?? 0);
     }, 0);
   }
-  // { perNight: [...] } or { dailyPrices: [...] }
   const arr = (p.perNight ?? p.dailyPrices) as unknown[];
   if (Array.isArray(arr)) {
     return arr.reduce((s: number, item: any) => {
@@ -92,7 +85,9 @@ export function ExperienceAvailabilityPreview({
   currency = "ILS",
   lang = "en",
   nights: propNights,
-  onRoomPriceSelect,
+  minParty = 1,
+  maxParty = 20,
+  onPriceChange,
   hidePriceBreakdown = false,
 }: ExperienceAvailabilityPreviewProps) {
   const t = {
@@ -100,40 +95,34 @@ export function ExperienceAvailabilityPreview({
       title: "Price / availability preview",
       subtitle: "Check what guests will see for a sample stay",
       selectDates: "Select dates",
-      selectCheckin: "Select check-in date",
       checkPrice: "Check price",
       noHotel: "Select a hotel with HyperGuest to preview prices.",
       noDates: 'Select check-in and check-out, then click "Check price".',
-      noDatesNights: 'Select a check-in date, then click "Check price".',
       maxNights: "Max 30 nights for HyperGuest search; this range was capped.",
-      adults: "Adults",
       nightsLabel: "nights",
+      travelers: "Travelers",
     },
     he: {
       title: "תצוגת מחיר / זמינות",
       subtitle: "בדוק מה יראו האורחים לדוגמה",
       selectDates: "בחר תאריכים",
-      selectCheckin: "בחר תאריך כניסה",
       checkPrice: "בדוק מחיר",
       noHotel: "בחר מלון עם HyperGuest לתצוגת מחירים.",
       noDates: 'בחר תאריכי כניסה ויציאה ולחץ "בדוק מחיר".',
-      noDatesNights: 'בחר תאריך כניסה ולחץ "בדוק מחיר".',
       maxNights: "מקסימום 30 לילות לחיפוש HyperGuest; הטווח הוגבל.",
-      adults: "מבוגרים",
       nightsLabel: "לילות",
+      travelers: "מטיילים",
     },
     fr: {
       title: "Aperçu prix / disponibilités",
       subtitle: "Vérifiez ce que verront les voyageurs pour un séjour exemple",
       selectDates: "Sélectionnez les dates",
-      selectCheckin: "Sélectionnez la date d'arrivée",
       checkPrice: "Vérifier le prix",
       noHotel: "Sélectionnez un hôtel avec HyperGuest pour prévisualiser les prix.",
       noDates: 'Sélectionnez arrivée et départ, puis cliquez sur "Vérifier le prix".',
-      noDatesNights: 'Sélectionnez une date d\'arrivée, puis cliquez sur "Vérifier le prix".',
       maxNights: "Maximum 30 nuits pour la recherche HyperGuest ; la plage a été plafonnée.",
-      adults: "Adultes",
       nightsLabel: "nuits",
+      travelers: "Voyageurs",
     },
   }[lang];
 
@@ -142,13 +131,10 @@ export function ExperienceAvailabilityPreview({
   // -----------------------------------------------------------------------
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
-  const [adults] = useState(2);
-  /** Params envoyés à l'API uniquement après clic sur "Vérifier prix" */
+  const [numberOfGuests, setNumberOfGuests] = useState(Math.max(minParty, 2));
   const [submittedRange, setSubmittedRange] = useState<{ from: Date; to: Date } | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
-
-  // No date override — the user freely picks check-in and check-out
 
   // -----------------------------------------------------------------------
   // Search params
@@ -166,12 +152,12 @@ export function ExperienceAvailabilityPreview({
     return {
       checkIn,
       nights,
-      guests: formatGuests([{ adults, children: [] }]),
+      guests: formatGuests([{ adults: numberOfGuests, children: [] }]),
       hotelIds: [parseInt(hyperguestPropertyId, 10)],
       customerNationality: "IL",
       currency,
     };
-  }, [submittedRange, hyperguestPropertyId, adults, currency]);
+  }, [submittedRange, hyperguestPropertyId, numberOfGuests, currency]);
 
   const {
     data: rawResult,
@@ -189,7 +175,7 @@ export function ExperienceAvailabilityPreview({
       MAX_NIGHTS;
 
   // -----------------------------------------------------------------------
-  // Price breakdown
+  // Price breakdown V2
   // -----------------------------------------------------------------------
 
   const selectedRatePlan = useMemo(() => {
@@ -211,31 +197,22 @@ export function ExperienceAvailabilityPreview({
 
   const ratePlanPrices = selectedRatePlan?.prices ?? null;
 
+  // V2 hook with numberOfGuests
   const priceBreakdown = useExperience2Price(
     experienceId,
     null,
     currency,
     effectiveNights,
-    ratePlanPrices as Parameters<typeof useExperience2Price>[4],
+    numberOfGuests,
+    ratePlanPrices,
   );
 
-  // Extraire le prix total et notifier le parent
-  // 1. Essaie extractRoomTotal sur les prix bruts HyperGuest
-  // 2. Fallback : prend le total calculé par useExperience2Price (qui inclut les addons)
-  const computedRoomTotal = useMemo(() => {
-    const fromRaw = extractRoomTotal(ratePlanPrices);
-    if (fromRaw != null) return fromRaw;
-    // Fallback : extraire depuis le price breakdown déjà calculé
-    if (priceBreakdown) {
-      const pb = priceBreakdown as any;
-      return pb.grandTotal ?? pb.total ?? pb.roomTotal ?? pb.totalPrice ?? null;
-    }
-    return null;
-  }, [ratePlanPrices, priceBreakdown]);
+  // Notify parent of total price change
+  const computedTotal = priceBreakdown?.finalTotal ?? null;
 
   useEffect(() => {
-    onRoomPriceSelect?.(computedRoomTotal);
-  }, [computedRoomTotal, onRoomPriceSelect]);
+    onPriceChange?.(computedTotal);
+  }, [computedTotal, onPriceChange]);
 
   const roomsList = searchResult?.results?.[0]?.rooms ?? searchResult?.rooms ?? [];
 
@@ -263,6 +240,9 @@ export function ExperienceAvailabilityPreview({
   };
 
   const canCheckPrice = !!hyperguestPropertyId && !!dateRange.from && !!dateRange.to && dateRange.from < dateRange.to;
+
+  const incrementGuests = () => setNumberOfGuests((n) => Math.min(n + 1, maxParty));
+  const decrementGuests = () => setNumberOfGuests((n) => Math.max(n - 1, minParty));
 
   // -----------------------------------------------------------------------
   // Render: no HyperGuest ID
@@ -307,9 +287,57 @@ export function ExperienceAvailabilityPreview({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm font-medium">{t.selectDates}</p>
-          <DateRangePicker value={dateRange} onChange={setDateRange} />
+        {/* Date picker + Guests input + Check price */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium">{t.selectDates}</Label>
+              <DateRangePicker value={dateRange} onChange={setDateRange} />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-sm font-medium flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" />
+                {t.travelers}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={decrementGuests}
+                  disabled={numberOfGuests <= minParty}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  min={minParty}
+                  max={maxParty}
+                  value={numberOfGuests}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val)) {
+                      setNumberOfGuests(Math.max(minParty, Math.min(maxParty, val)));
+                    }
+                  }}
+                  className="w-16 text-center"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={incrementGuests}
+                  disabled={numberOfGuests >= maxParty}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-2">
             <Button
               type="button"

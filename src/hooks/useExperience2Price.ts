@@ -1,185 +1,292 @@
-/**
- * Hook pour calculer le prix final d'une expérience V2
- * Combine le prix HyperGuest + les add-ons (commissions/taxes)
- */
+// =============================================================================
+// src/hooks/useExperience2Price.ts
+// Hook de calcul de prix V2 — Modèle à 6 couches
+// =============================================================================
 
 import { useMemo } from "react";
-import { useExperienceAddons } from "./useExperience2Addons";
-import type { ExperienceAddon } from "@/types/experience2_addons";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  ExperienceAddon,
+  PricingConfig,
+  PriceBreakdownV2,
+  PerPersonAddonLine,
+  DEFAULT_PRICING_CONFIG,
+} from "@/types/experience2_addons";
 
-export interface PriceBreakdown {
-  basePrice: number;
-  commissions: Array<{
-    name: string;
-    amount: number;
-    type: "commission" | "per_night";
-  }>;
-  taxes: Array<{
-    name: string;
-    amount: number;
-  }>;
-  subtotal: number;
-  totalTaxes: number;
-  total: number;
-  currency: string;
-  nights: number;
+// ---------------------------------------------------------------------------
+// Fetch addons for an experience (per_person only for V2 calculation)
+// ---------------------------------------------------------------------------
+
+export function useExperienceAddons(experienceId: string | null) {
+  return useQuery({
+    queryKey: ["experience2-addons", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return [];
+      const { data, error } = await supabase
+        .from("experience2_addons")
+        .select("*")
+        .eq("experience_id", experienceId)
+        .eq("is_active", true)
+        .order("calculation_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as ExperienceAddon[];
+    },
+    enabled: !!experienceId,
+  });
 }
 
-function safeNumber(value: unknown, fallback: number = 0): number {
-  const n = Number(value);
-  if (Number.isNaN(n) || !Number.isFinite(n)) return fallback;
-  return n;
+// ---------------------------------------------------------------------------
+// Fetch pricing config from experiences2 table
+// ---------------------------------------------------------------------------
+
+export function useExperiencePricingConfig(experienceId: string | null) {
+  return useQuery({
+    queryKey: ["experience2-pricing-config", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return null;
+      const { data, error } = await supabase
+        .from("experiences2")
+        .select("commission_room_pct, commission_addons_pct, tax_pct, promo_type, promo_value, promo_is_percentage")
+        .eq("id", experienceId)
+        .single();
+      if (error) throw error;
+      return {
+        commission_room_pct: data.commission_room_pct ?? 0,
+        commission_addons_pct: data.commission_addons_pct ?? 0,
+        tax_pct: data.tax_pct ?? 0,
+        promo_type: data.promo_type ?? null,
+        promo_value: data.promo_value ?? null,
+        promo_is_percentage: data.promo_is_percentage ?? true,
+      } as PricingConfig;
+    },
+    enabled: !!experienceId,
+  });
 }
 
-function calculatePriceWithAddons(
-  basePrice: number,
-  addons: ExperienceAddon[],
-  nights: number,
-  currency: string = "USD",
-): PriceBreakdown {
-  const safeBase = safeNumber(basePrice, 0);
-  const safeNights = Math.max(0, Math.floor(Number(nights)) || 0);
+// ---------------------------------------------------------------------------
+// Extract room price from HyperGuest RatePlanPrices
+// ---------------------------------------------------------------------------
 
-  if (!addons || addons.length === 0) {
-    return {
-      basePrice: Math.round(safeBase * 100) / 100,
-      commissions: [],
-      taxes: [],
-      subtotal: safeBase,
-      totalTaxes: 0,
-      total: safeBase,
-      currency,
-      nights: safeNights,
-    };
+export function extractPriceFromRatePlanPrices(ratePlanPrices: unknown): { amount: number; currency: string } | null {
+  if (ratePlanPrices == null) return null;
+
+  // Direct number
+  if (typeof ratePlanPrices === "number") {
+    return { amount: ratePlanPrices, currency: "ILS" };
   }
 
-  let subtotal = safeBase;
-  const commissions: PriceBreakdown["commissions"] = [];
-  const taxes: PriceBreakdown["taxes"] = [];
+  const p = ratePlanPrices as Record<string, unknown>;
 
-  const sortedAddons = [...addons].sort((a, b) => (a.calculation_order ?? 0) - (b.calculation_order ?? 0));
-
-  sortedAddons
-    .filter((a) => (a.calculation_order ?? 0) === 0 && a.is_active)
-    .forEach((addon) => {
-      const value = safeNumber(addon.value, 0);
-      let amount = 0;
-      if (addon.type === "commission") {
-        amount = addon.is_percentage ? (subtotal * value) / 100 : value;
-      } else if (addon.type === "per_night") {
-        amount = addon.is_percentage ? ((subtotal * value) / 100) * safeNights : value * safeNights;
-      }
-      amount = safeNumber(amount, 0);
-      subtotal += amount;
-      commissions.push({
-        name: addon.name ?? "",
-        amount: Math.round(amount * 100) / 100,
-        type: addon.type === "per_night" ? "per_night" : "commission",
-      });
-    });
-
-  sortedAddons
-    .filter((a) => (a.calculation_order ?? 0) >= 1 && a.type === "tax" && a.is_active)
-    .forEach((addon) => {
-      const value = safeNumber(addon.value, 0);
-      const amount = addon.is_percentage ? (subtotal * value) / 100 : value;
-      const safeAmount = safeNumber(amount, 0);
-      subtotal += safeAmount;
-      taxes.push({
-        name: addon.name ?? "",
-        amount: Math.round(safeAmount * 100) / 100,
-      });
-    });
-
-  const totalTaxes = taxes.reduce((sum, tax) => sum + tax.amount, 0);
-  subtotal = safeNumber(subtotal, safeBase);
-  let total = Math.round(subtotal * 100) / 100;
-  if (!Number.isFinite(total) || total < 0) total = safeBase;
-
-  return {
-    basePrice: Math.round(safeBase * 100) / 100,
-    commissions,
-    taxes,
-    subtotal: Math.round((subtotal - totalTaxes) * 100) / 100,
-    totalTaxes: Math.round(totalTaxes * 100) / 100,
-    total,
-    currency,
-    nights: safeNights,
-  };
-}
-
-export interface RatePlanPrices {
-  sell?: { price?: number; amount?: number; currency?: string; [key: string]: unknown };
-  net?: { price?: number; amount?: number; currency?: string; [key: string]: unknown };
-  total?: number;
-  amount?: number;
-  [key: string]: unknown;
-}
-
-function toNumber(value: unknown): number | null {
-  if (value == null) return null;
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const n = Number(value.trim());
-    return Number.isFinite(n) ? n : null;
-  }
-  return null;
-}
-
-function extractPriceFromRatePlanPrices(
-  ratePlanPrices: RatePlanPrices | null,
-): { amount: number; currency: string } | null {
-  if (!ratePlanPrices || typeof ratePlanPrices !== "object") return null;
-  const R = ratePlanPrices as Record<string, unknown>;
-  const tryAmount = (val: unknown): number | null => toNumber(val);
-  const getCurrency = (): string => {
-    const sell = ratePlanPrices?.sell as { currency?: string } | undefined;
-    const net = ratePlanPrices?.net as { currency?: string } | undefined;
-    return (sell?.currency || net?.currency || (R.currency as string) || "ILS") as string;
-  };
-  const sellObj = ratePlanPrices?.sell as { price?: unknown; amount?: unknown } | undefined;
-  const netObj = ratePlanPrices?.net as { price?: unknown; amount?: unknown } | undefined;
-  const sellAmount = tryAmount(sellObj?.price ?? sellObj?.amount);
-  const netAmount = tryAmount(netObj?.price ?? netObj?.amount);
-  const total = tryAmount(R.total);
-  const amount = tryAmount(R.amount);
-  const first = sellAmount ?? netAmount ?? total ?? amount;
-  if (first != null && first >= 0) {
-    return { amount: first, currency: getCurrency() };
-  }
-  for (const k of Object.keys(R)) {
-    const n = tryAmount(R[k]);
-    if (n != null && n >= 0) return { amount: n, currency: getCurrency() };
-  }
-  for (const k of Object.keys(R)) {
-    const v = R[k];
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      const obj = v as Record<string, unknown>;
-      const nestedAmount = tryAmount(obj.price ?? obj.amount ?? obj.value ?? obj.total);
-      if (nestedAmount != null && nestedAmount >= 0) {
-        return { amount: nestedAmount, currency: getCurrency() };
-      }
+  // { sell: { price: number, currency } }
+  if (p.sell && typeof p.sell === "object") {
+    const sell = p.sell as Record<string, unknown>;
+    if (typeof sell.price === "number") {
+      return {
+        amount: sell.price,
+        currency: (sell.currency as string) || "ILS",
+      };
     }
   }
+
+  // { net: { price: number, currency } }
+  if (p.net && typeof p.net === "object") {
+    const net = p.net as Record<string, unknown>;
+    if (typeof net.price === "number") {
+      return {
+        amount: net.price,
+        currency: (net.currency as string) || "ILS",
+      };
+    }
+  }
+
+  // { total: number }
+  if (typeof p.total === "number") {
+    return { amount: p.total, currency: (p.currency as string) || "ILS" };
+  }
+
+  // { total: { amount: number } }
+  if (p.total && typeof p.total === "object") {
+    const total = p.total as Record<string, unknown>;
+    if (typeof total.amount === "number") {
+      return {
+        amount: total.amount,
+        currency: (total.currency as string) || "ILS",
+      };
+    }
+  }
+
+  // { amount: number }
+  if (typeof p.amount === "number") {
+    return { amount: p.amount, currency: (p.currency as string) || "ILS" };
+  }
+
+  // Array of daily prices → sum
+  if (Array.isArray(ratePlanPrices)) {
+    const sum = (ratePlanPrices as unknown[]).reduce((s: number, item: unknown) => {
+      if (typeof item === "number") return s + item;
+      if (item && typeof item === "object") {
+        const i = item as Record<string, unknown>;
+        return s + ((i.price ?? i.amount ?? i.rate ?? 0) as number);
+      }
+      return s;
+    }, 0);
+    return { amount: sum, currency: "ILS" };
+  }
+
+  // { perNight: [...] } or { dailyPrices: [...] }
+  const arr = (p.perNight ?? p.dailyPrices) as unknown[];
+  if (Array.isArray(arr)) {
+    const sum = arr.reduce((s: number, item: unknown) => {
+      if (typeof item === "number") return s + item;
+      if (item && typeof item === "object") {
+        const i = item as Record<string, unknown>;
+        return s + ((i.price ?? i.amount ?? i.rate ?? 0) as number);
+      }
+      return s;
+    }, 0);
+    return { amount: sum, currency: "ILS" };
+  }
+
   return null;
 }
+
+// ---------------------------------------------------------------------------
+// Core calculation: 6-layer pricing model
+// ---------------------------------------------------------------------------
+
+export function calculatePriceV2(
+  roomPrice: number,
+  guests: number,
+  nights: number,
+  perPersonAddons: ExperienceAddon[],
+  config: PricingConfig,
+  currency: string,
+): PriceBreakdownV2 {
+  // --- Layer 1: Room ---
+  // roomPrice is already the full stay price from HyperGuest
+
+  // --- Layer 2: Per-person addons ---
+  const addonLines: PerPersonAddonLine[] = perPersonAddons
+    .filter((a) => a.type === "per_person" && a.is_active)
+    .map((addon) => ({
+      name: addon.name,
+      pricePerPerson: addon.value,
+      guests,
+      total: addon.value * guests,
+    }));
+
+  const totalAddons = addonLines.reduce((sum, a) => sum + a.total, 0);
+
+  // --- Layer 3: Commissions ---
+  const commissionRoomPct = config.commission_room_pct || 0;
+  const commissionAddonsPct = config.commission_addons_pct || 0;
+
+  const commissionRoomAmount = (roomPrice * commissionRoomPct) / 100;
+  const commissionAddonsAmount = (totalAddons * commissionAddonsPct) / 100;
+  const totalCommissions = commissionRoomAmount + commissionAddonsAmount;
+
+  // --- Layer 4: Taxes ---
+  const subtotalBeforeTax = roomPrice + totalAddons + totalCommissions;
+  const taxPct = config.tax_pct || 0;
+  const taxAmount = (subtotalBeforeTax * taxPct) / 100;
+
+  // --- Layer 5: Promo ---
+  const totalBeforePromo = subtotalBeforeTax + taxAmount;
+  let discountAmount = 0;
+  let fakeOriginalPrice: number | null = null;
+
+  if (config.promo_type === "real_discount" && config.promo_value != null && config.promo_value > 0) {
+    if (config.promo_is_percentage) {
+      discountAmount = (totalBeforePromo * config.promo_value) / 100;
+    } else {
+      discountAmount = Math.min(config.promo_value, totalBeforePromo); // Can't discount more than total
+    }
+  } else if (config.promo_type === "fake_markup" && config.promo_value != null && config.promo_value > 0) {
+    // Show a higher "original" price as strikethrough
+    fakeOriginalPrice = totalBeforePromo * (1 + config.promo_value / 100);
+  }
+
+  // --- Final ---
+  const finalTotal = Math.max(0, totalBeforePromo - discountAmount);
+
+  return {
+    roomPrice,
+    perPersonAddons: addonLines,
+    totalAddons,
+    commissionRoomPct,
+    commissionRoomAmount,
+    commissionAddonsPct,
+    commissionAddonsAmount,
+    totalCommissions,
+    subtotalBeforeTax,
+    taxPct,
+    taxAmount,
+    promo: {
+      type: config.promo_type,
+      value: config.promo_value,
+      isPercentage: config.promo_is_percentage,
+      discountAmount,
+      fakeOriginalPrice,
+    },
+    finalTotal,
+    currency,
+    nights,
+    guests,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Main hook: useExperience2Price
+// ---------------------------------------------------------------------------
 
 export function useExperience2Price(
   experienceId: string | null,
   basePrice: number | null,
   currency: string,
   nights: number,
-  ratePlanPrices: RatePlanPrices | null,
-) {
-  const { data: addons = [] } = useExperienceAddons(experienceId);
+  numberOfGuests: number,
+  ratePlanPrices?: unknown,
+): PriceBreakdownV2 | null {
+  const { data: addons } = useExperienceAddons(experienceId);
+  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
 
   return useMemo(() => {
+    // Try to extract room price from HyperGuest rate plan
     const extracted = extractPriceFromRatePlanPrices(ratePlanPrices);
-    if (!basePrice && !ratePlanPrices) return null;
+    const roomPrice = extracted?.amount ?? basePrice ?? 0;
+    const cur = extracted?.currency ?? currency;
 
-    const hyperguestPrice = extracted ? safeNumber(extracted.amount, 0) : safeNumber(basePrice, 0);
-    const priceCurrency = extracted?.currency ?? currency;
+    if (roomPrice <= 0 && (!addons || addons.length === 0)) return null;
 
-    return calculatePriceWithAddons(hyperguestPrice, addons, nights, priceCurrency);
-  }, [basePrice, currency, nights, ratePlanPrices, addons]);
+    const config: PricingConfig = pricingConfig ?? {
+      commission_room_pct: 0,
+      commission_addons_pct: 0,
+      tax_pct: 0,
+      promo_type: null,
+      promo_value: null,
+      promo_is_percentage: true,
+    };
+
+    // Filter only per_person addons for V2 calculation
+    const perPersonAddons = (addons ?? []).filter((a) => a.type === "per_person");
+
+    return calculatePriceV2(roomPrice, numberOfGuests, nights, perPersonAddons, config, cur);
+  }, [addons, pricingConfig, basePrice, currency, nights, numberOfGuests, ratePlanPrices]);
+}
+
+// ---------------------------------------------------------------------------
+// Legacy compatibility: old PriceBreakdown type
+// (for components that haven't been updated yet)
+// ---------------------------------------------------------------------------
+
+export interface PriceBreakdown {
+  basePrice: number;
+  commissions: Array<{ name: string; amount: number; type: "commission" | "per_night" }>;
+  taxes: Array<{ name: string; amount: number }>;
+  subtotal: number;
+  totalTaxes: number;
+  total: number;
+  currency: string;
+  nights: number;
 }

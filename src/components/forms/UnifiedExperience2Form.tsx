@@ -1082,7 +1082,9 @@ export function UnifiedExperience2Form({
                       currency="ILS"
                       lang="en"
                       nights={eh.nights}
-                      onRoomPriceSelect={(price) => setHotelRoomPrices((prev) => ({ ...prev, [eh.hotel_id]: price }))}
+                      minParty={watch("min_party") || 1}
+                      maxParty={watch("max_party") || 20}
+                      onPriceChange={(price) => setHotelRoomPrices((prev) => ({ ...prev, [eh.hotel_id]: price }))}
                     />
                   </div>
                 );
@@ -1121,7 +1123,7 @@ export function UnifiedExperience2Form({
                         );
                       })}
                       <div className="border-t pt-2 flex justify-between items-center font-bold text-base">
-                        <span>Total chambres</span>
+                        <span>Total Parcours</span>
                         <span>
                           ₪
                           {combinedTotal.toLocaleString("en-IL", {
