@@ -1448,6 +1448,56 @@ export type Database = {
           },
         ]
       }
+      hotel2_extras: {
+        Row: {
+          created_at: string | null
+          currency: string
+          hotel_id: string
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          name: string
+          name_he: string | null
+          price: number
+          pricing_type: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string
+          hotel_id: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          name: string
+          name_he?: string | null
+          price?: number
+          pricing_type?: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string
+          hotel_id?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          name?: string
+          name_he?: string | null
+          price?: number
+          pricing_type?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotel2_extras_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotels: {
         Row: {
           address: string | null
