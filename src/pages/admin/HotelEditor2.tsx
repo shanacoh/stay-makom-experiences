@@ -424,15 +424,31 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => saveMutation.mutate(formData)}
+            onClick={() => {
+              setFormData(prev => ({ ...prev, status: "draft" }));
+              saveMutation.mutate({ ...formData, status: "draft" });
+            }}
             disabled={saveMutation.isPending || !formData.name}
           >
-            {saveMutation.isPending ? (
+            {saveMutation.isPending && formData.status === "draft" ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
             Save Draft
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              setFormData(prev => ({ ...prev, status: "published" }));
+              saveMutation.mutate({ ...formData, status: "published" });
+            }}
+            disabled={saveMutation.isPending || !formData.name}
+          >
+            {saveMutation.isPending && formData.status === "published" ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : null}
+            Publish
           </Button>
         </div>
       </div>
@@ -497,21 +513,6 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Status *</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value: "draft" | "published") => setFormData({ ...formData, status: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="border-t pt-6 space-y-4">
               <h3 className="text-lg font-semibold">Images & Media</h3>
