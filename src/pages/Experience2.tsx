@@ -12,6 +12,11 @@ import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
 import YourStaySection from "@/components/experience-test/YourStaySection";
 import LocationMap from "@/components/experience-test/LocationMap";
 import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
+import PracticalInfo from "@/components/experience-test/PracticalInfo";
+import ReviewsGrid2 from "@/components/experience-test/ReviewsGrid2";
+import ExtrasSection2 from "@/components/experience-test/ExtrasSection2";
+import ShareWithFriendsSection from "@/components/experience/ShareWithFriendsSection";
+import OtherExperiences2 from "@/components/experience-test/OtherExperiences2";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -398,11 +403,39 @@ export default function Experience2() {
               />
             )}
 
+            {/* Practical Info */}
+            <PracticalInfo experience={experience} lang={lang as "en" | "he" | "fr"} />
+
+            {/* Extras / Add-ons */}
+            <ExtrasSection2
+              experienceId={experience.id}
+              lang={lang}
+              currency={experience.currency || "ILS"}
+            />
+
             {/* Hotel stay section(s) */}
             {renderStaySections()}
 
             {/* Location map(s) */}
             {renderMaps()}
+
+            {/* Reviews */}
+            <ReviewsGrid2 experienceId={experience.id} lang={lang} />
+
+            {/* Share */}
+            <ShareWithFriendsSection
+              title={title}
+              lang={lang as "en" | "he" | "fr"}
+            />
+
+            {/* Other Experiences */}
+            {primaryHotel?.id && (
+              <OtherExperiences2
+                hotelId={primaryHotel.id}
+                currentExperienceId={experience.id}
+                lang={lang}
+              />
+            )}
           </div>
 
           {/* Colonne droite - Booking Panel (Desktop) */}
