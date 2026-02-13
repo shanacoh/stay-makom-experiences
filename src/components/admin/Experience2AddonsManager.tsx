@@ -1,11 +1,6 @@
 // =============================================================================
 // src/components/admin/Experience2AddonsManager.tsx
-// Gestionnaire d'addons par personne — V2
-//
-// Supporte deux modes :
-//   - Mode DB (experienceId fourni) : CRUD direct dans experience2_addons
-//   - Mode local (pas d'experienceId) : gère les addons en mémoire,
-//     le parent les sauvegarde après création de l'expérience
+// Gestionnaire d'addons — V3 (supports any addon type via props)
 // =============================================================================
 
 import { useState, useEffect } from "react";
@@ -17,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,19 +24,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2, Users, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, DollarSign, Percent, Receipt } from "lucide-react";
 import { toast } from "sonner";
-import type { ExperienceAddon } from "@/types/experience2_addons";
+import type { ExperienceAddon, AddonType } from "@/types/experience2_addons";
+import {
+  ADDON_TYPES,
+  EXPERIENCE_PRICING_TYPES,
+  COMMISSION_TYPES,
+  TAX_TYPES,
+  DEFAULT_CALCULATION_ORDER,
+} from "@/types/experience2_addons";
 
 // ---------------------------------------------------------------------------
 // Local addon type (used when no experienceId yet)
 // ---------------------------------------------------------------------------
 
 export interface LocalAddonEntry {
-  id: string; // temp UUID locally, real UUID from DB
+  id: string;
+  type: AddonType;
   name: string;
   name_he: string | null;
   value: number;
+  is_percentage: boolean;
   is_active: boolean;
 }
 
@@ -49,13 +54,33 @@ export interface LocalAddonEntry {
 // ---------------------------------------------------------------------------
 
 interface Experience2AddonsManagerProps {
-  /** Si fourni, les addons sont lus/écrits directement en base */
   experienceId: string | null | undefined;
   disabled?: boolean;
-  /** Addons en mémoire locale (mode création, avant que l'expérience soit sauvegardée) */
   localAddons?: LocalAddonEntry[];
-  /** Callback quand les addons locaux changent */
   onLocalAddonsChange?: (addons: LocalAddonEntry[]) => void;
+  /** Which addon types this section manages */
+  addonTypes?: AddonType[];
+  /** Section title */
+  sectionTitle?: string;
+  /** Section description */
+  sectionDescription?: string;
+  /** Icon to display */
+  icon?: React.ReactNode;
+}
+
+// ---------------------------------------------------------------------------
+// Section icon helper
+// ---------------------------------------------------------------------------
+
+function getSectionIcon(addonTypes: AddonType[]) {
+  if (addonTypes.some((t) => COMMISSION_TYPES.includes(t))) return <Percent className="h-4 w-4 text-orange-600" />;
+  if (addonTypes.some((t) => TAX_TYPES.includes(t))) return <Receipt className="h-4 w-4 text-red-600" />;
+  return <DollarSign className="h-4 w-4 text-emerald-600" />;
+}
+
+function formatBadge(addon: { type: AddonType; value: number; is_percentage: boolean }) {
+  if (addon.is_percentage) return `${addon.value}%`;
+  return `₪${addon.value}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -67,17 +92,23 @@ export function Experience2AddonsManager({
   disabled = false,
   localAddons = [],
   onLocalAddonsChange,
+  addonTypes = EXPERIENCE_PRICING_TYPES,
+  sectionTitle = "Experience Pricing",
+  sectionDescription = "Fees and extras charged to travelers",
+  icon,
 }: Experience2AddonsManagerProps) {
   const queryClient = useQueryClient();
   const isLocalMode = !experienceId;
 
   // ─── State: new addon form ───
+  const [newType, setNewType] = useState<AddonType>(addonTypes[0]);
   const [newAddonName, setNewAddonName] = useState("");
   const [newAddonNameHe, setNewAddonNameHe] = useState("");
   const [newAddonValue, setNewAddonValue] = useState<number>(0);
+  const [newIsPercentage, setNewIsPercentage] = useState(false);
   const [deleteAddonId, setDeleteAddonId] = useState<string | null>(null);
 
-  // ─── Query: fetch addons from DB (only when experienceId exists) ───
+  // ─── Query: fetch addons from DB ───
   const { data: dbAddons, isLoading: isLoadingAddons } = useQuery({
     queryKey: ["experience2-addons", experienceId],
     queryFn: async () => {
@@ -93,16 +124,18 @@ export function Experience2AddonsManager({
     enabled: !!experienceId,
   });
 
-  // Sync DB addons → local addons when they load (so parent always has the list)
+  // Sync DB addons → local addons when they load
   useEffect(() => {
     if (dbAddons && !isLocalMode && onLocalAddonsChange) {
       const synced: LocalAddonEntry[] = dbAddons
-        .filter((a) => a.type === "per_person")
+        .filter((a) => (addonTypes as string[]).includes(a.type))
         .map((a) => ({
           id: a.id,
+          type: a.type as AddonType,
           name: a.name,
           name_he: a.name_he ?? null,
           value: a.value,
+          is_percentage: a.is_percentage,
           is_active: a.is_active,
         }));
       onLocalAddonsChange(synced);
@@ -114,27 +147,24 @@ export function Experience2AddonsManager({
   const addAddonMutation = useMutation({
     mutationFn: async () => {
       if (!experienceId) throw new Error("No experience ID");
-      const maxOrder = (dbAddons ?? []).reduce((m, a) => Math.max(m, a.calculation_order), 0);
       const { error } = await supabase.from("experience2_addons").insert({
         experience_id: experienceId,
-        type: "per_person" as const,
-        name: newAddonName.trim(),
+        type: newType as any,
+        name: newAddonName.trim() || ADDON_TYPES[newType].label,
         name_he: newAddonNameHe.trim() || null,
         value: newAddonValue,
-        is_percentage: false,
-        calculation_order: maxOrder + 1,
+        is_percentage: newIsPercentage,
+        calculation_order: DEFAULT_CALCULATION_ORDER[newType] ?? 0,
         is_active: true,
-      });
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Addon ajouté");
+      toast.success("Addon added");
       resetNewForm();
-      queryClient.invalidateQueries({
-        queryKey: ["experience2-addons", experienceId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
     },
-    onError: (err: any) => toast.error(err.message || "Erreur lors de l'ajout"),
+    onError: (err: any) => toast.error(err.message || "Error adding addon"),
   });
 
   const toggleAddonMutation = useMutation({
@@ -143,9 +173,7 @@ export function Experience2AddonsManager({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["experience2-addons", experienceId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -156,11 +184,9 @@ export function Experience2AddonsManager({
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Addon supprimé");
+      toast.success("Addon deleted");
       setDeleteAddonId(null);
-      queryClient.invalidateQueries({
-        queryKey: ["experience2-addons", experienceId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["experience2-addons", experienceId] });
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -171,15 +197,19 @@ export function Experience2AddonsManager({
     setNewAddonName("");
     setNewAddonNameHe("");
     setNewAddonValue(0);
+    setNewIsPercentage(false);
+    setNewType(addonTypes[0]);
   }
 
   function handleAddLocal() {
-    if (!newAddonName.trim() || newAddonValue <= 0) return;
+    if (newAddonValue <= 0) return;
     const newEntry: LocalAddonEntry = {
       id: crypto.randomUUID(),
-      name: newAddonName.trim(),
+      type: newType,
+      name: newAddonName.trim() || ADDON_TYPES[newType].label,
       name_he: newAddonNameHe.trim() || null,
       value: newAddonValue,
+      is_percentage: newIsPercentage,
       is_active: true,
     };
     onLocalAddonsChange?.([...localAddons, newEntry]);
@@ -197,42 +227,35 @@ export function Experience2AddonsManager({
 
   // ─── Resolved addons list ───
 
-  const perPersonAddons: LocalAddonEntry[] = isLocalMode
-    ? localAddons
+  const filteredAddons: LocalAddonEntry[] = isLocalMode
+    ? localAddons.filter((a) => (addonTypes as string[]).includes(a.type))
     : (dbAddons ?? [])
-        .filter((a) => a.type === "per_person")
+        .filter((a) => (addonTypes as string[]).includes(a.type))
         .map((a) => ({
           id: a.id,
+          type: a.type as AddonType,
           name: a.name,
           name_he: a.name_he ?? null,
           value: a.value,
+          is_percentage: a.is_percentage,
           is_active: a.is_active,
         }));
 
-  // ─── Handlers (dispatch to local or DB mode) ───
+  // ─── Handlers ───
 
   function handleAdd() {
-    if (isLocalMode) {
-      handleAddLocal();
-    } else {
-      addAddonMutation.mutate();
-    }
+    if (isLocalMode) handleAddLocal();
+    else addAddonMutation.mutate();
   }
 
   function handleToggle(id: string, isActive: boolean) {
-    if (isLocalMode) {
-      handleToggleLocal(id, isActive);
-    } else {
-      toggleAddonMutation.mutate({ id, isActive });
-    }
+    if (isLocalMode) handleToggleLocal(id, isActive);
+    else toggleAddonMutation.mutate({ id, isActive });
   }
 
   function handleDelete(id: string) {
-    if (isLocalMode) {
-      handleDeleteLocal(id);
-    } else {
-      deleteAddonMutation.mutate(id);
-    }
+    if (isLocalMode) handleDeleteLocal(id);
+    else deleteAddonMutation.mutate(id);
   }
 
   // ─── Loading ───
@@ -245,6 +268,8 @@ export function Experience2AddonsManager({
     );
   }
 
+  const showPercentageToggle = addonTypes.some((t) => COMMISSION_TYPES.includes(t) || TAX_TYPES.includes(t));
+
   // ─── Render ───
 
   return (
@@ -252,16 +277,16 @@ export function Experience2AddonsManager({
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Users className="h-4 w-4 text-emerald-600" />
-            Addons par personne
+            {icon || getSectionIcon(addonTypes)}
+            {sectionTitle}
           </CardTitle>
-          <CardDescription>Prestations facturées par voyageur (petit-déjeuner, massage, activités…)</CardDescription>
+          <CardDescription>{sectionDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Existing addons list */}
-          {perPersonAddons.length > 0 && (
+          {filteredAddons.length > 0 && (
             <div className="space-y-2">
-              {perPersonAddons.map((addon) => (
+              {filteredAddons.map((addon) => (
                 <div
                   key={addon.id}
                   className="flex items-center justify-between gap-3 p-2 rounded-md border bg-muted/30"
@@ -282,7 +307,12 @@ export function Experience2AddonsManager({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={addon.is_active ? "default" : "secondary"}>${addon.value} / pers.</Badge>
+                    <Badge variant={addon.is_active ? "default" : "secondary"}>
+                      {formatBadge(addon)}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {ADDON_TYPES[addon.type]?.label ?? addon.type}
+                    </Badge>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -298,65 +328,85 @@ export function Experience2AddonsManager({
             </div>
           )}
 
-          {perPersonAddons.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">Aucun addon par personne configuré.</p>
+          {filteredAddons.length === 0 && (
+            <p className="text-sm text-muted-foreground italic">No addons configured for this section.</p>
           )}
 
           {/* Add new addon form */}
           <Separator />
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-            <div className="sm:col-span-1">
-              <Label htmlFor="addon-name" className="text-xs">
-                Nom (EN) *
-              </Label>
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 items-end">
+            {/* Type selector (only if multiple types) */}
+            {addonTypes.length > 1 && (
+              <div className="sm:col-span-1">
+                <Label className="text-xs">Type</Label>
+                <Select value={newType} onValueChange={(v) => setNewType(v as AddonType)} disabled={disabled}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {addonTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {ADDON_TYPES[type].label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className={addonTypes.length > 1 ? "sm:col-span-1" : "sm:col-span-2"}>
+              <Label className="text-xs">Name (EN)</Label>
               <Input
-                id="addon-name"
                 value={newAddonName}
                 onChange={(e) => setNewAddonName(e.target.value)}
-                placeholder="Breakfast"
+                placeholder={ADDON_TYPES[newType]?.label ?? "Name"}
                 disabled={disabled}
               />
             </div>
             <div className="sm:col-span-1">
-              <Label htmlFor="addon-name-he" className="text-xs">
-                Nom (HE)
-              </Label>
+              <Label className="text-xs">Name (HE)</Label>
               <Input
-                id="addon-name-he"
                 value={newAddonNameHe}
                 onChange={(e) => setNewAddonNameHe(e.target.value)}
-                placeholder="ארוחת בוקר"
+                placeholder={ADDON_TYPES[newType]?.labelHe ?? ""}
                 dir="rtl"
                 disabled={disabled}
               />
             </div>
             <div className="sm:col-span-1">
-              <Label htmlFor="addon-value" className="text-xs">
-                Prix / personne ($) *
+              <Label className="text-xs">
+                Value {showPercentageToggle && newIsPercentage ? "(%)" : "(₪)"}
               </Label>
               <Input
-                id="addon-value"
                 type="number"
                 min="0"
                 step="0.01"
                 value={newAddonValue || ""}
                 onChange={(e) => setNewAddonValue(parseFloat(e.target.value) || 0)}
-                placeholder="10"
+                placeholder="0"
                 disabled={disabled}
               />
             </div>
+            {showPercentageToggle && (
+              <div className="sm:col-span-1 flex items-center gap-2 pb-1">
+                <Switch
+                  checked={newIsPercentage}
+                  onCheckedChange={setNewIsPercentage}
+                  disabled={disabled}
+                />
+                <Label className="text-xs">{newIsPercentage ? "%" : "Fixed"}</Label>
+              </div>
+            )}
             <div className="sm:col-span-1">
               <Button
                 type="button"
                 variant="outline"
                 className="w-full"
                 onClick={handleAdd}
-                disabled={
-                  disabled || !newAddonName.trim() || newAddonValue <= 0 || (!isLocalMode && addAddonMutation.isPending)
-                }
+                disabled={disabled || newAddonValue <= 0 || (!isLocalMode && addAddonMutation.isPending)}
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Ajouter
+                Add
               </Button>
             </div>
           </div>
@@ -367,18 +417,18 @@ export function Experience2AddonsManager({
       <AlertDialog open={!!deleteAddonId} onOpenChange={() => setDeleteAddonId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cet addon ?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this addon?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. L'addon sera définitivement supprimé.
+              This action is irreversible. The addon will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteAddonId && handleDelete(deleteAddonId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Supprimer
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

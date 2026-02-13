@@ -3,7 +3,27 @@
  * Compatible Supabase. Prix final = prix HyperGuest + addons.
  */
 
-export type AddonType = "commission" | "per_night" | "tax" | "per_person";
+export type AddonType =
+  // === Section 1 : Experience Pricing (extras client) ===
+  | "per_person"           // Prix par personne
+  | "per_night"            // Prix par nuit
+  | "per_person_per_night" // Prix par personne par nuit
+  | "fixed"                // Montant fixe
+  // === Section 2 : Commissions (marge Staymakom) ===
+  | "commission"           // Commission sur le total
+  | "commission_room"      // Commission sur prix de la chambre
+  | "commission_experience"// Commission sur prix de l'expérience
+  | "commission_fixed"     // Commission montant fixe
+  // === Section 3 : Taxes ===
+  | "tax";                 // Taxe
+
+// ---------------------------------------------------------------------------
+// Section grouping helpers
+// ---------------------------------------------------------------------------
+
+export const EXPERIENCE_PRICING_TYPES: AddonType[] = ["per_person", "per_night", "per_person_per_night", "fixed"];
+export const COMMISSION_TYPES: AddonType[] = ["commission", "commission_room", "commission_experience", "commission_fixed"];
+export const TAX_TYPES: AddonType[] = ["tax"];
 
 export interface ExperienceAddon {
   id: string;
@@ -79,6 +99,28 @@ export const DEFAULT_PRICING_CONFIG: PricingConfig = {
   promo_is_percentage: true,
 };
 
+// ---------------------------------------------------------------------------
+// Addon line types for breakdown
+// ---------------------------------------------------------------------------
+
+export interface PricingAddonLine {
+  name: string;
+  type: AddonType;
+  unitPrice: number;
+  multiplier: number;
+  total: number;
+  description?: string;
+}
+
+export interface CommissionLine {
+  name: string;
+  type: AddonType;
+  value: number;
+  isPercentage: boolean;
+  baseAmount: number;
+  total: number;
+}
+
 export interface PerPersonAddonLine {
   name: string;
   pricePerPerson: number;
@@ -88,16 +130,21 @@ export interface PerPersonAddonLine {
 
 export interface PriceBreakdownV2 {
   roomPrice: number;
+  // V3 addon lines
+  pricingAddonLines: PricingAddonLine[];
+  totalPricingAddons: number;
+  commissionLines: CommissionLine[];
+  totalCommissions: number;
+  subtotalBeforeTax: number;
+  taxLines: { name: string; pct: number; amount: number; note?: string }[];
+  totalTax: number;
+  // Legacy compat
   perPersonAddons: PerPersonAddonLine[];
   totalAddons: number;
   commissionRoomPct: number;
   commissionRoomAmount: number;
   commissionAddonsPct: number;
   commissionAddonsAmount: number;
-  totalCommissions: number;
-  subtotalBeforeTax: number;
-  taxPct: number;
-  taxAmount: number;
   promo: {
     type: string | null;
     value: number | null;
@@ -109,55 +156,89 @@ export interface PriceBreakdownV2 {
   currency: string;
   nights: number;
   guests: number;
+  taxPct: number;
+  taxAmount: number;
+  isIsraeli: boolean;
+  taxForeignExemptRoom: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// ADDON_TYPES — full labels
+// ---------------------------------------------------------------------------
+
 export const ADDON_TYPES: Record<AddonType, { label: string; labelHe?: string; description: string }> = {
-  commission: {
-    label: "Fixed Commission",
-    labelHe: "עמלה קבועה",
-    description: "Fixed amount added to the HyperGuest price (e.g. +₪50)",
+  // --- Experience Pricing ---
+  per_person: {
+    label: "Per Person Fee",
+    labelHe: "מחיר לאדם",
+    description: "Amount multiplied by the number of guests (e.g. +₪30/person)",
   },
   per_night: {
     label: "Per Night Fee",
     labelHe: "מחיר ללילה",
     description: "Amount multiplied by the number of nights (e.g. +₪20/night)",
   },
-  per_person: {
-    label: "Per Person Fee",
-    labelHe: "מחיר לאדם",
-    description: "Amount multiplied by the number of guests (e.g. +₪30/person)",
+  per_person_per_night: {
+    label: "Per Person Per Night",
+    labelHe: "מחיר לאדם ללילה",
+    description: "Amount multiplied by guests × nights (e.g. +₪15/person/night)",
   },
+  fixed: {
+    label: "Fixed Amount",
+    labelHe: "מחיר קבוע",
+    description: "One-time fixed fee added to the total (e.g. +₪100)",
+  },
+  // --- Commissions ---
+  commission: {
+    label: "Commission on Total",
+    labelHe: "עמלה על הסכום הכולל",
+    description: "Percentage or fixed commission on the total price",
+  },
+  commission_room: {
+    label: "Commission on Room",
+    labelHe: "עמלה על מחיר החדר",
+    description: "Percentage or fixed commission on room price only",
+  },
+  commission_experience: {
+    label: "Commission on Experience",
+    labelHe: "עמלה על מחיר החוויה",
+    description: "Percentage or fixed commission on experience extras only",
+  },
+  commission_fixed: {
+    label: "Fixed Commission",
+    labelHe: "עמלה קבועה",
+    description: "Fixed amount added as commission (e.g. +₪50)",
+  },
+  // --- Tax ---
   tax: {
     label: "Tax",
     labelHe: "מס",
-    description: "Tax applied on the total after commissions (e.g. +10%)",
+    description: "Tax applied on the total after commissions (default 18%)",
   },
 };
 
 export const ADDON_TYPES_EN: Record<AddonType, { label: string; description: string }> = {
-  commission: {
-    label: "Fixed Commission",
-    description: "Fixed amount added to the HyperGuest price (e.g. +₪50)",
-  },
-  per_night: {
-    label: "Per Night Fee",
-    description: "Amount multiplied by the number of nights (e.g. +₪20/night)",
-  },
-  per_person: {
-    label: "Per Person Fee",
-    description: "Amount multiplied by the number of guests (e.g. +₪30/person)",
-  },
-  tax: {
-    label: "Tax",
-    description: "Tax applied on the total after commissions (e.g. +10%)",
-  },
+  per_person: { label: "Per Person Fee", description: "Amount multiplied by the number of guests" },
+  per_night: { label: "Per Night Fee", description: "Amount multiplied by the number of nights" },
+  per_person_per_night: { label: "Per Person Per Night", description: "Amount multiplied by guests × nights" },
+  fixed: { label: "Fixed Amount", description: "One-time fixed fee added to the total" },
+  commission: { label: "Commission on Total", description: "Commission on the total price" },
+  commission_room: { label: "Commission on Room", description: "Commission on room price only" },
+  commission_experience: { label: "Commission on Experience", description: "Commission on experience extras only" },
+  commission_fixed: { label: "Fixed Commission", description: "Fixed amount added as commission" },
+  tax: { label: "Tax", description: "Tax applied on the total after commissions" },
 };
 
 export const DEFAULT_CALCULATION_ORDER: Record<AddonType, number> = {
-  commission: 0,
-  per_night: 0,
-  per_person: 0,
-  tax: 1,
+  per_person: 1,
+  per_night: 2,
+  per_person_per_night: 3,
+  fixed: 4,
+  commission: 10,
+  commission_room: 11,
+  commission_experience: 12,
+  commission_fixed: 13,
+  tax: 20,
 };
 
 export function formatAddonValue(addon: ExperienceAddon | AddonFormData, currency = "₪"): string {
@@ -183,7 +264,11 @@ export function getDefaultCalculationOrder(type: AddonType): number {
   return DEFAULT_CALCULATION_ORDER[type] ?? 0;
 }
 
-const ADDON_TYPES_ORDER: AddonType[] = ["commission", "per_night", "per_person", "tax"];
+const ADDON_TYPES_ORDER: AddonType[] = [
+  "per_person", "per_night", "per_person_per_night", "fixed",
+  "commission", "commission_room", "commission_experience", "commission_fixed",
+  "tax",
+];
 
 export function getDefaultDraftAddons(): AddonFormData[] {
   return ADDON_TYPES_ORDER.map((type) => ({

@@ -1,12 +1,12 @@
 // =============================================================================
 // src/components/experience/PriceBreakdownV2.tsx
-// Affichage du détail prix V2 — 6 couches
+// Affichage du détail prix V3 — Addons-only model
 // =============================================================================
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Hotel, Users, Percent, Receipt, Tag } from "lucide-react";
+import { Loader2, Hotel, Percent, Receipt, Tag, DollarSign } from "lucide-react";
 import type { PriceBreakdownV2 as PriceBreakdownType } from "@/types/experience2_addons";
 
 interface PriceBreakdownV2Props {
@@ -25,60 +25,54 @@ const translations = {
     title: "Price Breakdown",
     room: "Room (HyperGuest)",
     roomPrice: "Room price",
-    addonsTitle: "Experience addons",
-    travelers: "travelers",
-    perPerson: "/ person",
-    subtotalAddons: "Subtotal addons",
+    experiencePricing: "Experience pricing",
+    subtotalPricing: "Subtotal extras",
     commissions: "Commissions",
-    commRoom: "Room commission",
-    commAddons: "Addons commission",
     subtotalBeforeTax: "Subtotal before tax",
     tax: "Tax",
+    taxExemptNote: "Room tax exempt for foreign visitors",
     promo: "Promo",
     discount: "Discount",
     originalPrice: "Original price",
     total: "TOTAL",
     nights: "nights",
+    travelers: "travelers",
     noData: "Select a room and rate plan to see the price breakdown.",
   },
   he: {
     title: "פירוט מחיר",
     room: "חדר (HyperGuest)",
     roomPrice: "מחיר חדר",
-    addonsTitle: "תוספות חוויה",
-    travelers: "מטיילים",
-    perPerson: "/ אדם",
-    subtotalAddons: 'סה"כ תוספות',
+    experiencePricing: "מחיר חוויה",
+    subtotalPricing: 'סה"כ תוספות',
     commissions: "עמלות",
-    commRoom: "עמלת חדר",
-    commAddons: "עמלת תוספות",
     subtotalBeforeTax: 'סה"כ לפני מס',
     tax: "מס",
+    taxExemptNote: "חדר פטור ממס לתיירים זרים",
     promo: "מבצע",
     discount: "הנחה",
     originalPrice: "מחיר מקורי",
     total: 'סה"כ',
     nights: "לילות",
+    travelers: "מטיילים",
     noData: "בחר חדר ותכנית תעריף כדי לראות פירוט מחירים.",
   },
   fr: {
     title: "Détail du prix",
     room: "Chambre (HyperGuest)",
     roomPrice: "Prix chambre",
-    addonsTitle: "Addons expérience",
-    travelers: "voyageurs",
-    perPerson: "/ pers.",
-    subtotalAddons: "Sous-total addons",
+    experiencePricing: "Tarification expérience",
+    subtotalPricing: "Sous-total extras",
     commissions: "Commissions",
-    commRoom: "Commission chambre",
-    commAddons: "Commission addons",
     subtotalBeforeTax: "Sous-total avant taxe",
     tax: "Taxe",
+    taxExemptNote: "Chambre exonérée de taxe pour visiteurs étrangers",
     promo: "Promo",
     discount: "Remise",
     originalPrice: "Prix original",
     total: "TOTAL",
     nights: "nuits",
+    travelers: "voyageurs",
     noData: "Sélectionnez une chambre et un plan tarifaire pour voir le détail du prix.",
   },
 };
@@ -123,9 +117,9 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
   }
 
   const b = breakdown;
-  const hasAddons = b.perPersonAddons.length > 0;
+  const hasPricingAddons = b.pricingAddonLines.length > 0;
   const hasCommissions = b.totalCommissions > 0;
-  const hasTax = b.taxAmount > 0;
+  const hasTax = b.totalTax > 0;
   const hasPromo = b.promo.type !== null;
   const hasDiscount = b.promo.discountAmount > 0;
   const hasFakeMarkup = b.promo.type === "fake_markup" && b.promo.fakeOriginalPrice != null;
@@ -155,32 +149,29 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
           </div>
         </div>
 
-        {/* ─── Layer 2: Per-person addons ─── */}
-        {hasAddons && (
+        {/* ─── Layer 2: Experience Pricing Addons ─── */}
+        {hasPricingAddons && (
           <>
             <Separator />
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Users className="h-3.5 w-3.5 text-emerald-600" />
-                {t.addonsTitle}
-                <span className="text-xs text-muted-foreground">
-                  ({b.guests} {t.travelers})
-                </span>
+                <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+                {t.experiencePricing}
               </div>
-              {b.perPersonAddons.map((addon, i) => (
+              {b.pricingAddonLines.map((line, i) => (
                 <div key={i} className="flex justify-between text-sm pl-5">
                   <span className="text-muted-foreground">
-                    {addon.name}{" "}
+                    {line.name}{" "}
                     <span className="text-xs">
-                      ({fmt(addon.pricePerPerson, b.currency)} {t.perPerson} × {addon.guests})
+                      ({fmt(line.unitPrice, b.currency)} {line.description})
                     </span>
                   </span>
-                  <span>{fmt(addon.total, b.currency)}</span>
+                  <span>{fmt(line.total, b.currency)}</span>
                 </div>
               ))}
               <div className="flex justify-between text-sm pl-5 font-medium pt-1">
-                <span>{t.subtotalAddons}</span>
-                <span>{fmt(b.totalAddons, b.currency)}</span>
+                <span>{t.subtotalPricing}</span>
+                <span>{fmt(b.totalPricingAddons, b.currency)}</span>
               </div>
             </div>
           </>
@@ -195,22 +186,17 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
                 <Percent className="h-3.5 w-3.5 text-orange-600" />
                 {t.commissions}
               </div>
-              {b.commissionRoomAmount > 0 && (
-                <div className="flex justify-between text-sm pl-5">
+              {b.commissionLines.map((comm, i) => (
+                <div key={i} className="flex justify-between text-sm pl-5">
                   <span className="text-muted-foreground">
-                    {t.commRoom} ({b.commissionRoomPct}%)
+                    {comm.name}{" "}
+                    <span className="text-xs">
+                      ({comm.isPercentage ? `${comm.value}%` : fmt(comm.value, b.currency)})
+                    </span>
                   </span>
-                  <span>{fmt(b.commissionRoomAmount, b.currency)}</span>
+                  <span>{fmt(comm.total, b.currency)}</span>
                 </div>
-              )}
-              {b.commissionAddonsAmount > 0 && (
-                <div className="flex justify-between text-sm pl-5">
-                  <span className="text-muted-foreground">
-                    {t.commAddons} ({b.commissionAddonsPct}%)
-                  </span>
-                  <span>{fmt(b.commissionAddonsAmount, b.currency)}</span>
-                </div>
-              )}
+              ))}
             </div>
           </>
         )}
@@ -224,11 +210,20 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
 
         {/* ─── Layer 4: Taxes ─── */}
         {hasTax && (
-          <div className="flex justify-between text-sm pl-2">
-            <span className="text-muted-foreground">
-              {t.tax} ({b.taxPct}%)
-            </span>
-            <span>{fmt(b.taxAmount, b.currency)}</span>
+          <div className="space-y-1">
+            {b.taxLines.map((tax, i) => (
+              <div key={i}>
+                <div className="flex justify-between text-sm pl-2">
+                  <span className="text-muted-foreground">
+                    {t.tax} {tax.pct > 0 ? `(${tax.pct}%)` : ""}
+                  </span>
+                  <span>{fmt(tax.amount, b.currency)}</span>
+                </div>
+                {tax.note && (
+                  <p className="text-xs text-muted-foreground pl-2 italic">{t.taxExemptNote}</p>
+                )}
+              </div>
+            ))}
           </div>
         )}
 

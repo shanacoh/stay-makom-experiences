@@ -32,20 +32,20 @@ async function fetchExperienceAddons(experienceId: string): Promise<ExperienceAd
 }
 
 async function createExperienceAddon(addon: ExperienceAddonInsert): Promise<ExperienceAddon> {
-  const { data, error } = await supabase.from(TABLE).insert(addon).select().single();
+  const { data, error } = await supabase.from(TABLE).insert(addon as any).select().single();
 
   if (error) {
     throw new Error(`Erreur lors de la création de l'ajout: ${error.message}`);
   }
-  return data;
+  return data as any;
 }
 
 const ADDON_TYPES_ORDER: AddonType[] = ["commission", "per_night", "tax"];
 
 async function createAllDefaultAddons(experienceId: string): Promise<ExperienceAddon[]> {
-  const rows: ExperienceAddonInsert[] = ADDON_TYPES_ORDER.map((type) => ({
+  const rows = ADDON_TYPES_ORDER.map((type) => ({
     experience_id: experienceId,
-    type,
+    type: type as string,
     name: ADDON_TYPES[type]?.label ?? type,
     name_he: ADDON_TYPES[type]?.labelHe ?? null,
     description: null,
@@ -56,18 +56,18 @@ async function createAllDefaultAddons(experienceId: string): Promise<ExperienceA
     is_active: true,
   }));
 
-  const { data, error } = await supabase.from(TABLE).insert(rows).select();
+  const { data, error } = await supabase.from(TABLE).insert(rows as any).select();
 
   if (error) {
     throw new Error(`Erreur lors de la création des ajouts: ${error.message}`);
   }
-  return data ?? [];
+  return (data ?? []) as any;
 }
 
 async function createAddonsWithValues(experienceId: string, addons: AddonFormData[]): Promise<ExperienceAddon[]> {
-  const rows: ExperienceAddonInsert[] = addons.map((a) => ({
+  const rows = addons.map((a) => ({
     experience_id: experienceId,
-    type: a.type,
+    type: a.type as string,
     name: a.name,
     name_he: a.name_he ?? null,
     description: a.description ?? null,
@@ -78,20 +78,20 @@ async function createAddonsWithValues(experienceId: string, addons: AddonFormDat
     is_active: true,
   }));
 
-  const { data, error } = await supabase.from(TABLE).insert(rows).select();
+  const { data, error } = await supabase.from(TABLE).insert(rows as any).select();
   if (error) {
     throw new Error(`Erreur lors de la création des ajouts: ${error.message}`);
   }
-  return data ?? [];
+  return (data ?? []) as any;
 }
 
 async function updateExperienceAddon(id: string, updates: ExperienceAddonUpdate): Promise<ExperienceAddon> {
-  const { data, error } = await supabase.from(TABLE).update(updates).eq("id", id).select().single();
+  const { data, error } = await supabase.from(TABLE).update(updates as any).eq("id", id).select().single();
 
   if (error) {
     throw new Error(`Erreur lors de la mise à jour de l'ajout: ${error.message}`);
   }
-  return data;
+  return data as any;
 }
 
 async function deleteExperienceAddon(id: string): Promise<void> {

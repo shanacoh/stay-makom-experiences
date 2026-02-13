@@ -5,8 +5,10 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, Users, AlertCircle } from "lucide-react";
+import { Calendar, Users, AlertCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -74,6 +76,7 @@ export function BookingPanel2({
   const [adults, setAdults] = useState(minParty);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+  const [isIsraeli, setIsIsraeli] = useState(true);
 
   /** HyperGuest Search API : nombre de nuits limité à 30 (SN.400) */
   const MAX_NIGHTS = 30;
@@ -117,7 +120,7 @@ export function BookingPanel2({
   const nights = searchParams?.nights || 0;
   const ratePlanPrices = selectedRatePlan?.prices || null;
 
-  const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, ratePlanPrices);
+  const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, adults, ratePlanPrices, isIsraeli);
 
   useEffect(() => {
     if (searchResult && !selectedRoomId) {
@@ -202,6 +205,24 @@ export function BookingPanel2({
             >
               +
             </Button>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Israeli Resident Toggle */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Globe className="h-4 w-4" />
+            {lang === "he" ? "תושב ישראל" : lang === "fr" ? "Résident israélien" : "Israeli resident"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch checked={isIsraeli} onCheckedChange={setIsIsraeli} />
+            <Label className="text-xs text-muted-foreground">
+              {isIsraeli
+                ? (lang === "he" ? "כן" : lang === "fr" ? "Oui" : "Yes")
+                : (lang === "he" ? "לא - תייר" : lang === "fr" ? "Non - touriste" : "No - tourist")}
+            </Label>
           </div>
         </div>
 
