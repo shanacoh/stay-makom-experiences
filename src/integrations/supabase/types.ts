@@ -980,6 +980,7 @@ export type Database = {
           subtitle_he: string | null
           tax_foreign_exempt_room: boolean | null
           tax_pct: number | null
+          thumbnail_image: string | null
           title: string
           title_he: string | null
           updated_at: string | null
@@ -1048,6 +1049,7 @@ export type Database = {
           subtitle_he?: string | null
           tax_foreign_exempt_room?: boolean | null
           tax_pct?: number | null
+          thumbnail_image?: string | null
           title: string
           title_he?: string | null
           updated_at?: string | null
@@ -1116,6 +1118,7 @@ export type Database = {
           subtitle_he?: string | null
           tax_foreign_exempt_room?: boolean | null
           tax_pct?: number | null
+          thumbnail_image?: string | null
           title?: string
           title_he?: string | null
           updated_at?: string | null
