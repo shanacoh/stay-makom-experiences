@@ -2349,7 +2349,16 @@ export type Database = {
       }
     }
     Enums: {
-      addon_type: "commission" | "per_night" | "tax" | "per_person"
+      addon_type:
+        | "commission"
+        | "per_night"
+        | "tax"
+        | "per_person"
+        | "per_person_per_night"
+        | "fixed"
+        | "commission_room"
+        | "commission_experience"
+        | "commission_fixed"
       app_role: "admin" | "hotel_admin" | "customer"
       base_price_type: "fixed" | "per_person" | "per_booking"
       booking_extra_status: "pending" | "done" | "unavailable"
@@ -2492,7 +2501,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      addon_type: ["commission", "per_night", "tax", "per_person"],
+      addon_type: [
+        "commission",
+        "per_night",
+        "tax",
+        "per_person",
+        "per_person_per_night",
+        "fixed",
+        "commission_room",
+        "commission_experience",
+        "commission_fixed",
+      ],
       app_role: ["admin", "hotel_admin", "customer"],
       base_price_type: ["fixed", "per_person", "per_booking"],
       booking_extra_status: ["pending", "done", "unavailable"],
