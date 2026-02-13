@@ -26,6 +26,7 @@ import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
 import { Experience2AddonsManager, type LocalAddonEntry } from "@/components/admin/Experience2AddonsManager";
+import { EXPERIENCE_PRICING_TYPES, COMMISSION_TYPES, TAX_TYPES } from "@/types/experience2_addons";
 import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
 import { Separator } from "@/components/ui/separator";
 import { Percent, Tag } from "lucide-react";
@@ -1098,153 +1099,109 @@ export function UnifiedExperience2Form({
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Pricing Section — All-in-one (no need to save draft first) */}
+        {/* Pricing Section — 3 sections */}
         {/* ----------------------------------------------------------------- */}
+
+        {/* Section 1: Experience Pricing */}
+        <Experience2AddonsManager
+          experienceId={currentExperienceId}
+          disabled={isSaving}
+          localAddons={localAddons}
+          onLocalAddonsChange={setLocalAddons}
+          addonTypes={EXPERIENCE_PRICING_TYPES}
+          sectionTitle="Experience Pricing"
+          sectionDescription="Fees and extras charged to travelers (per person, per night, fixed...)"
+        />
+
+        {/* Section 2: Commissions */}
+        <Experience2AddonsManager
+          experienceId={currentExperienceId}
+          disabled={isSaving}
+          addonTypes={COMMISSION_TYPES}
+          sectionTitle="Commissions"
+          sectionDescription="Staymakom margins on room and experience prices"
+        />
+
+        {/* Section 3: Taxes */}
+        <Experience2AddonsManager
+          experienceId={currentExperienceId}
+          disabled={isSaving}
+          addonTypes={TAX_TYPES}
+          sectionTitle="Taxes"
+          sectionDescription="VAT and applicable taxes (default 18%). A tax addon at 18% is created automatically."
+        />
+
+        {/* --- Promo (unchanged) --- */}
         <Card>
           <CardHeader>
-            <CardTitle>Configuration Pricing</CardTitle>
-            <CardDescription>Commissions, taxe, promo et addons par personne</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Promo
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* --- Addons par personne (local or DB mode) --- */}
-            <Experience2AddonsManager
-              experienceId={currentExperienceId}
-              disabled={isSaving}
-              localAddons={localAddons}
-              onLocalAddonsChange={setLocalAddons}
-            />
-
-            <Separator />
-
-            {/* --- Commissions & Taxe --- */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold flex items-center gap-2">
-                <Percent className="h-4 w-4 text-orange-600" />
-                Commissions & Taxe
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="commission_room_pct" className="text-xs">
-                    Commission chambre (%)
-                  </Label>
-                  <Input
-                    id="commission_room_pct"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    {...register("commission_room_pct", { valueAsNumber: true })}
-                    placeholder="10"
-                    disabled={isSaving}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Sur le prix HyperGuest</p>
-                </div>
-                <div>
-                  <Label htmlFor="commission_addons_pct" className="text-xs">
-                    Commission addons (%)
-                  </Label>
-                  <Input
-                    id="commission_addons_pct"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    {...register("commission_addons_pct", { valueAsNumber: true })}
-                    placeholder="15"
-                    disabled={isSaving}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Sur le total addons par personne</p>
-                </div>
-                <div>
-                  <Label htmlFor="tax_pct" className="text-xs">
-                    Taxe (%)
-                  </Label>
-                  <Input
-                    id="tax_pct"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    {...register("tax_pct", { valueAsNumber: true })}
-                    placeholder="18"
-                    disabled={isSaving}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Sur chambre + addons + commissions</p>
-                </div>
-              </div>
+          <CardContent className="space-y-3">
+            <div>
+              <Label className="text-xs">Type de promo</Label>
+              <Controller
+                name="promo_type"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Aucune" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Aucune promo</SelectItem>
+                      <SelectItem value="real_discount">Remise réelle</SelectItem>
+                      <SelectItem value="fake_markup">Faux prix barré</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
-            <Separator />
-
-            {/* --- Promo --- */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold flex items-center gap-2">
-                <Tag className="h-4 w-4 text-purple-600" />
-                Promo
-              </h4>
-              <div>
-                <Label className="text-xs">Type de promo</Label>
-                <Controller
-                  name="promo_type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Aucune" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Aucune promo</SelectItem>
-                        <SelectItem value="real_discount">Remise réelle</SelectItem>
-                        <SelectItem value="fake_markup">Faux prix barré</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-
-              {watch("promo_type") && watch("promo_type") !== "none" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {watch("promo_type") && watch("promo_type") !== "none" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="promo_value" className="text-xs">
+                    {watch("promo_type") === "real_discount" ? "Valeur de la remise" : "Majoration affichée (%)"}
+                  </Label>
+                  <Input
+                    id="promo_value"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    {...register("promo_value", { valueAsNumber: true })}
+                    placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
+                    disabled={isSaving}
+                  />
+                </div>
+                {watch("promo_type") === "real_discount" && (
                   <div>
-                    <Label htmlFor="promo_value" className="text-xs">
-                      {watch("promo_type") === "real_discount" ? "Valeur de la remise" : "Majoration affichée (%)"}
-                    </Label>
-                    <Input
-                      id="promo_value"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      {...register("promo_value", { valueAsNumber: true })}
-                      placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
-                      disabled={isSaving}
+                    <Label className="text-xs">Mode</Label>
+                    <Controller
+                      name="promo_is_percentage"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value ? "percentage" : "fixed"}
+                          onValueChange={(val) => field.onChange(val === "percentage")}
+                          disabled={isSaving}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="percentage">Pourcentage (%)</SelectItem>
+                            <SelectItem value="fixed">Montant fixe ($)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
                   </div>
-                  {watch("promo_type") === "real_discount" && (
-                    <div>
-                      <Label className="text-xs">Mode</Label>
-                      <Controller
-                        name="promo_is_percentage"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            value={field.value ? "percentage" : "fixed"}
-                            onValueChange={(val) => field.onChange(val === "percentage")}
-                            disabled={isSaving}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="percentage">Pourcentage (%)</SelectItem>
-                              <SelectItem value="fixed">Montant fixe ($)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 

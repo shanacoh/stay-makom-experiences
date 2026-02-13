@@ -978,6 +978,7 @@ export type Database = {
           status: Database["public"]["Enums"]["hotel_status"] | null
           subtitle: string | null
           subtitle_he: string | null
+          tax_foreign_exempt_room: boolean | null
           tax_pct: number | null
           title: string
           title_he: string | null
@@ -1045,6 +1046,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["hotel_status"] | null
           subtitle?: string | null
           subtitle_he?: string | null
+          tax_foreign_exempt_room?: boolean | null
           tax_pct?: number | null
           title: string
           title_he?: string | null
@@ -1112,6 +1114,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["hotel_status"] | null
           subtitle?: string | null
           subtitle_he?: string | null
+          tax_foreign_exempt_room?: boolean | null
           tax_pct?: number | null
           title?: string
           title_he?: string | null
