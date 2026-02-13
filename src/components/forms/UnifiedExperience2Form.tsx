@@ -1024,48 +1024,72 @@ export function UnifiedExperience2Form({
               <p className="text-xs text-muted-foreground mb-2">
                 Appears in listing cards and search results. Falls back to Hero if empty.
               </p>
-              <div className="border-2 border-dashed rounded-lg p-4 flex items-center gap-4">
-                {thumbnailImagePreview ? (
-                  <div className="relative w-[150px] shrink-0">
-                    <img src={thumbnailImagePreview} alt="Thumbnail preview" className="w-[150px] h-[150px] object-cover rounded-lg" />
-                    <button
-                      type="button"
-                      onClick={() => setThumbnailImagePreview(null)}
-                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+              <div className="border-2 border-dashed rounded-lg p-4 space-y-3">
+                {/* Current thumbnail preview */}
+                <div className="flex items-center gap-4">
+                  {thumbnailImagePreview ? (
+                    <div className="relative w-[150px] shrink-0">
+                      <img src={thumbnailImagePreview} alt="Thumbnail preview" className="w-[150px] h-[150px] object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => setThumbnailImagePreview(null)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">No thumbnail — will use hero image</p>
+                  )}
+                  <div>
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-background hover:bg-muted transition-colors">
+                      <Upload className="h-3.5 w-3.5" />
+                      {thumbnailImagePreview ? "Change" : "Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
+                          try {
+                            const ext = file.name.split(".").pop();
+                            const name = `${Math.random().toString(36).substring(2)}-${Date.now()}.${ext}`;
+                            const { error } = await supabase.storage.from("experience-images").upload(name, file);
+                            if (error) throw error;
+                            const { data: { publicUrl } } = supabase.storage.from("experience-images").getPublicUrl(name);
+                            setThumbnailImagePreview(publicUrl);
+                            toast.success("Thumbnail uploaded");
+                          } catch (err: any) {
+                            toast.error(err.message || "Upload failed");
+                          }
+                        }}
+                      />
+                    </label>
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground italic">No thumbnail — will use hero image</p>
-                )}
-                <div>
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-background hover:bg-muted transition-colors">
-                    <Upload className="h-3.5 w-3.5" />
-                    {thumbnailImagePreview ? "Change" : "Upload"}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
-                        try {
-                          const ext = file.name.split(".").pop();
-                          const name = `${Math.random().toString(36).substring(2)}-${Date.now()}.${ext}`;
-                          const { error } = await supabase.storage.from("experience-images").upload(name, file);
-                          if (error) throw error;
-                          const { data: { publicUrl } } = supabase.storage.from("experience-images").getPublicUrl(name);
-                          setThumbnailImagePreview(publicUrl);
-                          toast.success("Thumbnail uploaded");
-                        } catch (err: any) {
-                          toast.error(err.message || "Upload failed");
-                        }
-                      }}
-                    />
-                  </label>
                 </div>
+
+                {/* Pick from hotel images */}
+                {allParcoursImages.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium text-muted-foreground">Or pick from hotel images:</p>
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {allParcoursImages.map((img, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setThumbnailImagePreview(img)}
+                          className={`relative w-16 h-16 shrink-0 rounded-md overflow-hidden border-2 transition-all hover:border-primary ${
+                            thumbnailImagePreview === img ? "border-primary ring-2 ring-primary/30" : "border-transparent"
+                          }`}
+                        >
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
