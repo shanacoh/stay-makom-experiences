@@ -214,7 +214,7 @@ export default function ExperienceCard({
         <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1">
           {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
           <img
-            src={experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
+            src={(experience as any).thumbnail_image || experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />

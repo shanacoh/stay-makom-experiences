@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { HyperGuestPhotoSelector, type HyperGuestPhoto } from "@/components/admin/HyperGuestPhotoSelector";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon, Save } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Sparkles, Image as ImageIcon, Save, Star } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 import { Hotel2ExtrasManager } from "@/components/admin/Hotel2ExtrasManager";
 import { Link } from "react-router-dom";
@@ -35,6 +36,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const [_justSaved, setJustSaved] = useState(false);
   const [hyperguestId, setHyperguestId] = useState<number | null>(null);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const [hyperguestPhotos, setHyperguestPhotos] = useState<HyperGuestPhoto[]>([]);
+  const [selectedHGPhotos, setSelectedHGPhotos] = useState<string[]>([]);
+  const [selectedHGHero, setSelectedHGHero] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     name_he: "",
@@ -130,7 +134,24 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
   const handleHyperGuestSelect = async (hotel: HyperGuestHotelWithDetails) => {
     setHyperguestId(hotel.id as number);
 
-    if (hotel.images && hotel.images.length > 0) {
+    if (hotel.hotelModel?.images && hotel.hotelModel.images.length > 0) {
+      const hgPhotos: HyperGuestPhoto[] = hotel.hotelModel.images.map((img: any) => ({
+        url: img.large || img.uri,
+        thumbnail: img.thumbnail || img.uri,
+        caption: img.description || "",
+      }));
+      setHyperguestPhotos(hgPhotos);
+      setSelectedHGPhotos(hgPhotos.map((p) => p.url));
+      setSelectedHGHero(hotel.heroImage || hgPhotos[0]?.url || null);
+    } else if (hotel.images && hotel.images.length > 0) {
+      const hgPhotos: HyperGuestPhoto[] = hotel.images.map((url: string, i: number) => ({
+        url,
+        thumbnail: url.replace("_original", "_thumbnail"),
+        caption: `Photo ${i + 1}`,
+      }));
+      setHyperguestPhotos(hgPhotos);
+      setSelectedHGPhotos(hgPhotos.map((p) => p.url));
+      setSelectedHGHero(hotel.heroImage || hgPhotos[0]?.url || null);
       setPendingImages(hotel.images);
     }
 
@@ -478,34 +499,40 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       </span>
                     </div>
 
-                    {pendingImages.length > 0 && (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <ImageIcon className="h-5 w-5 text-blue-600" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-blue-900">
-                            {pendingImages.length} images available from HyperGuest
-                          </p>
-                          <p className="text-xs text-blue-700">Click to download and add to gallery</p>
+                    {hyperguestPhotos.length > 0 && (
+                      <div className="mt-3">
+                        <HyperGuestPhotoSelector
+                          photos={hyperguestPhotos}
+                          selectedPhotos={selectedHGPhotos}
+                          heroImage={selectedHGHero}
+                          onSelectionChange={setSelectedHGPhotos}
+                          onHeroChange={setSelectedHGHero}
+                          isLoading={isDownloadingImages}
+                        />
+                        <div className="mt-3 flex justify-end">
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={isDownloadingImages || selectedHGPhotos.length === 0}
+                            onClick={() => {
+                              const hero = selectedHGHero && selectedHGPhotos.includes(selectedHGHero) ? selectedHGHero : null;
+                              const gallery = selectedHGPhotos.filter((u) => u !== hero);
+                              downloadHyperGuestImages(gallery, hero);
+                            }}
+                          >
+                            {isDownloadingImages ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Importing {selectedHGPhotos.length} photos...
+                              </>
+                            ) : (
+                              <>
+                                <ImageIcon className="mr-2 h-4 w-4" />
+                                Save {selectedHGPhotos.length} Selected Photos
+                              </>
+                            )}
+                          </Button>
                         </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="default"
-                          disabled={isDownloadingImages}
-                          onClick={() => downloadHyperGuestImages(pendingImages.slice(1), pendingImages[0])}
-                        >
-                          {isDownloadingImages ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Importing...
-                            </>
-                          ) : (
-                            <>
-                              <ImageIcon className="mr-2 h-4 w-4" />
-                              Import Images
-                            </>
-                          )}
-                        </Button>
                       </div>
                     )}
                   </div>
@@ -536,18 +563,38 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                   {formData.photos.map((photo, index) => (
                     <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border bg-muted">
                       <img src={photo} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => {
-                          const newPhotos = formData.photos.filter((_, i) => i !== index);
-                          setFormData({ ...formData, photos: newPhotos });
-                        }}
-                      >
-                        <span className="text-xs">×</span>
-                      </Button>
+                      {/* Hero badge */}
+                      {formData.hero_image === photo && (
+                        <div className="absolute top-2 left-2 bg-amber-500 text-white rounded-full p-1">
+                          <Star className="h-3 w-3 fill-current" />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {formData.hero_image !== photo && (
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="secondary"
+                            className="h-7 w-7"
+                            title="Set as Hero"
+                            onClick={() => setFormData({ ...formData, hero_image: photo })}
+                          >
+                            <Star className="h-3 w-3" />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => {
+                            const newPhotos = formData.photos.filter((_, i) => i !== index);
+                            setFormData({ ...formData, photos: newPhotos });
+                          }}
+                        >
+                          <span className="text-xs">×</span>
+                        </Button>
+                      </div>
                     </div>
                   ))}
 

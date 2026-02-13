@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Save, Rocket, X, Upload, Loader2, Trash2, ArrowLeft, Plus, ChevronUp, ChevronDown } from "lucide-react";
+import { Save, Rocket, X, Upload, Loader2, Trash2, ArrowLeft, Plus, ChevronUp, ChevronDown, Star, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/ui/rich-text-editor";
 import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
@@ -108,6 +108,7 @@ export function UnifiedExperience2Form({
   const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [thumbnailImagePreview, setThumbnailImagePreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [createdExperienceId, setCreatedExperienceId] = useState<string | null>(null);
@@ -304,6 +305,9 @@ export function UnifiedExperience2Form({
       if (existingExperience.hero_image) {
         setHeroImagePreview(existingExperience.hero_image);
       }
+      if ((existingExperience as any).thumbnail_image) {
+        setThumbnailImagePreview((existingExperience as any).thumbnail_image);
+      }
       if (existingExperience.photos && Array.isArray(existingExperience.photos)) {
         setGalleryPreviews(existingExperience.photos);
       }
@@ -478,6 +482,7 @@ export function UnifiedExperience2Form({
       cancellation_policy: data.cancellation_policy || null,
       cancellation_policy_he: data.cancellation_policy_he || null,
       hero_image: heroImageUrl || null,
+      thumbnail_image: thumbnailImagePreview || null,
       photos: photoUrls,
       status,
       slug: currentExperienceId ? existingExperience?.slug : generateSlug(title),
@@ -1010,8 +1015,42 @@ export function UnifiedExperience2Form({
               </div>
             )}
 
+            {/* Thumbnail Image */}
             <div>
-              <Label>Hero Image</Label>
+              <Label className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Card Thumbnail
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Appears in listing cards and search results. Falls back to Hero if empty.
+              </p>
+              <div className="border-2 border-dashed rounded-lg p-4">
+                {thumbnailImagePreview ? (
+                  <div className="relative w-[150px]">
+                    <img src={thumbnailImagePreview} alt="Thumbnail preview" className="w-[150px] h-[150px] object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => setThumbnailImagePreview(null)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No thumbnail — will use hero image</p>
+                )}
+              </div>
+            </div>
+
+            {/* Hero Image */}
+            <div>
+              <Label className="flex items-center gap-2">
+                <Star className="h-4 w-4" />
+                Hero Image
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Large image displayed at the top of the detail page.
+              </p>
               <div className="border-2 border-dashed rounded-lg p-4">
                 {heroImagePreview && (
                   <div className="relative mb-2">
@@ -1037,19 +1076,48 @@ export function UnifiedExperience2Form({
               </div>
             </div>
 
+            {/* Gallery Images */}
             <div>
               <Label>Gallery Images (up to 8)</Label>
               <div className="grid grid-cols-4 gap-4">
                 {galleryPreviews.map((preview, index) => (
                   <div key={index} className="relative group">
                     <img src={preview} alt={`Gallery ${index + 1}`} className="w-full h-32 object-cover rounded-lg" />
-                    <button
-                      type="button"
-                      onClick={() => removeGalleryImage(index)}
-                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => setThumbnailImagePreview(preview)}
+                        className="bg-secondary text-secondary-foreground rounded-full p-1"
+                        title="Set as Thumbnail"
+                      >
+                        <ImageIcon className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setHeroImage(null);
+                          setHeroImagePreview(preview);
+                        }}
+                        className="bg-secondary text-secondary-foreground rounded-full p-1"
+                        title="Set as Hero"
+                      >
+                        <Star className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(index)}
+                        className="bg-destructive text-destructive-foreground rounded-full p-1"
+                        title="Remove"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    {thumbnailImagePreview === preview && (
+                      <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-primary-foreground px-1 rounded">THUMB</span>
+                    )}
+                    {heroImagePreview === preview && (
+                      <span className="absolute bottom-1 right-1 text-[9px] bg-amber-500 text-white px-1 rounded">HERO</span>
+                    )}
                   </div>
                 ))}
                 {galleryPreviews.length < 8 && (
