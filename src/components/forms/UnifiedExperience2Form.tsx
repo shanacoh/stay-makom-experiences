@@ -29,7 +29,7 @@ import { Experience2AddonsManager, type LocalAddonEntry } from "@/components/adm
 import { EXPERIENCE_PRICING_TYPES, COMMISSION_TYPES, TAX_TYPES } from "@/types/experience2_addons";
 import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
 import { Separator } from "@/components/ui/separator";
-import { Percent, Tag } from "lucide-react";
+import { Tag } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -512,15 +512,15 @@ export function UnifiedExperience2Form({
     if (localAddons.length === 0) return;
     const rows = localAddons.map((addon, index) => ({
       experience_id: expId,
-      type: "per_person" as const,
+      type: addon.type as string,
       name: addon.name,
       name_he: addon.name_he || null,
       value: addon.value,
-      is_percentage: false,
+      is_percentage: addon.is_percentage ?? false,
       calculation_order: index + 1,
       is_active: addon.is_active,
     }));
-    const { error } = await supabase.from("experience2_addons").insert(rows);
+    const { error } = await supabase.from("experience2_addons").insert(rows as any);
     if (error) {
       console.error("Error saving addons:", error);
       toast.error("Addons saved partially — check console");
