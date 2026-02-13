@@ -123,7 +123,7 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
                   <span>{city}{region ? `, ${region}` : ''}</span>
                 </div>
               </div>
-              <Link to={`/hotel/${hotel.slug}`}>
+              <Link to={`/hotel2/${hotel.slug}`}>
                 <Button 
                   variant="secondary" 
                   size="sm"
