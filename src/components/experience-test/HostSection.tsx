@@ -67,7 +67,7 @@ const HostSection = ({ hotel, lang = "en" }: HostSectionProps) => {
           )}
 
           <div className="flex flex-wrap gap-3">
-            <Link to={`/hotel/${hotel.slug}`}>
+            <Link to={`/hotel2/${hotel.slug}`}>
               <Button variant="outline" size="sm" className="gap-2">
                 <ExternalLink className="h-4 w-4" />
                 {lang === "he" ? "צפה בפרופיל" : lang === "en" ? "View profile" : "Voir le profil"}
