@@ -119,8 +119,8 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
           <CardDescription>Select tags that will appear as badges on the experience card</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Save this experience as a draft first to manage highlight tags.</p>
+          <div className="text-center py-6 text-muted-foreground">
+            <p className="text-sm">Save this experience first (Draft or Publish) to manage highlight tags.</p>
           </div>
         </CardContent>
       </Card>
