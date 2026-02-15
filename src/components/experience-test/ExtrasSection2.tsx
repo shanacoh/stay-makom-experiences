@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
 import { Sparkles } from "lucide-react";
+import { DualPrice } from "@/components/ui/DualPrice";
 
 interface ExtrasSection2Props {
   experienceId: string;
@@ -69,7 +70,11 @@ const ExtrasSection2 = ({ experienceId, lang = "en", currency = "ILS" }: ExtrasS
                 )}
               </div>
               <div className="text-right shrink-0">
-                <span className="font-bold text-sm">{formatPrice(addon.value, addon.is_percentage)}</span>
+                {addon.is_percentage ? (
+                  <span className="font-bold text-sm">{addon.value}%</span>
+                ) : (
+                  <DualPrice amount={addon.value} currency={currency} inline className="text-sm" />
+                )}
                 <span className="text-xs text-muted-foreground ml-1">{getTypeLabel(addon.type)}</span>
               </div>
             </div>

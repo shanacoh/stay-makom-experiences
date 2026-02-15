@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import DateRangePicker from "./DateRangePicker";
+import { DualPrice } from "@/components/ui/DualPrice";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
@@ -367,10 +368,9 @@ export function BookingPanel2({
 
         <Button className="w-full" size="lg" disabled={!isReadyToBook || totalIsNaN} onClick={handleBook}>
           {isReadyToBook && !totalIsNaN
-            ? `${t.book} - ${new Intl.NumberFormat(lang === "he" ? "he-IL" : "en-US", {
-                style: "currency",
-                currency: priceBreakdown?.currency || "ILS",
-              }).format(displayTotal)}`
+            ? <span className="flex items-center gap-2">
+                {t.book} - <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
+              </span>
             : t.selectDates}
         </Button>
 

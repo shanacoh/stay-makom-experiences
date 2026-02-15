@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DualPrice } from "@/components/ui/DualPrice";
 
 interface StickyPriceBarProps {
   basePrice: number;
@@ -63,7 +64,7 @@ const StickyPriceBar = ({
               <span className="text-sm">
                 {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
               </span>
-              <span className="text-base font-semibold underline">{formattedPrice}</span>
+              <DualPrice amount={basePrice} currency={currency} inline className="text-base font-semibold" />
               <span className="text-xs text-muted-foreground ml-1">{priceLabel}</span>
             </div>
             <p className="text-sm text-cta font-medium">

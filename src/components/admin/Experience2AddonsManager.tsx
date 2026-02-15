@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, Loader2, DollarSign, Percent, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import type { ExperienceAddon, AddonType } from "@/types/experience2_addons";
+import { ConvertedHint } from "@/components/ui/DualPrice";
 import {
   ADDON_TYPES,
   EXPERIENCE_PRICING_TYPES,
@@ -310,6 +311,9 @@ export function Experience2AddonsManager({
                     <Badge variant={addon.is_active ? "default" : "secondary"}>
                       {formatBadge(addon)}
                     </Badge>
+                    {!addon.is_percentage && (
+                      <ConvertedHint amount={addon.value} fromCurrency="ILS" toCurrency="EUR" />
+                    )}
                     <Badge variant="outline" className="text-xs">
                       {ADDON_TYPES[addon.type]?.label ?? addon.type}
                     </Badge>
@@ -377,15 +381,20 @@ export function Experience2AddonsManager({
               <Label className="text-xs">
                 Value {showPercentageToggle && newIsPercentage ? "(%)" : "(₪)"}
               </Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={newAddonValue || ""}
-                onChange={(e) => setNewAddonValue(parseFloat(e.target.value) || 0)}
-                placeholder="0"
-                disabled={disabled}
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newAddonValue || ""}
+                  onChange={(e) => setNewAddonValue(parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  disabled={disabled}
+                />
+                {!newIsPercentage && newAddonValue > 0 && (
+                  <ConvertedHint amount={newAddonValue} fromCurrency="ILS" toCurrency="EUR" />
+                )}
+              </div>
             </div>
             {showPercentageToggle && (
               <div className="sm:col-span-1 flex items-center gap-2 pb-1">
