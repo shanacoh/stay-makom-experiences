@@ -14,6 +14,10 @@ function getFetchHeaders(url: string): Record<string, string> {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
+    // Some CDNs check referer/user-agent for hotlink protection
+    headers["Referer"] = "https://hyperguest.com/";
+    headers["User-Agent"] = "Mozilla/5.0 (compatible; StaymakomBot/1.0)";
+    headers["Accept"] = "image/webp,image/jpeg,image/png,image/*,*/*";
   }
   return headers;
 }
