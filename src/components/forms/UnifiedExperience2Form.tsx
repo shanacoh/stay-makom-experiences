@@ -541,10 +541,6 @@ export function UnifiedExperience2Form({
   // -------------------------------------------------------------------------
 
   const handleSaveDraft = async (data: Experience2FormData) => {
-    if (experienceHotels.length === 0) {
-      toast.error("Ajoutez au moins un hôtel au parcours");
-      return;
-    }
     setIsSaving(true);
     try {
       const experienceData = await buildExperienceData(data, "draft");
@@ -1233,8 +1229,8 @@ export function UnifiedExperience2Form({
             {currentExperienceId ? (
               <IncludesManager2 experienceId={currentExperienceId} />
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Save this experience as a draft first to manage What's Included items.</p>
+              <div className="text-center py-6 text-muted-foreground space-y-2">
+                <p className="text-sm">Save this experience first (Draft or Publish) to manage What's Included items.</p>
               </div>
             )}
           </CardContent>
