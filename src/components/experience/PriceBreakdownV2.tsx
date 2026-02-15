@@ -119,7 +119,7 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
   const b = breakdown;
   const hasPricingAddons = b.pricingAddonLines.length > 0;
   const hasCommissions = b.totalCommissions > 0;
-  const hasTax = b.totalTax > 0;
+  
   const hasPromo = b.promo.type !== null;
   const hasDiscount = b.promo.discountAmount > 0;
   const hasFakeMarkup = b.promo.type === "fake_markup" && b.promo.fakeOriginalPrice != null;
@@ -201,31 +201,12 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
           </>
         )}
 
-        {/* ─── Subtotal before tax ─── */}
+        {/* ─── Subtotal ─── */}
         <Separator />
         <div className="flex justify-between text-sm font-medium">
           <span>{t.subtotalBeforeTax}</span>
           <span>{fmt(b.subtotalBeforeTax, b.currency)}</span>
         </div>
-
-        {/* ─── Layer 4: Taxes ─── */}
-        {hasTax && (
-          <div className="space-y-1">
-            {b.taxLines.map((tax, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-sm pl-2">
-                  <span className="text-muted-foreground">
-                    {t.tax} {tax.pct > 0 ? `(${tax.pct}%)` : ""}
-                  </span>
-                  <span>{fmt(tax.amount, b.currency)}</span>
-                </div>
-                {tax.note && (
-                  <p className="text-xs text-muted-foreground pl-2 italic">{t.taxExemptNote}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* ─── Layer 5: Promo ─── */}
         {hasPromo && (

@@ -17,7 +17,6 @@ import type {
 import {
   EXPERIENCE_PRICING_TYPES,
   COMMISSION_TYPES,
-  TAX_TYPES,
 } from "@/types/experience2_addons";
 
 // ---------------------------------------------------------------------------
@@ -53,7 +52,7 @@ export function useExperiencePricingConfig(experienceId: string | null) {
       if (!experienceId) return null;
       const { data, error } = await supabase
         .from("experiences2")
-        .select("commission_room_pct, commission_addons_pct, tax_pct, promo_type, promo_value, promo_is_percentage, tax_foreign_exempt_room")
+        .select("commission_room_pct, commission_addons_pct, tax_pct, promo_type, promo_value, promo_is_percentage")
         .eq("id", experienceId)
         .single();
       if (error) throw error;
@@ -64,8 +63,7 @@ export function useExperiencePricingConfig(experienceId: string | null) {
         promo_type: data.promo_type ?? null,
         promo_value: data.promo_value ?? null,
         promo_is_percentage: data.promo_is_percentage ?? true,
-        tax_foreign_exempt_room: (data as any).tax_foreign_exempt_room ?? true,
-      } as PricingConfig & { tax_foreign_exempt_room: boolean };
+      } as PricingConfig;
     },
     enabled: !!experienceId,
   });
@@ -152,8 +150,6 @@ export function calculatePriceV2(
   allAddons: ExperienceAddon[],
   config: PricingConfig,
   currency: string,
-  isIsraeli: boolean = true,
-  taxForeignExemptRoom: boolean = true,
 ): PriceBreakdownV2 {
   // --- Layer 1: Room ---
   // roomPrice is already the full stay price from HyperGuest
@@ -249,41 +245,11 @@ export function calculatePriceV2(
   const commissionAddonsPct = commissionAddons.find((a) => a.type === "commission_experience" && a.is_percentage)?.value ?? 0;
   const commissionAddonsAmount = commissionLines.filter((c) => c.type === "commission_experience").reduce((s, c) => s + c.total, 0);
 
-  // --- Layer 4: Taxes ---
+  // --- Layer 4: Taxes — REMOVED (prices displayed excl. VAT) ---
   const subtotalBeforeTax = roomPrice + totalPricingAddons + totalCommissions;
-  const taxAddons = allAddons.filter((a) => (TAX_TYPES as string[]).includes(a.type) && a.is_active);
-
-  const taxLines = taxAddons.map((addon) => {
-    const pct = addon.is_percentage ? addon.value : 0;
-    let taxableAmount = subtotalBeforeTax;
-    let note: string | undefined;
-
-    if (!isIsraeli && taxForeignExemptRoom) {
-      // Foreign visitor: exempt tax on room price
-      taxableAmount = subtotalBeforeTax - roomPrice;
-      note = "Room tax exempt for foreign visitors";
-    }
-
-    const amount = addon.is_percentage
-      ? (taxableAmount * addon.value) / 100
-      : addon.value;
-
-    return {
-      name: addon.name,
-      pct,
-      amount,
-      note,
-    };
-  });
-
-  const totalTax = taxLines.reduce((sum, t) => sum + t.amount, 0);
-
-  // Legacy compat
-  const taxPct = taxAddons.length > 0 && taxAddons[0].is_percentage ? taxAddons[0].value : 0;
-  const taxAmount = totalTax;
 
   // --- Layer 5: Promo ---
-  const totalBeforePromo = subtotalBeforeTax + totalTax;
+  const totalBeforePromo = subtotalBeforeTax;
   let discountAmount = 0;
   let fakeOriginalPrice: number | null = null;
 
@@ -307,8 +273,8 @@ export function calculatePriceV2(
     commissionLines,
     totalCommissions,
     subtotalBeforeTax,
-    taxLines,
-    totalTax,
+    taxLines: [],
+    totalTax: 0,
     // Legacy compat
     perPersonAddons,
     totalAddons,
@@ -316,8 +282,8 @@ export function calculatePriceV2(
     commissionRoomAmount,
     commissionAddonsPct,
     commissionAddonsAmount,
-    taxPct,
-    taxAmount,
+    taxPct: 0,
+    taxAmount: 0,
     promo: {
       type: config.promo_type,
       value: config.promo_value,
@@ -329,8 +295,6 @@ export function calculatePriceV2(
     currency,
     nights,
     guests,
-    isIsraeli,
-    taxForeignExemptRoom,
   };
 }
 
@@ -345,7 +309,6 @@ export function useExperience2Price(
   nights: number,
   numberOfGuests: number,
   ratePlanPrices?: unknown,
-  isIsraeli: boolean = true,
 ): PriceBreakdownV2 | null {
   const { data: addons } = useExperienceAddons(experienceId);
   const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
@@ -366,10 +329,8 @@ export function useExperience2Price(
       promo_is_percentage: true,
     };
 
-    const taxForeignExemptRoom = (pricingConfig as any)?.tax_foreign_exempt_room ?? true;
-
-    return calculatePriceV2(roomPrice, numberOfGuests, nights, addons ?? [], config, cur, isIsraeli, taxForeignExemptRoom);
-  }, [addons, pricingConfig, basePrice, currency, nights, numberOfGuests, ratePlanPrices, isIsraeli]);
+    return calculatePriceV2(roomPrice, numberOfGuests, nights, addons ?? [], config, cur);
+  }, [addons, pricingConfig, basePrice, currency, nights, numberOfGuests, ratePlanPrices]);
 }
 
 // ---------------------------------------------------------------------------

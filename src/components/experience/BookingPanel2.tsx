@@ -5,12 +5,10 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, Users, AlertCircle, Globe, CalendarDays, ChevronRight } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, ChevronRight, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -124,7 +122,7 @@ export function BookingPanel2({
   const [adults, setAdults] = useState(minParty);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
-  const [isIsraeli, setIsIsraeli] = useState(true);
+  
 
   // Default to free mode if no predefined dates
   useEffect(() => {
@@ -177,7 +175,7 @@ export function BookingPanel2({
 
   const nights = searchParams?.nights || 0;
   const ratePlanPrices = selectedRatePlan?.prices || null;
-  const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, adults, ratePlanPrices, isIsraeli);
+  const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, adults, ratePlanPrices);
 
   useEffect(() => {
     if (searchResult && !selectedRoomId) {
@@ -343,23 +341,6 @@ export function BookingPanel2({
 
         <Separator />
 
-        {/* Israeli Resident Toggle */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Globe className="h-4 w-4" />
-            {lang === "he" ? "תושב ישראל" : lang === "fr" ? "Résident israélien" : "Israeli resident"}
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={isIsraeli} onCheckedChange={setIsIsraeli} />
-            <Label className="text-xs text-muted-foreground">
-              {isIsraeli
-                ? (lang === "he" ? "כן" : lang === "fr" ? "Oui" : "Yes")
-                : (lang === "he" ? "לא - תייר" : lang === "fr" ? "Non - touriste" : "No - tourist")}
-            </Label>
-          </div>
-        </div>
-
-        <Separator />
 
         {searchParams && (
           <RoomOptionsV2
@@ -393,7 +374,13 @@ export function BookingPanel2({
             : t.selectDates}
         </Button>
 
-        <p className="text-xs text-muted-foreground text-center">{t.note}</p>
+        {/* VAT info notice */}
+        <div className="flex gap-2 p-3 rounded-md bg-muted/50 border border-border">
+          <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Prices do not include VAT. In accordance with Israeli tax law, Israeli citizens and residents are subject to 18% VAT on top of the listed rates, payable directly at the hotel. Foreign visitors holding a B2/3/4 visa are exempt from VAT.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
