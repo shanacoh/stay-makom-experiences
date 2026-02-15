@@ -95,10 +95,19 @@ export function HyperGuestPhotoSelector({
               onClick={() => togglePhoto(photo.url)}
             >
               <img
-                src={photo.thumbnail}
+                src={photo.thumbnail || photo.url}
                 alt={photo.caption || `Photo ${index + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                onError={(e) => {
+                  // Fallback: try the full URL if thumbnail fails
+                  const target = e.currentTarget;
+                  if (target.src !== photo.url) {
+                    target.src = photo.url;
+                  }
+                }}
               />
 
               {/* Hero badge */}
