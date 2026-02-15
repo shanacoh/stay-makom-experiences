@@ -670,6 +670,65 @@ export type Database = {
           },
         ]
       }
+      experience2_date_options: {
+        Row: {
+          checkin: string
+          checkout: string
+          created_at: string
+          discount_percent: number | null
+          experience_id: string
+          featured: boolean
+          id: string
+          is_active: boolean
+          label: string | null
+          label_he: string | null
+          order_index: number
+          original_price: number | null
+          price_override: number | null
+          updated_at: string
+        }
+        Insert: {
+          checkin: string
+          checkout: string
+          created_at?: string
+          discount_percent?: number | null
+          experience_id: string
+          featured?: boolean
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          label_he?: string | null
+          order_index?: number
+          original_price?: number | null
+          price_override?: number | null
+          updated_at?: string
+        }
+        Update: {
+          checkin?: string
+          checkout?: string
+          created_at?: string
+          discount_percent?: number | null
+          experience_id?: string
+          featured?: boolean
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          label_he?: string | null
+          order_index?: number
+          original_price?: number | null
+          price_override?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_date_options_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experience2_highlight_tags: {
         Row: {
           created_at: string

@@ -33,6 +33,7 @@ import { Tag } from "lucide-react";
 import IncludesManager2 from "@/components/admin/IncludesManager2";
 import { HighlightTagsSelector2 } from "@/components/admin/HighlightTagsSelector2";
 import ReviewsManager2 from "@/components/admin/ReviewsManager2";
+import DateOptionsManager from "@/components/admin/DateOptionsManager";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1353,6 +1354,11 @@ export function UnifiedExperience2Form({
             )}
           </CardContent>
         </Card>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Predefined Date Options */}
+        {/* ----------------------------------------------------------------- */}
+        <DateOptionsManager experienceId={currentExperienceId} disabled={isSaving} />
 
         {/* ----------------------------------------------------------------- */}
         {/* Price / Availability Preview — one per hotel in the parcours */}
