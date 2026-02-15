@@ -1285,7 +1285,7 @@ export function UnifiedExperience2Form({
           sectionDescription="VAT and applicable taxes (default 18%). A tax addon at 18% is created automatically."
         />
 
-        {/* --- Promo (unchanged) --- */}
+        {/* --- Promo --- */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1293,69 +1293,75 @@ export function UnifiedExperience2Form({
               Promo
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <Label className="text-xs">Type de promo</Label>
-              <Controller
-                name="promo_type"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Aucune" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Aucune promo</SelectItem>
-                      <SelectItem value="real_discount">Remise réelle</SelectItem>
-                      <SelectItem value="fake_markup">Faux prix barré</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
+          <CardContent>
+            <div className="flex items-end gap-3">
+              {/* Type */}
+              <div className="w-[200px] shrink-0">
+                <Label className="text-xs">Type</Label>
+                <Controller
+                  name="promo_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Aucune" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Aucune promo</SelectItem>
+                        <SelectItem value="real_discount">Remise réelle</SelectItem>
+                        <SelectItem value="fake_markup">Faux prix barré</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
 
-            {watch("promo_type") && watch("promo_type") !== "none" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="promo_value" className="text-xs">
-                    {watch("promo_type") === "real_discount" ? "Valeur de la remise" : "Majoration affichée (%)"}
-                  </Label>
-                  <Input
-                    id="promo_value"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    {...register("promo_value", { valueAsNumber: true })}
-                    placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
-                    disabled={isSaving}
-                  />
-                </div>
-                {watch("promo_type") === "real_discount" && (
-                  <div>
-                    <Label className="text-xs">Mode</Label>
-                    <Controller
-                      name="promo_is_percentage"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          value={field.value ? "percentage" : "fixed"}
-                          onValueChange={(val) => field.onChange(val === "percentage")}
-                          disabled={isSaving}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="percentage">Pourcentage (%)</SelectItem>
-                            <SelectItem value="fixed">Montant fixe ($)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
+              {/* Value — visible when a promo type is active */}
+              {watch("promo_type") && watch("promo_type") !== "none" && (
+                <>
+                  <div className="w-[120px] shrink-0">
+                    <Label htmlFor="promo_value" className="text-xs">
+                      Valeur
+                    </Label>
+                    <Input
+                      id="promo_value"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      {...register("promo_value", { valueAsNumber: true })}
+                      placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
+                      disabled={isSaving}
                     />
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* Mode (% or fixed) — only for real_discount */}
+                  {watch("promo_type") === "real_discount" && (
+                    <div className="w-[180px] shrink-0">
+                      <Label className="text-xs">Mode</Label>
+                      <Controller
+                        name="promo_is_percentage"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value ? "percentage" : "fixed"}
+                            onValueChange={(val) => field.onChange(val === "percentage")}
+                            disabled={isSaving}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="percentage">Pourcentage (%)</SelectItem>
+                              <SelectItem value="fixed">Montant fixe ($)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </CardContent>
         </Card>
 
