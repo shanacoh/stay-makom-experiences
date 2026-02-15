@@ -30,6 +30,9 @@ import { EXPERIENCE_PRICING_TYPES, COMMISSION_TYPES, TAX_TYPES } from "@/types/e
 import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
 import { Separator } from "@/components/ui/separator";
 import { Tag } from "lucide-react";
+import IncludesManager2 from "@/components/admin/IncludesManager2";
+import { HighlightTagsSelector2 } from "@/components/admin/HighlightTagsSelector2";
+import ReviewsManager2 from "@/components/admin/ReviewsManager2";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1216,6 +1219,33 @@ export function UnifiedExperience2Form({
             </div>
           </CardContent>
         </Card>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* What's Included */}
+        {/* ----------------------------------------------------------------- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>What's Included</CardTitle>
+            <CardDescription>Manage the items included in this experience</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {currentExperienceId ? (
+              <IncludesManager2 experienceId={currentExperienceId} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Save this experience as a draft first to manage What's Included items.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Highlight Tags (badges on cards) */}
+        <HighlightTagsSelector2 experienceId={currentExperienceId} />
+
+        {/* Reviews */}
+        {currentExperienceId && (
+          <ReviewsManager2 experienceId={currentExperienceId} />
+        )}
 
         {/* ----------------------------------------------------------------- */}
         {/* Pricing Section — 3 sections */}

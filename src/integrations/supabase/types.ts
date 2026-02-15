@@ -670,6 +670,42 @@ export type Database = {
           },
         ]
       }
+      experience2_highlight_tags: {
+        Row: {
+          created_at: string
+          experience_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          experience_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          experience_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_highlight_tags_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience2_highlight_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "highlight_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experience2_hotels: {
         Row: {
           created_at: string | null
@@ -714,6 +750,56 @@ export type Database = {
             columns: ["hotel_id"]
             isOneToOne: false
             referencedRelation: "hotels2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experience2_includes: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_he: string | null
+          experience_id: string
+          icon_url: string | null
+          id: string
+          order_index: number
+          published: boolean
+          title: string
+          title_he: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_he?: string | null
+          experience_id: string
+          icon_url?: string | null
+          id?: string
+          order_index?: number
+          published?: boolean
+          title: string
+          title_he?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_he?: string | null
+          experience_id?: string
+          icon_url?: string | null
+          id?: string
+          order_index?: number
+          published?: boolean
+          title?: string
+          title_he?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_includes_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
             referencedColumns: ["id"]
           },
         ]
