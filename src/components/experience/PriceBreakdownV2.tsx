@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Hotel, Percent, Receipt, Tag, DollarSign } from "lucide-react";
 import type { PriceBreakdownV2 as PriceBreakdownType } from "@/types/experience2_addons";
+import { DualPrice } from "@/components/ui/DualPrice";
 
 interface PriceBreakdownV2Props {
   breakdown: PriceBreakdownType | null;
@@ -145,7 +146,7 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
           </div>
           <div className="flex justify-between text-sm pl-5">
             <span className="text-muted-foreground">{t.roomPrice}</span>
-            <span className="font-medium">{fmt(b.roomPrice, b.currency)}</span>
+            <DualPrice amount={b.roomPrice} currency={b.currency} inline className="font-medium text-sm" />
           </div>
         </div>
 
@@ -158,7 +159,7 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
                 <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
                 {t.experiencePricing}
               </div>
-              {b.pricingAddonLines.map((line, i) => (
+               {b.pricingAddonLines.map((line, i) => (
                 <div key={i} className="flex justify-between text-sm pl-5">
                   <span className="text-muted-foreground">
                     {line.name}{" "}
@@ -166,12 +167,12 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
                       ({fmt(line.unitPrice, b.currency)} {line.description})
                     </span>
                   </span>
-                  <span>{fmt(line.total, b.currency)}</span>
+                  <DualPrice amount={line.total} currency={b.currency} inline className="text-sm" />
                 </div>
               ))}
               <div className="flex justify-between text-sm pl-5 font-medium pt-1">
                 <span>{t.subtotalPricing}</span>
-                <span>{fmt(b.totalPricingAddons, b.currency)}</span>
+                <DualPrice amount={b.totalPricingAddons} currency={b.currency} inline className="text-sm font-medium" />
               </div>
             </div>
           </>
@@ -194,7 +195,7 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
                       ({comm.isPercentage ? `${comm.value}%` : fmt(comm.value, b.currency)})
                     </span>
                   </span>
-                  <span>{fmt(comm.total, b.currency)}</span>
+                  <DualPrice amount={comm.total} currency={b.currency} inline className="text-sm" />
                 </div>
               ))}
             </div>
@@ -205,7 +206,7 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
         <Separator />
         <div className="flex justify-between text-sm font-medium">
           <span>{t.subtotalBeforeTax}</span>
-          <span>{fmt(b.subtotalBeforeTax, b.currency)}</span>
+          <DualPrice amount={b.subtotalBeforeTax} currency={b.currency} inline className="text-sm font-medium" />
         </div>
 
         {/* ─── Layer 5: Promo ─── */}
@@ -248,7 +249,7 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
                 {fmt(b.promo.fakeOriginalPrice!, b.currency)}
               </span>
             )}
-            <span className="text-primary text-lg">{fmt(b.finalTotal, b.currency)}</span>
+            <DualPrice amount={b.finalTotal} currency={b.currency} className="text-primary text-lg items-end" />
           </div>
         </div>
       </CardContent>

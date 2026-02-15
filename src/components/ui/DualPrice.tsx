@@ -1,0 +1,93 @@
+import { useCurrencyRate } from "@/hooks/useCurrencyRate";
+import { cn } from "@/lib/utils";
+
+interface DualPriceProps {
+  amount: number;
+  currency: string;
+  className?: string;
+  showSecondary?: boolean;
+  reverse?: boolean;
+  /** Compact inline mode (e.g. for table rows) */
+  inline?: boolean;
+}
+
+function formatCurrency(amount: number, currency: string, locale = "en-US"): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
+function getSecondaryCurrency(currency: string): string | null {
+  const c = currency.toUpperCase();
+  if (c === "EUR") return "ILS";
+  if (c === "ILS") return "EUR";
+  return null;
+}
+
+export function DualPrice({
+  amount,
+  currency,
+  className,
+  showSecondary = true,
+  reverse = false,
+  inline = false,
+}: DualPriceProps) {
+  const { convertPrice } = useCurrencyRate();
+  const secondaryCurrency = getSecondaryCurrency(currency);
+
+  const primaryCur = reverse && secondaryCurrency ? secondaryCurrency : currency;
+  const secondCur = reverse && secondaryCurrency ? currency : secondaryCurrency;
+
+  const primaryAmount = reverse && secondaryCurrency ? convertPrice(amount, currency, secondaryCurrency) : amount;
+  const secondaryAmount = secondCur ? convertPrice(amount, currency, secondCur) : null;
+
+  const primaryFormatted = formatCurrency(primaryAmount, primaryCur);
+  const secondaryFormatted = secondaryAmount != null && secondCur ? formatCurrency(secondaryAmount, secondCur) : null;
+
+  if (!showSecondary || !secondaryFormatted) {
+    return <span className={className}>{primaryFormatted}</span>;
+  }
+
+  if (inline) {
+    return (
+      <span className={cn("inline-flex items-baseline gap-1.5", className)}>
+        <span className="font-bold">{primaryFormatted}</span>
+        <span className="text-xs text-muted-foreground">({secondaryFormatted})</span>
+      </span>
+    );
+  }
+
+  return (
+    <div className={cn("flex flex-col", className)}>
+      <span className="font-bold">{primaryFormatted}</span>
+      <span className="text-xs text-muted-foreground">
+        soit {secondaryFormatted}
+      </span>
+    </div>
+  );
+}
+
+/** Small helper for admin: shows "≈ XX €" next to an input */
+export function ConvertedHint({
+  amount,
+  fromCurrency,
+  toCurrency,
+  className,
+}: {
+  amount: number;
+  fromCurrency: string;
+  toCurrency: string;
+  className?: string;
+}) {
+  const { convertPrice } = useCurrencyRate();
+  if (!amount || fromCurrency.toUpperCase() === toCurrency.toUpperCase()) return null;
+  const converted = convertPrice(amount, fromCurrency, toCurrency);
+  return (
+    <span className={cn("text-xs text-muted-foreground whitespace-nowrap", className)}>
+      ≈ {formatCurrency(converted, toCurrency)}
+    </span>
+  );
+}
