@@ -17,6 +17,7 @@ import ReviewsGrid2 from "@/components/experience-test/ReviewsGrid2";
 import ExtrasSection2 from "@/components/experience-test/ExtrasSection2";
 import ShareWithFriendsSection from "@/components/experience/ShareWithFriendsSection";
 import OtherExperiences2 from "@/components/experience-test/OtherExperiences2";
+import WhatsIncludedPhotos2 from "@/components/experience-test/WhatsIncludedPhotos2";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -405,6 +406,9 @@ export default function Experience2() {
 
             {/* Practical Info */}
             <PracticalInfo experience={experience} lang={lang as "en" | "he" | "fr"} />
+
+            {/* What's Included (visual grid) */}
+            <WhatsIncludedPhotos2 experienceId={experience.id} lang={lang} />
 
             {/* Extras / Add-ons */}
             <ExtrasSection2
