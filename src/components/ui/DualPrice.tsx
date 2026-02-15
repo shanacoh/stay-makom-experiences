@@ -38,10 +38,13 @@ export function DualPrice({
   const { convertPrice } = useCurrencyRate();
   const secondaryCurrency = getSecondaryCurrency(currency);
 
-  const primaryCur = reverse && secondaryCurrency ? secondaryCurrency : currency;
-  const secondCur = reverse && secondaryCurrency ? currency : secondaryCurrency;
+  // Default: always show EUR as primary for user-facing display
+  const shouldReverse = reverse || currency.toUpperCase() === "ILS";
 
-  const primaryAmount = reverse && secondaryCurrency ? convertPrice(amount, currency, secondaryCurrency) : amount;
+  const primaryCur = shouldReverse && secondaryCurrency ? secondaryCurrency : currency;
+  const secondCur = shouldReverse && secondaryCurrency ? currency : secondaryCurrency;
+
+  const primaryAmount = shouldReverse && secondaryCurrency ? convertPrice(amount, currency, secondaryCurrency) : amount;
   const secondaryAmount = secondCur ? convertPrice(amount, currency, secondCur) : null;
 
   const primaryFormatted = formatCurrency(primaryAmount, primaryCur);
