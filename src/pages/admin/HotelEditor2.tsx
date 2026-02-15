@@ -141,8 +141,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         caption: img.description || "",
       }));
       setHyperguestPhotos(hgPhotos);
-      setSelectedHGPhotos(hgPhotos.map((p) => p.url));
-      setSelectedHGHero(hotel.heroImage || hgPhotos[0]?.url || null);
+      setSelectedHGPhotos([]);
+      setSelectedHGHero(null);
     } else if (hotel.images && hotel.images.length > 0) {
       const hgPhotos: HyperGuestPhoto[] = hotel.images.map((url: string, i: number) => ({
         url,
@@ -150,8 +150,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         caption: `Photo ${i + 1}`,
       }));
       setHyperguestPhotos(hgPhotos);
-      setSelectedHGPhotos(hgPhotos.map((p) => p.url));
-      setSelectedHGHero(hotel.heroImage || hgPhotos[0]?.url || null);
+      setSelectedHGPhotos([]);
+      setSelectedHGHero(null);
       setPendingImages(hotel.images);
     }
 
