@@ -1267,6 +1267,8 @@ export function UnifiedExperience2Form({
         <Experience2AddonsManager
           experienceId={currentExperienceId}
           disabled={isSaving}
+          localAddons={localAddons}
+          onLocalAddonsChange={setLocalAddons}
           addonTypes={COMMISSION_TYPES}
           sectionTitle="Commissions"
           sectionDescription="Staymakom margins on room and experience prices"
@@ -1276,6 +1278,8 @@ export function UnifiedExperience2Form({
         <Experience2AddonsManager
           experienceId={currentExperienceId}
           disabled={isSaving}
+          localAddons={localAddons}
+          onLocalAddonsChange={setLocalAddons}
           addonTypes={TAX_TYPES}
           sectionTitle="Taxes"
           sectionDescription="VAT and applicable taxes (default 18%). A tax addon at 18% is created automatically."
