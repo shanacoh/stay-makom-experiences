@@ -158,8 +158,6 @@ export interface PriceBreakdownV2 {
   guests: number;
   taxPct: number;
   taxAmount: number;
-  isIsraeli: boolean;
-  taxForeignExemptRoom: boolean;
 }
 
 // ---------------------------------------------------------------------------
