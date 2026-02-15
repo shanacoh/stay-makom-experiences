@@ -6,6 +6,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Build fetch headers — add HyperGuest auth when needed
+function getFetchHeaders(url: string): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (url.includes("hyperguest.com") || url.includes("hyperguest.io")) {
+    const token = Deno.env.get("HYPERGUEST_BEARER_TOKEN");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,16 +33,17 @@ serve(async (req) => {
       );
     }
 
+    const fetchHeaders = getFetchHeaders(imageUrl);
+
     // --- Mode 1: Return base64 for preview (no storage upload) ---
     if (returnBase64) {
       console.log(`[download-image] Proxying for preview: ${imageUrl}`);
-      const imageResponse = await fetch(imageUrl);
+      const imageResponse = await fetch(imageUrl, { headers: fetchHeaders });
       if (!imageResponse.ok) {
         throw new Error(`Failed to fetch image: ${imageResponse.status}`);
       }
       const arrayBuf = await imageResponse.arrayBuffer();
       const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
-      // Convert to base64
       const uint8 = new Uint8Array(arrayBuf);
       let binary = "";
       for (let i = 0; i < uint8.length; i++) {
@@ -53,8 +66,7 @@ serve(async (req) => {
 
     console.log(`[download-image] Downloading: ${imageUrl}`);
 
-    // Download the image from external URL (no CORS restriction server-side)
-    const imageResponse = await fetch(imageUrl);
+    const imageResponse = await fetch(imageUrl, { headers: fetchHeaders });
     if (!imageResponse.ok) {
       throw new Error(`Failed to fetch image: ${imageResponse.status}`);
     }
@@ -64,7 +76,6 @@ serve(async (req) => {
 
     console.log(`[download-image] Downloaded ${imageBlob.size} bytes, type: ${contentType}`);
 
-    // Upload to Supabase storage
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -82,7 +93,6 @@ serve(async (req) => {
       throw error;
     }
 
-    // Get public URL
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
 
     console.log(`[download-image] Uploaded to: ${urlData.publicUrl}`);
