@@ -1,15 +1,13 @@
 /**
  * HyperGuestPhotoSelector — Grid gallery for selecting HyperGuest photos
  * Supports checkbox selection, hero designation, select all/deselect all
- * Uses blob proxy to bypass CORS restrictions on HyperGuest CDN images
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Star, CheckSquare, XSquare, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface HyperGuestPhoto {
   url: string;
@@ -26,71 +24,6 @@ interface HyperGuestPhotoSelectorProps {
   isLoading?: boolean;
 }
 
-/**
- * Proxied image component that fetches via the download-image edge function
- * to bypass CORS restrictions from HyperGuest CDN.
- */
-function ProxiedImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!src) return;
-
-    let objectUrl: string | null = null;
-
-    // Try to fetch via edge function proxy
-    (async () => {
-      try {
-        const { data, error: fnError } = await supabase.functions.invoke("download-image", {
-          body: { imageUrl: src, returnBase64: true },
-        });
-
-        if (fnError || !data?.base64) {
-          if (mountedRef.current) setError(true);
-          return;
-        }
-
-        if (mountedRef.current) {
-          setBlobUrl(`data:${data.contentType || "image/jpeg"};base64,${data.base64}`);
-        }
-      } catch {
-        if (mountedRef.current) setError(true);
-      }
-    })();
-
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [src]);
-
-  if (error) {
-    return (
-      <div className={cn("flex items-center justify-center bg-muted text-muted-foreground text-xs", className)}>
-        <ImageIcon className="h-6 w-6 opacity-40" />
-      </div>
-    );
-  }
-
-  if (!blobUrl) {
-    return (
-      <div className={cn("flex items-center justify-center bg-muted animate-pulse", className)}>
-        <ImageIcon className="h-6 w-6 opacity-20" />
-      </div>
-    );
-  }
-
-  return <img src={blobUrl} alt={alt} className={className} loading="lazy" />;
-}
-
 export function HyperGuestPhotoSelector({
   photos,
   selectedPhotos,
@@ -100,6 +33,7 @@ export function HyperGuestPhotoSelector({
   isLoading,
 }: HyperGuestPhotoSelectorProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [failedThumbs, setFailedThumbs] = useState<Set<string>>(new Set());
 
   const togglePhoto = (url: string) => {
     if (selectedPhotos.includes(url)) {
@@ -161,10 +95,20 @@ export function HyperGuestPhotoSelector({
               onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => togglePhoto(photo.url)}
             >
-              <ProxiedImage
-                src={photo.thumbnail || photo.url}
+              <img
+                src={failedThumbs.has(photo.thumbnail || photo.url) ? photo.url : (photo.thumbnail || photo.url)}
                 alt={photo.caption || `Photo ${index + 1}`}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const thumbUrl = photo.thumbnail || photo.url;
+                  if (target.src !== photo.url && !failedThumbs.has(thumbUrl)) {
+                    setFailedThumbs(prev => new Set(prev).add(thumbUrl));
+                    target.src = photo.url;
+                  }
+                }}
               />
 
               {/* Hero badge */}
