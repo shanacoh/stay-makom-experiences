@@ -85,6 +85,19 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
     hyperguest_extras: [] as TaxFeeExtra[],
     /** Équipements & services (WiFi, piscine, etc. – HyperGuest facilities, sans prix) */
     hyperguest_facilities: [] as FacilityItem[],
+    // Nouvelles colonnes HyperGuest
+    country_code: "",
+    timezone: "",
+    utc_offset: null as number | null,
+    contact_website: "",
+    max_child_age: null as number | null,
+    max_infant_age: null as number | null,
+    supported_cards: [] as string[],
+    cut_off: "",
+    description_room: "",
+    description_location: "",
+    description_room_he: "",
+    description_location_he: "",
   });
 
   const downloadHyperGuestImages = async (imageUrls: string[], heroUrl?: string | null) => {
@@ -185,11 +198,24 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       check_out_time: hotel.checkOut ?? "",
       hyperguest_extras: hotel.taxesFeesExtras ?? [],
       hyperguest_facilities: hotel.facilitiesDetail ?? [],
+      // Nouvelles données HG
+      country_code: hotel.hotelModel?.location?.countryCode || hotel.countryCode || prev.country_code,
+      timezone: hotel.hotelModel?.settings?.timezone || prev.timezone,
+      utc_offset: hotel.hotelModel?.settings?.utcOffset ?? prev.utc_offset,
+      contact_website: hotel.hotelModel?.contact?.website || hotel.contact?.website || prev.contact_website,
+      max_child_age: hotel.hotelModel?.settings?.maxChildAge ?? prev.max_child_age,
+      max_infant_age: hotel.hotelModel?.settings?.maxInfantAge ?? prev.max_infant_age,
+      supported_cards: hotel.hotelModel?.policies?.supportedCards?.result?.Card || prev.supported_cards,
+      cut_off: hotel.hotelModel?.settings?.cutOff || prev.cut_off,
+      description_room: hotel.hotelModel?.descriptions?.room || prev.description_room,
+      description_location: hotel.hotelModel?.descriptions?.location || prev.description_location,
     }));
 
     const hotelName = hotel.name || "";
     const story = hotel.description || "";
-    const textsToTranslate = [hotelName, city, region, address, story].filter(Boolean);
+    const roomDesc = hotel.hotelModel?.descriptions?.room || "";
+    const locationDesc = hotel.hotelModel?.descriptions?.location || "";
+    const textsToTranslate = [hotelName, city, region, address, story, roomDesc, locationDesc].filter(Boolean);
 
     if (textsToTranslate.length > 0) {
       setIsTranslating(true);
@@ -206,6 +232,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           const regionHe = region ? translations[idx++] : "";
           const addressHe = address ? translations[idx++] : "";
           const storyHe = story ? translations[idx++] : "";
+          const descRoomHe = roomDesc ? translations[idx++] : "";
+          const descLocationHe = locationDesc ? translations[idx++] : "";
 
           setFormData((prev) => ({
             ...prev,
@@ -214,6 +242,8 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
             region_he: regionHe || prev.region_he,
             address_he: addressHe || prev.address_he,
             story_he: storyHe || prev.story_he,
+            description_room_he: descRoomHe || prev.description_room_he,
+            description_location_he: descLocationHe || prev.description_location_he,
           }));
         }
       } catch (err) {
@@ -292,6 +322,19 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         hyperguest_facilities: Array.isArray(h.hyperguest_facilities)
           ? (h.hyperguest_facilities as FacilityItem[])
           : [],
+        // Nouveaux champs
+        country_code: (h.country_code as string) ?? "",
+        timezone: (h.timezone as string) ?? "",
+        utc_offset: (h.utc_offset as number) ?? null,
+        contact_website: (h.contact_website as string) ?? "",
+        max_child_age: (h.max_child_age as number) ?? null,
+        max_infant_age: (h.max_infant_age as number) ?? null,
+        supported_cards: Array.isArray(h.supported_cards) ? (h.supported_cards as string[]) : [],
+        cut_off: (h.cut_off as string) ?? "",
+        description_room: (h.description_room as string) ?? "",
+        description_location: (h.description_location as string) ?? "",
+        description_room_he: (h.description_room_he as string) ?? "",
+        description_location_he: (h.description_location_he as string) ?? "",
       });
     }
   }, [hotel]);
@@ -351,6 +394,19 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         hyperguest_facilities: data.hyperguest_facilities?.length
           ? (data.hyperguest_facilities as unknown as Json)
           : null,
+        // Nouveaux champs
+        country_code: data.country_code || null,
+        timezone: data.timezone || null,
+        utc_offset: data.utc_offset,
+        contact_website: data.contact_website || null,
+        max_child_age: data.max_child_age,
+        max_infant_age: data.max_infant_age,
+        supported_cards: data.supported_cards?.length ? (data.supported_cards as unknown as Json) : null,
+        cut_off: data.cut_off || null,
+        description_room: data.description_room || null,
+        description_location: data.description_location || null,
+        description_room_he: data.description_room_he || null,
+        description_location_he: data.description_location_he || null,
       };
 
       // ======== DEBUG START ========
