@@ -1841,7 +1841,13 @@ export type Database = {
           contact_instagram: string | null
           contact_phone: string | null
           contact_website: string | null
+          country_code: string | null
           created_at: string | null
+          cut_off: string | null
+          description_location: string | null
+          description_location_he: string | null
+          description_room: string | null
+          description_room_he: string | null
           extra_conditions: string | null
           faqs: Json | null
           hero_image: string | null
@@ -1854,6 +1860,8 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          max_child_age: number | null
+          max_infant_age: number | null
           max_stay: number | null
           meta_description_en: string | null
           meta_description_fr: string | null
@@ -1882,7 +1890,10 @@ export type Database = {
           status: Database["public"]["Enums"]["hotel_status"] | null
           story: string | null
           story_he: string | null
+          supported_cards: Json | null
+          timezone: string | null
           updated_at: string | null
+          utc_offset: number | null
           visibility: string | null
         }
         Insert: {
@@ -1900,7 +1911,13 @@ export type Database = {
           contact_instagram?: string | null
           contact_phone?: string | null
           contact_website?: string | null
+          country_code?: string | null
           created_at?: string | null
+          cut_off?: string | null
+          description_location?: string | null
+          description_location_he?: string | null
+          description_room?: string | null
+          description_room_he?: string | null
           extra_conditions?: string | null
           faqs?: Json | null
           hero_image?: string | null
@@ -1913,6 +1930,8 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          max_child_age?: number | null
+          max_infant_age?: number | null
           max_stay?: number | null
           meta_description_en?: string | null
           meta_description_fr?: string | null
@@ -1941,7 +1960,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["hotel_status"] | null
           story?: string | null
           story_he?: string | null
+          supported_cards?: Json | null
+          timezone?: string | null
           updated_at?: string | null
+          utc_offset?: number | null
           visibility?: string | null
         }
         Update: {
@@ -1959,7 +1981,13 @@ export type Database = {
           contact_instagram?: string | null
           contact_phone?: string | null
           contact_website?: string | null
+          country_code?: string | null
           created_at?: string | null
+          cut_off?: string | null
+          description_location?: string | null
+          description_location_he?: string | null
+          description_room?: string | null
+          description_room_he?: string | null
           extra_conditions?: string | null
           faqs?: Json | null
           hero_image?: string | null
@@ -1972,6 +2000,8 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          max_child_age?: number | null
+          max_infant_age?: number | null
           max_stay?: number | null
           meta_description_en?: string | null
           meta_description_fr?: string | null
@@ -2000,7 +2030,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["hotel_status"] | null
           story?: string | null
           story_he?: string | null
+          supported_cards?: Json | null
+          timezone?: string | null
           updated_at?: string | null
+          utc_offset?: number | null
           visibility?: string | null
         }
         Relationships: []

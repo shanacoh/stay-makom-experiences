@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Loader2, ExternalLink, Star, DoorOpen, Home, Clock } from "lucide-react";
+import { MapPin, Loader2, ExternalLink, Star, DoorOpen, Home, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
@@ -76,12 +76,16 @@ const Hotel2 = () => {
     );
   }
 
+  const h = hotel as Record<string, unknown>;
   const hotelName = getLocalizedField(hotel, 'name', lang) as string || hotel.name;
   const city = getLocalizedField(hotel, 'city', lang) as string || hotel.city;
   const region = getLocalizedField(hotel, 'region', lang) as string || hotel.region;
   const story = getLocalizedField(hotel, 'story', lang) as string || hotel.story;
   const highlights = getLocalizedField(hotel, 'highlights', lang) as string[] || hotel.highlights;
   const amenities = getLocalizedField(hotel, 'amenities', lang) as string[] || hotel.amenities;
+  const address = getLocalizedField(hotel, 'address', lang) as string || hotel.address;
+  const descriptionRoom = lang === "he" ? ((h.description_room_he as string) || (h.description_room as string)) : (h.description_room as string);
+  const descriptionLocation = lang === "he" ? ((h.description_location_he as string) || (h.description_location as string)) : (h.description_location as string);
 
   const displayPhotos = hotel.photos && hotel.photos.length > 0
     ? hotel.photos.slice(0, 8)
@@ -93,7 +97,25 @@ const Hotel2 = () => {
     hotel.number_of_rooms && { icon: DoorOpen, label: `${hotel.number_of_rooms} rooms` },
     hotel.check_in_time && { icon: Clock, label: `Check-in ${hotel.check_in_time}` },
     hotel.check_out_time && { icon: Clock, label: `Check-out ${hotel.check_out_time}` },
+    address && { icon: MapPin, label: address },
   ].filter(Boolean) as { icon: any; label: string }[];
+
+  const hgFacilities = hotel.hyperguest_facilities as Array<{
+    name: string;
+    category?: string;
+    classification?: string;
+    type?: string;
+  }> | null;
+
+  const supportedCards = h.supported_cards as string[] | null;
+  const roomCapacities = h.room_capacities as Array<{
+    name: string;
+    maxAdultsNumber?: number;
+    maxChildrenNumber?: number;
+    maxOccupancy?: number;
+    roomSize?: number;
+    beddingSummary?: string;
+  }> | null;
 
   return (
     <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
@@ -181,17 +203,165 @@ const Hotel2 = () => {
                 </div>
               )}
 
-              {/* Amenities */}
-              {amenities && amenities.length > 0 && (
+              {/* About the Rooms */}
+              {descriptionRoom && (
                 <div>
-                  <h2 className="font-sans text-3xl font-bold mb-6">{t(lang, 'amenities')}</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    {amenities.map((amenity, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <span className="text-primary">✓</span>
-                        <span>{amenity}</span>
+                  <h2 className="font-sans text-3xl font-bold mb-6">
+                    {lang === "he" ? "על החדרים" : lang === "fr" ? "Les chambres" : "About the Rooms"}
+                  </h2>
+                  <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {descriptionRoom}
+                  </p>
+                </div>
+              )}
+
+              {/* Location description */}
+              {descriptionLocation && (
+                <div>
+                  <h2 className="font-sans text-3xl font-bold mb-6">
+                    {lang === "he" ? "מיקום" : lang === "fr" ? "Emplacement" : "Location"}
+                  </h2>
+                  <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {descriptionLocation}
+                  </p>
+                </div>
+              )}
+
+              {/* Room Types & Capacities */}
+              {roomCapacities && Array.isArray(roomCapacities) && roomCapacities.length > 0 && (
+                <div>
+                  <h2 className="font-sans text-3xl font-bold mb-6">
+                    {lang === "he" ? "סוגי חדרים" : lang === "fr" ? "Types de chambres" : "Room Types"}
+                  </h2>
+                  <div className="grid gap-4">
+                    {roomCapacities.map((room, i) => (
+                      <div key={i} className="p-4 rounded-lg border flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <span className="font-semibold">{room.name}</span>
+                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                          {room.maxAdultsNumber != null && (
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3.5 w-3.5" />
+                              {room.maxAdultsNumber} {lang === "he" ? "מבוגרים" : lang === "fr" ? "adultes" : "adults"}
+                            </span>
+                          )}
+                          {room.maxOccupancy != null && (
+                            <span>max {room.maxOccupancy}</span>
+                          )}
+                          {room.roomSize != null && (
+                            <span>{room.roomSize} m²</span>
+                          )}
+                          {room.beddingSummary && (
+                            <span>{room.beddingSummary}</span>
+                          )}
+                        </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Facilities / Amenities */}
+              {(() => {
+                if (hgFacilities && hgFacilities.length > 0) {
+                  const byCategory: Record<string, typeof hgFacilities> = {};
+                  hgFacilities.forEach((fac) => {
+                    const cat = fac.classification === "Service"
+                      ? "Services"
+                      : (fac.category?.trim() || "Other");
+                    if (!byCategory[cat]) byCategory[cat] = [];
+                    byCategory[cat].push(fac);
+                  });
+
+                  return (
+                    <div>
+                      <h2 className="font-sans text-3xl font-bold mb-6">{t(lang, 'amenities')}</h2>
+                      <div className="space-y-6">
+                        {Object.entries(byCategory).map(([category, facilities]) => (
+                          <div key={category}>
+                            <h3 className="text-lg font-semibold mb-3 text-muted-foreground">{category}</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                              {facilities.map((fac, i) => (
+                                <div key={i} className="flex items-center gap-2">
+                                  <span className="text-primary">✓</span>
+                                  <span>{fac.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (amenities && amenities.length > 0) {
+                  return (
+                    <div>
+                      <h2 className="font-sans text-3xl font-bold mb-6">{t(lang, 'amenities')}</h2>
+                      <div className="grid grid-cols-2 gap-4">
+                        {amenities.map((amenity, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <span className="text-primary">✓</span>
+                            <span>{amenity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
+
+              {/* Policies & Conditions */}
+              {(hotel.cancellation_policy || hotel.extra_conditions || hotel.min_stay || hotel.max_stay) && (
+                <div>
+                  <h2 className="font-sans text-3xl font-bold mb-6">
+                    {lang === "he" ? "תנאים ומדיניות" : lang === "fr" ? "Conditions et politiques" : "Policies & Conditions"}
+                  </h2>
+                  <div className="space-y-4">
+                    {hotel.cancellation_policy && (
+                      <div className="p-4 rounded-lg border bg-muted/30">
+                        <h3 className="font-semibold mb-2 flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-primary" />
+                          {lang === "he" ? "מדיניות ביטול" : lang === "fr" ? "Politique d'annulation" : "Cancellation Policy"}
+                        </h3>
+                        <p className="text-muted-foreground whitespace-pre-line">{hotel.cancellation_policy}</p>
+                      </div>
+                    )}
+
+                    {(hotel.min_stay || hotel.max_stay) && (
+                      <div className="p-4 rounded-lg border bg-muted/30">
+                        <h3 className="font-semibold mb-2">
+                          {lang === "he" ? "משך שהייה" : lang === "fr" ? "Durée de séjour" : "Length of Stay"}
+                        </h3>
+                        <div className="flex gap-4 text-muted-foreground">
+                          {hotel.min_stay && (
+                            <span>
+                              {lang === "he" ? `מינימום ${hotel.min_stay} לילות` :
+                               lang === "fr" ? `Minimum ${hotel.min_stay} nuits` :
+                               `Minimum ${hotel.min_stay} night${hotel.min_stay > 1 ? 's' : ''}`}
+                            </span>
+                          )}
+                          {hotel.max_stay && (
+                            <span>
+                              {lang === "he" ? `מקסימום ${hotel.max_stay} לילות` :
+                               lang === "fr" ? `Maximum ${hotel.max_stay} nuits` :
+                               `Maximum ${hotel.max_stay} night${hotel.max_stay > 1 ? 's' : ''}`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {hotel.extra_conditions && (
+                      <div className="p-4 rounded-lg border bg-amber-50 border-amber-200">
+                        <h3 className="font-semibold mb-2 text-amber-800">
+                          {lang === "he" ? "הערות חשובות" : lang === "fr" ? "Remarques importantes" : "Important Notices"}
+                        </h3>
+                        <p className="text-amber-700 whitespace-pre-line text-sm">{hotel.extra_conditions}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -265,6 +435,24 @@ const Hotel2 = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Supported payment cards */}
+              {supportedCards && Array.isArray(supportedCards) && supportedCards.length > 0 && (
+                <Card>
+                  <CardContent className="p-6 space-y-3">
+                    <h3 className="font-sans text-xl font-bold">
+                      {lang === "he" ? "כרטיסים מקובלים" : lang === "fr" ? "Cartes acceptées" : "Accepted Cards"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {supportedCards.map((card, i) => (
+                        <span key={i} className="inline-flex items-center px-3 py-1.5 rounded-full bg-muted text-sm font-medium">
+                          {card}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* V2 Experiences at this hotel */}
               {!experiencesLoading && experiences && experiences.length > 0 && (
