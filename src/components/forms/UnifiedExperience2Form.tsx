@@ -194,6 +194,7 @@ export function UnifiedExperience2Form({
     handleSubmit,
     watch,
     setValue,
+    getValues,
     control,
     formState: { errors },
   } = useForm<Experience2FormData>({
@@ -533,6 +534,32 @@ export function UnifiedExperience2Form({
     if (error) {
       console.error("Error saving addons:", error);
       toast.error("Addons saved partially — check console");
+    }
+  };
+
+  // -------------------------------------------------------------------------
+  // Quick-create a minimal draft so junction-table sections become available
+  // -------------------------------------------------------------------------
+
+  const quickCreateDraft = async () => {
+    if (currentExperienceId) return;
+    setIsSaving(true);
+    try {
+      const title = getValues("title") || "Untitled Experience";
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `exp-${Date.now()}`;
+      const { data: insertedData, error } = await supabase
+        .from("experiences2")
+        .insert([{ title, slug, base_price: 0, status: "draft" as const }])
+        .select("id")
+        .single();
+      if (error) throw error;
+      setCreatedExperienceId(insertedData.id);
+      toast.success("Draft created — you can now manage all sections");
+    } catch (error: any) {
+      console.error("Quick create error:", error);
+      toast.error(error.message || "Failed to create draft");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1229,15 +1256,18 @@ export function UnifiedExperience2Form({
             {currentExperienceId ? (
               <IncludesManager2 experienceId={currentExperienceId} />
             ) : (
-              <div className="text-center py-6 text-muted-foreground space-y-2">
-                <p className="text-sm">Save this experience first (Draft or Publish) to manage What's Included items.</p>
+              <div className="text-center py-6 space-y-3">
+                <p className="text-sm text-muted-foreground">Create a draft first to manage What's Included items.</p>
+                <Button type="button" variant="outline" size="sm" onClick={quickCreateDraft} disabled={isSaving}>
+                  {isSaving ? "Creating…" : "Create Draft Now"}
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Highlight Tags (badges on cards) */}
-        <HighlightTagsSelector2 experienceId={currentExperienceId} />
+        <HighlightTagsSelector2 experienceId={currentExperienceId} onQuickCreate={quickCreateDraft} isCreating={isSaving} />
 
         {/* Reviews */}
         {currentExperienceId && (
