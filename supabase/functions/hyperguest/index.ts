@@ -1,4 +1,10 @@
-// HyperGuest API Edge Function v4
+// HyperGuest API Edge Function v5
+// B3: isTest driven by ENVIRONMENT secret
+// S2: JWT auth for mutative actions
+// B1: Proper pre-book format
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -8,6 +14,9 @@ const corsHeaders = {
 const SEARCH_DOMAIN = 'https://search-api.hyperguest.io/2.0/';
 const BOOKING_DOMAIN = 'https://book-api.hyperguest.io/2.0/';
 const STATIC_DOMAIN = 'https://hg-static.hyperguest.com/';
+
+// ✅ S2 FIX: Actions that require user authentication
+const PROTECTED_ACTIONS = ['create-booking', 'pre-book', 'cancel-booking', 'list-bookings', 'get-booking'];
 
 interface SearchParams {
   checkIn: string;
@@ -36,6 +45,53 @@ interface BookingData {
   customerNationality?: string;
   currency?: string;
   isTest?: boolean;
+}
+
+// ✅ B1 FIX: Dedicated interface for pre-book (HyperGuest format)
+interface PreBookData {
+  search: {
+    dates: { from: string; to: string };
+    propertyId: number;
+    nationality?: string;
+    pax: Array<{ adults: number; children: number[] }>;
+  };
+  rooms: Array<{
+    roomCode?: string;
+    roomId?: number;
+    rateCode?: string;
+    ratePlanId?: number;
+    expectedPrice: { amount: number; currency: string };
+  }>;
+}
+
+// ✅ S2 FIX: Verify Supabase auth for protected actions
+async function verifyAuth(req: Request, action: string): Promise<{ authenticated: boolean; userId?: string; error?: string }> {
+  if (!PROTECTED_ACTIONS.includes(action)) {
+    return { authenticated: true };
+  }
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return { authenticated: false, error: 'Missing or invalid Authorization header' };
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return { authenticated: false, error: 'Invalid or expired token' };
+    }
+
+    return { authenticated: true, userId: user.id };
+  } catch (err) {
+    console.error('❌ Auth verification failed:', err);
+    return { authenticated: false, error: 'Auth verification failed' };
+  }
 }
 
 // Validate search parameters
@@ -122,16 +178,16 @@ async function searchHotels(params: SearchParams) {
   return data;
 }
 
-// Pre-book (verification before booking)
-async function preBook(bookingData: BookingData) {
-  console.log('📋 Pre-booking for property:', bookingData.propertyId);
+// ✅ B1 FIX: Pre-book with correct HyperGuest format
+async function preBook(preBookData: PreBookData) {
+  console.log('📋 Pre-booking for property:', preBookData.search.propertyId);
   
   const url = `${BOOKING_DOMAIN}booking/pre-book`;
   
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify(bookingData),
+    body: JSON.stringify(preBookData),
   });
   
   if (!response.ok) {
@@ -141,20 +197,28 @@ async function preBook(bookingData: BookingData) {
   }
   
   const data = await response.json();
-  console.log('✅ Pre-book successful, id:', data.id || data.content?.id);
+  console.log('✅ Pre-book successful');
   return data.content || data;
 }
 
 // Create booking
 async function createBooking(bookingData: BookingData) {
-  console.log('🎫 Creating booking for property:', bookingData.propertyId, 'isTest:', bookingData.isTest || false);
+  // ✅ B3 FIX: Force isTest based on environment — never trust frontend
+  const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
+  const safeBookingData = {
+    ...bookingData,
+    isTest: !isProduction,
+  };
+
+  console.log('🎫 Creating booking for property:', safeBookingData.propertyId,
+    'isTest:', safeBookingData.isTest, 'env:', isProduction ? 'PROD' : 'DEV/STAGING');
   
   const url = `${BOOKING_DOMAIN}booking/create`;
   
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify(bookingData),
+    body: JSON.stringify(safeBookingData),
   });
   
   if (!response.ok) {
@@ -256,7 +320,6 @@ async function getAllHotels(countryCode?: string) {
   console.log('📡 Static API URL:', url);
   
   const headers = getAuthHeaders();
-  console.log('🔑 Using auth headers');
   
   const response = await fetch(url, {
     method: 'GET',
@@ -289,7 +352,6 @@ async function getAllHotels(countryCode?: string) {
   if (Array.isArray(data) && data.length > 0) {
     const firstHotel = data[0];
     console.log('📋 First hotel keys:', JSON.stringify(Object.keys(firstHotel)));
-    console.log('📋 Sample hotel:', JSON.stringify(firstHotel).substring(0, 400));
   }
   
   if (countryCode && Array.isArray(data)) {
@@ -372,6 +434,24 @@ Deno.serve(async (req) => {
     const action = url.searchParams.get('action');
     
     console.log('🚀 HyperGuest API request:', action, 'method:', req.method);
+
+    // ✅ S2 FIX: Verify auth for protected actions
+    if (action) {
+      const auth = await verifyAuth(req, action);
+      if (!auth.authenticated) {
+        console.error('🔒 Auth failed for action:', action, auth.error);
+        return new Response(JSON.stringify({
+          success: false,
+          error: `Authentication required: ${auth.error}`
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (auth.userId) {
+        console.log('🔓 Authenticated user:', auth.userId, 'for action:', action);
+      }
+    }
     
     // Parse body only for POST with actual content
     let body: Record<string, unknown> = {};
@@ -401,7 +481,7 @@ Deno.serve(async (req) => {
         break;
       
       case 'pre-book':
-        result = await preBook(body as unknown as BookingData);
+        result = await preBook(body as unknown as PreBookData);
         break;
       
       case 'create-booking':

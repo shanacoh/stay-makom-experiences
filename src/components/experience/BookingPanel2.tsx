@@ -2,6 +2,8 @@
  * BookingPanel V2 – Hybrid: predefined dates + free calendar
  * Fetches real-time prices/rooms from HyperGuest
  * Max 30 nights (API limit SN.400)
+ * ✅ B1: Pre-book before booking + price change detection
+ * ✅ V4: Property remarks display
  */
 
 import { useState, useMemo, useEffect } from "react";
@@ -20,7 +22,7 @@ import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
-import { formatGuests, calculateNights } from "@/services/hyperguest";
+import { formatGuests, calculateNights, preBook } from "@/services/hyperguest";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -69,6 +71,9 @@ export function BookingPanel2({
       pickDates: "Choose your dates",
       orPickOwn: "Or choose your own dates",
       orSeeSuggested: "See suggested dates",
+      verifying: "Verifying price...",
+      importantNotices: "Important notices",
+      priceChanged: "Price has changed",
     },
     he: {
       title: "הזמן חוויה זו",
@@ -83,6 +88,9 @@ export function BookingPanel2({
       pickDates: "בחר תאריכים",
       orPickOwn: "או בחר תאריכים משלך",
       orSeeSuggested: "ראה תאריכים מוצעים",
+      verifying: "בודק מחיר...",
+      importantNotices: "הערות חשובות",
+      priceChanged: "המחיר השתנה",
     },
     fr: {
       title: "Réserver cette expérience",
@@ -97,6 +105,9 @@ export function BookingPanel2({
       pickDates: "Choisir vos dates",
       orPickOwn: "Ou choisissez vos propres dates",
       orSeeSuggested: "Voir les dates suggérées",
+      verifying: "Vérification du prix...",
+      importantNotices: "Remarques importantes",
+      priceChanged: "Le prix a changé",
     },
   }[lang];
 
@@ -123,7 +134,7 @@ export function BookingPanel2({
   const [adults, setAdults] = useState(minParty);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
-  
+  const [isBooking, setIsBooking] = useState(false);
 
   // Default to free mode if no predefined dates
   useEffect(() => {
@@ -174,6 +185,18 @@ export function BookingPanel2({
     return room?.ratePlans?.find((rp: any) => rp.ratePlanId === selectedRatePlanId) || null;
   }, [searchResult, selectedRoomId, selectedRatePlanId]);
 
+  // ✅ V4 FIX: Extract property-level remarks from search result
+  const propertyRemarks = useMemo(() => {
+    if (!searchResult) return [];
+    if (searchResult.results && searchResult.results.length > 0) {
+      return searchResult.results[0]?.remarks || [];
+    }
+    if ((searchResult as any).remarks) {
+      return (searchResult as any).remarks;
+    }
+    return [];
+  }, [searchResult]);
+
   const nights = searchParams?.nights || 0;
   const ratePlanPrices = selectedRatePlan?.prices || null;
   const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, adults, ratePlanPrices);
@@ -201,9 +224,65 @@ export function BookingPanel2({
     setSelectedRatePlanId(null);
   }, [dateRange.from, dateRange.to]);
 
-  const handleBook = () => {
-    if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId) return;
-    toast.info("Booking flow coming soon!");
+  // ✅ B1 FIX: Pre-book before booking to verify price
+  const handleBook = async () => {
+    if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId || !selectedRatePlan) return;
+
+    setIsBooking(true);
+
+    try {
+      const checkIn = dateRange.from.toISOString().split("T")[0];
+      const checkOut = dateRange.to.toISOString().split("T")[0];
+
+      const preBookData = {
+        search: {
+          dates: { from: checkIn, to: checkOut },
+          propertyId: parseInt(hyperguestPropertyId!),
+          nationality: "IL",
+          pax: [{ adults, children: [] as number[] }],
+        },
+        rooms: [{
+          roomId: selectedRoomId,
+          ratePlanId: selectedRatePlanId,
+          expectedPrice: {
+            amount: selectedRatePlan.payment?.chargeAmount?.price
+                    ?? selectedRatePlan.prices?.sell?.price
+                    ?? selectedRatePlan.prices?.sell?.amount
+                    ?? 0,
+            currency: selectedRatePlan.payment?.chargeAmount?.currency
+                      ?? selectedRatePlan.prices?.sell?.currency
+                      ?? "EUR",
+          },
+        }],
+      };
+
+      const preBookResult = await preBook(preBookData);
+
+      // Detect price change
+      const roomResult = preBookResult.rooms?.[0];
+      if (roomResult?.priceChange) {
+        const { fromAmount, toAmount } = roomResult.priceChange;
+        const priceDiff = toAmount.amount - fromAmount.amount;
+        const priceDiffPercent = Math.round((priceDiff / fromAmount.amount) * 100);
+
+        toast.warning(
+          `${t.priceChanged}: ${fromAmount.amount} ${fromAmount.currency} → ${toAmount.amount} ${toAmount.currency} (${priceDiff > 0 ? '+' : ''}${priceDiffPercent}%)`,
+          { duration: 8000 }
+        );
+
+        setIsBooking(false);
+        return;
+      }
+
+      // Price OK — booking flow to be completed
+      toast.info("Pre-book validated! Full booking flow coming soon.");
+
+    } catch (error) {
+      console.error("Pre-book/Booking error:", error);
+      toast.error(t.error);
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   const isReadyToBook = dateRange.from && dateRange.to && selectedRoomId && selectedRatePlanId && priceBreakdown;
@@ -366,12 +445,32 @@ export function BookingPanel2({
           </Alert>
         )}
 
-        <Button className="w-full" size="lg" disabled={!isReadyToBook || totalIsNaN} onClick={handleBook}>
-          {isReadyToBook && !totalIsNaN
-            ? <span className="flex items-center gap-2">
-                {t.book} - <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
-              </span>
-            : t.selectDates}
+        {/* ✅ V4 FIX: Property-level remarks */}
+        {propertyRemarks.length > 0 && (
+          <div className="space-y-2 p-3 rounded-md bg-muted/50 border border-border">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              {t.importantNotices}
+            </div>
+            {propertyRemarks.map((remark: string, idx: number) => (
+              <p key={idx} className="text-xs text-muted-foreground leading-relaxed pl-6">{remark}</p>
+            ))}
+          </div>
+        )}
+
+        <Button
+          className="w-full"
+          size="lg"
+          disabled={!isReadyToBook || totalIsNaN || isBooking}
+          onClick={handleBook}
+        >
+          {isBooking
+            ? t.verifying
+            : isReadyToBook && !totalIsNaN
+              ? <span className="flex items-center gap-2">
+                  {t.book} - <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
+                </span>
+              : t.selectDates}
         </Button>
 
         {/* VAT info notice */}
