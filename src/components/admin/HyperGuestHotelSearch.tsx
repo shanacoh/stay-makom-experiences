@@ -417,22 +417,25 @@ export function HyperGuestHotelSearch({
           <SelectTrigger className="w-full">
             <SelectValue placeholder="All cities" />
           </SelectTrigger>
-          <SelectContent className="max-h-[300px]">
-            <div className="px-2 pb-2 sticky top-0 bg-popover">
+          <SelectContent className="max-h-[340px] overflow-hidden">
+            <div className="px-2 py-2 border-b bg-popover">
               <Input
                 placeholder="Search city..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
                 className="h-8 text-sm"
               />
             </div>
-            <SelectItem value="all">All cities ({hotels?.length || 0} hotels)</SelectItem>
-            {uniqueCities
-              .filter((city) => !searchTerm.trim() || city.toLowerCase().includes(searchTerm.toLowerCase()))
-              .map((city) => (
-                <SelectItem key={city} value={city}>{city}</SelectItem>
-              ))}
+            <div className="max-h-[280px] overflow-y-auto">
+              <SelectItem value="all">All cities ({hotels?.length || 0} hotels)</SelectItem>
+              {uniqueCities
+                .filter((city) => !searchTerm.trim() || city.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((city) => (
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                ))}
+            </div>
           </SelectContent>
         </Select>
       </div>
