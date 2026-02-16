@@ -15,9 +15,11 @@ import {
 
 interface HighlightTagsSelector2Props {
   experienceId?: string;
+  onQuickCreate?: () => void;
+  isCreating?: boolean;
 }
 
-export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2Props) {
+export function HighlightTagsSelector2({ experienceId, onQuickCreate, isCreating }: HighlightTagsSelector2Props) {
   const queryClient = useQueryClient();
   const [showCustomDialog, setShowCustomDialog] = useState(false);
   const [customLabelEn, setCustomLabelEn] = useState("");
@@ -119,8 +121,13 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
           <CardDescription>Select tags that will appear as badges on the experience card</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-6 text-muted-foreground">
-            <p className="text-sm">Save this experience first (Draft or Publish) to manage highlight tags.</p>
+          <div className="text-center py-6 space-y-3">
+            <p className="text-sm text-muted-foreground">Create a draft first to manage highlight tags.</p>
+            {onQuickCreate && (
+              <Button type="button" variant="outline" size="sm" onClick={onQuickCreate} disabled={isCreating}>
+                {isCreating ? "Creating…" : "Create Draft Now"}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
