@@ -1,6 +1,7 @@
 /**
  * Composant pour afficher et sélectionner les chambres HyperGuest
  * API HyperGuest : prices.sell / prices.net utilisent "price" (pas "amount")
+ * ✅ V4 FIX: Affichage des remarks par rate plan
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Check } from "lucide-react";
+import { Users, Check, Info } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ interface RoomRatePlan {
   ratePlanId: number;
   ratePlanName: string;
   board: string;
+  remarks?: string[]; // ✅ V4 FIX
   prices?: {
     sell?: { price?: number; amount?: number; currency?: string };
     net?: { price?: number; amount?: number; currency?: string };
@@ -27,6 +29,7 @@ interface Room {
   roomId: number;
   roomName: string;
   ratePlans: RoomRatePlan[];
+  remarks?: string[]; // ✅ V4 FIX
   settings?: { maxAdultsNumber?: number; maxChildrenNumber?: number };
 }
 
@@ -160,40 +163,53 @@ export function RoomOptionsV2({
                 const isSelected = selectedRoomId === room.roomId && selectedRatePlanId === ratePlan.ratePlanId;
 
                 return (
-                  <Label
-                    key={ratePlan.ratePlanId}
-                    htmlFor={`${room.roomId}-${ratePlan.ratePlanId}`}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors",
-                      isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem
-                        value={`${room.roomId}-${ratePlan.ratePlanId}`}
-                        id={`${room.roomId}-${ratePlan.ratePlanId}`}
-                      />
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{ratePlan.ratePlanName}</p>
-                        <div className="flex flex-wrap gap-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {getBoardTypeLabel(ratePlan.board)}
-                          </Badge>
-                          {ratePlan.cancellationPolicy?.type === "FREE_CANCELLATION" && (
-                            <Badge variant="outline" className="text-xs text-green-600 border-green-600">
-                              <Check className="h-3 w-3 mr-1" />
-                              {t.freeCancellation}
+                  <div key={ratePlan.ratePlanId} className="space-y-1">
+                    <Label
+                      htmlFor={`${room.roomId}-${ratePlan.ratePlanId}`}
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors",
+                        isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem
+                          value={`${room.roomId}-${ratePlan.ratePlanId}`}
+                          id={`${room.roomId}-${ratePlan.ratePlanId}`}
+                        />
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">{ratePlan.ratePlanName}</p>
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {getBoardTypeLabel(ratePlan.board)}
                             </Badge>
-                          )}
+                            {ratePlan.cancellationPolicy?.type === "FREE_CANCELLATION" && (
+                              <Badge variant="outline" className="text-xs text-green-600 border-green-600">
+                                <Check className="h-3 w-3 mr-1" />
+                                {t.freeCancellation}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="text-right">
-                      <p className="font-semibold">{amount > 0 ? formatPrice(amount, currency) : "N/A"}</p>
-                      {priceObj && <p className="text-xs text-muted-foreground">{t.totalStay}</p>}
-                    </div>
-                  </Label>
+                      <div className="text-right">
+                        <p className="font-semibold">{amount > 0 ? formatPrice(amount, currency) : "N/A"}</p>
+                        {priceObj && <p className="text-xs text-muted-foreground">{t.totalStay}</p>}
+                      </div>
+                    </Label>
+
+                    {/* ✅ V4 FIX: Display rate plan remarks */}
+                    {ratePlan.remarks && ratePlan.remarks.length > 0 && (
+                      <div className="ml-8 space-y-1 px-3 py-2 rounded-md bg-muted/50 border border-border">
+                        {ratePlan.remarks.map((remark, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <Info className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                            <p className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </CardContent>

@@ -13,6 +13,7 @@ import {
   getBoardTypeLabel as modelGetBoardTypeLabel,
   BOARD_LABELS,
 } from '@/models/hyperguest';
+import { supabase } from '@/integrations/supabase/client';
 
 // Re-export utilities from models
 export const formatGuests = modelFormatGuests;
@@ -134,6 +135,38 @@ export interface HyperGuestCancelOptions {
   simulation?: boolean;
 }
 
+// ✅ B1 FIX: Dedicated pre-book types matching HyperGuest API format
+export interface HyperGuestPreBookData {
+  search: {
+    dates: { from: string; to: string };
+    propertyId: number;
+    nationality?: string;
+    pax: Array<{ adults: number; children: number[] }>;
+  };
+  rooms: Array<{
+    roomId: number;
+    ratePlanId: number;
+    expectedPrice: { amount: number; currency: string };
+  }>;
+}
+
+export interface HyperGuestPreBookResponse {
+  paymentOptions?: Array<{
+    type: string;
+    paymentAmount: { amount: number; currency: string };
+  }>;
+  rooms?: Array<{
+    prices: any;
+    cancellationPolicies: any[];
+    remarks?: string[];
+    priceChange?: {
+      fromAmount: { amount: number; currency: string };
+      toAmount: { amount: number; currency: string };
+    };
+    [key: string]: any;
+  }>;
+}
+
 // =====================
 // API CLIENT
 // =====================
@@ -149,8 +182,15 @@ const getSupabaseConfig = () => {
   return { supabaseUrl, supabaseKey };
 };
 
+// ✅ S2 FIX: Get user session token for protected actions, fallback to anon key
+async function getAuthToken(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+}
+
 async function callHyperGuestGet<T>(action: string, queryParams: Record<string, string> = {}): Promise<T> {
-  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+  const { supabaseUrl } = getSupabaseConfig();
+  const token = await getAuthToken();
   
   const searchParams = new URLSearchParams({ action, ...queryParams });
   
@@ -159,7 +199,7 @@ async function callHyperGuestGet<T>(action: string, queryParams: Record<string, 
     {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     }
@@ -179,14 +219,15 @@ async function callHyperGuestGet<T>(action: string, queryParams: Record<string, 
 }
 
 async function callHyperGuestPost<T>(action: string, body: Record<string, any> = {}): Promise<T> {
-  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+  const { supabaseUrl } = getSupabaseConfig();
+  const token = await getAuthToken();
   
   const response = await fetch(
     `${supabaseUrl}/functions/v1/hyperguest?action=${action}`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
@@ -240,8 +281,9 @@ export async function getPropertyAvailability(
 // BOOKING API
 // =====================
 
-export async function preBook(bookingData: HyperGuestBookingData): Promise<HyperGuestBookingResponse> {
-  return callHyperGuestPost('pre-book', bookingData);
+// ✅ B1 FIX: Pre-book with proper HyperGuest format
+export async function preBook(preBookData: HyperGuestPreBookData): Promise<HyperGuestPreBookResponse> {
+  return callHyperGuestPost('pre-book', preBookData);
 }
 
 export async function createBooking(bookingData: HyperGuestBookingData): Promise<HyperGuestBookingResponse> {
