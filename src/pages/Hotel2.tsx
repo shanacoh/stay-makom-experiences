@@ -313,23 +313,18 @@ const Hotel2 = () => {
                 return null;
               })()}
 
-              {/* Policies & Conditions */}
-              {(hotel.cancellation_policy || hotel.extra_conditions || hotel.min_stay || hotel.max_stay) && (
+              {/* Cancellation Policy */}
+              {(hotel.cancellation_policy || hotel.min_stay || hotel.max_stay) && (
                 <div>
                   <h2 className="font-sans text-3xl font-bold mb-6">
-                    {lang === "he" ? "תנאים ומדיניות" : lang === "fr" ? "Conditions et politiques" : "Policies & Conditions"}
+                    {lang === "he" ? "מדיניות ביטול" : lang === "fr" ? "Politique d'annulation" : "Cancellation Policy"}
                   </h2>
                   <div className="space-y-4">
                     {hotel.cancellation_policy && (
                       <div className="p-4 rounded-lg border bg-muted/30">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-primary" />
-                          {lang === "he" ? "מדיניות ביטול" : lang === "fr" ? "Politique d'annulation" : "Cancellation Policy"}
-                        </h3>
                         <p className="text-muted-foreground whitespace-pre-line">{hotel.cancellation_policy}</p>
                       </div>
                     )}
-
                     {(hotel.min_stay || hotel.max_stay) && (
                       <div className="p-4 rounded-lg border bg-muted/30">
                         <h3 className="font-semibold mb-2">
@@ -353,15 +348,18 @@ const Hotel2 = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
 
-                    {hotel.extra_conditions && (
-                      <div className="p-4 rounded-lg border bg-amber-50 border-amber-200">
-                        <h3 className="font-semibold mb-2 text-amber-800">
-                          {lang === "he" ? "הערות חשובות" : lang === "fr" ? "Remarques importantes" : "Important Notices"}
-                        </h3>
-                        <p className="text-amber-700 whitespace-pre-line text-sm">{hotel.extra_conditions}</p>
-                      </div>
-                    )}
+              {/* General Conditions / Remarks */}
+              {hotel.extra_conditions && (
+                <div>
+                  <h2 className="font-sans text-3xl font-bold mb-6">
+                    {lang === "he" ? "תנאים כלליים / הערות" : lang === "fr" ? "Conditions générales / remarques" : "General Conditions / Remarks"}
+                  </h2>
+                  <div className="p-4 rounded-lg border bg-amber-50 border-amber-200">
+                    <p className="text-amber-700 whitespace-pre-line text-sm">{hotel.extra_conditions}</p>
                   </div>
                 </div>
               )}
