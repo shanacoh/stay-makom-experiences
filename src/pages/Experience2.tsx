@@ -6,6 +6,8 @@
 import { useRef, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { BookingPanel2 } from "@/components/experience/BookingPanel2";
 import HeroSection from "@/components/experience-test/HeroSection";
 import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
@@ -24,7 +26,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SEOHead } from "@/components/SEOHead";
-import { MapPin, Moon } from "lucide-react";
+import { MapPin, Moon, icons } from "lucide-react";
 
 export default function Experience2() {
   const { slug } = useParams<{ slug: string }>();
@@ -120,6 +122,23 @@ export default function Experience2() {
     }
     return [];
   }, [hasMultiHotel, parcoursHotels, legacyHotel]);
+
+  // ---------------------------------------------------------------------------
+  // Highlight tags
+  // ---------------------------------------------------------------------------
+
+  const { data: highlightTags } = useQuery({
+    queryKey: ["experience2-highlight-tags-public", experience?.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("experience2_highlight_tags")
+        .select("tag_id, highlight_tags(*)")
+        .eq("experience_id", experience!.id);
+      if (error) throw error;
+      return (data || []).map((eht: any) => eht.highlight_tags).filter(Boolean);
+    },
+    enabled: !!experience?.id,
+  });
 
   // ---------------------------------------------------------------------------
   // Loading state
@@ -395,6 +414,25 @@ export default function Experience2() {
           <div className="space-y-12">
             {/* Journey Overview (multi-hotel) */}
             {renderJourneyOverview()}
+
+            {/* Highlight Tags */}
+            {highlightTags && highlightTags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {highlightTags.map((tag: any) => {
+                  const IconComponent = tag.icon ? (icons as any)[tag.icon] : null;
+                  const label = lang === "he" ? tag.label_he || tag.label_en : tag.label_en;
+                  return (
+                    <span
+                      key={tag.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-sm font-medium"
+                    >
+                      {IconComponent && <IconComponent className="h-3.5 w-3.5" />}
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
 
             {includesData.length > 0 && (
               <ProgramTimeline
