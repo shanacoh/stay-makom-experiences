@@ -296,25 +296,27 @@ export default function ExperienceCard({
             </div>
           )}
 
-          {/* Line 4: Price */}
-          <div className="flex items-baseline gap-1 pt-0.5">
-            <span className="font-bold text-sm">
-              {currencySymbol}{displayPrice}
-            </span>
-            <span className="text-[10px] text-muted-foreground">
-              / {lang === 'he' ? 'לילה' : 'night'}
-            </span>
-            {originalPrice && originalPrice > displayPrice && (
-              <span className="text-[10px] text-muted-foreground line-through">
-                {currencySymbol}{originalPrice}
+          {/* Line 4: Price (hidden if 0) */}
+          {displayPrice > 0 && (
+            <div className="flex items-baseline gap-1 pt-0.5">
+              <span className="font-bold text-sm">
+                {currencySymbol}{displayPrice}
               </span>
-            )}
-            {discountPercent && (
-              <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded">
-                -{discountPercent} %
+              <span className="text-[10px] text-muted-foreground">
+                / {lang === 'he' ? 'לילה' : 'night'}
               </span>
-            )}
-          </div>
+              {originalPrice && originalPrice > displayPrice && (
+                <span className="text-[10px] text-muted-foreground line-through">
+                  {currencySymbol}{originalPrice}
+                </span>
+              )}
+              {discountPercent && (
+                <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded">
+                  -{discountPercent} %
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </Link>
     </>
