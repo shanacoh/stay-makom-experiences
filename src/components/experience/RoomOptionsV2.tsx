@@ -13,16 +13,26 @@ import { Users, Check, Info } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
 
+interface CancellationPolicy {
+  type?: string;
+  description?: string;
+  deadline?: string;
+  penaltyAmount?: number;
+  penaltyCurrency?: string;
+  penaltyNights?: number;
+}
+
 interface RoomRatePlan {
   ratePlanId: number;
   ratePlanName: string;
   board: string;
-  remarks?: string[]; // ✅ V4 FIX
+  remarks?: string[];
   prices?: {
     sell?: { price?: number; amount?: number; currency?: string };
     net?: { price?: number; amount?: number; currency?: string };
   };
-  cancellationPolicy?: { type?: string };
+  cancellationPolicy?: CancellationPolicy;
+  cancellationPolicies?: CancellationPolicy[];
 }
 
 interface Room {
@@ -188,6 +198,11 @@ export function RoomOptionsV2({
                                 {t.freeCancellation}
                               </Badge>
                             )}
+                            {ratePlan.cancellationPolicy?.type && ratePlan.cancellationPolicy.type !== "FREE_CANCELLATION" && (
+                              <Badge variant="outline" className="text-xs">
+                                {t.cancellationTerms}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -205,6 +220,20 @@ export function RoomOptionsV2({
                           <div key={idx} className="flex items-start gap-2">
                             <Info className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
                             <p className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Cancellation policy details */}
+                    {ratePlan.cancellationPolicies && ratePlan.cancellationPolicies.length > 0 && (
+                      <div className="ml-8 space-y-1 px-3 py-2 rounded-md bg-muted/30 border border-border text-xs">
+                        {ratePlan.cancellationPolicies.map((cp, idx) => (
+                          <div key={idx} className="text-muted-foreground">
+                            {cp.deadline && <span>Deadline: {new Date(cp.deadline).toLocaleDateString()} · </span>}
+                            {cp.penaltyAmount != null && <span>Penalty: {cp.penaltyAmount} {cp.penaltyCurrency || ''} · </span>}
+                            {cp.penaltyNights != null && <span>{cp.penaltyNights} night(s) penalty · </span>}
+                            {cp.description && <span>{cp.description}</span>}
                           </div>
                         ))}
                       </div>
