@@ -4,10 +4,11 @@
  * Max 30 nights (API limit SN.400)
  * ✅ B1: Pre-book before booking + price change detection
  * ✅ V4: Property remarks display
+ * ✅ V5: Optional hotel extras (Spice it up) affecting total price
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { Users, AlertCircle, CalendarDays, ChevronRight, Info } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, ChevronRight, Info, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,15 @@ interface DateOption {
   featured: boolean;
 }
 
+interface SelectedExtra {
+  id: string;
+  name: string;
+  name_he: string | null;
+  price: number;
+  currency: string;
+  pricing_type: string;
+}
+
 interface BookingPanel2Props {
   experienceId: string;
   hotelId: string;
@@ -46,6 +56,7 @@ interface BookingPanel2Props {
   minParty?: number;
   maxParty?: number;
   lang?: "en" | "he" | "fr";
+  selectedExtras?: SelectedExtra[];
 }
 
 export function BookingPanel2({
@@ -56,6 +67,7 @@ export function BookingPanel2({
   minParty = 2,
   maxParty = 4,
   lang = "en",
+  selectedExtras = [],
 }: BookingPanel2Props) {
   const t = {
     en: {
@@ -285,8 +297,18 @@ export function BookingPanel2({
     }
   };
 
+  // Calculate extras total based on pricing type
+  const extrasTotal = useMemo(() => {
+    return selectedExtras.reduce((sum, extra) => {
+      let multiplier = 1;
+      if (extra.pricing_type === "per_guest") multiplier = adults;
+      if (extra.pricing_type === "per_night") multiplier = nights;
+      return sum + extra.price * multiplier;
+    }, 0);
+  }, [selectedExtras, adults, nights]);
+
   const isReadyToBook = dateRange.from && dateRange.to && selectedRoomId && selectedRatePlanId && priceBreakdown;
-  const displayTotal = priceBreakdown?.finalTotal ?? 0;
+  const displayTotal = (priceBreakdown?.finalTotal ?? 0) + extrasTotal;
   const totalIsNaN = Number.isNaN(displayTotal);
 
   if (!hyperguestPropertyId) {
@@ -437,6 +459,34 @@ export function BookingPanel2({
         )}
 
         {searchParams && <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} />}
+
+        {/* ✅ V5: Selected extras summary */}
+        {selectedExtras.length > 0 && (
+          <div className="space-y-2">
+            <Separator />
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Sparkles className="h-4 w-4 text-primary" />
+              {lang === "he" ? "תוספות נבחרות" : lang === "fr" ? "Extras sélectionnés" : "Selected extras"}
+            </div>
+            {selectedExtras.map((extra) => {
+              const name = lang === "he" ? extra.name_he || extra.name : extra.name;
+              let multiplier = 1;
+              if (extra.pricing_type === "per_guest") multiplier = adults;
+              if (extra.pricing_type === "per_night") multiplier = nights;
+              const lineTotal = extra.price * multiplier;
+              return (
+                <div key={extra.id} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{name}</span>
+                  <DualPrice amount={lineTotal} currency={extra.currency} inline className="text-sm" />
+                </div>
+              );
+            })}
+            <div className="flex justify-between text-sm font-medium pt-1 border-t border-border">
+              <span>{lang === "he" ? "סה\"כ תוספות" : lang === "fr" ? "Total extras" : "Extras total"}</span>
+              <DualPrice amount={extrasTotal} currency={currency} inline className="text-sm" />
+            </div>
+          </div>
+        )}
 
         {availabilityError && (
           <Alert variant="destructive">

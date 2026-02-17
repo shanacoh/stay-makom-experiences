@@ -3,7 +3,7 @@
  * Supporte le parcours multi-hôtels via experience2_hotels
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ import LocationMap from "@/components/experience-test/LocationMap";
 import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
 import PracticalInfo from "@/components/experience-test/PracticalInfo";
 import ReviewsGrid2 from "@/components/experience-test/ReviewsGrid2";
-import ExtrasSection2 from "@/components/experience-test/ExtrasSection2";
+import ExtrasSection2, { type SelectedExtra } from "@/components/experience-test/ExtrasSection2";
 import ShareWithFriendsSection from "@/components/experience/ShareWithFriendsSection";
 import OtherExperiences2 from "@/components/experience-test/OtherExperiences2";
 import WhatsIncludedPhotos2 from "@/components/experience-test/WhatsIncludedPhotos2";
@@ -34,6 +34,15 @@ export default function Experience2() {
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedExtras, setSelectedExtras] = useState<SelectedExtra[]>([]);
+
+  const handleToggleExtra = useCallback((extra: SelectedExtra) => {
+    setSelectedExtras((prev) => {
+      const exists = prev.some((e) => e.id === extra.id);
+      if (exists) return prev.filter((e) => e.id !== extra.id);
+      return [...prev, extra];
+    });
+  }, []);
 
   const t = {
     en: {
@@ -453,6 +462,8 @@ export default function Experience2() {
               experienceId={experience.id}
               lang={lang}
               currency={experience.currency || "ILS"}
+              selectedExtras={selectedExtras}
+              onToggleExtra={handleToggleExtra}
             />
 
             {/* Hotel stay section(s) */}
@@ -491,6 +502,7 @@ export default function Experience2() {
                 minParty={experience.min_party || 2}
                 maxParty={experience.max_party || 4}
                 lang={lang as "en" | "he" | "fr"}
+                selectedExtras={selectedExtras}
               />
             </div>
           </div>
@@ -518,6 +530,7 @@ export default function Experience2() {
             minParty={experience.min_party || 2}
             maxParty={experience.max_party || 4}
             lang={lang as "en" | "he" | "fr"}
+            selectedExtras={selectedExtras}
           />
         </SheetContent>
       </Sheet>

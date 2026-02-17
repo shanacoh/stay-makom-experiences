@@ -23,7 +23,6 @@ import {
 import { Save, Rocket, X, Upload, Loader2, Trash2, ArrowLeft, Plus, ChevronUp, ChevronDown, Star, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/ui/rich-text-editor";
-import NightsRangeSelector from "@/components/experience/NightsRangeSelector";
 import { generateSlug } from "@/lib/utils";
 import { Experience2AddonsManager, type LocalAddonEntry } from "@/components/admin/Experience2AddonsManager";
 import { EXPERIENCE_PRICING_TYPES, COMMISSION_TYPES, TAX_TYPES } from "@/types/experience2_addons";
@@ -34,6 +33,7 @@ import IncludesManager2, { type LocalIncludeEntry } from "@/components/admin/Inc
 import { HighlightTagsSelector2, type LocalTagEntry } from "@/components/admin/HighlightTagsSelector2";
 import ReviewsManager2, { type LocalReviewEntry } from "@/components/admin/ReviewsManager2";
 import DateOptionsManager from "@/components/admin/DateOptionsManager";
+import ExperienceExtrasSelector2 from "@/components/admin/ExperienceExtrasSelector2";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1241,31 +1241,26 @@ export function UnifiedExperience2Form({
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Capacity & Availability */}
+        {/* Spice It Up (Hotel Extras) */}
         {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
-            <CardTitle>Capacity & Availability</CardTitle>
+            <CardTitle>Spice It Up (Extras)</CardTitle>
+            <CardDescription>Select hotel extras that guests can optionally add to their booking</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <NightsRangeSelector
-                minValue={minNights}
-                maxValue={maxNights}
-                onMinChange={(value) => setValue("min_nights", value)}
-                onMaxChange={(value) => setValue("max_nights", value)}
+          <CardContent>
+            {currentExperienceId && experienceHotels.length > 0 ? (
+              <ExperienceExtrasSelector2
+                experienceId={currentExperienceId}
+                hotelIds={experienceHotels.map((h) => h.hotel_id)}
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="min_party">Min Participants *</Label>
-                <Input id="min_party" type="number" min="1" {...register("min_party", { valueAsNumber: true })} />
-              </div>
-              <div>
-                <Label htmlFor="max_party">Max Participants *</Label>
-                <Input id="max_party" type="number" min="1" {...register("max_party", { valueAsNumber: true })} />
-              </div>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic text-center py-4">
+                {experienceHotels.length === 0
+                  ? "Add at least one hotel to the journey first."
+                  : "Available after first save."}
+              </p>
+            )}
           </CardContent>
         </Card>
 
