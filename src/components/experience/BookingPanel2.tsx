@@ -8,7 +8,7 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
+import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
 import { formatGuests, calculateNights, preBook } from "@/services/hyperguest";
 import { toast } from "sonner";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface DateOption {
@@ -152,35 +153,25 @@ export function BookingPanel2({
   const [isBooking, setIsBooking] = useState(false);
   const [specialRequests, setSpecialRequests] = useState("");
 
-  // Generate quick date options for 1/2/3 nights tabs
-  const quickDateOptions = useMemo(() => {
-    if (selectedTab === "pick") return [];
-    const nightsCount = selectedTab as number;
-    const options: Array<{ id: string; checkin: Date; checkout: Date; nights: number }> = [];
-    const today = new Date();
-    // Generate next 5 check-in dates starting from tomorrow
-    for (let i = 1; i <= 5; i++) {
-      const checkin = addDays(today, i);
-      const checkout = addDays(checkin, nightsCount);
-      options.push({
-        id: `quick-${nightsCount}-${i}`,
-        checkin,
-        checkout,
-        nights: nightsCount,
-      });
-    }
-    return options;
-  }, [selectedTab]);
+  // Fetch real availability for 1/2/3 nights tabs
+  const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+  const { data: quickDates, isLoading: isLoadingQuickDates } = useQuickDateAvailability({
+    propertyId: propId,
+    nights: typeof selectedTab === "number" ? selectedTab : 1,
+    adults,
+    currency,
+    enabled: selectedTab !== "pick",
+  });
 
   // When a quick date option is selected, set the dateRange
   useEffect(() => {
-    if (selectedDateOptionId && selectedTab !== "pick") {
-      const opt = quickDateOptions.find((d) => d.id === selectedDateOptionId);
+    if (selectedDateOptionId && selectedTab !== "pick" && quickDates) {
+      const opt = quickDates.find((d) => d.id === selectedDateOptionId);
       if (opt) {
         setDateRange({ from: opt.checkin, to: opt.checkout });
       }
     }
-  }, [selectedDateOptionId, quickDateOptions, selectedTab]);
+  }, [selectedDateOptionId, quickDates, selectedTab]);
 
   // Reset selection when tab changes
   useEffect(() => {
@@ -410,38 +401,61 @@ export function BookingPanel2({
             </button>
           </div>
 
-          {/* Quick date options for 1/2/3 nights */}
+          {/* Quick date options for 1/2/3 nights — real HyperGuest availability */}
           {selectedTab !== "pick" && (
-            <RadioGroup
-              value={selectedDateOptionId ?? ""}
-              onValueChange={(val) => setSelectedDateOptionId(val)}
-              className="space-y-1.5"
-            >
-              {quickDateOptions.map((opt) => (
-                <label
-                  key={opt.id}
-                  className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                    selectedDateOptionId === opt.id
-                      ? "border-primary bg-primary/5 ring-1 ring-primary"
-                      : "border-border hover:border-primary/50"
-                  )}
+            <>
+              {isLoadingQuickDates && (
+                <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {lang === "he" ? "בודק זמינות..." : lang === "fr" ? "Vérification des disponibilités..." : "Checking availability..."}
+                </div>
+              )}
+              {!isLoadingQuickDates && quickDates && quickDates.length === 0 && (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  {lang === "he" ? "אין תאריכים זמינים כרגע" : lang === "fr" ? "Aucune date disponible pour le moment" : "No available dates at the moment"}
+                </p>
+              )}
+              {!isLoadingQuickDates && quickDates && quickDates.length > 0 && (
+                <RadioGroup
+                  value={selectedDateOptionId ?? ""}
+                  onValueChange={(val) => setSelectedDateOptionId(val)}
+                  className="space-y-1.5"
                 >
-                  <RadioGroupItem value={opt.id} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">
-                      {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {opt.nights} {opt.nights === 1
-                        ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
-                        : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
-                      }
-                    </p>
-                  </div>
-                </label>
-              ))}
-            </RadioGroup>
+                  {quickDates.map((opt) => (
+                    <label
+                      key={opt.id}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                        selectedDateOptionId === opt.id
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <RadioGroupItem value={opt.id} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">
+                          {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {opt.nights} {opt.nights === 1
+                            ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
+                            : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
+                          }
+                        </p>
+                      </div>
+                      {opt.cheapestPrice != null && (
+                        <div className="text-right shrink-0">
+                          <DualPrice amount={opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-medium" />
+                          <p className="text-[10px] text-muted-foreground">
+                            {lang === "he" ? "מ-" : lang === "fr" ? "dès" : "from"}
+                          </p>
+                        </div>
+                      )}
+                    </label>
+                  ))}
+                </RadioGroup>
+              )}
+            </>
           )}
 
           {/* Free calendar mode */}
