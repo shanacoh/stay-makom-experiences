@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+// Card removed – parent form wraps this component
 import { Plus, Trash2, GripVertical, Edit2, Save, X, ImageIcon, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -240,122 +240,120 @@ const IncludesManager2 = ({ experienceId, hotelIds = [], localIncludes, onLocalI
   };
 
   return (
-    <Card>
-      <CardContent className="space-y-4 pt-4">
-        <div className="space-y-4">
-          <h4 className="font-medium">Add new item</h4>
-          <div className="flex items-end gap-3">
-            <div className="w-36 flex-shrink-0 space-y-2">
-              <Label className="text-sm font-medium">Image</Label>
-              <div className="flex gap-1">
-                {hasHotels && (
-                  <HotelPhotoPickerDialog
-                    hotelIds={hotelIds}
-                    onSelect={handleHotelPhotoSelect}
-                    trigger={
-                      <Button type="button" variant="outline" size="sm" className="flex-1">
-                        <ImageIcon className="w-4 h-4 mr-1" />
-                        Gallery
-                      </Button>
-                    }
-                  />
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => document.getElementById("new-include2-image")?.click()}
-                >
-                  <Upload className="w-4 h-4 mr-1" />
-                  Upload
+    <div className="space-y-4">
+      <div className="space-y-4">
+        <h4 className="font-medium text-sm">Add new item</h4>
+        <div className="flex items-end gap-3 flex-wrap">
+          <div className="w-36 flex-shrink-0 space-y-2">
+            <Label className="text-sm font-medium">Image</Label>
+            <div className="flex gap-1">
+              {hasHotels && (
+                <HotelPhotoPickerDialog
+                  hotelIds={hotelIds}
+                  onSelect={handleHotelPhotoSelect}
+                  trigger={
+                    <Button type="button" variant="outline" size="sm" className="flex-1">
+                      <ImageIcon className="w-4 h-4 mr-1" />
+                      Gallery
+                    </Button>
+                  }
+                />
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => document.getElementById("new-include2-image")?.click()}
+              >
+                <Upload className="w-4 h-4 mr-1" />
+                Upload
+              </Button>
+              <input id="new-include2-image" type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+            </div>
+            {imagePreview && (
+              <div className="relative">
+                <img src={imagePreview} alt="Preview" className="w-full h-20 object-cover rounded-lg border" referrerPolicy="no-referrer" />
+                <Button type="button" variant="ghost" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background" onClick={() => { setImageFile(null); setImagePreview(null); setNewInclude((p) => ({ ...p, icon_url: "" })); }}>
+                  <X className="w-3 h-3" />
                 </Button>
-                <input id="new-include2-image" type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
               </div>
-              {imagePreview && (
-                <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-full h-20 object-cover rounded-lg border" referrerPolicy="no-referrer" />
-                  <Button type="button" variant="ghost" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background" onClick={() => { setImageFile(null); setImagePreview(null); setNewInclude((p) => ({ ...p, icon_url: "" })); }}>
-                    <X className="w-3 h-3" />
-                  </Button>
+            )}
+          </div>
+          <div className="flex-1 min-w-[120px]">
+            <Label htmlFor="title2">Title EN *</Label>
+            <Input id="title2" placeholder="e.g., Breakfast Included" value={newInclude.title} onChange={(e) => setNewInclude({ ...newInclude, title: e.target.value })} className="mt-1" />
+          </div>
+          <div className="flex-1 min-w-[120px]">
+            <Label htmlFor="title_he2">Title HE (כותרת)</Label>
+            <Input id="title_he2" placeholder="למשל: ארוחת בוקר כלולה" value={newInclude.title_he} onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })} dir="rtl" className="bg-hebrew-input mt-1" />
+          </div>
+          <Button type="button" onClick={handleAdd} disabled={createMutation.isPending || isUploading || !newInclude.title.trim()} className="flex-shrink-0">
+            <Plus className="w-4 h-4 mr-2" />
+            {isUploading ? "Uploading..." : "Add"}
+          </Button>
+        </div>
+      </div>
+
+      {displayItems.length === 0 ? (
+        <p className="text-muted-foreground text-center py-4 text-sm">No items yet</p>
+      ) : (
+        <div className="space-y-2">
+          {displayItems.map((include: any) => (
+            <div key={include.id} className="flex items-start gap-3 p-3 border border-border rounded-lg bg-card">
+              <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1 flex-shrink-0" />
+              {editingId === include.id && !isLocalMode ? (
+                <div className="flex-1 flex items-center gap-3 flex-wrap">
+                  <div className="w-24 flex-shrink-0 space-y-1">
+                    <div className="flex gap-1">
+                      {hasHotels && (
+                        <HotelPhotoPickerDialog
+                          hotelIds={hotelIds}
+                          onSelect={handleEditHotelPhotoSelect}
+                          trigger={
+                            <Button type="button" variant="outline" size="icon" className="h-8 w-8">
+                              <ImageIcon className="w-4 h-4" />
+                            </Button>
+                          }
+                        />
+                      )}
+                      <Button type="button" variant="outline" size="icon" className="h-8 w-8" onClick={() => document.getElementById(`edit-image2-${include.id}`)?.click()}>
+                        <Upload className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <input id={`edit-image2-${include.id}`} type="file" accept="image/*" onChange={handleEditImageSelect} className="hidden" />
+                    {editImagePreview && <img src={editImagePreview} alt="Preview" className="w-full h-16 object-cover rounded-lg border" referrerPolicy="no-referrer" />}
+                  </div>
+                  <Input value={editData.title} onChange={(e) => setEditData({ ...editData, title: e.target.value })} placeholder="Title EN" className="flex-1 min-w-[100px]" />
+                  <Input value={editData.title_he} onChange={(e) => setEditData({ ...editData, title_he: e.target.value })} placeholder="כותרת HE" dir="rtl" className="bg-hebrew-input flex-1 min-w-[100px]" />
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button type="button" size="sm" onClick={() => saveEdit(include)} disabled={updateMutation.isPending}><Save className="w-4 h-4" /></Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={cancelEditing} disabled={updateMutation.isPending}><X className="w-4 h-4" /></Button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {include.icon_url && <img src={include.icon_url} alt={include.title} className="w-12 h-12 object-cover rounded flex-shrink-0" referrerPolicy="no-referrer" />}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">{include.title}</div>
+                    {include.title_he && <div className="text-xs text-muted-foreground" dir="rtl">{include.title_he}</div>}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {!isLocalMode && (
+                      <>
+                        <Switch checked={include.published} onCheckedChange={() => togglePublishedMutation.mutate({ id: include.id, published: !include.published })} />
+                        <Button type="button" size="icon" variant="ghost" onClick={() => startEditing(include)}><Edit2 className="w-4 h-4" /></Button>
+                      </>
+                    )}
+                    <Button type="button" size="icon" variant="ghost" onClick={() => handleDelete(include.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  </div>
+                </>
               )}
             </div>
-            <div className="flex-1">
-              <Label htmlFor="title2">Title EN *</Label>
-              <Input id="title2" placeholder="e.g., Breakfast Included" value={newInclude.title} onChange={(e) => setNewInclude({ ...newInclude, title: e.target.value })} className="mt-2" />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="title_he2">Title HE (כותרת)</Label>
-              <Input id="title_he2" placeholder="למשל: ארוחת בוקר כלולה" value={newInclude.title_he} onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })} dir="rtl" className="bg-hebrew-input mt-2" />
-            </div>
-            <Button type="button" onClick={handleAdd} disabled={createMutation.isPending || isUploading || !newInclude.title.trim()} className="flex-shrink-0">
-              <Plus className="w-4 h-4 mr-2" />
-              {isUploading ? "Uploading..." : "Add"}
-            </Button>
-          </div>
+          ))}
         </div>
-
-        {displayItems.length === 0 ? (
-          <p className="text-muted-foreground text-center py-4">No items yet</p>
-        ) : (
-          <div className="space-y-2">
-            {displayItems.map((include: any) => (
-              <div key={include.id} className="flex items-start gap-3 p-3 border border-border rounded-lg bg-card">
-                <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1 flex-shrink-0" />
-                {editingId === include.id && !isLocalMode ? (
-                  <div className="flex-1 flex items-center gap-3">
-                    <div className="w-24 flex-shrink-0 space-y-1">
-                      <div className="flex gap-1">
-                        {hasHotels && (
-                          <HotelPhotoPickerDialog
-                            hotelIds={hotelIds}
-                            onSelect={handleEditHotelPhotoSelect}
-                            trigger={
-                              <Button type="button" variant="outline" size="icon" className="h-8 w-8">
-                                <ImageIcon className="w-4 h-4" />
-                              </Button>
-                            }
-                          />
-                        )}
-                        <Button type="button" variant="outline" size="icon" className="h-8 w-8" onClick={() => document.getElementById(`edit-image2-${include.id}`)?.click()}>
-                          <Upload className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <input id={`edit-image2-${include.id}`} type="file" accept="image/*" onChange={handleEditImageSelect} className="hidden" />
-                      {editImagePreview && <img src={editImagePreview} alt="Preview" className="w-full h-16 object-cover rounded-lg border" referrerPolicy="no-referrer" />}
-                    </div>
-                    <Input value={editData.title} onChange={(e) => setEditData({ ...editData, title: e.target.value })} placeholder="Title EN" className="flex-1" />
-                    <Input value={editData.title_he} onChange={(e) => setEditData({ ...editData, title_he: e.target.value })} placeholder="כותרת HE" dir="rtl" className="bg-hebrew-input flex-1" />
-                    <div className="flex gap-2 flex-shrink-0">
-                      <Button type="button" size="sm" onClick={() => saveEdit(include)} disabled={updateMutation.isPending}><Save className="w-4 h-4" /></Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={cancelEditing} disabled={updateMutation.isPending}><X className="w-4 h-4" /></Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {include.icon_url && <img src={include.icon_url} alt={include.title} className="w-12 h-12 object-cover rounded flex-shrink-0" referrerPolicy="no-referrer" />}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm">{include.title}</div>
-                      {include.title_he && <div className="text-xs text-muted-foreground" dir="rtl">{include.title_he}</div>}
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {!isLocalMode && (
-                        <>
-                          <Switch checked={include.published} onCheckedChange={() => togglePublishedMutation.mutate({ id: include.id, published: !include.published })} />
-                          <Button type="button" size="icon" variant="ghost" onClick={() => startEditing(include)}><Edit2 className="w-4 h-4" /></Button>
-                        </>
-                      )}
-                      <Button type="button" size="icon" variant="ghost" onClick={() => handleDelete(include.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };
 
