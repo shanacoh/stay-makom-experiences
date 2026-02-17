@@ -8,7 +8,7 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { Users, AlertCircle, CalendarDays, ChevronRight, Info, Sparkles, MessageSquare } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
 import { formatGuests, calculateNights, preBook } from "@/services/hyperguest";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface DateOption {
   id: string;
@@ -141,7 +142,8 @@ export function BookingPanel2({
 
   const hasPredefinedDates = (dateOptions ?? []).length > 0;
 
-  const [dateMode, setDateMode] = useState<"suggested" | "free">("suggested");
+  type NightsTab = 1 | 2 | 3 | "pick";
+  const [selectedTab, setSelectedTab] = useState<NightsTab>(1);
   const [selectedDateOptionId, setSelectedDateOptionId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [adults, setAdults] = useState(minParty);
@@ -150,25 +152,43 @@ export function BookingPanel2({
   const [isBooking, setIsBooking] = useState(false);
   const [specialRequests, setSpecialRequests] = useState("");
 
-  // Default to free mode if no predefined dates
-  useEffect(() => {
-    if (dateOptions && !hasPredefinedDates) {
-      setDateMode("free");
+  // Generate quick date options for 1/2/3 nights tabs
+  const quickDateOptions = useMemo(() => {
+    if (selectedTab === "pick") return [];
+    const nightsCount = selectedTab as number;
+    const options: Array<{ id: string; checkin: Date; checkout: Date; nights: number }> = [];
+    const today = new Date();
+    // Generate next 5 check-in dates starting from tomorrow
+    for (let i = 1; i <= 5; i++) {
+      const checkin = addDays(today, i);
+      const checkout = addDays(checkin, nightsCount);
+      options.push({
+        id: `quick-${nightsCount}-${i}`,
+        checkin,
+        checkout,
+        nights: nightsCount,
+      });
     }
-  }, [dateOptions, hasPredefinedDates]);
+    return options;
+  }, [selectedTab]);
 
-  // When a predefined date is selected, set the dateRange
+  // When a quick date option is selected, set the dateRange
   useEffect(() => {
-    if (selectedDateOptionId && dateOptions) {
-      const opt = dateOptions.find((d) => d.id === selectedDateOptionId);
+    if (selectedDateOptionId && selectedTab !== "pick") {
+      const opt = quickDateOptions.find((d) => d.id === selectedDateOptionId);
       if (opt) {
-        setDateRange({
-          from: new Date(opt.checkin + "T00:00:00"),
-          to: new Date(opt.checkout + "T00:00:00"),
-        });
+        setDateRange({ from: opt.checkin, to: opt.checkout });
       }
     }
-  }, [selectedDateOptionId, dateOptions]);
+  }, [selectedDateOptionId, quickDateOptions, selectedTab]);
+
+  // Reset selection when tab changes
+  useEffect(() => {
+    setSelectedDateOptionId(null);
+    setDateRange({});
+    setSelectedRoomId(null);
+    setSelectedRatePlanId(null);
+  }, [selectedTab]);
 
   const MAX_NIGHTS = 30;
 
@@ -354,91 +374,80 @@ export function BookingPanel2({
             {t.dates}
           </div>
 
-          {/* Predefined dates mode */}
-          {hasPredefinedDates && dateMode === "suggested" && (
-            <div className="space-y-3">
-              <RadioGroup
-                value={selectedDateOptionId ?? ""}
-                onValueChange={(val) => setSelectedDateOptionId(val)}
-                className="space-y-2"
-              >
-                {(dateOptions ?? []).map((opt) => {
-                  const checkinDate = new Date(opt.checkin + "T00:00:00");
-                  const checkoutDate = new Date(opt.checkout + "T00:00:00");
-                  const nightsCount = Math.round((checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                  return (
-                    <label
-                      key={opt.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedDateOptionId === opt.id
-                          ? "border-primary bg-primary/5 ring-1 ring-primary"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <RadioGroupItem value={opt.id} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">
-                          {format(checkinDate, "EEE dd MMM")} → {format(checkoutDate, "EEE dd MMM")}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {nightsCount} {nightsCount === 1 ? "night" : "nights"}
-                          {opt.label && ` · ${lang === "he" ? (opt.label_he || opt.label) : opt.label}`}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {opt.original_price != null && (
-                          <span className="text-xs text-muted-foreground line-through">₪{opt.original_price}</span>
-                        )}
-                        {opt.price_override != null && (
-                          <span className="text-sm font-bold">₪{opt.price_override}</span>
-                        )}
-                        {opt.discount_percent != null && (
-                          <Badge variant="destructive" className="text-xs">-{opt.discount_percent}%</Badge>
-                        )}
-                        {opt.featured && (
-                          <Badge variant="secondary" className="text-xs">⚡</Badge>
-                        )}
-                      </div>
-                    </label>
-                  );
-                })}
-              </RadioGroup>
-
+          {/* Nights tabs: 1 night / 2 nights / 3 nights / Pick dates */}
+          <div className="flex gap-1.5">
+            {([1, 2, 3] as const).map((n) => (
               <button
+                key={n}
                 type="button"
-                onClick={() => {
-                  setDateMode("free");
-                  setSelectedDateOptionId(null);
-                  setDateRange({});
-                }}
-                className="flex items-center gap-1 text-sm text-primary hover:underline"
+                onClick={() => setSelectedTab(n)}
+                className={cn(
+                  "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
+                  "hover:border-primary/50",
+                  selectedTab === n
+                    ? "border-primary bg-primary/5 font-medium"
+                    : "border-border"
+                )}
               >
-                {t.orPickOwn}
-                <ChevronRight className="h-3 w-3" />
+                {n} {n === 1
+                  ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
+                  : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
+                }
               </button>
-            </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSelectedTab("pick")}
+              className={cn(
+                "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
+                "hover:border-primary/50",
+                selectedTab === "pick"
+                  ? "border-primary bg-primary/5 font-medium"
+                  : "border-border"
+              )}
+            >
+              {lang === "he" ? "בחר תאריכים" : lang === "fr" ? "Choisir" : "Pick dates"}
+            </button>
+          </div>
+
+          {/* Quick date options for 1/2/3 nights */}
+          {selectedTab !== "pick" && (
+            <RadioGroup
+              value={selectedDateOptionId ?? ""}
+              onValueChange={(val) => setSelectedDateOptionId(val)}
+              className="space-y-1.5"
+            >
+              {quickDateOptions.map((opt) => (
+                <label
+                  key={opt.id}
+                  className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                    selectedDateOptionId === opt.id
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <RadioGroupItem value={opt.id} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">
+                      {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {opt.nights} {opt.nights === 1
+                        ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
+                        : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
+                      }
+                    </p>
+                  </div>
+                </label>
+              ))}
+            </RadioGroup>
           )}
 
           {/* Free calendar mode */}
-          {(dateMode === "free" || !hasPredefinedDates) && (
+          {selectedTab === "pick" && (
             <div className="space-y-3">
               <DateRangePicker value={dateRange} onChange={(range) => setDateRange(range)} />
-
-              {hasPredefinedDates && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDateMode("suggested");
-                    setDateRange({});
-                    setSelectedDateOptionId(null);
-                  }}
-                  className="flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  {t.orSeeSuggested}
-                  <ChevronRight className="h-3 w-3" />
-                </button>
-              )}
             </div>
           )}
         </div>
