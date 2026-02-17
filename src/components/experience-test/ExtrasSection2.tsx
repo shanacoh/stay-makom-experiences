@@ -2,11 +2,13 @@
  * Spice It Up – User-facing interactive extras section
  * Fetches hotel2_extras linked to the experience via experience2_extras
  * Users can toggle extras on/off, affecting the booking price
+ * Limited to max 2 rows (4 items desktop, 2 mobile) with expand toggle
  */
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Check } from "lucide-react";
+import { Sparkles, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { DualPrice } from "@/components/ui/DualPrice";
 
 export interface SelectedExtra {
@@ -33,11 +35,12 @@ const ExtrasSection2 = ({
   selectedExtras,
   onToggleExtra,
 }: ExtrasSection2Props) => {
+  const [expanded, setExpanded] = useState(false);
+
   // Fetch hotel2_extras linked to this experience via experience2_extras
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
-      // Get linked extra IDs
       const { data: links, error: linksError } = await (supabase as any)
         .from("experience2_extras")
         .select("extra_id")
@@ -46,8 +49,6 @@ const ExtrasSection2 = ({
       if (!links || links.length === 0) return [];
 
       const extraIds = links.map((l: any) => l.extra_id);
-
-      // Fetch the actual extras
       const { data, error } = await supabase
         .from("hotel2_extras")
         .select("*")
@@ -72,6 +73,12 @@ const ExtrasSection2 = ({
 
   const sectionTitle = lang === "he" ? "תוספות אופציונליות" : lang === "fr" ? "Personnalisez votre séjour" : "Spice it up";
 
+  // Max 4 items on desktop (2 cols × 2 rows), 2 on mobile (1 col × 2 rows)
+  // We use 4 as the cap since sm:grid-cols-2 is the desktop layout
+  const MAX_VISIBLE = 4;
+  const hasMore = extras.length > MAX_VISIBLE;
+  const visibleExtras = expanded ? extras : extras.slice(0, MAX_VISIBLE);
+
   return (
     <section className="py-6 border-b border-border">
       <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-2">
@@ -86,7 +93,7 @@ const ExtrasSection2 = ({
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {extras.map((extra) => {
+        {visibleExtras.map((extra) => {
           const isSelected = selectedExtras.some((se) => se.id === extra.id);
           const name = lang === "he" ? extra.name_he || extra.name : extra.name;
 
@@ -130,6 +137,19 @@ const ExtrasSection2 = ({
           );
         })}
       </div>
+
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 flex items-center gap-1 text-sm text-primary hover:underline mx-auto"
+        >
+          {expanded
+            ? (lang === "he" ? "הצג פחות" : "Show less")
+            : (lang === "he" ? `עוד ${extras.length - MAX_VISIBLE} תוספות` : `${extras.length - MAX_VISIBLE} more extras`)}
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+      )}
     </section>
   );
 };
