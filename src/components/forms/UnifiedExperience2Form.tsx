@@ -1256,22 +1256,22 @@ export function UnifiedExperience2Form({
             {currentExperienceId ? (
               <IncludesManager2 experienceId={currentExperienceId} hotelIds={experienceHotels.map((h) => h.hotel_id)} />
             ) : (
-              <div className="text-center py-6 space-y-3">
-                <p className="text-sm text-muted-foreground">Create a draft first to manage What's Included items.</p>
-                <Button type="button" variant="outline" size="sm" onClick={quickCreateDraft} disabled={isSaving}>
-                  {isSaving ? "Creating…" : "Create Draft Now"}
-                </Button>
-              </div>
+              <p className="text-sm text-muted-foreground text-center py-4">Available after first save</p>
             )}
           </CardContent>
         </Card>
 
         {/* Highlight Tags (badges on cards) */}
-        <HighlightTagsSelector2 experienceId={currentExperienceId} onQuickCreate={quickCreateDraft} isCreating={isSaving} />
+        <HighlightTagsSelector2 experienceId={currentExperienceId} />
 
         {/* Reviews */}
-        {currentExperienceId && (
+        {currentExperienceId ? (
           <ReviewsManager2 experienceId={currentExperienceId} />
+        ) : (
+          <Card className="opacity-60">
+            <CardHeader><CardTitle>Reviews</CardTitle></CardHeader>
+            <CardContent><p className="text-sm text-muted-foreground text-center py-4">Available after first save</p></CardContent>
+          </Card>
         )}
 
         {/* ----------------------------------------------------------------- */}
