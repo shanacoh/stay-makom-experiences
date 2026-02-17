@@ -30,9 +30,9 @@ import { EXPERIENCE_PRICING_TYPES, COMMISSION_TYPES, TAX_TYPES } from "@/types/e
 import { ExperienceAvailabilityPreview } from "@/components/experience/ExperienceAvailabilityPreview";
 import { Separator } from "@/components/ui/separator";
 import { Tag } from "lucide-react";
-import IncludesManager2 from "@/components/admin/IncludesManager2";
-import { HighlightTagsSelector2 } from "@/components/admin/HighlightTagsSelector2";
-import ReviewsManager2 from "@/components/admin/ReviewsManager2";
+import IncludesManager2, { type LocalIncludeEntry } from "@/components/admin/IncludesManager2";
+import { HighlightTagsSelector2, type LocalTagEntry } from "@/components/admin/HighlightTagsSelector2";
+import ReviewsManager2, { type LocalReviewEntry } from "@/components/admin/ReviewsManager2";
 import DateOptionsManager from "@/components/admin/DateOptionsManager";
 
 // ---------------------------------------------------------------------------
@@ -124,6 +124,10 @@ export function UnifiedExperience2Form({
   const [hotelRoomPrices, setHotelRoomPrices] = useState<Record<string, number | null>>({});
   /** Addons par personne en mode local (avant sauvegarde) */
   const [localAddons, setLocalAddons] = useState<LocalAddonEntry[]>([]);
+  /** Local state for includes/tags/reviews before first save */
+  const [localIncludes, setLocalIncludes] = useState<LocalIncludeEntry[]>([]);
+  const [localTags, setLocalTags] = useState<LocalTagEntry[]>([]);
+  const [localReviews, setLocalReviews] = useState<LocalReviewEntry[]>([]);
 
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
@@ -538,29 +542,44 @@ export function UnifiedExperience2Form({
   };
 
   // -------------------------------------------------------------------------
-  // Quick-create a minimal draft so junction-table sections become available
+  // Save local includes/tags/reviews to DB after experience creation
   // -------------------------------------------------------------------------
 
-  const quickCreateDraft = async () => {
-    if (currentExperienceId) return;
-    setIsSaving(true);
-    try {
-      const title = getValues("title") || "Untitled Experience";
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `exp-${Date.now()}`;
-      const { data: insertedData, error } = await supabase
-        .from("experiences2")
-        .insert([{ title, slug, base_price: 0, status: "draft" as const }])
-        .select("id")
-        .single();
-      if (error) throw error;
-      setCreatedExperienceId(insertedData.id);
-      toast.success("Draft created — you can now manage all sections");
-    } catch (error: any) {
-      console.error("Quick create error:", error);
-      toast.error(error.message || "Failed to create draft");
-    } finally {
-      setIsSaving(false);
-    }
+  const saveLocalIncludes = async (expId: string) => {
+    if (localIncludes.length === 0) return;
+    const rows = localIncludes.map((inc, index) => ({
+      experience_id: expId,
+      title: inc.title,
+      title_he: inc.title_he || null,
+      icon_url: inc.icon_url || null,
+      order_index: index,
+      published: inc.published,
+    }));
+    const { error } = await (supabase as any).from("experience2_includes").insert(rows);
+    if (error) console.error("Error saving includes:", error);
+  };
+
+  const saveLocalTags = async (expId: string) => {
+    if (localTags.length === 0) return;
+    const rows = localTags.map((t) => ({
+      experience_id: expId,
+      tag_id: t.tag_id,
+    }));
+    const { error } = await (supabase as any).from("experience2_highlight_tags").insert(rows);
+    if (error) console.error("Error saving tags:", error);
+  };
+
+  const saveLocalReviews = async (expId: string) => {
+    if (localReviews.length === 0) return;
+    const rows = localReviews.map((r) => ({
+      experience_id: expId,
+      user_name: r.user_name,
+      rating: r.rating,
+      comment: r.comment || null,
+      is_visible: r.is_visible,
+    }));
+    const { error } = await supabase.from("experience2_reviews").insert(rows);
+    if (error) console.error("Error saving reviews:", error);
   };
 
   // -------------------------------------------------------------------------
@@ -587,6 +606,9 @@ export function UnifiedExperience2Form({
         setCreatedExperienceId(insertedData.id);
         await saveExperienceHotels(insertedData.id);
         await saveLocalAddons(insertedData.id);
+        await saveLocalIncludes(insertedData.id);
+        await saveLocalTags(insertedData.id);
+        await saveLocalReviews(insertedData.id);
         toast.success("Draft saved!");
       }
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
@@ -626,6 +648,9 @@ export function UnifiedExperience2Form({
         setCreatedExperienceId(insertedData.id);
         await saveExperienceHotels(insertedData.id);
         await saveLocalAddons(insertedData.id);
+        await saveLocalIncludes(insertedData.id);
+        await saveLocalTags(insertedData.id);
+        await saveLocalReviews(insertedData.id);
         toast.success("Published successfully");
       }
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
@@ -1253,26 +1278,28 @@ export function UnifiedExperience2Form({
             <CardDescription>Manage the items included in this experience</CardDescription>
           </CardHeader>
           <CardContent>
-            {currentExperienceId ? (
-              <IncludesManager2 experienceId={currentExperienceId} hotelIds={experienceHotels.map((h) => h.hotel_id)} />
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">Available after first save</p>
-            )}
+            <IncludesManager2
+              experienceId={currentExperienceId || undefined}
+              hotelIds={experienceHotels.map((h) => h.hotel_id)}
+              localIncludes={!currentExperienceId ? localIncludes : undefined}
+              onLocalIncludesChange={!currentExperienceId ? setLocalIncludes : undefined}
+            />
           </CardContent>
         </Card>
 
         {/* Highlight Tags (badges on cards) */}
-        <HighlightTagsSelector2 experienceId={currentExperienceId} />
+        <HighlightTagsSelector2
+          experienceId={currentExperienceId || undefined}
+          localTags={!currentExperienceId ? localTags : undefined}
+          onLocalTagsChange={!currentExperienceId ? setLocalTags : undefined}
+        />
 
         {/* Reviews */}
-        {currentExperienceId ? (
-          <ReviewsManager2 experienceId={currentExperienceId} />
-        ) : (
-          <Card className="opacity-60">
-            <CardHeader><CardTitle>Reviews</CardTitle></CardHeader>
-            <CardContent><p className="text-sm text-muted-foreground text-center py-4">Available after first save</p></CardContent>
-          </Card>
-        )}
+        <ReviewsManager2
+          experienceId={currentExperienceId || undefined}
+          localReviews={!currentExperienceId ? localReviews : undefined}
+          onLocalReviewsChange={!currentExperienceId ? setLocalReviews : undefined}
+        />
 
         {/* ----------------------------------------------------------------- */}
         {/* Pricing Section — 3 sections */}

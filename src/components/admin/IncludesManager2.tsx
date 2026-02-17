@@ -10,13 +10,27 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import HotelPhotoPickerDialog from "@/components/admin/HotelPhotoPickerDialog";
 
-interface IncludesManager2Props {
-  experienceId: string;
-  hotelIds?: string[];
+export interface LocalIncludeEntry {
+  _localId: string;
+  title: string;
+  title_he: string;
+  icon_url: string;
+  published: boolean;
+  order_index: number;
 }
 
-const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props) => {
+interface IncludesManager2Props {
+  experienceId?: string;
+  hotelIds?: string[];
+  /** Local mode props (used when no experienceId yet) */
+  localIncludes?: LocalIncludeEntry[];
+  onLocalIncludesChange?: (includes: LocalIncludeEntry[]) => void;
+}
+
+const IncludesManager2 = ({ experienceId, hotelIds = [], localIncludes, onLocalIncludesChange }: IncludesManager2Props) => {
   const queryClient = useQueryClient();
+  const isLocalMode = !experienceId;
+
   const [newInclude, setNewInclude] = useState({ title: "", title_he: "", icon_url: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -37,7 +51,11 @@ const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props
       if (error) throw error;
       return data;
     },
+    enabled: !!experienceId,
   });
+
+  // Determine items to display
+  const displayItems: any[] = isLocalMode ? (localIncludes || []).map(li => ({ ...li, id: li._localId })) : (includes || []);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,6 +100,36 @@ const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props
     return data.publicUrl;
   };
 
+  // --- Local mode: add ---
+  const handleLocalAdd = async () => {
+    if (!newInclude.title.trim()) { toast.error("Title is required"); return; }
+    let imageUrl = newInclude.icon_url;
+    if (imageFile) {
+      setIsUploading(true);
+      try { imageUrl = await uploadImage(imageFile); } catch { toast.error("Upload failed"); setIsUploading(false); return; }
+      setIsUploading(false);
+    }
+    const newEntry: LocalIncludeEntry = {
+      _localId: `local-${Date.now()}`,
+      title: newInclude.title,
+      title_he: newInclude.title_he,
+      icon_url: imageUrl,
+      published: true,
+      order_index: (localIncludes?.length || 0),
+    };
+    onLocalIncludesChange?.([...(localIncludes || []), newEntry]);
+    setNewInclude({ title: "", title_he: "", icon_url: "" });
+    setImageFile(null);
+    setImagePreview(null);
+    toast.success("Item added");
+  };
+
+  const handleLocalDelete = (localId: string) => {
+    onLocalIncludesChange?.((localIncludes || []).filter(i => i._localId !== localId));
+    toast.success("Item removed");
+  };
+
+  // --- DB mutations ---
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!newInclude.title.trim()) throw new Error("Title is required");
@@ -177,9 +225,19 @@ const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props
     updateMutation.mutate({ id: include.id });
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (!isLocalMode && isLoading) return <div>Loading...</div>;
 
   const hasHotels = hotelIds.length > 0;
+
+  const handleAdd = () => {
+    if (isLocalMode) handleLocalAdd();
+    else createMutation.mutate();
+  };
+
+  const handleDelete = (id: string) => {
+    if (isLocalMode) handleLocalDelete(id);
+    else deleteMutation.mutate(id);
+  };
 
   return (
     <Card>
@@ -187,7 +245,6 @@ const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props
         <div className="space-y-4">
           <h4 className="font-medium">Add new item</h4>
           <div className="flex items-end gap-3">
-            {/* Image source: gallery picker + file upload */}
             <div className="w-36 flex-shrink-0 space-y-2">
               <Label className="text-sm font-medium">Image</Label>
               <div className="flex gap-1">
@@ -232,21 +289,21 @@ const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props
               <Label htmlFor="title_he2">Title HE (כותרת)</Label>
               <Input id="title_he2" placeholder="למשל: ארוחת בוקר כלולה" value={newInclude.title_he} onChange={(e) => setNewInclude({ ...newInclude, title_he: e.target.value })} dir="rtl" className="bg-hebrew-input mt-2" />
             </div>
-            <Button type="button" onClick={() => createMutation.mutate()} disabled={createMutation.isPending || isUploading || !newInclude.title.trim()} className="flex-shrink-0">
+            <Button type="button" onClick={handleAdd} disabled={createMutation.isPending || isUploading || !newInclude.title.trim()} className="flex-shrink-0">
               <Plus className="w-4 h-4 mr-2" />
               {isUploading ? "Uploading..." : "Add"}
             </Button>
           </div>
         </div>
 
-        {!includes || includes.length === 0 ? (
+        {displayItems.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No items yet</p>
         ) : (
           <div className="space-y-2">
-            {includes.map((include: any) => (
+            {displayItems.map((include: any) => (
               <div key={include.id} className="flex items-start gap-3 p-3 border border-border rounded-lg bg-card">
                 <GripVertical className="w-4 h-4 text-muted-foreground cursor-move mt-1 flex-shrink-0" />
-                {editingId === include.id ? (
+                {editingId === include.id && !isLocalMode ? (
                   <div className="flex-1 flex items-center gap-3">
                     <div className="w-24 flex-shrink-0 space-y-1">
                       <div className="flex gap-1">
@@ -283,9 +340,13 @@ const IncludesManager2 = ({ experienceId, hotelIds = [] }: IncludesManager2Props
                       {include.title_he && <div className="text-xs text-muted-foreground" dir="rtl">{include.title_he}</div>}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <Switch checked={include.published} onCheckedChange={() => togglePublishedMutation.mutate({ id: include.id, published: !include.published })} />
-                      <Button type="button" size="icon" variant="ghost" onClick={() => startEditing(include)}><Edit2 className="w-4 h-4" /></Button>
-                      <Button type="button" size="icon" variant="ghost" onClick={() => deleteMutation.mutate(include.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      {!isLocalMode && (
+                        <>
+                          <Switch checked={include.published} onCheckedChange={() => togglePublishedMutation.mutate({ id: include.id, published: !include.published })} />
+                          <Button type="button" size="icon" variant="ghost" onClick={() => startEditing(include)}><Edit2 className="w-4 h-4" /></Button>
+                        </>
+                      )}
+                      <Button type="button" size="icon" variant="ghost" onClick={() => handleDelete(include.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </>
                 )}
