@@ -729,6 +729,45 @@ export type Database = {
           },
         ]
       }
+      experience2_extras: {
+        Row: {
+          created_at: string | null
+          experience_id: string
+          extra_id: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_id: string
+          extra_id: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_id?: string
+          extra_id?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_extras_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience2_extras_extra_id_fkey"
+            columns: ["extra_id"]
+            isOneToOne: false
+            referencedRelation: "hotel2_extras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experience2_highlight_tags: {
         Row: {
           created_at: string
