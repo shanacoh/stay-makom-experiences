@@ -1254,7 +1254,7 @@ export function UnifiedExperience2Form({
           </CardHeader>
           <CardContent>
             {currentExperienceId ? (
-              <IncludesManager2 experienceId={currentExperienceId} />
+              <IncludesManager2 experienceId={currentExperienceId} hotelIds={experienceHotels.map((h) => h.hotel_id)} />
             ) : (
               <div className="text-center py-6 space-y-3">
                 <p className="text-sm text-muted-foreground">Create a draft first to manage What's Included items.</p>
