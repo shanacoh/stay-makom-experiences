@@ -8,7 +8,7 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { Users, AlertCircle, CalendarDays, ChevronRight, Info, Sparkles } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, ChevronRight, Info, Sparkles, MessageSquare } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import DateRangePicker from "./DateRangePicker";
 import { DualPrice } from "@/components/ui/DualPrice";
+import { Textarea } from "@/components/ui/textarea";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
@@ -147,6 +148,7 @@ export function BookingPanel2({
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
   const [isBooking, setIsBooking] = useState(false);
+  const [specialRequests, setSpecialRequests] = useState("");
 
   // Default to free mode if no predefined dates
   useEffect(() => {
@@ -507,6 +509,21 @@ export function BookingPanel2({
             ))}
           </div>
         )}
+
+        {/* ✅ V5: Special requests */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <MessageSquare className="h-4 w-4" />
+            {lang === "he" ? "בקשות מיוחדות" : lang === "fr" ? "Demandes spéciales" : "Special requests"}
+          </div>
+          <Textarea
+            placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
+            value={specialRequests}
+            onChange={(e) => setSpecialRequests(e.target.value)}
+            className="min-h-[60px] text-sm resize-none"
+            rows={2}
+          />
+        </div>
 
         <Button
           className="w-full"

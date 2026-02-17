@@ -13,6 +13,7 @@ import {
   Brain,
   Mail,
   Heart,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,7 @@ const menuItems = [
   { title: "Journal", url: "/admin/journal", icon: BookOpen },
   { title: "AI Insights", url: "/admin/ai-insights", icon: Brain },
   { title: "Settings", url: "/admin/settings", icon: Settings },
+  { title: "HG Certification", url: "/admin/hyperguest-certification", icon: ShieldCheck },
 ];
 
 export function AdminSidebar() {

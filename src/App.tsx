@@ -63,6 +63,7 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminAIInsights from "./pages/admin/AIInsights";
 import AdminLeads from "./pages/admin/Leads";
 import AdminFavorites from "./pages/admin/Favorites";
+import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -152,6 +153,7 @@ const App = () => (
               <Route path="leads" element={<AdminLeads />} />
               <Route path="favorites" element={<AdminFavorites />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
             </Route>
             <Route
               path="/hotel-admin"
