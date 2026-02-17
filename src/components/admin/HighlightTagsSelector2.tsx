@@ -13,15 +13,25 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 
-interface HighlightTagsSelector2Props {
-  experienceId?: string;
+// A local tag entry stores the tag_id selected locally before the experience exists in DB
+export interface LocalTagEntry {
+  tag_id: string;
 }
 
-export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2Props) {
+interface HighlightTagsSelector2Props {
+  experienceId?: string;
+  /** Local mode: selected tag IDs stored in parent state (used when no experienceId yet) */
+  localTags?: LocalTagEntry[];
+  onLocalTagsChange?: (tags: LocalTagEntry[]) => void;
+}
+
+export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsChange }: HighlightTagsSelector2Props) {
   const queryClient = useQueryClient();
   const [showCustomDialog, setShowCustomDialog] = useState(false);
   const [customLabelEn, setCustomLabelEn] = useState("");
   const [customLabelHe, setCustomLabelHe] = useState("");
+
+  const isLocalMode = !experienceId;
 
   const { data: commonTags, isLoading: isLoadingTags } = useQuery({
     queryKey: ["highlight-tags-common"],
@@ -54,8 +64,11 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
     enabled: !!experienceId,
   });
 
-  const selectedTagIds = experienceTags || [];
+  // Selected tag IDs: from DB or local state
+  const selectedTagIds = isLocalMode ? (localTags?.map(t => t.tag_id) || []) : (experienceTags || []);
   const allAvailableTags = [...(commonTags || []), ...(customTags || [])];
+
+  // --- DB mutations (only used when experienceId exists) ---
 
   const addTagMutation = useMutation({
     mutationFn: async (tagId: string) => {
@@ -92,7 +105,12 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
     },
     onSuccess: (newTag) => {
       queryClient.invalidateQueries({ queryKey: ["highlight-tags-custom2", experienceId] });
-      if (experienceId) addTagMutation.mutate(newTag.id);
+      // Auto-select the newly created tag
+      if (isLocalMode) {
+        onLocalTagsChange?.([...(localTags || []), { tag_id: newTag.id }]);
+      } else if (experienceId) {
+        addTagMutation.mutate(newTag.id);
+      }
       setShowCustomDialog(false);
       setCustomLabelEn("");
       setCustomLabelHe("");
@@ -102,8 +120,16 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
   });
 
   const handleTagToggle = (tagId: string, checked: boolean) => {
-    if (checked) addTagMutation.mutate(tagId);
-    else removeTagMutation.mutate(tagId);
+    if (isLocalMode) {
+      if (checked) {
+        onLocalTagsChange?.([...(localTags || []), { tag_id: tagId }]);
+      } else {
+        onLocalTagsChange?.((localTags || []).filter(t => t.tag_id !== tagId));
+      }
+    } else {
+      if (checked) addTagMutation.mutate(tagId);
+      else removeTagMutation.mutate(tagId);
+    }
   };
 
   const handleCreateCustomTag = () => {
@@ -111,21 +137,7 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
     createCustomTagMutation.mutate({ labelEn: customLabelEn.trim(), labelHe: customLabelHe.trim() });
   };
 
-  if (!experienceId) {
-    return (
-      <Card className="opacity-60">
-        <CardHeader>
-          <CardTitle>Highlight Tags</CardTitle>
-          <CardDescription>Save the experience first to manage highlight tags</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-4">Available after first save</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoadingTags || isLoadingExpTags || isLoadingCustomTags) {
+  if (isLoadingTags || (!isLocalMode && (isLoadingExpTags || isLoadingCustomTags))) {
     return (
       <Card>
         <CardHeader><CardTitle>Highlight Tags</CardTitle></CardHeader>
@@ -159,7 +171,7 @@ export function HighlightTagsSelector2({ experienceId }: HighlightTagsSelector2P
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {commonTags?.map((tag) => (
               <label key={tag.id} className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors">
-                <Checkbox checked={selectedTagIds.includes(tag.id)} onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)} disabled={addTagMutation.isPending || removeTagMutation.isPending} />
+                <Checkbox checked={selectedTagIds.includes(tag.id)} onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)} disabled={!isLocalMode && (addTagMutation.isPending || removeTagMutation.isPending)} />
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">{tag.label_en}</span>
                   {tag.label_he && <span className="text-xs text-muted-foreground" dir="rtl">{tag.label_he}</span>}
