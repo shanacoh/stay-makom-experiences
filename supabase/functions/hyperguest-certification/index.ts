@@ -13,8 +13,8 @@ const BOOKING_DOMAIN = 'https://book-api.hyperguest.com/2.0/'; // .com as per of
 const PROPERTY_ID = 19912;
 
 function getCertHeaders(): Record<string, string> {
-  const token = Deno.env.get('HYPERGUEST_CERT_TOKEN');
-  if (!token) throw new Error('HYPERGUEST_CERT_TOKEN not configured');
+  const token = Deno.env.get('HYPERGUEST_CERT_TOKEN') || Deno.env.get('HYPERGUEST_BEARER_TOKEN');
+  if (!token) throw new Error('HYPERGUEST_CERT_TOKEN or HYPERGUEST_BEARER_TOKEN not configured');
   return {
     'Authorization': `Bearer ${token}`,
     'Accept-Encoding': 'gzip, deflate',
