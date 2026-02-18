@@ -779,12 +779,12 @@ export function UnifiedExperience2Form({
         </div>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Basic Information */}
+        {/* 1. Présentation (anciennement Basic Information, sans Cancellation Policy) */}
         {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Core details in English and Hebrew</CardDescription>
+            <CardTitle>Présentation</CardTitle>
+            <CardDescription>Informations principales en anglais et en hébreu</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
@@ -793,16 +793,16 @@ export function UnifiedExperience2Form({
                 <div className="font-medium text-sm text-muted-foreground">English Version</div>
 
                 <div>
-                  <Label htmlFor="title">Title (EN) *</Label>
+                  <Label htmlFor="title">Titre (EN) *</Label>
                   <Input id="title" {...register("title")} />
                   {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="subtitle">Subtitle (EN)</Label>
+                  <Label htmlFor="subtitle">Sous-titre (EN)</Label>
                   <Input id="subtitle" {...register("subtitle")} />
                 </div>
                 <div>
-                  <Label htmlFor="long_copy">Description (EN) * (min 100 characters)</Label>
+                  <Label htmlFor="long_copy">Description (EN) * (min 100 caractères)</Label>
                   <Controller
                     name="long_copy"
                     control={control}
@@ -817,13 +817,9 @@ export function UnifiedExperience2Form({
                   <div className="flex justify-between mt-1">
                     {errors.long_copy && <p className="text-sm text-destructive">{errors.long_copy.message}</p>}
                     <p className="text-sm text-muted-foreground ml-auto">
-                      {longCopy?.length || 0} / 100 characters minimum
+                      {longCopy?.length || 0} / 100 caractères minimum
                     </p>
                   </div>
-                </div>
-                <div>
-                  <Label htmlFor="cancellation_policy">Cancellation Policy (EN)</Label>
-                  <Input id="cancellation_policy" {...register("cancellation_policy")} />
                 </div>
               </div>
 
@@ -832,11 +828,11 @@ export function UnifiedExperience2Form({
                 <div className="font-medium text-sm text-muted-foreground">Hebrew Version (עברית)</div>
 
                 <div>
-                  <Label htmlFor="title_he">Title (HE)</Label>
+                  <Label htmlFor="title_he">Titre (HE)</Label>
                   <Input id="title_he" {...register("title_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
                 <div>
-                  <Label htmlFor="subtitle_he">Subtitle (HE)</Label>
+                  <Label htmlFor="subtitle_he">Sous-titre (HE)</Label>
                   <Input id="subtitle_he" {...register("subtitle_he")} dir="rtl" className="bg-hebrew-input" />
                 </div>
                 <div>
@@ -855,29 +851,20 @@ export function UnifiedExperience2Form({
                   />
                   <p className="text-sm text-muted-foreground mt-1">{longCopyHe?.length || 0} characters</p>
                 </div>
-                <div>
-                  <Label htmlFor="cancellation_policy_he">Cancellation Policy (HE)</Label>
-                  <Input
-                    id="cancellation_policy_he"
-                    {...register("cancellation_policy_he")}
-                    dir="rtl"
-                    className="bg-hebrew-input"
-                  />
-                </div>
               </div>
             </div>
 
-            {/* Category (hotel selector moved to Parcours card) */}
+            {/* Category */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="category_id">Category *</Label>
+                <Label htmlFor="category_id">Catégorie *</Label>
                 <Controller
                   name="category_id"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value || ""} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Sélectionner une catégorie" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories?.map((cat) => (
@@ -1021,19 +1008,19 @@ export function UnifiedExperience2Form({
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Images & Media */}
+        {/* 3. Photos (anciennement Images & Media) */}
         {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
-            <CardTitle>Images & Media</CardTitle>
-            <CardDescription>Upload hero image and gallery photos, or use images from the hotels</CardDescription>
+            <CardTitle>Photos</CardTitle>
+            <CardDescription>Images de l'expérience pour les listings et la page détail</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Hotel Images Section – from ALL hotels in parcours */}
             {allParcoursImages.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-sm font-medium">
-                  Hotel Images (click to add) — {allParcoursImages.length} image(s)
+                  Images depuis les hôtels (cliquer pour ajouter) — {allParcoursImages.length} image(s)
                 </Label>
                 <div className="grid grid-cols-6 gap-2 p-3 bg-muted/30 rounded-lg border">
                   {allParcoursImages.map((img, index) => (
@@ -1057,7 +1044,7 @@ export function UnifiedExperience2Form({
                       {(heroImagePreview === img || galleryPreviews.includes(img)) && (
                         <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                           <span className="text-xs font-medium text-primary-foreground bg-primary px-1.5 py-0.5 rounded">
-                            Added
+                            Ajouté
                           </span>
                         </div>
                       )}
@@ -1067,14 +1054,14 @@ export function UnifiedExperience2Form({
               </div>
             )}
 
-            {/* Thumbnail Image */}
+            {/* Vignette carte (anciennement Card Thumbnail) */}
             <div>
               <Label className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
-                Card Thumbnail
+                Vignette carte
               </Label>
               <p className="text-xs text-muted-foreground mb-2">
-                Appears in listing cards and search results. Falls back to Hero if empty.
+                Apparaît dans les listings et résultats de recherche. Utilise la photo de couverture si vide.
               </p>
               <div className="border-2 border-dashed rounded-lg p-4 space-y-3">
                 {/* Current thumbnail preview */}
@@ -1091,12 +1078,12 @@ export function UnifiedExperience2Form({
                       </button>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground italic">No thumbnail — will use hero image</p>
+                    <p className="text-xs text-muted-foreground italic">Aucune vignette — utilisera la photo de couverture</p>
                   )}
                   <div>
                     <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-background hover:bg-muted transition-colors">
                       <Upload className="h-3.5 w-3.5" />
-                      {thumbnailImagePreview ? "Change" : "Upload"}
+                      {thumbnailImagePreview ? "Changer" : "Télécharger"}
                       <input
                         type="file"
                         accept="image/*"
@@ -1112,7 +1099,7 @@ export function UnifiedExperience2Form({
                             if (error) throw error;
                             const { data: { publicUrl } } = supabase.storage.from("experience-images").getPublicUrl(name);
                             setThumbnailImagePreview(publicUrl);
-                            toast.success("Thumbnail uploaded");
+                            toast.success("Vignette téléchargée");
                           } catch (err: any) {
                             toast.error(err.message || "Upload failed");
                           }
@@ -1125,7 +1112,7 @@ export function UnifiedExperience2Form({
                 {/* Pick from hotel images */}
                 {allParcoursImages.length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-xs font-medium text-muted-foreground">Or pick from hotel images:</p>
+                    <p className="text-xs font-medium text-muted-foreground">Ou choisir depuis les images hôtels :</p>
                     <div className="flex gap-2 overflow-x-auto pb-1">
                       {allParcoursImages.map((img, i) => (
                         <button
@@ -1145,14 +1132,14 @@ export function UnifiedExperience2Form({
               </div>
             </div>
 
-            {/* Hero Image */}
+            {/* Photo de couverture (anciennement Hero Image) */}
             <div>
               <Label className="flex items-center gap-2">
                 <Star className="h-4 w-4" />
-                Hero Image
+                Photo de couverture
               </Label>
               <p className="text-xs text-muted-foreground mb-2">
-                Large image displayed at the top of the detail page.
+                Grande image affichée en haut de la page détail.
               </p>
               <div className="border-2 border-dashed rounded-lg p-4">
                 {heroImagePreview && (
@@ -1179,9 +1166,9 @@ export function UnifiedExperience2Form({
               </div>
             </div>
 
-            {/* Gallery Images */}
+            {/* Galerie (anciennement Gallery Images) */}
             <div>
-              <Label>Gallery Images (up to 8)</Label>
+              <Label>Galerie (max. 8)</Label>
               <div className="grid grid-cols-4 gap-4">
                 {galleryPreviews.map((preview, index) => (
                   <div key={index} className="relative group">
@@ -1191,7 +1178,7 @@ export function UnifiedExperience2Form({
                         type="button"
                         onClick={() => setThumbnailImagePreview(preview)}
                         className="bg-secondary text-secondary-foreground rounded-full p-1"
-                        title="Set as Thumbnail"
+                        title="Définir comme vignette"
                       >
                         <ImageIcon className="h-3 w-3" />
                       </button>
@@ -1202,7 +1189,7 @@ export function UnifiedExperience2Form({
                           setHeroImagePreview(preview);
                         }}
                         className="bg-secondary text-secondary-foreground rounded-full p-1"
-                        title="Set as Hero"
+                        title="Définir comme couverture"
                       >
                         <Star className="h-3 w-3" />
                       </button>
@@ -1210,16 +1197,16 @@ export function UnifiedExperience2Form({
                         type="button"
                         onClick={() => removeGalleryImage(index)}
                         className="bg-destructive text-destructive-foreground rounded-full p-1"
-                        title="Remove"
+                        title="Supprimer"
                       >
                         <X className="h-3 w-3" />
                       </button>
                     </div>
                     {thumbnailImagePreview === preview && (
-                      <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-primary-foreground px-1 rounded">THUMB</span>
+                      <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-primary-foreground px-1 rounded">VIGNETTE</span>
                     )}
                     {heroImagePreview === preview && (
-                      <span className="absolute bottom-1 right-1 text-[9px] bg-amber-500 text-white px-1 rounded">HERO</span>
+                      <span className="absolute bottom-1 right-1 text-[9px] bg-amber-500 text-white px-1 rounded">COUV.</span>
                     )}
                   </div>
                 ))}
@@ -1241,36 +1228,21 @@ export function UnifiedExperience2Form({
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Spice It Up (Hotel Extras) */}
+        {/* 4. Points forts (anciennement Highlight Tags) */}
         {/* ----------------------------------------------------------------- */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Spice It Up (Extras)</CardTitle>
-            <CardDescription>Select hotel extras that guests can optionally add to their booking</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {currentExperienceId && experienceHotels.length > 0 ? (
-              <ExperienceExtrasSelector2
-                experienceId={currentExperienceId}
-                hotelIds={experienceHotels.map((h) => h.hotel_id)}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground italic text-center py-4">
-                {experienceHotels.length === 0
-                  ? "Add at least one hotel to the journey first."
-                  : "Available after first save."}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <HighlightTagsSelector2
+          experienceId={currentExperienceId || undefined}
+          localTags={!currentExperienceId ? localTags : undefined}
+          onLocalTagsChange={!currentExperienceId ? setLocalTags : undefined}
+        />
 
         {/* ----------------------------------------------------------------- */}
-        {/* What's Included */}
+        {/* 5. Le séjour comprend (anciennement What's Included) */}
         {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
-            <CardTitle>What's Included</CardTitle>
-            <CardDescription>Manage the items included in this experience</CardDescription>
+            <CardTitle>Le séjour comprend</CardTitle>
+            <CardDescription>Les éléments inclus dans cette expérience</CardDescription>
           </CardHeader>
           <CardContent>
             <IncludesManager2
@@ -1282,141 +1254,206 @@ export function UnifiedExperience2Form({
           </CardContent>
         </Card>
 
-        {/* Highlight Tags (badges on cards) */}
-        <HighlightTagsSelector2
-          experienceId={currentExperienceId || undefined}
-          localTags={!currentExperienceId ? localTags : undefined}
-          onLocalTagsChange={!currentExperienceId ? setLocalTags : undefined}
-        />
-
-        {/* Reviews */}
-        <ReviewsManager2
-          experienceId={currentExperienceId || undefined}
-          localReviews={!currentExperienceId ? localReviews : undefined}
-          onLocalReviewsChange={!currentExperienceId ? setLocalReviews : undefined}
-        />
-
         {/* ----------------------------------------------------------------- */}
-        {/* Pricing Section — 3 sections */}
+        {/* 6. Options & extras (anciennement Spice It Up) */}
         {/* ----------------------------------------------------------------- */}
-
-        {/* Section 1: Experience Pricing */}
-        <Experience2AddonsManager
-          experienceId={currentExperienceId}
-          disabled={isSaving}
-          localAddons={localAddons}
-          onLocalAddonsChange={setLocalAddons}
-          addonTypes={EXPERIENCE_PRICING_TYPES}
-          sectionTitle="Experience Pricing"
-          sectionDescription="Fees and extras charged to travelers (per person, per night, fixed...)"
-        />
-
-        {/* Section 2: Commissions */}
-        <Experience2AddonsManager
-          experienceId={currentExperienceId}
-          disabled={isSaving}
-          localAddons={localAddons}
-          onLocalAddonsChange={setLocalAddons}
-          addonTypes={COMMISSION_TYPES}
-          sectionTitle="Commissions"
-          sectionDescription="Staymakom margins on room and experience prices"
-        />
-
-        {/* Section 3: Taxes */}
-        <Experience2AddonsManager
-          experienceId={currentExperienceId}
-          disabled={isSaving}
-          localAddons={localAddons}
-          onLocalAddonsChange={setLocalAddons}
-          addonTypes={TAX_TYPES}
-          sectionTitle="Taxes"
-          sectionDescription="VAT and applicable taxes (default 18%). A tax addon at 18% is created automatically."
-        />
-
-        {/* --- Promo --- */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Promo
-            </CardTitle>
+            <CardTitle>Options & extras</CardTitle>
+            <CardDescription>Extras que les voyageurs peuvent ajouter à leur réservation</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-end gap-3">
-              {/* Type */}
-              <div className="w-[200px] shrink-0">
-                <Label className="text-xs">Type</Label>
-                <Controller
-                  name="promo_type"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Aucune" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Aucune promo</SelectItem>
-                        <SelectItem value="real_discount">Remise réelle</SelectItem>
-                        <SelectItem value="fake_markup">Faux prix barré</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
+            {currentExperienceId && experienceHotels.length > 0 ? (
+              <ExperienceExtrasSelector2
+                experienceId={currentExperienceId}
+                hotelIds={experienceHotels.map((h) => h.hotel_id)}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground italic text-center py-4">
+                {experienceHotels.length === 0
+                  ? "Ajoutez au moins un hôtel au parcours."
+                  : "Disponible après la première sauvegarde."}
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-              {/* Value — visible when a promo type is active */}
-              {watch("promo_type") && watch("promo_type") !== "none" && (
-                <>
-                  <div className="w-[120px] shrink-0">
-                    <Label htmlFor="promo_value" className="text-xs">
-                      Valeur
-                    </Label>
-                    <Input
-                      id="promo_value"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      {...register("promo_value", { valueAsNumber: true })}
-                      placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
-                      disabled={isSaving}
-                    />
-                  </div>
+        {/* ----------------------------------------------------------------- */}
+        {/* 7. Tarification (fusion Experience Pricing + Commissions + Taxes) */}
+        {/* ----------------------------------------------------------------- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tarification</CardTitle>
+            <CardDescription>Frais, commissions et taxes de l'expérience</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Sous-section : Frais expérience */}
+            <div>
+              <p className="font-medium text-sm mb-3">Frais par personne / nuit / fixes</p>
+              <Experience2AddonsManager
+                experienceId={currentExperienceId}
+                disabled={isSaving}
+                localAddons={localAddons}
+                onLocalAddonsChange={setLocalAddons}
+                addonTypes={EXPERIENCE_PRICING_TYPES}
+                sectionTitle="Experience Pricing"
+                sectionDescription="Fees and extras charged to travelers (per person, per night, fixed...)"
+              />
+            </div>
 
-                  {/* Mode (% or fixed) — only for real_discount */}
-                  {watch("promo_type") === "real_discount" && (
-                    <div className="w-[180px] shrink-0">
-                      <Label className="text-xs">Mode</Label>
-                      <Controller
-                        name="promo_is_percentage"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            value={field.value ? "percentage" : "fixed"}
-                            onValueChange={(val) => field.onChange(val === "percentage")}
-                            disabled={isSaving}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="percentage">Pourcentage (%)</SelectItem>
-                              <SelectItem value="fixed">Montant fixe ($)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
+            <div className="border-t pt-6">
+              <p className="font-medium text-sm mb-3">Commissions Staymakom</p>
+              <Experience2AddonsManager
+                experienceId={currentExperienceId}
+                disabled={isSaving}
+                localAddons={localAddons}
+                onLocalAddonsChange={setLocalAddons}
+                addonTypes={COMMISSION_TYPES}
+                sectionTitle="Commissions"
+                sectionDescription="Staymakom margins on room and experience prices"
+              />
+            </div>
+
+            <div className="border-t pt-6">
+              <p className="font-medium text-sm mb-3">Taxes</p>
+              <Experience2AddonsManager
+                experienceId={currentExperienceId}
+                disabled={isSaving}
+                localAddons={localAddons}
+                onLocalAddonsChange={setLocalAddons}
+                addonTypes={TAX_TYPES}
+                sectionTitle="Taxes"
+                sectionDescription="VAT and applicable taxes (default 18%). A tax addon at 18% is created automatically."
+              />
             </div>
           </CardContent>
         </Card>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Predefined Date Options */}
+        {/* 8. Conditions (politique d'annulation extraite de Présentation) */}
         {/* ----------------------------------------------------------------- */}
-        <DateOptionsManager experienceId={currentExperienceId} disabled={isSaving} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Conditions</CardTitle>
+            <CardDescription>Politique d'annulation de l'expérience</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="cancellation_policy">Politique d'annulation (EN)</Label>
+                <Input id="cancellation_policy" {...register("cancellation_policy")} />
+              </div>
+              <div>
+                <Label htmlFor="cancellation_policy_he">Politique d'annulation (HE)</Label>
+                <Input
+                  id="cancellation_policy_he"
+                  {...register("cancellation_policy_he")}
+                  dir="rtl"
+                  className="bg-hebrew-input"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* 9. Promo & dates (fusion Promo + Predefined Date Options) */}
+        {/* ----------------------------------------------------------------- */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Promo & dates
+            </CardTitle>
+            <CardDescription>Réductions promotionnelles et dates disponibles prédéfinies</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Promo */}
+            <div>
+              <p className="font-medium text-sm mb-3">Type de promo</p>
+              <div className="flex items-end gap-3">
+                <div className="w-[200px] shrink-0">
+                  <Label className="text-xs">Type</Label>
+                  <Controller
+                    name="promo_type"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value || "none"} onValueChange={field.onChange} disabled={isSaving}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Aucune" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Aucune promo</SelectItem>
+                          <SelectItem value="real_discount">Remise réelle</SelectItem>
+                          <SelectItem value="fake_markup">Faux prix barré</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                {watch("promo_type") && watch("promo_type") !== "none" && (
+                  <>
+                    <div className="w-[120px] shrink-0">
+                      <Label htmlFor="promo_value" className="text-xs">
+                        Valeur
+                      </Label>
+                      <Input
+                        id="promo_value"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        {...register("promo_value", { valueAsNumber: true })}
+                        placeholder={watch("promo_type") === "real_discount" ? "10" : "20"}
+                        disabled={isSaving}
+                      />
+                    </div>
+
+                    {watch("promo_type") === "real_discount" && (
+                      <div className="w-[180px] shrink-0">
+                        <Label className="text-xs">Mode</Label>
+                        <Controller
+                          name="promo_is_percentage"
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value ? "percentage" : "fixed"}
+                              onValueChange={(val) => field.onChange(val === "percentage")}
+                              disabled={isSaving}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="percentage">Pourcentage (%)</SelectItem>
+                                <SelectItem value="fixed">Montant fixe ($)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Dates disponibles */}
+            <div className="border-t pt-6">
+              <p className="font-medium text-sm mb-3">Dates disponibles</p>
+              <DateOptionsManager experienceId={currentExperienceId} disabled={isSaving} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* 10. Avis clients (anciennement Reviews) */}
+        {/* ----------------------------------------------------------------- */}
+        <ReviewsManager2
+          experienceId={currentExperienceId || undefined}
+          localReviews={!currentExperienceId ? localReviews : undefined}
+          onLocalReviewsChange={!currentExperienceId ? setLocalReviews : undefined}
+        />
 
         {/* ----------------------------------------------------------------- */}
         {/* Price / Availability Preview — one per hotel in the parcours */}
