@@ -34,8 +34,8 @@ async function scanAvailability(
   const today = new Date();
   // Lead time: start 3 days from now (hotels often need lead time)
   const startOffset = 3;
-  const datesToScan = 14; // scan 14 dates to find at least 3 available
-  const maxResults = 3;
+  const datesToScan = 20; // scan 20 dates to find at least 5 available
+  const maxResults = 5;
 
   const guests = formatGuests([{ adults, children: [] }]);
 
