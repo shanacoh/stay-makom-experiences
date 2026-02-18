@@ -445,10 +445,10 @@ export function BookingPanel2({
                       </div>
                       {opt.cheapestPrice != null && (
                         <div className="text-right shrink-0">
-                          <DualPrice amount={opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-medium" />
                           <p className="text-[10px] text-muted-foreground">
-                            {lang === "he" ? "מ-" : lang === "fr" ? "dès" : "from"}
+                            {lang === "he" ? "מ-" : lang === "fr" ? "à partir de" : "from"}
                           </p>
+                          <DualPrice amount={opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
                         </div>
                       )}
                     </label>
