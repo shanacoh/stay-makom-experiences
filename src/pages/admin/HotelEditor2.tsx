@@ -530,80 +530,210 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* ══════════════════════════════════════════════════════════
+            1. IMPORT RAPIDE
+        ══════════════════════════════════════════════════════════ */}
+        {!hotelId && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Import rapide
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Recherchez et importez un hôtel depuis HyperGuest pour pré-remplir le formulaire.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} fetchFullDetails={true} />
+              {hyperguestId && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
+                    ✓ Lié à HyperGuest ID : {hyperguestId}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════
+            2. IDENTITÉ DE L'HÔTEL
+        ══════════════════════════════════════════════════════════ */}
         <Card>
           <CardHeader>
-            <CardTitle>Hotel Details - Bilingual</CardTitle>
+            <CardTitle>Identité de l'hôtel</CardTitle>
+            <p className="text-sm text-muted-foreground">Nom, région, ville et description bilingues.</p>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!hotelId && (
-              <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold text-primary">Quick Import</h3>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Colonne EN */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">English Version</h4>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Search and import hotel data directly from HyperGuest to pre-fill the form.
-                </p>
-                <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} fetchFullDetails={true} />
+                <div className="space-y-2">
+                  <Label htmlFor="name">Hotel Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="region">Region</Label>
+                  <Input
+                    id="region"
+                    value={formData.region}
+                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="story">Story</Label>
+                  <Textarea
+                    id="story"
+                    value={formData.story}
+                    onChange={(e) => setFormData({ ...formData, story: e.target.value })}
+                    rows={6}
+                  />
+                </div>
+              </div>
 
-                {hyperguestId && (
-                  <div className="mt-3 space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-green-600">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
-                        ✓ Linked to HyperGuest ID: {hyperguestId}
-                      </span>
-                    </div>
-
-                    {hyperguestPhotos.length > 0 && (
-                      <div className="mt-3">
-                        <HyperGuestPhotoSelector
-                          photos={hyperguestPhotos}
-                          selectedPhotos={selectedHGPhotos}
-                          heroImage={selectedHGHero}
-                          onSelectionChange={setSelectedHGPhotos}
-                          onHeroChange={setSelectedHGHero}
-                          isLoading={isDownloadingImages}
-                        />
-                        <div className="mt-3 flex justify-end">
-                          <Button
-                            type="button"
-                            size="sm"
-                            disabled={isDownloadingImages || selectedHGPhotos.length === 0}
-                            onClick={() => {
-                              const hero = selectedHGHero && selectedHGPhotos.includes(selectedHGHero) ? selectedHGHero : null;
-                              const gallery = selectedHGPhotos.filter((u) => u !== hero);
-                              downloadHyperGuestImages(gallery, hero);
-                            }}
-                          >
-                            {isDownloadingImages ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Importing {selectedHGPhotos.length} photos...
-                              </>
-                            ) : (
-                              <>
-                                <ImageIcon className="mr-2 h-4 w-4" />
-                                Save {selectedHGPhotos.length} Selected Photos
-                              </>
-                            )}
-                          </Button>
-                        </div>
+              {/* Colonne HE */}
+              <div className="space-y-4">
+                <div className="bg-muted/30 p-2 rounded">
+                  <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name_he">שם המלון</Label>
+                  <div className="relative">
+                    <Input
+                      id="name_he"
+                      value={formData.name_he}
+                      onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
+                      dir="rtl"
+                      className="bg-hebrew-input"
+                      disabled={isTranslating}
+                    />
+                    {isTranslating && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
                       </div>
                     )}
                   </div>
-                )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="region_he">אזור</Label>
+                  <Input
+                    id="region_he"
+                    value={formData.region_he}
+                    onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                    disabled={isTranslating}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city_he">עיר</Label>
+                  <Input
+                    id="city_he"
+                    value={formData.city_he}
+                    onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                    disabled={isTranslating}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="story_he">סיפור</Label>
+                  <Textarea
+                    id="story_he"
+                    value={formData.story_he}
+                    onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
+                    rows={6}
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                    disabled={isTranslating}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ══════════════════════════════════════════════════════════
+            3. PHOTOS
+        ══════════════════════════════════════════════════════════ */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-primary" />
+              Photos
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Sélectionnez des photos depuis HyperGuest ou ajoutez vos propres images.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Sous-section : Sélection depuis HyperGuest */}
+            {hyperguestPhotos.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm border-b pb-2">
+                  Sélection depuis HyperGuest ({hyperguestPhotos.length} disponibles)
+                </h4>
+                <HyperGuestPhotoSelector
+                  photos={hyperguestPhotos}
+                  selectedPhotos={selectedHGPhotos}
+                  heroImage={selectedHGHero}
+                  onSelectionChange={setSelectedHGPhotos}
+                  onHeroChange={setSelectedHGHero}
+                  isLoading={isDownloadingImages}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isDownloadingImages || selectedHGPhotos.length === 0}
+                    onClick={() => {
+                      const hero = selectedHGHero && selectedHGPhotos.includes(selectedHGHero) ? selectedHGHero : null;
+                      const gallery = selectedHGPhotos.filter((u) => u !== hero);
+                      downloadHyperGuestImages(gallery, hero);
+                    }}
+                  >
+                    {isDownloadingImages ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Import de {selectedHGPhotos.length} photos...
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="mr-2 h-4 w-4" />
+                        Enregistrer la sélection ({selectedHGPhotos.length})
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             )}
 
-
-            <div className="border-t pt-6 space-y-4">
-              <h3 className="text-lg font-semibold">Images & Media</h3>
-              <p className="text-sm text-muted-foreground">Upload hero image and gallery photos</p>
+            {/* Sous-section : Photos de l'hôtel */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm border-b pb-2">Photos de l'hôtel</h4>
 
               <div className="space-y-2">
                 <ImageUpload
-                  label="Hero Image"
+                  label="Photo de couverture"
                   bucket="hotel-images"
                   value={formData.hero_image}
                   onChange={(url) => setFormData({ ...formData, hero_image: url })}
@@ -612,14 +742,13 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Gallery Images</Label>
+                  <Label>Galerie</Label>
                   <span className="text-sm text-muted-foreground">{formData.photos.length} image(s)</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {formData.photos.map((photo, index) => (
                     <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border bg-muted">
-                      <img src={photo} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
-                      {/* Hero badge */}
+                      <img src={photo} alt={`Galerie ${index + 1}`} className="w-full h-full object-cover" />
                       {formData.hero_image === photo && (
                         <div className="absolute top-2 left-2 bg-amber-500 text-white rounded-full p-1">
                           <Star className="h-3 w-3 fill-current" />
@@ -632,7 +761,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                             size="icon"
                             variant="secondary"
                             className="h-7 w-7"
-                            title="Set as Hero"
+                            title="Définir comme couverture"
                             onClick={() => setFormData({ ...formData, hero_image: photo })}
                           >
                             <Star className="h-3 w-3" />
@@ -665,29 +794,27 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                         input.accept = "image/*";
                         input.onchange = async (e) => {
                           const files = Array.from((e.target as HTMLInputElement).files || []);
-                          const filesToUpload = files;
-
                           toast.promise(
                             Promise.all(
-                              filesToUpload.map(async (file) => {
+                              files.map(async (file) => {
                                 const fileExt = file.name.split(".").pop();
                                 const fileName = `${Math.random()}.${fileExt}`;
                                 const { error: uploadError } = await supabase.storage
                                   .from("hotel-images")
                                   .upload(fileName, file);
                                 if (uploadError) throw uploadError;
-                                const {
-                                  data: { publicUrl },
-                                } = supabase.storage.from("hotel-images").getPublicUrl(fileName);
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from("hotel-images")
+                                  .getPublicUrl(fileName);
                                 return publicUrl;
                               }),
                             ).then((urls) => {
                               setFormData({ ...formData, photos: [...formData.photos, ...urls] });
                             }),
                             {
-                              loading: `Uploading ${filesToUpload.length} image(s)...`,
-                              success: `${filesToUpload.length} image(s) uploaded!`,
-                              error: "Failed to upload images",
+                              loading: `Upload de ${files.length} image(s)...`,
+                              success: `${files.length} image(s) ajoutée(s) !`,
+                              error: "Échec de l'upload",
                             },
                           );
                         };
@@ -697,16 +824,120 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                       <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                         <span className="text-2xl">+</span>
                       </div>
-                      <span className="text-sm font-medium">Add images</span>
+                      <span className="text-sm font-medium">Ajouter des photos</span>
                     </button>
                   )}
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
+        {/* ══════════════════════════════════════════════════════════
+            4. LOCALISATION & CONTACT
+        ══════════════════════════════════════════════════════════ */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              Localisation & contact
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Adresse, coordonnées GPS et informations de contact.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contact_email">Contact Email</Label>
+                <Label htmlFor="address">Adresse (English)</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="e.g., 123 Hotel Street, Ayyelet HaShahar, Israel"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address_he">כתובת (עברית)</Label>
+                <div className="relative">
+                  <Input
+                    id="address_he"
+                    value={formData.address_he}
+                    onChange={(e) => setFormData({ ...formData, address_he: e.target.value })}
+                    placeholder="כתובת בעברית"
+                    dir="rtl"
+                    className="bg-hebrew-input"
+                    disabled={isTranslating}
+                  />
+                  {isTranslating && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="latitude">Latitude</Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="any"
+                  value={formData.latitude ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, latitude: e.target.value ? parseFloat(e.target.value) : null })
+                  }
+                  placeholder="e.g., 33.0742"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="longitude">Longitude</Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="any"
+                  value={formData.longitude ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, longitude: e.target.value ? parseFloat(e.target.value) : null })
+                  }
+                  placeholder="e.g., 35.5585"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>&nbsp;</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleGeocode}
+                  disabled={isGeocoding}
+                  className="w-full"
+                >
+                  {isGeocoding ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Détection...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Auto-detect coordonnées
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {formData.latitude && formData.longitude && (
+              <p className="text-sm text-green-600">
+                ✓ Coordonnées : {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+              </p>
+            )}
+
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="contact_email">Email de contact</Label>
                 <Input
                   id="contact_email"
                   type="email"
@@ -715,7 +946,7 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contact_phone">Contact Phone</Label>
+                <Label htmlFor="contact_phone">Téléphone</Label>
                 <Input
                   id="contact_phone"
                   value={formData.contact_phone}
@@ -723,492 +954,300 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="border-t pt-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Location</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">Set the hotel address and coordinates for map display</p>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address (English)</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="e.g., 123 Hotel Street, Ayyelet HaShahar, Israel"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address_he">כתובת (עברית)</Label>
-                  <div className="relative">
-                    <Input
-                      id="address_he"
-                      value={formData.address_he}
-                      onChange={(e) => setFormData({ ...formData, address_he: e.target.value })}
-                      placeholder="כתובת בעברית"
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                      disabled={isTranslating}
-                    />
-                    {isTranslating && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                      </div>
-                    )}
-                  </div>
-                </div>
+        {/* ══════════════════════════════════════════════════════════
+            5. CARACTÉRISTIQUES
+        ══════════════════════════════════════════════════════════ */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Caractéristiques</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Étoiles, type de propriété, capacité et horaires.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Étoiles</Label>
+                <Select
+                  value={formData.star_rating != null ? String(formData.star_rating) : ""}
+                  onValueChange={(v) =>
+                    setFormData({ ...formData, star_rating: v === "" ? null : parseInt(v, 10) })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n === 0 ? "0 (non classé)" : "★ ".repeat(n)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude</Label>
-                  <Input
-                    id="latitude"
-                    type="number"
-                    step="any"
-                    value={formData.latitude ?? ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        latitude: e.target.value ? parseFloat(e.target.value) : null,
-                      })
-                    }
-                    placeholder="e.g., 33.0742"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude</Label>
-                  <Input
-                    id="longitude"
-                    type="number"
-                    step="any"
-                    value={formData.longitude ?? ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        longitude: e.target.value ? parseFloat(e.target.value) : null,
-                      })
-                    }
-                    placeholder="e.g., 35.5585"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>&nbsp;</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleGeocode}
-                    disabled={isGeocoding}
-                    className="w-full"
-                  >
-                    {isGeocoding ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Finding...
-                      </>
-                    ) : (
-                      <>
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Auto-detect coordinates
-                      </>
-                    )}
-                  </Button>
-                </div>
+              <div className="space-y-2">
+                <Label>Type de propriété</Label>
+                <Input
+                  value={formData.property_type}
+                  onChange={(e) => setFormData({ ...formData, property_type: e.target.value })}
+                  placeholder="Hotel, Apartment…"
+                />
               </div>
 
-              {formData.latitude && formData.longitude && (
-                <p className="text-sm text-green-600">
-                  ✓ Coordinates set: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
-                </p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label>Nombre de chambres</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={formData.number_of_rooms ?? ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      number_of_rooms: e.target.value ? parseInt(e.target.value, 10) : null,
+                    })
+                  }
+                  placeholder="—"
+                />
+              </div>
 
-            {/* Infos HyperGuest */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Infos HyperGuest</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Données importées depuis HyperGuest (étoiles, capacités chambres, annulation, conditions).
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label>Étoiles</Label>
-                    <Select
-                      value={formData.star_rating != null ? String(formData.star_rating) : ""}
-                      onValueChange={(v) =>
-                        setFormData({
-                          ...formData,
-                          star_rating: v === "" ? null : parseInt(v, 10),
-                        })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="—" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[0, 1, 2, 3, 4, 5].map((n) => (
-                          <SelectItem key={n} value={String(n)}>
-                            {n === 0 ? "0 (non classé)" : "★ ".repeat(n)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Type de propriété</Label>
-                    <Input
-                      value={formData.property_type}
-                      onChange={(e) => setFormData({ ...formData, property_type: e.target.value })}
-                      placeholder="Hotel, Apartment…"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Nombre de chambres</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={formData.number_of_rooms ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          number_of_rooms: e.target.value ? parseInt(e.target.value, 10) : null,
-                        })
-                      }
-                      placeholder="—"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label>Check-in</Label>
-                      <Input
-                        value={formData.check_in_time}
-                        onChange={(e) => setFormData({ ...formData, check_in_time: e.target.value })}
-                        placeholder="14:00"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Check-out</Label>
-                      <Input
-                        value={formData.check_out_time}
-                        onChange={(e) => setFormData({ ...formData, check_out_time: e.target.value })}
-                        placeholder="12:00"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Nuits min.</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={formData.min_stay ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          min_stay: e.target.value ? parseInt(e.target.value, 10) : null,
-                        })
-                      }
-                      placeholder="—"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Nuits max.</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={formData.max_stay ?? ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          max_stay: e.target.value ? parseInt(e.target.value, 10) : null,
-                        })
-                      }
-                      placeholder="—"
-                    />
-                  </div>
-                </div>
-
-                {formData.room_capacities && formData.room_capacities.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Capacités par type de chambre (lecture seule)</Label>
-                    <ul className="rounded-lg border divide-y text-sm">
-                      {formData.room_capacities.map((room, i) => (
-                        <li key={i} className="p-3 flex flex-wrap gap-x-4 gap-y-1">
-                          <span className="font-medium">{room.name}</span>
-                          <span className="text-muted-foreground">
-                            {[
-                              room.maxAdultsNumber != null && `${room.maxAdultsNumber} adultes`,
-                              room.maxChildrenNumber != null && `${room.maxChildrenNumber} enfants`,
-                              room.maxOccupancy != null && `max ${room.maxOccupancy} pers.`,
-                              room.roomSize != null && `${room.roomSize} m²`,
-                              room.beddingSummary,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
+              <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-2">
-                  <Label>Politique d&apos;annulation</Label>
-                  <Textarea
-                    value={formData.cancellation_policy}
-                    onChange={(e) => setFormData({ ...formData, cancellation_policy: e.target.value })}
-                    placeholder="Ex: J-2: 100% • À tout moment: 100%"
-                    rows={2}
+                  <Label>Check-in</Label>
+                  <Input
+                    value={formData.check_in_time}
+                    onChange={(e) => setFormData({ ...formData, check_in_time: e.target.value })}
+                    placeholder="14:00"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label>Conditions générales / remarques</Label>
-                  <Textarea
-                    value={formData.extra_conditions}
-                    onChange={(e) => setFormData({ ...formData, extra_conditions: e.target.value })}
-                    placeholder="Remarques, taxes, âge min, animaux…"
-                    rows={4}
+                  <Label>Check-out</Label>
+                  <Input
+                    value={formData.check_out_time}
+                    onChange={(e) => setFormData({ ...formData, check_out_time: e.target.value })}
+                    placeholder="12:00"
                   />
-                </div>
-
-                <div className="space-y-4">
-                  <Label>Équipements & services (HyperGuest)</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Tout ce que l&apos;hôtel propose, classé par section (catégorie HyperGuest) – sans prix.
-                  </p>
-
-                  {formData.hyperguest_facilities && formData.hyperguest_facilities.length > 0 ? (
-                    (() => {
-                      const bySection = formData.hyperguest_facilities.reduce(
-                        (acc, fac) => {
-                          const section =
-                            fac.classification === "Service"
-                              ? "Services"
-                              : (fac.category && fac.category.trim()) || "Autres";
-                          if (!acc[section]) acc[section] = [];
-                          acc[section].push(fac);
-                          return acc;
-                        },
-                        {} as Record<string, FacilityItem[]>,
-                      );
-
-                      const sectionOrder = [
-                        "Services",
-                        "Pool",
-                        "Spa",
-                        "Food & Beverage",
-                        "Internet",
-                        "Reception",
-                        "Wellness",
-                        "Parking",
-                        "Room Amenities",
-                        "Autres",
-                      ];
-                      const otherSections = Object.keys(bySection)
-                        .filter((s) => !sectionOrder.includes(s))
-                        .sort((a, b) => a.localeCompare(b));
-                      const sections = [...sectionOrder.filter((s) => bySection[s]?.length), ...otherSections];
-
-                      return (
-                        <div className="space-y-4">
-                          {sections.map((sectionName) => (
-                            <div key={sectionName} className="space-y-2">
-                              <span className="text-sm font-medium text-foreground">{sectionName}</span>
-                              <div className="flex flex-wrap gap-2">
-                                {bySection[sectionName].map((fac, i) => (
-                                  <span
-                                    key={fac.name + String(i)}
-                                    className={
-                                      sectionName === "Services"
-                                        ? "inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium"
-                                        : "inline-flex items-center rounded-md border bg-muted/50 px-2.5 py-1 text-xs font-medium"
-                                    }
-                                  >
-                                    {fac.name}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()
-                  ) : (
-                    <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-3 bg-muted/30">
-                      Aucun équipement ni service importé. Importez un hôtel depuis HyperGuest pour remplir cette liste.
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Extras / taxes / frais proposés par l&apos;hôtel (HyperGuest)</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Taxes et frais avec montants – en lecture seule. Appliqués au moment du checkout.
-                  </p>
-
-                  {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 ? (
-                    <ul className="rounded-lg border divide-y text-sm">
-                      {formData.hyperguest_extras.map((extra, i) => (
-                        <li key={extra.id ?? i} className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                          <span className="font-medium">{extra.title}</span>
-                          <span className="capitalize text-muted-foreground">
-                            {extra.category === "fee" ? "Frais" : "Taxe"}
-                          </span>
-                          {(extra.chargeValue != null || extra.chargeDisplay) && (
-                            <span className="font-medium text-primary">
-                              {extra.chargeDisplay ??
-                                (extra.chargeType === "percent"
-                                  ? `${extra.chargeValue}%`
-                                  : extra.currency
-                                    ? `${extra.chargeValue} ${extra.currency}`
-                                    : String(extra.chargeValue))}
-                            </span>
-                          )}
-                          {(extra.scope || extra.frequency) && (
-                            <span className="text-xs text-muted-foreground">
-                              {[extra.scope, extra.frequency].filter(Boolean).join(" · ")}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-4 bg-muted/30">
-                      Aucun extra / taxe / frais importé. Importez un hôtel depuis HyperGuest pour remplir cette liste.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4">Bilingual Content</h3>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-muted/30 p-2 rounded">
-                    <h4 className="font-medium text-sm">English Version</h4>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Hotel Name *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="region">Region</Label>
-                    <Input
-                      id="region"
-                      value={formData.region}
-                      onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="story">Story</Label>
-                    <Textarea
-                      id="story"
-                      value={formData.story}
-                      onChange={(e) => setFormData({ ...formData, story: e.target.value })}
-                      rows={6}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-muted/30 p-2 rounded">
-                    <h4 className="font-medium text-sm">Hebrew Version (עברית)</h4>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="name_he">שם המלון</Label>
-                    <div className="relative">
-                      <Input
-                        id="name_he"
-                        value={formData.name_he}
-                        onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
-                        dir="rtl"
-                        className="bg-hebrew-input"
-                        disabled={isTranslating}
-                      />
-                      {isTranslating && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-hebrew-input/80 rounded-md">
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="region_he">אזור</Label>
-                    <Input
-                      id="region_he"
-                      value={formData.region_he}
-                      onChange={(e) => setFormData({ ...formData, region_he: e.target.value })}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                      disabled={isTranslating}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city_he">עיר</Label>
-                    <Input
-                      id="city_he"
-                      value={formData.city_he}
-                      onChange={(e) => setFormData({ ...formData, city_he: e.target.value })}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                      disabled={isTranslating}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="story_he">סיפור</Label>
-                    <Textarea
-                      id="story_he"
-                      value={formData.story_he}
-                      onChange={(e) => setFormData({ ...formData, story_he: e.target.value })}
-                      rows={6}
-                      dir="rtl"
-                      className="bg-hebrew-input"
-                      disabled={isTranslating}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={saveMutation.isPending}>
-                {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {hotelId ? "Update Hotel" : "Create Hotel"}
-              </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nuits min.</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={formData.min_stay ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, min_stay: e.target.value ? parseInt(e.target.value, 10) : null })
+                  }
+                  placeholder="—"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nuits max.</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={formData.max_stay ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, max_stay: e.target.value ? parseInt(e.target.value, 10) : null })
+                  }
+                  placeholder="—"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-muted/30 mt-6">
+        {/* ══════════════════════════════════════════════════════════
+            6. CHAMBRES & CAPACITÉS
+        ══════════════════════════════════════════════════════════ */}
+        {formData.room_capacities && formData.room_capacities.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Chambres & capacités</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Capacités par type de chambre importées depuis HyperGuest (lecture seule).
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ul className="rounded-lg border divide-y text-sm">
+                {formData.room_capacities.map((room, i) => (
+                  <li key={i} className="p-3 flex flex-wrap gap-x-4 gap-y-1">
+                    <span className="font-medium">{room.name}</span>
+                    <span className="text-muted-foreground">
+                      {[
+                        room.maxAdultsNumber != null && `${room.maxAdultsNumber} adultes`,
+                        room.maxChildrenNumber != null && `${room.maxChildrenNumber} enfants`,
+                        room.maxOccupancy != null && `max ${room.maxOccupancy} pers.`,
+                        room.roomSize != null && `${room.roomSize} m²`,
+                        room.beddingSummary,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════
+            7. ÉQUIPEMENTS & SERVICES
+        ══════════════════════════════════════════════════════════ */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Équipements & services</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Tout ce que l'hôtel propose, classé par catégorie – sans prix.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {formData.hyperguest_facilities && formData.hyperguest_facilities.length > 0 ? (
+              (() => {
+                const bySection = formData.hyperguest_facilities.reduce(
+                  (acc, fac) => {
+                    const section =
+                      fac.classification === "Service"
+                        ? "Services"
+                        : (fac.category && fac.category.trim()) || "Autres";
+                    if (!acc[section]) acc[section] = [];
+                    acc[section].push(fac);
+                    return acc;
+                  },
+                  {} as Record<string, FacilityItem[]>,
+                );
+
+                const sectionOrder = [
+                  "Services",
+                  "Pool",
+                  "Spa",
+                  "Food & Beverage",
+                  "Internet",
+                  "Reception",
+                  "Wellness",
+                  "Parking",
+                  "Room Amenities",
+                  "Autres",
+                ];
+                const otherSections = Object.keys(bySection)
+                  .filter((s) => !sectionOrder.includes(s))
+                  .sort((a, b) => a.localeCompare(b));
+                const sections = [...sectionOrder.filter((s) => bySection[s]?.length), ...otherSections];
+
+                return (
+                  <div className="space-y-4">
+                    {sections.map((sectionName) => (
+                      <div key={sectionName} className="space-y-2">
+                        <span className="text-sm font-medium text-foreground">{sectionName}</span>
+                        <div className="flex flex-wrap gap-2">
+                          {bySection[sectionName].map((fac, i) => (
+                            <span
+                              key={fac.name + String(i)}
+                              className={
+                                sectionName === "Services"
+                                  ? "inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium"
+                                  : "inline-flex items-center rounded-md border bg-muted/50 px-2.5 py-1 text-xs font-medium"
+                              }
+                            >
+                              {fac.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()
+            ) : (
+              <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-3 bg-muted/30">
+                Aucun équipement importé. Importez un hôtel depuis HyperGuest pour remplir cette liste.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ══════════════════════════════════════════════════════════
+            8. CONDITIONS & TARIFICATION
+        ══════════════════════════════════════════════════════════ */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Conditions & tarification</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Politique d'annulation, conditions générales et taxes/frais.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Politique d&apos;annulation</Label>
+              <Textarea
+                value={formData.cancellation_policy}
+                onChange={(e) => setFormData({ ...formData, cancellation_policy: e.target.value })}
+                placeholder="Ex: J-2: 100% • À tout moment: 100%"
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Conditions</Label>
+              <Textarea
+                value={formData.extra_conditions}
+                onChange={(e) => setFormData({ ...formData, extra_conditions: e.target.value })}
+                placeholder="Remarques, taxes, âge min, animaux…"
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Taxes & frais</Label>
+              <p className="text-xs text-muted-foreground">
+                Taxes et frais avec montants – en lecture seule. Appliqués au moment du checkout.
+              </p>
+              {formData.hyperguest_extras && formData.hyperguest_extras.length > 0 ? (
+                <ul className="rounded-lg border divide-y text-sm">
+                  {formData.hyperguest_extras.map((extra, i) => (
+                    <li key={extra.id ?? i} className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                      <span className="font-medium">{extra.title}</span>
+                      <span className="capitalize text-muted-foreground">
+                        {extra.category === "fee" ? "Frais" : "Taxe"}
+                      </span>
+                      {(extra.chargeValue != null || extra.chargeDisplay) && (
+                        <span className="font-medium text-primary">
+                          {extra.chargeDisplay ??
+                            (extra.chargeType === "percent"
+                              ? `${extra.chargeValue}%`
+                              : extra.currency
+                                ? `${extra.chargeValue} ${extra.currency}`
+                                : String(extra.chargeValue))}
+                        </span>
+                      )}
+                      {(extra.scope || extra.frequency) && (
+                        <span className="text-xs text-muted-foreground">
+                          {[extra.scope, extra.frequency].filter(Boolean).join(" · ")}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-4 bg-muted/30">
+                  Aucune taxe ni frais importés. Importez un hôtel depuis HyperGuest pour remplir cette liste.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ══════════════════════════════════════════════════════════
+            SEO CONFIGURATION
+        ══════════════════════════════════════════════════════════ */}
+        <Card className="bg-muted/30">
           <CardHeader>
             <CardTitle>SEO Configuration</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -1309,8 +1348,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           </CardContent>
         </Card>
 
+        {/* Hotel Extras (edit mode only) */}
         {hotelId && (
-          <Card className="mt-6">
+          <Card>
             <CardHeader>
               <CardTitle>Hotel Extras</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -1325,8 +1365,41 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
             </CardContent>
           </Card>
         )}
-      </form>
 
+        {/* Boutons Save/Publish */}
+        <div className="flex gap-2 justify-end pb-8">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setFormData(prev => ({ ...prev, status: "draft" }));
+              saveMutation.mutate({ ...formData, status: "draft" });
+            }}
+            disabled={saveMutation.isPending || !formData.name}
+          >
+            {saveMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Draft
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              setFormData(prev => ({ ...prev, status: "published" }));
+              saveMutation.mutate({ ...formData, status: "published" });
+            }}
+            disabled={saveMutation.isPending || !formData.name}
+          >
+            {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Publish
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
