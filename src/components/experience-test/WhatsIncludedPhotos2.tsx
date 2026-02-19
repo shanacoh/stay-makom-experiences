@@ -6,9 +6,10 @@ import type { LucideIcon } from "lucide-react";
 interface WhatsIncludedPhotos2Props {
   experienceId: string;
   lang?: string;
+  longCopy?: string;
 }
 
-const WhatsIncludedPhotos2 = ({ experienceId, lang = "en" }: WhatsIncludedPhotos2Props) => {
+const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncludedPhotos2Props) => {
   const { data: includes } = useQuery({
     queryKey: ["experience2-includes", experienceId],
     queryFn: async () => {
@@ -23,10 +24,24 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en" }: WhatsIncludedPhotos
     },
   });
 
-  if (!includes || includes.length === 0) return null;
+  if (!includes || includes.length === 0) {
+    // Still show the section if there's a description
+    if (!longCopy) return null;
+    return (
+      <div className="space-y-4 sm:space-y-6 py-6 border-b border-border" dir={lang === "he" ? "rtl" : "ltr"}>
+        <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold">
+          {lang === "he" ? "מה בתכנית" : lang === "fr" ? "Au programme" : "What's on the program"}
+        </h2>
+        <div
+          className="text-sm md:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: longCopy }}
+        />
+      </div>
+    );
+  }
 
   const heading =
-    lang === "he" ? "מה כולל" : lang === "fr" ? "Ce qui est inclus" : "What's included";
+    lang === "he" ? "מה בתכנית" : lang === "fr" ? "Au programme" : "What's on the program";
 
   const isImageUrl = (url?: string | null): boolean =>
     !!url && (url.startsWith("http://") || url.startsWith("https://"));
@@ -38,8 +53,14 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en" }: WhatsIncludedPhotos
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6" dir={lang === "he" ? "rtl" : "ltr"}>
+    <div className="space-y-4 sm:space-y-6 py-6 border-b border-border" dir={lang === "he" ? "rtl" : "ltr"}>
       <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold">{heading}</h2>
+      {longCopy && (
+        <div
+          className="text-sm md:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: longCopy }}
+        />
+      )}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {includes.map((item) => {
           const title = lang === "he" ? item.title_he || item.title : item.title;
