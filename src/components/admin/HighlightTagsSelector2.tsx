@@ -93,28 +93,40 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
   const createCustomTagMutation = useMutation({
     mutationFn: async ({ labelEn, labelHe }: { labelEn: string; labelHe: string }) => {
       const slug = labelEn.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-      const { data, error } = await supabase.from("highlight_tags").insert({
+      // 1. Create the tag in highlight_tags
+      const { data: newTag, error: tagError } = await supabase.from("highlight_tags").insert({
         slug: `custom-${slug}-${Date.now()}`,
         label_en: labelEn,
         label_he: labelHe || null,
         is_common: false,
         display_order: 100,
       }).select().single();
-      if (error) throw error;
-      return data;
+      if (tagError) throw tagError;
+
+      // 2. Immediately link it to the experience if we have an ID
+      if (experienceId && newTag) {
+        const { error: linkError } = await (supabase as any)
+          .from("experience2_highlight_tags")
+          .insert({ experience_id: experienceId, tag_id: newTag.id });
+        if (linkError) throw linkError;
+      }
+
+      return newTag;
     },
     onSuccess: (newTag) => {
+      // Invalidate both queries so UI refreshes immediately
       queryClient.invalidateQueries({ queryKey: ["highlight-tags-custom2", experienceId] });
-      // Auto-select the newly created tag
+      queryClient.invalidateQueries({ queryKey: ["experience2-highlight-tags", experienceId] });
+
+      // In local mode (no experienceId yet), add to parent state
       if (isLocalMode) {
         onLocalTagsChange?.([...(localTags || []), { tag_id: newTag.id }]);
-      } else if (experienceId) {
-        addTagMutation.mutate(newTag.id);
       }
+
       setShowCustomDialog(false);
       setCustomLabelEn("");
       setCustomLabelHe("");
-      toast.success("Custom tag created");
+      toast.success("Tag personnalisé créé et sélectionné !");
     },
     onError: (error: any) => toast.error(error.message || "Failed to create tag"),
   });
