@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Receipt, ChevronDown, ChevronUp, Gift } from "lucide-react";
+import { Loader2, Plus, Trash2, Receipt, ChevronDown, ChevronUp, Gift, Zap } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import * as LucideIcons from "lucide-react";
 import type { TaxFeeExtra } from "@/components/admin/HyperGuestHotelSearch";
@@ -17,6 +17,38 @@ interface Hotel2ExtrasManagerProps {
   hotelId: string;
   hyperguestExtras?: TaxFeeExtra[];
 }
+
+// ── Presets catalogue ──────────────────────────────────────────────────────
+const PRESETS: { name_en: string; name_he: string; icon: string; pricing_type: string }[] = [
+  // 🏨 Hôtel & Logistique
+  { name_en: "Car Transfer Service (one way)",  name_he: "שירות העברה ברכב (כיוון אחד)", icon: "Car",        pricing_type: "per_booking" },
+  { name_en: "Car Transfer Service (round trip)", name_he: "שירות העברה ברכב (הלוך ושוב)", icon: "Car",      pricing_type: "per_booking" },
+  { name_en: "Early Check-in",                  name_he: "צ'ק אין מוקדם",                  icon: "Clock",      pricing_type: "per_booking" },
+  { name_en: "Late Check-out",                  name_he: "צ'ק אאוט מאוחר",                  icon: "Clock",      pricing_type: "per_booking" },
+  { name_en: "Breakfast",                        name_he: "ארוחת בוקר",                      icon: "Coffee",     pricing_type: "per_person"  },
+  { name_en: "Lazy Breakfast (late / in-room)",  name_he: "ארוחת בוקר עצלה (מאוחרת / בחדר)", icon: "Coffee",   pricing_type: "per_person"  },
+  { name_en: "Dinner",                           name_he: "ארוחת ערב",                        icon: "Utensils",  pricing_type: "per_person"  },
+  { name_en: "Picnic Basket",                    name_he: "סל פיקניק",                        icon: "ShoppingCart", pricing_type: "per_booking" },
+  { name_en: "Parking Reservation",              name_he: "הזמנת חניה",                       icon: "Car",       pricing_type: "per_booking" },
+  // 🧘 Bien-être & Expérience
+  { name_en: "Massage (60 min)",                 name_he: "עיסוי (60 דקות)",                  icon: "Sparkles",  pricing_type: "per_person"  },
+  { name_en: "Photoshoot Session",               name_he: "סשן צילומים",                      icon: "Camera",    pricing_type: "per_booking" },
+  { name_en: "Private Yoga Session",             name_he: "שיעור יוגה פרטי",                  icon: "Sun",       pricing_type: "per_booking" },
+  { name_en: "Spa Access",                       name_he: "כניסה לספא",                       icon: "Waves",     pricing_type: "per_person"  },
+  { name_en: "Beach Kit (STAYMAKOM towel)",      name_he: "ערכת חוף (מגבת STAYMAKOM)",        icon: "Umbrella",  pricing_type: "per_person"  },
+  // 🍾 Chambre & Ambiance
+  { name_en: "Champagne in Room",                name_he: "שמפניה בחדר",                      icon: "Wine",      pricing_type: "per_booking" },
+  { name_en: "Wine in Room",                     name_he: "יין בחדר",                         icon: "Wine",      pricing_type: "per_booking" },
+  { name_en: "Welcome Snack Basket",             name_he: "סל קבלת פנים",                    icon: "Gift",      pricing_type: "per_booking" },
+  { name_en: "Flower Bouquet",                   name_he: "זר פרחים",                         icon: "Flower",    pricing_type: "per_booking" },
+  { name_en: "Romantic Room Setup (candles / decoration)", name_he: "הכנת חדר רומנטי (נרות / קישוטים)", icon: "Heart", pricing_type: "per_booking" },
+  // 🎞️ Souvenirs & Slow Moments
+  { name_en: "Digital Camera",                   name_he: "מצלמה דיגיטלית",                   icon: "Camera",    pricing_type: "per_booking" },
+  { name_en: "Letter-to-Yourself Kit",           name_he: "ערכת מכתב לעצמי",                  icon: "Pen",       pricing_type: "per_booking" },
+  { name_en: "Stay Journal",                     name_he: "יומן שהייה",                       icon: "BookOpen",  pricing_type: "per_booking" },
+  { name_en: "Board Game",                       name_he: "משחק קופסה",                       icon: "Briefcase", pricing_type: "per_booking" },
+  { name_en: "Card Game",                        name_he: "משחק קלפים",                       icon: "Star",      pricing_type: "per_booking" },
+];
 
 const AVAILABLE_ICONS = [
   "Gift", "Wifi", "Utensils", "Wine", "Dumbbell", "Tent", "Plane", "Car",
@@ -32,18 +64,19 @@ const AVAILABLE_ICONS = [
 
 const PRICING_TYPES = [
   { value: "per_booking", label: "Per Experience (one-time)" },
-  { value: "per_night", label: "Per Night" },
-  { value: "per_person", label: "Per Guest" },
+  { value: "per_night",   label: "Per Night" },
+  { value: "per_person",  label: "Per Guest" },
 ];
 
 const CURRENCIES = ["ILS", "USD", "EUR", "GBP"];
 
+const EMPTY_FORM = { name_en: "", name_he: "", price: "", currency: "ILS", pricing_type: "per_booking", icon: "Gift" };
+
 export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2ExtrasManagerProps) {
   const queryClient = useQueryClient();
   const [expandedHyperguest, setExpandedHyperguest] = useState(false);
-  const [newExtra, setNewExtra] = useState({
-    name_en: "", name_he: "", price: "", currency: "ILS", pricing_type: "per_booking", icon: "Gift",
-  });
+  const [newExtra, setNewExtra] = useState(EMPTY_FORM);
+  const [selectedPreset, setSelectedPreset] = useState<string>("");
 
   const { data: extras = [], isLoading } = useQuery({
     queryKey: ["hotel2-extras", hotelId],
@@ -75,10 +108,11 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hotel2-extras", hotelId] });
-      toast.success("Extra added");
-      setNewExtra({ name_en: "", name_he: "", price: "", currency: "ILS", pricing_type: "per_booking", icon: "Gift" });
+      toast.success("Extra ajouté ✓");
+      setNewExtra(EMPTY_FORM);
+      setSelectedPreset("");
     },
-    onError: () => toast.error("Error adding extra"),
+    onError: () => toast.error("Erreur lors de l'ajout"),
   });
 
   const deleteMutation = useMutation({
@@ -88,9 +122,9 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hotel2-extras", hotelId] });
-      toast.success("Extra deleted");
+      toast.success("Extra supprimé");
     },
-    onError: () => toast.error("Error deleting extra"),
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   const toggleMutation = useMutation({
@@ -99,16 +133,36 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["hotel2-extras", hotelId] }),
-    onError: () => toast.error("Error updating extra"),
+    onError: () => toast.error("Erreur lors de la mise à jour"),
   });
 
   const handleAddExtra = () => {
-    if (!newExtra.name_en.trim()) { toast.error("English name required"); return; }
-    if (!newExtra.price || parseFloat(newExtra.price) <= 0) { toast.error("Valid price required"); return; }
+    if (!newExtra.name_en.trim()) { toast.error("Nom en anglais requis"); return; }
+    if (!newExtra.price || parseFloat(newExtra.price) <= 0) { toast.error("Prix valide requis"); return; }
     createMutation.mutate(newExtra);
   };
 
+  const handlePresetSelect = (presetName: string) => {
+    setSelectedPreset(presetName);
+    if (presetName === "__custom__" || !presetName) {
+      setNewExtra(EMPTY_FORM);
+      return;
+    }
+    const preset = PRESETS.find((p) => p.name_en === presetName);
+    if (preset) {
+      setNewExtra({
+        name_en: preset.name_en,
+        name_he: preset.name_he,
+        price: "",
+        currency: "ILS",
+        pricing_type: preset.pricing_type,
+        icon: preset.icon,
+      });
+    }
+  };
+
   const handleImport = (item: TaxFeeExtra) => {
+    setSelectedPreset("__custom__");
     setNewExtra({
       name_en: item.title,
       name_he: "",
@@ -117,7 +171,7 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
       pricing_type: "per_booking",
       icon: item.category === "tax" ? "Receipt" : "Gift",
     });
-    toast.success(`"${item.title}" pre-filled. Adjust and click Add.`);
+    toast.success(`"${item.title}" pré-rempli. Ajustez et cliquez Ajouter.`);
   };
 
   const renderIcon = (name: string) => {
@@ -145,7 +199,7 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
               </Button>
             </div>
             <CardDescription>
-              Imported from HyperGuest — click Import to pre-fill the form below
+              Importés depuis HyperGuest — cliquez Import pour pré-remplir le formulaire
             </CardDescription>
           </CardHeader>
           {expandedHyperguest && (
@@ -171,7 +225,7 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
       {/* Existing Extras */}
       {extras.length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-medium text-sm">Existing Extras</h4>
+          <h4 className="font-medium text-sm">Extras existants</h4>
           {extras.map((extra: any) => (
             <Card key={extra.id}>
               <CardContent className="p-3">
@@ -211,12 +265,62 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
 
       {/* Add New Extra Form */}
       <Card>
-        <CardContent className="p-4 space-y-4">
-          <h4 className="font-medium text-sm">Add New Extra</h4>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <CardTitle className="text-sm">Ajouter un extra</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Preset selector */}
+          <div className="space-y-1">
+            <Label className="text-xs font-semibold flex items-center gap-1">
+              <Zap className="h-3 w-3 text-amber-500" />
+              Sélectionner un extra récurrent (optionnel)
+            </Label>
+            <Select value={selectedPreset} onValueChange={handlePresetSelect}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="— Choisir un preset pour pré-remplir —" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[280px]">
+                <SelectItem value="__custom__">✏️ Créer un extra personnalisé</SelectItem>
+                {/* Hôtel & Logistique */}
+                <SelectItem value="__disabled_h" disabled className="text-xs font-semibold text-muted-foreground">🏨 Hôtel & Logistique</SelectItem>
+                {PRESETS.slice(0, 9).map((p) => (
+                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
+                    {p.name_en}
+                  </SelectItem>
+                ))}
+                {/* Bien-être */}
+                <SelectItem value="__disabled_b" disabled className="text-xs font-semibold text-muted-foreground">🧘 Bien-être & Expérience</SelectItem>
+                {PRESETS.slice(9, 14).map((p) => (
+                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
+                    {p.name_en}
+                  </SelectItem>
+                ))}
+                {/* Chambre & Ambiance */}
+                <SelectItem value="__disabled_c" disabled className="text-xs font-semibold text-muted-foreground">🍾 Chambre & Ambiance</SelectItem>
+                {PRESETS.slice(14, 19).map((p) => (
+                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
+                    {p.name_en}
+                  </SelectItem>
+                ))}
+                {/* Souvenirs */}
+                <SelectItem value="__disabled_s" disabled className="text-xs font-semibold text-muted-foreground">🎞️ Souvenirs & Slow Moments</SelectItem>
+                {PRESETS.slice(19).map((p) => (
+                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
+                    {p.name_en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Fields */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {/* Icon */}
             <div className="space-y-1">
-              <Label className="text-xs">Icon</Label>
+              <Label className="text-xs">Icône</Label>
               <Select value={newExtra.icon} onValueChange={(v) => setNewExtra({ ...newExtra, icon: v })}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
@@ -236,25 +340,25 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
 
             {/* Name EN */}
             <div className="space-y-1">
-              <Label className="text-xs">Name (EN) *</Label>
+              <Label className="text-xs">Nom (EN) *</Label>
               <Input className="h-9" value={newExtra.name_en} onChange={(e) => setNewExtra({ ...newExtra, name_en: e.target.value })} placeholder="Late Checkout" />
             </div>
 
             {/* Name HE */}
             <div className="space-y-1">
-              <Label className="text-xs">Name (HE)</Label>
-              <Input className="h-9" value={newExtra.name_he} onChange={(e) => setNewExtra({ ...newExtra, name_he: e.target.value })} dir="rtl" placeholder="צ'ק אאוט מאוחר" />
+              <Label className="text-xs">Nom (HE)</Label>
+              <Input className="h-9 bg-blue-50" value={newExtra.name_he} onChange={(e) => setNewExtra({ ...newExtra, name_he: e.target.value })} dir="rtl" placeholder="צ'ק אאוט מאוחר" />
             </div>
 
             {/* Price */}
             <div className="space-y-1">
-              <Label className="text-xs">Price *</Label>
+              <Label className="text-xs">Prix *</Label>
               <Input className="h-9" type="number" value={newExtra.price} onChange={(e) => setNewExtra({ ...newExtra, price: e.target.value })} placeholder="0.00" />
             </div>
 
             {/* Currency */}
             <div className="space-y-1">
-              <Label className="text-xs">Currency</Label>
+              <Label className="text-xs">Devise</Label>
               <Select value={newExtra.currency} onValueChange={(v) => setNewExtra({ ...newExtra, currency: v })}>
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -265,7 +369,7 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
 
             {/* Pricing Type */}
             <div className="space-y-1">
-              <Label className="text-xs">Pricing Type</Label>
+              <Label className="text-xs">Type de tarification</Label>
               <Select value={newExtra.pricing_type} onValueChange={(v) => setNewExtra({ ...newExtra, pricing_type: v })}>
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -274,9 +378,10 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
               </Select>
             </div>
           </div>
+
           <Button onClick={handleAddExtra} disabled={createMutation.isPending} className="w-full">
             {createMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-            Add Extra
+            Ajouter l'extra
           </Button>
         </CardContent>
       </Card>
