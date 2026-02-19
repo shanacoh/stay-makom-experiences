@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, Tag } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -16,6 +16,16 @@ import {
 // A local tag entry stores the tag_id selected locally before the experience exists in DB
 export interface LocalTagEntry {
   tag_id: string;
+}
+
+interface TagObject {
+  id: string;
+  label_en: string;
+  label_he?: string | null;
+  is_common: boolean;
+  slug: string;
+  icon?: string | null;
+  display_order: number;
 }
 
 interface HighlightTagsSelector2Props {
@@ -30,6 +40,8 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
   const [showCustomDialog, setShowCustomDialog] = useState(false);
   const [customLabelEn, setCustomLabelEn] = useState("");
   const [customLabelHe, setCustomLabelHe] = useState("");
+  // Local custom tags created during this session (for both local and edit mode, before refetch)
+  const [sessionCustomTags, setSessionCustomTags] = useState<TagObject[]>([]);
 
   const isLocalMode = !experienceId;
 
@@ -38,7 +50,7 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
     queryFn: async () => {
       const { data, error } = await supabase.from("highlight_tags").select("*").eq("is_common", true).order("display_order");
       if (error) throw error;
-      return data;
+      return data as TagObject[];
     },
   });
 
@@ -48,32 +60,53 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
       if (!experienceId) return [];
       const { data, error } = await (supabase as any).from("experience2_highlight_tags").select("tag_id").eq("experience_id", experienceId);
       if (error) throw error;
-      return data.map((et: any) => et.tag_id);
+      return data.map((et: any) => et.tag_id) as string[];
     },
     enabled: !!experienceId,
   });
 
-  const { data: customTags, isLoading: isLoadingCustomTags } = useQuery({
+  const { data: customTagsFromDB, isLoading: isLoadingCustomTags } = useQuery({
     queryKey: ["highlight-tags-custom2", experienceId],
     queryFn: async () => {
       if (!experienceId) return [];
-      const { data, error } = await (supabase as any).from("experience2_highlight_tags").select("tag_id, highlight_tags(*)").eq("experience_id", experienceId);
+      const { data, error } = await (supabase as any)
+        .from("experience2_highlight_tags")
+        .select("tag_id, highlight_tags(*)")
+        .eq("experience_id", experienceId);
       if (error) throw error;
-      return data.map((eht: any) => eht.highlight_tags).filter((tag: any): tag is NonNullable<typeof tag> => tag !== null && !tag.is_common);
+      return data
+        .map((eht: any) => eht.highlight_tags)
+        .filter((tag: any): tag is TagObject => tag !== null && !tag.is_common);
     },
     enabled: !!experienceId,
+    // Merge session custom tags once DB refreshes
+    select: (data) => {
+      // Remove session tags that are now in DB to avoid duplicates
+      const dbIds = new Set(data.map((t: TagObject) => t.id));
+      const remaining = sessionCustomTags.filter((t) => !dbIds.has(t.id));
+      return [...data, ...remaining];
+    },
   });
 
-  // Selected tag IDs: from DB or local state
-  const selectedTagIds = isLocalMode ? (localTags?.map(t => t.tag_id) || []) : (experienceTags || []);
-  const allAvailableTags = [...(commonTags || []), ...(customTags || [])];
+  // In local mode, use sessionCustomTags directly (not from DB)
+  const customTags: TagObject[] = isLocalMode ? sessionCustomTags : (customTagsFromDB || []);
 
-  // --- DB mutations (only used when experienceId exists) ---
+  // Selected tag IDs
+  const selectedTagIds: string[] = isLocalMode
+    ? (localTags?.map((t) => t.tag_id) || [])
+    : (experienceTags || []);
+
+  // All tags available for selection (common + custom)
+  const allAvailableTags: TagObject[] = [...(commonTags || []), ...customTags];
+
+  // --- DB mutations ---
 
   const addTagMutation = useMutation({
     mutationFn: async (tagId: string) => {
       if (!experienceId) throw new Error("No experience ID");
-      const { error } = await (supabase as any).from("experience2_highlight_tags").insert({ experience_id: experienceId, tag_id: tagId });
+      const { error } = await (supabase as any)
+        .from("experience2_highlight_tags")
+        .insert({ experience_id: experienceId, tag_id: tagId });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["experience2-highlight-tags", experienceId] }),
@@ -83,7 +116,11 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
   const removeTagMutation = useMutation({
     mutationFn: async (tagId: string) => {
       if (!experienceId) throw new Error("No experience ID");
-      const { error } = await (supabase as any).from("experience2_highlight_tags").delete().eq("experience_id", experienceId).eq("tag_id", tagId);
+      const { error } = await (supabase as any)
+        .from("experience2_highlight_tags")
+        .delete()
+        .eq("experience_id", experienceId)
+        .eq("tag_id", tagId);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["experience2-highlight-tags", experienceId] }),
@@ -93,17 +130,21 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
   const createCustomTagMutation = useMutation({
     mutationFn: async ({ labelEn, labelHe }: { labelEn: string; labelHe: string }) => {
       const slug = labelEn.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-      // 1. Create the tag in highlight_tags
-      const { data: newTag, error: tagError } = await supabase.from("highlight_tags").insert({
-        slug: `custom-${slug}-${Date.now()}`,
-        label_en: labelEn,
-        label_he: labelHe || null,
-        is_common: false,
-        display_order: 100,
-      }).select().single();
+      // 1. Create tag in highlight_tags
+      const { data: newTag, error: tagError } = await supabase
+        .from("highlight_tags")
+        .insert({
+          slug: `custom-${slug}-${Date.now()}`,
+          label_en: labelEn,
+          label_he: labelHe || null,
+          is_common: false,
+          display_order: 100,
+        })
+        .select()
+        .single();
       if (tagError) throw tagError;
 
-      // 2. Immediately link it to the experience if we have an ID
+      // 2. Link to experience if editing
       if (experienceId && newTag) {
         const { error: linkError } = await (supabase as any)
           .from("experience2_highlight_tags")
@@ -111,16 +152,22 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
         if (linkError) throw linkError;
       }
 
-      return newTag;
+      return newTag as TagObject;
     },
     onSuccess: (newTag) => {
-      // Invalidate both queries so UI refreshes immediately
-      queryClient.invalidateQueries({ queryKey: ["highlight-tags-custom2", experienceId] });
-      queryClient.invalidateQueries({ queryKey: ["experience2-highlight-tags", experienceId] });
+      // 1. Add to session custom tags immediately (visible in UI right away)
+      setSessionCustomTags((prev) => {
+        if (prev.some((t) => t.id === newTag.id)) return prev;
+        return [...prev, newTag];
+      });
 
-      // In local mode (no experienceId yet), add to parent state
+      // 2. Auto-select the new tag
       if (isLocalMode) {
         onLocalTagsChange?.([...(localTags || []), { tag_id: newTag.id }]);
+      } else if (experienceId) {
+        // Already linked in DB, just invalidate to sync
+        queryClient.invalidateQueries({ queryKey: ["highlight-tags-custom2", experienceId] });
+        queryClient.invalidateQueries({ queryKey: ["experience2-highlight-tags", experienceId] });
       }
 
       setShowCustomDialog(false);
@@ -136,7 +183,7 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
       if (checked) {
         onLocalTagsChange?.([...(localTags || []), { tag_id: tagId }]);
       } else {
-        onLocalTagsChange?.((localTags || []).filter(t => t.tag_id !== tagId));
+        onLocalTagsChange?.((localTags || []).filter((t) => t.tag_id !== tagId));
       }
     } else {
       if (checked) addTagMutation.mutate(tagId);
@@ -145,14 +192,14 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
   };
 
   const handleCreateCustomTag = () => {
-    if (!customLabelEn.trim()) { toast.error("English label is required"); return; }
+    if (!customLabelEn.trim()) { toast.error("Le label en anglais est requis"); return; }
     createCustomTagMutation.mutate({ labelEn: customLabelEn.trim(), labelHe: customLabelHe.trim() });
   };
 
   if (isLoadingTags || (!isLocalMode && (isLoadingExpTags || isLoadingCustomTags))) {
     return (
       <Card>
-        <CardHeader><CardTitle>Highlight Tags</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Points forts (badges)</CardTitle></CardHeader>
         <CardContent className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></CardContent>
       </Card>
     );
@@ -164,36 +211,71 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Highlight Tags</CardTitle>
-          <CardDescription>Select tags that will appear as badges on the experience card (e.g., NIGHT, BREAKFAST, SPA)</CardDescription>
+          <CardTitle>Points forts (badges)</CardTitle>
+          <CardDescription>Sélectionnez les tags qui apparaîtront comme badges sur la fiche expérience (ex : Petit-déjeuner, SPA, Nuit...)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Selected tags preview */}
           {selectedTagsDetails.length > 0 && (
             <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
               {selectedTagsDetails.map((tag) => (
                 <Badge key={tag.id} variant="secondary" className="flex items-center gap-1 px-2 py-1">
                   {tag.label_en}
-                  <button type="button" onClick={() => handleTagToggle(tag.id, false)} className="hover:text-destructive" disabled={removeTagMutation.isPending}>
+                  <button
+                    type="button"
+                    onClick={() => handleTagToggle(tag.id, false)}
+                    className="hover:text-destructive ml-1"
+                    disabled={removeTagMutation.isPending}
+                  >
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
             </div>
           )}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+          {/* Common tags grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {commonTags?.map((tag) => (
-              <label key={tag.id} className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors">
-                <Checkbox checked={selectedTagIds.includes(tag.id)} onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)} disabled={!isLocalMode && (addTagMutation.isPending || removeTagMutation.isPending)} />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{tag.label_en}</span>
-                  {tag.label_he && <span className="text-xs text-muted-foreground" dir="rtl">{tag.label_he}</span>}
+              <label
+                key={tag.id}
+                className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors"
+              >
+                <Checkbox
+                  checked={selectedTagIds.includes(tag.id)}
+                  onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)}
+                  disabled={!isLocalMode && (addTagMutation.isPending || removeTagMutation.isPending)}
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium truncate">{tag.label_en}</span>
+                  {tag.label_he && <span className="text-xs text-muted-foreground truncate" dir="rtl">{tag.label_he}</span>}
+                </div>
+              </label>
+            ))}
+
+            {/* Custom tags (session or DB) */}
+            {customTags.map((tag) => (
+              <label
+                key={tag.id}
+                className="flex items-center gap-2 p-2 rounded-md border border-accent/40 bg-accent/5 cursor-pointer hover:bg-accent/10 transition-colors"
+              >
+                <Checkbox
+                  checked={selectedTagIds.includes(tag.id)}
+                  onCheckedChange={(checked) => handleTagToggle(tag.id, checked as boolean)}
+                  disabled={!isLocalMode && (addTagMutation.isPending || removeTagMutation.isPending)}
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium truncate">{tag.label_en}</span>
+                  {tag.label_he && <span className="text-xs text-muted-foreground truncate" dir="rtl">{tag.label_he}</span>}
+                  <span className="text-[10px] text-accent font-medium">Custom</span>
                 </div>
               </label>
             ))}
           </div>
+
           <Button type="button" variant="outline" size="sm" onClick={() => setShowCustomDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Custom Tag
+            <Tag className="h-4 w-4 mr-2" />
+            Créer un tag personnalisé
           </Button>
         </CardContent>
       </Card>
@@ -201,24 +283,37 @@ export function HighlightTagsSelector2({ experienceId, localTags, onLocalTagsCha
       <Dialog open={showCustomDialog} onOpenChange={setShowCustomDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Custom Tag</DialogTitle>
-            <DialogDescription>Add a unique tag for this experience</DialogDescription>
+            <DialogTitle>Créer un tag personnalisé</DialogTitle>
+            <DialogDescription>Ce tag sera unique à cette expérience</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="custom-label-en2">Label (English) *</Label>
-              <Input id="custom-label-en2" value={customLabelEn} onChange={(e) => setCustomLabelEn(e.target.value)} placeholder="e.g., Private Beach" />
+              <Label htmlFor="custom-label-en2">Label (Anglais) *</Label>
+              <Input
+                id="custom-label-en2"
+                value={customLabelEn}
+                onChange={(e) => setCustomLabelEn(e.target.value)}
+                placeholder="ex : Private Beach"
+                onKeyDown={(e) => e.key === "Enter" && handleCreateCustomTag()}
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="custom-label-he2">Label (Hebrew)</Label>
-              <Input id="custom-label-he2" value={customLabelHe} onChange={(e) => setCustomLabelHe(e.target.value)} placeholder="חוף פרטי" dir="rtl" className="bg-hebrew-input" />
+              <Label htmlFor="custom-label-he2">Label (Hébreu)</Label>
+              <Input
+                id="custom-label-he2"
+                value={customLabelHe}
+                onChange={(e) => setCustomLabelHe(e.target.value)}
+                placeholder="חוף פרטי"
+                dir="rtl"
+                className="bg-hebrew-input"
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setShowCustomDialog(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => setShowCustomDialog(false)}>Annuler</Button>
             <Button type="button" onClick={handleCreateCustomTag} disabled={createCustomTagMutation.isPending}>
               {createCustomTagMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Create Tag
+              Créer le tag
             </Button>
           </DialogFooter>
         </DialogContent>
