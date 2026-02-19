@@ -325,6 +325,15 @@ export function BookingPanel2({
   const totalIsNaN = Number.isNaN(displayTotal);
 
   if (!hyperguestPropertyId) {
+    console.log("[BookingPanel2] ⛔ No hyperguestPropertyId — props received:", {
+      experienceId,
+      hotelId,
+      hyperguestPropertyId,
+      currency,
+      minParty,
+      maxParty,
+      lang,
+    });
     return (
       <Card>
         <CardContent className="pt-6">
