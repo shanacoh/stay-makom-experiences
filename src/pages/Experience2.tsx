@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingPanel2 } from "@/components/experience/BookingPanel2";
 import HeroSection from "@/components/experience-test/HeroSection";
-import ProgramTimeline from "@/components/experience-test/ProgramTimeline";
+
 import YourStaySection from "@/components/experience-test/YourStaySection";
 import LocationMap from "@/components/experience-test/LocationMap";
 import StickyPriceBar from "@/components/experience-test/StickyPriceBar";
@@ -26,7 +26,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SEOHead } from "@/components/SEOHead";
-import { MapPin, Moon, icons } from "lucide-react";
+import { MapPin, Moon } from "lucide-react";
 
 export default function Experience2() {
   const { slug } = useParams<{ slug: string }>();
@@ -133,21 +133,27 @@ export default function Experience2() {
   }, [hasMultiHotel, parcoursHotels, legacyHotel]);
 
   // ---------------------------------------------------------------------------
-  // Highlight tags
+  // Reviews for rating display in hero
   // ---------------------------------------------------------------------------
 
-  const { data: highlightTags } = useQuery({
-    queryKey: ["experience2-highlight-tags-public", experience?.id],
+  const { data: reviewsData } = useQuery({
+    queryKey: ["experience2-reviews-rating", experience?.id],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("experience2_highlight_tags")
-        .select("tag_id, highlight_tags(*)")
-        .eq("experience_id", experience!.id);
+      const { data, error } = await supabase
+        .from("experience2_reviews")
+        .select("rating")
+        .eq("experience_id", experience!.id)
+        .eq("is_visible", true);
       if (error) throw error;
-      return (data || []).map((eht: any) => eht.highlight_tags).filter(Boolean);
+      return data || [];
     },
     enabled: !!experience?.id,
   });
+
+  const reviewsCount = reviewsData?.length ?? 0;
+  const averageRating = reviewsCount > 0
+    ? reviewsData!.reduce((acc, r) => acc + r.rating, 0) / reviewsCount
+    : null;
 
   // ---------------------------------------------------------------------------
   // Loading state
@@ -246,12 +252,6 @@ export default function Experience2() {
     };
   };
 
-  // Build includes for ProgramTimeline
-  const includesData = (experience.includes || []).map((item: string, index: number) => ({
-    id: `include-${index}`,
-    title: item,
-    order_index: index,
-  }));
 
   // ---------------------------------------------------------------------------
   // Compute total nights for display
@@ -414,6 +414,8 @@ export default function Experience2() {
         categorySlug={category?.slug || undefined}
         minParty={experience.min_party || 2}
         maxParty={experience.max_party || 4}
+        averageRating={averageRating}
+        reviewsCount={reviewsCount}
       />
 
       {/* Contenu principal */}
@@ -424,48 +426,8 @@ export default function Experience2() {
             {/* Journey Overview (multi-hotel) */}
             {renderJourneyOverview()}
 
-            {/* Highlight Tags */}
-            {highlightTags && highlightTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {highlightTags.map((tag: any) => {
-                  const IconComponent = tag.icon ? (icons as any)[tag.icon] : null;
-                  const label = lang === "he" ? tag.label_he || tag.label_en : tag.label_en;
-                  return (
-                    <span
-                      key={tag.id}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-sm font-medium"
-                    >
-                      {IconComponent && <IconComponent className="h-3.5 w-3.5" />}
-                      {label}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Description (long copy) — shown standalone when no includes, or as intro in ProgramTimeline */}
-            {longCopy && includesData.length === 0 && (
-              <section className="py-6 border-b border-border" dir={lang === 'he' ? 'rtl' : 'ltr'}>
-                <div
-                  className="text-sm md:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: longCopy }}
-                />
-              </section>
-            )}
-
-            {includesData.length > 0 && (
-              <ProgramTimeline
-                includes={includesData}
-                lang={lang as "en" | "he" | "fr"}
-                introText={longCopy || undefined}
-              />
-            )}
-
-            {/* Practical Info */}
-            <PracticalInfo experience={experience} lang={lang as "en" | "he" | "fr"} />
-
-            {/* What's Included (visual grid) */}
-            <WhatsIncludedPhotos2 experienceId={experience.id} lang={lang} />
+            {/* What's on the program (always shown with long_copy as intro + experience2_includes grid) */}
+            <WhatsIncludedPhotos2 experienceId={experience.id} lang={lang} longCopy={longCopy || undefined} />
 
             {/* Extras / Add-ons */}
             <ExtrasSection2
@@ -485,6 +447,9 @@ export default function Experience2() {
             {/* Reviews */}
             <ReviewsGrid2 experienceId={experience.id} lang={lang} />
 
+            {/* Practical Info - Things to know */}
+            <PracticalInfo experience={experience} lang={lang as "en" | "he" | "fr"} />
+
             {/* Share */}
             <ShareWithFriendsSection
               title={title}
@@ -503,7 +468,7 @@ export default function Experience2() {
 
           {/* Colonne droite - Booking Panel (Desktop) */}
           <div className="hidden lg:block">
-            <div className="sticky top-24">
+            <div className="sticky top-8">
               <BookingPanel2
                 experienceId={experience.id}
                 hotelId={primaryHotel?.id || ""}
