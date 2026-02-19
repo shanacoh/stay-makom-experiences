@@ -207,6 +207,13 @@ export default function Experience2() {
   const category = experience.categories;
   const hyperguestPropertyId = primaryHotel?.hyperguest_property_id;
 
+  // 🔍 DEBUG — à retirer après investigation
+  console.log("[Experience2] primaryHotel complet:", primaryHotel);
+  console.log("[Experience2] hyperguestPropertyId résolu:", hyperguestPropertyId);
+  console.log("[Experience2] hasMultiHotel:", hasMultiHotel);
+  console.log("[Experience2] parcoursHotels[0]?.hotel keys:", Object.keys(parcoursHotels[0]?.hotel || {}));
+  console.log("[Experience2] legacyHotel keys:", Object.keys(legacyHotel || {}));
+
   // Use experience photos if available, otherwise hotel photos
   const photos =
     experience.photos?.length > 0
