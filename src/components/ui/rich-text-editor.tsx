@@ -7,11 +7,17 @@ import { useEffect } from 'react';
 import { 
   Bold, 
   Italic, 
-  Underline as UnderlineIcon, 
+  Strikethrough,
   List, 
   ListOrdered, 
   Link as LinkIcon,
-  Palette
+  Palette,
+  Heading1,
+  Heading2,
+  Heading3,
+  Undo,
+  Redo,
+  RemoveFormatting,
 } from 'lucide-react';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
@@ -27,6 +33,19 @@ interface RichTextEditorProps {
   placeholder?: string;
   dir?: 'ltr' | 'rtl';
 }
+
+const COLORS = [
+  { hex: '#1a2c3d', label: 'Navy' },
+  { hex: '#1d4ed8', label: 'Blue' },
+  { hex: '#15803d', label: 'Green' },
+  { hex: '#b45309', label: 'Amber' },
+  { hex: '#b91c1c', label: 'Red' },
+  { hex: '#7c3aed', label: 'Purple' },
+  { hex: '#0f766e', label: 'Teal' },
+  { hex: '#9f1239', label: 'Rose' },
+  { hex: '#78350f', label: 'Brown' },
+  { hex: '#374151', label: 'Gray' },
+];
 
 const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTextEditorProps) => {
   const editor = useEditor({
@@ -51,8 +70,20 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border rounded-md',
+        class: cn(
+          'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4',
+          'prose-headings:font-bold prose-headings:text-foreground',
+          'prose-p:text-foreground prose-p:leading-relaxed',
+          'prose-strong:text-foreground prose-strong:font-bold',
+          'prose-em:italic',
+          'prose-ul:list-disc prose-ul:pl-5',
+          'prose-ol:list-decimal prose-ol:pl-5',
+          'prose-li:text-foreground',
+          'prose-a:text-primary prose-a:underline',
+          'prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg',
+        ),
         dir,
+        'data-placeholder': placeholder || '',
       },
     },
   });
@@ -60,7 +91,7 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
   // Sync content prop changes with editor (for async data loading)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+      editor.commands.setContent(content || '');
     }
   }, [content, editor]);
 
@@ -75,130 +106,205 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
     }
   };
 
+  const ToolbarButton = ({ 
+    onClick, 
+    isActive, 
+    title, 
+    children 
+  }: { 
+    onClick: () => void; 
+    isActive?: boolean; 
+    title: string; 
+    children: React.ReactNode 
+  }) => (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      title={title}
+      className={cn(
+        "h-8 w-8 p-0 hover:bg-accent/50",
+        isActive && "bg-primary text-primary-foreground hover:bg-primary/90"
+      )}
+    >
+      {children}
+    </Button>
+  );
+
+  const Separator = () => <div className="w-px h-6 bg-border mx-1 self-center" />;
+
   return (
-    <div className="border rounded-lg">
+    <div className="border border-input rounded-lg overflow-hidden bg-card shadow-sm">
       {/* Toolbar */}
-      <div className="border-b p-2 flex flex-wrap gap-1 bg-muted/30">
-        {/* Text Formatting */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn(editor.isActive('bold') && 'bg-accent')}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn(editor.isActive('italic') && 'bg-accent')}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={cn(editor.isActive('strike') && 'bg-accent')}
-        >
-          <UnderlineIcon className="h-4 w-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-border mx-1" />
-
+      <div className="border-b border-border p-1.5 flex flex-wrap gap-0.5 bg-muted/20 items-center">
         {/* Headings */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={cn(editor.isActive('heading', { level: 1 }) && 'bg-accent')}
+          isActive={editor.isActive('heading', { level: 1 })}
+          title="Titre H1"
         >
-          H1
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+          <Heading1 className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={cn(editor.isActive('heading', { level: 2 }) && 'bg-accent')}
+          isActive={editor.isActive('heading', { level: 2 })}
+          title="Titre H2"
         >
-          H2
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+          <Heading2 className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={cn(editor.isActive('heading', { level: 3 }) && 'bg-accent')}
+          isActive={editor.isActive('heading', { level: 3 })}
+          title="Titre H3"
         >
-          H3
-        </Button>
+          <Heading3 className="h-3.5 w-3.5" />
+        </ToolbarButton>
 
-        <div className="w-px h-6 bg-border mx-1" />
+        <Separator />
+
+        {/* Text Formatting */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          isActive={editor.isActive('bold')}
+          title="Gras"
+        >
+          <Bold className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          isActive={editor.isActive('italic')}
+          title="Italique"
+        >
+          <Italic className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          isActive={editor.isActive('strike')}
+          title="Barré"
+        >
+          <Strikethrough className="h-3.5 w-3.5" />
+        </ToolbarButton>
+
+        <Separator />
 
         {/* Lists */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={cn(editor.isActive('bulletList') && 'bg-accent')}
+          isActive={editor.isActive('bulletList')}
+          title="Liste à puces"
         >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+          <List className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={cn(editor.isActive('orderedList') && 'bg-accent')}
+          isActive={editor.isActive('orderedList')}
+          title="Liste numérotée"
         >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
+          <ListOrdered className="h-3.5 w-3.5" />
+        </ToolbarButton>
 
-        <div className="w-px h-6 bg-border mx-1" />
+        <Separator />
 
         {/* Link */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+        <ToolbarButton
           onClick={setLink}
-          className={cn(editor.isActive('link') && 'bg-accent')}
+          isActive={editor.isActive('link')}
+          title="Lien"
         >
-          <LinkIcon className="h-4 w-4" />
-        </Button>
+          <LinkIcon className="h-3.5 w-3.5" />
+        </ToolbarButton>
 
         {/* Color Picker */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="sm">
-              <Palette className="h-4 w-4" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              title="Couleur du texte"
+              className="h-8 w-8 p-0 hover:bg-accent/50 relative"
+            >
+              <Palette className="h-3.5 w-3.5" />
+              <span
+                className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-4 rounded-sm"
+                style={{ backgroundColor: editor.getAttributes('textStyle').color || '#1a2c3d' }}
+              />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <div className="grid grid-cols-5 gap-2">
-              {['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB'].map((color) => (
+          <PopoverContent className="w-auto p-3" align="start">
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Couleur du texte</p>
+            <div className="grid grid-cols-5 gap-1.5">
+              {COLORS.map(({ hex, label }) => (
                 <button
-                  key={color}
+                  key={hex}
                   type="button"
-                  className="w-6 h-6 rounded border"
-                  style={{ backgroundColor: color }}
-                  onClick={() => editor.chain().focus().setColor(color).run()}
+                  title={label}
+                  className={cn(
+                    "w-7 h-7 rounded-md border-2 transition-transform hover:scale-110",
+                    editor.isActive('textStyle', { color: hex }) 
+                      ? "border-primary scale-110" 
+                      : "border-transparent"
+                  )}
+                  style={{ backgroundColor: hex }}
+                  onClick={() => editor.chain().focus().setColor(hex).run()}
                 />
               ))}
             </div>
+            <button
+              type="button"
+              className="mt-2 text-xs text-muted-foreground hover:text-foreground w-full text-left"
+              onClick={() => editor.chain().focus().unsetColor().run()}
+            >
+              ✕ Réinitialiser la couleur
+            </button>
           </PopoverContent>
         </Popover>
+
+        <Separator />
+
+        {/* Clear formatting */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
+          title="Effacer la mise en forme"
+        >
+          <RemoveFormatting className="h-3.5 w-3.5" />
+        </ToolbarButton>
+
+        <div className="flex-1" />
+
+        {/* Undo / Redo */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().undo().run()}
+          title="Annuler"
+        >
+          <Undo className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().redo().run()}
+          title="Rétablir"
+        >
+          <Redo className="h-3.5 w-3.5" />
+        </ToolbarButton>
       </div>
 
       {/* Editor Content */}
-      <EditorContent editor={editor} />
+      <div className="relative">
+        <EditorContent editor={editor} />
+        {/* Placeholder */}
+        {editor.isEmpty && placeholder && (
+          <p className="absolute top-4 left-4 text-muted-foreground/50 text-sm pointer-events-none select-none">
+            {placeholder}
+          </p>
+        )}
+      </div>
+
+      {/* Preview label */}
+      <div className="border-t border-border px-4 py-1.5 bg-muted/10 flex items-center gap-2">
+        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wide font-medium">Rendu en direct</span>
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-[10px] text-muted-foreground/50">HTML</span>
+      </div>
     </div>
   );
 };

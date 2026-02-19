@@ -443,6 +443,16 @@ export default function Experience2() {
               </div>
             )}
 
+            {/* Description (long copy) — shown standalone when no includes, or as intro in ProgramTimeline */}
+            {longCopy && includesData.length === 0 && (
+              <section className="py-6 border-b border-border" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+                <div
+                  className="text-sm md:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: longCopy }}
+                />
+              </section>
+            )}
+
             {includesData.length > 0 && (
               <ProgramTimeline
                 includes={includesData}

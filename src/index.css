@@ -202,4 +202,53 @@ All colors MUST be HSL.
   .prose p:has(br:only-child) {
     min-height: 1.5em;
   }
+
+  /* Tiptap editor prose overrides */
+  .ProseMirror {
+    @apply outline-none;
+  }
+
+  .ProseMirror h1 {
+    @apply text-2xl font-bold mt-4 mb-2;
+  }
+
+  .ProseMirror h2 {
+    @apply text-xl font-bold mt-3 mb-2;
+  }
+
+  .ProseMirror h3 {
+    @apply text-lg font-semibold mt-3 mb-1;
+  }
+
+  .ProseMirror p {
+    @apply leading-relaxed mb-2;
+  }
+
+  .ProseMirror strong {
+    @apply font-bold;
+  }
+
+  .ProseMirror em {
+    @apply italic;
+  }
+
+  .ProseMirror ul {
+    @apply list-disc pl-5 mb-2 space-y-1;
+  }
+
+  .ProseMirror ol {
+    @apply list-decimal pl-5 mb-2 space-y-1;
+  }
+
+  .ProseMirror li {
+    @apply leading-relaxed;
+  }
+
+  .ProseMirror a {
+    @apply text-primary underline cursor-pointer;
+  }
+
+  .ProseMirror s {
+    @apply line-through;
+  }
 }
