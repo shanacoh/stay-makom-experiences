@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,6 +129,7 @@ export function UnifiedExperience2Form({
   const [localIncludes, setLocalIncludes] = useState<LocalIncludeEntry[]>([]);
   const [localTags, setLocalTags] = useState<LocalTagEntry[]>([]);
   const [localReviews, setLocalReviews] = useState<LocalReviewEntry[]>([]);
+  const [showExtras, setShowExtras] = useState(false);
 
   // Use either the prop experienceId or the newly created one
   const currentExperienceId = experienceId || createdExperienceId;
@@ -1259,23 +1261,36 @@ export function UnifiedExperience2Form({
         {/* ----------------------------------------------------------------- */}
         <Card>
           <CardHeader>
-            <CardTitle>Options & extras</CardTitle>
-            <CardDescription>Extras que les voyageurs peuvent ajouter à leur réservation</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Options & extras</CardTitle>
+                <CardDescription>Extras que les voyageurs peuvent ajouter à leur réservation</CardDescription>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">{showExtras ? "Activés" : "Désactivés"}</span>
+                <Switch
+                  checked={showExtras}
+                  onCheckedChange={setShowExtras}
+                />
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            {currentExperienceId && experienceHotels.length > 0 ? (
-              <ExperienceExtrasSelector2
-                experienceId={currentExperienceId}
-                hotelIds={experienceHotels.map((h) => h.hotel_id)}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground italic text-center py-4">
-                {experienceHotels.length === 0
-                  ? "Ajoutez au moins un hôtel au parcours."
-                  : "Disponible après la première sauvegarde."}
-              </p>
-            )}
-          </CardContent>
+          {showExtras && (
+            <CardContent>
+              {currentExperienceId && experienceHotels.length > 0 ? (
+                <ExperienceExtrasSelector2
+                  experienceId={currentExperienceId}
+                  hotelIds={experienceHotels.map((h) => h.hotel_id)}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic text-center py-4">
+                  {experienceHotels.length === 0
+                    ? "Ajoutez au moins un hôtel au parcours."
+                    : "Disponible après la première sauvegarde."}
+                </p>
+              )}
+            </CardContent>
+          )}
         </Card>
 
         {/* ----------------------------------------------------------------- */}
