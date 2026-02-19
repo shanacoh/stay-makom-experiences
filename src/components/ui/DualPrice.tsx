@@ -20,11 +20,13 @@ function formatCurrency(amount: number, currency: string, locale = "en-US"): str
   }).format(amount);
 }
 
-function getSecondaryCurrency(currency: string): string | null {
+/** Always display EUR as the primary currency; show ILS as secondary. USD is converted to EUR. */
+function getDisplayCurrencies(currency: string): { primaryCur: string; secondaryCur: string | null } {
   const c = currency.toUpperCase();
-  if (c === "EUR") return "ILS";
-  if (c === "ILS") return "EUR";
-  return null;
+  if (c === "EUR") return { primaryCur: "EUR", secondaryCur: "ILS" };
+  if (c === "ILS") return { primaryCur: "EUR", secondaryCur: "ILS" };
+  if (c === "USD") return { primaryCur: "EUR", secondaryCur: "ILS" };
+  return { primaryCur: currency, secondaryCur: null };
 }
 
 export function DualPrice({
@@ -36,19 +38,15 @@ export function DualPrice({
   inline = false,
 }: DualPriceProps) {
   const { convertPrice } = useCurrencyRate();
-  const secondaryCurrency = getSecondaryCurrency(currency);
+  const { primaryCur, secondaryCur } = getDisplayCurrencies(currency);
 
-  // Default: always show EUR as primary for user-facing display
-  const shouldReverse = reverse || currency.toUpperCase() === "ILS";
-
-  const primaryCur = shouldReverse && secondaryCurrency ? secondaryCurrency : currency;
-  const secondCur = shouldReverse && secondaryCurrency ? currency : secondaryCurrency;
-
-  const primaryAmount = shouldReverse && secondaryCurrency ? convertPrice(amount, currency, secondaryCurrency) : amount;
-  const secondaryAmount = secondCur ? convertPrice(amount, currency, secondCur) : null;
+  const primaryAmount = primaryCur === currency.toUpperCase()
+    ? amount
+    : convertPrice(amount, currency, primaryCur);
+  const secondaryAmount = secondaryCur ? convertPrice(amount, currency, secondaryCur) : null;
 
   const primaryFormatted = formatCurrency(primaryAmount, primaryCur);
-  const secondaryFormatted = secondaryAmount != null && secondCur ? formatCurrency(secondaryAmount, secondCur) : null;
+  const secondaryFormatted = secondaryAmount != null && secondaryCur ? formatCurrency(secondaryAmount, secondaryCur) : null;
 
   if (!showSecondary || !secondaryFormatted) {
     return <span className={className}>{primaryFormatted}</span>;
