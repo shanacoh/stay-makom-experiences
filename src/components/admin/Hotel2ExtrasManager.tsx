@@ -8,9 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Receipt, ChevronDown, ChevronUp, Gift, Zap } from "lucide-react";
+import { Loader2, Plus, Trash2, Receipt, ChevronDown, ChevronUp, Zap, Eye, Settings2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import * as LucideIcons from "lucide-react";
+import {
+  Wine, Car, Coffee, Flower, Sparkle, Gift, Heart, Camera,
+  MusicNotes, Champagne, Bed, Cake, Drop, Leaf, Star, Sun, Umbrella,
+  BookOpen, Pen, Briefcase, ShoppingCart, type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import type { TaxFeeExtra } from "@/components/admin/HyperGuestHotelSearch";
 
 interface Hotel2ExtrasManagerProps {
@@ -50,33 +55,118 @@ const PRESETS: { name_en: string; name_he: string; icon: string; pricing_type: s
   { name_en: "Card Game",                        name_he: "משחק קלפים",                       icon: "Star",      pricing_type: "per_booking" },
 ];
 
+// ── Phosphor icon map (same as front) ──────────────────────────────────────
+const iconNameMapping: Record<string, PhosphorIcon> = {
+  Wine, Car, Coffee, Flower, Flower2: Flower, Sparkles: Sparkle, Sparkle, Gift, Heart,
+  Camera, Music: MusicNotes, MusicNotes, Bed, Cake, Drop, Droplets: Drop, Leaf, Star,
+  Sun, Umbrella, BookOpen, Pen, Briefcase, ShoppingCart,
+};
+const keywordMapping: Array<{ keywords: string[]; icon: PhosphorIcon }> = [
+  { keywords: ["wine", "vin", "יין"], icon: Wine },
+  { keywords: ["champagne", "שמפניה"], icon: Champagne },
+  { keywords: ["car", "transport", "taxi", "הסעה", "רכב"], icon: Car },
+  { keywords: ["coffee", "breakfast", "café", "ארוחת בוקר", "קפה", "dinner", "ערב"], icon: Coffee },
+  { keywords: ["flower", "bouquet", "פרח", "זר"], icon: Flower },
+  { keywords: ["spa", "massage", "wellness", "ספא", "עיסוי"], icon: Drop },
+  { keywords: ["gift", "basket", "snack", "picnic", "מתנה", "סל"], icon: Gift },
+  { keywords: ["romantic", "romance", "candle", "רומנטי", "נר"], icon: Heart },
+  { keywords: ["photo", "camera", "צילום", "מצלמה"], icon: Camera },
+  { keywords: ["journal", "book", "pen", "letter", "יומן", "מכתב"], icon: BookOpen },
+  { keywords: ["game", "board", "card", "משחק", "קלפים"], icon: Briefcase },
+  { keywords: ["beach", "umbrella", "towel", "חוף", "מגבת"], icon: Umbrella },
+  { keywords: ["yoga", "sun", "יוגה"], icon: Sun },
+];
+
+function getPhosphorIcon(iconName?: string, name?: string): PhosphorIcon {
+  if (iconName && iconNameMapping[iconName]) return iconNameMapping[iconName];
+  if (name) {
+    const lower = name.toLowerCase();
+    for (const { keywords, icon } of keywordMapping) {
+      if (keywords.some((kw) => lower.includes(kw))) return icon;
+    }
+  }
+  return Sparkle;
+}
+
+// ── Pricing labels ─────────────────────────────────────────────────────────
+const PRICING_TYPES = [
+  { value: "per_booking", label: "Par réservation" },
+  { value: "per_night",   label: "Par nuit" },
+  { value: "per_person",  label: "Par personne" },
+];
+const CURRENCIES = ["ILS", "USD", "EUR", "GBP"];
 const AVAILABLE_ICONS = [
   "Gift", "Wifi", "Utensils", "Wine", "Dumbbell", "Tent", "Plane", "Car",
   "Camera", "Music", "Sparkles", "Heart", "Star", "Coffee", "Baby",
-  "Dog", "Flower2", "Bike", "Hotel", "Bed", "Bath", "Sun", "Moon",
+  "Flower2", "Bike", "Hotel", "Bed", "Bath", "Sun", "Moon",
   "Umbrella", "Key", "Map", "MapPin", "Phone", "Globe", "Clock", "Calendar",
-  "ShoppingCart", "CreditCard", "Briefcase", "Package", "Shirt",
-  "Mountain", "Waves", "Snowflake", "Gem", "Crown", "Trophy", "Medal", "Flag",
-  "Compass", "Anchor", "Ship", "Train", "Bus", "Pizza", "IceCream",
+  "ShoppingCart", "CreditCard", "Briefcase", "Package",
+  "Mountain", "Waves", "Snowflake", "Gem", "Crown",
+  "Compass", "Anchor", "Pizza", "IceCream",
   "Cake", "Beer", "GlassWater", "BookOpen", "Newspaper", "Pen", "Bell",
-  "Lightbulb", "Flame", "Wind", "Leaf", "Trees", "Flower", "Bird", "Fish",
+  "Lightbulb", "Flame", "Wind", "Leaf", "Trees", "Flower", "Bird",
 ];
-
-const PRICING_TYPES = [
-  { value: "per_booking", label: "Per Experience (one-time)" },
-  { value: "per_night",   label: "Per Night" },
-  { value: "per_person",  label: "Per Guest" },
-];
-
-const CURRENCIES = ["ILS", "USD", "EUR", "GBP"];
-
 const EMPTY_FORM = { name_en: "", name_he: "", price: "", currency: "ILS", pricing_type: "per_booking", icon: "Gift" };
+
+// ── Front-style preview card ───────────────────────────────────────────────
+function ExtraPreviewCard({ extra, onToggle, onDelete }: {
+  extra: any;
+  onToggle: () => void;
+  onDelete: () => void;
+}) {
+  const IconComponent = getPhosphorIcon(extra.image_url, extra.name);
+  const pricingLabel = PRICING_TYPES.find(t => t.value === extra.pricing_type)?.label || "";
+
+  return (
+    <div className={`group rounded-xl border flex flex-col items-center text-center p-4 transition-all relative ${
+      extra.is_available ? "border-border/60 bg-muted/20" : "border-dashed border-border/30 bg-muted/10 opacity-50"
+    }`}>
+      {/* Actions overlay */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={onToggle}
+          title={extra.is_available ? "Désactiver" : "Activer"}
+          className="p-1 rounded-md bg-background border border-border hover:bg-muted transition-colors"
+        >
+          <div className={`w-2 h-2 rounded-full ${extra.is_available ? "bg-green-500" : "bg-muted-foreground"}`} />
+        </button>
+        <button
+          onClick={onDelete}
+          title="Supprimer"
+          className="p-1 rounded-md bg-background border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      </div>
+
+      {/* Icon */}
+      <div className="w-12 h-12 rounded-xl mb-3 flex items-center justify-center bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10">
+        <IconComponent size={26} weight="duotone" className="text-primary/60" />
+      </div>
+
+      {/* Name */}
+      <p className="text-sm font-medium text-foreground/80 leading-snug line-clamp-2 mb-1">{extra.name}</p>
+      {extra.name_he && (
+        <p className="text-xs text-muted-foreground mb-2" dir="rtl">{extra.name_he}</p>
+      )}
+
+      {/* Price pill */}
+      <div className="mt-auto pt-2">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border/60 px-3 py-1 text-xs font-medium bg-background">
+          +{extra.price} {extra.currency}
+          <span className="text-muted-foreground">{pricingLabel ? ` · ${pricingLabel}` : ""}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2ExtrasManagerProps) {
   const queryClient = useQueryClient();
   const [expandedHyperguest, setExpandedHyperguest] = useState(false);
   const [newExtra, setNewExtra] = useState(EMPTY_FORM);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"preview" | "manage">("preview");
 
   const { data: extras = [], isLoading } = useQuery({
     queryKey: ["hotel2-extras", hotelId],
@@ -124,7 +214,6 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
       queryClient.invalidateQueries({ queryKey: ["hotel2-extras", hotelId] });
       toast.success("Extra supprimé");
     },
-    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   const toggleMutation = useMutation({
@@ -133,7 +222,6 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["hotel2-extras", hotelId] }),
-    onError: () => toast.error("Erreur lors de la mise à jour"),
   });
 
   const handleAddExtra = () => {
@@ -144,44 +232,30 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
 
   const handlePresetSelect = (presetName: string) => {
     setSelectedPreset(presetName);
-    if (presetName === "__custom__" || !presetName) {
-      setNewExtra(EMPTY_FORM);
-      return;
-    }
+    if (presetName === "__custom__" || !presetName) { setNewExtra(EMPTY_FORM); return; }
     const preset = PRESETS.find((p) => p.name_en === presetName);
     if (preset) {
-      setNewExtra({
-        name_en: preset.name_en,
-        name_he: preset.name_he,
-        price: "",
-        currency: "ILS",
-        pricing_type: preset.pricing_type,
-        icon: preset.icon,
-      });
+      setNewExtra({ name_en: preset.name_en, name_he: preset.name_he, price: "", currency: "ILS", pricing_type: preset.pricing_type, icon: preset.icon });
     }
   };
 
   const handleImport = (item: TaxFeeExtra) => {
     setSelectedPreset("__custom__");
+    setActiveTab("manage");
     setNewExtra({
-      name_en: item.title,
-      name_he: "",
-      price: (item.chargeValue ?? 0).toString(),
-      currency: item.currency || "ILS",
-      pricing_type: "per_booking",
+      name_en: item.title, name_he: "", price: (item.chargeValue ?? 0).toString(),
+      currency: item.currency || "ILS", pricing_type: "per_booking",
       icon: item.category === "tax" ? "Receipt" : "Gift",
     });
-    toast.success(`"${item.title}" pré-rempli. Ajustez et cliquez Ajouter.`);
+    toast.success(`"${item.title}" pré-rempli.`);
   };
 
-  const renderIcon = (name: string) => {
+  const renderLucideIcon = (name: string) => {
     const Ic = (LucideIcons as any)[name];
-    return Ic ? <Ic className="h-4 w-4" /> : <Gift className="h-4 w-4" />;
+    return Ic ? <Ic className="h-4 w-4" /> : <LucideIcons.Gift className="h-4 w-4" />;
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-  }
+  if (isLoading) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>;
 
   return (
     <div className="space-y-6">
@@ -198,9 +272,7 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
                 {expandedHyperguest ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
             </div>
-            <CardDescription>
-              Importés depuis HyperGuest — cliquez Import pour pré-remplir le formulaire
-            </CardDescription>
+            <CardDescription>Importés depuis HyperGuest — cliquez Import pour pré-remplir le formulaire</CardDescription>
           </CardHeader>
           {expandedHyperguest && (
             <CardContent className="space-y-2">
@@ -222,169 +294,221 @@ export function Hotel2ExtrasManager({ hotelId, hyperguestExtras = [] }: Hotel2Ex
         </Card>
       )}
 
-      {/* Existing Extras */}
-      {extras.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">Extras existants</h4>
-          {extras.map((extra: any) => (
-            <Card key={extra.id}>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0">{renderIcon(extra.image_url || "Gift")}</div>
-                  <div className="flex-1 grid grid-cols-3 gap-2">
-                    <div>
-                      <p className="font-medium text-sm">{extra.name}</p>
-                      <p className="text-xs text-muted-foreground">English</p>
-                    </div>
-                    <div>
-                      <p className="text-sm">{extra.name_he || "-"}</p>
-                      <p className="text-xs text-muted-foreground">Hebrew</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{extra.price} {extra.currency}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {PRICING_TYPES.find(t => t.value === extra.pricing_type)?.label || "Pricing"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={extra.is_available}
-                      onCheckedChange={() => toggleMutation.mutate({ id: extra.id, is_available: extra.is_available })}
-                    />
-                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteMutation.mutate(extra.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Tab switcher */}
+      <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
+        <button
+          onClick={() => setActiveTab("preview")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+            activeTab === "preview" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Eye className="h-3.5 w-3.5" />
+          Aperçu front ({extras.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("manage")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+            activeTab === "manage" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Settings2 className="h-3.5 w-3.5" />
+          Gérer & ajouter
+        </button>
+      </div>
+
+      {/* ── PREVIEW TAB ── */}
+      {activeTab === "preview" && (
+        <div>
+          {extras.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-10 text-center border-2 border-dashed border-border rounded-xl">
+              <Sparkle size={32} className="text-muted-foreground/40" weight="duotone" />
+              <p className="text-sm text-muted-foreground">Aucun extra créé pour cet hôtel.</p>
+              <Button variant="outline" size="sm" onClick={() => setActiveTab("manage")}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Ajouter un extra
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* Section title exactly like front */}
+              <div className="mb-4 border-b border-border pb-4">
+                <h2 className="font-serif text-xl font-medium text-foreground mb-1">Spice it up</h2>
+                <p className="text-sm text-muted-foreground">Enhance your stay with optional extras</p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                {extras.map((extra) => (
+                  <ExtraPreviewCard
+                    key={extra.id}
+                    extra={extra}
+                    onToggle={() => toggleMutation.mutate({ id: extra.id, is_available: extra.is_available })}
+                    onDelete={() => deleteMutation.mutate(extra.id)}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-3 text-center">
+                Survolez une carte pour afficher les actions · Les désactivés apparaissent en grisé
+              </p>
+            </>
+          )}
         </div>
       )}
 
-      {/* Add New Extra Form */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            <CardTitle className="text-sm">Ajouter un extra</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Preset selector */}
-          <div className="space-y-1">
-            <Label className="text-xs font-semibold flex items-center gap-1">
-              <Zap className="h-3 w-3 text-amber-500" />
-              Sélectionner un extra récurrent (optionnel)
-            </Label>
-            <Select value={selectedPreset} onValueChange={handlePresetSelect}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder="— Choisir un preset pour pré-remplir —" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[280px]">
-                <SelectItem value="__custom__">✏️ Créer un extra personnalisé</SelectItem>
-                {/* Hôtel & Logistique */}
-                <SelectItem value="__disabled_h" disabled className="text-xs font-semibold text-muted-foreground">🏨 Hôtel & Logistique</SelectItem>
-                {PRESETS.slice(0, 9).map((p) => (
-                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
-                    {p.name_en}
-                  </SelectItem>
-                ))}
-                {/* Bien-être */}
-                <SelectItem value="__disabled_b" disabled className="text-xs font-semibold text-muted-foreground">🧘 Bien-être & Expérience</SelectItem>
-                {PRESETS.slice(9, 14).map((p) => (
-                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
-                    {p.name_en}
-                  </SelectItem>
-                ))}
-                {/* Chambre & Ambiance */}
-                <SelectItem value="__disabled_c" disabled className="text-xs font-semibold text-muted-foreground">🍾 Chambre & Ambiance</SelectItem>
-                {PRESETS.slice(14, 19).map((p) => (
-                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
-                    {p.name_en}
-                  </SelectItem>
-                ))}
-                {/* Souvenirs */}
-                <SelectItem value="__disabled_s" disabled className="text-xs font-semibold text-muted-foreground">🎞️ Souvenirs & Slow Moments</SelectItem>
-                {PRESETS.slice(19).map((p) => (
-                  <SelectItem key={p.name_en} value={p.name_en} className="pl-4">
-                    {p.name_en}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Fields */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {/* Icon */}
-            <div className="space-y-1">
-              <Label className="text-xs">Icône</Label>
-              <Select value={newExtra.icon} onValueChange={(v) => setNewExtra({ ...newExtra, icon: v })}>
-                <SelectTrigger className="h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-[200px]">
-                  {AVAILABLE_ICONS.map((icon) => (
-                    <SelectItem key={icon} value={icon}>
-                      <span className="flex items-center gap-2">
-                        {renderIcon(icon)}
-                        <span className="text-xs">{icon}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {/* ── MANAGE TAB ── */}
+      {activeTab === "manage" && (
+        <div className="space-y-4">
+          {/* List view */}
+          {extras.length > 0 && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 border-b border-border">
+                  <tr>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Extra</th>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Prix</th>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Type</th>
+                    <th className="text-center px-3 py-2 font-medium text-muted-foreground text-xs">Actif</th>
+                    <th className="px-3 py-2" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {extras.map((extra) => {
+                    const IconCmp = getPhosphorIcon(extra.image_url, extra.name);
+                    return (
+                      <tr key={extra.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                              <IconCmp size={16} weight="duotone" className="text-primary/60" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{extra.name}</p>
+                              {extra.name_he && <p className="text-xs text-muted-foreground" dir="rtl">{extra.name_he}</p>}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold">{extra.price} {extra.currency}</td>
+                        <td className="px-3 py-2.5 text-muted-foreground text-xs">
+                          {PRICING_TYPES.find(t => t.value === extra.pricing_type)?.label}
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          <Switch
+                            checked={extra.is_available}
+                            onCheckedChange={() => toggleMutation.mutate({ id: extra.id, is_available: extra.is_available })}
+                          />
+                        </td>
+                        <td className="px-3 py-2.5 text-right">
+                          <Button
+                            variant="ghost" size="icon"
+                            className="text-destructive h-7 w-7"
+                            onClick={() => deleteMutation.mutate(extra.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
+          )}
 
-            {/* Name EN */}
-            <div className="space-y-1">
-              <Label className="text-xs">Nom (EN) *</Label>
-              <Input className="h-9" value={newExtra.name_en} onChange={(e) => setNewExtra({ ...newExtra, name_en: e.target.value })} placeholder="Late Checkout" />
-            </div>
+          {/* Add form */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                <CardTitle className="text-sm">Ajouter un extra</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Preset selector */}
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold flex items-center gap-1">
+                  <Zap className="h-3 w-3 text-amber-500" />
+                  Sélectionner un preset (optionnel)
+                </Label>
+                <Select value={selectedPreset} onValueChange={handlePresetSelect}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="— Choisir un preset pour pré-remplir —" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[280px]">
+                    <SelectItem value="__custom__">✏️ Créer un extra personnalisé</SelectItem>
+                    <SelectItem value="__h" disabled className="text-xs font-semibold text-muted-foreground">🏨 Hôtel & Logistique</SelectItem>
+                    {PRESETS.slice(0, 9).map((p) => <SelectItem key={p.name_en} value={p.name_en} className="pl-4">{p.name_en}</SelectItem>)}
+                    <SelectItem value="__b" disabled className="text-xs font-semibold text-muted-foreground">🧘 Bien-être & Expérience</SelectItem>
+                    {PRESETS.slice(9, 14).map((p) => <SelectItem key={p.name_en} value={p.name_en} className="pl-4">{p.name_en}</SelectItem>)}
+                    <SelectItem value="__c" disabled className="text-xs font-semibold text-muted-foreground">🍾 Chambre & Ambiance</SelectItem>
+                    {PRESETS.slice(14, 19).map((p) => <SelectItem key={p.name_en} value={p.name_en} className="pl-4">{p.name_en}</SelectItem>)}
+                    <SelectItem value="__s" disabled className="text-xs font-semibold text-muted-foreground">🎞️ Souvenirs & Slow Moments</SelectItem>
+                    {PRESETS.slice(19).map((p) => <SelectItem key={p.name_en} value={p.name_en} className="pl-4">{p.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Name HE */}
-            <div className="space-y-1">
-              <Label className="text-xs">Nom (HE)</Label>
-              <Input className="h-9 bg-blue-50" value={newExtra.name_he} onChange={(e) => setNewExtra({ ...newExtra, name_he: e.target.value })} dir="rtl" placeholder="צ'ק אאוט מאוחר" />
-            </div>
+              {/* Fields grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Icône</Label>
+                  <Select value={newExtra.icon} onValueChange={(v) => setNewExtra({ ...newExtra, icon: v })}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {AVAILABLE_ICONS.map((icon) => (
+                        <SelectItem key={icon} value={icon}>
+                          <span className="flex items-center gap-2">
+                            {renderLucideIcon(icon)}
+                            <span className="text-xs">{icon}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            {/* Price */}
-            <div className="space-y-1">
-              <Label className="text-xs">Prix *</Label>
-              <Input className="h-9" type="number" value={newExtra.price} onChange={(e) => setNewExtra({ ...newExtra, price: e.target.value })} placeholder="0.00" />
-            </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Nom (EN) *</Label>
+                  <Input className="h-9" value={newExtra.name_en} onChange={(e) => setNewExtra({ ...newExtra, name_en: e.target.value })} placeholder="Late Checkout" />
+                </div>
 
-            {/* Currency */}
-            <div className="space-y-1">
-              <Label className="text-xs">Devise</Label>
-              <Select value={newExtra.currency} onValueChange={(v) => setNewExtra({ ...newExtra, currency: v })}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Nom (HE)</Label>
+                  <Input className="h-9 bg-blue-50" value={newExtra.name_he} onChange={(e) => setNewExtra({ ...newExtra, name_he: e.target.value })} dir="rtl" placeholder="צ'ק אאוט מאוחר" />
+                </div>
 
-            {/* Pricing Type */}
-            <div className="space-y-1">
-              <Label className="text-xs">Type de tarification</Label>
-              <Select value={newExtra.pricing_type} onValueChange={(v) => setNewExtra({ ...newExtra, pricing_type: v })}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRICING_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Prix *</Label>
+                  <Input className="h-9" type="number" value={newExtra.price} onChange={(e) => setNewExtra({ ...newExtra, price: e.target.value })} placeholder="0.00" />
+                </div>
 
-          <Button onClick={handleAddExtra} disabled={createMutation.isPending} className="w-full">
-            {createMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-            Ajouter l'extra
-          </Button>
-        </CardContent>
-      </Card>
+                <div className="space-y-1">
+                  <Label className="text-xs">Devise</Label>
+                  <Select value={newExtra.currency} onValueChange={(v) => setNewExtra({ ...newExtra, currency: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs">Type de tarification</Label>
+                  <Select value={newExtra.pricing_type} onValueChange={(v) => setNewExtra({ ...newExtra, pricing_type: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PRICING_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Button onClick={handleAddExtra} disabled={createMutation.isPending} className="w-full">
+                {createMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                Ajouter l'extra
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
