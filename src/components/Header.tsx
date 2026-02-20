@@ -14,22 +14,22 @@ const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const isDarkHeroPage = [
-    "/gift-card",
-    "/companies",
-    "/corporate",
-    "/contact",
-    "/partners",
-    "/about",
-    "/launch",
-  ].includes(location.pathname);
+  "/gift-card",
+  "/companies",
+  "/corporate",
+  "/contact",
+  "/partners",
+  "/about",
+  "/launch"].
+  includes(location.pathname);
   const isTransparentPage = isHomePage || isDarkHeroPage;
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  
+
   // Auth popup state
-  const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup"; context: "favorites" | "account" | "signup" }>({ open: false, tab: "login", context: "account" });
+  const [authDialog, setAuthDialog] = useState<{open: boolean;tab: "login" | "signup";context: "favorites" | "account" | "signup";}>({ open: false, tab: "login", context: "account" });
 
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -72,13 +72,13 @@ const Header = () => {
   }, [isTransparentPage, lastScrollY]);
 
   const headerClasses =
-    isTransparentPage && !isScrolled
-      ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${
-          isVisible ? "top-0" : "-top-full"
-        }`
-      : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm border-b border-border/40 transition-all duration-200 ${
-          isVisible ? "top-0" : "-top-full"
-        }`;
+  isTransparentPage && !isScrolled ?
+  `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${
+  isVisible ? "top-0" : "-top-full"}` :
+
+  `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm border-b border-border/40 transition-all duration-200 ${
+  isVisible ? "top-0" : "-top-full"}`;
+
 
   const logoClasses = isTransparentPage && !isScrolled ? "text-white" : "text-logo";
 
@@ -87,8 +87,8 @@ const Header = () => {
       <div className="container flex items-center justify-between bg-transparent h-14">
         <Link to={getLocalizedPath("/")} className="flex items-center space-x-2">
           <span
-            className={`font-sans font-bold tracking-[-0.04em] uppercase text-xl ${logoClasses}`}
-          >
+            className={`font-sans font-bold tracking-[-0.04em] uppercase text-xl ${logoClasses}`}>
+
             STAYMAKOM
           </span>
         </Link>
@@ -100,77 +100,77 @@ const Header = () => {
             <button
               onClick={() => setLanguage("en")}
               className={`text-xs transition-colors ${
-                lang === "en"
-                  ? isTransparentPage && !isScrolled
-                    ? "text-white font-semibold"
-                    : "text-foreground font-semibold"
-                  : isTransparentPage && !isScrolled
-                    ? "text-white/60 hover:text-white/80"
-                    : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
+              lang === "en" ?
+              isTransparentPage && !isScrolled ?
+              "text-white font-semibold" :
+              "text-foreground font-semibold" :
+              isTransparentPage && !isScrolled ?
+              "text-white/60 hover:text-white/80" :
+              "text-muted-foreground hover:text-foreground"}`
+              }>
+
               EN
             </button>
             <span
               className={`text-xs ${
-                isTransparentPage && !isScrolled
-                  ? "text-white/40"
-                  : "text-muted-foreground/40"
-              }`}
-            >
+              isTransparentPage && !isScrolled ?
+              "text-white/40" :
+              "text-muted-foreground/40"}`
+              }>
+
               |
             </span>
             <button
               onClick={() => setLanguage("he")}
               className={`text-xs transition-colors ${
-                lang === "he"
-                  ? isTransparentPage && !isScrolled
-                    ? "text-white font-semibold"
-                    : "text-foreground font-semibold"
-                  : isTransparentPage && !isScrolled
-                    ? "text-white/60 hover:text-white/80"
-                    : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
+              lang === "he" ?
+              isTransparentPage && !isScrolled ?
+              "text-white font-semibold" :
+              "text-foreground font-semibold" :
+              isTransparentPage && !isScrolled ?
+              "text-white/60 hover:text-white/80" :
+              "text-muted-foreground hover:text-foreground"}`
+              }>
+
               עב
             </button>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className={`hidden md:flex text-[11px] h-6 px-2.5 ${
-              isTransparentPage && !isScrolled
-                ? "border-white/30 text-white hover:bg-white/10 hover:text-white"
-                : "border-border/60 hover:bg-foreground/5 hover:border-border"
-            }`}
-            onClick={() => {
-              if (location.pathname !== "/") {
-                navigate(getLocalizedPath("/#choose-escape"));
-              } else {
-                document
-                  .getElementById("choose-escape")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-          >
-            {lang === "he" ? "מלון + חוויה" : "HOTEL + EXPERIENCE"}
-          </Button>
+          
 
-          {user ? (
-            <UserDropdown
-              user={user}
-              isTransparent={isTransparentPage && !isScrolled}
-              onSignOut={handleSignOut}
-            />
-          ) : (
-            <AccountBubble
-              lang={lang as "en" | "fr" | "he"}
-              isTransparent={isTransparentPage && !isScrolled}
-              onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
-              onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
-            />
-          )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          {user ?
+          <UserDropdown
+            user={user}
+            isTransparent={isTransparentPage && !isScrolled}
+            onSignOut={handleSignOut} /> :
+
+
+          <AccountBubble
+            lang={lang as "en" | "fr" | "he"}
+            isTransparent={isTransparentPage && !isScrolled}
+            onSignIn={() => setAuthDialog({ open: true, tab: "login", context: "account" })}
+            onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })} />
+
+          }
 
           {/* Favorites Button */}
           <Button
@@ -178,11 +178,11 @@ const Header = () => {
             size="icon"
             onClick={handleFavoritesClick}
             className={`h-8 w-8 ${
-              isTransparentPage && !isScrolled
-                ? "text-white hover:bg-white/10"
-                : "hover:bg-foreground/5"
-            }`}
-          >
+            isTransparentPage && !isScrolled ?
+            "text-white hover:bg-white/10" :
+            "hover:bg-foreground/5"}`
+            }>
+
             <Heart className="h-5 w-5" />
           </Button>
 
@@ -200,10 +200,10 @@ const Header = () => {
         onSignupSuccess={() => {
           setAuthDialog({ open: false, tab: "login", context: "account" });
           navigateLocalized("/account");
-        }}
-      />
-    </header>
-  );
+        }} />
+
+    </header>);
+
 };
 
 export default Header;
