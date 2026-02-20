@@ -21,7 +21,8 @@ import {
   DialogTitle,
   DialogDescription } from
 "@/components/ui/dialog";
-import { Loader2, ArrowRight, Gift, CheckCircle } from "lucide-react";
+import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
@@ -44,7 +45,7 @@ const LaunchIndex = () => {
   const [submitted, setSubmitted] = useState(false);
 
   // Filter state
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>(FILTER_ADVENTURE);
 
   // Waitlist popup state
   const [waitlistOpen, setWaitlistOpen] = useState(false);
@@ -203,87 +204,44 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 2. FILTER SECTION ─── */}
-        <section className="py-16 sm:py-20 bg-background md:py-[52px]">
+        <section className="py-16 sm:py-20 bg-background md:py-20">
           <div className="container px-4 max-w-5xl mx-auto text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-3">Handpicked hotels, 
-unforgettable experiences.
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold uppercase tracking-[-0.02em] mb-3 leading-tight">
+              Handpicked Hotels.
+              <br />
+              Unforgettable Experiences.
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base mb-10">
               For 24 hours, 48 hours, or tailor-made experiences.
             </p>
 
-            {/* Two visual filter buttons */}
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
-              {/* Romantic getaway */}
+            {/* Compact pill toggle */}
+            <div className="inline-flex items-center bg-muted/50 rounded-full p-1 border border-border/50">
               <button
-                onClick={() => handleFilterClick(FILTER_ROMANTIC)}
-                className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
-                activeFilter === FILTER_ROMANTIC ?
-                "ring-2 ring-primary ring-offset-2 scale-[1.02]" :
-                "hover:scale-[1.02]"}`
-                }>
-
-                <img
-                  src={romanticImg}
-                  alt="Romantic getaway"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-
-                <div
-                  className={`absolute inset-0 transition-all duration-500 ${
-                  activeFilter === FILTER_ROMANTIC ?
-                  "bg-black/30" :
-                  "bg-black/40 group-hover:bg-black/30"}`
-                  } />
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
-                    Romantic
-                    <br />
-                    getaway
-                  </span>
-                </div>
+                onClick={() => setActiveFilter(FILTER_ADVENTURE)}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
+                  activeFilter === FILTER_ADVENTURE
+                    ? "bg-white shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Compass size={15} />
+                Feel adventurous
               </button>
-
-              {/* Feel adventurous */}
               <button
-                onClick={() => handleFilterClick(FILTER_ADVENTURE)}
-                className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
-                activeFilter === FILTER_ADVENTURE ?
-                "ring-2 ring-primary ring-offset-2 scale-[1.02]" :
-                "hover:scale-[1.02]"}`
-                }>
-
-                <img
-                  src={activeImg}
-                  alt="Feel adventurous"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-
-                <div
-                  className={`absolute inset-0 transition-all duration-500 ${
-                  activeFilter === FILTER_ADVENTURE ?
-                  "bg-black/30" :
-                  "bg-black/40 group-hover:bg-black/30"}`
-                  } />
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
-                    Feel
-                    <br />
-                    adventurous
-                  </span>
-                </div>
+                onClick={() => setActiveFilter(FILTER_ROMANTIC)}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
+                  activeFilter === FILTER_ROMANTIC
+                    ? "bg-white shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Heart size={15} />
+                Romantic getaway
               </button>
             </div>
-
-            {/* Active filter indicator */}
-            {activeFilter &&
-            <button
-              onClick={() => setActiveFilter(null)}
-              className="mt-6 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
-
-                {isRTL ? "הצג הכל" : "Show all experiences"}
-              </button>
-            }
           </div>
         </section>
 
