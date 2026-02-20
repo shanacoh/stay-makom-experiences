@@ -321,11 +321,8 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 6. GIFT CARD ─── */}
-        <section className="container py-16 md:py-20 px-4">
-          <div
-            className={`grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto ${
-            isRTL ? "md:grid-flow-col-dense" : ""}`
-            }>
+        <section className="container py-10 md:py-14 px-4">
+          <div className={`grid md:grid-cols-2 gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
 
             <div
               className={`relative overflow-hidden rounded-2xl ${
@@ -335,12 +332,12 @@ const LaunchIndex = () => {
               <img
                 src={giftCardHero}
                 alt="Gift Card"
-                className="w-full h-72 md:h-96 object-cover hover:scale-105 transition-transform duration-500" />
+                className="w-full h-56 md:h-72 object-cover hover:scale-105 transition-transform duration-500" />
 
             </div>
 
-            <div className={`space-y-5 ${isRTL ? "text-right md:order-1" : ""}`}>
-              <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] leading-tight">
+            <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
+              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
                 Perfect gift.
                 <br />
                 The gift of escape.
