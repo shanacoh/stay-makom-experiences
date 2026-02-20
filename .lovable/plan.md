@@ -1,68 +1,52 @@
 
 
-# Refonte du sélecteur de filtre -- Section 2 de `/launch`
+# Fusion sections "More experiences" + "Coming soon" -- version compacte
 
-## Ce qui change
+## Concept
 
-### 1. Titre reformaté sur deux lignes distinctes
-Le titre passe de "Handpicked hotels, unforgettable experiences." a deux lignes separees par un point :
-```
-Handpicked Hotels.
-Unforgettable Experiences.
-```
-Typographie bold uppercase, grande taille, avec un espacement genereux.
+Une seule section avec fond `bg-muted/50`, sans separateur, et le haut (titre + email) condense sur le minimum de lignes possible.
 
-### 2. Remplacement des grandes cartes image par un toggle compact
-
-Les deux grosses cartes image (aspect ratio, overlay sombre, etc.) sont remplacees par un **toggle button inline** compact et elegant :
-
-- Un conteneur horizontal avec fond `bg-muted/50` et `rounded-full`, type "pill selector"
-- Deux boutons cote a cote :
-  - **Feel adventurous** (a gauche)
-  - **Romantic getaway** (a droite)
-- Chaque bouton a une petite icone :
-  - Feel adventurous : icone `Compass` (lucide)
-  - Romantic getaway : icone `Heart` (lucide)
-- Le bouton actif a un fond `bg-white` (ou `bg-primary` avec texte blanc), un `shadow-sm`, et `rounded-full`
-- Le bouton inactif est transparent avec texte `text-muted-foreground`
-- Transition smooth entre les etats (`transition-all duration-300`)
-- Taille compacte : `h-10 px-5 text-sm`
-
-### 3. Etat par defaut
-
-`activeFilter` est initialise a `FILTER_ADVENTURE` ("active") au lieu de `null`, donc "Feel adventurous" est selectionne par defaut au chargement.
-
-### 4. Sous-titre conserve
-
-"For 24 hours, 48 hours, or tailor-made experiences." reste en place sous le titre.
-
-### 5. Suppression du lien "Show all experiences"
-
-Le bouton "Show all experiences" qui apparaissait sous les filtres est retire. L'utilisateur bascule simplement entre les deux options.
-
-## Details techniques
-
-### Fichier modifie : `src/pages/LaunchIndex.tsx`
-
-- **Ligne 47** : Changer l'initialisation de `useState<string | null>(null)` a `useState<string | null>(FILTER_ADVENTURE)`
-- **Lignes 206-288** : Remplacer toute la section filtre :
-  - Nouveau titre en 2 lignes avec `<br />` ou deux `<span>` en block
-  - Sous-titre inchange
-  - Nouveau composant toggle inline : un `div` flex horizontal avec deux `button` stylises en pill, chacun avec icone Lucide + texte
-  - Suppression du bouton "Show all experiences"
-- Les images `romanticImg` et `activeImg` ne seront plus utilisees dans cette section (les imports peuvent rester pour usage futur)
-
-### Rendu visuel attendu
+## Rendu visuel
 
 ```text
-        Handpicked Hotels.
-     Unforgettable Experiences.
-
-  For 24 hours, 48 hours, or tailor-made.
-
-  [ 🧭 Feel adventurous | ❤️ Romantic getaway ]
-         (toggle compact pill)
+┌──────────────────────────────────────────────────┐
+│              (fond beige unifie bg-muted/50)      │
+│                                                   │
+│  MORE EXPERIENCES ARE ON THE WAY.                 │
+│  Be the first to know.  [email______] [NOTIFY ME]│
+│                                                   │
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                 │
+│  │ ROM │ │ FAM │ │ SPO │ │ NAT │                  │
+│  └─────┘ └─────┘ └─────┘ └─────┘                 │
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                 │
+│  │ FOO │ │ MIN │ │ WOR │ │ GOL │                  │
+│  └─────┘ └─────┘ └─────┘ └─────┘                 │
+│                                                   │
+└──────────────────────────────────────────────────┘
 ```
 
-Le toggle fait environ 350px de large, centre, avec des coins arrondis, et un indicateur visuel clair sur l'option active (fond blanc + ombre).
+Le titre, le sous-titre et le formulaire email sont condenses sur **2 lignes max** en desktop (titre sur une ligne, sous-titre + formulaire sur la meme ligne). En mobile, ca passe sur 3 lignes naturellement.
+
+## Changements techniques
+
+Fichier : `src/pages/LaunchIndex.tsx`
+
+### 1. Fusionner les sections 7 et 8 en une seule `<section>`
+- Supprimer le `</section>` de la section 7 et le `<section>` de la section 8
+- Un seul wrapper `<section className="py-12 sm:py-16 bg-muted/50">`
+
+### 2. Condenser le haut (titre + email) sur le minimum de place
+- Titre en une seule ligne : `text-xl sm:text-2xl md:text-3xl` avec `mb-3` seulement
+- Sous-titre et formulaire email sur la meme ligne en desktop via `flex` :
+  - Sur mobile : sous-titre au-dessus, formulaire en dessous (flex-col)
+  - Sur tablette+ : sous-titre a gauche, formulaire a droite (flex-row items-center)
+- Reduire le `max-w` du conteneur haut a `max-w-2xl` pour que tout soit compact
+
+### 3. Grille de categories juste en dessous
+- `mt-10` entre le formulaire et la grille (pas de separateur)
+- Supprimer le titre "Coming soon" (redondant)
+- Garder la grille `grid-cols-2 md:grid-cols-4` existante
+
+### 4. Pas de separateur
+- Aucune ligne, aucun border-t -- juste de l'espace naturel entre le formulaire et les cartes
 
