@@ -1,114 +1,68 @@
 
 
-# Refonte de la page `/launch` -- Alignement sur l'ADN visuel de la homepage
+# Refonte du sélecteur de filtre -- Section 2 de `/launch`
 
-## Probleme actuel
+## Ce qui change
 
-La page `/launch` a ete creee "from scratch" avec un hero generique (serif, fond plein, bouton pill) qui ne correspond pas du tout au style de la homepage actuelle : typographie sans-serif bold uppercase, hero avec texte rotatif, bandeau marquee, categories visuelles, sections sombres avec images.
-
-## Ce qui va changer
-
-La page `LaunchIndex.tsx` sera entierement reecrite pour reprendre les composants et le style exact de la homepage, en ne gardant que les sections pertinentes pour le lancement.
-
-## Structure de la nouvelle page `/launch`
-
-```text
-+-----------------------------------------------+
-| HEADER (existant, inchange)                   |
-+-----------------------------------------------+
-| HERO (meme style que Index.tsx)               |
-| - Image de fond: hero-image-new.jpg           |
-| - Titre uppercase bold: "MORE THAN A STAY,    |
-|   IT'S A [RotatingText categories]"           |
-| - CTA blanc: "FIND YOUR EXPERIENCE + HOTEL"  |
-|   scrolle vers la grille                      |
-+-----------------------------------------------+
-| HOW IT WORKS BANNER (composant existant)      |
-+-----------------------------------------------+
-| SECTION "DON'T CHOOSE A CITY"                 |
-| - Titre + sous-titre (meme texte/style)       |
-| - Grille de categories (CategoryCard)         |
-|   seulement celles qui ont des experiences    |
-|   publiees dans experiences2                  |
-+-----------------------------------------------+
-| MARQUEE BANNER (composant existant)           |
-+-----------------------------------------------+
-| SECTION HANDPICKED HOTELS (hero sombre)       |
-| - Image: handpicked-hero.jpg                  |
-| - Texte descriptif sur fond sombre            |
-+-----------------------------------------------+
-| SECTION EXPERIENCES2 (grille)                 |
-| - Titre "New Experiences" / "View all"        |
-| - Grille des experiences2 publiees            |
-| - ExperienceCard avec linkPrefix="/experience2"|
-+-----------------------------------------------+
-| GIFT CARD SECTION (meme style que homepage)   |
-| - Image + texte + CTA "Send a gift card"      |
-+-----------------------------------------------+
-| COMING SOON + LEAD CAPTURE                    |
-| - "More experiences are on the way"           |
-| - Email input + "Notify me"                   |
-| - Appel edge function collect-lead            |
-+-----------------------------------------------+
-| CATEGORIES GRID (pleine largeur)              |
-| - Toutes les categories publiees              |
-| - Meme composant CategoryCard                 |
-+-----------------------------------------------+
-| FOOTER (existant, inchange)                   |
-+-----------------------------------------------+
+### 1. Titre reformaté sur deux lignes distinctes
+Le titre passe de "Handpicked hotels, unforgettable experiences." a deux lignes separees par un point :
 ```
+Handpicked Hotels.
+Unforgettable Experiences.
+```
+Typographie bold uppercase, grande taille, avec un espacement genereux.
 
-## Sections retirees vs homepage
+### 2. Remplacement des grandes cartes image par un toggle compact
 
-- Section "Who STAYMAKOM is for" (cards frosted glass) : retiree
-- V1 Experiences carousels et grilles : retires (on ne montre que V2)
-- Category Tabs avec icones : retires (pas assez de contenu)
-- AI Experience Assistant + StickyAIButton : retires
-- Desert Kiosk Hero (partner CTA) : retire
-- Journal section : retiree
+Les deux grosses cartes image (aspect ratio, overlay sombre, etc.) sont remplacees par un **toggle button inline** compact et elegant :
 
-## Sections conservees et copiees depuis la homepage
+- Un conteneur horizontal avec fond `bg-muted/50` et `rounded-full`, type "pill selector"
+- Deux boutons cote a cote :
+  - **Feel adventurous** (a gauche)
+  - **Romantic getaway** (a droite)
+- Chaque bouton a une petite icone :
+  - Feel adventurous : icone `Compass` (lucide)
+  - Romantic getaway : icone `Heart` (lucide)
+- Le bouton actif a un fond `bg-white` (ou `bg-primary` avec texte blanc), un `shadow-sm`, et `rounded-full`
+- Le bouton inactif est transparent avec texte `text-muted-foreground`
+- Transition smooth entre les etats (`transition-all duration-300`)
+- Taille compacte : `h-10 px-5 text-sm`
 
-1. **Hero** -- Meme image (`hero-image-new.jpg`), meme overlay `bg-black/30`, meme typographie `font-sans uppercase bold`, meme `RotatingText` avec les noms de categories, meme CTA blanc rectangulaire
-2. **HowItWorksBanner** -- Import direct du composant existant
-3. **Categories "Choose your escape"** -- Meme titre, meme sous-titre, meme grille `CategoryCard` 
-4. **MarqueeBanner** -- Import direct
-5. **Handpicked Hotels hero** -- Meme image `handpicked-hero.jpg`, meme texte, meme overlay sombre
-6. **Experiences2 grid** -- Reprend le pattern `Experiences2HomeSection` de Index.tsx mais sans limite de 4 (affiche tout)
-7. **Gift Card section** -- Meme layout image + texte + CTA
-8. **Coming Soon + Lead capture** -- Garde le formulaire email existant mais avec le style de la homepage (font-sans, pas serif)
-9. **Categories grid plein** -- La grille 4x2 de categories en bas (visible dans la capture d'ecran)
+### 3. Etat par defaut
 
-## Ameliorations UX/UI proposees
+`activeFilter` est initialise a `FILTER_ADVENTURE` ("active") au lieu de `null`, donc "Feel adventurous" est selectionne par defaut au chargement.
 
-1. **Grille experiences responsive** : adopter le meme pattern que la homepage (4 colonnes desktop, carousel mobile avec snap scroll) au lieu de la grille statique 3 colonnes actuelle
-2. **Categories filtrables** : les CategoryCard en bas pourraient etre cliquables vers `/category/[slug]` comme sur la homepage
-3. **Lead capture integre** : deplacer le formulaire email dans la section "More experiences are on the way" juste au-dessus de la grille de categories, comme sur la capture d'ecran
-4. **Typographie unifiee** : tout en `font-sans` (Inter) avec `tracking-[-0.02em]`, pas de `font-serif`
-5. **CTA style unifie** : boutons blancs rectangulaires (`rounded-none` ou `rounded-md`) comme sur la homepage, pas de boutons pill
+### 4. Sous-titre conserve
+
+"For 24 hours, 48 hours, or tailor-made experiences." reste en place sous le titre.
+
+### 5. Suppression du lien "Show all experiences"
+
+Le bouton "Show all experiences" qui apparaissait sous les filtres est retire. L'utilisateur bascule simplement entre les deux options.
 
 ## Details techniques
 
 ### Fichier modifie : `src/pages/LaunchIndex.tsx`
 
-Reecrit pour importer et utiliser :
-- `heroImage` depuis `@/assets/hero-image-new.jpg`
-- `handpickedHero` depuis `@/assets/handpicked-hero.jpg`
-- `giftCardHero` depuis `@/assets/gift-card-hero.jpg`
-- `RotatingText` composant
-- `CategoryCard` composant
-- `MarqueeBanner` composant
-- `HowItWorksBanner` composant
-- `ExperienceCard` composant
-- Traductions via `t(lang, ...)` depuis `@/lib/translations`
+- **Ligne 47** : Changer l'initialisation de `useState<string | null>(null)` a `useState<string | null>(FILTER_ADVENTURE)`
+- **Lignes 206-288** : Remplacer toute la section filtre :
+  - Nouveau titre en 2 lignes avec `<br />` ou deux `<span>` en block
+  - Sous-titre inchange
+  - Nouveau composant toggle inline : un `div` flex horizontal avec deux `button` stylises en pill, chacun avec icone Lucide + texte
+  - Suppression du bouton "Show all experiences"
+- Les images `romanticImg` et `activeImg` ne seront plus utilisees dans cette section (les imports peuvent rester pour usage futur)
 
-### Queries Supabase
+### Rendu visuel attendu
 
-- Categories : `supabase.from("categories").select("*").eq("status", "published").order("display_order")`
-- Experiences2 : `supabase.from("experiences2").select("*, experience2_hotels(position, nights, hotel:hotels2(...))").eq("status", "published")`
+```text
+        Handpicked Hotels.
+     Unforgettable Experiences.
 
-### Aucune modification de la homepage
+  For 24 hours, 48 hours, or tailor-made.
 
-`src/pages/Index.tsx` reste intacte. Seul `LaunchIndex.tsx` est modifie.
+  [ 🧭 Feel adventurous | ❤️ Romantic getaway ]
+         (toggle compact pill)
+```
 
-### Aucune migration de base de donnees
+Le toggle fait environ 350px de large, centre, avec des coins arrondis, et un indicateur visuel clair sur l'option active (fond blanc + ombre).
+
