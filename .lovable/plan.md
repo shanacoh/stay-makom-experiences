@@ -1,59 +1,57 @@
 
 
-# Correction des tags et prix sur la page listing Experiences 2
+# Page de lancement simplifiee -- `/launch`
 
-## Probleme identifie
+Nouvelle page accessible sur `/launch`, ta page d'accueil actuelle reste intacte sur `/`.
 
-Apres analyse de la base de donnees et du code :
+## Ce qui sera cree
 
-1. **Tags manquants** : La requete dans `Experiences2.tsx` ne recupere pas les `experience2_highlight_tags`. Les tags existent bien en base (13 tags pour "Desert Flavors", 3 pour "TEST NIGHT + MASSAGE") mais ne sont jamais charges.
+### 1 nouveau fichier : `src/pages/LaunchIndex.tsx`
 
-2. **Prix a 0** : Le champ `base_price` vaut 0 dans la table `experiences2` car le systeme V2 utilise les addons (`experience2_addons`) pour definir les prix (ex: "Massage 400 ILS/personne"). La carte affiche `base_price` directement, qui est 0.
+Une page defilante unique avec ces sections :
 
-## Corrections prevues
+**Section 1 -- Hero plein ecran**
+- Image de fond (reutilisation de `hero-image-new.jpg` ou `desert-hero.jpg`)
+- Titre : "Handpicked hotels. Unforgettable experiences." / version HE
+- Sous-titre : "We curate Israel's best boutique hotels and pair them with unique local experiences."
+- Un CTA "Explore experiences" qui scroll vers la grille
 
-### 1. Ajouter les highlight tags a la requete de listing
+**Section 2 -- Grille d'experiences**
+- Titre "Our Experiences"
+- Query sur `experiences2` avec statut `published` + jointure `hotels2`
+- Reutilisation du composant `ExperienceCard` existant avec `linkPrefix="/experience2"`
+- Grille responsive : 1 col mobile, 2 col tablette, 3 col desktop
+- Pas de filtre categorie, tout est visible d'un coup
 
-Dans `src/pages/Experiences2.tsx`, ajouter `experience2_highlight_tags(highlight_tags(*))` a la requete Supabase, puis mapper les donnees vers la prop `experience_highlight_tags` attendue par `ExperienceCard`.
+**Section 3 -- Bandeau "How it works"**
+- Reutilisation du composant `HowItWorksBanner` existant
 
-### 2. Calculer un prix d'affichage a partir des addons
+**Section 4 -- Coming Soon + Lead capture**
+- Message : "More experiences are on the way"
+- Champ email simple + bouton "Notify me"
+- Appel a l'edge function `collect-lead` avec `source: 'coming_soon'` (deja supporte)
 
-Dans `src/pages/Experiences2.tsx`, ajouter une sous-requete pour recuperer les addons de type "pricing" (per_person, per_night, etc.) pour chaque experience. Calculer un prix "a partir de" en additionnant les addons actifs de type pricing. Ce prix sera passe a `ExperienceCard` via `base_price`.
+**Section 5 -- Footer**
+- Reutilisation du `Footer` existant
 
-Si aucun addon pricing n'existe et que `base_price` vaut 0, la carte n'affichera pas de prix plutot que d'afficher "0".
+### 1 modification mineure : `src/App.tsx`
 
-### 3. Masquer le prix quand il est 0
+- Ajout d'une route `/launch` pointant vers `LaunchIndex`
+- La route `/` reste sur `Index` -- rien ne change
 
-Dans `ExperienceCard.tsx`, ne pas afficher la ligne prix si `displayPrice` vaut 0 ou est indefini, pour eviter l'affichage "0 / night".
+## Ce qui ne change PAS
+- Page Index.tsx actuelle : intacte
+- Aucun composant existant modifie
+- Aucune migration de base de donnees
+- Header et Footer reutilises tels quels
 
 ## Details techniques
 
-**Fichiers modifies :**
-- `src/pages/Experiences2.tsx` : Ajout des tags et addons a la requete + mapping
-- `src/components/ExperienceCard.tsx` : Masquer le prix a 0
+- Le composant utilise `useQuery` pour fetcher les `experiences2` publiees avec `hotels2` en jointure
+- Support multilingue via `useLanguage` + `getLocalizedField` (pattern existant)
+- Le formulaire email appelle `supabase.functions.invoke('collect-lead', ...)` avec le source `coming_soon`
+- SEOHead pour les meta tags
+- Scroll smooth vers la grille au clic sur le CTA hero
 
-**Requete mise a jour (Experiences2.tsx) :**
-```sql
-experiences2 {
-  *,
-  experience2_hotels(...),
-  categories(...),
-  experience2_highlight_tags(tag_id, highlight_tags(*)),  -- NOUVEAU
-  experience2_addons(type, value, is_active)              -- NOUVEAU
-}
-```
-
-**Mapping des donnees :**
-```typescript
-const cardExperience = {
-  ...experience,
-  hotels: primaryHotelLink || null,
-  // Mapper les V2 tags vers la prop V1 attendue par ExperienceCard
-  experience_highlight_tags: experience.experience2_highlight_tags,
-  // Calculer prix affichage depuis les addons pricing
-  base_price: computeDisplayPrice(experience),
-};
-```
-
-La fonction `computeDisplayPrice` additionnera les valeurs des addons actifs dont le type est `per_person`, `per_night`, `per_person_per_night` ou `fixed`.
+Quand tu seras pret a en faire ta page d'accueil, il suffira de changer la route `/` dans App.tsx.
 
