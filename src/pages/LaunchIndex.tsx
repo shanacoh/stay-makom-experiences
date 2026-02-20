@@ -8,26 +8,51 @@ import { t } from "@/lib/translations";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
-import HowItWorksBanner from "@/components/HowItWorksBanner";
 import MarqueeBanner from "@/components/MarqueeBanner";
-import RotatingText from "@/components/RotatingText";
+import HowItWorksBanner from "@/components/HowItWorksBanner";
 import CategoryCard from "@/components/CategoryCard";
 import ExperienceCard from "@/components/ExperienceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Loader2, ArrowRight, Gift, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
+import romanticImg from "@/assets/romantic-category.jpg";
+import activeImg from "@/assets/active-category.jpg";
+
+/* ─── Filter button slugs mapped to category slugs ─── */
+const FILTER_ROMANTIC = "romantic";
+const FILTER_ADVENTURE = "active";
 
 const LaunchIndex = () => {
   const { lang } = useLanguage();
   const { getLocalizedPath } = useLocalizedNavigation();
   const isRTL = lang === "he";
+
+  // Lead capture state
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Filter state
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Waitlist popup state
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistCategory, setWaitlistCategory] = useState<string>("");
+  const [waitlistCategoryId, setWaitlistCategoryId] = useState<string>("");
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
 
   // Fetch categories
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
@@ -43,7 +68,7 @@ const LaunchIndex = () => {
     },
   });
 
-  // Fetch published experiences2 with hotels2
+  // Fetch published experiences2 with hotels
   const { data: experiences2, isLoading: isLoadingExp } = useQuery({
     queryKey: ["launch-experiences2"],
     queryFn: async () => {
@@ -51,6 +76,7 @@ const LaunchIndex = () => {
         .from("experiences2")
         .select(`
           *,
+          categories(slug),
           experience2_hotels(
             position,
             nights,
@@ -66,6 +92,18 @@ const LaunchIndex = () => {
     },
   });
 
+  // Resolve category id from slug
+  const getCategoryIdFromSlug = (slug: string) =>
+    categories?.find((c) => c.slug === slug)?.id;
+
+  // Filtered experiences
+  const filteredExperiences = activeFilter
+    ? experiences2?.filter(
+        (exp: any) => exp.categories?.slug === activeFilter
+      )
+    : experiences2;
+
+  // Lead capture handler
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || isSubmitting) return;
@@ -85,6 +123,46 @@ const LaunchIndex = () => {
     }
   };
 
+  // Waitlist handler
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail || waitlistSubmitting) return;
+    setWaitlistSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke("collect-lead", {
+        body: {
+          email: waitlistEmail,
+          source: "category_waitlist",
+          cta_id: waitlistCategoryId,
+          metadata: { category_name: waitlistCategory },
+        },
+      });
+      if (error) throw error;
+      setWaitlistSubmitted(true);
+      setWaitlistEmail("");
+      toast.success(isRTL ? "נרשמת בהצלחה!" : "You're on the list!");
+    } catch {
+      toast.error(isRTL ? "שגיאה, נסה שנית" : "Something went wrong.");
+    } finally {
+      setWaitlistSubmitting(false);
+    }
+  };
+
+  // Handle category card click → open waitlist popup
+  const handleCategoryClick = (category: any) => {
+    const name = getLocalizedField(category, "name", lang) as string;
+    setWaitlistCategory(name);
+    setWaitlistCategoryId(category.id);
+    setWaitlistSubmitted(false);
+    setWaitlistEmail("");
+    setWaitlistOpen(true);
+  };
+
+  // Handle filter button click
+  const handleFilterClick = (slug: string) => {
+    setActiveFilter((prev) => (prev === slug ? null : slug));
+  };
+
   return (
     <div className="min-h-screen flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
       <SEOHead
@@ -94,117 +172,147 @@ const LaunchIndex = () => {
       <Header />
 
       <main className="flex-1">
-        {/* ───── HERO (copied from Index.tsx) ───── */}
-        <section className="relative h-[80vh] min-h-[450px] flex items-center justify-center md:items-end md:justify-start">
+        {/* ─── 1. HERO ─── */}
+        <section className="relative h-screen min-h-[600px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/35" />
 
-          <div className={`relative z-10 container text-white px-4 sm:px-6 pb-6 md:pb-12 flex flex-col items-center text-center md:items-start md:text-left ${isRTL ? 'md:mr-0 md:mr-4 lg:mr-[1cm] md:text-right' : 'md:ml-0 md:ml-4 lg:ml-[1cm] md:text-left'}`}>
-            <h1 className="font-sans text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 tracking-[-0.02em] animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase max-w-4xl text-slate-50 pt-4">
-              <span className="md:hidden">
-                {t(lang, 'heroTitle1')} {t(lang, 'heroTitle2')}
-              </span>
-              <span className="hidden md:inline">
-                {t(lang, 'heroTitle1')}
-                <br />
-                {t(lang, 'heroTitle2')}{" "}
-              </span>
-              <span className="block md:inline">
-                <RotatingText
-                  words={categories?.map(cat => getLocalizedField(cat, 'name', lang) as string) || ["Romance", "Adventure", "Family"]}
-                  interval={2500}
-                />
-              </span>
+          <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
+            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              Don't choose a city,
+              <br />
+              choose your escape
             </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/90 font-light mb-10 max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+              We curate Israel's best hotels and pair them with unique local
+              experiences.
+            </p>
             <button
               onClick={() => {
-                const element = document.getElementById('launch-choose-escape');
-                element?.scrollIntoView({ behavior: 'smooth' });
+                const el = document.getElementById("launch-experiences");
+                el?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="mt-3 sm:mt-4 px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-foreground font-semibold uppercase tracking-wide text-xs sm:text-sm rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
+              className="px-8 py-3.5 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400"
             >
-              {t(lang, 'heroCTA')}
+              Find your experience & hotel
             </button>
           </div>
         </section>
 
-        {/* ───── HOW IT WORKS ───── */}
-        <HowItWorksBanner />
-
-        {/* ───── CATEGORIES "Choose your escape" ───── */}
-        <section id="launch-choose-escape" className="container py-4 sm:py-6 md:py-8 px-4 scroll-mt-16">
-          <div className="text-center mb-3 sm:mb-4">
-            <h2 className="font-sans text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-[-0.02em] mb-1.5">
-              {t(lang, 'chooseCityTitle')}<br />{t(lang, 'chooseEscapeTitle')}
+        {/* ─── 2. FILTER SECTION ─── */}
+        <section className="py-16 sm:py-20 md:py-24 bg-background">
+          <div className="container px-4 max-w-5xl mx-auto text-center">
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-3">
+              Handpicked hotels, unforgettable experiences.
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
-              {t(lang, 'chooseCitySubtitle')}
+            <p className="text-muted-foreground text-sm sm:text-base mb-10">
+              For 24 hours, 48 hours, or tailor-made experiences.
             </p>
-          </div>
 
-          {isLoadingCategories ? (
-            <div className="text-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            {/* Two visual filter buttons */}
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
+              {/* Romantic getaway */}
+              <button
+                onClick={() => handleFilterClick(FILTER_ROMANTIC)}
+                className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
+                  activeFilter === FILTER_ROMANTIC
+                    ? "ring-2 ring-primary ring-offset-2 scale-[1.02]"
+                    : "hover:scale-[1.02]"
+                }`}
+              >
+                <img
+                  src={romanticImg}
+                  alt="Romantic getaway"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div
+                  className={`absolute inset-0 transition-all duration-500 ${
+                    activeFilter === FILTER_ROMANTIC
+                      ? "bg-black/30"
+                      : "bg-black/40 group-hover:bg-black/30"
+                  }`}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
+                    Romantic
+                    <br />
+                    getaway
+                  </span>
+                </div>
+              </button>
+
+              {/* Feel adventurous */}
+              <button
+                onClick={() => handleFilterClick(FILTER_ADVENTURE)}
+                className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
+                  activeFilter === FILTER_ADVENTURE
+                    ? "ring-2 ring-primary ring-offset-2 scale-[1.02]"
+                    : "hover:scale-[1.02]"
+                }`}
+              >
+                <img
+                  src={activeImg}
+                  alt="Feel adventurous"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div
+                  className={`absolute inset-0 transition-all duration-500 ${
+                    activeFilter === FILTER_ADVENTURE
+                      ? "bg-black/30"
+                      : "bg-black/40 group-hover:bg-black/30"
+                  }`}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
+                    Feel
+                    <br />
+                    adventurous
+                  </span>
+                </div>
+              </button>
             </div>
-          ) : (
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                {categories?.map(category => (
-                  <CategoryCard key={category.slug} category={category} />
-                ))}
-              </div>
-            </div>
-          )}
+
+            {/* Active filter indicator */}
+            {activeFilter && (
+              <button
+                onClick={() => setActiveFilter(null)}
+                className="mt-6 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+              >
+                {isRTL ? "הצג הכל" : "Show all experiences"}
+              </button>
+            )}
+          </div>
         </section>
 
-        {/* ───── MARQUEE BANNER ───── */}
-        <MarqueeBanner />
-
-        {/* ───── HANDPICKED HOTELS ───── */}
-        <section className="relative py-10 sm:py-14 md:py-18 overflow-hidden">
-          <div className="absolute inset-0">
-            <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40" />
-          </div>
-
-          <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
-              {t(lang, 'handpickedTitle1')}<br />
-              {t(lang, 'handpickedTitle2')}
+        {/* ─── 3. EXPERIENCES GRID ─── */}
+        <section id="launch-experiences" className="container py-12 sm:py-16 md:py-20 px-4 scroll-mt-16">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]">
+              {activeFilter
+                ? activeFilter === FILTER_ROMANTIC
+                  ? "Romantic Getaway"
+                  : "Feel Adventurous"
+                : lang === "he"
+                ? "חוויות חדשות"
+                : "New Experiences"}
             </h2>
-            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-2xl mx-auto space-y-2">
-              <p>{t(lang, 'handpickedP1')}</p>
-              <p>{t(lang, 'handpickedP2')}</p>
-              <p>{t(lang, 'handpickedP3')}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* ───── EXPERIENCES2 GRID ───── */}
-        <section className="container py-8 sm:py-12 md:py-16 px-4">
-          <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold tracking-[-0.02em]">
-              {lang === 'he' ? 'חוויות חדשות' : 'New Experiences'}
-            </h2>
-            <Button variant="link" asChild className="text-foreground underline underline-offset-4 text-xs sm:text-sm p-0 h-auto">
-              <Link to={`/experiences2${lang === 'he' ? '?lang=he' : ''}`}>
-                {lang === 'he' ? 'צפו בכולן' : 'View all'}
-              </Link>
-            </Button>
           </div>
 
           {isLoadingExp ? (
             <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
-          ) : experiences2 && experiences2.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
-              {experiences2.map((experience: any) => {
+          ) : filteredExperiences && filteredExperiences.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 transition-all duration-500">
+              {filteredExperiences.map((experience: any) => {
                 const primaryHotelLink = experience.experience2_hotels
-                  ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+                  ?.sort(
+                    (a: any, b: any) =>
+                      (a.position || 0) - (b.position || 0)
+                  )
                   ?.[0]?.hotel;
 
                 const cardExperience = {
@@ -221,59 +329,110 @@ const LaunchIndex = () => {
                 );
               })}
             </div>
-          ) : null}
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">
+                {isRTL
+                  ? "אין חוויות בקטגוריה זו עדיין"
+                  : "No experiences in this category yet."}
+              </p>
+              <button
+                onClick={() => setActiveFilter(null)}
+                className="mt-4 text-sm underline underline-offset-4 text-primary hover:text-primary/80"
+              >
+                {isRTL ? "הצג הכל" : "Show all experiences"}
+              </button>
+            </div>
+          )}
         </section>
 
-        {/* ───── GIFT CARD ───── */}
-        <section className="container py-12 md:py-16 px-4">
-          <div className={`grid md:grid-cols-2 gap-8 items-center max-w-5xl mx-auto ${isRTL ? 'md:grid-flow-col-dense' : ''}`}>
-            <div className={`relative overflow-hidden rounded-2xl ${isRTL ? 'md:order-2' : ''}`}>
+        {/* ─── 4. MARQUEE BANNER ─── */}
+        <MarqueeBanner />
+
+        {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
+        <section className="relative py-20 sm:py-28 md:py-32 overflow-hidden">
+          <div className="absolute inset-0">
+            <img
+              src={handpickedHero}
+              alt="Israeli countryside"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/50" />
+          </div>
+
+          <div className="container max-w-3xl relative z-10 px-6 text-center">
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-6 text-white leading-tight">
+              Handpicked hotels,
+              <br />
+              unforgettable experiences.
+            </h2>
+            <div className="text-sm sm:text-base md:text-lg leading-relaxed text-white/90 max-w-2xl mx-auto space-y-4">
+              <p>Today, we don't just book a room.</p>
+              <p>We design meaningful escapes.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── 6. GIFT CARD ─── */}
+        <section className="container py-16 md:py-20 px-4">
+          <div
+            className={`grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto ${
+              isRTL ? "md:grid-flow-col-dense" : ""
+            }`}
+          >
+            <div
+              className={`relative overflow-hidden rounded-2xl ${
+                isRTL ? "md:order-2" : ""
+              }`}
+            >
               <img
                 src={giftCardHero}
                 alt="Gift Card"
-                className="w-full h-64 md:h-80 object-cover hover:scale-105 transition-transform duration-500"
+                className="w-full h-72 md:h-96 object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
 
-            <div className={`space-y-4 ${isRTL ? 'text-right md:order-1' : ''}`}>
-              <div className={`inline-flex items-center gap-2 text-primary ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Gift className="h-5 w-5" />
-                <span className="text-xs font-medium uppercase tracking-wider">
-                  {t(lang, 'giftCardSectionTag')}
-                </span>
-              </div>
-              <h2 className="font-sans text-2xl md:text-3xl font-bold tracking-[-0.02em]">
-                {t(lang, 'giftCardSectionTitle')}
+            <div className={`space-y-5 ${isRTL ? "text-right md:order-1" : ""}`}>
+              <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] leading-tight">
+                Perfect gift.
+                <br />
+                The gift of escape.
               </h2>
-              <p className="text-muted-foreground text-sm md:text-base">
-                {t(lang, 'giftCardSectionDesc')}
+              <p className="text-muted-foreground text-sm md:text-base max-w-md">
+                {t(lang, "giftCardSectionDesc")}
               </p>
               <Button asChild className="group">
-                <Link to={getLocalizedPath('/gift-card')}>
-                  {t(lang, 'giftCardSectionCTA')}
-                  <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'mr-2 rotate-180 group-hover:-translate-x-1' : 'ml-2'}`} />
+                <Link to={getLocalizedPath("/gift-card")}>
+                  {t(lang, "giftCardSectionCTA")}
+                  <ArrowRight
+                    className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
+                      isRTL
+                        ? "mr-2 rotate-180 group-hover:-translate-x-1"
+                        : "ml-2"
+                    }`}
+                  />
                 </Link>
               </Button>
             </div>
           </div>
         </section>
 
-        {/* ───── COMING SOON + LEAD CAPTURE ───── */}
-        <section className="py-12 sm:py-16 bg-muted/50">
+        {/* ─── 7. COMING SOON + LEAD CAPTURE ─── */}
+        <section className="py-16 sm:py-20 bg-muted/50">
           <div className="container px-4 max-w-lg mx-auto text-center">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3">
-              {isRTL ? 'עוד חוויות בדרך' : 'More experiences are on the way'}
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4">
+              {isRTL ? "עוד חוויות בדרך" : "More experiences are on the way"}
             </h2>
             <p className="text-muted-foreground text-sm mb-8">
               {isRTL
-                ? 'היו הראשונים לדעת כשיעדים וחוויות חדשים מושקים.'
-                : 'Be the first to know when new destinations and experiences launch.'}
+                ? "היו הראשונים לדעת כשיעדים וחוויות חדשים מושקים."
+                : "Be the first to know when new destinations and experiences launch."}
             </p>
 
             {submitted ? (
               <div className="flex items-center justify-center gap-2 text-primary font-medium">
                 <CheckCircle className="h-5 w-5" />
-                {isRTL ? 'נרשמת בהצלחה!' : "You're on the list!"}
+                {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
               </div>
             ) : (
               <form onSubmit={handleLeadSubmit} className="flex gap-2">
@@ -282,25 +441,60 @@ const LaunchIndex = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={isRTL ? 'כתובת האימייל שלך' : 'Your email address'}
+                  placeholder={
+                    isRTL ? "כתובת האימייל שלך" : "Your email address"
+                  }
                   className="flex-1"
                 />
                 <Button type="submit" disabled={isSubmitting}>
-                  {isRTL ? 'עדכנו אותי' : 'Notify me'}
+                  {isRTL ? "עדכנו אותי" : "Notify me"}
                 </Button>
               </form>
             )}
           </div>
         </section>
 
-        {/* ───── BOTTOM CATEGORIES GRID ───── */}
+        {/* ─── 8. FUTURE CATEGORIES (8 cards – waitlist popup) ─── */}
         {!isLoadingCategories && categories && categories.length > 0 && (
-          <section className="container py-8 sm:py-12 md:py-16 px-4">
+          <section className="container py-12 sm:py-16 md:py-20 px-4">
+            <div className="text-center mb-8">
+              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]">
+                {isRTL ? "קטגוריות שבדרך" : "Coming soon"}
+              </h2>
+            </div>
             <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                {categories.map(category => (
-                  <CategoryCard key={`bottom-${category.slug}`} category={category} />
-                ))}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                {categories.map((category) => {
+                  const catTitle = getLocalizedField(category, "name", lang) as string;
+                  const image = category.hero_image || "";
+                  const words = catTitle.split(" ");
+                  const midpoint = Math.ceil(words.length / 2);
+                  const line1 = words.slice(0, midpoint).join(" ");
+                  const line2 = words.slice(midpoint).join(" ");
+
+                  return (
+                    <button
+                      key={`waitlist-${category.slug}`}
+                      onClick={() => handleCategoryClick(category)}
+                      className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer"
+                    >
+                      <div className="aspect-square relative">
+                        <img
+                          src={image}
+                          alt={catTitle}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
+                        <div className="absolute inset-0 flex items-center justify-center p-4">
+                          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
+                            <span className="block">{line1}</span>
+                            {line2 && <span className="block -mt-1.5">{line2}</span>}
+                          </h3>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -308,6 +502,61 @@ const LaunchIndex = () => {
       </main>
 
       <Footer />
+
+      {/* ─── WAITLIST POPUP ─── */}
+      <Dialog
+        open={waitlistOpen}
+        onOpenChange={(open) => {
+          setWaitlistOpen(open);
+          if (!open) setWaitlistSubmitted(false);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-sans text-xl font-bold tracking-[-0.02em]">
+              {isRTL
+                ? "החוויה הזו בדרך"
+                : "This experience is coming soon."}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {isRTL
+                ? `הצטרף לרשימת ההמתנה של "${waitlistCategory}" והיה הראשון לדעת.`
+                : `Join the waitlist for "${waitlistCategory}" and be the first to access it.`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {waitlistSubmitted ? (
+            <div className="flex items-center justify-center gap-2 text-primary font-medium py-6">
+              <CheckCircle className="h-5 w-5" />
+              {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
+            </div>
+          ) : (
+            <form
+              onSubmit={handleWaitlistSubmit}
+              className="flex flex-col gap-3 pt-2"
+            >
+              <Input
+                type="email"
+                required
+                value={waitlistEmail}
+                onChange={(e) => setWaitlistEmail(e.target.value)}
+                placeholder={
+                  isRTL ? "כתובת האימייל שלך" : "Your email address"
+                }
+              />
+              <Button type="submit" disabled={waitlistSubmitting} className="w-full">
+                {waitlistSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isRTL ? (
+                  "עדכנו אותי"
+                ) : (
+                  "Notify me — be the first to know"
+                )}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
