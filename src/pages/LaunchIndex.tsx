@@ -308,25 +308,21 @@ const LaunchIndex = () => {
         <MarqueeBanner />
 
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
-        <section className="relative py-20 sm:py-28 md:py-32 overflow-hidden">
+        <section className="relative py-10 sm:py-14 md:py-18 overflow-hidden">
           <div className="absolute inset-0">
-            <img
-              src={handpickedHero}
-              alt="Israeli countryside"
-              className="w-full h-full object-cover" />
-
-            <div className="absolute inset-0 bg-black/50" />
+            <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40" />
           </div>
-
-          <div className="container max-w-3xl relative z-10 px-6 text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-6 text-white leading-tight">
-              Handpicked hotels,
-              <br />
-              unforgettable experiences.
+          
+          <div className="container max-w-3xl relative z-10 px-4 text-center">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
+              {t(lang, 'handpickedTitle1')}<br />
+              {t(lang, 'handpickedTitle2')}
             </h2>
-            <div className="text-sm sm:text-base md:text-lg leading-relaxed text-white/90 max-w-2xl mx-auto space-y-4">
-              <p>Today, we don't just book a room.</p>
-              <p>We design meaningful escapes.</p>
+            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-2xl mx-auto space-y-2">
+              <p>{t(lang, 'handpickedP1')}</p>
+              <p>{t(lang, 'handpickedP2')}</p>
+              <p>{t(lang, 'handpickedP3')}</p>
             </div>
           </div>
         </section>
