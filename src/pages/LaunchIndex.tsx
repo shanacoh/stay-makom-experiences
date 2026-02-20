@@ -21,8 +21,7 @@ import {
   DialogTitle,
   DialogDescription } from
 "@/components/ui/dialog";
-import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2, ArrowRight, Gift, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
@@ -30,9 +29,10 @@ import giftCardHero from "@/assets/gift-card-hero.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 
-/* ─── Filter button slugs ─── */
-const FILTER_ADVENTURE = "adventure";
+/* ─── Filter button slugs mapped to category slugs ─── */
 const FILTER_ROMANTIC = "romantic";
+const FILTER_ADVENTURE = "active";
+
 const LaunchIndex = () => {
   const { lang } = useLanguage();
   const { getLocalizedPath } = useLocalizedNavigation();
@@ -44,7 +44,7 @@ const LaunchIndex = () => {
   const [submitted, setSubmitted] = useState(false);
 
   // Filter state
-  const [activeFilter, setActiveFilter] = useState<string | null>(FILTER_ADVENTURE);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Waitlist popup state
   const [waitlistOpen, setWaitlistOpen] = useState(false);
@@ -97,11 +97,11 @@ const LaunchIndex = () => {
   categories?.find((c) => c.slug === slug)?.id;
 
   // Filtered experiences
-  const filteredExperiences = activeFilter === FILTER_ROMANTIC
-    ? experiences2?.filter((exp: any) => exp.categories?.slug === "romantic")
-    : activeFilter === FILTER_ADVENTURE
-    ? experiences2?.filter((exp: any) => exp.categories?.slug !== "romantic")
-    : experiences2;
+  const filteredExperiences = activeFilter ?
+  experiences2?.filter(
+    (exp: any) => exp.categories?.slug === activeFilter
+  ) :
+  experiences2;
 
   // Lead capture handler
   const handleLeadSubmit = async (e: React.FormEvent) => {
@@ -173,7 +173,7 @@ const LaunchIndex = () => {
 
       <main className="flex-1">
         {/* ─── 1. HERO ─── */}
-        <section className="relative h-[70vh] min-h-[400px] flex items-center justify-center">
+        <section className="relative h-screen min-h-[600px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
@@ -203,44 +203,87 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 2. FILTER SECTION ─── */}
-        <section className="py-16 sm:py-20 bg-background md:py-20">
+        <section className="py-16 sm:py-20 bg-background md:py-[56px]">
           <div className="container px-4 max-w-5xl mx-auto text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold uppercase tracking-[-0.02em] mb-3 leading-tight">
-              Handpicked Hotels.
-              <br />
-              Unforgettable Experiences.
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-3">Handpicked hotels, 
+unforgettable experiences.
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base mb-10">
               For 24 hours, 48 hours, or tailor-made experiences.
             </p>
 
-            {/* Compact pill toggle */}
-            <div className="inline-flex items-center bg-muted/50 rounded-full p-1 border border-border/50">
+            {/* Two visual filter buttons */}
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
+              {/* Romantic getaway */}
               <button
-                onClick={() => setActiveFilter(FILTER_ADVENTURE)}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
-                  activeFilter === FILTER_ADVENTURE
-                    ? "bg-white shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Compass size={15} />
-                Feel adventurous
+                onClick={() => handleFilterClick(FILTER_ROMANTIC)}
+                className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
+                activeFilter === FILTER_ROMANTIC ?
+                "ring-2 ring-primary ring-offset-2 scale-[1.02]" :
+                "hover:scale-[1.02]"}`
+                }>
+
+                <img
+                  src={romanticImg}
+                  alt="Romantic getaway"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+
+                <div
+                  className={`absolute inset-0 transition-all duration-500 ${
+                  activeFilter === FILTER_ROMANTIC ?
+                  "bg-black/30" :
+                  "bg-black/40 group-hover:bg-black/30"}`
+                  } />
+
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
+                    Romantic
+                    <br />
+                    getaway
+                  </span>
+                </div>
               </button>
+
+              {/* Feel adventurous */}
               <button
-                onClick={() => setActiveFilter(FILTER_ROMANTIC)}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
-                  activeFilter === FILTER_ROMANTIC
-                    ? "bg-white shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Heart size={15} />
-                Romantic getaway
+                onClick={() => handleFilterClick(FILTER_ADVENTURE)}
+                className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
+                activeFilter === FILTER_ADVENTURE ?
+                "ring-2 ring-primary ring-offset-2 scale-[1.02]" :
+                "hover:scale-[1.02]"}`
+                }>
+
+                <img
+                  src={activeImg}
+                  alt="Feel adventurous"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+
+                <div
+                  className={`absolute inset-0 transition-all duration-500 ${
+                  activeFilter === FILTER_ADVENTURE ?
+                  "bg-black/30" :
+                  "bg-black/40 group-hover:bg-black/30"}`
+                  } />
+
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
+                    Feel
+                    <br />
+                    adventurous
+                  </span>
+                </div>
               </button>
             </div>
+
+            {/* Active filter indicator */}
+            {activeFilter &&
+            <button
+              onClick={() => setActiveFilter(null)}
+              className="mt-6 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+
+                {isRTL ? "הצג הכל" : "Show all experiences"}
+              </button>
+            }
           </div>
         </section>
 
@@ -307,21 +350,25 @@ const LaunchIndex = () => {
         <MarqueeBanner />
 
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
-        <section className="relative py-10 sm:py-14 md:py-18 overflow-hidden">
+        <section className="relative py-20 sm:py-28 md:py-32 overflow-hidden">
           <div className="absolute inset-0">
-            <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40" />
+            <img
+              src={handpickedHero}
+              alt="Israeli countryside"
+              className="w-full h-full object-cover" />
+
+            <div className="absolute inset-0 bg-black/50" />
           </div>
-          
-          <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
-              {t(lang, 'handpickedTitle1')}<br />
-              {t(lang, 'handpickedTitle2')}
+
+          <div className="container max-w-3xl relative z-10 px-6 text-center">
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-6 text-white leading-tight">
+              Handpicked hotels,
+              <br />
+              unforgettable experiences.
             </h2>
-            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-2xl mx-auto space-y-2">
-              <p>{t(lang, 'handpickedP1')}</p>
-              <p>{t(lang, 'handpickedP2')}</p>
-              <p>{t(lang, 'handpickedP3')}</p>
+            <div className="text-sm sm:text-base md:text-lg leading-relaxed text-white/90 max-w-2xl mx-auto space-y-4">
+              <p>Today, we don't just book a room.</p>
+              <p>We design meaningful escapes.</p>
             </div>
           </div>
         </section>
