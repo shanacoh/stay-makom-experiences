@@ -19,36 +19,33 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
     queryKey: ["wishlist", userId],
     queryFn: async () => {
       if (!userId) return [];
-      
-      const { data, error } = await supabase
+
+      // Fetch wishlist entries
+      const { data: wishlistData, error } = await supabase
         .from("wishlist")
-        .select(`
-          id,
-          created_at,
-          experiences (
-            id,
-            slug,
-            title,
-            title_he,
-            subtitle,
-            hero_image,
-            photos,
-            base_price,
-            currency,
-            hotel_id,
-            hotels (
-              name,
-              city,
-              hero_image
-            )
-          )
-        `)
+        .select("id, experience_id, created_at")
         .eq("user_id", userId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
-      return data;
+      if (!wishlistData || wishlistData.length === 0) return [];
+
+      // Fetch experiences separately
+      const expIds = wishlistData.map((w) => w.experience_id).filter(Boolean);
+      if (expIds.length === 0) return [];
+
+      const { data: experiences } = await supabase
+        .from("experiences")
+        .select("id, slug, title, title_he, subtitle, hero_image, photos, base_price, currency, hotel_id, hotels(name, city, hero_image)")
+        .in("id", expIds)
+        .eq("status", "published");
+
+      const expMap = new Map((experiences || []).map((e) => [e.id, e]));
+
+      return wishlistData
+        .map((w) => ({ ...w, experience: expMap.get(w.experience_id) || null }))
+        .filter((w) => w.experience);
     },
     enabled: !!userId,
   });
@@ -59,7 +56,6 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
         .from("wishlist")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", wishlistId);
-      
       if (error) throw error;
     },
     onSuccess: () => {
@@ -73,10 +69,6 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
 
   const handleRemove = (wishlistId: string) => {
     removeMutation.mutate(wishlistId);
-  };
-
-  const handleBookNow = (experienceSlug: string) => {
-    navigate(`/experience/${experienceSlug}`);
   };
 
   if (isLoading) {
@@ -111,7 +103,7 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
   }
 
   const handleWishlistRemove = (experienceId: string) => {
-    const wishlistItem = wishlist?.find(item => item.experiences?.id === experienceId);
+    const wishlistItem = wishlist?.find((item) => item.experience?.id === experienceId);
     if (wishlistItem) {
       removeMutation.mutate(wishlistItem.id);
     }
@@ -120,7 +112,7 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {wishlist.map((item) => {
-        const exp = item.experiences;
+        const exp = item.experience;
         if (!exp) return null;
 
         return (

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { Loader2, Sparkles } from "lucide-react";
 import ExperienceCard from "@/components/ExperienceCard";
 import CompactExperienceCard from "@/components/account/CompactExperienceCard";
@@ -22,35 +21,40 @@ export default function RecommendedExperiences({
   excludeIds = [],
   compact = false,
 }: RecommendedExperiencesProps) {
-  const navigate = useNavigate();
-
   // Fetch user's interests and wishlist categories
   const { data: userPreferences } = useQuery({
     queryKey: ["user-preferences", userId],
     queryFn: async () => {
       if (!userId) return { interests: [], wishlistCategoryIds: [] };
 
-      // Get user interests
       const { data: profile } = await supabase
         .from("user_profiles")
         .select("interests")
         .eq("user_id", userId)
         .maybeSingle();
 
-      // Get categories from wishlist
-      const { data: wishlist } = await supabase
+      // Fetch wishlist experience IDs, then look up their categories
+      const { data: wishlistData } = await supabase
         .from("wishlist")
-        .select("experiences(category_id)")
+        .select("experience_id")
         .eq("user_id", userId)
         .is("deleted_at", null);
 
-      const wishlistCategoryIds = wishlist
-        ?.map((w) => w.experiences?.category_id)
-        .filter(Boolean) as string[];
+      let wishlistCategoryIds: string[] = [];
+      if (wishlistData && wishlistData.length > 0) {
+        const expIds = wishlistData.map((w) => w.experience_id).filter(Boolean);
+        if (expIds.length > 0) {
+          const { data: exps } = await supabase
+            .from("experiences")
+            .select("category_id")
+            .in("id", expIds);
+          wishlistCategoryIds = [...new Set((exps || []).map((e) => e.category_id).filter(Boolean) as string[])];
+        }
+      }
 
       return {
         interests: (profile?.interests as string[]) || [],
-        wishlistCategoryIds: [...new Set(wishlistCategoryIds)],
+        wishlistCategoryIds,
       };
     },
     enabled: !!userId,
@@ -62,23 +66,10 @@ export default function RecommendedExperiences({
     queryFn: async () => {
       let query = supabase
         .from("experiences")
-        .select(`
-          id,
-          slug,
-          title,
-          title_he,
-          subtitle,
-          hero_image,
-          photos,
-          base_price,
-          currency,
-          category_id,
-          hotels (name, city, hero_image)
-        `)
+        .select("id, slug, title, title_he, subtitle, hero_image, photos, base_price, currency, category_id, hotels(name, city, hero_image)")
         .eq("status", "published")
         .limit(limit + excludeIds.length);
 
-      // If we have category preferences, prioritize those
       if (userPreferences?.wishlistCategoryIds?.length) {
         query = query.in("category_id", userPreferences.wishlistCategoryIds);
       }
@@ -86,7 +77,6 @@ export default function RecommendedExperiences({
       const { data, error } = await query;
       if (error) throw error;
 
-      // Filter out excluded IDs
       const filtered = (data || []).filter((exp) => !excludeIds.includes(exp.id));
       return filtered.slice(0, limit);
     },
@@ -129,7 +119,6 @@ export default function RecommendedExperiences({
       <p className="text-xs text-muted-foreground mb-4">{subtitle}</p>
 
       {compact ? (
-        // Compact grid layout
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-muted/30 rounded-xl p-2">
           {recommendations.map((exp) => (
             <CompactExperienceCard
@@ -142,7 +131,6 @@ export default function RecommendedExperiences({
           ))}
         </div>
       ) : (
-        // Standard grid layout
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recommendations.map((exp) => (
             <ExperienceCard

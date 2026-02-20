@@ -64,6 +64,7 @@ import AdminAIInsights from "./pages/admin/AIInsights";
 import AdminLeads from "./pages/admin/Leads";
 import AdminFavorites from "./pages/admin/Favorites";
 import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
+import LaunchIndex from "./pages/LaunchIndex";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,7 @@ const App = () => (
           <Routes>
             {/* Page principale */}
             <Route path="/" element={<Index />} />
+            <Route path="/launch" element={<LaunchIndex />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
