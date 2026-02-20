@@ -83,6 +83,11 @@ const LaunchIndex = () => {
             hotel:hotels2(
               id, name, name_he, city, city_he, region, region_he, hero_image
             )
+          ),
+          experience2_highlight_tags(
+            highlight_tags(
+              id, slug, label_en, label_he
+            )
           )
         `).
       eq("status", "published").
@@ -202,15 +207,15 @@ const LaunchIndex = () => {
           </div>
         </section>
 
-        {/* ─── 2. FILTER SECTION ─── */}
-        <section className="py-16 sm:py-20 bg-background md:py-20">
-          <div className="container px-4 max-w-5xl mx-auto text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold uppercase tracking-[-0.02em] mb-3 leading-tight">
+        {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
+        <section id="launch-experiences" className="container py-8 sm:py-12 md:py-16 px-4 scroll-mt-16">
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
               Handpicked Hotels.
               <br />
               Unforgettable Experiences.
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base mb-10">
+            <p className="text-muted-foreground text-xs sm:text-sm mb-5">
               For 24 hours, 48 hours, or tailor-made experiences.
             </p>
 
@@ -242,28 +247,13 @@ const LaunchIndex = () => {
               </button>
             </div>
           </div>
-        </section>
-
-        {/* ─── 3. EXPERIENCES GRID ─── */}
-        <section id="launch-experiences" className="container py-12 sm:py-16 md:py-20 px-4 scroll-mt-16">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]">
-              {activeFilter ?
-              activeFilter === FILTER_ROMANTIC ?
-              "Romantic Getaway" :
-              "Feel Adventurous" :
-              lang === "he" ?
-              "חוויות חדשות" :
-              "New Experiences"}
-            </h2>
-          </div>
 
           {isLoadingExp ?
           <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div> :
           filteredExperiences && filteredExperiences.length > 0 ?
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 transition-all duration-500">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 transition-all duration-500">
               {filteredExperiences.map((experience: any) => {
               const primaryHotelLink = experience.experience2_hotels?.
               sort(
@@ -274,7 +264,8 @@ const LaunchIndex = () => {
 
               const cardExperience = {
                 ...experience,
-                hotels: primaryHotelLink || null
+                hotels: primaryHotelLink || null,
+                experience_highlight_tags: experience.experience2_highlight_tags || []
               };
 
               return (
