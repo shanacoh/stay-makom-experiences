@@ -20,6 +20,7 @@ const Header = () => {
     "/contact",
     "/partners",
     "/about",
+    "/launch",
   ].includes(location.pathname);
   const isTransparentPage = isHomePage || isDarkHeroPage;
 
