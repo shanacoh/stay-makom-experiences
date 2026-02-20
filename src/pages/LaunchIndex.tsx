@@ -30,10 +30,9 @@ import giftCardHero from "@/assets/gift-card-hero.jpg";
 import romanticImg from "@/assets/romantic-category.jpg";
 import activeImg from "@/assets/active-category.jpg";
 
-/* ─── Filter button slugs mapped to category slugs ─── */
+/* ─── Filter button slugs ─── */
+const FILTER_ADVENTURE = "adventure";
 const FILTER_ROMANTIC = "romantic";
-const FILTER_ADVENTURE = "active";
-
 const LaunchIndex = () => {
   const { lang } = useLanguage();
   const { getLocalizedPath } = useLocalizedNavigation();
@@ -98,11 +97,11 @@ const LaunchIndex = () => {
   categories?.find((c) => c.slug === slug)?.id;
 
   // Filtered experiences
-  const filteredExperiences = activeFilter ?
-  experiences2?.filter(
-    (exp: any) => exp.categories?.slug === activeFilter
-  ) :
-  experiences2;
+  const filteredExperiences = activeFilter === FILTER_ROMANTIC
+    ? experiences2?.filter((exp: any) => exp.categories?.slug === "romantic")
+    : activeFilter === FILTER_ADVENTURE
+    ? experiences2?.filter((exp: any) => exp.categories?.slug !== "romantic")
+    : experiences2;
 
   // Lead capture handler
   const handleLeadSubmit = async (e: React.FormEvent) => {
