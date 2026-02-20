@@ -178,7 +178,7 @@ const LaunchIndex = () => {
 
       <main className="flex-1">
         {/* ─── 1. HERO ─── */}
-        <section className="relative h-[70vh] min-h-[400px] flex items-center justify-center">
+        <section className="relative h-[78vh] min-h-[500px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
@@ -206,6 +206,9 @@ const LaunchIndex = () => {
             </button>
           </div>
         </section>
+
+        {/* ─── 1b. HOW IT WORKS BANNER ─── */}
+        <HowItWorksBanner />
 
         {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
         <section id="launch-experiences" className="container py-8 sm:py-12 md:py-16 px-4 scroll-mt-16">
