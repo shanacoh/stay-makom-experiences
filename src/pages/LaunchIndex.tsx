@@ -19,8 +19,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  DialogDescription } from
+"@/components/ui/dialog";
 import { Loader2, ArrowRight, Gift, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
@@ -58,23 +58,23 @@ const LaunchIndex = () => {
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ["launch-categories"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("status", "published")
-        .order("display_order", { ascending: true });
+      const { data, error } = await supabase.
+      from("categories").
+      select("*").
+      eq("status", "published").
+      order("display_order", { ascending: true });
       if (error) throw error;
       return data;
-    },
+    }
   });
 
   // Fetch published experiences2 with hotels
   const { data: experiences2, isLoading: isLoadingExp } = useQuery({
     queryKey: ["launch-experiences2"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experiences2")
-        .select(`
+      const { data, error } = await supabase.
+      from("experiences2").
+      select(`
           *,
           categories(slug),
           experience2_hotels(
@@ -84,24 +84,24 @@ const LaunchIndex = () => {
               id, name, name_he, city, city_he, region, region_he, hero_image
             )
           )
-        `)
-        .eq("status", "published")
-        .order("created_at", { ascending: false });
+        `).
+      eq("status", "published").
+      order("created_at", { ascending: false });
       if (error) throw error;
       return data;
-    },
+    }
   });
 
   // Resolve category id from slug
   const getCategoryIdFromSlug = (slug: string) =>
-    categories?.find((c) => c.slug === slug)?.id;
+  categories?.find((c) => c.slug === slug)?.id;
 
   // Filtered experiences
-  const filteredExperiences = activeFilter
-    ? experiences2?.filter(
-        (exp: any) => exp.categories?.slug === activeFilter
-      )
-    : experiences2;
+  const filteredExperiences = activeFilter ?
+  experiences2?.filter(
+    (exp: any) => exp.categories?.slug === activeFilter
+  ) :
+  experiences2;
 
   // Lead capture handler
   const handleLeadSubmit = async (e: React.FormEvent) => {
@@ -110,7 +110,7 @@ const LaunchIndex = () => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("collect-lead", {
-        body: { email, source: "coming_soon" },
+        body: { email, source: "coming_soon" }
       });
       if (error) throw error;
       setSubmitted(true);
@@ -134,8 +134,8 @@ const LaunchIndex = () => {
           email: waitlistEmail,
           source: "category_waitlist",
           cta_id: waitlistCategoryId,
-          metadata: { category_name: waitlistCategory },
-        },
+          metadata: { category_name: waitlistCategory }
+        }
       });
       if (error) throw error;
       setWaitlistSubmitted(true);
@@ -160,15 +160,15 @@ const LaunchIndex = () => {
 
   // Handle filter button click
   const handleFilterClick = (slug: string) => {
-    setActiveFilter((prev) => (prev === slug ? null : slug));
+    setActiveFilter((prev) => prev === slug ? null : slug);
   };
 
   return (
     <div className="min-h-screen flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
       <SEOHead
         title="STAYMAKOM — Handpicked Hotels & Experiences in Israel"
-        description="We curate Israel's best boutique hotels and pair them with unique local experiences."
-      />
+        description="We curate Israel's best boutique hotels and pair them with unique local experiences." />
+
       <Header />
 
       <main className="flex-1">
@@ -176,17 +176,17 @@ const LaunchIndex = () => {
         <section className="relative h-screen min-h-[600px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage})` }}
-          />
+            style={{ backgroundImage: `url(${heroImage})` }} />
+
           <div className="absolute inset-0 bg-black/35" />
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
-            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 text-white">
               Don't choose a city,
               <br />
               choose your escape
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/90 font-light mb-10 max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+            <p className="text-base sm:text-lg text-white/90 font-light mb-10 max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 md:text-base">
               We curate Israel's best hotels and pair them with unique local
               experiences.
             </p>
@@ -195,18 +195,18 @@ const LaunchIndex = () => {
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-8 py-3.5 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400"
-            >
+              className="px-8 py-3.5 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400">
+
               Find your experience & hotel
             </button>
           </div>
         </section>
 
         {/* ─── 2. FILTER SECTION ─── */}
-        <section className="py-16 sm:py-20 md:py-24 bg-background">
+        <section className="py-16 sm:py-20 bg-background md:py-[52px]">
           <div className="container px-4 max-w-5xl mx-auto text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-3">
-              Handpicked hotels, unforgettable experiences.
+            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-3">Handpicked hotels, 
+unforgettable experiences.
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base mb-10">
               For 24 hours, 48 hours, or tailor-made experiences.
@@ -218,23 +218,23 @@ const LaunchIndex = () => {
               <button
                 onClick={() => handleFilterClick(FILTER_ROMANTIC)}
                 className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
-                  activeFilter === FILTER_ROMANTIC
-                    ? "ring-2 ring-primary ring-offset-2 scale-[1.02]"
-                    : "hover:scale-[1.02]"
-                }`}
-              >
+                activeFilter === FILTER_ROMANTIC ?
+                "ring-2 ring-primary ring-offset-2 scale-[1.02]" :
+                "hover:scale-[1.02]"}`
+                }>
+
                 <img
                   src={romanticImg}
                   alt="Romantic getaway"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+
                 <div
                   className={`absolute inset-0 transition-all duration-500 ${
-                    activeFilter === FILTER_ROMANTIC
-                      ? "bg-black/30"
-                      : "bg-black/40 group-hover:bg-black/30"
-                  }`}
-                />
+                  activeFilter === FILTER_ROMANTIC ?
+                  "bg-black/30" :
+                  "bg-black/40 group-hover:bg-black/30"}`
+                  } />
+
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
                     Romantic
@@ -248,23 +248,23 @@ const LaunchIndex = () => {
               <button
                 onClick={() => handleFilterClick(FILTER_ADVENTURE)}
                 className={`group relative aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-xl transition-all duration-500 ${
-                  activeFilter === FILTER_ADVENTURE
-                    ? "ring-2 ring-primary ring-offset-2 scale-[1.02]"
-                    : "hover:scale-[1.02]"
-                }`}
-              >
+                activeFilter === FILTER_ADVENTURE ?
+                "ring-2 ring-primary ring-offset-2 scale-[1.02]" :
+                "hover:scale-[1.02]"}`
+                }>
+
                 <img
                   src={activeImg}
                   alt="Feel adventurous"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+
                 <div
                   className={`absolute inset-0 transition-all duration-500 ${
-                    activeFilter === FILTER_ADVENTURE
-                      ? "bg-black/30"
-                      : "bg-black/40 group-hover:bg-black/30"
-                  }`}
-                />
+                  activeFilter === FILTER_ADVENTURE ?
+                  "bg-black/30" :
+                  "bg-black/40 group-hover:bg-black/30"}`
+                  } />
+
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
                     Feel
@@ -276,14 +276,14 @@ const LaunchIndex = () => {
             </div>
 
             {/* Active filter indicator */}
-            {activeFilter && (
-              <button
-                onClick={() => setActiveFilter(null)}
-                className="mt-6 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
-              >
+            {activeFilter &&
+            <button
+              onClick={() => setActiveFilter(null)}
+              className="mt-6 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+
                 {isRTL ? "הצג הכל" : "Show all experiences"}
               </button>
-            )}
+            }
           </div>
         </section>
 
@@ -291,59 +291,59 @@ const LaunchIndex = () => {
         <section id="launch-experiences" className="container py-12 sm:py-16 md:py-20 px-4 scroll-mt-16">
           <div className="flex justify-between items-center mb-8">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]">
-              {activeFilter
-                ? activeFilter === FILTER_ROMANTIC
-                  ? "Romantic Getaway"
-                  : "Feel Adventurous"
-                : lang === "he"
-                ? "חוויות חדשות"
-                : "New Experiences"}
+              {activeFilter ?
+              activeFilter === FILTER_ROMANTIC ?
+              "Romantic Getaway" :
+              "Feel Adventurous" :
+              lang === "he" ?
+              "חוויות חדשות" :
+              "New Experiences"}
             </h2>
           </div>
 
-          {isLoadingExp ? (
-            <div className="text-center py-12">
+          {isLoadingExp ?
+          <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            </div>
-          ) : filteredExperiences && filteredExperiences.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 transition-all duration-500">
+            </div> :
+          filteredExperiences && filteredExperiences.length > 0 ?
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 transition-all duration-500">
               {filteredExperiences.map((experience: any) => {
-                const primaryHotelLink = experience.experience2_hotels
-                  ?.sort(
-                    (a: any, b: any) =>
-                      (a.position || 0) - (b.position || 0)
-                  )
-                  ?.[0]?.hotel;
+              const primaryHotelLink = experience.experience2_hotels?.
+              sort(
+                (a: any, b: any) =>
+                (a.position || 0) - (b.position || 0)
+              )?.[
+              0]?.hotel;
 
-                const cardExperience = {
-                  ...experience,
-                  hotels: primaryHotelLink || null,
-                };
+              const cardExperience = {
+                ...experience,
+                hotels: primaryHotelLink || null
+              };
 
-                return (
-                  <ExperienceCard
-                    key={experience.id}
-                    experience={cardExperience}
-                    linkPrefix="/experience2"
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-16">
+              return (
+                <ExperienceCard
+                  key={experience.id}
+                  experience={cardExperience}
+                  linkPrefix="/experience2" />);
+
+
+            })}
+            </div> :
+
+          <div className="text-center py-16">
               <p className="text-muted-foreground">
-                {isRTL
-                  ? "אין חוויות בקטגוריה זו עדיין"
-                  : "No experiences in this category yet."}
+                {isRTL ?
+              "אין חוויות בקטגוריה זו עדיין" :
+              "No experiences in this category yet."}
               </p>
               <button
-                onClick={() => setActiveFilter(null)}
-                className="mt-4 text-sm underline underline-offset-4 text-primary hover:text-primary/80"
-              >
+              onClick={() => setActiveFilter(null)}
+              className="mt-4 text-sm underline underline-offset-4 text-primary hover:text-primary/80">
+
                 {isRTL ? "הצג הכל" : "Show all experiences"}
               </button>
             </div>
-          )}
+          }
         </section>
 
         {/* ─── 4. MARQUEE BANNER ─── */}
@@ -355,8 +355,8 @@ const LaunchIndex = () => {
             <img
               src={handpickedHero}
               alt="Israeli countryside"
-              className="w-full h-full object-cover"
-            />
+              className="w-full h-full object-cover" />
+
             <div className="absolute inset-0 bg-black/50" />
           </div>
 
@@ -377,19 +377,19 @@ const LaunchIndex = () => {
         <section className="container py-16 md:py-20 px-4">
           <div
             className={`grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto ${
-              isRTL ? "md:grid-flow-col-dense" : ""
-            }`}
-          >
+            isRTL ? "md:grid-flow-col-dense" : ""}`
+            }>
+
             <div
               className={`relative overflow-hidden rounded-2xl ${
-                isRTL ? "md:order-2" : ""
-              }`}
-            >
+              isRTL ? "md:order-2" : ""}`
+              }>
+
               <img
                 src={giftCardHero}
                 alt="Gift Card"
-                className="w-full h-72 md:h-96 object-cover hover:scale-105 transition-transform duration-500"
-              />
+                className="w-full h-72 md:h-96 object-cover hover:scale-105 transition-transform duration-500" />
+
             </div>
 
             <div className={`space-y-5 ${isRTL ? "text-right md:order-1" : ""}`}>
@@ -406,11 +406,11 @@ const LaunchIndex = () => {
                   {t(lang, "giftCardSectionCTA")}
                   <ArrowRight
                     className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
-                      isRTL
-                        ? "mr-2 rotate-180 group-hover:-translate-x-1"
-                        : "ml-2"
-                    }`}
-                  />
+                    isRTL ?
+                    "mr-2 rotate-180 group-hover:-translate-x-1" :
+                    "ml-2"}`
+                    } />
+
                 </Link>
               </Button>
             </div>
@@ -424,39 +424,39 @@ const LaunchIndex = () => {
               {isRTL ? "עוד חוויות בדרך" : "More experiences are on the way"}
             </h2>
             <p className="text-muted-foreground text-sm mb-8">
-              {isRTL
-                ? "היו הראשונים לדעת כשיעדים וחוויות חדשים מושקים."
-                : "Be the first to know when new destinations and experiences launch."}
+              {isRTL ?
+              "היו הראשונים לדעת כשיעדים וחוויות חדשים מושקים." :
+              "Be the first to know when new destinations and experiences launch."}
             </p>
 
-            {submitted ? (
-              <div className="flex items-center justify-center gap-2 text-primary font-medium">
+            {submitted ?
+            <div className="flex items-center justify-center gap-2 text-primary font-medium">
                 <CheckCircle className="h-5 w-5" />
                 {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
-              </div>
-            ) : (
-              <form onSubmit={handleLeadSubmit} className="flex gap-2">
+              </div> :
+
+            <form onSubmit={handleLeadSubmit} className="flex gap-2">
                 <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={
-                    isRTL ? "כתובת האימייל שלך" : "Your email address"
-                  }
-                  className="flex-1"
-                />
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={
+                isRTL ? "כתובת האימייל שלך" : "Your email address"
+                }
+                className="flex-1" />
+
                 <Button type="submit" disabled={isSubmitting}>
                   {isRTL ? "עדכנו אותי" : "Notify me"}
                 </Button>
               </form>
-            )}
+            }
           </div>
         </section>
 
         {/* ─── 8. FUTURE CATEGORIES (8 cards – waitlist popup) ─── */}
-        {!isLoadingCategories && categories && categories.length > 0 && (
-          <section className="container py-12 sm:py-16 md:py-20 px-4">
+        {!isLoadingCategories && categories && categories.length > 0 &&
+        <section className="container py-12 sm:py-16 md:py-20 px-4">
             <div className="text-center mb-8">
               <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]">
                 {isRTL ? "קטגוריות שבדרך" : "Coming soon"}
@@ -465,25 +465,25 @@ const LaunchIndex = () => {
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 {categories.map((category) => {
-                  const catTitle = getLocalizedField(category, "name", lang) as string;
-                  const image = category.hero_image || "";
-                  const words = catTitle.split(" ");
-                  const midpoint = Math.ceil(words.length / 2);
-                  const line1 = words.slice(0, midpoint).join(" ");
-                  const line2 = words.slice(midpoint).join(" ");
+                const catTitle = getLocalizedField(category, "name", lang) as string;
+                const image = category.hero_image || "";
+                const words = catTitle.split(" ");
+                const midpoint = Math.ceil(words.length / 2);
+                const line1 = words.slice(0, midpoint).join(" ");
+                const line2 = words.slice(midpoint).join(" ");
 
-                  return (
-                    <button
-                      key={`waitlist-${category.slug}`}
-                      onClick={() => handleCategoryClick(category)}
-                      className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer"
-                    >
+                return (
+                  <button
+                    key={`waitlist-${category.slug}`}
+                    onClick={() => handleCategoryClick(category)}
+                    className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
+
                       <div className="aspect-square relative">
                         <img
-                          src={image}
-                          alt={catTitle}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                        src={image}
+                        alt={catTitle}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
                         <div className="absolute inset-0 flex items-center justify-center p-4">
                           <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
@@ -492,13 +492,13 @@ const LaunchIndex = () => {
                           </h3>
                         </div>
                       </div>
-                    </button>
-                  );
-                })}
+                    </button>);
+
+              })}
               </div>
             </div>
           </section>
-        )}
+        }
       </main>
 
       <Footer />
@@ -509,56 +509,56 @@ const LaunchIndex = () => {
         onOpenChange={(open) => {
           setWaitlistOpen(open);
           if (!open) setWaitlistSubmitted(false);
-        }}
-      >
+        }}>
+
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-sans text-xl font-bold tracking-[-0.02em]">
-              {isRTL
-                ? "החוויה הזו בדרך"
-                : "This experience is coming soon."}
+              {isRTL ?
+              "החוויה הזו בדרך" :
+              "This experience is coming soon."}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              {isRTL
-                ? `הצטרף לרשימת ההמתנה של "${waitlistCategory}" והיה הראשון לדעת.`
-                : `Join the waitlist for "${waitlistCategory}" and be the first to access it.`}
+              {isRTL ?
+              `הצטרף לרשימת ההמתנה של "${waitlistCategory}" והיה הראשון לדעת.` :
+              `Join the waitlist for "${waitlistCategory}" and be the first to access it.`}
             </DialogDescription>
           </DialogHeader>
 
-          {waitlistSubmitted ? (
-            <div className="flex items-center justify-center gap-2 text-primary font-medium py-6">
+          {waitlistSubmitted ?
+          <div className="flex items-center justify-center gap-2 text-primary font-medium py-6">
               <CheckCircle className="h-5 w-5" />
               {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
-            </div>
-          ) : (
-            <form
-              onSubmit={handleWaitlistSubmit}
-              className="flex flex-col gap-3 pt-2"
-            >
+            </div> :
+
+          <form
+            onSubmit={handleWaitlistSubmit}
+            className="flex flex-col gap-3 pt-2">
+
               <Input
-                type="email"
-                required
-                value={waitlistEmail}
-                onChange={(e) => setWaitlistEmail(e.target.value)}
-                placeholder={
-                  isRTL ? "כתובת האימייל שלך" : "Your email address"
-                }
-              />
+              type="email"
+              required
+              value={waitlistEmail}
+              onChange={(e) => setWaitlistEmail(e.target.value)}
+              placeholder={
+              isRTL ? "כתובת האימייל שלך" : "Your email address"
+              } />
+
               <Button type="submit" disabled={waitlistSubmitting} className="w-full">
-                {waitlistSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isRTL ? (
-                  "עדכנו אותי"
-                ) : (
-                  "Notify me — be the first to know"
-                )}
+                {waitlistSubmitting ?
+              <Loader2 className="h-4 w-4 animate-spin" /> :
+              isRTL ?
+              "עדכנו אותי" :
+
+              "Notify me — be the first to know"
+              }
               </Button>
             </form>
-          )}
+          }
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 };
 
 export default LaunchIndex;
