@@ -361,88 +361,81 @@ const LaunchIndex = () => {
           </div>
         </section>
 
-        {/* ─── 7. COMING SOON + LEAD CAPTURE ─── */}
-        <section className="py-16 sm:py-20 bg-muted/50">
-          <div className="container px-4 max-w-lg mx-auto text-center">
-            <h2 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold tracking-[-0.02em] mb-4">
-              {isRTL ? "עוד חוויות בדרך" : "More experiences are on the way"}
-            </h2>
-            <p className="text-muted-foreground text-sm mb-8">
-              {isRTL ?
-              "היו הראשונים לדעת כשיעדים וחוויות חדשים מושקים." :
-              "Be the first to know when new destinations and experiences launch."}
-            </p>
-
-            {submitted ?
-            <div className="flex items-center justify-center gap-2 text-primary font-medium">
-                <CheckCircle className="h-5 w-5" />
-                {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
-              </div> :
-
-            <form onSubmit={handleLeadSubmit} className="flex gap-2">
-                <Input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={
-                isRTL ? "כתובת האימייל שלך" : "Your email address"
-                }
-                className="flex-1" />
-
-                <Button type="submit" disabled={isSubmitting}>
-                  {isRTL ? "עדכנו אותי" : "Notify me"}
-                </Button>
-              </form>
-            }
-          </div>
-        </section>
-
-        {/* ─── 8. FUTURE CATEGORIES (8 cards – waitlist popup) ─── */}
-        {!isLoadingCategories && categories && categories.length > 0 &&
-        <section className="container py-12 sm:py-16 md:py-20 px-4">
-            <div className="text-center mb-8">
-              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em]">
-                {isRTL ? "קטגוריות שבדרך" : "Coming soon"}
+        {/* ─── 7. MORE EXPERIENCES + CATEGORIES (unified) ─── */}
+        <section className="py-12 sm:py-16 bg-muted/50">
+          <div className="container px-4 mx-auto">
+            <div className="max-w-2xl mx-auto text-center mb-3">
+              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] uppercase">
+                {isRTL ? "עוד חוויות בדרך" : "More experiences are on the way."}
               </h2>
             </div>
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                {categories.map((category) => {
-                const catTitle = getLocalizedField(category, "name", lang) as string;
-                const image = category.hero_image || "";
-                const words = catTitle.split(" ");
-                const midpoint = Math.ceil(words.length / 2);
-                const line1 = words.slice(0, midpoint).join(" ");
-                const line2 = words.slice(midpoint).join(" ");
 
-                return (
-                  <button
-                    key={`waitlist-${category.slug}`}
-                    onClick={() => handleCategoryClick(category)}
-                    className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
+            <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10">
+              <p className="text-muted-foreground text-sm whitespace-nowrap">
+                {isRTL ? "היו הראשונים לדעת." : "Be the first to know."}
+              </p>
 
-                      <div className="aspect-square relative">
-                        <img
-                        src={image}
-                        alt={catTitle}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
-                        <div className="absolute inset-0 flex items-center justify-center p-4">
-                          <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
-                            <span className="block">{line1}</span>
-                            {line2 && <span className="block -mt-1.5">{line2}</span>}
-                          </h3>
-                        </div>
-                      </div>
-                    </button>);
-
-              })}
-              </div>
+              {submitted ? (
+                <div className="flex items-center gap-2 text-primary font-medium">
+                  <CheckCircle className="h-5 w-5" />
+                  {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
+                </div>
+              ) : (
+                <form onSubmit={handleLeadSubmit} className="flex gap-2 w-full sm:w-auto">
+                  <Input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
+                    className="flex-1 sm:w-56"
+                  />
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isRTL ? "עדכנו אותי" : "Notify me"}
+                  </Button>
+                </form>
+              )}
             </div>
-          </section>
-        }
+
+            {!isLoadingCategories && categories && categories.length > 0 && (
+              <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  {categories.map((category) => {
+                    const catTitle = getLocalizedField(category, "name", lang) as string;
+                    const image = category.hero_image || "";
+                    const words = catTitle.split(" ");
+                    const midpoint = Math.ceil(words.length / 2);
+                    const line1 = words.slice(0, midpoint).join(" ");
+                    const line2 = words.slice(midpoint).join(" ");
+
+                    return (
+                      <button
+                        key={`waitlist-${category.slug}`}
+                        onClick={() => handleCategoryClick(category)}
+                        className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer"
+                      >
+                        <div className="aspect-square relative">
+                          <img
+                            src={image}
+                            alt={catTitle}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
+                          <div className="absolute inset-0 flex items-center justify-center p-4">
+                            <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
+                              <span className="block">{line1}</span>
+                              {line2 && <span className="block -mt-1.5">{line2}</span>}
+                            </h3>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       </main>
 
       <Footer />
