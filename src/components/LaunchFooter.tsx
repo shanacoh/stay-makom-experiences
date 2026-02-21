@@ -108,12 +108,11 @@ const LaunchFooter = () => {
           </div>
         </div>
 
-        {/* ─── TABLET (md to lg) — 2×2 grid ─── */}
+        {/* ─── TABLET (md to lg) — 2 columns: nav | community ─── */}
         <div className="hidden md:block lg:hidden">
-          <div className="max-w-2xl mx-auto space-y-8">
-            {/* Row 1 */}
-            <div className="grid grid-cols-2 gap-8">
-              {/* Brand */}
+          <div className="max-w-2xl mx-auto grid grid-cols-2 gap-10">
+            {/* Left: Brand + Nav */}
+            <div className="space-y-6">
               <div>
                 <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
                   STAYMAKOM
@@ -122,9 +121,8 @@ const LaunchFooter = () => {
                   Handpicked Hotels.<br />Unforgettable Experiences.
                 </p>
               </div>
-              {/* STAYMAKOM links */}
               <div>
-                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
+                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
                   STAYMAKOM
                 </h4>
                 <ul className="space-y-2">
@@ -132,15 +130,8 @@ const LaunchFooter = () => {
                   <li><Link to="/partners" className="text-sm text-white hover:text-primary transition-smooth">Become a Partner</Link></li>
                 </ul>
               </div>
-            </div>
-
-            <div className="border-t border-white/10" />
-
-            {/* Row 2 */}
-            <div className="grid grid-cols-2 gap-8">
-              {/* Explore */}
               <div>
-                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
+                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
                   Explore
                 </h4>
                 <ul className="space-y-2">
@@ -148,12 +139,17 @@ const LaunchFooter = () => {
                   <li><Link to="/category/romantic" className="text-sm text-white hover:text-primary transition-smooth">Romantic Escape</Link></li>
                 </ul>
               </div>
-              {/* Join + Social */}
+            </div>
+
+            {/* Right: Community */}
+            <div className="space-y-5">
               <div>
                 <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
                   Join the journey
                 </h4>
-                <EmailForm className="mb-4" />
+                <EmailForm className="mb-0" />
+              </div>
+              <div>
                 <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">Follow us</p>
                 <SocialIcons />
                 <p className="text-xs text-white/60 mt-2 leading-relaxed">
