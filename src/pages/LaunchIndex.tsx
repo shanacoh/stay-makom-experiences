@@ -6,7 +6,7 @@ import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import { t } from "@/lib/translations";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchFooter from "@/components/LaunchFooter";
 import { SEOHead } from "@/components/SEOHead";
 import MarqueeBanner from "@/components/MarqueeBanner";
 import HowItWorksBanner from "@/components/HowItWorksBanner";
@@ -438,7 +438,7 @@ const LaunchIndex = () => {
         </section>
       </main>
 
-      <Footer />
+      <LaunchFooter />
 
       {/* ─── WAITLIST POPUP ─── */}
       <Dialog
