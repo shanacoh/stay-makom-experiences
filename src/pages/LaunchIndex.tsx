@@ -200,11 +200,14 @@ const LaunchIndex = () => {
               )}
             </h1>
             <p
-              className="text-base sm:text-lg text-white/90 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up md:text-base"
+              className="text-lg sm:text-xl md:text-2xl text-white font-medium mb-1 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
               style={{ animationDelay: '250ms' }}>
-              {isRTL
-                ? "אנחנו אוצרים את המלונות הטובים בישראל ומשלבים אותם עם חוויות מקומיות ייחודיות."
-                : "We curate Israel's best hotels and pair them with unique local experiences."}
+              {isRTL ? "לא יעד. תחושה." : "Not a destination. A feeling."}
+            </p>
+            <p
+              className="text-sm sm:text-base text-white/80 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
+              style={{ animationDelay: '375ms' }}>
+              {isRTL ? "הישראל שרוב האנשים לא מוצאים." : "The Israel most people never find."}
             </p>
             <button
               onClick={() => {
@@ -213,7 +216,7 @@ const LaunchIndex = () => {
               }}
               className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/90 transition-all duration-300 opacity-0 animate-hero-fade-up"
               style={{ animationDelay: '500ms' }}>
-              {isRTL ? "מצא את החוויה והמלון שלך" : "Find your experience & hotel"}
+              {isRTL ? "מצא את הבריחה שלך" : "Find your escape"}
             </button>
           </div>
         </section>
@@ -329,46 +332,7 @@ const LaunchIndex = () => {
           </div>
         </section>
 
-        {/* ─── 6. GIFT CARD ─── */}
-        <section className="container py-10 md:py-14 px-4">
-          <div className={`grid md:grid-cols-2 gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
-
-            <div
-              className={`relative overflow-hidden rounded-2xl ${
-              isRTL ? "md:order-2" : ""}`
-              }>
-
-              <img
-                src={giftCardHero}
-                alt="Gift Card"
-                className="w-full h-56 md:h-72 object-cover hover:scale-105 transition-transform duration-500" />
-
-            </div>
-
-            <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
-              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
-                {isRTL ? (<>מתנה מושלמת.<br />מתנת הבריחה.</>) : (<>Perfect gift.<br />The gift of escape.</>)}
-              </h2>
-              <p className="text-muted-foreground text-sm md:text-base max-w-md">
-                {t(lang, "giftCardSectionDesc")}
-              </p>
-              <Button asChild className="group">
-                <Link to={getLocalizedPath("/gift-card")}>
-                  {t(lang, "giftCardSectionCTA")}
-                  <ArrowRight
-                    className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
-                    isRTL ?
-                    "mr-2 rotate-180 group-hover:-translate-x-1" :
-                    "ml-2"}`
-                    } />
-
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── 7. MORE EXPERIENCES + CATEGORIES (unified) ─── */}
+        {/* ─── 6. MORE EXPERIENCES + CATEGORIES (unified) ─── */}
         <section className="py-12 sm:py-16 bg-muted/50">
           <div className="container px-4 mx-auto">
             <div className="max-w-2xl mx-auto text-center mb-3">
@@ -441,6 +405,45 @@ const LaunchIndex = () => {
                 </div>
               </div>
             }
+          </div>
+        </section>
+
+        {/* ─── 7. GIFT CARD ─── */}
+        <section className="container py-10 md:py-14 px-4">
+          <div className={`grid md:grid-cols-2 gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
+
+            <div
+              className={`relative overflow-hidden rounded-2xl ${
+              isRTL ? "md:order-2" : ""}`
+              }>
+
+              <img
+                src={giftCardHero}
+                alt="Gift Card"
+                className="w-full h-56 md:h-72 object-cover hover:scale-105 transition-transform duration-500" />
+
+            </div>
+
+            <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
+              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
+                {isRTL ? (<>מתנה מושלמת.<br />מתנת הבריחה.</>) : (<>Perfect gift.<br />The gift of escape.</>)}
+              </h2>
+              <p className="text-muted-foreground text-sm md:text-base max-w-md">
+                {t(lang, "giftCardSectionDesc")}
+              </p>
+              <Button asChild className="group">
+                <Link to={getLocalizedPath("/gift-card")}>
+                  {t(lang, "giftCardSectionCTA")}
+                  <ArrowRight
+                    className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${
+                    isRTL ?
+                    "mr-2 rotate-180 group-hover:-translate-x-1" :
+                    "ml-2"}`
+                    } />
+
+                </Link>
+              </Button>
+            </div>
           </div>
         </section>
       </main>
