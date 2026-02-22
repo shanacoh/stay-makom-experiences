@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import { t } from "@/lib/translations";
-import Header from "@/components/Header";
+import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
 import { SEOHead } from "@/components/SEOHead";
 import MarqueeBanner from "@/components/MarqueeBanner";
@@ -174,7 +174,7 @@ const LaunchIndex = () => {
         title="STAYMAKOM — Handpicked Hotels & Experiences in Israel"
         description="We curate Israel's best boutique hotels and pair them with unique local experiences." />
 
-      <Header />
+      <LaunchHeader />
 
       <main className="flex-1">
         {/* ─── 1. HERO ─── */}
