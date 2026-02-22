@@ -171,8 +171,8 @@ const LaunchIndex = () => {
   return (
     <div className="min-h-screen flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
       <SEOHead
-        title="STAYMAKOM — Handpicked Hotels & Experiences in Israel"
-        description="We curate Israel's best boutique hotels and pair them with unique local experiences." />
+        title={isRTL ? "STAYMAKOM — מלונות וחוויות נבחרים בישראל" : "STAYMAKOM — Handpicked Hotels & Experiences in Israel"}
+        description={isRTL ? "אנחנו אוצרים את המלונות הבוטיק הטובים בישראל ומשלבים אותם עם חוויות מקומיות ייחודיות." : "We curate Israel's best boutique hotels and pair them with unique local experiences."} />
 
       <LaunchHeader />
 
@@ -189,17 +189,18 @@ const LaunchIndex = () => {
             <h1
               className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
               style={{ animationDelay: '0ms' }}>
-
-              Don't choose a city,
-              <br />
-              choose your escape
+              {isRTL ? (
+                <>אל תבחר עיר,<br />בחר את הבריחה שלך</>
+              ) : (
+                <>Don't choose a city,<br />choose your escape</>
+              )}
             </h1>
             <p
               className="text-base sm:text-lg text-white/90 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up md:text-base"
               style={{ animationDelay: '250ms' }}>
-
-              We curate Israel's best hotels and pair them with unique local
-              experiences.
+              {isRTL
+                ? "אנחנו אוצרים את המלונות הטובים בישראל ומשלבים אותם עם חוויות מקומיות ייחודיות."
+                : "We curate Israel's best hotels and pair them with unique local experiences."}
             </p>
             <button
               onClick={() => {
@@ -208,8 +209,7 @@ const LaunchIndex = () => {
               }}
               className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/90 transition-all duration-300 opacity-0 animate-hero-fade-up"
               style={{ animationDelay: '500ms' }}>
-
-              Find your experience & hotel
+              {isRTL ? "מצא את החוויה והמלון שלך" : "Find your experience & hotel"}
             </button>
           </div>
         </section>
@@ -221,12 +221,10 @@ const LaunchIndex = () => {
         <section id="launch-experiences" className="container sm:py-8 md:py-10 px-4 scroll-mt-16 py-[26px]">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
-              Handpicked Hotels.
-              <br />
-              Unforgettable Experiences.
+              {isRTL ? (<>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</>) : (<>Handpicked Hotels.<br />Unforgettable Experiences.</>)}
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm mb-5">
-              For 24 hours, 48 hours, or tailor-made experiences.
+              {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
             </p>
 
             {/* Compact pill toggle */}
@@ -241,7 +239,7 @@ const LaunchIndex = () => {
                 )}>
 
                 <Compass size={15} />
-                Feel adventurous
+                {isRTL ? "הרפתקה" : "Feel adventurous"}
               </button>
               <button
                 onClick={() => setActiveFilter(FILTER_ROMANTIC)}
@@ -253,7 +251,7 @@ const LaunchIndex = () => {
                 )}>
 
                 <Heart size={15} />
-                Romantic getaway
+                {isRTL ? "בריחה רומנטית" : "Romantic getaway"}
               </button>
             </div>
           </div>
@@ -345,9 +343,7 @@ const LaunchIndex = () => {
 
             <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
               <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
-                Perfect gift.
-                <br />
-                The gift of escape.
+                {isRTL ? (<>מתנה מושלמת.<br />מתנת הבריחה.</>) : (<>Perfect gift.<br />The gift of escape.</>)}
               </h2>
               <p className="text-muted-foreground text-sm md:text-base max-w-md">
                 {t(lang, "giftCardSectionDesc")}

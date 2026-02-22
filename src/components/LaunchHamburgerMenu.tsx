@@ -4,6 +4,7 @@ import { Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 interface LaunchHamburgerMenuProps {
@@ -14,7 +15,9 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
   const [isOpen, setIsOpen] = useState(false);
   const [bookExpanded, setBookExpanded] = useState(false);
   const { user } = useAuth();
+  const { lang } = useLanguage();
   const { getLocalizedPath } = useLocalizedNavigation();
+  const isRTL = lang === "he";
 
   const handleNavClick = () => {
     setIsOpen(false);
@@ -38,30 +41,30 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
         className="w-[230px] p-2 bg-white border border-border/10 shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-xl"
         sideOffset={8}
       >
-        <nav className="flex flex-col">
+        <nav className="flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
           {/* Book Your Stay with sub-items */}
           <button
             onClick={() => setBookExpanded(!bookExpanded)}
             className="flex items-center justify-between px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors w-full text-left"
           >
-            <span>Book Your Stay</span>
+            <span>{isRTL ? "הזמן את השהות שלך" : "Book Your Stay"}</span>
             <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${bookExpanded ? "rotate-180" : ""}`} />
           </button>
           {bookExpanded && (
-            <div className="ml-3 border-l border-border/20 pl-2">
+            <div className={`${isRTL ? "mr-3 border-r pr-2" : "ml-3 border-l pl-2"} border-border/20`}>
               <Link
                 to={getLocalizedPath("/experiences2?filter=adventure")}
                 onClick={handleNavClick}
                 className="px-4 py-2.5 text-[14px] text-muted-foreground hover:text-foreground hover:bg-foreground/5 rounded-lg transition-colors block"
               >
-                Feel Adventurous
+                {isRTL ? "הרפתקה" : "Feel Adventurous"}
               </Link>
               <Link
                 to={getLocalizedPath("/experiences2?filter=romantic")}
                 onClick={handleNavClick}
                 className="px-4 py-2.5 text-[14px] text-muted-foreground hover:text-foreground hover:bg-foreground/5 rounded-lg transition-colors block"
               >
-                Romantic Escape
+                {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
               </Link>
             </div>
           )}
@@ -71,7 +74,7 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
             onClick={handleNavClick}
             className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
           >
-            About
+            {isRTL ? "אודות" : "About"}
           </Link>
 
           <Link
@@ -79,7 +82,7 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
             onClick={handleNavClick}
             className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
           >
-            Contact Us
+            {isRTL ? "צרו קשר" : "Contact Us"}
           </Link>
 
           {!user && (
@@ -88,7 +91,7 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
               onClick={handleNavClick}
               className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
             >
-              Sign In
+              {isRTL ? "התחברות" : "Sign In"}
             </Link>
           )}
         </nav>
