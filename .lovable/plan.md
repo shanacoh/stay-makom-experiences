@@ -1,52 +1,44 @@
 
 
-# Fusion sections "More experiences" + "Coming soon" -- version compacte
+## Hero Section Adjustments for Launch Page
 
-## Concept
+### Goal
 
-Une seule section avec fond `bg-muted/50`, sans separateur, et le haut (titre + email) condense sur le minimum de lignes possible.
+The first viewport (what the user sees on arrival without scrolling) should show:
+- The hero image with title, subtitle, and CTA
+- The "How it works" banner
+- The "Handpicked Hotels / Unforgettable Experiences" heading
+- The subtitle "For 24 hours, 48 hours, or tailor-made experiences."
+- **Stop right before the pill toggle filter** (the toggle must NOT be visible)
 
-## Rendu visuel
+No orange CTA. Keep the current white CTA style. No full-screen hero.
 
-```text
-┌──────────────────────────────────────────────────┐
-│              (fond beige unifie bg-muted/50)      │
-│                                                   │
-│  MORE EXPERIENCES ARE ON THE WAY.                 │
-│  Be the first to know.  [email______] [NOTIFY ME]│
-│                                                   │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                 │
-│  │ ROM │ │ FAM │ │ SPO │ │ NAT │                  │
-│  └─────┘ └─────┘ └─────┘ └─────┘                 │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                 │
-│  │ FOO │ │ MIN │ │ WOR │ │ GOL │                  │
-│  └─────┘ └─────┘ └─────┘ └─────┘                 │
-│                                                   │
-└──────────────────────────────────────────────────┘
-```
+### Changes
 
-Le titre, le sous-titre et le formulaire email sont condenses sur **2 lignes max** en desktop (titre sur une ligne, sous-titre + formulaire sur la meme ligne). En mobile, ca passe sur 3 lignes naturellement.
+**File: `src/pages/LaunchIndex.tsx`**
 
-## Changements techniques
+1. **Hero height**: Change `h-[60vh] min-h-[380px]` to approximately `h-[50vh] min-h-[340px]` — shorter so the content below (banner + heading + subtitle) fits in the viewport before the toggle.
 
-Fichier : `src/pages/LaunchIndex.tsx`
+2. **Overlay**: Darken from `bg-black/35` to `bg-black/45` for better text readability.
 
-### 1. Fusionner les sections 7 et 8 en une seule `<section>`
-- Supprimer le `</section>` de la section 7 et le `<section>` de la section 8
-- Un seul wrapper `<section className="py-12 sm:py-16 bg-muted/50">`
+3. **Tighter spacing**: Reduce `mb-6` (title) to `mb-4`, and `mb-10` (subtitle) to `mb-7`.
 
-### 2. Condenser le haut (titre + email) sur le minimum de place
-- Titre en une seule ligne : `text-xl sm:text-2xl md:text-3xl` avec `mb-3` seulement
-- Sous-titre et formulaire email sur la meme ligne en desktop via `flex` :
-  - Sur mobile : sous-titre au-dessus, formulaire en dessous (flex-col)
-  - Sur tablette+ : sous-titre a gauche, formulaire a droite (flex-row items-center)
-- Reduire le `max-w` du conteneur haut a `max-w-2xl` pour que tout soit compact
+4. **CTA styling**: Keep white background, but refine for a more premium feel — add `shadow-md`, slightly more padding, and a subtle `hover:-translate-y-0.5 hover:shadow-lg` lift effect. No color change.
 
-### 3. Grille de categories juste en dessous
-- `mt-10` entre le formulaire et la grille (pas de separateur)
-- Supprimer le titre "Coming soon" (redondant)
-- Garder la grille `grid-cols-2 md:grid-cols-4` existante
+5. **Entrance animations**: Add staggered fade-in-up animations to the hero title, subtitle, and CTA using custom keyframes.
 
-### 4. Pas de separateur
-- Aucune ligne, aucun border-t -- juste de l'espace naturel entre le formulaire et les cartes
+**File: `tailwind.config.ts`**
+
+6. Add `hero-fade-up` keyframe: opacity 0 + translateY(25px) to opacity 1 + translateY(0), duration ~0.8s ease-out, with `animation-fill-mode: forwards`.
+
+7. Add animation utilities with staggered delays:
+   - `animate-hero-fade-up` (base)
+   - Applied via inline `animationDelay` styles: 0ms (title), 250ms (subtitle), 500ms (CTA)
+
+### Technical Details
+
+- Hero elements will start with `opacity-0` and the animation fills forward to `opacity-1`
+- The keyframe uses `forwards` fill mode so elements stay visible after animation
+- No new dependencies required
+- Only two files modified: `LaunchIndex.tsx` and `tailwind.config.ts`
 
