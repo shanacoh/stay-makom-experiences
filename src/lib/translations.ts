@@ -298,6 +298,7 @@ export const translations = {
     // About page
     aboutHeroTagline: "Reimagining how you experience Israel",
     aboutWhyIsraelLabel: "WHY ISRAEL. WHY NOW.",
+    aboutWhyIsraelTitle: "A new way to experience Israel",
     aboutWhyIsraelP1: "A country this layered deserves better than generic hotel listings and cookie-cutter packages.",
     aboutWhyIsraelP2: "Israel is one of the most diverse, culturally rich, and emotionally charged destinations in the world, yet the way people discover and book stays here hasn't kept up.",
     aboutWhyIsraelP3: "STAYMAKOM was born to change that. To bring intention, curation, and storytelling into how travelers experience this country, one stay at a time.",
@@ -652,6 +653,7 @@ export const translations = {
     // About page
     aboutHeroTagline: "מחדשים את הדרך שבה אתם חווים את ישראל",
     aboutWhyIsraelLabel: "למה ישראל. למה עכשיו.",
+    aboutWhyIsraelTitle: "דרך חדשה לחוות את ישראל",
     aboutWhyIsraelP1: "מדינה עם כל כך הרבה שכבות ראויה ליותר מרשימות מלונות גנריות וחבילות תבניתיות.",
     aboutWhyIsraelP2: "ישראל היא אחד היעדים המגוונים, העשירים תרבותית והטעונים רגשית בעולם, אך הדרך שבה אנשים מגלים ומזמינים שהיות כאן לא עמדה בקצב.",
     aboutWhyIsraelP3: "STAYMAKOM נולדה כדי לשנות את זה. להביא כוונה, אוצרות ונרטיב לאופן שבו מטיילים חווים את המדינה הזו, שהייה אחת בכל פעם.",
