@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ import {
   DialogDescription } from
 "@/components/ui/dialog";
 import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
+import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
@@ -168,8 +169,11 @@ const LaunchIndex = () => {
     setActiveFilter((prev) => prev === slug ? null : slug);
   };
 
+  const isPageLoading = isLoadingCategories || isLoadingExp;
+
   return (
     <div className="min-h-screen flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
+      <LoadingScreen isLoading={isPageLoading} />
       <SEOHead
         title={isRTL ? "STAYMAKOM — מלונות וחוויות נבחרים בישראל" : "STAYMAKOM — Handpicked Hotels & Experiences in Israel"}
         description={isRTL ? "אנחנו אוצרים את המלונות הבוטיק הטובים בישראל ומשלבים אותם עם חוויות מקומיות ייחודיות." : "We curate Israel's best boutique hotels and pair them with unique local experiences."} />
