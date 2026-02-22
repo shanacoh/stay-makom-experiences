@@ -178,7 +178,7 @@ const LaunchIndex = () => {
 
       <main className="flex-1">
         {/* ─── 1. HERO ─── */}
-        <section className="relative h-[50vh] min-h-[340px] flex items-center justify-center">
+        <section className="relative h-[70vh] min-h-[480px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
