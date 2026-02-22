@@ -5,9 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
 const LaunchFooter = () => {
   const [email, setEmail] = useState("");
+  const { lang } = useLanguage();
+  const { getLocalizedPath } = useLocalizedNavigation();
+  const isRTL = lang === "he";
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,11 +22,11 @@ const LaunchFooter = () => {
         email: email.trim(),
       });
       if (error) throw error;
-      toast.success("You're in! Welcome to the journey.");
+      toast.success(isRTL ? "נרשמת בהצלחה! ברוכים הבאים למסע." : "You're in! Welcome to the journey.");
       setEmail("");
     } catch (error) {
       console.error("Error subscribing:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(isRTL ? "משהו השתבש. נסה שנית." : "Something went wrong. Please try again.");
     }
   };
 
@@ -42,119 +47,98 @@ const LaunchFooter = () => {
     <form onSubmit={handleNewsletterSubmit} className={className}>
       <Input
         type="email"
-        placeholder="Your email"
+        placeholder={isRTL ? "האימייל שלך" : "Your email"}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary"
         required
       />
       <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full">
-        Subscribe
+        {isRTL ? "הרשמה" : "Subscribe"}
       </Button>
     </form>
   );
 
+  const brandTagline = isRTL ? "מלונות שנבחרו בקפידה. חוויות בלתי נשכחות." : "Handpicked Hotels. Unforgettable Experiences.";
+  const brandTaglineBr = isRTL ? (<>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</>) : (<>Handpicked Hotels.<br />Unforgettable Experiences.</>);
+  const giftCardLabel = isRTL ? "כרטיס מתנה" : "Gift Card";
+  const partnerLabel = isRTL ? "הפוך לשותף" : "Become a Partner";
+  const exploreLabel = isRTL ? "גלה" : "Explore";
+  const adventureLabel = isRTL ? "הרפתקה" : "Feel Adventurous";
+  const romanticLabel = isRTL ? "בריחה רומנטית" : "Romantic Escape";
+  const joinLabel = isRTL ? "הצטרף למסע" : "Join the journey";
+  const followLabel = isRTL ? "עקבו אחרינו" : "Follow us";
+  const followDesc = isRTL ? "צפו בנו בונים. גלו את ישראל אחרת." : "Watch us build. Discover Israel differently.";
+  const privacyLabel = isRTL ? "מדיניות פרטיות" : "Privacy Policy";
+  const termsLabel = isRTL ? "תנאי שימוש" : "Terms";
+
   return (
-    <footer className="bg-[#1a1a1a] text-white">
+    <footer className="bg-[#1a1a1a] text-white" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container py-8">
 
         {/* ─── DESKTOP (lg+) — 4 compact columns ─── */}
         <div className="hidden lg:block">
           <div className="max-w-4xl mx-auto grid grid-cols-4 gap-6">
-            {/* Col 1: Brand */}
             <div>
-              <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
-                STAYMAKOM
-              </h3>
-              <p className="text-xs text-white/80 leading-relaxed">
-                Handpicked Hotels.<br />Unforgettable Experiences.
-              </p>
+              <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">STAYMAKOM</h3>
+              <p className="text-xs text-white/80 leading-relaxed">{brandTaglineBr}</p>
             </div>
-
-            {/* Col 2: STAYMAKOM */}
             <div>
-              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-                STAYMAKOM
-              </h4>
+              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">STAYMAKOM</h4>
               <ul className="space-y-2">
-                <li><Link to="/gift-card" className="text-sm text-white hover:text-primary transition-smooth">Gift Card</Link></li>
-                <li><Link to="/partners" className="text-sm text-white hover:text-primary transition-smooth">Become a Partner</Link></li>
+                <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white hover:text-primary transition-smooth">{partnerLabel}</Link></li>
               </ul>
             </div>
-
-            {/* Col 3: Explore */}
             <div>
-              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-                Explore
-              </h4>
+              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{exploreLabel}</h4>
               <ul className="space-y-2">
-                <li><Link to="/category/adventure" className="text-sm text-white hover:text-primary transition-smooth">Feel Adventurous</Link></li>
-                <li><Link to="/category/romantic" className="text-sm text-white hover:text-primary transition-smooth">Romantic Escape</Link></li>
+                <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white hover:text-primary transition-smooth">{adventureLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white hover:text-primary transition-smooth">{romanticLabel}</Link></li>
               </ul>
             </div>
-
-            {/* Col 4: Social & Email */}
             <div>
-              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-                Join the journey
-              </h4>
+              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{joinLabel}</h4>
               <EmailForm className="mb-4" />
-              <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">Follow us</p>
+              <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">{followLabel}</p>
               <SocialIcons />
-              <p className="text-xs text-white/60 mt-2 leading-relaxed">
-                Watch us build. Discover Israel differently.
-              </p>
+              <p className="text-xs text-white/60 mt-2 leading-relaxed">{followDesc}</p>
             </div>
           </div>
         </div>
 
-        {/* ─── TABLET (md to lg) — 2 columns: nav | community ─── */}
+        {/* ─── TABLET (md to lg) — 2 columns ─── */}
         <div className="hidden md:block lg:hidden">
           <div className="max-w-2xl mx-auto grid grid-cols-2 gap-10">
-            {/* Left: Brand + Nav */}
             <div className="space-y-6">
               <div>
-                <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
-                  STAYMAKOM
-                </h3>
-                <p className="text-xs text-white/80 leading-relaxed">
-                  Handpicked Hotels.<br />Unforgettable Experiences.
-                </p>
+                <h3 className="font-sans text-xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">STAYMAKOM</h3>
+                <p className="text-xs text-white/80 leading-relaxed">{brandTaglineBr}</p>
               </div>
               <div>
-                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
-                  STAYMAKOM
-                </h4>
+                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">STAYMAKOM</h4>
                 <ul className="space-y-2">
-                  <li><Link to="/gift-card" className="text-sm text-white hover:text-primary transition-smooth">Gift Card</Link></li>
-                  <li><Link to="/partners" className="text-sm text-white hover:text-primary transition-smooth">Become a Partner</Link></li>
+                  <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
+                  <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white hover:text-primary transition-smooth">{partnerLabel}</Link></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
-                  Explore
-                </h4>
+                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">{exploreLabel}</h4>
                 <ul className="space-y-2">
-                  <li><Link to="/category/adventure" className="text-sm text-white hover:text-primary transition-smooth">Feel Adventurous</Link></li>
-                  <li><Link to="/category/romantic" className="text-sm text-white hover:text-primary transition-smooth">Romantic Escape</Link></li>
+                  <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white hover:text-primary transition-smooth">{adventureLabel}</Link></li>
+                  <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white hover:text-primary transition-smooth">{romanticLabel}</Link></li>
                 </ul>
               </div>
             </div>
-
-            {/* Right: Community */}
             <div className="space-y-5">
               <div>
-                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-                  Join the journey
-                </h4>
+                <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{joinLabel}</h4>
                 <EmailForm className="mb-0" />
               </div>
               <div>
-                <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">Follow us</p>
+                <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">{followLabel}</p>
                 <SocialIcons />
-                <p className="text-xs text-white/60 mt-2 leading-relaxed">
-                  Watch us build. Discover Israel differently.
-                </p>
+                <p className="text-xs text-white/60 mt-2 leading-relaxed">{followDesc}</p>
               </div>
             </div>
           </div>
@@ -162,57 +146,38 @@ const LaunchFooter = () => {
 
         {/* ─── MOBILE (<md) — stacked, centered ─── */}
         <div className="md:hidden text-center space-y-6">
-          {/* Brand */}
           <div className="pb-5 border-b border-white/15">
-            <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">
-              STAYMAKOM
-            </h3>
-            <p className="text-sm text-white/80 leading-relaxed">
-              Handpicked Hotels. Unforgettable Experiences.
-            </p>
+            <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">STAYMAKOM</h3>
+            <p className="text-sm text-white/80 leading-relaxed">{brandTagline}</p>
           </div>
-
-          {/* STAYMAKOM links */}
           <div className="pb-5 border-b border-white/15">
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
-              STAYMAKOM
-            </h4>
+            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">STAYMAKOM</h4>
             <ul className="space-y-2">
-              <li><Link to="/gift-card" className="text-sm text-white/80 hover:text-primary transition-smooth">Gift Card</Link></li>
-              <li><Link to="/partners" className="text-sm text-white/80 hover:text-primary transition-smooth">Become a Partner</Link></li>
+              <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white/80 hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
+              <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white/80 hover:text-primary transition-smooth">{partnerLabel}</Link></li>
             </ul>
           </div>
-
-          {/* Explore links */}
           <div className="pb-5 border-b border-white/15">
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">
-              Explore
-            </h4>
+            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">{exploreLabel}</h4>
             <ul className="space-y-2">
-              <li><Link to="/category/adventure" className="text-sm text-white/80 hover:text-primary transition-smooth">Feel Adventurous</Link></li>
-              <li><Link to="/category/romantic" className="text-sm text-white/80 hover:text-primary transition-smooth">Romantic Escape</Link></li>
+              <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white/80 hover:text-primary transition-smooth">{adventureLabel}</Link></li>
+              <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white/80 hover:text-primary transition-smooth">{romanticLabel}</Link></li>
             </ul>
           </div>
-
-          {/* Join + Social */}
           <div>
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">
-              Join the journey
-            </h4>
+            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{joinLabel}</h4>
             <EmailForm className="mb-5 max-w-sm mx-auto" />
-            <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-3 text-slate-50">Follow us</p>
+            <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-3 text-slate-50">{followLabel}</p>
             <SocialIcons iconSize="h-6 w-6" className="justify-center" />
-            <p className="text-xs text-white/60 mt-3 leading-relaxed">
-              Watch us build. Discover Israel differently.
-            </p>
+            <p className="text-xs text-white/60 mt-3 leading-relaxed">{followDesc}</p>
           </div>
         </div>
 
         {/* ─── Legal bottom ─── */}
         <div className="mt-6 pt-5 border-t border-white/20 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-white/60">
-          <Link to="/privacy" className="hover:text-white transition-smooth">Privacy Policy</Link>
+          <Link to={getLocalizedPath("/privacy")} className="hover:text-white transition-smooth">{privacyLabel}</Link>
           <span className="hidden sm:inline">·</span>
-          <Link to="/terms" className="hover:text-white transition-smooth">Terms</Link>
+          <Link to={getLocalizedPath("/terms")} className="hover:text-white transition-smooth">{termsLabel}</Link>
           <span className="hidden sm:inline">·</span>
           <span>© 2026 STAYMAKOM</span>
         </div>
