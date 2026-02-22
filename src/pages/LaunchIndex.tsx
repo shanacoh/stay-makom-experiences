@@ -222,7 +222,7 @@ const LaunchIndex = () => {
         <HowItWorksBanner />
 
         {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
-        <section id="launch-experiences" className="container sm:py-8 md:py-10 px-4 scroll-mt-16 py-[26px]">
+        <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-16">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
               {isRTL ? (<>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</>) : (<>Handpicked Hotels.<br />Unforgettable Experiences.</>)}
