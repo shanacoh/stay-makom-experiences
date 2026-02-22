@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogDescription } from
 "@/components/ui/dialog";
-import { Loader2, ArrowRight, Gift, CheckCircle } from "lucide-react";
+import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -259,7 +259,10 @@ const LaunchIndex = () => {
                     : "font-light text-foreground/40 hover:text-foreground/70"
                 )}
               >
-                {isRTL ? "הרפתקה" : "Feel adventurous"}
+                <span className="inline-flex items-center gap-1.5">
+                  <Compass size={13} strokeWidth={1.5} />
+                  {isRTL ? "הרפתקה" : "Feel adventurous"}
+                </span>
               </button>
               <div className="w-px h-4 bg-foreground/20" />
               <button
@@ -272,7 +275,10 @@ const LaunchIndex = () => {
                     : "font-light text-foreground/40 hover:text-foreground/70"
                 )}
               >
-                {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
+                <span className="inline-flex items-center gap-1.5">
+                  <Heart size={13} strokeWidth={1.5} />
+                  {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
+                </span>
               </button>
               <div
                 className="absolute bottom-0 h-px bg-foreground transition-all duration-300 ease-in-out"
