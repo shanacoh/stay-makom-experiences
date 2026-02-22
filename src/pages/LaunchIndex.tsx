@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogDescription } from
 "@/components/ui/dialog";
-import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
+import { Loader2, ArrowRight, Gift, CheckCircle } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -46,6 +46,19 @@ const LaunchIndex = () => {
 
   // Filter state
   const [activeFilter, setActiveFilter] = useState<string | null>(FILTER_ADVENTURE);
+
+  // Toggle underline refs
+  const toggleBtn1Ref = useRef<HTMLButtonElement>(null);
+  const toggleBtn2Ref = useRef<HTMLButtonElement>(null);
+  const [toggleUnderline, setToggleUnderline] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const activeRef = activeFilter === FILTER_ADVENTURE ? toggleBtn1Ref : toggleBtn2Ref;
+    if (activeRef.current) {
+      const { offsetLeft, offsetWidth } = activeRef.current;
+      setToggleUnderline({ left: offsetLeft, width: offsetWidth });
+    }
+  }, [activeFilter]);
 
   // Waitlist popup state
   const [waitlistOpen, setWaitlistOpen] = useState(false);
@@ -234,32 +247,37 @@ const LaunchIndex = () => {
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
             </p>
 
-            {/* Compact pill toggle */}
-            <div className="inline-flex items-center bg-muted/50 rounded-full p-1 border border-border/50">
+            {/* Premium segmented text toggle */}
+            <div className="relative inline-flex items-center gap-6">
               <button
+                ref={toggleBtn1Ref}
                 onClick={() => setActiveFilter(FILTER_ADVENTURE)}
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
-                  activeFilter === FILTER_ADVENTURE ?
-                  "bg-white shadow-sm text-foreground" :
-                  "text-muted-foreground hover:text-foreground"
-                )}>
-
-                <Compass size={15} />
+                  "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
+                  activeFilter === FILTER_ADVENTURE
+                    ? "font-medium text-foreground"
+                    : "font-light text-foreground/40 hover:text-foreground/70"
+                )}
+              >
                 {isRTL ? "הרפתקה" : "Feel adventurous"}
               </button>
+              <div className="w-px h-4 bg-foreground/20" />
               <button
+                ref={toggleBtn2Ref}
                 onClick={() => setActiveFilter(FILTER_ROMANTIC)}
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
-                  activeFilter === FILTER_ROMANTIC ?
-                  "bg-white shadow-sm text-foreground" :
-                  "text-muted-foreground hover:text-foreground"
-                )}>
-
-                <Heart size={15} />
-                {isRTL ? "בריחה רומנטית" : "Romantic getaway"}
+                  "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
+                  activeFilter === FILTER_ROMANTIC
+                    ? "font-medium text-foreground"
+                    : "font-light text-foreground/40 hover:text-foreground/70"
+                )}
+              >
+                {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
               </button>
+              <div
+                className="absolute bottom-0 h-px bg-foreground transition-all duration-300 ease-in-out"
+                style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
+              />
             </div>
           </div>
 
