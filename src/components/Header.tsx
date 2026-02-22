@@ -76,7 +76,7 @@ const Header = () => {
       ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${
           isVisible ? "top-0" : "-top-full"
         }`
-      : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm border-b border-border/40 transition-all duration-200 ${
+      : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm shadow-[0_1px_8px_-2px_rgba(0,0,0,0.06)] border-none transition-all duration-200 ${
           isVisible ? "top-0" : "-top-full"
         }`;
 
