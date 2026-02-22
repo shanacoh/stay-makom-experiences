@@ -1,44 +1,68 @@
 
 
-## Hero Section Adjustments for Launch Page
+# Premium Toggle Redesign for Launch Page
 
-### Goal
+## Current State
+The filter toggle is a basic pill-style component with `bg-muted/50` background, simple white highlight on active state, and Compass/Heart icons. It works but feels generic and utilitarian.
 
-The first viewport (what the user sees on arrival without scrolling) should show:
-- The hero image with title, subtitle, and CTA
-- The "How it works" banner
-- The "Handpicked Hotels / Unforgettable Experiences" heading
-- The subtitle "For 24 hours, 48 hours, or tailor-made experiences."
-- **Stop right before the pill toggle filter** (the toggle must NOT be visible)
+## Design Vision
+A refined, editorial-quality toggle that feels like a luxury brand selector — think Aesop or Aman Hotels navigation elements.
 
-No orange CTA. Keep the current white CTA style. No full-screen hero.
+## Changes
 
-### Changes
+### 1. Replace pill toggle with a segmented text toggle
+- Remove the rounded-pill container with its gray background
+- Use two text-only buttons separated by a thin vertical divider ("|")
+- Active state: full opacity, subtle underline animation (a thin line that slides from one label to the other)
+- Inactive state: reduced opacity (text-foreground/40)
+- No background color changes — purely typographic
 
-**File: `src/pages/LaunchIndex.tsx`**
+### 2. Typography upgrade
+- Use uppercase, wide letter-spacing (`tracking-[0.15em]`), small text (`text-xs`)
+- Font weight: medium for active, light for inactive
+- This matches the editorial/luxury tone of the rest of the page
 
-1. **Hero height**: Change `h-[60vh] min-h-[380px]` to approximately `h-[50vh] min-h-[340px]` — shorter so the content below (banner + heading + subtitle) fits in the viewport before the toggle.
+### 3. Rename "Romantic getaway" to "Romantic Escape"
+- English: "Romantic Escape"
+- Hebrew: "בריחה רומנטית" (already correct)
 
-2. **Overlay**: Darken from `bg-black/35` to `bg-black/45` for better text readability.
+### 4. Sliding underline indicator
+- A 1px-height line under the active label
+- Animated with CSS `transition` (transform translateX) so it glides between the two options
+- Color: foreground (black)
 
-3. **Tighter spacing**: Reduce `mb-6` (title) to `mb-4`, and `mb-10` (subtitle) to `mb-7`.
+### 5. Remove icons
+- Drop the Compass and Heart icons for a cleaner, text-first look
+- The toggle becomes purely typographic, which is more premium
 
-4. **CTA styling**: Keep white background, but refine for a more premium feel — add `shadow-md`, slightly more padding, and a subtle `hover:-translate-y-0.5 hover:shadow-lg` lift effect. No color change.
+---
 
-5. **Entrance animations**: Add staggered fade-in-up animations to the hero title, subtitle, and CTA using custom keyframes.
+## Technical Details
 
-**File: `tailwind.config.ts`**
+### File: `src/pages/LaunchIndex.tsx` (lines 238-263)
 
-6. Add `hero-fade-up` keyframe: opacity 0 + translateY(25px) to opacity 1 + translateY(0), duration ~0.8s ease-out, with `animation-fill-mode: forwards`.
+Replace the current toggle block with a new component:
 
-7. Add animation utilities with staggered delays:
-   - `animate-hero-fade-up` (base)
-   - Applied via inline `animationDelay` styles: 0ms (title), 250ms (subtitle), 500ms (CTA)
+```text
+  Container: inline-flex, items-center, gap-6
+  
+  Button 1: "FEEL ADVENTUROUS"
+    - uppercase, tracking-[0.15em], text-xs, font-medium or font-light
+    - Active: opacity-100, after pseudo-element underline
+    - Inactive: opacity-40, hover:opacity-70
+    
+  Divider: thin vertical line (w-px h-4 bg-foreground/20)
+  
+  Button 2: "ROMANTIC ESCAPE"  
+    - Same styling as Button 1
+```
 
-### Technical Details
+Since Tailwind pseudo-element underlines are complex inline, the active underline will be implemented as a separate `div` with absolute positioning under the active button, using a `ref` to measure width and offset, animated via `transition-all duration-300`.
 
-- Hero elements will start with `opacity-0` and the animation fills forward to `opacity-1`
-- The keyframe uses `forwards` fill mode so elements stay visible after animation
-- No new dependencies required
-- Only two files modified: `LaunchIndex.tsx` and `tailwind.config.ts`
+### Implementation approach
+- Create two `button` refs to measure their position
+- Track which is active
+- Render a thin absolute-positioned bar that animates its `left` and `width` to match the active button
+- Wrap in a `relative` container
 
+This keeps everything inside `LaunchIndex.tsx` without needing a separate component file, staying consistent with the current pattern.
