@@ -178,20 +178,26 @@ const LaunchIndex = () => {
 
       <main className="flex-1">
         {/* ─── 1. HERO ─── */}
-        <section className="relative h-[60vh] min-h-[380px] flex items-center justify-center">
+        <section className="relative h-[50vh] min-h-[340px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
 
-          <div className="absolute inset-0 bg-black/35" />
+          <div className="absolute inset-0 bg-black/45" />
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
-            <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 text-white">
+            <h1
+              className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
+              style={{ animationDelay: '0ms' }}
+            >
               Don't choose a city,
               <br />
               choose your escape
             </h1>
-            <p className="text-base sm:text-lg text-white/90 font-light mb-10 max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 md:text-base">
+            <p
+              className="text-base sm:text-lg text-white/90 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up md:text-base"
+              style={{ animationDelay: '250ms' }}
+            >
               We curate Israel's best hotels and pair them with unique local
               experiences.
             </p>
@@ -200,8 +206,9 @@ const LaunchIndex = () => {
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-8 py-3.5 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md hover:bg-white/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400">
-
+              className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/90 transition-all duration-300 opacity-0 animate-hero-fade-up"
+              style={{ animationDelay: '500ms' }}
+            >
               Find your experience & hotel
             </button>
           </div>

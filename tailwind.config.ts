@@ -144,6 +144,16 @@ export default {
             transform: "translate(-50%, -50%) translateY(-35px) translateX(var(--float-x, 0px)) scale(0.4)",
           },
         },
+        "hero-fade-up": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(25px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -153,6 +163,7 @@ export default {
         "marquee-rtl": "marquee-rtl 30s linear infinite",
         "heart-pop": "heart-pop 0.4s ease-out",
         "heart-float": "heart-float 0.6s ease-out forwards",
+        "hero-fade-up": "hero-fade-up 0.8s ease-out forwards",
       },
     },
   },
