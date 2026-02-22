@@ -48,9 +48,12 @@ const About = () => {
         {/* WHY ISRAEL. WHY NOW. */}
         <section className="py-20 md:py-28 px-6 bg-background">
           <div className="max-w-3xl mx-auto text-center">
-            <p className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground mb-8">
+            <p className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground mb-6">
               {t(lang, 'aboutWhyIsraelLabel')}
             </p>
+            <h2 className="font-sans text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-[-0.02em] text-foreground mb-10">
+              {t(lang, 'aboutWhyIsraelTitle')}
+            </h2>
             <p className="font-sans text-base md:text-lg leading-relaxed text-muted-foreground mb-6">
               {t(lang, 'aboutWhyIsraelP1')}
             </p>
