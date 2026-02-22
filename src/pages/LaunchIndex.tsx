@@ -102,11 +102,11 @@ const LaunchIndex = () => {
   categories?.find((c) => c.slug === slug)?.id;
 
   // Filtered experiences
-  const filteredExperiences = activeFilter === FILTER_ROMANTIC
-    ? experiences2?.filter((exp: any) => exp.categories?.slug === "romantic")
-    : activeFilter === FILTER_ADVENTURE
-    ? experiences2?.filter((exp: any) => exp.categories?.slug !== "romantic")
-    : experiences2;
+  const filteredExperiences = activeFilter === FILTER_ROMANTIC ?
+  experiences2?.filter((exp: any) => exp.categories?.slug === "romantic") :
+  activeFilter === FILTER_ADVENTURE ?
+  experiences2?.filter((exp: any) => exp.categories?.slug !== "romantic") :
+  experiences2;
 
   // Lead capture handler
   const handleLeadSubmit = async (e: React.FormEvent) => {
@@ -188,16 +188,16 @@ const LaunchIndex = () => {
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
             <h1
               className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
-              style={{ animationDelay: '0ms' }}
-            >
+              style={{ animationDelay: '0ms' }}>
+
               Don't choose a city,
               <br />
               choose your escape
             </h1>
             <p
               className="text-base sm:text-lg text-white/90 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up md:text-base"
-              style={{ animationDelay: '250ms' }}
-            >
+              style={{ animationDelay: '250ms' }}>
+
               We curate Israel's best hotels and pair them with unique local
               experiences.
             </p>
@@ -207,8 +207,8 @@ const LaunchIndex = () => {
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
               className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/90 transition-all duration-300 opacity-0 animate-hero-fade-up"
-              style={{ animationDelay: '500ms' }}
-            >
+              style={{ animationDelay: '500ms' }}>
+
               Find your experience & hotel
             </button>
           </div>
@@ -218,7 +218,7 @@ const LaunchIndex = () => {
         <HowItWorksBanner />
 
         {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
-        <section id="launch-experiences" className="container py-5 sm:py-8 md:py-10 px-4 scroll-mt-16">
+        <section id="launch-experiences" className="container sm:py-8 md:py-10 px-4 scroll-mt-16 py-[26px]">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
               Handpicked Hotels.
@@ -235,11 +235,11 @@ const LaunchIndex = () => {
                 onClick={() => setActiveFilter(FILTER_ADVENTURE)}
                 className={cn(
                   "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
-                  activeFilter === FILTER_ADVENTURE
-                    ? "bg-white shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
+                  activeFilter === FILTER_ADVENTURE ?
+                  "bg-white shadow-sm text-foreground" :
+                  "text-muted-foreground hover:text-foreground"
+                )}>
+
                 <Compass size={15} />
                 Feel adventurous
               </button>
@@ -247,11 +247,11 @@ const LaunchIndex = () => {
                 onClick={() => setActiveFilter(FILTER_ROMANTIC)}
                 className={cn(
                   "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300",
-                  activeFilter === FILTER_ROMANTIC
-                    ? "bg-white shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
+                  activeFilter === FILTER_ROMANTIC ?
+                  "bg-white shadow-sm text-foreground" :
+                  "text-muted-foreground hover:text-foreground"
+                )}>
+
                 <Heart size={15} />
                 Romantic getaway
               </button>
@@ -382,51 +382,51 @@ const LaunchIndex = () => {
                 {isRTL ? "היו הראשונים לדעת." : "Be the first to know."}
               </p>
 
-              {submitted ? (
-                <div className="flex items-center gap-2 text-primary font-medium">
+              {submitted ?
+              <div className="flex items-center gap-2 text-primary font-medium">
                   <CheckCircle className="h-5 w-5" />
                   {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
-                </div>
-              ) : (
-                <form onSubmit={handleLeadSubmit} className="flex gap-2 w-full sm:w-auto">
+                </div> :
+
+              <form onSubmit={handleLeadSubmit} className="flex gap-2 w-full sm:w-auto">
                   <Input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
-                    className="flex-1 sm:w-56"
-                  />
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
+                  className="flex-1 sm:w-56" />
+
                   <Button type="submit" disabled={isSubmitting}>
                     {isRTL ? "עדכנו אותי" : "Notify me"}
                   </Button>
                 </form>
-              )}
+              }
             </div>
 
-            {!isLoadingCategories && categories && categories.length > 0 && (
-              <div className="max-w-4xl mx-auto">
+            {!isLoadingCategories && categories && categories.length > 0 &&
+            <div className="max-w-4xl mx-auto">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {categories.map((category) => {
-                    const catTitle = getLocalizedField(category, "name", lang) as string;
-                    const image = category.hero_image || "";
-                    const words = catTitle.split(" ");
-                    const midpoint = Math.ceil(words.length / 2);
-                    const line1 = words.slice(0, midpoint).join(" ");
-                    const line2 = words.slice(midpoint).join(" ");
+                  const catTitle = getLocalizedField(category, "name", lang) as string;
+                  const image = category.hero_image || "";
+                  const words = catTitle.split(" ");
+                  const midpoint = Math.ceil(words.length / 2);
+                  const line1 = words.slice(0, midpoint).join(" ");
+                  const line2 = words.slice(midpoint).join(" ");
 
-                    return (
-                      <button
-                        key={`waitlist-${category.slug}`}
-                        onClick={() => handleCategoryClick(category)}
-                        className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer"
-                      >
+                  return (
+                    <button
+                      key={`waitlist-${category.slug}`}
+                      onClick={() => handleCategoryClick(category)}
+                      className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
+
                         <div className="aspect-square relative">
                           <img
-                            src={image}
-                            alt={catTitle}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          src={image}
+                          alt={catTitle}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+
                           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
                           <div className="absolute inset-0 flex items-center justify-center p-4">
                             <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
@@ -435,12 +435,12 @@ const LaunchIndex = () => {
                             </h3>
                           </div>
                         </div>
-                      </button>
-                    );
-                  })}
+                      </button>);
+
+                })}
                 </div>
               </div>
-            )}
+            }
           </div>
         </section>
       </main>
