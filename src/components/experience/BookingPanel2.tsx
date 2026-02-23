@@ -418,6 +418,7 @@ export function BookingPanel2({
         }],
       };
 
+      console.log("[Book] body:", JSON.stringify(bookingData, null, 2));
       const bookingResult = await createBooking(bookingData);
 
       // ── Step 3: Save to bookings_hg ──
