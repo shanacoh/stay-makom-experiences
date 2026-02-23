@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Check, CalendarDays, Hotel, Users, Info, MessageSquare, Copy } from "lucide-react";
+import { Check, CalendarDays, Hotel, Users, MessageSquare, Copy } from "lucide-react";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { toast } from "sonner";
@@ -184,16 +184,12 @@ export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: 
           <p className="text-xs text-muted-foreground">{t.vatNote}</p>
 
           {/* Remarks */}
-          {data.remarks.length > 0 && (
+          {data.remarks.filter(r => !/general message that should be shown/i.test(r)).length > 0 && (
             <>
               <Separator />
-              <div className="space-y-2 p-3 rounded-md bg-amber-50 border border-amber-200">
-                <div className="flex items-center gap-2 text-sm font-medium text-amber-800">
-                  <Info className="h-4 w-4" />
-                  {t.remarks}
-                </div>
-                {data.remarks.map((remark, idx) => (
-                  <p key={idx} className="text-xs text-amber-700 pl-6">{remark}</p>
+              <div className="space-y-1.5 p-3 rounded-md bg-amber-50 border border-amber-200">
+                {data.remarks.filter(r => !/general message that should be shown/i.test(r)).map((remark, idx) => (
+                  <p key={idx} className="text-xs text-amber-700">{remark}</p>
                 ))}
               </div>
             </>
