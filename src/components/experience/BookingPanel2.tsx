@@ -101,7 +101,7 @@ export function BookingPanel2({
       priceChanged: "Price has changed",
       priceChangedConfirm: "The price changed. Do you want to continue with the new price?",
       fillGuestInfo: "Please fill in guest information (name, email, phone, birth date)",
-      bookingError: "Booking failed. Please try again.",
+      bookingError: "Booking failed. Your information has been saved — please try again.",
     },
     he: {
       title: "הזמן חוויה זו",
@@ -122,7 +122,7 @@ export function BookingPanel2({
       priceChanged: "המחיר השתנה",
       priceChangedConfirm: "המחיר השתנה. האם תרצה להמשיך עם המחיר החדש?",
       fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון, תאריך לידה)",
-      bookingError: "ההזמנה נכשלה. אנא נסה שוב.",
+      bookingError: "ההזמנה נכשלה. הפרטים שלך נשמרו — אנא נסה שוב.",
     },
     fr: {
       title: "Réserver cette expérience",
@@ -143,7 +143,7 @@ export function BookingPanel2({
       priceChanged: "Le prix a changé",
       priceChangedConfirm: "Le prix a changé. Voulez-vous continuer avec le nouveau prix ?",
       fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone, date de naissance)",
-      bookingError: "La réservation a échoué. Veuillez réessayer.",
+      bookingError: "La réservation a échoué. Vos informations ont été conservées — veuillez réessayer.",
     },
   }[lang];
 
@@ -511,9 +511,13 @@ export function BookingPanel2({
         // Non-blocking — booking is confirmed regardless
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Pre-book/Booking error:", error);
-      toast.error(t.bookingError);
+      const detail = error?.message || "";
+      toast.error(t.bookingError, {
+        description: detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined,
+        duration: 8000,
+      });
     } finally {
       setIsBooking(false);
       setBookingStep("idle");
