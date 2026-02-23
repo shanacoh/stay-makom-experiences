@@ -1,15 +1,16 @@
 /**
  * Lead Guest Form — Collects guest info required by HyperGuest create-booking
  * Auto-fills from user profile, with option to book for someone else
+ * ✅ Enhanced UX: country dropdown, inline validation, phone format, birthDate guidance
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { User, Gift } from "lucide-react";
+import { User, Gift, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,7 +30,43 @@ interface LeadGuestFormProps {
   value: LeadGuestData;
   onChange: (data: LeadGuestData) => void;
   lang?: "en" | "he" | "fr";
+  showErrors?: boolean;
 }
+
+const COUNTRIES = [
+  { code: "IL", en: "Israel", he: "ישראל", fr: "Israël" },
+  { code: "US", en: "United States", he: "ארצות הברית", fr: "États-Unis" },
+  { code: "GB", en: "United Kingdom", he: "בריטניה", fr: "Royaume-Uni" },
+  { code: "FR", en: "France", he: "צרפת", fr: "France" },
+  { code: "DE", en: "Germany", he: "גרמניה", fr: "Allemagne" },
+  { code: "IT", en: "Italy", he: "איטליה", fr: "Italie" },
+  { code: "ES", en: "Spain", he: "ספרד", fr: "Espagne" },
+  { code: "NL", en: "Netherlands", he: "הולנד", fr: "Pays-Bas" },
+  { code: "BE", en: "Belgium", he: "בלגיה", fr: "Belgique" },
+  { code: "CH", en: "Switzerland", he: "שווייץ", fr: "Suisse" },
+  { code: "AT", en: "Austria", he: "אוסטריה", fr: "Autriche" },
+  { code: "AU", en: "Australia", he: "אוסטרליה", fr: "Australie" },
+  { code: "CA", en: "Canada", he: "קנדה", fr: "Canada" },
+  { code: "BR", en: "Brazil", he: "ברזיל", fr: "Brésil" },
+  { code: "AR", en: "Argentina", he: "ארגנטינה", fr: "Argentine" },
+  { code: "MX", en: "Mexico", he: "מקסיקו", fr: "Mexique" },
+  { code: "ZA", en: "South Africa", he: "דרום אפריקה", fr: "Afrique du Sud" },
+  { code: "IN", en: "India", he: "הודו", fr: "Inde" },
+  { code: "JP", en: "Japan", he: "יפן", fr: "Japon" },
+  { code: "RU", en: "Russia", he: "רוסיה", fr: "Russie" },
+  { code: "UA", en: "Ukraine", he: "אוקראינה", fr: "Ukraine" },
+  { code: "PT", en: "Portugal", he: "פורטוגל", fr: "Portugal" },
+  { code: "GR", en: "Greece", he: "יוון", fr: "Grèce" },
+  { code: "TR", en: "Turkey", he: "טורקיה", fr: "Turquie" },
+  { code: "PL", en: "Poland", he: "פולין", fr: "Pologne" },
+  { code: "RO", en: "Romania", he: "רומניה", fr: "Roumanie" },
+  { code: "CZ", en: "Czech Republic", he: "צ'כיה", fr: "Tchéquie" },
+  { code: "HU", en: "Hungary", he: "הונגריה", fr: "Hongrie" },
+  { code: "SE", en: "Sweden", he: "שוודיה", fr: "Suède" },
+  { code: "DK", en: "Denmark", he: "דנמרק", fr: "Danemark" },
+  { code: "NO", en: "Norway", he: "נורווגיה", fr: "Norvège" },
+  { code: "FI", en: "Finland", he: "פינלנד", fr: "Finlande" },
+];
 
 const translations = {
   en: {
@@ -46,6 +83,11 @@ const translations = {
     bookForOther: "Book for someone else",
     bookForOtherDesc: "Fill in the guest's details below",
     autoFilled: "Auto-filled from your account",
+    required: "Required",
+    invalidEmail: "Invalid email",
+    invalidPhone: "Use international format, e.g. +972501234567",
+    invalidDate: "Select a valid date",
+    phonePlaceholder: "+972501234567",
   },
   he: {
     title: "פרטי האורח",
@@ -61,6 +103,11 @@ const translations = {
     bookForOther: "הזמנה עבור מישהו אחר",
     bookForOtherDesc: "מלא את פרטי האורח למטה",
     autoFilled: "מילוי אוטומטי מהחשבון שלך",
+    required: "שדה חובה",
+    invalidEmail: "כתובת אימייל לא תקינה",
+    invalidPhone: "השתמש בפורמט בינלאומי, לדוג׳ 972501234567+",
+    invalidDate: "בחר תאריך תקין",
+    phonePlaceholder: "+972501234567",
   },
   fr: {
     title: "Informations voyageur",
@@ -76,29 +123,77 @@ const translations = {
     bookForOther: "Réserver pour quelqu'un d'autre",
     bookForOtherDesc: "Remplissez les coordonnées du voyageur ci-dessous",
     autoFilled: "Pré-rempli depuis votre compte",
+    required: "Requis",
+    invalidEmail: "Email invalide",
+    invalidPhone: "Format international, ex : +972501234567",
+    invalidDate: "Sélectionnez une date valide",
+    phonePlaceholder: "+972501234567",
   },
 };
 
-export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormProps) {
+/** Validate birth date is YYYY-MM-DD and reasonable */
+function isValidBirthDate(d: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return false;
+  const now = new Date();
+  return date < now && date > new Date("1900-01-01");
+}
+
+function isValidEmail(e: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+function isValidPhone(p: string): boolean {
+  // Accept international format with + and at least 8 digits
+  return /^\+?\d[\d\s\-]{7,}$/.test(p.trim());
+}
+
+/** Normalize phone: strip spaces/dashes, ensure starts with + */
+function normalizePhone(p: string): string {
+  let cleaned = p.replace(/[\s\-()]/g, "");
+  if (cleaned && !cleaned.startsWith("+") && cleaned.length >= 8) {
+    cleaned = "+" + cleaned;
+  }
+  return cleaned;
+}
+
+export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false }: LeadGuestFormProps) {
   const t = translations[lang];
   const { user } = useAuth();
   const [isForOther, setIsForOther] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [savedProfileData, setSavedProfileData] = useState<LeadGuestData | null>(null);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
+
+  // Field-level errors
+  const errors = useMemo(() => {
+    const show = showErrors; // show all when booking attempted
+    return {
+      firstName: (show || touched.firstName) && !value.firstName.trim() ? t.required : null,
+      lastName: (show || touched.lastName) && !value.lastName.trim() ? t.required : null,
+      email: (show || touched.email) && !value.email.trim() ? t.required 
+           : (show || touched.email) && !isValidEmail(value.email) ? t.invalidEmail : null,
+      phone: (show || touched.phone) && !value.phone.trim() ? t.required 
+           : (show || touched.phone) && !isValidPhone(value.phone) ? t.invalidPhone : null,
+      birthDate: (show || touched.birthDate) && !value.birthDate ? t.required
+               : (show || touched.birthDate) && !isValidBirthDate(value.birthDate) ? t.invalidDate : null,
+    };
+  }, [value, touched, showErrors, t]);
 
   // Auto-fill from user profile on mount
   useEffect(() => {
     if (!user || profileLoaded) return;
 
     const loadProfile = async () => {
-      // Get user profile
       const { data: profile } = await supabase
         .from("user_profiles")
         .select("display_name, phone")
         .eq("user_id", user.id)
         .single();
 
-      // Get customer data (has more fields like birthdate, city, country)
       const { data: customer } = await supabase
         .from("customers")
         .select("first_name, last_name, phone, birthdate, city, address_country")
@@ -108,13 +203,19 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
       const displayName = profile?.display_name || user.user_metadata?.display_name || "";
       const nameParts = displayName.split(" ");
 
+      // Normalize birthdate to YYYY-MM-DD
+      let birthDate = customer?.birthdate || "";
+      if (birthDate && !isValidBirthDate(birthDate)) {
+        birthDate = ""; // Clear if invalid format from DB
+      }
+
       const profileData: LeadGuestData = {
         title: "MR",
         firstName: customer?.first_name || nameParts[0] || user.user_metadata?.first_name || "",
         lastName: customer?.last_name || nameParts.slice(1).join(" ") || user.user_metadata?.last_name || "",
         email: user.email || "",
-        phone: customer?.phone || profile?.phone || user.user_metadata?.phone || "",
-        birthDate: customer?.birthdate || "",
+        phone: normalizePhone(customer?.phone || profile?.phone || user.user_metadata?.phone || ""),
+        birthDate,
         address: "",
         city: customer?.city || "",
         country: customer?.address_country || "IL",
@@ -128,19 +229,13 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
     loadProfile();
   }, [user, profileLoaded]);
 
-  // Toggle between self and other guest
   const handleToggleForOther = (forOther: boolean) => {
     setIsForOther(forOther);
+    setTouched({});
     if (!forOther && savedProfileData) {
-      // Restore profile data
       onChange(savedProfileData);
     } else if (forOther) {
-      // Clear for new guest entry
-      onChange({
-        ...EMPTY_LEAD_GUEST,
-        // Keep country default
-        country: savedProfileData?.country || "IL",
-      });
+      onChange({ ...EMPTY_LEAD_GUEST, country: savedProfileData?.country || "IL" });
     }
   };
 
@@ -148,7 +243,17 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
     onChange({ ...value, [field]: val });
   };
 
-  const isRtl = lang === "he";
+  const FieldError = ({ msg }: { msg: string | null }) => {
+    if (!msg) return null;
+    return (
+      <p className="text-xs text-destructive flex items-center gap-1 mt-0.5">
+        <AlertCircle className="h-3 w-3 flex-shrink-0" />
+        {msg}
+      </p>
+    );
+  };
+
+  const countryLabel = (c: typeof COUNTRIES[0]) => lang === "he" ? c.he : lang === "fr" ? c.fr : c.en;
 
   return (
     <Card>
@@ -200,20 +305,24 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
             <Input
               value={value.firstName}
               onChange={(e) => update("firstName", e.target.value)}
-              className="h-9"
+              onBlur={() => markTouched("firstName")}
+              className={`h-9 ${errors.firstName ? "border-destructive" : ""}`}
               required
               readOnly={!isForOther && profileLoaded && !!value.firstName}
             />
+            <FieldError msg={errors.firstName} />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{t.lastName} *</Label>
             <Input
               value={value.lastName}
               onChange={(e) => update("lastName", e.target.value)}
-              className="h-9"
+              onBlur={() => markTouched("lastName")}
+              className={`h-9 ${errors.lastName ? "border-destructive" : ""}`}
               required
               readOnly={!isForOther && profileLoaded && !!value.lastName}
             />
+            <FieldError msg={errors.lastName} />
           </div>
         </div>
 
@@ -225,10 +334,12 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
               type="email"
               value={value.email}
               onChange={(e) => update("email", e.target.value)}
-              className="h-9"
+              onBlur={() => markTouched("email")}
+              className={`h-9 ${errors.email ? "border-destructive" : ""}`}
               required
               readOnly={!isForOther && profileLoaded && !!value.email}
             />
+            <FieldError msg={errors.email} />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{t.phone} *</Label>
@@ -236,10 +347,17 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
               type="tel"
               value={value.phone}
               onChange={(e) => update("phone", e.target.value)}
-              className="h-9"
-              placeholder="+972..."
+              onBlur={() => {
+                markTouched("phone");
+                // Auto-normalize on blur
+                const normalized = normalizePhone(value.phone);
+                if (normalized !== value.phone) update("phone", normalized);
+              }}
+              className={`h-9 ${errors.phone ? "border-destructive" : ""}`}
+              placeholder={t.phonePlaceholder}
               required
             />
+            <FieldError msg={errors.phone} />
           </div>
         </div>
 
@@ -250,9 +368,12 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
             type="date"
             value={value.birthDate}
             onChange={(e) => update("birthDate", e.target.value)}
-            className="h-9"
+            onBlur={() => markTouched("birthDate")}
+            className={`h-9 ${errors.birthDate ? "border-destructive" : ""}`}
             max={new Date().toISOString().split("T")[0]}
+            min="1900-01-01"
           />
+          <FieldError msg={errors.birthDate} />
         </div>
 
         {/* City & Country */}
@@ -267,13 +388,18 @@ export function LeadGuestForm({ value, onChange, lang = "en" }: LeadGuestFormPro
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{t.country}</Label>
-            <Input
-              value={value.country}
-              onChange={(e) => update("country", e.target.value)}
-              className="h-9"
-              placeholder="IL"
-              maxLength={2}
-            />
+            <Select value={value.country} onValueChange={(v) => update("country", v)}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder={t.country} />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {countryLabel(c)} ({c.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardContent>
@@ -292,3 +418,22 @@ export const EMPTY_LEAD_GUEST: LeadGuestData = {
   city: "",
   country: "IL",
 };
+
+/** Sanitize lead guest data before sending to HyperGuest — ensures all formats are correct */
+export function sanitizeLeadGuest(g: LeadGuestData): LeadGuestData {
+  let birthDate = g.birthDate;
+  if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+    birthDate = "1990-01-01"; // Safe fallback
+  }
+  return {
+    ...g,
+    firstName: g.firstName.trim(),
+    lastName: g.lastName.trim(),
+    email: g.email.trim().toLowerCase(),
+    phone: normalizePhone(g.phone),
+    birthDate,
+    address: g.address?.trim() || "N/A",
+    city: g.city?.trim() || "N/A",
+    country: g.country?.trim().toUpperCase() || "IL",
+  };
+}
