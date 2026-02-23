@@ -213,10 +213,19 @@ async function preBook(preBookData: PreBookData) {
   return data.content || data;
 }
 
-// Helper: convert "YYYY-MM-DD" string to {year, month, day} object for HyperGuest
-function parseBirthDate(dateStr: string): { year: number; month: number; day: number } {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return { year, month, day };
+// Helper: ensure birthDate is a valid "YYYY-MM-DD" string
+function ensureDateString(dateVal: unknown): string {
+  if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+    return dateVal; // Already correct format
+  }
+  if (dateVal && typeof dateVal === 'object') {
+    const d = dateVal as Record<string, number>;
+    if (d.year && d.month && d.day) {
+      return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
+    }
+  }
+  console.warn('⚠️ Invalid birthDate, using fallback:', dateVal);
+  return '1990-01-01'; // Safe fallback
 }
 
 // Create booking
@@ -224,23 +233,23 @@ async function createBooking(bookingData: BookingData) {
   // ✅ B3 FIX: Force isTest based on environment — never trust frontend
   const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
 
-  // ✅ Convert birthDate strings to {year, month, day} objects as required by HyperGuest
-  const convertedLeadGuest = {
+  // ✅ Ensure birthDate is always a valid "YYYY-MM-DD" string
+  const safeLeadGuest = {
     ...bookingData.leadGuest,
-    birthDate: parseBirthDate(bookingData.leadGuest.birthDate),
+    birthDate: ensureDateString(bookingData.leadGuest.birthDate),
   };
-  const convertedRooms = bookingData.rooms.map(room => ({
+  const safeRooms = bookingData.rooms.map(room => ({
     ...room,
     guests: room.guests.map(guest => ({
       ...guest,
-      birthDate: parseBirthDate(guest.birthDate),
+      birthDate: ensureDateString(guest.birthDate),
     })),
   }));
 
   const safeBookingData = {
     ...bookingData,
-    leadGuest: convertedLeadGuest,
-    rooms: convertedRooms,
+    leadGuest: safeLeadGuest,
+    rooms: safeRooms,
     isTest: !isProduction,
     // Payment details — test card for staging, will come from Stripe in production
     paymentDetails: bookingData.paymentDetails || {
