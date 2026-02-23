@@ -53,7 +53,12 @@ const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps)
 
   const handleMessengerShare = () => {
     const encodedUrl = encodeURIComponent(url);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank', 'width=600,height=400');
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = `fb-messenger://share/?link=${encodedUrl}`;
+    } else {
+      window.open(`https://www.facebook.com/dialog/send?link=${encodedUrl}&redirect_uri=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400');
+    }
   };
 
   const handleWhatsAppShare = () => {
