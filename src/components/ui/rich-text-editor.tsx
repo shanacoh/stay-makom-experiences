@@ -3,7 +3,8 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Link as TiptapLink } from '@tiptap/extension-link';
-import { useEffect } from 'react';
+import TextAlign from '@tiptap/extension-text-align';
+import { useEffect, useRef, useCallback } from 'react';
 import { 
   Bold, 
   Italic, 
@@ -18,6 +19,9 @@ import {
   Undo,
   Redo,
   RemoveFormatting,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from 'lucide-react';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
@@ -48,6 +52,14 @@ const COLORS = [
 ];
 
 const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTextEditorProps) => {
+  // Track whether the change originated from the editor itself (user typing/formatting)
+  const isInternalChange = useRef(false);
+
+  const handleUpdate = useCallback(({ editor }: { editor: any }) => {
+    isInternalChange.current = true;
+    onChange(editor.getHTML());
+  }, [onChange]);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -57,6 +69,11 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
       }),
       TextStyle,
       Color,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+        defaultAlignment: 'left',
+      }),
       TiptapLink.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -65,9 +82,7 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
       }),
     ],
     content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
+    onUpdate: handleUpdate,
     editorProps: {
       attributes: {
         class: cn(
@@ -88,10 +103,32 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
     },
   });
 
-  // Sync content prop changes with editor (for async data loading)
+  // Sync content prop changes with editor ONLY when the change comes from outside
+  // (e.g. async data loading), never when the user is actively editing
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content || '');
+    if (!editor) return;
+
+    // If the change originated from the editor's own onUpdate, skip the sync
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+
+    // External content change (form reset, async load) — sync it
+    const currentHTML = editor.getHTML();
+    if (content !== currentHTML) {
+      // Preserve cursor position when possible
+      const { from, to } = editor.state.selection;
+      editor.commands.setContent(content || '', { emitUpdate: false });
+      // Try to restore selection if the doc is long enough
+      try {
+        const maxPos = editor.state.doc.content.size;
+        const safeFrom = Math.min(from, maxPos);
+        const safeTo = Math.min(to, maxPos);
+        editor.commands.setTextSelection({ from: safeFrom, to: safeTo });
+      } catch {
+        // Selection restore failed, that's fine
+      }
     }
   }, [content, editor]);
 
@@ -100,10 +137,14 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
   }
 
   const setLink = () => {
-    const url = window.prompt('Enter URL:');
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
+    const previousUrl = editor.getAttributes('link').href;
+    const url = window.prompt('Enter URL:', previousUrl || '');
+    if (url === null) return; // cancelled
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
     }
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   };
 
   const ToolbarButton = ({ 
@@ -121,7 +162,11 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
       type="button"
       variant="ghost"
       size="sm"
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
       title={title}
       className={cn(
         "h-8 w-8 p-0 hover:bg-accent/50",
@@ -184,6 +229,31 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
           title="Barré"
         >
           <Strikethrough className="h-3.5 w-3.5" />
+        </ToolbarButton>
+
+        <Separator />
+
+        {/* Alignment */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          isActive={editor.isActive({ textAlign: 'left' })}
+          title="Aligner à gauche"
+        >
+          <AlignLeft className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          isActive={editor.isActive({ textAlign: 'center' })}
+          title="Centrer"
+        >
+          <AlignCenter className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          isActive={editor.isActive({ textAlign: 'right' })}
+          title="Aligner à droite"
+        >
+          <AlignRight className="h-3.5 w-3.5" />
         </ToolbarButton>
 
         <Separator />
@@ -265,7 +335,11 @@ const RichTextEditor = ({ content, onChange, placeholder, dir = 'ltr' }: RichTex
 
         {/* Clear formatting */}
         <ToolbarButton
-          onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
+          onClick={() => {
+            editor.chain().focus().clearNodes().unsetAllMarks().run();
+            // Also reset alignment to default
+            editor.chain().focus().setTextAlign('left').run();
+          }}
           title="Effacer la mise en forme"
         >
           <RemoveFormatting className="h-3.5 w-3.5" />
