@@ -339,6 +339,13 @@ async function cancelBooking(bookingId: string, options: { reason?: string; simu
   if (!response.ok) {
     const errorText = await response.text();
     console.error('❌ Cancel booking failed:', response.status, errorText);
+    
+    // If HG says booking not found, treat as already cancelled
+    if (errorText.includes('booking cannot be found') || errorText.includes('BN.500')) {
+      console.warn('⚠️ Booking not found on HyperGuest — treating as already cancelled');
+      return { cancelled: true, notFoundOnHG: true, bookingId };
+    }
+    
     throw new Error(`Cancel booking failed: ${response.status} - ${errorText}`);
   }
   
