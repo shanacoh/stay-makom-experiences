@@ -8,7 +8,7 @@
  * ✅ V6: Full booking flow — pre-book → create-booking → save DB → confirmation
  */
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,8 @@ import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { LeadGuestForm, EMPTY_LEAD_GUEST, type LeadGuestData } from "./LeadGuestForm";
 import { BookingConfirmationDialog, type BookingConfirmationData } from "./BookingConfirmationDialog";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
@@ -175,6 +177,9 @@ export function BookingPanel2({
   const [leadGuest, setLeadGuest] = useState<LeadGuestData>(EMPTY_LEAD_GUEST);
   const [confirmationData, setConfirmationData] = useState<BookingConfirmationData | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const pendingBookAfterAuth = useRef(false);
+  const { user } = useAuth();
 
   // Fetch real availability for 1/2/3 nights tabs
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
@@ -292,8 +297,27 @@ export function BookingPanel2({
     leadGuest.phone.trim() !== "" &&
     leadGuest.birthDate !== "";
 
+  // Auto-trigger booking after auth
+  useEffect(() => {
+    if (user && pendingBookAfterAuth.current) {
+      pendingBookAfterAuth.current = false;
+      // Small delay to let state settle
+      setTimeout(() => handleBookInternal(), 300);
+    }
+  }, [user]);
+
+  // ✅ Auth gate: check login before booking
+  const handleBook = () => {
+    if (!user) {
+      pendingBookAfterAuth.current = true;
+      setShowAuthPrompt(true);
+      return;
+    }
+    handleBookInternal();
+  };
+
   // ✅ V6: Full booking flow — Pre-book → Create booking → Save to DB
-  const handleBook = async () => {
+  const handleBookInternal = async () => {
     if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId || !selectedRatePlan) return;
 
     if (!isGuestValid) {
@@ -780,6 +804,20 @@ export function BookingPanel2({
         onClose={() => setShowConfirmation(false)}
         data={confirmationData}
         lang={lang}
+      />
+
+      {/* Auth prompt for unauthenticated booking */}
+      <AuthPromptDialog
+        open={showAuthPrompt}
+        onOpenChange={(open) => {
+          setShowAuthPrompt(open);
+          if (!open && !user) {
+            pendingBookAfterAuth.current = false;
+          }
+        }}
+        lang={lang as "en" | "he" | "fr"}
+        defaultTab="login"
+        context="account"
       />
     </>
   );
