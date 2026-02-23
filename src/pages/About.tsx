@@ -8,6 +8,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useLanguage } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
+import { MapPin, Globe } from "lucide-react";
 
 const About = () => {
   const { lang } = useLanguage();
@@ -31,15 +32,11 @@ const About = () => {
           <div className="absolute inset-0 bg-black/45" />
         </div>
         <div className="relative z-10 text-center text-white px-6 max-w-3xl">
-          <p 
-            className="font-sans text-xs sm:text-sm uppercase tracking-[0.2em] text-white/80 mb-4 opacity-0 animate-[fade-in_0.8s_ease-out_0.2s_forwards]"
-          >
-            {t(lang, 'aboutHeroTagline')}
-          </p>
-          <h1 
-            className="font-sans text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-[-0.02em] text-white opacity-0 animate-[fade-in_0.8s_ease-out_0.5s_forwards]"
-          >
+          <p className="font-sans text-xs sm:text-sm uppercase tracking-[0.2em] text-white/80 mb-4 animate-hero-fade-up [animation-delay:200ms]">
             STAYMAKOM
+          </p>
+          <h1 className="font-sans text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-[-0.02em] text-white animate-hero-fade-up [animation-delay:400ms]">
+            {t(lang, 'aboutHeroTagline')}
           </h1>
         </div>
       </section>
@@ -71,7 +68,8 @@ const About = () => {
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16">
               <div className="border-t border-border/40 pt-8">
-                <h3 className="font-sans text-lg md:text-xl font-semibold uppercase tracking-[0.05em] text-foreground mb-4">
+                <h3 className="font-sans text-lg md:text-xl font-semibold uppercase tracking-[0.05em] text-foreground mb-4 flex items-center gap-2.5">
+                  <MapPin size={18} strokeWidth={1.5} />
                   {t(lang, 'aboutAudienceIsraeliTitle')}
                 </h3>
                 <p className="font-sans text-base md:text-lg leading-relaxed text-muted-foreground mb-3 italic">
@@ -83,7 +81,8 @@ const About = () => {
               </div>
 
               <div className="border-t border-border/40 pt-8">
-                <h3 className="font-sans text-lg md:text-xl font-semibold uppercase tracking-[0.05em] text-foreground mb-4">
+                <h3 className="font-sans text-lg md:text-xl font-semibold uppercase tracking-[0.05em] text-foreground mb-4 flex items-center gap-2.5">
+                  <Globe size={18} strokeWidth={1.5} />
                   {t(lang, 'aboutAudienceIntlTitle')}
                 </h3>
                 <p className="font-sans text-base md:text-lg leading-relaxed text-muted-foreground mb-3 italic">
@@ -98,9 +97,9 @@ const About = () => {
         </section>
 
         {/* WHAT MAKES STAYMAKOM DIFFERENT */}
-        <section className="py-20 md:py-28 px-6 bg-[#1a1a1a] text-white">
+        <section className="py-20 md:py-28 px-6 bg-background">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-sans text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-[-0.02em] mb-12 text-white">
+            <h2 className="font-sans text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-[-0.02em] mb-12 text-foreground">
               {t(lang, 'aboutDifferentTitle')}
             </h2>
             <div className="space-y-5 mb-12 text-left max-w-xl mx-auto">
@@ -111,20 +110,20 @@ const About = () => {
                 t(lang, 'aboutDifferent4'),
                 t(lang, 'aboutDifferent5')
               ].map((item, index) => (
-                <div key={index} className="flex items-start gap-4 text-base md:text-lg text-white/85">
-                  <span className="text-white/40 mt-0.5">—</span>
+                <div key={index} className="flex items-start gap-4 text-base md:text-lg text-foreground/80">
+                  <span className="text-muted-foreground/50 mt-0.5">—</span>
                   <span>{item}</span>
                 </div>
               ))}
             </div>
-            <p className="font-sans text-base md:text-lg text-white/50 italic max-w-xl mx-auto">
+            <p className="font-sans text-base md:text-lg text-muted-foreground italic max-w-xl mx-auto">
               {t(lang, 'aboutDifferentQuote')}
             </p>
           </div>
         </section>
 
         {/* THE NAME */}
-        <section className="py-20 md:py-28 px-6 bg-background">
+        <section className="py-20 md:py-28 px-6 bg-[#FAF8F5]">
           <div className="max-w-3xl mx-auto text-center">
             <p className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground mb-6">
               {t(lang, 'aboutNameTitle')}
@@ -142,7 +141,7 @@ const About = () => {
         </section>
 
         {/* FOUNDER */}
-        <section className="py-16 md:py-24 px-6 bg-[#FAF8F5]">
+        <section className="py-16 md:py-24 px-6 bg-background">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
               <div className={`${isRTL ? 'md:order-2' : ''}`}>
@@ -168,8 +167,11 @@ const About = () => {
                 <p className="font-sans text-base leading-relaxed text-muted-foreground mb-5">
                   {t(lang, 'aboutFounderP2')}
                 </p>
-                <p className="font-sans text-base leading-relaxed text-muted-foreground">
+                <p className="font-sans text-base leading-relaxed text-muted-foreground mb-5 italic">
                   {t(lang, 'aboutFounderP3')}
+                </p>
+                <p className="font-sans text-base leading-relaxed text-muted-foreground">
+                  {t(lang, 'aboutFounderP4')}
                 </p>
               </div>
             </div>
@@ -177,16 +179,16 @@ const About = () => {
         </section>
 
         {/* FINAL CTA */}
-        <section className="py-20 md:py-28 px-6 bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] text-white">
+        <section className="py-20 md:py-28 px-6 bg-[#FAF8F5]">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-sans text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-[-0.02em] mb-10 text-neutral-50">
+            <h2 className="font-sans text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-[-0.02em] mb-10 text-foreground">
               {t(lang, 'aboutCTATitle')}
             </h2>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" className="bg-[#D72638] hover:bg-[#D72638]/90 text-white px-8">
+              <Button asChild size="lg" className="bg-foreground hover:bg-foreground/90 text-white px-8">
                 <Link to={getLocalizedPath("/experiences")}>{t(lang, 'aboutCTAExplore')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8">
+              <Button asChild size="lg" variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 px-8">
                 <Link to={getLocalizedPath("/contact")}>{t(lang, 'aboutCTAList')}</Link>
               </Button>
             </div>
