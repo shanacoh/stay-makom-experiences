@@ -115,20 +115,36 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       const booking = bookingsHg?.find((b: any) => b.id === bookingId);
       if (!booking) throw new Error("Booking not found");
 
-      // Call HyperGuest cancel API — action must be in query param
+      // Call HyperGuest cancel API
       console.log("[Cancel] bookingId envoyé:", booking.hg_booking_id);
       const { cancelBooking } = await import("@/services/hyperguest");
-      await cancelBooking(booking.hg_booking_id);
+      
+      let hgCancelSuccess = false;
+      try {
+        await cancelBooking(booking.hg_booking_id);
+        hgCancelSuccess = true;
+      } catch (err: any) {
+        // If HG says booking not found, treat as already cancelled
+        const msg = err?.message || "";
+        if (msg.includes("booking cannot be found") || msg.includes("BN.500")) {
+          console.warn("[Cancel] Booking not found on HyperGuest, marking as cancelled locally");
+          hgCancelSuccess = true;
+        } else {
+          throw err;
+        }
+      }
 
-      // Update local DB
-      await supabase
-        .from("bookings_hg")
-        .update({
-          is_cancelled: true,
-          cancelled_at: new Date().toISOString(),
-          status: "cancelled",
-        } as any)
-        .eq("id", bookingId);
+      // Update local DB if cancel succeeded (or booking already gone)
+      if (hgCancelSuccess) {
+        await supabase
+          .from("bookings_hg")
+          .update({
+            is_cancelled: true,
+            cancelled_at: new Date().toISOString(),
+            status: "cancelled",
+          } as any)
+          .eq("id", bookingId);
+      }
 
       return true;
     },
