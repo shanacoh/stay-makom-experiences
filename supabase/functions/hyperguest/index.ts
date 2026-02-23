@@ -246,6 +246,19 @@ async function createBooking(bookingData: BookingData) {
   if (!response.ok) {
     const errorText = await response.text();
     console.error('❌ Create booking failed:', response.status, errorText);
+    
+    // 409 may contain a bookingId — HG created the booking but flagged an issue
+    // Try to extract bookingId and return partial success so the frontend can handle it
+    if (response.status === 409) {
+      try {
+        const parsed = JSON.parse(errorText);
+        if (parsed.bookingId) {
+          console.log('⚠️ 409 with bookingId:', parsed.bookingId, '— treating as partial success');
+          return { id: String(parsed.bookingId), status: 'PendingReview', partialError: parsed.error };
+        }
+      } catch (_) { /* not JSON, fall through */ }
+    }
+    
     throw new Error(`Create booking failed: ${response.status} - ${errorText}`);
   }
   
