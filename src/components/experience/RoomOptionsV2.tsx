@@ -214,9 +214,9 @@ export function RoomOptionsV2({
                     </Label>
 
                     {/* ✅ V4 FIX: Display rate plan remarks */}
-                    {ratePlan.remarks && ratePlan.remarks.length > 0 && (
+                    {ratePlan.remarks && ratePlan.remarks.filter(r => !/general message that should be shown/i.test(r)).length > 0 && (
                       <div className="ml-8 space-y-1 px-3 py-2 rounded-md bg-muted/50 border border-border">
-                        {ratePlan.remarks.map((remark, idx) => (
+                        {ratePlan.remarks.filter(r => !/general message that should be shown/i.test(r)).map((remark, idx) => (
                           <div key={idx} className="flex items-start gap-2">
                             <Info className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
                             <p className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
