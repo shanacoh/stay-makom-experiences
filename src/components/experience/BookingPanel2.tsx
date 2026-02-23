@@ -402,6 +402,9 @@ export function BookingPanel2({
       const sellPrice = bookingResult.totalPrice?.amount ?? expectedAmount;
       const bookingCurrency = bookingResult.totalPrice?.currency ?? expectedCurrency;
 
+      const currentSession = await supabase.auth.getSession();
+      const currentUserId = currentSession.data.session?.user?.id || null;
+
       const { error: dbError } = await supabase.from("bookings_hg").insert({
         hg_booking_id: hgBookingId,
         hotel_id: hotelId,
@@ -423,6 +426,7 @@ export function BookingPanel2({
         customer_name: `${leadGuest.firstName} ${leadGuest.lastName}`,
         customer_email: leadGuest.email,
         hg_raw_data: bookingResult,
+        user_id: currentUserId,
       } as any);
 
       if (dbError) {
