@@ -14,6 +14,7 @@ import {
   Mail,
   Heart,
   ShieldCheck,
+  Archive,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,14 +27,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
-const menuItems = [
+const mainMenuItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "Categories", url: "/admin/categories", icon: FolderKanban },
-  { title: "Hotels", url: "/admin/hotels", icon: Building2 },
-  { title: "Hotels 2", url: "/admin/hotels2", icon: Building2 },
-  { title: "Experiences", url: "/admin/experiences", icon: Sparkles },
-  { title: "Experiences 2", url: "/admin/experiences2", icon: Sparkles },
+  { title: "Hotels", url: "/admin/hotels2", icon: Building2 },
+  { title: "Experiences", url: "/admin/experiences2", icon: Sparkles },
   { title: "Bookings", url: "/admin/bookings", icon: Calendar },
   { title: "Gift Cards", url: "/admin/gift-cards", icon: Gift },
   { title: "Leads", url: "/admin/leads", icon: Mail },
@@ -44,6 +49,12 @@ const menuItems = [
   { title: "AI Insights", url: "/admin/ai-insights", icon: Brain },
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "HG Certification", url: "/admin/hyperguest-certification", icon: ShieldCheck },
+];
+
+const backupMenuItems = [
+  { title: "Dashboard V1", url: "/admin/backup/dashboard", icon: LayoutDashboard },
+  { title: "Hotels V1", url: "/admin/backup/hotels", icon: Building2 },
+  { title: "Experiences V1", url: "/admin/backup/experiences", icon: Sparkles },
 ];
 
 export function AdminSidebar() {
@@ -59,7 +70,6 @@ export function AdminSidebar() {
   };
 
   const handleNavClick = () => {
-    // Close sidebar on mobile after navigation
     if (isMobile) {
       setOpenMobile(false);
     }
@@ -78,7 +88,7 @@ export function AdminSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -98,6 +108,42 @@ export function AdminSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Backup V1 section */}
+        {!collapsed && (
+          <SidebarGroup>
+            <Collapsible>
+              <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
+                <Archive className="h-4 w-4" />
+                <span>Backup (V1)</span>
+                <ChevronDown className="ml-auto h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {backupMenuItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          className={
+                            isActive(item.url)
+                              ? "bg-muted text-foreground"
+                              : "text-muted-foreground hover:bg-muted/50"
+                          }
+                        >
+                          <Link to={item.url} onClick={handleNavClick}>
+                            <item.icon className="h-4 w-4 mr-3" />
+                            <span className="text-xs">{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );

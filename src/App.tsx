@@ -128,18 +128,28 @@ const App = () => (
               <Route path="categories" element={<AdminCategories />} />
               <Route path="categories/new" element={<CategoryEditor />} />
               <Route path="categories/edit/:id" element={<CategoryEditor />} />
-              <Route path="hotels" element={<AdminHotels />} />
-              <Route path="hotels/new" element={<AdminHotels key="new" />} />
-              <Route path="hotels/edit/:hotelId" element={<AdminHotels key="edit" />} />
+              {/* Principal = V2 */}
               <Route path="hotels2" element={<AdminHotels2 />} />
               <Route path="hotels2/new" element={<AdminHotels2 key="new" />} />
               <Route path="hotels2/edit/:hotelId" element={<AdminHotels2 key="edit" />} />
-              <Route path="experiences" element={<AdminExperiences />} />
-              <Route path="experiences/new" element={<AdminExperiences key="new" />} />
-              <Route path="experiences/edit/:experienceId" element={<AdminExperiences key="edit" />} />
               <Route path="experiences2" element={<AdminExperiences2 />} />
               <Route path="experiences2/new" element={<AdminExperiences2 key="new" />} />
               <Route path="experiences2/edit/:experienceId" element={<AdminExperiences2 key="edit" />} />
+              {/* Backup V1 */}
+              <Route path="backup/dashboard" element={<AdminDashboard />} />
+              <Route path="backup/hotels" element={<AdminHotels />} />
+              <Route path="backup/hotels/new" element={<AdminHotels key="new" />} />
+              <Route path="backup/hotels/edit/:hotelId" element={<AdminHotels key="edit" />} />
+              <Route path="backup/experiences" element={<AdminExperiences />} />
+              <Route path="backup/experiences/new" element={<AdminExperiences key="new" />} />
+              <Route path="backup/experiences/edit/:experienceId" element={<AdminExperiences key="edit" />} />
+              {/* Legacy routes kept */}
+              <Route path="hotels" element={<AdminHotels />} />
+              <Route path="hotels/new" element={<AdminHotels key="new" />} />
+              <Route path="hotels/edit/:hotelId" element={<AdminHotels key="edit" />} />
+              <Route path="experiences" element={<AdminExperiences />} />
+              <Route path="experiences/new" element={<AdminExperiences key="new" />} />
+              <Route path="experiences/edit/:experienceId" element={<AdminExperiences key="edit" />} />
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="reservations" element={<AdminBookings />} />
