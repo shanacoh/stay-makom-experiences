@@ -462,7 +462,7 @@ export function BookingPanel2({
       const allRemarks = [
         ...propertyRemarks,
         ...(selectedRatePlan?.remarks || []),
-      ];
+      ].filter((r: string) => !/general message that should be shown/i.test(r));
 
       setConfirmationData({
         hgBookingId,
