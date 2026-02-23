@@ -115,16 +115,9 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       const booking = bookingsHg?.find((b: any) => b.id === bookingId);
       if (!booking) throw new Error("Booking not found");
 
-      // Call HyperGuest cancel API
-      const { data, error } = await supabase.functions.invoke("hyperguest", {
-        body: {
-          action: "cancel-booking",
-          bookingId: booking.hg_booking_id,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      // Call HyperGuest cancel API — action must be in query param
+      const { cancelBooking } = await import("@/services/hyperguest");
+      await cancelBooking(booking.hg_booking_id);
 
       // Update local DB
       await supabase
@@ -136,7 +129,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         } as any)
         .eq("id", bookingId);
 
-      return data;
+      return true;
     },
     onSuccess: () => {
       toast.success(isHebrew ? "ההזמנה בוטלה בהצלחה" : "Booking cancelled successfully");
