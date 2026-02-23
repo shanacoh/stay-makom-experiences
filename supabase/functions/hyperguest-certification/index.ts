@@ -288,17 +288,72 @@ async function runTest5(): Promise<TestResult> {
     const search = await certSearch({ checkIn, nights: 2, guests: '1-8.2-1' });
     logs.push(search.log);
     const property = search.data.results?.[0];
-    const room1 = property.rooms?.[0];
-    const room2 = property.rooms?.[1] || property.rooms?.[0];
+    if (!property) throw new Error('No property in search results');
+
+    // Multi-room search: rooms array has one entry per searchedPax group per room type
+    // We need to match rooms to the correct pax group
+    // Room 1: pax group with 1 adult + 1 child (age 8)
+    // Room 2: pax group with 2 adults + 1 infant (age 1)
+    const room1 = property.rooms?.find((r: any) => 
+      r.searchedPax?.adults === 1 && r.searchedPax?.children?.length > 0
+    ) || property.rooms?.[0];
+    const room2 = property.rooms?.find((r: any) => 
+      r.searchedPax?.adults === 2
+    ) || property.rooms?.[1] || property.rooms?.[0];
+
+    if (!room1 || !room2) throw new Error(`Could not find matching rooms. Total rooms: ${property.rooms?.length}`);
+
+    // Compute infant birthDate to match age 1 at checkin
+    const infantBirthYear = new Date(checkIn).getFullYear() - 1;
+    const infantBirthDate = `${infantBirthYear}-06-15`;
 
     const bookBody = buildBookingBody({
       checkIn, checkOut,
       rooms: [
-        { roomId: room1.roomId, ratePlanId: room1.ratePlans[0].ratePlanId, expectedPrice: { amount: room1.ratePlans[0].payment.chargeAmount.price, currency: room1.ratePlans[0].payment.chargeAmount.currency }, guests: [{ first: "Test", last: "R1Adult", birthDate: "1990-01-01", title: "MR", isLead: true }, { first: "Test", last: "R1Child", birthDate: "2017-06-15", title: "C" }] },
-        { roomId: room2.roomId, ratePlanId: room2.ratePlans[0].ratePlanId, expectedPrice: { amount: room2.ratePlans[0].payment.chargeAmount.price, currency: room2.ratePlans[0].payment.chargeAmount.currency }, guests: [{ first: "Test", last: "R2AdultA", birthDate: "1988-05-05", title: "MR" }, { first: "Test", last: "R2AdultB", birthDate: "1989-06-06", title: "MS" }, { first: "Test", last: "R2Infant", birthDate: "2024-03-20", title: "C" }] },
+        { 
+          roomId: room1.roomId, ratePlanId: room1.ratePlans[0].ratePlanId, 
+          expectedPrice: { amount: room1.ratePlans[0].payment.chargeAmount.price, currency: room1.ratePlans[0].payment.chargeAmount.currency }, 
+          guests: [
+            { first: "Test", last: "R1Adult", birthDate: "1990-01-01", title: "MR", isLead: true }, 
+            { first: "Test", last: "R1Child", birthDate: "2017-06-15", title: "C" },
+          ] 
+        },
+        { 
+          roomId: room2.roomId, ratePlanId: room2.ratePlans[0].ratePlanId, 
+          expectedPrice: { amount: room2.ratePlans[0].payment.chargeAmount.price, currency: room2.ratePlans[0].payment.chargeAmount.currency }, 
+          guests: [
+            { first: "Test", last: "R2AdultA", birthDate: "1988-05-05", title: "MR" }, 
+            { first: "Test", last: "R2AdultB", birthDate: "1989-06-06", title: "MS" }, 
+            { first: "Test", last: "R2Infant", birthDate: infantBirthDate, title: "INF" },
+          ] 
+        },
       ],
       reference: "CERT-TEST5",
     });
+
+    // Add pre-book step first
+    const preBookBody = {
+      search: { 
+        dates: { from: checkIn, to: checkOut }, 
+        propertyId: PROPERTY_ID, 
+        nationality: "IL", 
+        pax: [
+          { adults: 1, children: [8] },
+          { adults: 2, children: [1] },
+        ] 
+      },
+      rooms: [
+        { roomId: room1.roomId, ratePlanId: room1.ratePlans[0].ratePlanId, expectedPrice: { amount: room1.ratePlans[0].payment.chargeAmount.price, currency: room1.ratePlans[0].payment.chargeAmount.currency } },
+        { roomId: room2.roomId, ratePlanId: room2.ratePlans[0].ratePlanId, expectedPrice: { amount: room2.ratePlans[0].payment.chargeAmount.price, currency: room2.ratePlans[0].payment.chargeAmount.currency } },
+      ],
+    };
+    const prebook = await certPreBook(preBookBody);
+    logs.push(prebook.log);
+
+    if (prebook.log.response.status !== 200) {
+      return { name: "Test 5: 2 rooms (1a+1c / 2a+1i)", logs, success: false, error: `Pre-book failed with status ${prebook.log.response.status}` };
+    }
+
     const book = await certBook(bookBody);
     logs.push(book.log);
 
