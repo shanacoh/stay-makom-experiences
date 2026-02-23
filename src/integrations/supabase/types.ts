@@ -332,6 +332,7 @@ export type Database = {
           status: string
           synced_at: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           board_type?: string | null
@@ -360,6 +361,7 @@ export type Database = {
           status?: string
           synced_at?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           board_type?: string | null
@@ -388,6 +390,7 @@ export type Database = {
           status?: string
           synced_at?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
