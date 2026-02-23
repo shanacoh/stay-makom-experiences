@@ -247,14 +247,15 @@ export function BookingPanel2({
 
   // ✅ V4 FIX: Extract property-level remarks from search result
   const propertyRemarks = useMemo(() => {
-    if (!searchResult) return [];
+    let raw: string[] = [];
+    if (!searchResult) return raw;
     if (searchResult.results && searchResult.results.length > 0) {
-      return searchResult.results[0]?.remarks || [];
+      raw = searchResult.results[0]?.remarks || [];
+    } else if ((searchResult as any).remarks) {
+      raw = (searchResult as any).remarks;
     }
-    if ((searchResult as any).remarks) {
-      return (searchResult as any).remarks;
-    }
-    return [];
+    // Filter out generic placeholder messages from HyperGuest
+    return raw.filter((r: string) => !/general message that should be shown/i.test(r));
   }, [searchResult]);
 
   const nights = searchParams?.nights || 0;
@@ -709,13 +710,9 @@ export function BookingPanel2({
 
           {/* ✅ V4 FIX: Property-level remarks */}
           {propertyRemarks.length > 0 && (
-            <div className="space-y-2 p-3 rounded-md bg-muted/50 border border-border">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Info className="h-4 w-4 text-muted-foreground" />
-                {t.importantNotices}
-              </div>
+            <div className="space-y-1.5 p-3 rounded-md bg-muted/50 border border-border">
               {propertyRemarks.map((remark: string, idx: number) => (
-                <p key={idx} className="text-xs text-muted-foreground leading-relaxed pl-6">{remark}</p>
+                <p key={idx} className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
               ))}
             </div>
           )}
