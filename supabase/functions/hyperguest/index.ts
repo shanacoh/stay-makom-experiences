@@ -220,6 +220,16 @@ async function createBooking(bookingData: BookingData) {
   const safeBookingData = {
     ...bookingData,
     isTest: !isProduction,
+    // Payment details — test card for staging, will come from Stripe in production
+    paymentDetails: bookingData.paymentDetails || {
+      type: "credit_card",
+      details: {
+        number: "4111111111111111",
+        cvv: "123",
+        expiration: { month: "12", year: "2027" },
+        holderName: "TEST STAYMAKOM",
+      },
+    },
   };
 
   console.log('🎫 Creating booking for property:', safeBookingData.propertyId,
