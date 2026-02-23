@@ -116,6 +116,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       if (!booking) throw new Error("Booking not found");
 
       // Call HyperGuest cancel API — action must be in query param
+      console.log("[Cancel] bookingId envoyé:", booking.hg_booking_id);
       const { cancelBooking } = await import("@/services/hyperguest");
       await cancelBooking(booking.hg_booking_id);
 
