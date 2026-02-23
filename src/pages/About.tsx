@@ -17,12 +17,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead 
-        titleEn="About STAYMAKOM | Curated Hotel Stays in Israel" 
-        titleHe="אודות STAYMAKOM | חוויות אירוח מובחרות בישראל" 
-        descriptionEn="Discover STAYMAKOM - a curated booking platform combining boutique hotels and immersive local experiences in Israel." 
-        descriptionHe="גלו את STAYMAKOM - פלטפורמת הזמנות מובחרת המשלבת מלונות בוטיק וחוויות מקומיות סוחפות בישראל." 
-      />
+      <SEOHead
+        titleEn="About STAYMAKOM | Curated Hotel Stays in Israel"
+        titleHe="אודות STAYMAKOM | חוויות אירוח מובחרות בישראל"
+        descriptionEn="Discover STAYMAKOM - a curated booking platform combining boutique hotels and immersive local experiences in Israel."
+        descriptionHe="גלו את STAYMAKOM - פלטפורמת הזמנות מובחרת המשלבת מלונות בוטיק וחוויות מקומיות סוחפות בישראל." />
+
       <Header />
 
       {/* HERO */}
@@ -43,7 +43,7 @@ const About = () => {
 
       <main dir={isRTL ? 'rtl' : 'ltr'}>
         {/* WHY ISRAEL. WHY NOW. */}
-        <section className="py-20 md:py-28 px-6 bg-background">
+        <section className="py-20 px-6 bg-background md:py-[52px]">
           <div className="max-w-3xl mx-auto text-center">
             <p className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground mb-6">
               {t(lang, 'aboutWhyIsraelLabel')}
@@ -64,7 +64,7 @@ const About = () => {
         </section>
 
         {/* TWO AUDIENCES */}
-        <section className="py-16 md:py-24 px-6 bg-[#FAF8F5]">
+        <section className="py-16 px-6 bg-[#FAF8F5] md:py-[52px]">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16">
               <div className="border-t border-border/40 pt-8">
@@ -97,24 +97,24 @@ const About = () => {
         </section>
 
         {/* WHAT MAKES STAYMAKOM DIFFERENT */}
-        <section className="py-20 md:py-28 px-6 bg-background">
+        <section className="py-20 px-6 bg-background md:py-[62px]">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="font-sans text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-[-0.02em] mb-12 text-foreground">
               {t(lang, 'aboutDifferentTitle')}
             </h2>
             <div className="space-y-5 mb-12 text-left max-w-xl mx-auto">
               {[
-                t(lang, 'aboutDifferent1'),
-                t(lang, 'aboutDifferent2'),
-                t(lang, 'aboutDifferent3'),
-                t(lang, 'aboutDifferent4'),
-                t(lang, 'aboutDifferent5')
-              ].map((item, index) => (
-                <div key={index} className="flex items-start gap-4 text-base md:text-lg text-foreground/80">
+              t(lang, 'aboutDifferent1'),
+              t(lang, 'aboutDifferent2'),
+              t(lang, 'aboutDifferent3'),
+              t(lang, 'aboutDifferent4'),
+              t(lang, 'aboutDifferent5')].
+              map((item, index) =>
+              <div key={index} className="flex items-start gap-4 text-base md:text-lg text-foreground/80">
                   <span className="text-muted-foreground/50 mt-0.5">—</span>
                   <span>{item}</span>
                 </div>
-              ))}
+              )}
             </div>
             <p className="font-sans text-base md:text-lg text-muted-foreground italic max-w-xl mx-auto">
               {t(lang, 'aboutDifferentQuote')}
@@ -123,7 +123,7 @@ const About = () => {
         </section>
 
         {/* THE NAME */}
-        <section className="py-20 md:py-28 px-6 bg-[#FAF8F5]">
+        <section className="py-20 px-6 bg-[#FAF8F5] md:py-[52px]">
           <div className="max-w-3xl mx-auto text-center">
             <p className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground mb-6">
               {t(lang, 'aboutNameTitle')}
@@ -141,15 +141,15 @@ const About = () => {
         </section>
 
         {/* FOUNDER */}
-        <section className="py-16 md:py-24 px-6 bg-background">
+        <section className="py-16 px-6 bg-background md:py-[62px]">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
               <div className={`${isRTL ? 'md:order-2' : ''}`}>
-                <img 
-                  src={founderPhoto} 
-                  alt="Shana, Founder of STAYMAKOM" 
-                  className="w-full max-w-md mx-auto aspect-[3/4] object-cover grayscale"
-                />
+                <img
+                  src={founderPhoto}
+                  alt="Shana, Founder of STAYMAKOM"
+                  className="w-full max-w-md mx-auto aspect-[3/4] object-cover grayscale" />
+
               </div>
               <div className={`${isRTL ? 'md:order-1' : ''}`}>
                 <p className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">
@@ -161,16 +161,16 @@ const About = () => {
                 <p className="font-sans text-sm text-muted-foreground mb-8">
                   {t(lang, 'aboutFounderRole')}
                 </p>
-                <p className="font-sans text-base leading-relaxed text-muted-foreground mb-5">
+                <p className="font-sans leading-relaxed text-muted-foreground mb-5 text-sm">
                   {t(lang, 'aboutFounderP1')}
                 </p>
-                <p className="font-sans text-base leading-relaxed text-muted-foreground mb-5">
+                <p className="font-sans leading-relaxed text-muted-foreground mb-5 text-sm">
                   {t(lang, 'aboutFounderP2')}
                 </p>
-                <p className="font-sans text-base leading-relaxed text-muted-foreground mb-5 italic">
+                <p className="font-sans leading-relaxed text-muted-foreground mb-5 italic text-sm">
                   {t(lang, 'aboutFounderP3')}
                 </p>
-                <p className="font-sans text-base leading-relaxed text-muted-foreground">
+                <p className="font-sans leading-relaxed text-muted-foreground text-sm">
                   {t(lang, 'aboutFounderP4')}
                 </p>
               </div>
@@ -179,7 +179,7 @@ const About = () => {
         </section>
 
         {/* FINAL CTA */}
-        <section className="py-20 md:py-28 px-6 bg-[#FAF8F5]">
+        <section className="py-20 px-6 bg-[#FAF8F5] md:py-[52px]">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="font-sans text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-[-0.02em] mb-10 text-foreground">
               {t(lang, 'aboutCTATitle')}
@@ -197,8 +197,8 @@ const About = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>);
+
 };
 
 export default About;
