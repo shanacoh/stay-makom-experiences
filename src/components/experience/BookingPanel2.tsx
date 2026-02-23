@@ -23,7 +23,7 @@ import { DualPrice } from "@/components/ui/DualPrice";
 import { Textarea } from "@/components/ui/textarea";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
-import { LeadGuestForm, EMPTY_LEAD_GUEST, type LeadGuestData } from "./LeadGuestForm";
+import { LeadGuestForm, EMPTY_LEAD_GUEST, sanitizeLeadGuest, type LeadGuestData } from "./LeadGuestForm";
 import { BookingConfirmationDialog, type BookingConfirmationData } from "./BookingConfirmationDialog";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -178,6 +178,7 @@ export function BookingPanel2({
   const [confirmationData, setConfirmationData] = useState<BookingConfirmationData | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [showGuestErrors, setShowGuestErrors] = useState(false);
   const pendingBookAfterAuth = useRef(false);
   const { user } = useAuth();
 
@@ -321,6 +322,7 @@ export function BookingPanel2({
     if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId || !selectedRatePlan) return;
 
     if (!isGuestValid) {
+      setShowGuestErrors(true);
       toast.error(t.fillGuestInfo);
       return;
     }
@@ -379,19 +381,22 @@ export function BookingPanel2({
 
       const staymakomRef = `SM-${experienceId.substring(0, 8).toUpperCase()}-${Date.now()}`;
 
+      // ✅ Sanitize guest data to ensure HyperGuest-compatible formats
+      const safe = sanitizeLeadGuest(leadGuest);
+
       const bookingData = {
         dates: { from: checkIn, to: checkOut },
         propertyId: parseInt(hyperguestPropertyId!),
         leadGuest: {
-          birthDate: leadGuest.birthDate,
-          title: leadGuest.title,
-          name: { first: leadGuest.firstName, last: leadGuest.lastName },
+          birthDate: safe.birthDate,
+          title: safe.title,
+          name: { first: safe.firstName, last: safe.lastName },
           contact: {
-            address: leadGuest.address || "N/A",
-            city: leadGuest.city || "N/A",
-            country: leadGuest.country || "IL",
-            email: leadGuest.email,
-            phone: leadGuest.phone,
+            address: safe.address,
+            city: safe.city,
+            country: safe.country,
+            email: safe.email,
+            phone: safe.phone,
             state: "N/A",
             zip: "00000",
           },
@@ -404,9 +409,9 @@ export function BookingPanel2({
           specialRequests: specialRequests || undefined,
           guests: [
             {
-              birthDate: leadGuest.birthDate,
-              title: leadGuest.title,
-              name: { first: leadGuest.firstName, last: leadGuest.lastName },
+              birthDate: safe.birthDate,
+              title: safe.title,
+              name: { first: safe.firstName, last: safe.lastName },
             },
             // Add additional adult guests as placeholders
             ...Array.from({ length: Math.max(0, adults - 1) }, (_, i) => ({
@@ -769,7 +774,7 @@ export function BookingPanel2({
           {selectedRoomId && selectedRatePlanId && (
             <>
               <Separator />
-              <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} />
+              <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
             </>
           )}
 
