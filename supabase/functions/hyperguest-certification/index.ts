@@ -324,7 +324,7 @@ async function runTest5(): Promise<TestResult> {
           guests: [
             { first: "Test", last: "R2AdultA", birthDate: "1988-05-05", title: "MR" }, 
             { first: "Test", last: "R2AdultB", birthDate: "1989-06-06", title: "MS" }, 
-            { first: "Test", last: "R2Infant", birthDate: infantBirthDate, title: "INF" },
+            { first: "Test", last: "R2Infant", birthDate: infantBirthDate, title: "C" },
           ] 
         },
       ],
