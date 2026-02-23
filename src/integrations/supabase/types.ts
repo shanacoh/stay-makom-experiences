@@ -304,6 +304,108 @@ export type Database = {
           },
         ]
       }
+      bookings_hg: {
+        Row: {
+          board_type: string | null
+          cancelled_at: string | null
+          checkin: string
+          checkout: string
+          commission_amount: number
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          experience_id: string | null
+          hg_booking_id: string
+          hg_raw_data: Json | null
+          hg_status: string | null
+          hotel_id: string | null
+          id: string
+          is_cancelled: boolean
+          net_price: number
+          nights: number
+          party_size: number
+          rate_plan: string | null
+          room_code: string | null
+          room_name: string | null
+          sell_price: number
+          status: string
+          synced_at: string
+          updated_at: string
+        }
+        Insert: {
+          board_type?: string | null
+          cancelled_at?: string | null
+          checkin: string
+          checkout: string
+          commission_amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          experience_id?: string | null
+          hg_booking_id: string
+          hg_raw_data?: Json | null
+          hg_status?: string | null
+          hotel_id?: string | null
+          id?: string
+          is_cancelled?: boolean
+          net_price?: number
+          nights?: number
+          party_size?: number
+          rate_plan?: string | null
+          room_code?: string | null
+          room_name?: string | null
+          sell_price?: number
+          status?: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Update: {
+          board_type?: string | null
+          cancelled_at?: string | null
+          checkin?: string
+          checkout?: string
+          commission_amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          experience_id?: string | null
+          hg_booking_id?: string
+          hg_raw_data?: Json | null
+          hg_status?: string | null
+          hotel_id?: string | null
+          id?: string
+          is_cancelled?: boolean
+          net_price?: number
+          nights?: number
+          party_size?: number
+          rate_plan?: string | null
+          room_code?: string | null
+          room_name?: string | null
+          sell_price?: number
+          status?: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_hg_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_hg_hotel_id_fkey"
+            columns: ["hotel_id"]
+            isOneToOne: false
+            referencedRelation: "hotels2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           bullets: string[] | null
