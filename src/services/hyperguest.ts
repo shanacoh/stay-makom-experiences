@@ -87,29 +87,38 @@ export interface HyperGuestPropertyDetails {
 }
 
 export interface HyperGuestLeadGuest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  nationality?: string;
+  birthDate: string;
+  title: string;
+  name: { first: string; last: string };
+  contact: {
+    address?: string;
+    city?: string;
+    country: string;
+    email: string;
+    phone: string;
+    state?: string;
+    zip?: string;
+  };
 }
 
-export interface HyperGuestRoom {
+export interface HyperGuestBookingRoom {
   roomId: number;
   ratePlanId: number;
-  guests: {
-    adults: number;
-    children: number[];
-  };
+  expectedPrice?: { amount: number; currency: string };
+  specialRequests?: string;
+  guests: Array<{
+    birthDate: string;
+    title: string;
+    name: { first: string; last: string };
+  }>;
 }
 
 export interface HyperGuestBookingData {
   dates: { from: string; to: string };
   propertyId: number;
   leadGuest: HyperGuestLeadGuest;
-  rooms: HyperGuestRoom[];
-  customerNationality?: string;
-  currency?: string;
+  reference?: { agency: string };
+  rooms: HyperGuestBookingRoom[];
   isTest?: boolean;
 }
 
@@ -119,6 +128,13 @@ export interface HyperGuestBookingResponse {
   propertyId: number;
   dates: { from: string; to: string };
   totalPrice: { amount: number; currency: string };
+  rooms?: Array<{
+    roomId?: number;
+    roomName?: string;
+    ratePlanId?: number;
+    board?: string;
+    prices?: any;
+  }>;
   [key: string]: any;
 }
 

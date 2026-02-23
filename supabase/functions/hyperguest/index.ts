@@ -31,19 +31,31 @@ interface BookingData {
   dates: { from: string; to: string };
   propertyId: number;
   leadGuest: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    nationality?: string;
+    birthDate: string;
+    title: string;
+    name: { first: string; last: string };
+    contact: {
+      address?: string;
+      city?: string;
+      country: string;
+      email: string;
+      phone: string;
+      state?: string;
+      zip?: string;
+    };
   };
+  reference?: { agency: string };
   rooms: Array<{
     roomId: number;
     ratePlanId: number;
-    guests: { adults: number; children: number[] };
+    expectedPrice?: { amount: number; currency: string };
+    specialRequests?: string;
+    guests: Array<{
+      birthDate: string;
+      title: string;
+      name: { first: string; last: string };
+    }>;
   }>;
-  customerNationality?: string;
-  currency?: string;
   isTest?: boolean;
 }
 

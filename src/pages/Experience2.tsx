@@ -478,7 +478,9 @@ export default function Experience2() {
             <div className="sticky top-8">
               <BookingPanel2
                 experienceId={experience.id}
+                experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
                 hotelId={primaryHotel?.id || ""}
+                hotelName={primaryHotel?.name || ""}
                 hyperguestPropertyId={hyperguestPropertyId || null}
                 currency={experience.currency || "ILS"}
                 minParty={experience.min_party || 2}
@@ -506,7 +508,9 @@ export default function Experience2() {
         <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
           <BookingPanel2
             experienceId={experience.id}
+            experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
             hotelId={primaryHotel?.id || ""}
+            hotelName={primaryHotel?.name || ""}
             hyperguestPropertyId={hyperguestPropertyId || null}
             currency={experience.currency || "ILS"}
             minParty={experience.min_party || 2}
