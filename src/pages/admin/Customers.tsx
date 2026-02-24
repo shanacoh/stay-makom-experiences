@@ -58,6 +58,7 @@ const AdminCustomers = () => {
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [bookingsFilter, setBookingsFilter] = useState<"all" | "has_bookings" | "no_bookings">("all");
+  const [clubFilter, setClubFilter] = useState<"all" | "explorer" | "traveler" | "insider" | "circle">("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [editUserOpen, setEditUserOpen] = useState(false);
@@ -87,7 +88,7 @@ const AdminCustomers = () => {
   });
 
   const { data: customers, isLoading, refetch } = useQuery({
-    queryKey: ["admin-customers", searchTerm, roleFilter, countryFilter, statusFilter, bookingsFilter],
+    queryKey: ["admin-customers", searchTerm, roleFilter, countryFilter, statusFilter, bookingsFilter, clubFilter],
     queryFn: async () => {
       // Fetch customers with emails using the secure function
       const { data: customersWithEmails, error: emailError } = await supabase
@@ -202,18 +203,37 @@ const AdminCustomers = () => {
         return acc;
       }, {} as Record<string, any>);
 
-      return filteredCustomers.map((customer: any) => {
+      // Helper to compute club status from membership_progress
+      const getClubStatus = (mp: number) => {
+        if (mp >= 3000) return "circle";
+        if (mp >= 1500) return "insider";
+        if (mp >= 500) return "traveler";
+        return "explorer";
+      };
+
+      let mapped = filteredCustomers.map((customer: any) => {
+        const profile = profilesMap[customer.user_id];
+        const membershipProgress = profile?.membership_progress || 0;
         return {
           ...customer,
-          user_profiles: profilesMap[customer.user_id] || null,
+          user_profiles: profile || null,
           user_roles: rolesMap[customer.user_id] || null,
           hotel_admin: hotelAdminsMap[customer.user_id] || null,
           bookingsCount: statsMap[customer.id]?.count || 0,
           totalSpent: statsMap[customer.id]?.total || 0,
           hotelsVisited: statsMap[customer.id]?.hotels.size || 0,
-          isActive: true, // Assume active if user exists in database
+          isActive: true,
+          membershipProgress,
+          clubStatus: getClubStatus(membershipProgress),
         };
       });
+
+      // Apply club status filter
+      if (clubFilter !== "all") {
+        mapped = mapped.filter(c => c.clubStatus === clubFilter);
+      }
+
+      return mapped;
     },
   });
 
@@ -596,6 +616,18 @@ const AdminCustomers = () => {
             ))}
           </SelectContent>
         </Select>
+        <Select value={clubFilter} onValueChange={(value) => setClubFilter(value as any)}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Club Status</SelectItem>
+            <SelectItem value="explorer">Explorer</SelectItem>
+            <SelectItem value="traveler">Traveler</SelectItem>
+            <SelectItem value="insider">Insider</SelectItem>
+            <SelectItem value="circle">Circle</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
@@ -613,6 +645,8 @@ const AdminCustomers = () => {
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Bookings</TableHead>
                 <TableHead className="text-right">Total Spent</TableHead>
+                <TableHead className="text-right">Progress</TableHead>
+                <TableHead>Club Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -688,6 +722,12 @@ const AdminCustomers = () => {
                     <TableCell className="text-right">{customer.bookingsCount}</TableCell>
                     <TableCell className="text-right">
                       ${customer.totalSpent.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-right">{customer.membershipProgress}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="capitalize text-xs">
+                        {customer.clubStatus}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
@@ -776,7 +816,7 @@ const AdminCustomers = () => {
           ) : customerDetail ? (
             <div className="space-y-6 mt-6">
               {/* Summary Stats */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div className="border rounded-lg p-4">
                   <p className="text-sm text-muted-foreground">Total Bookings</p>
                   <p className="text-2xl font-bold">{customerDetail.bookings.length}</p>
@@ -786,8 +826,12 @@ const AdminCustomers = () => {
                   <p className="text-2xl font-bold">${customerDetail.totalSpent.toFixed(2)}</p>
                 </div>
                 <div className="border rounded-lg p-4">
-                  <p className="text-sm text-muted-foreground">Hotels Visited</p>
-                  <p className="text-2xl font-bold">{customerDetail.hotelsVisited}</p>
+                  <p className="text-sm text-muted-foreground">Membership Progress</p>
+                  <p className="text-2xl font-bold">{customerDetail.user_profiles?.membership_progress || 0}</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">Club Status</p>
+                  <p className="text-2xl font-bold capitalize">{customerDetail.user_profiles?.loyalty_tier || "explorer"}</p>
                 </div>
               </div>
 
