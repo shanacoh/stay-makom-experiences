@@ -2468,6 +2468,7 @@ export type Database = {
           locale: Database["public"]["Enums"]["locale"]
           loyalty_tier: string | null
           marketing_opt_in: boolean
+          membership_progress: number
           onboarding_completed_at: string | null
           phone: string | null
           referral_source: string | null
@@ -2485,6 +2486,7 @@ export type Database = {
           locale?: Database["public"]["Enums"]["locale"]
           loyalty_tier?: string | null
           marketing_opt_in?: boolean
+          membership_progress?: number
           onboarding_completed_at?: string | null
           phone?: string | null
           referral_source?: string | null
@@ -2502,6 +2504,7 @@ export type Database = {
           locale?: Database["public"]["Enums"]["locale"]
           loyalty_tier?: string | null
           marketing_opt_in?: boolean
+          membership_progress?: number
           onboarding_completed_at?: string | null
           phone?: string | null
           referral_source?: string | null
