@@ -1007,6 +1007,62 @@ export type Database = {
           },
         ]
       }
+      experience2_practical_info: {
+        Row: {
+          created_at: string
+          experience_id: string
+          field_key: string | null
+          icon: string | null
+          id: string
+          is_visible: boolean
+          label: string
+          label_he: string | null
+          order_index: number
+          source: string
+          updated_at: string
+          value: string
+          value_he: string | null
+        }
+        Insert: {
+          created_at?: string
+          experience_id: string
+          field_key?: string | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean
+          label: string
+          label_he?: string | null
+          order_index?: number
+          source?: string
+          updated_at?: string
+          value: string
+          value_he?: string | null
+        }
+        Update: {
+          created_at?: string
+          experience_id?: string
+          field_key?: string | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean
+          label?: string
+          label_he?: string | null
+          order_index?: number
+          source?: string
+          updated_at?: string
+          value?: string
+          value_he?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience2_practical_info_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experience2_reviews: {
         Row: {
           comment: string | null

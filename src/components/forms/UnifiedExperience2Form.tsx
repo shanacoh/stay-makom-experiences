@@ -35,6 +35,7 @@ import { HighlightTagsSelector2, type LocalTagEntry } from "@/components/admin/H
 import ReviewsManager2, { type LocalReviewEntry } from "@/components/admin/ReviewsManager2";
 import DateOptionsManager from "@/components/admin/DateOptionsManager";
 import ExperienceExtrasSelector2 from "@/components/admin/ExperienceExtrasSelector2";
+import PracticalInfoManager from "@/components/admin/PracticalInfoManager";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1370,6 +1371,36 @@ export function UnifiedExperience2Form({
             </div>
           </CardContent>
         </Card>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* 8b. Things to Know */}
+        {/* ----------------------------------------------------------------- */}
+        {experienceId && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Things to Know</CardTitle>
+              <CardDescription>Manage practical info shown to travelers. Toggle hotel-provided items and add custom ones.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PracticalInfoManager
+                experienceId={experienceId}
+                experience={{
+                  min_party: existingExperience?.min_party ?? watch("min_party"),
+                  max_party: existingExperience?.max_party ?? watch("max_party"),
+                  cancellation_policy: existingExperience?.cancellation_policy || watch("cancellation_policy") || undefined,
+                  cancellation_policy_he: existingExperience?.cancellation_policy_he || watch("cancellation_policy_he") || undefined,
+                  duration: existingExperience?.duration || undefined,
+                  duration_he: existingExperience?.duration_he || undefined,
+                  checkin_time: existingExperience?.checkin_time || undefined,
+                  checkout_time: existingExperience?.checkout_time || undefined,
+                  address: existingExperience?.address || undefined,
+                  address_he: existingExperience?.address_he || undefined,
+                  lead_time_days: existingExperience?.lead_time_days || undefined,
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* ----------------------------------------------------------------- */}
         {/* 9. Promo & dates (fusion Promo + Predefined Date Options) */}
