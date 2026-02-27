@@ -1,15 +1,65 @@
 /**
- * Spice It Up – User-facing interactive extras section
+ * Make it unforgettable – User-facing interactive extras section
+ * Matches Experience1 ExtrasSection design exactly
  * Fetches hotel2_extras linked to the experience via experience2_extras
- * Users can toggle extras on/off, affecting the booking price
- * Limited to max 2 rows (4 items desktop, 2 mobile) with expand toggle
  */
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Check, ChevronDown, ChevronUp } from "lucide-react";
-import { DualPrice } from "@/components/ui/DualPrice";
+import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Wine,
+  Car,
+  Coffee,
+  Flower,
+  Sparkle,
+  Gift,
+  Heart,
+  Camera,
+  MusicNotes,
+  Champagne,
+  Bed,
+  Cake,
+  Drop,
+  Leaf,
+  HandHeart,
+  Star,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
+
+// Map icon names to Phosphor icons
+const iconNameMapping: Record<string, PhosphorIcon> = {
+  Wine, Champagne, Car, Coffee, Flower, Flower2: Flower, Sparkles: Sparkle, Sparkle, Gift, Heart, Camera, Music: MusicNotes, MusicNotes, Bed, Cake, Drop, Droplets: Drop, Leaf, HandHeart, Star,
+};
+
+const keywordMapping: Array<{ keywords: string[]; icon: PhosphorIcon }> = [
+  { keywords: ['wine', 'vin', 'יין'], icon: Wine },
+  { keywords: ['champagne', 'שמפניה'], icon: Champagne },
+  { keywords: ['car', 'transport', 'taxi', 'ride', 'הסעה', 'רכב'], icon: Car },
+  { keywords: ['coffee', 'breakfast', 'café', 'ארוחת בוקר', 'קפה'], icon: Coffee },
+  { keywords: ['flower', 'fleur', 'פרח', 'bouquet', 'זר'], icon: Flower },
+  { keywords: ['spa', 'massage', 'wellness', 'ספא', 'עיסוי'], icon: Drop },
+  { keywords: ['gift', 'cadeau', 'surprise', 'מתנה', 'הפתעה'], icon: Gift },
+  { keywords: ['romance', 'romantic', 'love', 'רומנטי', 'אהבה'], icon: Heart },
+  { keywords: ['photo', 'camera', 'צילום', 'מצלמה'], icon: Camera },
+  { keywords: ['music', 'dj', 'מוזיקה'], icon: MusicNotes },
+  { keywords: ['cake', 'birthday', 'anniversary', 'עוגה', 'יום הולדת'], icon: Cake },
+  { keywords: ['room', 'upgrade', 'suite', 'חדר', 'שדרוג'], icon: Bed },
+  { keywords: ['nature', 'eco', 'green', 'טבע'], icon: Leaf },
+];
+
+const getPhosphorIcon = (imageUrl?: string | null, name?: string): PhosphorIcon => {
+  if (imageUrl && iconNameMapping[imageUrl]) return iconNameMapping[imageUrl];
+  if (name) {
+    const lowerName = name.toLowerCase();
+    for (const { keywords, icon } of keywordMapping) {
+      if (keywords.some((kw) => lowerName.includes(kw))) return icon;
+    }
+  }
+  return Sparkle;
+};
 
 export interface SelectedExtra {
   id: string;
@@ -31,13 +81,10 @@ interface ExtrasSection2Props {
 const ExtrasSection2 = ({
   experienceId,
   lang = "en",
-  currency = "ILS",
+  currency = "USD",
   selectedExtras,
   onToggleExtra,
 }: ExtrasSection2Props) => {
-  const [expanded, setExpanded] = useState(false);
-
-  // Fetch hotel2_extras linked to this experience via experience2_extras
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
@@ -62,40 +109,48 @@ const ExtrasSection2 = ({
 
   if (!extras || extras.length === 0) return null;
 
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, Record<string, string>> = {
-      per_booking: { en: "/ booking", he: "/ הזמנה", fr: "/ réservation" },
-      per_night: { en: "/ night", he: "/ לילה", fr: "/ nuit" },
-      per_guest: { en: "/ guest", he: "/ אורח", fr: "/ voyageur" },
+  const getText = (key: string) => {
+    const texts: Record<string, Record<string, string>> = {
+      sectionTitle: {
+        en: "Make it unforgettable",
+        fr: "Rendez-le inoubliable",
+        he: "הפכו את זה לבלתי נשכח"
+      },
+      sectionSubtitle: {
+        en: "Thoughtful touches to elevate your stay",
+        fr: "Des attentions pour sublimer votre séjour",
+        he: "נגיעות מחשבה להעלאת השהייה"
+      },
+      add: { en: "Add", fr: "Ajouter", he: "הוסף" },
+      added: { en: "Added", fr: "Ajouté", he: "נוסף" },
     };
-    return labels[type]?.[lang] || labels[type]?.en || "";
+    return texts[key]?.[lang] || texts[key]?.en || key;
   };
 
-  const sectionTitle = lang === "he" ? "תוספות אופציונליות" : lang === "fr" ? "Personnalisez votre séjour" : "Spice it up";
+  const formatPrice = (price: number, cur: string) => {
+    const symbol = cur === 'ILS' ? '₪' : '$';
+    return `+${symbol}${price}`;
+  };
 
-  // Max 4 items on desktop (2 cols × 2 rows), 2 on mobile (1 col × 2 rows)
-  // We use 4 as the cap since sm:grid-cols-2 is the desktop layout
-  const MAX_VISIBLE = 4;
-  const hasMore = extras.length > MAX_VISIBLE;
-  const visibleExtras = expanded ? extras : extras.slice(0, MAX_VISIBLE);
+  const isImageUrl = (url?: string | null) => url && (url.startsWith('http') || url.startsWith('/'));
 
   return (
-    <section className="py-6 border-b border-border">
-      <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-2">
-        {sectionTitle}
-      </h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        {lang === "he"
-          ? "הוסיפו תוספות לחוויה שלכם"
-          : lang === "fr"
-            ? "Ajoutez des extras optionnels à votre réservation"
-            : "Enhance your stay with optional extras"}
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {visibleExtras.map((extra) => {
+    <section className="py-6 border-b border-border" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+      <div className="mb-5">
+        <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-1">
+          {getText('sectionTitle')}
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          {getText('sectionSubtitle')}
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+        {extras.map((extra) => {
           const isSelected = selectedExtras.some((se) => se.id === extra.id);
           const name = lang === "he" ? extra.name_he || extra.name : extra.name;
+          const hasImage = isImageUrl(extra.image_url);
+          const IconComponent = !hasImage ? getPhosphorIcon(extra.image_url, extra.name) : null;
 
           const extraData: SelectedExtra = {
             id: extra.id,
@@ -105,51 +160,72 @@ const ExtrasSection2 = ({
             currency: extra.currency,
             pricing_type: extra.pricing_type,
           };
-
+          
           return (
-            <button
+            <div
               key={extra.id}
-              type="button"
-              onClick={() => onToggleExtra(extraData)}
-              className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
-                isSelected
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border hover:border-primary/50 bg-muted/30"
-              }`}
+              className={`
+                group rounded-xl p-4
+                transition-all duration-200 ease-out
+                border flex flex-col items-center text-center
+                ${isSelected 
+                  ? 'border-primary/40 bg-primary/5' 
+                  : 'border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40'
+                }
+              `}
             >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                isSelected ? "bg-primary text-primary-foreground" : "bg-primary/10"
-              }`}>
-                {isSelected ? (
-                  <Check className="h-4 w-4" />
+              <div className={`
+                w-12 h-12 rounded-xl mb-3
+                flex items-center justify-center overflow-hidden
+                ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
+              `}>
+                {hasImage ? (
+                  <img 
+                    src={extra.image_url!} 
+                    alt={name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : IconComponent ? (
+                  <IconComponent 
+                    size={26} 
+                    weight="duotone" 
+                    className="text-primary/60"
+                  />
+                ) : null}
+              </div>
+
+              <div className="flex-1 flex items-start">
+                <p className="text-sm text-foreground/80 leading-snug line-clamp-2">
+                  {name}
+                </p>
+              </div>
+
+              <div className="mt-3">
+                {!isSelected ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                    onClick={() => onToggleExtra(extraData)}
+                  >
+                    {formatPrice(extra.price, extra.currency)} {getText('add')}
+                  </Button>
                 ) : (
-                  <Sparkles className="h-4 w-4 text-primary" />
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-8 text-xs font-medium rounded-full px-4"
+                    onClick={() => onToggleExtra(extraData)}
+                  >
+                    <Check className="w-3 h-3 mr-1" />
+                    {getText('added')}
+                  </Button>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{name}</p>
-              </div>
-              <div className="text-right shrink-0">
-                <DualPrice amount={extra.price} currency={extra.currency} inline className="text-sm" />
-                <span className="text-xs text-muted-foreground ml-1">{getTypeLabel(extra.pricing_type)}</span>
-              </div>
-            </button>
+            </div>
           );
         })}
       </div>
-
-      {hasMore && (
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          className="mt-3 flex items-center gap-1 text-sm text-primary hover:underline mx-auto"
-        >
-          {expanded
-            ? (lang === "he" ? "הצג פחות" : "Show less")
-            : (lang === "he" ? `עוד ${extras.length - MAX_VISIBLE} תוספות` : `${extras.length - MAX_VISIBLE} more extras`)}
-          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-      )}
     </section>
   );
 };

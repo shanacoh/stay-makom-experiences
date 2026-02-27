@@ -20,12 +20,12 @@ function formatCurrency(amount: number, currency: string, locale = "en-US"): str
   }).format(amount);
 }
 
-/** Always display EUR as the primary currency; show ILS as secondary. USD is converted to EUR. */
+/** Always display USD as the primary currency; no secondary currency for user-facing pages. */
 function getDisplayCurrencies(currency: string): { primaryCur: string; secondaryCur: string | null } {
   const c = currency.toUpperCase();
-  if (c === "EUR") return { primaryCur: "EUR", secondaryCur: "ILS" };
-  if (c === "ILS") return { primaryCur: "EUR", secondaryCur: "ILS" };
-  if (c === "USD") return { primaryCur: "EUR", secondaryCur: "ILS" };
+  if (c === "USD") return { primaryCur: "USD", secondaryCur: null };
+  if (c === "ILS") return { primaryCur: "USD", secondaryCur: null };
+  if (c === "EUR") return { primaryCur: "USD", secondaryCur: null };
   return { primaryCur: currency, secondaryCur: null };
 }
 
