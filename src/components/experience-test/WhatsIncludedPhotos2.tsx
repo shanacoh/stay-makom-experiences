@@ -25,18 +25,17 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
   });
 
   if (!includes || includes.length === 0) {
-    // Still show the section if there's a description
     if (!longCopy) return null;
     return (
-      <div className="space-y-4 sm:space-y-6 py-6 border-b border-border" dir={lang === "he" ? "rtl" : "ltr"}>
-        <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold">
+      <section className="py-6 border-b border-border" dir={lang === "he" ? "rtl" : "ltr"}>
+        <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-3">
           {lang === "he" ? "מה בתכנית" : lang === "fr" ? "Au programme" : "What's on the program"}
         </h2>
         <div
-          className="text-sm md:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+          className="text-xs md:text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
           dangerouslySetInnerHTML={{ __html: longCopy }}
         />
-      </div>
+      </section>
     );
   }
 
@@ -53,15 +52,15 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 py-6 border-b border-border" dir={lang === "he" ? "rtl" : "ltr"}>
-      <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold">{heading}</h2>
+    <section className="py-6 border-b border-border" dir={lang === "he" ? "rtl" : "ltr"}>
+      <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-3">{heading}</h2>
       {longCopy && (
         <div
-          className="text-sm md:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+          className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-6 prose prose-sm max-w-none"
           dangerouslySetInnerHTML={{ __html: longCopy }}
         />
       )}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {includes.map((item) => {
           const title = lang === "he" ? item.title_he || item.title : item.title;
           const description =
@@ -71,7 +70,7 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
 
           return (
             <div key={item.id} className="group flex flex-col">
-              <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-3">
+              <div className="aspect-[4/3] bg-muted rounded-lg overflow-hidden flex items-center justify-center mb-2">
                 {hasImageUrl ? (
                   <img
                     src={item.icon_url!}
@@ -83,11 +82,11 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
                 )}
               </div>
               <div className="flex flex-col flex-1">
-                <h3 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-2 h-8 sm:h-9">
+                <h3 className="font-semibold text-[11px] sm:text-xs leading-tight line-clamp-2 h-7 sm:h-8">
                   {title}
                 </h3>
                 {description && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">
                     {description}
                   </p>
                 )}
@@ -96,7 +95,7 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
           );
         })}
       </div>
-    </div>
+    </section>
   );
 };
 

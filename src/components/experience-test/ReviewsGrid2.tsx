@@ -36,6 +36,9 @@ const ReviewsGrid2 = ({ experienceId, lang = "en" }: ReviewsGrid2Props) => {
 
   return (
     <section className="py-6 border-b border-border">
+      <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-4">
+        {lang === "he" ? "ביקורות" : lang === "fr" ? "Avis" : "Reviews"}
+      </h2>
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
           <Star className="h-5 w-5 fill-foreground text-foreground" />
