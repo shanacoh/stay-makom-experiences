@@ -82,8 +82,8 @@ const App = () => (
         <AuthProvider>
           <Routes>
             {/* Page principale */}
-            <Route path="/" element={<ComingSoon />} />
-            <Route path="/home" element={<Index />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/launch" element={<LaunchIndex />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
