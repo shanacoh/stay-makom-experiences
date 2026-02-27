@@ -1397,6 +1397,7 @@ export function UnifiedExperience2Form({
                   address_he: existingExperience?.address_he || undefined,
                   lead_time_days: existingExperience?.lead_time_days || undefined,
                 }}
+                hotelId={experienceHotels.length > 0 ? experienceHotels[0].hotel_id : undefined}
               />
             </CardContent>
           </Card>

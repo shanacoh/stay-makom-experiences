@@ -3,6 +3,7 @@
  * - Shows hotel-provided default items with toggle visibility
  * - Allows adding custom items
  * - Persists to experience2_practical_info table
+ * - Auto-propagates HyperGuest hotel data when no DB items exist
  */
 
 import { useState, useEffect } from "react";
@@ -46,13 +47,32 @@ interface PracticalInfoManagerProps {
     cancellation_policy_he?: string;
     lead_time_days?: number;
   };
+  hotelId?: string;
 }
 
-// Default items derived from experience + hotel data
-const buildDefaultItems = (exp: PracticalInfoManagerProps["experience"], experienceId: string): PracticalInfoItem[] => {
+interface HotelData {
+  check_in_time?: string | null;
+  check_out_time?: string | null;
+  cancellation_policy?: string | null;
+  property_type?: string | null;
+  star_rating?: number | null;
+  hyperguest_facilities?: any | null;
+  min_stay?: number | null;
+  max_stay?: number | null;
+  max_child_age?: number | null;
+  name?: string | null;
+}
+
+// Build default items from experience fields + hotel data
+const buildDefaultItems = (
+  exp: PracticalInfoManagerProps["experience"],
+  experienceId: string,
+  hotel?: HotelData | null
+): PracticalInfoItem[] => {
   const items: PracticalInfoItem[] = [];
   let idx = 0;
 
+  // Group size (from experience)
   if (exp.min_party && exp.max_party) {
     items.push({
       experience_id: experienceId, source: "hotel", field_key: "group_size",
@@ -62,6 +82,8 @@ const buildDefaultItems = (exp: PracticalInfoManagerProps["experience"], experie
       icon: "Users", is_visible: true, order_index: idx++,
     });
   }
+
+  // Duration (from experience)
   if (exp.duration) {
     items.push({
       experience_id: experienceId, source: "hotel", field_key: "duration",
@@ -70,14 +92,20 @@ const buildDefaultItems = (exp: PracticalInfoManagerProps["experience"], experie
       icon: "Clock", is_visible: true, order_index: idx++,
     });
   }
-  if (exp.checkin_time && exp.checkout_time) {
+
+  // Check-in / Check-out: prefer experience, fallback to hotel
+  const checkin = exp.checkin_time || hotel?.check_in_time;
+  const checkout = exp.checkout_time || hotel?.check_out_time;
+  if (checkin && checkout) {
     items.push({
-      experience_id: experienceId, source: "hotel", field_key: "checkin_checkout",
+      experience_id: experienceId, source: checkin === hotel?.check_in_time ? "hotel_auto" : "hotel", field_key: "checkin_checkout",
       label: "Check-in / Check-out", label_he: "צ'ק-אין / צ'ק-אאוט",
-      value: `${exp.checkin_time} - ${exp.checkout_time}`, value_he: `${exp.checkin_time} - ${exp.checkout_time}`,
+      value: `${checkin} - ${checkout}`, value_he: `${checkin} - ${checkout}`,
       icon: "Calendar", is_visible: true, order_index: idx++,
     });
   }
+
+  // Location (from experience)
   if (exp.address) {
     items.push({
       experience_id: experienceId, source: "hotel", field_key: "location",
@@ -86,6 +114,8 @@ const buildDefaultItems = (exp: PracticalInfoManagerProps["experience"], experie
       icon: "MapPin", is_visible: true, order_index: idx++,
     });
   }
+
+  // Accessibility (from experience)
   if (exp.accessibility_info) {
     items.push({
       experience_id: experienceId, source: "hotel", field_key: "accessibility",
@@ -94,14 +124,19 @@ const buildDefaultItems = (exp: PracticalInfoManagerProps["experience"], experie
       icon: "Accessibility", is_visible: true, order_index: idx++,
     });
   }
-  if (exp.cancellation_policy) {
+
+  // Cancellation policy: prefer experience, fallback to hotel
+  const cancelPolicy = exp.cancellation_policy || hotel?.cancellation_policy;
+  if (cancelPolicy) {
     items.push({
-      experience_id: experienceId, source: "hotel", field_key: "cancellation",
+      experience_id: experienceId, source: cancelPolicy === hotel?.cancellation_policy && !exp.cancellation_policy ? "hotel_auto" : "hotel", field_key: "cancellation",
       label: "Cancellation policy", label_he: "מדיניות ביטול",
-      value: exp.cancellation_policy, value_he: exp.cancellation_policy_he || "",
+      value: cancelPolicy, value_he: exp.cancellation_policy_he || "",
       icon: "AlertCircle", is_visible: true, order_index: idx++,
     });
   }
+
+  // Lead time (from experience)
   if (exp.lead_time_days && exp.lead_time_days > 0) {
     items.push({
       experience_id: experienceId, source: "hotel", field_key: "lead_time",
@@ -111,13 +146,90 @@ const buildDefaultItems = (exp: PracticalInfoManagerProps["experience"], experie
       icon: "Calendar", is_visible: true, order_index: idx++,
     });
   }
+
+  // ── Hotel-specific items (from HyperGuest) ──
+
+  // Min/Max stay
+  if (hotel?.min_stay && hotel.min_stay > 1) {
+    items.push({
+      experience_id: experienceId, source: "hotel_auto", field_key: "min_stay",
+      label: "Minimum stay", label_he: "שהייה מינימלית",
+      value: `${hotel.min_stay} nights`,
+      value_he: `${hotel.min_stay} לילות`,
+      icon: "Moon", is_visible: true, order_index: idx++,
+    });
+  }
+  if (hotel?.max_stay) {
+    items.push({
+      experience_id: experienceId, source: "hotel_auto", field_key: "max_stay",
+      label: "Maximum stay", label_he: "שהייה מקסימלית",
+      value: `${hotel.max_stay} nights`,
+      value_he: `${hotel.max_stay} לילות`,
+      icon: "Moon", is_visible: true, order_index: idx++,
+    });
+  }
+
+  // Child policy
+  if (hotel?.max_child_age != null) {
+    items.push({
+      experience_id: experienceId, source: "hotel_auto", field_key: "child_policy",
+      label: "Child policy", label_he: "מדיניות ילדים",
+      value: `Children up to age ${hotel.max_child_age}`,
+      value_he: `ילדים עד גיל ${hotel.max_child_age}`,
+      icon: "Baby", is_visible: true, order_index: idx++,
+    });
+  }
+
+  // Star rating
+  if (hotel?.star_rating) {
+    items.push({
+      experience_id: experienceId, source: "hotel_auto", field_key: "star_rating",
+      label: "Hotel rating", label_he: "דירוג המלון",
+      value: `${hotel.star_rating}-star ${hotel.property_type || "hotel"}`,
+      value_he: `${hotel.star_rating} כוכבים`,
+      icon: "Star", is_visible: true, order_index: idx++,
+    });
+  }
+
+  // Top facilities from HyperGuest
+  if (hotel?.hyperguest_facilities && Array.isArray(hotel.hyperguest_facilities)) {
+    const topFacilities = (hotel.hyperguest_facilities as any[])
+      .filter((f: any) => f?.name)
+      .slice(0, 6)
+      .map((f: any) => f.name)
+      .join(", ");
+    if (topFacilities) {
+      items.push({
+        experience_id: experienceId, source: "hotel_auto", field_key: "facilities",
+        label: "Hotel facilities", label_he: "מתקני המלון",
+        value: topFacilities,
+        icon: "Building2", is_visible: true, order_index: idx++,
+      });
+    }
+  }
+
   return items;
 };
 
-const PracticalInfoManager = ({ experienceId, experience }: PracticalInfoManagerProps) => {
+const PracticalInfoManager = ({ experienceId, experience, hotelId }: PracticalInfoManagerProps) => {
   const queryClient = useQueryClient();
   const [items, setItems] = useState<PracticalInfoItem[]>([]);
   const [initialized, setInitialized] = useState(false);
+
+  // Fetch hotel data if hotelId is provided
+  const { data: hotelData } = useQuery({
+    queryKey: ["admin-hotel2-practical", hotelId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hotels2")
+        .select("check_in_time, check_out_time, cancellation_policy, property_type, star_rating, hyperguest_facilities, min_stay, max_stay, max_child_age, name")
+        .eq("id", hotelId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as HotelData | null;
+    },
+    enabled: !!hotelId,
+  });
 
   // Fetch existing items from DB
   const { data: dbItems, isLoading } = useQuery({
@@ -134,16 +246,19 @@ const PracticalInfoManager = ({ experienceId, experience }: PracticalInfoManager
     enabled: !!experienceId,
   });
 
-  // Initialize items: if DB has items, use those; otherwise build defaults
+  // Wait for hotel data before initializing (if hotelId provided)
+  const hotelReady = !hotelId || hotelData !== undefined;
+
+  // Initialize items: if DB has items, use those; otherwise build defaults with hotel data
   useEffect(() => {
-    if (isLoading || initialized) return;
+    if (isLoading || initialized || !hotelReady) return;
     if (dbItems && dbItems.length > 0) {
       setItems(dbItems);
     } else {
-      setItems(buildDefaultItems(experience, experienceId));
+      setItems(buildDefaultItems(experience, experienceId, hotelData));
     }
     setInitialized(true);
-  }, [dbItems, isLoading, initialized, experience, experienceId]);
+  }, [dbItems, isLoading, initialized, experience, experienceId, hotelData, hotelReady]);
 
   // Save mutation
   const saveMutation = useMutation({
@@ -275,7 +390,7 @@ const PracticalInfoManager = ({ experienceId, experience }: PracticalInfoManager
             </div>
             <div className="flex items-end">
               <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
-                {item.source === "hotel" ? "📡 From hotel" : "✏️ Custom"}
+                {item.source === "hotel_auto" ? "🏨 From HyperGuest" : item.source === "hotel" ? "📡 From experience" : "✏️ Custom"}
               </span>
             </div>
           </div>
