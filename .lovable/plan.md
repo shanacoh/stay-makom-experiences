@@ -1,33 +1,74 @@
 
 
-# Auto-propager les infos hotel HyperGuest vers Things to Know
+# Mobile Responsive Enhancement - Launch Page & Experience Cards
 
-## Contexte
-Actuellement, le `PracticalInfoManager` construit les items par défaut à partir des champs de l'expérience (`checkin_time`, `address`, etc.), mais ne récupère **pas** les données enrichies du hotel HyperGuest (`check_in_time`, `check_out_time`, `cancellation_policy`, `hyperguest_facilities`, `star_rating`, `min_stay`, `max_stay`, etc.).
+## Problem Summary
+From the mobile screenshot (390px), several issues are visible:
+- **Experience Cards**: Highlight tags wrap across 3+ lines on mobile, overwhelming the card content. Tags like "NIGHT", "DINNER", "BREAKFAST", "COOKING CLASS" stack vertically and push content down.
+- **No price visible** on cards in the current view (price may be 0 or hidden).
+- **Hotel name truncated** ("Kedma by...") with no region shown clearly.
+- **HowItWorks banner**: Steps stack vertically taking too much vertical space on mobile.
+- **Toggle filter**: "FEEL ADVENTUROUS" and "ROMANTIC ESCAPE" labels are cramped with icons.
+- **Hero section**: Generally fine but CTA button could be more prominent on small screens.
 
-## Plan
+## Changes
 
-### 1. Enrichir PracticalInfoManager avec les données hotel
+### 1. ExperienceCard - Mobile-Optimized Tag Display
+**File: `src/components/ExperienceCard.tsx`**
 
-**`src/components/admin/PracticalInfoManager.tsx`** :
-- Ajouter une prop optionnelle `hotelId` (le primary hotel de l'expérience)
-- Fetch le record `hotels2` correspondant pour récupérer : `check_in_time`, `check_out_time`, `cancellation_policy`, `property_type`, `star_rating`, `hyperguest_facilities`, `min_stay`, `max_stay`, `max_child_age`
-- Enrichir `buildDefaultItems` : si l'expérience n'a pas `checkin_time`/`checkout_time` mais que le hotel les a, utiliser ceux du hotel
-- Ajouter de nouveaux items par défaut issus du hotel : facilities principales, min/max stay, child policy
+- On mobile, limit tags to **max 2** (currently 4 max, but all 4 show and wrap badly).
+- Use `useIsMobile()` hook to conditionally show 2 tags on mobile, 4 on desktop.
+- Make tags single-line with `truncate` if needed, use smaller font/padding on mobile.
+- Ensure price line is always visible even when base_price exists.
+- Force currency to `$` (matching the DualPrice USD-only change already made).
+- Tighten spacing: reduce `gap-1` to `gap-0.5` on tag container for mobile.
 
-### 2. Passer le hotelId depuis le formulaire
+### 2. ExperienceCard - Cleaner Info Hierarchy
+**File: `src/components/ExperienceCard.tsx`**
 
-**`src/components/forms/UnifiedExperience2Form.tsx`** :
-- Passer le `primaryHotelId` (premier hotel du parcours) au `PracticalInfoManager`
+- Hotel name + region: ensure `line-clamp-1` works properly, show region as secondary text.
+- Rating: keep compact, already fine.
+- Tags: render as a single scrollable row on mobile (no wrapping) using `flex-nowrap overflow-hidden`.
+- Price: ensure `$` symbol is always used (replace currency logic to always show `$`).
 
-### 3. Logique de fusion
+### 3. HowItWorksBanner - Horizontal on Mobile
+**File: `src/components/HowItWorksBanner.tsx`**
 
-Quand aucun item DB n'existe (première ouverture) :
-1. Items expérience (group size, duration, address, etc.) — comme aujourd'hui
-2. Items hotel (check-in/out du hotel si pas dans l'expérience, facilities, child policy, min stay)
-3. Tous visibles par défaut, l'admin peut ensuite toggle on/off et sauvegarder
+- Change mobile layout from `flex-col` to a compact horizontal row.
+- Reduce text size on mobile to `text-xs` and number to `text-base`.
+- Use a single-line horizontal layout with dots between steps even on mobile.
 
-Si des items DB existent déjà → pas de changement, on affiche ceux sauvegardés.
+### 4. Launch Page Toggle Filter - Mobile Polish
+**File: `src/pages/LaunchIndex.tsx`**
 
-Pas de migration DB nécessaire — la table `experience2_practical_info` existe déjà avec les bonnes colonnes.
+- Reduce toggle text size on mobile from `text-xs` to a tighter treatment.
+- Ensure the toggle fits cleanly within the viewport.
+- Reduce section heading sizes slightly on mobile for better density.
+
+### 5. Launch Page - Section Spacing
+**File: `src/pages/LaunchIndex.tsx`**
+
+- Tighten vertical padding between sections on mobile (`py-[26px]` is fine, but some sections like brand statement and categories have too much padding on mobile).
+- Gift card section: reduce gap on mobile.
+
+## Technical Details
+
+### ExperienceCard tag rendering (key change):
+```text
+Current: flex-wrap gap-1 showing up to 4 tags --> wraps to 3 lines on mobile
+New: flex-nowrap overflow-hidden on mobile, max 2 tags, gap-0.5
+     flex-wrap on desktop, max 4 tags
+```
+
+### HowItWorksBanner (key change):
+```text
+Current: flex-col sm:flex-row --> fully stacked on mobile
+New: flex-row on all sizes, compact text, dots visible
+```
+
+### Files to modify:
+1. `src/components/ExperienceCard.tsx` - Tag display, currency, mobile density
+2. `src/components/HowItWorksBanner.tsx` - Horizontal layout on all sizes
+3. `src/pages/LaunchIndex.tsx` - Toggle sizing, section spacing
+4. `src/pages/Experiences.tsx` - Same card improvements apply (uses same ExperienceCard)
 
