@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HighlightTag {
   id: string;
@@ -77,6 +78,7 @@ export default function ExperienceCard({
   const { lang } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isHovered, setIsHovered] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
@@ -89,8 +91,11 @@ export default function ExperienceCard({
   // Get highlight tags
   const highlightTags = experience.experience_highlight_tags?.map(eht => eht.highlight_tags) || [];
 
-  // Currency symbol mapping
-  const currencySymbol = experience.currency === 'ILS' ? '₪' : experience.currency === 'USD' ? '$' : '€';
+  // Always show USD
+  const currencySymbol = '$';
+
+  // Limit tags on mobile
+  const maxTags = isMobile ? 2 : 4;
 
   // Query wishlist status
   const { data: wishlistStatus } = useQuery({
@@ -279,18 +284,18 @@ export default function ExperienceCard({
 
           {/* Line 3: Highlight Tags as badges */}
           {highlightTags.length > 0 && (
-            <div className="flex flex-wrap gap-1 pt-0.5">
-              {highlightTags.slice(0, 4).map((tag) => (
+            <div className="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1 overflow-hidden pt-0.5">
+              {highlightTags.slice(0, maxTags).map((tag) => (
                 <span
                   key={tag.id}
-                  className="inline-block px-2 py-0.5 bg-muted rounded-full text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                  className="inline-block whitespace-nowrap px-1.5 md:px-2 py-0.5 bg-muted rounded-full text-[9px] md:text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
                 >
                   {lang === 'he' && tag.label_he ? tag.label_he : tag.label_en}
                 </span>
               ))}
-              {highlightTags.length > 4 && (
-                <span className="inline-block px-2 py-0.5 text-[10px] text-muted-foreground">
-                  +{highlightTags.length - 4}
+              {highlightTags.length > maxTags && (
+                <span className="inline-block whitespace-nowrap px-1 py-0.5 text-[9px] md:text-[10px] text-muted-foreground">
+                  +{highlightTags.length - maxTags}
                 </span>
               )}
             </div>

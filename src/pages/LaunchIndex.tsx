@@ -337,7 +337,7 @@ const LaunchIndex = () => {
         <MarqueeBanner />
 
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
-        <section className="relative py-10 sm:py-14 md:py-18 overflow-hidden">
+        <section className="relative py-8 sm:py-14 md:py-18 overflow-hidden">
           <div className="absolute inset-0">
             <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
@@ -357,7 +357,7 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 6. MORE EXPERIENCES + CATEGORIES (unified) ─── */}
-        <section className="py-12 sm:py-16 bg-muted/50">
+        <section className="py-8 sm:py-16 bg-muted/50">
           <div className="container px-4 mx-auto">
             <div className="max-w-2xl mx-auto text-center mb-3">
               <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] uppercase">
@@ -433,8 +433,8 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 7. GIFT CARD ─── */}
-        <section className="container py-10 md:py-14 px-4">
-          <div className={`grid md:grid-cols-2 gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
+        <section className="container py-8 md:py-14 px-4">
+          <div className={`grid md:grid-cols-2 gap-5 md:gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
 
             <div
               className={`relative overflow-hidden rounded-2xl ${
