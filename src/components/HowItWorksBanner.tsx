@@ -23,15 +23,15 @@ const HowItWorksBanner = () => {
     number: "3",
     text: "Book your hotel"
   }];
-  return <section className="bg-foreground py-3 sm:py-4" dir={isRTL ? 'rtl' : 'ltr'}>
+  return <section className="bg-foreground py-2.5 sm:py-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container px-4">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 md:gap-12">
-          {steps.map((step, index) => <div key={index} className="flex items-center gap-4 sm:gap-8 md:gap-12">
-              <span className="inline-flex items-center gap-2">
-                <span className="font-bold text-lg sm:text-2xl text-slate-100">{step.number}</span>
-                <span className="font-medium text-white text-sm sm:text-base uppercase tracking-wide">{step.text}</span>
+        <div className="flex flex-row items-center justify-center gap-3 sm:gap-8 md:gap-12">
+          {steps.map((step, index) => <div key={index} className="flex items-center gap-3 sm:gap-8 md:gap-12">
+              <span className="inline-flex items-center gap-1.5 sm:gap-2">
+                <span className="font-bold text-base sm:text-2xl text-slate-100">{step.number}</span>
+                <span className="font-medium text-white text-[11px] sm:text-base uppercase tracking-wide whitespace-nowrap">{step.text}</span>
               </span>
-              {index < steps.length - 1 && <span className="hidden sm:block text-primary/60 text-lg">•</span>}
+              {index < steps.length - 1 && <span className="text-primary/60 text-xs sm:text-lg">•</span>}
             </div>)}
         </div>
       </div>
