@@ -1,69 +1,110 @@
-# Responsive Premium -- Section "More experiences" + Footer mobile
 
-## Problemes identifies
 
-1. **8 categories en grille 2x2** = 4 rangees de carres, trop de scroll vertical sur mobile
-2. **Email input** pleine largeur avec gros bouton "Notify me" — pas esthetique, trop imposant
-3. Le tout manque de raffinement premium sur petit ecran
+# Launch Page -- Full UX/UI Revision
 
-## Solution
+## 1. Fix: Waitlist email submission fails (critical bug)
 
-### 1. Categories : scroll horizontal sur mobile (< md)
+The category waitlist popup sends `source: "category_waitlist"` to the backend function, but that function only recognizes `"coming_soon"` and `"ai_assistant_save"` as simple email sources. Everything else goes through full B2C validation (requiring first name, last name, country, interests), which causes the error.
 
-Remplacer la grille 2 colonnes par un **carousel horizontal sur 2 lignes avec snap** sur mobile :
+**Fix:** Update the `collect-lead` edge function to also handle `"category_waitlist"` as a simple email source, storing the category info in metadata so it appears in the backoffice.
 
-- Les cartes deviennent rectangulaires (aspect-[3/4] au lieu de aspect-square) et plus petites (~140px de large)
-- On voit ~2.5 x 2 cartes a la fois, ce qui invite naturellement a slider
-- Snap sur chaque carte (`snap-x snap-mandatory` + `snap-start` sur chaque item)
-- Masquer la scrollbar (`scrollbar-hide`)
-- Sur tablette (md) et desktop : garder la grille 4 colonnes actuelle, rien ne change
+**File:** `supabase/functions/collect-lead/index.ts`
+- Add `"category_waitlist"` to the simple email source check (line 159)
+- Store `cta_id` (category ID) and `metadata.category_name` in the leads table so admins can see which category the lead came from
 
-### 2. Email capture : design compact et elegant sur mobile
+## 2. Fix: Waitlist popup button text cleanup
 
-Remplacer le layout actuel (texte + input pleine largeur + bouton) par un design plus raffine :
+Remove the em-dash from `"Notify me -- be the first to know"` and replace with a cleaner text like `"Notify me"` with a subtitle below.
 
-- Texte "Be the first to know." et input sur une seule ligne plus compacte
-- Input avec placeholder + bouton integre (inline), largeur limitee a `max-w-sm`
-- Reduire les marges entre le titre et le formulaire
+**File:** `src/pages/LaunchIndex.tsx` (line 538)
 
-### 3. Footer mobile : plus compact
+## 3. Fix: Category hover description not fully visible
 
-Le footer mobile est correct mais un peu long. Fusionner les sections "STAYMAKOM" (links) et "Explore" en une seule rangee horizontale pour reduire la hauteur.
+The description text gets cut off on small cards because `line-clamp-3` at `text-[8px]` is too restrictive. Improve:
+- Increase the dark overlay on hover to `bg-black/55` for better readability
+- Use slightly larger text: `text-[9px]` on mobile, `sm:text-xs`
+- Use `line-clamp-4` on mobile too
+- Add a subtle gradient from bottom for better text contrast
 
-## Fichiers modifies
+**File:** `src/pages/LaunchIndex.tsx` (lines 414-438)
 
-- `src/pages/LaunchIndex.tsx` — section 6 : categories en scroll horizontal mobile + email compact
-- `src/components/LaunchFooter.tsx` — section mobile : fusionner les blocs de liens
-- `src/index.css` — ajouter la classe utilitaire `scrollbar-hide` si elle n'existe pas deja
+## 4. Fix: Category title too small on reduced/tablet screens
 
-## Detail technique
+Increase category card title from `text-[10px]` to `text-xs` on mobile and adjust the intermediate breakpoints.
 
-### LaunchIndex.tsx — Section categories (lignes ~395-431)
+**File:** `src/pages/LaunchIndex.tsx` (line 423)
 
-Sur mobile (< md), remplacer la grille par :
+## 5. Fix: HowItWorksBanner broken on tablet
 
-```text
-<div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide flex gap-3 md:hidden pb-2">
-  {categories.map(...) => 
-    <div className="snap-start shrink-0 w-[140px]">
-      <div className="aspect-[3/4] rounded-xl overflow-hidden ...">
-        ...
-      </div>
-    </div>
-  }
-</div>
-<div className="hidden md:grid grid-cols-4 gap-4">
-  {/* grille desktop inchangee */}
-</div>
+The banner uses `flex-col` on mobile and `flex-row` on sm+, but on tablet the items can overflow. Fix by:
+- Adding `flex-wrap` for safety
+- Adjusting gaps to be more proportional at tablet sizes
+- Ensuring the dots separator and text remain properly aligned at all breakpoints
+
+**File:** `src/components/HowItWorksBanner.tsx`
+
+## 6. General UX/UI polish
+
+Minor refinements across the page:
+- Tighten spacing consistency between sections
+- Ensure the "More experiences" section email form has consistent styling
+- Verify font sizes scale smoothly across breakpoints
+
+---
+
+## Files modified
+
+| File | Changes |
+|------|---------|
+| `supabase/functions/collect-lead/index.ts` | Add `category_waitlist` to simple email sources |
+| `src/pages/LaunchIndex.tsx` | Fix button text, hover descriptions, title sizes |
+| `src/components/HowItWorksBanner.tsx` | Fix tablet layout |
+
+## Technical detail
+
+### Edge function fix (collect-lead)
+
+Change line 159 from:
+```
+if (requestData.source === 'ai_assistant_save' || requestData.source === 'coming_soon') {
+```
+to:
+```
+if (['ai_assistant_save', 'coming_soon', 'category_waitlist'].includes(requestData.source)) {
 ```
 
-### LaunchIndex.tsx — Section email (lignes ~368-393)
+And ensure `cta_id` is saved:
+```typescript
+const { data, error } = await supabase
+  .from('leads')
+  .insert([{
+    source: requestData.source,
+    email: requestData.email.toLowerCase().trim(),
+    cta_id: requestData.cta_id || null,
+    metadata: requestData.metadata || {},
+    marketing_opt_in: true,
+    is_b2b: false,
+  }])
+```
 
-Rendre le formulaire plus compact sur mobile :
+This ensures the category name and ID are stored, visible in the admin Leads section.
 
-- Reduire le `mb-10` a `mb-6`
-- Input plus petit avec `h-9 text-sm`
+### Category cards hover improvement
 
-### LaunchFooter.tsx — Mobile
+Replace the hover overlay with a gradient-based approach for better text readability:
+```tsx
+{desc && (
+  <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50">
+    <h3 className="text-xs sm:text-sm md:text-base font-bold text-white uppercase mb-1">
+      {catTitle}
+    </h3>
+    <p className="text-[9px] sm:text-xs md:text-sm text-white/90 text-center leading-snug line-clamp-4">
+      {desc}
+    </p>
+  </div>
+)}
+```
 
-Fusionner les 2 blocs de liens (STAYMAKOM + Explore) en une seule rangee flex avec 2 colonnes cote a cote, reduisant la hauteur du footer de ~30%.
+### HowItWorksBanner tablet fix
+
+Use a more robust layout that handles tablet widths without overflow, keeping consistent alignment of numbers and text.
