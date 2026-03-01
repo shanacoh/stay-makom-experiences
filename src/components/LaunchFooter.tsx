@@ -144,32 +144,35 @@ const LaunchFooter = () => {
           </div>
         </div>
 
-        {/* ─── MOBILE (<md) — stacked, centered ─── */}
-        <div className="md:hidden text-center space-y-6">
-          <div className="pb-5 border-b border-white/15">
-            <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-2 text-slate-50">STAYMAKOM</h3>
-            <p className="text-sm text-white/80 leading-relaxed">{brandTagline}</p>
+        {/* ─── MOBILE (<md) — compact, centered ─── */}
+        <div className="md:hidden text-center space-y-5">
+          <div className="pb-4 border-b border-white/15">
+            <h3 className="font-sans text-2xl font-bold uppercase tracking-[-0.04em] mb-1 text-slate-50">STAYMAKOM</h3>
+            <p className="text-xs text-white/80 leading-relaxed">{brandTagline}</p>
           </div>
-          <div className="pb-5 border-b border-white/15">
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">STAYMAKOM</h4>
-            <ul className="space-y-2">
-              <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white/80 hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
-              <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white/80 hover:text-primary transition-smooth">{partnerLabel}</Link></li>
-            </ul>
-          </div>
-          <div className="pb-5 border-b border-white/15">
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">{exploreLabel}</h4>
-            <ul className="space-y-2">
-              <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white/80 hover:text-primary transition-smooth">{adventureLabel}</Link></li>
-              <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white/80 hover:text-primary transition-smooth">{romanticLabel}</Link></li>
-            </ul>
+          {/* Merged STAYMAKOM + Explore links side by side */}
+          <div className="pb-4 border-b border-white/15 flex gap-8 justify-center text-left">
+            <div>
+              <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">STAYMAKOM</h4>
+              <ul className="space-y-1.5">
+                <li><Link to={getLocalizedPath("/gift-card")} className="text-xs text-white/80 hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/partners")} className="text-xs text-white/80 hover:text-primary transition-smooth">{partnerLabel}</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">{exploreLabel}</h4>
+              <ul className="space-y-1.5">
+                <li><Link to={getLocalizedPath("/category/adventure")} className="text-xs text-white/80 hover:text-primary transition-smooth">{adventureLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/category/romantic")} className="text-xs text-white/80 hover:text-primary transition-smooth">{romanticLabel}</Link></li>
+              </ul>
+            </div>
           </div>
           <div>
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{joinLabel}</h4>
-            <EmailForm className="mb-5 max-w-sm mx-auto" />
-            <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-3 text-slate-50">{followLabel}</p>
-            <SocialIcons iconSize="h-6 w-6" className="justify-center" />
-            <p className="text-xs text-white/60 mt-3 leading-relaxed">{followDesc}</p>
+            <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-3 text-slate-50">{joinLabel}</h4>
+            <EmailForm className="mb-4 max-w-xs mx-auto" />
+            <p className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">{followLabel}</p>
+            <SocialIcons iconSize="h-5 w-5" className="justify-center" />
+            <p className="text-xs text-white/60 mt-2 leading-relaxed">{followDesc}</p>
           </div>
         </div>
 
