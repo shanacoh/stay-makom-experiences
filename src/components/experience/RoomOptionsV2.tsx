@@ -204,8 +204,8 @@ export function RoomOptionsV2({
           {t.title}
         </div>
 
-        {/* Room type chips — same style as nights tabs */}
-        <div className="flex gap-1.5 flex-wrap">
+        {/* Room type chips — horizontal scroll, full names */}
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
           {rooms.map((room) => {
             const cheapest = getCheapestPrice(room);
             const isActive = activeRoomId === room.roomId;
@@ -216,14 +216,14 @@ export function RoomOptionsV2({
                 type="button"
                 onClick={() => setActiveRoomId(room.roomId)}
                 className={cn(
-                  "flex-1 min-w-0 px-2 py-2 rounded-lg border-2 transition-all text-center",
+                  "shrink-0 px-3 py-2 rounded-lg border-2 transition-all text-center whitespace-nowrap",
                   "hover:border-primary/50",
                   isActive
                     ? "border-primary bg-primary/5 font-medium"
                     : "border-border"
                 )}
               >
-                <p className="text-xs font-medium truncate">{room.roomName}</p>
+                <p className="text-xs font-medium">{room.roomName}</p>
                 {cheapest && (
                   <p className="text-[10px] text-muted-foreground mt-0.5">
                     {formatPrice(cheapest.amount, cheapest.currency)}
@@ -249,7 +249,7 @@ export function RoomOptionsV2({
               const [roomId, ratePlanId] = value.split("-").map(Number);
               onSelect(roomId, ratePlanId);
             }}
-            className="space-y-1.5"
+            className="space-y-3"
           >
             {visibleRatePlans.map((ratePlan) => {
               // ✅ #6: Only use sell price
@@ -277,49 +277,46 @@ export function RoomOptionsV2({
                   <label
                     htmlFor={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
                     className={cn(
-                      "flex items-start justify-between p-3 rounded-lg border cursor-pointer transition-colors",
-                      isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
+                      "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
+                      isSelected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/50",
                     )}
                   >
-                    {/* Left: radio + name + board type + on-request badge */}
-                    <div className="flex items-start gap-3">
-                      <RadioGroupItem
-                        value={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
-                        id={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
-                        className="mt-0.5"
-                      />
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{ratePlan.ratePlanName}</p>
-                        <div className="flex flex-wrap gap-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {getBoardTypeLabel(ratePlan.board)}
+                    {/* Radio */}
+                    <RadioGroupItem
+                      value={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
+                      id={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
+                      className="mt-1 shrink-0"
+                    />
+
+                    {/* Left column: name + board type */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="text-sm font-medium leading-tight">{ratePlan.ratePlanName}</p>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {getBoardTypeLabel(ratePlan.board)}
+                        </Badge>
+                        {isOnRequest && (
+                          <Badge variant="outline" className="text-xs text-blue-600 border-blue-300 bg-blue-50">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {t.onRequest}
                           </Badge>
-                          {isOnRequest && (
-                            <Badge variant="outline" className="text-xs text-blue-600 border-blue-300 bg-blue-50">
-                              <Clock className="h-3 w-3 mr-1" />
-                              {t.onRequest}
-                            </Badge>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Right: price + taxes + cancellation badge below */}
-                    <div className="text-right shrink-0 space-y-1.5">
-                      <div>
-                        <p className="font-semibold">{formatPrice(amount, currency)}</p>
-                        <p className="text-xs text-muted-foreground">{t.totalStay}</p>
-                        {/* ✅ #2b: Display taxes at hotel */}
-                        {taxBreakdown.totalDisplayAmount > 0 && (
-                          <p className="text-[10px] text-muted-foreground">
-                            + {formatTaxAmount(taxBreakdown.totalDisplayAmount, taxBreakdown.currency)} {t.taxesAtHotel}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Cancellation badge — right-aligned under price */}
+                    {/* Right column: price + taxes + cancellation — fixed width */}
+                    <div className="flex flex-col items-end shrink-0 w-[120px] sm:w-[140px] gap-0.5">
+                      <p className="text-lg font-semibold leading-tight">{formatPrice(amount, currency)}</p>
+                      <p className="text-xs text-muted-foreground">{t.totalStay}</p>
+                      {taxBreakdown.totalDisplayAmount > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          + {formatTaxAmount(taxBreakdown.totalDisplayAmount, taxBreakdown.currency)} {t.taxesAtHotel}
+                        </p>
+                      )}
                       {cancellation.badgeText && (
-                        <CancellationBadge cancellation={cancellation} lang={lang} seeDetailsLabel={t.seeDetails} />
+                        <div className="mt-0.5">
+                          <CancellationBadge cancellation={cancellation} lang={lang} />
+                        </div>
                       )}
                     </div>
                   </label>
@@ -349,11 +346,9 @@ export function RoomOptionsV2({
 function CancellationBadge({
   cancellation,
   lang,
-  seeDetailsLabel,
 }: {
   cancellation: ReturnType<typeof analyzeCancellationPolicies>;
   lang: string;
-  seeDetailsLabel: string;
 }) {
   if (cancellation.isNonRefundable) {
     return (
