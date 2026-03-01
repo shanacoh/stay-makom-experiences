@@ -36,7 +36,7 @@ const HowItWorksBanner = () => {
               <span className="flex flex-col items-center sm:flex-row sm:items-center gap-0 sm:gap-2">
                 <span className="font-bold text-lg sm:text-2xl text-slate-100">{step.number}</span>
                 <span className="font-medium text-white text-[11px] sm:text-base uppercase tracking-wide text-center sm:text-left sm:whitespace-nowrap">
-                  {step.line1} {step.line2}
+                  {step.line1}<br className="sm:hidden" /> {step.line2}
                 </span>
               </span>
               {index < steps.length - 1 && <span className="text-primary/60 text-xs sm:text-lg">•</span>}
