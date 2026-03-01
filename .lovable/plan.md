@@ -1,57 +1,31 @@
 
+# HowItWorksBanner -- Texte sur deux lignes sur mobile/tablette
 
-# Implémentation complète des Cancellation Policies HyperGuest
+## Probleme
+Sur mobile, le texte des 3 etapes ("Choose your vibe", "Pick your experience", "Book your hotel") est tronque ou trop serre a cause du `whitespace-nowrap` et de la petite taille. L'utilisateur veut voir l'integralite du texte en cassant chaque etape sur deux lignes : le numero + premier mot sur la ligne 1, le reste sur la ligne 2.
 
-## Étape 1 — Créer `src/utils/cancellationPolicy.ts`
+## Solution
+Modifier `src/components/HowItWorksBanner.tsx` pour couper le texte de chaque etape apres le premier mot sur les ecrans mobiles/tablettes (en dessous de `sm`).
 
-Fonction utilitaire `analyzeCancellationPolicies(policies, checkInDate, lang)` qui :
-- Prend le tableau brut `cancellationPolicies[]` du JSON HyperGuest + date de check-in + langue
-- Détecte `isNonRefundable` (daysBefore ≥ 999 + amount 100 + penaltyType "percent")
-- Détecte `isFreeCancellation` (aucune pénalité > 0 applicable à la date actuelle)
-- Calcule `effectiveDeadline` : checkInDate à `cancellationDeadlineHour` (HH:mm) - `timeFromCheckIn` (hours/days)
-- Retourne `penalties[]` formatées et `summaryText` multilingue (en/fr/he)
-- Gère les 3 penaltyType : "nights" → "X night(s)", "percent" → "X%", "currency" → "X [symbol]"
+### Changements dans `HowItWorksBanner.tsx`
 
-## Étape 2 — Mettre à jour `RoomOptionsV2.tsx`
+1. **Separer le texte en deux parties** dans les donnees : premier mot (`line1`) et le reste (`line2`)
+   - "Choose" / "your vibe"
+   - "Pick" / "your experience"  
+   - "Book" / "your hotel"
+   - Hebrew : "בחר" / "את האווירה", "בחר" / "את החוויה", "הזמן" / "את המלון"
 
-- Importer `analyzeCancellationPolicies`
-- Recevoir `checkInDate?: string` en prop (passé depuis BookingPanel2)
-- Remplacer lignes 237-247 (la logique `cancellationPolicy?.type === "FREE_CANCELLATION"`) par :
-  - Appel à `analyzeCancellationPolicies(ratePlan.cancellationPolicies || [], checkInDate)`
-  - Badge vert si `isFreeCancellation` avec deadline
-  - Badge rouge si `isNonRefundable`
-  - Badge orange sinon avec `summaryText`
-- Supprimer l'interface `CancellationPolicy` locale (lignes 15-22) devenue inutile
+2. **Affichage mobile (< sm)** : le texte s'affiche sur deux lignes via un `flex flex-col` ou un `<br />` masque sur desktop
+   - Retirer le `whitespace-nowrap` sur mobile
+   - Garder `whitespace-nowrap` sur `sm:` et plus
 
-## Étape 3 — Afficher dans le récap de BookingPanel2
+3. **Affichage desktop (>= sm)** : rien ne change, tout reste sur une seule ligne comme aujourd'hui
 
-- Après la sélection de room/ratePlan et avant le bouton Book (vers ligne 774), ajouter une section affichant la politique d'annulation du rate plan sélectionné
-- Utiliser `analyzeCancellationPolicies(selectedRatePlan?.cancellationPolicies, checkIn)`
-- Afficher le `summaryText` complet avec icône appropriée (vert/rouge/orange)
+### Rendu attendu sur mobile
+```text
+1  Choose        2  Pick           3  Book
+   your vibe        your experience   your hotel
+```
 
-## Étape 4 — Remplacer le texte hardcodé sur les cards
-
-**`StickyPriceBar.tsx`** (ligne 70-72) et **`HeroBookingPreview.tsx`** (ligne 43-45) :
-- Supprimer le texte "Free cancellation" / "ביטול חינם" / "Annulation gratuite" statique
-- Ne rien afficher tant qu'aucune recherche n'a été faite (ces composants n'ont pas accès aux données de search — le texte est simplement retiré)
-
-## Étape 5 — Email de confirmation
-
-Dans `send-booking-confirmation/index.ts` :
-- Ajouter un champ `cancellationPolicy` au body (objet `{ summaryText, isNonRefundable, deadline }`)
-- Le frontend envoie ce champ dans l'appel `invoke` (BookingPanel2 ligne ~494)
-- Ajouter un bloc HTML dans l'email entre le total et les remarks affichant la politique
-
-## Étape 6 — Passer les données au BookingPanel2 → RoomOptionsV2
-
-- BookingPanel2 passe `checkInDate={searchParams?.checkIn}` à `RoomOptionsV2`
-- BookingPanel2 calcule aussi la cancellation du ratePlan sélectionné pour l'affichage récap et l'envoi email
-
-### Fichiers modifiés
-1. **Nouveau** : `src/utils/cancellationPolicy.ts`
-2. `src/components/experience/RoomOptionsV2.tsx`
-3. `src/components/experience/BookingPanel2.tsx`
-4. `src/components/experience-test/StickyPriceBar.tsx`
-5. `src/components/experience-test/HeroBookingPreview.tsx`
-6. `supabase/functions/send-booking-confirmation/index.ts`
-
+### Aucun autre fichier modifie
+Seul `src/components/HowItWorksBanner.tsx` est touche. Pas de changement de couleurs, padding global, ni de la structure `section > container > flex`.
