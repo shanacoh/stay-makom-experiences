@@ -6,30 +6,38 @@ const HowItWorksBanner = () => {
   const isRTL = lang === 'he';
   const steps = isRTL ? [{
     number: "1",
-    text: "בחר את האווירה"
+    line1: "בחר",
+    line2: "את האווירה"
   }, {
     number: "2",
-    text: "בחר את החוויה"
+    line1: "בחר",
+    line2: "את החוויה"
   }, {
     number: "3",
-    text: "הזמן את המלון"
+    line1: "הזמן",
+    line2: "את המלון"
   }] : [{
     number: "1",
-    text: "Choose your vibe"
+    line1: "Choose",
+    line2: "your vibe"
   }, {
     number: "2",
-    text: "Pick your experience"
+    line1: "Pick",
+    line2: "your experience"
   }, {
     number: "3",
-    text: "Book your hotel"
+    line1: "Book",
+    line2: "your hotel"
   }];
   return <section className="bg-foreground py-2.5 sm:py-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container px-4">
         <div className="flex flex-row items-center justify-center gap-3 sm:gap-8 md:gap-12">
           {steps.map((step, index) => <div key={index} className="flex items-center gap-3 sm:gap-8 md:gap-12">
-              <span className="inline-flex items-center gap-1.5 sm:gap-2">
+              <span className="inline-flex items-start sm:items-center gap-1.5 sm:gap-2">
                 <span className="font-bold text-base sm:text-2xl text-slate-100">{step.number}</span>
-                <span className="font-medium text-white text-[11px] sm:text-base uppercase tracking-wide whitespace-nowrap">{step.text}</span>
+                <span className="font-medium text-white text-[11px] sm:text-base uppercase tracking-wide sm:whitespace-nowrap">
+                  {step.line1}<br className="sm:hidden" />{' '}{step.line2}
+                </span>
               </span>
               {index < steps.length - 1 && <span className="text-primary/60 text-xs sm:text-lg">•</span>}
             </div>)}
