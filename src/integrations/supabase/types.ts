@@ -311,6 +311,7 @@ export type Database = {
           checkin: string
           checkout: string
           commission_amount: number
+          confirmation_token: string | null
           created_at: string
           currency: string
           customer_email: string | null
@@ -340,6 +341,7 @@ export type Database = {
           checkin: string
           checkout: string
           commission_amount?: number
+          confirmation_token?: string | null
           created_at?: string
           currency?: string
           customer_email?: string | null
@@ -369,6 +371,7 @@ export type Database = {
           checkin?: string
           checkout?: string
           commission_amount?: number
+          confirmation_token?: string | null
           created_at?: string
           currency?: string
           customer_email?: string | null
