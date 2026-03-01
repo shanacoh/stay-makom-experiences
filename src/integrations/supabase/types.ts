@@ -421,6 +421,8 @@ export type Database = {
           id: string
           intro_rich_text: string | null
           intro_rich_text_he: string | null
+          launch_description: string | null
+          launch_description_he: string | null
           meta_description_en: string | null
           meta_description_fr: string | null
           meta_description_he: string | null
@@ -455,6 +457,8 @@ export type Database = {
           id?: string
           intro_rich_text?: string | null
           intro_rich_text_he?: string | null
+          launch_description?: string | null
+          launch_description_he?: string | null
           meta_description_en?: string | null
           meta_description_fr?: string | null
           meta_description_he?: string | null
@@ -489,6 +493,8 @@ export type Database = {
           id?: string
           intro_rich_text?: string | null
           intro_rich_text_he?: string | null
+          launch_description?: string | null
+          launch_description_he?: string | null
           meta_description_en?: string | null
           meta_description_fr?: string | null
           meta_description_he?: string | null

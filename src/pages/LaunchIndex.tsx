@@ -405,6 +405,8 @@ const LaunchIndex = () => {
                     const line1 = words.slice(0, midpoint).join(" ");
                     const line2 = words.slice(midpoint).join(" ");
 
+                    const desc = getLocalizedField(category, "launch_description", lang) as string | null;
+
                     return (
                       <button
                         key={`waitlist-${category.slug}`}
@@ -412,13 +414,28 @@ const LaunchIndex = () => {
                         className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
                           <div className="aspect-square relative">
                             <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
-                            <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300" />
+                            {/* Title - visible by default, hidden on hover when description exists */}
+                            <div className={cn(
+                              "absolute inset-0 flex items-center justify-center p-2 md:p-4 transition-opacity duration-300",
+                              desc ? "group-hover:opacity-0" : ""
+                            )}>
                               <h3 className="font-sans text-[10px] sm:text-sm md:text-xl lg:text-2xl font-bold text-white text-center uppercase tracking-tight leading-tight">
                                 <span className="block">{line1}</span>
                                 {line2 && <span className="block -mt-1.5">{line2}</span>}
                               </h3>
                             </div>
+                            {/* Description - shown on hover */}
+                            {desc && (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center p-2 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <h3 className="font-sans text-[10px] sm:text-xs md:text-base lg:text-lg font-bold text-white text-center uppercase tracking-tight leading-tight mb-1 md:mb-2">
+                                  {catTitle}
+                                </h3>
+                                <p className="font-sans text-[8px] sm:text-[10px] md:text-sm text-white/90 text-center leading-tight line-clamp-3 md:line-clamp-4">
+                                  {desc}
+                                </p>
+                              </div>
+                            )}
                           </div>
                       </button>
                     );

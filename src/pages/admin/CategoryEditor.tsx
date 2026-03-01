@@ -68,6 +68,8 @@ const CategoryEditor = () => {
     display_order: 0,
     show_on_home: true,
     show_on_launch: true,
+    launch_description: "",
+    launch_description_he: "",
     status: "draft" as "draft" | "published",
     seo_title_en: "",
     seo_title_he: "",
@@ -117,6 +119,8 @@ const CategoryEditor = () => {
         display_order: category.display_order || 0,
         show_on_home: category.show_on_home ?? true,
         show_on_launch: category.show_on_launch ?? true,
+        launch_description: category.launch_description || "",
+        launch_description_he: category.launch_description_he || "",
         status: category.status || "draft",
         seo_title_en: category.seo_title_en || "",
         seo_title_he: category.seo_title_he || "",
@@ -370,6 +374,25 @@ const CategoryEditor = () => {
                   Selected: <span className="font-medium">{formData.icon}</span>
                 </p>
               )}
+            </div>
+            <div className="space-y-2 pt-2">
+              <Label>Launch Page Description</Label>
+              <p className="text-sm text-muted-foreground mb-1">
+                Short description shown on hover (launch page)
+              </p>
+              <Textarea
+                value={formData.launch_description}
+                onChange={(e) => setFormData({ ...formData, launch_description: e.target.value })}
+                placeholder="e.g. Discover unique romantic getaways..."
+                rows={2}
+              />
+              <Textarea
+                value={formData.launch_description_he}
+                onChange={(e) => setFormData({ ...formData, launch_description_he: e.target.value })}
+                placeholder="תיאור בעברית..."
+                rows={2}
+                dir="rtl"
+              />
             </div>
             <div className="space-y-2 pt-2">
               <Label>Page Visibility</Label>
