@@ -365,14 +365,14 @@ const LaunchIndex = () => {
               </h2>
             </div>
 
-            <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10">
-              <p className="text-muted-foreground text-sm whitespace-nowrap">
+            <div className="max-w-sm sm:max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6 sm:mb-10">
+              <p className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
                 {isRTL ? "היו הראשונים לדעת." : "Be the first to know."}
               </p>
 
               {submitted ?
-              <div className="flex items-center gap-2 text-primary font-medium">
-                  <CheckCircle className="h-5 w-5" />
+              <div className="flex items-center gap-2 text-primary font-medium text-sm">
+                  <CheckCircle className="h-4 w-4" />
                   {isRTL ? "נרשמת בהצלחה!" : "You're on the list!"}
                 </div> :
 
@@ -383,9 +383,9 @@ const LaunchIndex = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
-                  className="flex-1 sm:w-56" />
+                  className="flex-1 sm:w-56 h-9 text-sm" />
 
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4">
                     {isRTL ? "עדכנו אותי" : "Notify me"}
                   </Button>
                 </form>
@@ -394,38 +394,64 @@ const LaunchIndex = () => {
 
             {!isLoadingCategories && categories && categories.length > 0 &&
             <div className="max-w-4xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                {/* Mobile: horizontal scroll carousel */}
+                <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide flex flex-wrap gap-3 pb-2 md:hidden" style={{ maxHeight: '380px' }}>
                   {categories.map((category) => {
-                  const catTitle = getLocalizedField(category, "name", lang) as string;
-                  const image = category.hero_image || "";
-                  const words = catTitle.split(" ");
-                  const midpoint = Math.ceil(words.length / 2);
-                  const line1 = words.slice(0, midpoint).join(" ");
-                  const line2 = words.slice(midpoint).join(" ");
+                    const catTitle = getLocalizedField(category, "name", lang) as string;
+                    const image = category.hero_image || "";
+                    const words = catTitle.split(" ");
+                    const midpoint = Math.ceil(words.length / 2);
+                    const line1 = words.slice(0, midpoint).join(" ");
+                    const line2 = words.slice(midpoint).join(" ");
 
-                  return (
-                    <button
-                      key={`waitlist-${category.slug}`}
-                      onClick={() => handleCategoryClick(category)}
-                      className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
-
-                        <div className="aspect-square relative">
-                          <img
-                          src={image}
-                          alt={catTitle}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
-                          <div className="absolute inset-0 flex items-center justify-center p-4">
-                            <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
-                              <span className="block">{line1}</span>
-                              {line2 && <span className="block -mt-1.5">{line2}</span>}
-                            </h3>
+                    return (
+                      <button
+                        key={`waitlist-mobile-${category.slug}`}
+                        onClick={() => handleCategoryClick(category)}
+                        className="group snap-start shrink-0 w-[calc(50%-6px)] relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
+                          <div className="aspect-[3/4] relative">
+                            <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
+                            <div className="absolute inset-0 flex items-center justify-center p-3">
+                              <h3 className="font-sans text-base font-bold text-white text-center uppercase tracking-tight">
+                                <span className="block">{line1}</span>
+                                {line2 && <span className="block -mt-1">{line2}</span>}
+                              </h3>
+                            </div>
                           </div>
-                        </div>
-                      </button>);
+                      </button>
+                    );
+                  })}
+                </div>
 
-                })}
+                {/* Desktop: 4-col grid */}
+                <div className="hidden md:grid grid-cols-4 gap-4">
+                  {categories.map((category) => {
+                    const catTitle = getLocalizedField(category, "name", lang) as string;
+                    const image = category.hero_image || "";
+                    const words = catTitle.split(" ");
+                    const midpoint = Math.ceil(words.length / 2);
+                    const line1 = words.slice(0, midpoint).join(" ");
+                    const line2 = words.slice(midpoint).join(" ");
+
+                    return (
+                      <button
+                        key={`waitlist-${category.slug}`}
+                        onClick={() => handleCategoryClick(category)}
+                        className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
+                          <div className="aspect-square relative">
+                            <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
+                            <div className="absolute inset-0 flex items-center justify-center p-4">
+                              <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
+                                <span className="block">{line1}</span>
+                                {line2 && <span className="block -mt-1.5">{line2}</span>}
+                              </h3>
+                            </div>
+                          </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             }
