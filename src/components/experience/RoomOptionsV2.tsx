@@ -10,7 +10,7 @@ import { useState, useEffect, useMemo } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, Info, BedDouble, X, AlertTriangle, Clock } from "lucide-react";
+import { Check, Info, BedDouble, Clock } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
 import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
@@ -311,7 +311,7 @@ export function RoomOptionsV2({
                         <p className="text-xs text-muted-foreground">{t.totalStay}</p>
                         {/* ✅ #2b: Display taxes at hotel */}
                         {taxBreakdown.totalDisplayAmount > 0 && (
-                          <p className="text-[10px] text-orange-600">
+                          <p className="text-[10px] text-muted-foreground">
                             + {formatTaxAmount(taxBreakdown.totalDisplayAmount, taxBreakdown.currency)} {t.taxesAtHotel}
                           </p>
                         )}
@@ -357,8 +357,7 @@ function CancellationBadge({
 }) {
   if (cancellation.isNonRefundable) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-destructive">
-        <X className="h-3 w-3" />
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         {cancellation.badgeText}
       </span>
     );
@@ -366,7 +365,7 @@ function CancellationBadge({
 
   if (cancellation.isFreeCancellation) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-green-600">
+      <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
         <Check className="h-3 w-3" />
         {cancellation.badgeText}
       </span>
@@ -381,10 +380,9 @@ function CancellationBadge({
           <button
             type="button"
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 text-xs text-orange-600 hover:underline cursor-pointer text-right"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:underline cursor-pointer text-right"
           >
-            <AlertTriangle className="h-3 w-3 shrink-0" />
-            <span>{cancellation.badgeText}</span>
+            <span>{lang === "he" ? `ביטול: ${cancellation.badgeText}` : lang === "fr" ? `Annulation : ${cancellation.badgeText}` : `Cancellation: ${cancellation.badgeText}`}</span>
             <Info className="h-3 w-3 shrink-0 opacity-60" />
           </button>
         </PopoverTrigger>
@@ -411,8 +409,7 @@ function CancellationBadge({
 
   // Fallback: simple text
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-orange-600">
-      <AlertTriangle className="h-3 w-3" />
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
       {cancellation.badgeText}
     </span>
   );
