@@ -156,7 +156,7 @@ serve(async (req) => {
     console.log('Received lead data:', { ...requestData, email: '***' });
 
     // Handle simple email collection from AI assistant or coming soon page
-    if (requestData.source === 'ai_assistant_save' || requestData.source === 'coming_soon') {
+    if (['ai_assistant_save', 'coming_soon', 'category_waitlist'].includes(requestData.source)) {
       if (!requestData.email || !validateEmail(requestData.email)) {
         return new Response(
           JSON.stringify({ success: false, error: 'Valid email is required' }),
@@ -169,6 +169,7 @@ serve(async (req) => {
         .insert([{
           source: requestData.source,
           email: requestData.email.toLowerCase().trim(),
+          cta_id: requestData.cta_id || null,
           metadata: requestData.metadata || {},
           marketing_opt_in: true,
           is_b2b: false,
