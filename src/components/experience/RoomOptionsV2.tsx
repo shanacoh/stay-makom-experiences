@@ -11,6 +11,11 @@ import { Check, Info, BedDouble, X, AlertTriangle } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
 import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface RoomRatePlan {
   ratePlanId: number;
@@ -68,16 +73,19 @@ export function RoomOptionsV2({
       title: "Room type",
       noRooms: "No rooms available for these dates",
       totalStay: "Total for stay",
+      seeDetails: "See details",
     },
     he: {
       title: "סוג חדר",
       noRooms: "אין חדרים זמינים לתאריכים אלה",
       totalStay: 'סה"כ לשהייה',
+      seeDetails: "פרטים",
     },
     fr: {
       title: "Type de chambre",
       noRooms: "Aucune chambre disponible pour ces dates",
       totalStay: "Total du séjour",
+      seeDetails: "Voir détails",
     },
   }[lang];
 
@@ -143,134 +151,199 @@ export function RoomOptionsV2({
   }
 
   return (
-    <div className="space-y-3">
-      {/* Section title */}
-      <div className="flex items-center gap-2 text-sm font-medium">
-        <BedDouble className="h-4 w-4" />
-        {t.title}
-      </div>
+    <>
+      <div className="space-y-3">
+        {/* Section title */}
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <BedDouble className="h-4 w-4" />
+          {t.title}
+        </div>
 
-      {/* Room type chips — same style as nights tabs */}
-      <div className="flex gap-1.5 flex-wrap">
-        {rooms.map((room) => {
-          const cheapest = getCheapestPrice(room);
-          const isActive = activeRoomId === room.roomId;
-
-          return (
-            <button
-              key={room.roomId}
-              type="button"
-              onClick={() => setActiveRoomId(room.roomId)}
-              className={cn(
-                "flex-1 min-w-0 px-2 py-2 rounded-lg border-2 transition-all text-center",
-                "hover:border-primary/50",
-                isActive
-                  ? "border-primary bg-primary/5 font-medium"
-                  : "border-border"
-              )}
-            >
-              <p className="text-xs font-medium truncate">{room.roomName}</p>
-              {cheapest && (
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {formatPrice(cheapest.amount, cheapest.currency)}
-                </p>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Rate plans for selected room */}
-      {activeRoom && (
-        <RadioGroup
-          value={selectedRoomId === activeRoom.roomId && selectedRatePlanId != null
-            ? `${activeRoom.roomId}-${selectedRatePlanId}`
-            : ""}
-          onValueChange={(value) => {
-            if (!value) return;
-            const [roomId, ratePlanId] = value.split("-").map(Number);
-            onSelect(roomId, ratePlanId);
-          }}
-          className="space-y-1.5"
-        >
-          {activeRoom.ratePlans.map((ratePlan) => {
-            const priceObj = ratePlan.prices?.sell || ratePlan.prices?.net;
-            const amount = priceObj != null ? Number(priceObj.price ?? priceObj.amount) || 0 : 0;
-            const currency = priceObj?.currency ?? "ILS";
-            const isSelected = selectedRoomId === activeRoom.roomId && selectedRatePlanId === ratePlan.ratePlanId;
-            const filteredRemarks = filterGenericRemarks(ratePlan.remarks || []);
-
-            // Dynamic cancellation badge
-            const cancellation = analyzeCancellationPolicies(
-              ratePlan.cancellationPolicies,
-              checkInDate,
-              lang,
-            );
+        {/* Room type chips — same style as nights tabs */}
+        <div className="flex gap-1.5 flex-wrap">
+          {rooms.map((room) => {
+            const cheapest = getCheapestPrice(room);
+            const isActive = activeRoomId === room.roomId;
 
             return (
-              <div key={ratePlan.ratePlanId} className="space-y-1">
-                <label
-                  htmlFor={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
-                  className={cn(
-                    "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors",
-                    isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <RadioGroupItem
-                      value={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
-                      id={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
-                    />
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{ratePlan.ratePlanName}</p>
-                      <div className="flex flex-wrap gap-1">
+              <button
+                key={room.roomId}
+                type="button"
+                onClick={() => setActiveRoomId(room.roomId)}
+                className={cn(
+                  "flex-1 min-w-0 px-2 py-2 rounded-lg border-2 transition-all text-center",
+                  "hover:border-primary/50",
+                  isActive
+                    ? "border-primary bg-primary/5 font-medium"
+                    : "border-border"
+                )}
+              >
+                <p className="text-xs font-medium truncate">{room.roomName}</p>
+                {cheapest && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {formatPrice(cheapest.amount, cheapest.currency)}
+                  </p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Rate plans for selected room */}
+        {activeRoom && (
+          <RadioGroup
+            value={selectedRoomId === activeRoom.roomId && selectedRatePlanId != null
+              ? `${activeRoom.roomId}-${selectedRatePlanId}`
+              : ""}
+            onValueChange={(value) => {
+              if (!value) return;
+              const [roomId, ratePlanId] = value.split("-").map(Number);
+              onSelect(roomId, ratePlanId);
+            }}
+            className="space-y-1.5"
+          >
+            {activeRoom.ratePlans.map((ratePlan) => {
+              const priceObj = ratePlan.prices?.sell || ratePlan.prices?.net;
+              const amount = priceObj != null ? Number(priceObj.price ?? priceObj.amount) || 0 : 0;
+              const currency = priceObj?.currency ?? "ILS";
+              const isSelected = selectedRoomId === activeRoom.roomId && selectedRatePlanId === ratePlan.ratePlanId;
+              const filteredRemarks = filterGenericRemarks(ratePlan.remarks || []);
+
+              // Dynamic cancellation badge
+              const cancellation = analyzeCancellationPolicies(
+                ratePlan.cancellationPolicies,
+                checkInDate,
+                lang,
+              );
+
+              return (
+                <div key={ratePlan.ratePlanId} className="space-y-1">
+                  <label
+                    htmlFor={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
+                    className={cn(
+                      "flex items-start justify-between p-3 rounded-lg border cursor-pointer transition-colors",
+                      isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
+                    )}
+                  >
+                    {/* Left: radio + name + board type */}
+                    <div className="flex items-start gap-3">
+                      <RadioGroupItem
+                        value={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
+                        id={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
+                        className="mt-0.5"
+                      />
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">{ratePlan.ratePlanName}</p>
                         <Badge variant="secondary" className="text-xs">
                           {getBoardTypeLabel(ratePlan.board)}
                         </Badge>
-                        {cancellation.isFreeCancellation && (
-                          <Badge variant="outline" className="text-xs text-green-600 border-green-600">
-                            <Check className="h-3 w-3 mr-1" />
-                            {cancellation.summaryText}
-                          </Badge>
-                        )}
-                        {cancellation.isNonRefundable && (
-                          <Badge variant="outline" className="text-xs text-destructive border-destructive">
-                            <X className="h-3 w-3 mr-1" />
-                            {cancellation.summaryText}
-                          </Badge>
-                        )}
-                        {!cancellation.isFreeCancellation && !cancellation.isNonRefundable && cancellation.summaryText && (
-                          <Badge variant="outline" className="text-xs text-orange-600 border-orange-600">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            {cancellation.summaryText}
-                          </Badge>
-                        )}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold">{amount > 0 ? formatPrice(amount, currency) : "N/A"}</p>
-                    {priceObj && <p className="text-xs text-muted-foreground">{t.totalStay}</p>}
-                  </div>
-                </label>
-
-                {/* Rate plan remarks */}
-                {filteredRemarks.length > 0 && (
-                  <div className="ml-8 space-y-1 px-3 py-2 rounded-md bg-muted/50 border border-border">
-                    {filteredRemarks.map((remark, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
-                        <Info className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
-                        <p className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
+                    {/* Right: price + cancellation badge below */}
+                    <div className="text-right shrink-0 space-y-1.5">
+                      <div>
+                        <p className="font-semibold">{amount > 0 ? formatPrice(amount, currency) : "N/A"}</p>
+                        {priceObj && <p className="text-xs text-muted-foreground">{t.totalStay}</p>}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </RadioGroup>
-      )}
-    </div>
+
+                      {/* Cancellation badge — right-aligned under price */}
+                      {cancellation.badgeText && (
+                        <CancellationBadge cancellation={cancellation} lang={lang} seeDetailsLabel={t.seeDetails} />
+                      )}
+                    </div>
+                  </label>
+
+                  {/* Rate plan remarks */}
+                  {filteredRemarks.length > 0 && (
+                    <div className="ml-8 space-y-1 px-3 py-2 rounded-md bg-muted/50 border border-border">
+                      {filteredRemarks.map((remark, idx) => (
+                        <div key={idx} className="flex items-start gap-2">
+                          <Info className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                          <p className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </RadioGroup>
+        )}
+      </div>
+    </>
+  );
+}
+
+/** Cancellation badge sub-component — renders right-aligned under price */
+function CancellationBadge({
+  cancellation,
+  lang,
+  seeDetailsLabel,
+}: {
+  cancellation: ReturnType<typeof analyzeCancellationPolicies>;
+  lang: string;
+  seeDetailsLabel: string;
+}) {
+  if (cancellation.isNonRefundable) {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-destructive">
+        <X className="h-3 w-3" />
+        {cancellation.badgeText}
+      </span>
+    );
+  }
+
+  if (cancellation.isFreeCancellation) {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-green-600">
+        <Check className="h-3 w-3" />
+        {cancellation.badgeText}
+      </span>
+    );
+  }
+
+  // Intermediate case: short badge + tooltip/popover for details
+  if (cancellation.detailLines.length > 0) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 text-xs text-orange-600 hover:underline cursor-pointer text-right"
+          >
+            <AlertTriangle className="h-3 w-3 shrink-0" />
+            <span>{cancellation.badgeText}</span>
+            <Info className="h-3 w-3 shrink-0 opacity-60" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          side="top"
+          align="end"
+          className="w-64 p-3"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-xs font-medium mb-2 text-foreground">
+            {lang === "he" ? "תנאי ביטול" : lang === "fr" ? "Conditions d'annulation" : "Cancellation terms"}
+          </p>
+          <ul className="space-y-1">
+            {cancellation.detailLines.map((line, i) => (
+              <li key={i} className="text-xs text-muted-foreground">
+                • {line}
+              </li>
+            ))}
+          </ul>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  // Fallback: simple text
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-orange-600">
+      <AlertTriangle className="h-3 w-3" />
+      {cancellation.badgeText}
+    </span>
   );
 }
