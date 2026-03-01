@@ -173,6 +173,7 @@ const Index = () => {
         .from("categories")
         .select("*")
         .eq("status", "published")
+        .eq("show_on_home", true)
         .order("display_order", { ascending: true });
       if (error) throw error;
       return data;

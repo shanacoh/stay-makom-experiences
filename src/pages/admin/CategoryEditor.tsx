@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Eye, Heart, Users, Sparkles, Leaf, Wine, Zap, Laptop, Brain, Mountain, Utensils, Plane, Camera, Music, Book, Coffee, Sun, Moon, Star, Compass, Map, Globe, Briefcase, Award, Gift, Gem, Crown, Shield, Flame, Droplet, Wind, Cloud, TreePine, Flower2, type LucideIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { generateSlug } from "@/lib/utils";
 
 // Available icons for categories
@@ -65,6 +66,8 @@ const CategoryEditor = () => {
     bullets: ["", "", ""],
     bullets_he: ["", "", ""],
     display_order: 0,
+    show_on_home: true,
+    show_on_launch: true,
     status: "draft" as "draft" | "published",
     seo_title_en: "",
     seo_title_he: "",
@@ -112,6 +115,8 @@ const CategoryEditor = () => {
         bullets: category.bullets || ["", "", ""],
         bullets_he: category.bullets_he || ["", "", ""],
         display_order: category.display_order || 0,
+        show_on_home: category.show_on_home ?? true,
+        show_on_launch: category.show_on_launch ?? true,
         status: category.status || "draft",
         seo_title_en: category.seo_title_en || "",
         seo_title_he: category.seo_title_he || "",
@@ -365,6 +370,28 @@ const CategoryEditor = () => {
                   Selected: <span className="font-medium">{formData.icon}</span>
                 </p>
               )}
+            </div>
+            <div className="space-y-2 pt-2">
+              <Label>Page Visibility</Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Choose where this category appears
+              </p>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={formData.show_on_home}
+                    onCheckedChange={(checked) => setFormData({ ...formData, show_on_home: !!checked })}
+                  />
+                  <span className="text-sm font-medium">Homepage</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={formData.show_on_launch}
+                    onCheckedChange={(checked) => setFormData({ ...formData, show_on_launch: !!checked })}
+                  />
+                  <span className="text-sm font-medium">Launch Page</span>
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>

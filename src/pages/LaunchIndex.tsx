@@ -76,6 +76,7 @@ const LaunchIndex = () => {
       from("categories").
       select("*").
       eq("status", "published").
+      eq("show_on_launch", true).
       order("display_order", { ascending: true });
       if (error) throw error;
       return data;
