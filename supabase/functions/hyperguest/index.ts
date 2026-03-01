@@ -195,7 +195,7 @@ async function createBooking(bookingData: BookingData) {
     isTest: !isProduction,
     paymentDetails: bookingData.paymentDetails || {
       type: "credit_card",
-      details: { number: "4111111111111111", cvv: "123", expiration: { month: "12", year: "2027" }, holderName: "TEST STAYMAKOM" },
+      details: { number: "4111111111111111", cvv: "123", expiry: { month: "12", year: "2027" }, name: "TEST STAYMAKOM" },
     },
   };
 
