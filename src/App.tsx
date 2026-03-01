@@ -65,6 +65,7 @@ import AdminLeads from "./pages/admin/Leads";
 import AdminFavorites from "./pages/admin/Favorites";
 import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
 import LaunchIndex from "./pages/LaunchIndex";
+import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -108,6 +109,7 @@ const App = () => (
             <Route path="/hotel/:slug" element={<Hotel />} />
             <Route path="/hotels/:slug" element={<Hotel />} />
             <Route path="/hotel2/:slug" element={<Hotel2 />} />
+            <Route path="/booking/confirmation/:token" element={<BookingConfirmationPage />} />
             <Route
               path="/account"
               element={

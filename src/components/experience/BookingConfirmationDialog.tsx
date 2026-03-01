@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Check, CalendarDays, Hotel, Users, MessageSquare, Copy, Clock, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { toast } from "sonner";
@@ -34,6 +36,8 @@ export interface BookingConfirmationData {
   displayTaxesTotal?: number;
   /** ✅ #3c: Whether booking is on-request */
   isOnRequest?: boolean;
+  /** Confirmation token for dedicated page */
+  confirmationToken?: string;
 }
 
 interface BookingConfirmationDialogProps {
@@ -64,6 +68,7 @@ const translations = {
     nights: "nights",
     taxesAtHotel: "To pay at the hotel (taxes & fees)",
     vatNote: "Prices do not include VAT. Israeli residents are subject to 18% VAT payable at the hotel.",
+    viewConfirmation: "View my confirmation",
   },
   he: {
     confirmed: "!ההזמנה אושרה",
@@ -85,6 +90,7 @@ const translations = {
     nights: "לילות",
     taxesAtHotel: "לתשלום במלון (מסים ועמלות)",
     vatNote: "המחירים אינם כוללים מע\"מ. תושבי ישראל חייבים ב-18% מע\"מ המשולם ישירות במלון.",
+    viewConfirmation: "צפה באישור שלי",
   },
   fr: {
     confirmed: "Réservation confirmée !",
@@ -106,6 +112,7 @@ const translations = {
     nights: "nuits",
     taxesAtHotel: "À régler sur place (taxes et frais)",
     vatNote: "Les prix n'incluent pas la TVA. Les résidents israéliens sont soumis à 18% de TVA payable à l'hôtel.",
+    viewConfirmation: "Voir ma confirmation",
   },
 };
 
@@ -116,6 +123,8 @@ function fmt(amount: number, currency: string): string {
 
 export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: BookingConfirmationDialogProps) {
   const t = translations[lang];
+  const navigate = useNavigate();
+  const { lang: currentLang } = useLanguage();
 
   if (!data) return null;
 
@@ -251,7 +260,20 @@ export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: 
             </div>
           )}
 
-          <Button onClick={onClose} className="w-full mt-2">
+          {/* View confirmation page button */}
+          {data.confirmationToken && (
+            <Button
+              onClick={() => {
+                onClose();
+                navigate(`/booking/confirmation/${data.confirmationToken}${currentLang !== "en" ? `?lang=${currentLang}` : ""}`);
+              }}
+              className="w-full mt-2 bg-primary hover:bg-primary/90"
+            >
+              {t.viewConfirmation}
+            </Button>
+          )}
+
+          <Button variant="outline" onClick={onClose} className="w-full">
             {t.close}
           </Button>
         </div>

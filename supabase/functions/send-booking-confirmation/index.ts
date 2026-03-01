@@ -53,6 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
       cancellationPolicy,
       displayTaxesTotal, // ✅ #2d: Display taxes amount
       cancellationPenalty, // ✅ #9: Penalty for cancellation emails
+      confirmationToken, // ✅ Confirmation page token
     } = body;
 
     const isCancellation = type === 'cancellation';
@@ -201,7 +202,12 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color:#666;font-size:13px;margin:0;"><strong>${isHebrew ? 'בקשות מיוחדות:' : isFrench ? 'Demandes spéciales :' : 'Special requests:'}</strong> ${escapeHTML(specialRequests)}</p>
           </div>` : ''}
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-            <a href="https://staymakom.com/account" style="display:inline-block;background-color:#c9a87c;color:#fff;text-decoration:none;padding:16px 40px;border-radius:4px;font-size:14px;font-weight:600;letter-spacing:1px;">
+            <a href="https://staymakom.com/booking/confirmation/${confirmationToken || ''}" style="display:inline-block;background-color:#c9a87c;color:#fff;text-decoration:none;padding:16px 40px;border-radius:4px;font-size:14px;font-weight:600;letter-spacing:1px;margin-bottom:12px;">
+              ${isHebrew ? 'צפה באישור שלי' : isFrench ? 'VOIR MA CONFIRMATION' : 'VIEW MY CONFIRMATION'}
+            </a>
+          </td></tr></table>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;"><tr><td align="center">
+            <a href="https://staymakom.com/account" style="display:inline-block;background-color:transparent;color:#c9a87c;text-decoration:none;padding:12px 40px;border-radius:4px;font-size:13px;font-weight:500;letter-spacing:1px;border:1px solid #c9a87c;">
               ${isHebrew ? 'צפה בהזמנות שלי' : isFrench ? 'VOIR MES RÉSERVATIONS' : 'VIEW MY BOOKINGS'}
             </a>
           </td></tr></table>
