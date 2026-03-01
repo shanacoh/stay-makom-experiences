@@ -13,7 +13,7 @@
  */
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2, Clock, Baby, Minus, Plus } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2, Clock, Baby, Minus, Plus, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -966,23 +966,28 @@ export function BookingPanel2({
               <Separator />
               <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
 
-              {/* Cancellation policy recap */}
+              {/* Cancellation policy recap — subtle inline text */}
               {selectedRatePlan?.cancellationPolicies && searchParams?.checkIn && (() => {
                 const cancellation = analyzeCancellationPolicies(
                   selectedRatePlan.cancellationPolicies,
                   searchParams.checkIn,
                   lang,
                 );
-                if (!cancellation.summaryText) return null;
+                if (!cancellation.badgeText) return null;
+
+                if (cancellation.isFreeCancellation) {
+                  return (
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+                      <Check className="h-3.5 w-3.5 shrink-0" />
+                      <span>{cancellation.badgeText}</span>
+                    </div>
+                  );
+                }
+
                 return (
-                  <div className={cn(
-                    "flex items-start gap-2 p-3 rounded-md border text-sm",
-                    cancellation.isFreeCancellation && "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400",
-                    cancellation.isNonRefundable && "bg-destructive/10 border-destructive/30 text-destructive",
-                    !cancellation.isFreeCancellation && !cancellation.isNonRefundable && "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/30 dark:border-orange-800 dark:text-orange-400",
-                  )}>
-                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                    <p>{cancellation.summaryText}</p>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    {cancellation.detailLines.length > 0 && <Info className="h-3.5 w-3.5 shrink-0" />}
+                    <span>{cancellation.isNonRefundable ? cancellation.badgeText : cancellation.summaryText}</span>
                   </div>
                 );
               })()}
