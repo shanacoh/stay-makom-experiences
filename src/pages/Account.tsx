@@ -24,7 +24,7 @@ const Account = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   
-  const [activeTab, setActiveTab] = useState("wishlist");
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "bookings");
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Sync tab with URL query param

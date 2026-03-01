@@ -273,8 +273,15 @@ export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: 
             </Button>
           )}
 
-          <Button variant="outline" onClick={onClose} className="w-full">
-            {t.close}
+          <Button
+            variant="outline"
+            onClick={() => {
+              onClose();
+              navigate("/account?tab=bookings");
+            }}
+            className="w-full"
+          >
+            {lang === "he" ? "ההזמנות שלי" : lang === "fr" ? "Mes réservations" : "My Bookings"}
           </Button>
         </div>
       </DialogContent>
