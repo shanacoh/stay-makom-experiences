@@ -1,31 +1,31 @@
 
-# HowItWorksBanner -- Texte sur deux lignes sur mobile/tablette
 
-## Probleme
-Sur mobile, le texte des 3 etapes ("Choose your vibe", "Pick your experience", "Book your hotel") est tronque ou trop serre a cause du `whitespace-nowrap` et de la petite taille. L'utilisateur veut voir l'integralite du texte en cassant chaque etape sur deux lignes : le numero + premier mot sur la ligne 1, le reste sur la ligne 2.
+# HowItWorksBanner — Numero au-dessus, texte compact en dessous (mobile)
 
-## Solution
-Modifier `src/components/HowItWorksBanner.tsx` pour couper le texte de chaque etape apres le premier mot sur les ecrans mobiles/tablettes (en dessous de `sm`).
+## Rendu attendu sur mobile
 
-### Changements dans `HowItWorksBanner.tsx`
-
-1. **Separer le texte en deux parties** dans les donnees : premier mot (`line1`) et le reste (`line2`)
-   - "Choose" / "your vibe"
-   - "Pick" / "your experience"  
-   - "Book" / "your hotel"
-   - Hebrew : "בחר" / "את האווירה", "בחר" / "את החוויה", "הזמן" / "את המלון"
-
-2. **Affichage mobile (< sm)** : le texte s'affiche sur deux lignes via un `flex flex-col` ou un `<br />` masque sur desktop
-   - Retirer le `whitespace-nowrap` sur mobile
-   - Garder `whitespace-nowrap` sur `sm:` et plus
-
-3. **Affichage desktop (>= sm)** : rien ne change, tout reste sur une seule ligne comme aujourd'hui
-
-### Rendu attendu sur mobile
 ```text
-1  Choose        2  Pick           3  Book
-   your vibe        your experience   your hotel
+     1              2              3
+   Choose          Pick           Book
+  your vibe    your experience   your hotel
 ```
 
-### Aucun autre fichier modifie
-Seul `src/components/HowItWorksBanner.tsx` est touche. Pas de changement de couleurs, padding global, ni de la structure `section > container > flex`.
+Chaque etape est un bloc vertical centre : le chiffre en haut, puis le texte en dessous sur 1 ou 2 lignes naturelles. Les 3 blocs restent cote a cote, separes par le point.
+
+Sur desktop (>= sm), rien ne change — tout reste sur une ligne horizontale comme aujourd'hui.
+
+## Changement technique
+
+**Fichier unique** : `src/components/HowItWorksBanner.tsx`
+
+### Layout mobile (< sm)
+- Le conteneur de chaque etape passe de `inline-flex items-start` a `flex flex-col items-center` sur mobile, puis revient a `sm:flex-row sm:items-center`
+- Le chiffre est centre au-dessus du texte
+- Le texte (line1 + line2) est affiche en un seul bloc centre, sans `<br>` force — il wrappera naturellement si besoin
+- Taille du chiffre : `text-lg` sur mobile (un peu plus grand pour la hierarchie verticale), `sm:text-2xl` sur desktop
+- Taille du texte : reste `text-[11px]` sur mobile, `sm:text-base` sur desktop
+- Le padding vertical du bandeau reste `py-2.5` sur mobile — pas d'augmentation
+
+### Desktop (>= sm)
+- Aucun changement. Le layout horizontal actuel (numero + texte cote a cote) est preserve via les classes `sm:flex-row sm:items-center`
+
