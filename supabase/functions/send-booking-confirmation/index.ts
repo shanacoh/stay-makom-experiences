@@ -207,7 +207,7 @@ const handler = async (req: Request): Promise<Response> => {
             </a>
           </td></tr></table>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;"><tr><td align="center">
-            <a href="https://staymakom.com/account" style="display:inline-block;background-color:transparent;color:#c9a87c;text-decoration:none;padding:12px 40px;border-radius:4px;font-size:13px;font-weight:500;letter-spacing:1px;border:1px solid #c9a87c;">
+            <a href="https://staymakom.com/account?tab=bookings" style="display:inline-block;background-color:transparent;color:#c9a87c;text-decoration:none;padding:12px 40px;border-radius:4px;font-size:13px;font-weight:500;letter-spacing:1px;border:1px solid #c9a87c;">
               ${isHebrew ? 'צפה בהזמנות שלי' : isFrench ? 'VOIR MES RÉSERVATIONS' : 'VIEW MY BOOKINGS'}
             </a>
           </td></tr></table>

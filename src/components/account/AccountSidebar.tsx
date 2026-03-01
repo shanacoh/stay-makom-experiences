@@ -29,8 +29,8 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
   const copy = getCopy(lang);
 
   const navItems = [
-    { id: "wishlist", icon: Heart, label: copy.wishlist },
     { id: "bookings", icon: Calendar, label: copy.bookings },
+    { id: "wishlist", icon: Heart, label: copy.wishlist },
     { id: "giftcards", icon: Gift, label: copy.giftCards },
     { id: "profile", icon: User, label: copy.myAccount },
   ];

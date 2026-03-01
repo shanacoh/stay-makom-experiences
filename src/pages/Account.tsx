@@ -166,18 +166,18 @@ const Account = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-4 mb-6 p-1 bg-muted/60 rounded-full h-12">
                 <TabsTrigger 
-                  value="wishlist" 
-                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span className="hidden sm:inline">Wishlist</span>
-                </TabsTrigger>
-                <TabsTrigger 
                   value="bookings" 
                   className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
                 >
                   <Calendar className="h-4 w-4" />
                   <span className="hidden sm:inline">Bookings</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="wishlist" 
+                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span className="hidden sm:inline">Wishlist</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="giftcards" 
