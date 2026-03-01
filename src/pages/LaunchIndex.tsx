@@ -427,11 +427,8 @@ const LaunchIndex = () => {
                             </div>
                             {/* Description - shown on hover */}
                             {desc && (
-                              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <h3 className="font-sans text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white text-center uppercase tracking-tight leading-tight mb-1 md:mb-2">
-                                  {catTitle}
-                                </h3>
-                                <p className="font-sans text-[9px] sm:text-xs md:text-sm text-white/90 text-center leading-snug line-clamp-4">
+                              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/55">
+                                <p className="font-sans text-[10px] sm:text-xs md:text-sm text-white/95 text-center leading-snug line-clamp-6 md:line-clamp-8">
                                   {desc}
                                 </p>
                               </div>
