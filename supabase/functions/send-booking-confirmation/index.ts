@@ -49,6 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
       remarks,
       specialRequests,
       lang,
+      cancellationPolicy,
     } = body;
 
     console.log("Processing booking confirmation for:", to, "ref:", bookingRef);
@@ -74,6 +75,20 @@ const handler = async (req: Request): Promise<Response> => {
            ${filteredRemarks.map((r: string) => `<p style="color:#666;font-size:14px;line-height:1.6;margin:4px 0;">• ${escapeHTML(r)}</p>`).join('')}
          </div>`
       : '';
+
+    // Build cancellation policy HTML
+    let cancellationHtml = '';
+    if (cancellationPolicy?.summaryText) {
+      const bgColor = cancellationPolicy.isNonRefundable ? '#ffebee' : '#e8f5e9';
+      const textColor = cancellationPolicy.isNonRefundable ? '#c62828' : '#2e7d32';
+      const icon = cancellationPolicy.isNonRefundable ? '⚠️' : '✓';
+      const label = isHebrew ? 'מדיניות ביטול' : 'Cancellation Policy';
+      cancellationHtml = `
+        <div style="background-color:${bgColor};border-radius:8px;padding:15px;margin-bottom:20px;">
+          <p style="color:${textColor};font-size:14px;font-weight:600;margin:0 0 4px;">${icon} ${label}</p>
+          <p style="color:${textColor};font-size:13px;margin:0;">${escapeHTML(cancellationPolicy.summaryText)}</p>
+        </div>`;
+    }
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -140,6 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
               </tr></table>
             </div>
           </div>
+          ${cancellationHtml}
           ${remarksHtml}
           ${specialRequests ? `<div style="background-color:#f0f4ff;border-radius:8px;padding:15px;margin-bottom:20px;">
             <p style="color:#666;font-size:13px;margin:0;"><strong>${isHebrew ? 'בקשות מיוחדות:' : 'Special requests:'}</strong> ${escapeHTML(specialRequests)}</p>

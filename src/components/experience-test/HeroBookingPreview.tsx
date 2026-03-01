@@ -39,9 +39,7 @@ const HeroBookingPreview = ({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">{priceLabel}</p>
-            <p className="text-xs text-cta font-medium">
-              {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
-            </p>
+            {/* Cancellation info removed — dynamic data not available at this level */}
           </div>
 
           {/* Right: CTA Button */}

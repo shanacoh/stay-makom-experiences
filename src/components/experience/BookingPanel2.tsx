@@ -31,6 +31,7 @@ import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
 import { formatGuests, calculateNights, preBook, createBooking } from "@/services/hyperguest";
+import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -491,6 +492,13 @@ export function BookingPanel2({
 
       // ── Step 5: Send confirmation email ──
       try {
+        // Compute cancellation info for email
+        const emailCancellation = analyzeCancellationPolicies(
+          selectedRatePlan?.cancellationPolicies,
+          checkIn,
+          lang,
+        );
+
         await supabase.functions.invoke("send-booking-confirmation", {
           body: {
             to: leadGuest.email,
@@ -510,6 +518,11 @@ export function BookingPanel2({
             remarks: allRemarks,
             specialRequests,
             lang,
+            cancellationPolicy: {
+              summaryText: emailCancellation.summaryText,
+              isNonRefundable: emailCancellation.isNonRefundable,
+              deadline: emailCancellation.effectiveDeadline?.toISOString() || null,
+            },
           },
         });
       } catch (emailError) {
@@ -706,6 +719,7 @@ export function BookingPanel2({
                 setSelectedRatePlanId(ratePlanId);
               }}
               lang={lang}
+              checkInDate={searchParams?.checkIn}
             />
           )}
 
@@ -775,6 +789,27 @@ export function BookingPanel2({
             <>
               <Separator />
               <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
+
+              {/* Cancellation policy recap */}
+              {selectedRatePlan?.cancellationPolicies && searchParams?.checkIn && (() => {
+                const cancellation = analyzeCancellationPolicies(
+                  selectedRatePlan.cancellationPolicies,
+                  searchParams.checkIn,
+                  lang,
+                );
+                if (!cancellation.summaryText) return null;
+                return (
+                  <div className={cn(
+                    "flex items-start gap-2 p-3 rounded-md border text-sm",
+                    cancellation.isFreeCancellation && "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400",
+                    cancellation.isNonRefundable && "bg-destructive/10 border-destructive/30 text-destructive",
+                    !cancellation.isFreeCancellation && !cancellation.isNonRefundable && "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/30 dark:border-orange-800 dark:text-orange-400",
+                  )}>
+                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                    <p>{cancellation.summaryText}</p>
+                  </div>
+                );
+              })()}
             </>
           )}
 
