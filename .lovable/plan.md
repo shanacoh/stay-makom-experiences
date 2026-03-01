@@ -1,34 +1,24 @@
 
-# Fix: Category Waitlist Email Submission
 
-## Problem
-The email submission fails because the `leads` table has a database CHECK constraint (`leads_source_check`) that only allows these source values:
-`newsletter`, `contact`, `partners`, `corporate`, `win_trip`, `landing_page`, `coming_soon`, `ai_assistant_save`
+## Diagnosis
 
-The value `category_waitlist` is not in this list, so the INSERT is rejected with error code `23514`.
+The 403 error on Google Sign-In is caused by the current code using `supabase.auth.signInWithOAuth()` directly (in `OAuthButtons.tsx`), which requires manual Google OAuth credentials configuration. Since this project runs on Lovable Cloud, it should use the **managed Google OAuth** via `lovable.auth.signInWithOAuth("google", ...)` instead.
 
-The edge function code is correct -- the issue is purely at the database level.
+## Plan
 
-## Fix
-A single database migration to update the CHECK constraint:
+1. **Generate the Lovable Cloud auth module** by calling the `configure-social-auth` tool for Google — this creates `src/integrations/lovable/` with the managed OAuth client.
 
-```sql
-ALTER TABLE public.leads DROP CONSTRAINT leads_source_check;
-ALTER TABLE public.leads ADD CONSTRAINT leads_source_check 
-  CHECK (source = ANY (ARRAY[
-    'newsletter', 'contact', 'partners', 'corporate', 
-    'win_trip', 'landing_page', 'coming_soon', 
-    'ai_assistant_save', 'category_waitlist'
-  ]));
-```
+2. **Update `OAuthButtons.tsx`** to replace:
+   ```typescript
+   await supabase.auth.signInWithOAuth({ provider: "google", ... })
+   ```
+   with:
+   ```typescript
+   import { lovable } from "@/integrations/lovable/index";
+   await lovable.auth.signInWithOAuth("google", {
+     redirect_uri: window.location.origin,
+   });
+   ```
 
-## What already works (no code changes needed)
-- The `collect-lead` edge function already handles `category_waitlist` correctly (line 159)
-- The frontend (`LaunchIndex.tsx`) already sends `source: "category_waitlist"`, `cta_id`, and `metadata.category_name` properly
-- The backoffice Leads page already displays `source`, `cta_id`, and `metadata` columns, so category info will be visible to admins
+This will use Lovable Cloud's managed Google credentials, eliminating the 403 error without needing any Google Cloud Console configuration.
 
-## Result
-After this single migration:
-- Users can submit their email from the category waitlist popup
-- The lead is saved with the category ID and name in metadata
-- Admins can see which category the lead came from in the Leads backoffice
