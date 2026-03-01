@@ -438,6 +438,8 @@ export type Database = {
           seo_title_en: string | null
           seo_title_fr: string | null
           seo_title_he: string | null
+          show_on_home: boolean
+          show_on_launch: boolean
           slug: string
           status: Database["public"]["Enums"]["hotel_status"]
           updated_at: string
@@ -470,6 +472,8 @@ export type Database = {
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
+          show_on_home?: boolean
+          show_on_launch?: boolean
           slug: string
           status?: Database["public"]["Enums"]["hotel_status"]
           updated_at?: string
@@ -502,6 +506,8 @@ export type Database = {
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
+          show_on_home?: boolean
+          show_on_launch?: boolean
           slug?: string
           status?: Database["public"]["Enums"]["hotel_status"]
           updated_at?: string
