@@ -394,38 +394,8 @@ const LaunchIndex = () => {
 
             {!isLoadingCategories && categories && categories.length > 0 &&
             <div className="max-w-4xl mx-auto">
-                {/* Mobile: horizontal scroll carousel */}
-                <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide flex flex-wrap gap-3 pb-2 md:hidden" style={{ maxHeight: '380px' }}>
-                  {categories.map((category) => {
-                    const catTitle = getLocalizedField(category, "name", lang) as string;
-                    const image = category.hero_image || "";
-                    const words = catTitle.split(" ");
-                    const midpoint = Math.ceil(words.length / 2);
-                    const line1 = words.slice(0, midpoint).join(" ");
-                    const line2 = words.slice(midpoint).join(" ");
-
-                    return (
-                      <button
-                        key={`waitlist-mobile-${category.slug}`}
-                        onClick={() => handleCategoryClick(category)}
-                        className="group snap-start shrink-0 w-[calc(50%-6px)] relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
-                          <div className="aspect-[3/4] relative">
-                            <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
-                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                              <h3 className="font-sans text-base font-bold text-white text-center uppercase tracking-tight">
-                                <span className="block">{line1}</span>
-                                {line2 && <span className="block -mt-1">{line2}</span>}
-                              </h3>
-                            </div>
-                          </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Desktop: 4-col grid */}
-                <div className="hidden md:grid grid-cols-4 gap-4">
+                {/* All screens: 4-col grid */}
+                <div className="grid grid-cols-4 gap-2 md:gap-4">
                   {categories.map((category) => {
                     const catTitle = getLocalizedField(category, "name", lang) as string;
                     const image = category.hero_image || "";
@@ -442,8 +412,8 @@ const LaunchIndex = () => {
                           <div className="aspect-square relative">
                             <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
-                            <div className="absolute inset-0 flex items-center justify-center p-4">
-                              <h3 className="font-sans text-xl md:text-2xl font-bold text-white text-center uppercase tracking-tight">
+                            <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
+                              <h3 className="font-sans text-[10px] sm:text-sm md:text-xl lg:text-2xl font-bold text-white text-center uppercase tracking-tight leading-tight">
                                 <span className="block">{line1}</span>
                                 {line2 && <span className="block -mt-1.5">{line2}</span>}
                               </h3>
