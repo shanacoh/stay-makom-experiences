@@ -1,12 +1,13 @@
 // =============================================================================
 // src/components/experience/PriceBreakdownV2.tsx
 // Affichage du détail prix V3 — Addons-only model
+// ✅ #2a: HyperGuest display/included taxes
 // =============================================================================
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Hotel, Percent, Receipt, Tag, DollarSign } from "lucide-react";
+import { Loader2, Hotel, Percent, Receipt, Tag, DollarSign, AlertTriangle, Info } from "lucide-react";
 import type { PriceBreakdownV2 as PriceBreakdownType } from "@/types/experience2_addons";
 import { DualPrice } from "@/components/ui/DualPrice";
 
@@ -15,6 +16,8 @@ interface PriceBreakdownV2Props {
   isLoading?: boolean;
   className?: string;
   lang?: "en" | "he" | "fr";
+  /** Raw rate plan for extracting HyperGuest taxes */
+  ratePlanPrices?: any;
 }
 
 // ---------------------------------------------------------------------------
@@ -39,6 +42,9 @@ const translations = {
     nights: "nights",
     travelers: "travelers",
     noData: "Select a room and rate plan to see the price breakdown.",
+    displayTaxes: "Taxes & fees payable at the hotel",
+    includedTaxes: "Including taxes",
+    notInTotal: "Not included in online total",
   },
   he: {
     title: "פירוט מחיר",
@@ -57,6 +63,9 @@ const translations = {
     nights: "לילות",
     travelers: "מטיילים",
     noData: "בחר חדר ותכנית תעריף כדי לראות פירוט מחירים.",
+    displayTaxes: "מסים ועמלות לתשלום במלון",
+    includedTaxes: "כולל מסים",
+    notInTotal: "לא כלול בסה\"כ המקוון",
   },
   fr: {
     title: "Détail du prix",
@@ -75,6 +84,9 @@ const translations = {
     nights: "nuits",
     travelers: "voyageurs",
     noData: "Sélectionnez une chambre et un plan tarifaire pour voir le détail du prix.",
+    displayTaxes: "Taxes et frais payés à l'hôtel",
+    includedTaxes: "Dont taxes incluses",
+    notInTotal: "Non inclus dans le total en ligne",
   },
 };
 
@@ -94,7 +106,7 @@ function fmt(amount: number, currency: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function PriceBreakdownV2({ breakdown, isLoading = false, className = "", lang = "en" }: PriceBreakdownV2Props) {
+export function PriceBreakdownV2({ breakdown, isLoading = false, className = "", lang = "en", ratePlanPrices }: PriceBreakdownV2Props) {
   const t = translations[lang];
 
   if (isLoading) {
@@ -124,6 +136,14 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
   const hasPromo = b.promo.type !== null;
   const hasDiscount = b.promo.discountAmount > 0;
   const hasFakeMarkup = b.promo.type === "fake_markup" && b.promo.fakeOriginalPrice != null;
+
+  // ✅ #2a: Extract HyperGuest display/included taxes from ratePlanPrices
+  const sellTaxes = ratePlanPrices?.sell?.taxes || [];
+  const fees = ratePlanPrices?.fees || [];
+  const displayItems = [...sellTaxes, ...fees].filter((t: any) => t.relation === 'display');
+  const includedItems = [...sellTaxes, ...fees].filter((t: any) => t.relation === 'included');
+  const totalDisplay = displayItems.reduce((s: number, t: any) => s + Number(t.amount || 0), 0);
+  const totalIncluded = includedItems.reduce((s: number, t: any) => s + Number(t.amount || 0), 0);
 
   return (
     <Card className={className}>
@@ -252,6 +272,27 @@ export function PriceBreakdownV2({ breakdown, isLoading = false, className = "",
             <DualPrice amount={b.finalTotal} currency={b.currency} className="text-primary text-lg items-end" />
           </div>
         </div>
+
+        {/* ✅ #2a: Display taxes — payable at hotel */}
+        {totalDisplay > 0 && (
+          <div className="flex items-start gap-2 p-3 rounded-md bg-orange-50 border border-orange-200 dark:bg-orange-950/30 dark:border-orange-800">
+            <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                {t.displayTaxes}: {fmt(totalDisplay, b.currency)}
+              </p>
+              <p className="text-xs text-orange-600/80 dark:text-orange-400/70">{t.notInTotal}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ #2a: Included taxes — informational */}
+        {totalIncluded > 0 && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground pl-1">
+            <Info className="h-3 w-3" />
+            <span>{t.includedTaxes}: {fmt(totalIncluded, b.currency)}</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Calendar, Users, MapPin, ChevronRight, Clock, Plane, X, AlertTriangle } from "lucide-react";
+import { Loader2, Calendar, Users, MapPin, ChevronRight, Clock, Plane, X, AlertTriangle, Pencil } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { differenceInDays, format, parseISO, isPast, isBefore, addDays } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -30,8 +30,13 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
   const queryClient = useQueryClient();
   const { lang } = useLanguage();
   const isHebrew = lang === "he";
+  const isFrench = lang === "fr";
   const [timeFilter, setTimeFilter] = useState<string>("all");
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  // ✅ #4: Cancel simulation state
+  const [simulationResult, setSimulationResult] = useState<any>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationError, setSimulationError] = useState(false);
 
   // Fetch V2 bookings (bookings_hg) for the logged-in user
   const { data: bookingsHg, isLoading: loadingHg } = useQuery({
@@ -108,14 +113,34 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
     enabled: !!customer?.id,
   });
 
+  // ✅ #4: Simulate cancellation before showing dialog
+  const handleCancelClick = async (bookingId: string) => {
+    const booking = bookingsHg?.find((b: any) => b.id === bookingId);
+    if (!booking) return;
+
+    setIsSimulating(true);
+    setSimulationResult(null);
+    setSimulationError(false);
+    setCancellingBookingId(bookingId);
+
+    try {
+      const { simulateCancellation } = await import("@/services/hyperguest");
+      const result = await simulateCancellation(booking.hg_booking_id);
+      setSimulationResult(result);
+    } catch (err: any) {
+      console.error("[Cancel Simulate] Error:", err);
+      setSimulationError(true);
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
   // Cancel mutation
   const cancelMutation = useMutation({
     mutationFn: async (bookingId: string) => {
-      // Find the booking to get HG booking ID
       const booking = bookingsHg?.find((b: any) => b.id === bookingId);
       if (!booking) throw new Error("Booking not found");
 
-      // Call HyperGuest cancel API
       console.log("[Cancel] bookingId envoyé:", booking.hg_booking_id);
       const { cancelBooking } = await import("@/services/hyperguest");
       
@@ -124,7 +149,6 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         await cancelBooking(booking.hg_booking_id);
         hgCancelSuccess = true;
       } catch (err: any) {
-        // If HG says booking not found, treat as already cancelled
         const msg = err?.message || "";
         if (msg.includes("booking cannot be found") || msg.includes("BN.500")) {
           console.warn("[Cancel] Booking not found on HyperGuest, marking as cancelled locally");
@@ -134,7 +158,6 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         }
       }
 
-      // Update local DB if cancel succeeded (or booking already gone)
       if (hgCancelSuccess) {
         await supabase
           .from("bookings_hg")
@@ -144,40 +167,66 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
             status: "cancelled",
           } as any)
           .eq("id", bookingId);
+
+        // ✅ #9: Send cancellation email
+        try {
+          await supabase.functions.invoke('send-booking-confirmation', {
+            body: {
+              type: 'cancellation',
+              to: booking.customer_email,
+              guestName: booking.customer_name,
+              experienceTitle: booking.experiences2?.title || 'Experience',
+              hotelName: booking.hotels2?.name || 'Hotel',
+              checkIn: booking.checkin,
+              checkOut: booking.checkout,
+              nights: booking.nights,
+              partySize: booking.party_size,
+              totalPrice: booking.sell_price,
+              currency: booking.currency,
+              bookingRef: booking.hg_booking_id,
+              hgBookingId: booking.hg_booking_id,
+              lang: lang,
+              cancellationPenalty: simulationResult?.penalty || null,
+            },
+          });
+        } catch (emailErr) {
+          console.error("[Cancel] Email sending failed:", emailErr);
+        }
       }
 
       return true;
     },
     onSuccess: () => {
-      toast.success(isHebrew ? "ההזמנה בוטלה בהצלחה" : "Booking cancelled successfully");
+      toast.success(isHebrew ? "ההזמנה בוטלה בהצלחה" : isFrench ? "Réservation annulée avec succès" : "Booking cancelled successfully");
       queryClient.invalidateQueries({ queryKey: ["my-bookings-hg"] });
       setCancellingBookingId(null);
+      setSimulationResult(null);
     },
     onError: (error: any) => {
-      toast.error(isHebrew ? "שגיאה בביטול ההזמנה" : `Cancellation failed: ${error.message}`);
+      toast.error(isHebrew ? "שגיאה בביטול ההזמנה" : isFrench ? `Échec de l'annulation: ${error.message}` : `Cancellation failed: ${error.message}`);
       setCancellingBookingId(null);
+      setSimulationResult(null);
     },
   });
 
   const canCancel = (booking: any) => {
     if (booking.is_cancelled || booking.status === "cancelled") return false;
     const checkin = parseISO(booking.checkin);
-    // Allow cancellation if check-in is at least 2 days away
     return isBefore(new Date(), addDays(checkin, -2));
   };
 
   const getStatusBadge = (status: string, isCancelled: boolean) => {
     if (isCancelled) {
-      return <Badge variant="destructive">{isHebrew ? "בוטל" : "Cancelled"}</Badge>;
+      return <Badge variant="destructive">{isHebrew ? "בוטל" : isFrench ? "Annulé" : "Cancelled"}</Badge>;
     }
-    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string; labelHe: string }> = {
-      pending: { variant: "outline", label: "Pending", labelHe: "ממתין" },
-      confirmed: { variant: "default", label: "Confirmed", labelHe: "מאושר" },
-      cancelled: { variant: "destructive", label: "Cancelled", labelHe: "בוטל" },
-      pendingreview: { variant: "secondary", label: "Under Review", labelHe: "בבדיקה" },
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string; labelHe: string; labelFr: string }> = {
+      pending: { variant: "outline", label: "Pending", labelHe: "ממתין", labelFr: "En attente" },
+      confirmed: { variant: "default", label: "Confirmed", labelHe: "מאושר", labelFr: "Confirmé" },
+      cancelled: { variant: "destructive", label: "Cancelled", labelHe: "בוטל", labelFr: "Annulé" },
+      pendingreview: { variant: "secondary", label: "Under Review", labelHe: "בבדיקה", labelFr: "En cours d'examen" },
     };
-    const config = statusConfig[status?.toLowerCase()] || { variant: "outline" as const, label: status, labelHe: status };
-    return <Badge variant={config.variant}>{isHebrew ? config.labelHe : config.label}</Badge>;
+    const config = statusConfig[status?.toLowerCase()] || { variant: "outline" as const, label: status, labelHe: status, labelFr: status };
+    return <Badge variant={config.variant}>{isHebrew ? config.labelHe : isFrench ? config.labelFr : config.label}</Badge>;
   };
 
   const getTimeBadge = (checkinDate: string) => {
@@ -187,7 +236,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
     if (isPast(checkin)) {
       return (
         <Badge variant="secondary" className="bg-muted text-muted-foreground">
-          {isHebrew ? "הסתיים" : "Completed"}
+          {isHebrew ? "הסתיים" : isFrench ? "Terminé" : "Completed"}
         </Badge>
       );
     }
@@ -198,7 +247,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       return (
         <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
           <Plane className="h-3 w-3 mr-1" />
-          {isHebrew ? "היום!" : "Today!"}
+          {isHebrew ? "היום!" : isFrench ? "Aujourd'hui !" : "Today!"}
         </Badge>
       );
     }
@@ -207,7 +256,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       return (
         <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
           <Clock className="h-3 w-3 mr-1" />
-          {isHebrew ? `בעוד ${daysUntil} ימים` : `In ${daysUntil} day${daysUntil > 1 ? "s" : ""}`}
+          {isHebrew ? `בעוד ${daysUntil} ימים` : isFrench ? `Dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}` : `In ${daysUntil} day${daysUntil > 1 ? "s" : ""}`}
         </Badge>
       );
     }
@@ -215,7 +264,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
     return (
       <Badge variant="outline" className="text-muted-foreground">
         <Clock className="h-3 w-3 mr-1" />
-        {isHebrew ? `בעוד ${daysUntil} ימים` : `In ${daysUntil} days`}
+        {isHebrew ? `בעוד ${daysUntil} ימים` : isFrench ? `Dans ${daysUntil} jours` : `In ${daysUntil} days`}
       </Badge>
     );
   };
@@ -266,6 +315,60 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
     })),
   ].sort((a, b) => new Date(a.checkin).getTime() - new Date(b.checkin).getTime());
 
+  // ✅ #4: Get simulation display info
+  const getCancelSimulationDisplay = () => {
+    if (isSimulating) {
+      return {
+        loading: true,
+        message: isHebrew ? "מחשב עמלות ביטול..." : isFrench ? "Calcul des frais d'annulation..." : "Calculating cancellation fees...",
+      };
+    }
+
+    if (simulationError) {
+      return {
+        loading: false,
+        message: isHebrew
+          ? "לא ניתן לחשב את עמלות הביטול. ייתכנו עמלות ביטול בהתאם למדיניות המלון."
+          : isFrench
+          ? "Impossible de calculer les frais d'annulation. Des frais peuvent s'appliquer selon la politique de l'hôtel."
+          : "Could not calculate cancellation fees. Cancellation fees may apply depending on the hotel's policy.",
+        isWarning: true,
+      };
+    }
+
+    if (simulationResult) {
+      // Try to extract penalty info from simulation result
+      const penalty = simulationResult.cancellationFee || simulationResult.penalty || simulationResult.amount || 0;
+      const refund = simulationResult.refund || simulationResult.refundAmount || 0;
+
+      if (penalty === 0 || simulationResult.freeCancellation) {
+        return {
+          loading: false,
+          message: isHebrew ? "ביטול חינם — ללא עמלות" : isFrench ? "Annulation gratuite — aucun frais" : "Free cancellation — no fees",
+          isFree: true,
+        };
+      }
+
+      const booking = bookingsHg?.find((b: any) => b.id === cancellingBookingId);
+      const curr = booking?.currency || "ILS";
+      const symbol = curr === "ILS" ? "₪" : curr === "EUR" ? "€" : "$";
+
+      return {
+        loading: false,
+        message: isHebrew
+          ? `עמלת ביטול: ${symbol}${Number(penalty).toLocaleString()}`
+          : isFrench
+          ? `Frais d'annulation : ${symbol}${Number(penalty).toLocaleString()}`
+          : `Cancellation fee: ${symbol}${Number(penalty).toLocaleString()}`,
+        hasPenalty: true,
+        penalty,
+        refund,
+      };
+    }
+
+    return null;
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-16">
@@ -281,15 +384,15 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">{isHebrew ? "תקופה" : "Time Period"}</label>
+              <label className="text-sm font-medium mb-2 block">{isHebrew ? "תקופה" : isFrench ? "Période" : "Time Period"}</label>
               <Select value={timeFilter} onValueChange={setTimeFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{isHebrew ? "כל ההזמנות" : "All Bookings"}</SelectItem>
-                  <SelectItem value="upcoming">{isHebrew ? "עתידיות" : "Upcoming"}</SelectItem>
-                  <SelectItem value="past">{isHebrew ? "עברו" : "Past"}</SelectItem>
+                  <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
+                  <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
+                  <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -306,15 +409,17 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                 <Calendar className="h-10 w-10 text-primary" />
               </div>
               <div>
-                <h3 className="font-serif text-xl mb-2">{isHebrew ? "אין הזמנות" : "No bookings found"}</h3>
+                <h3 className="font-serif text-xl mb-2">{isHebrew ? "אין הזמנות" : isFrench ? "Aucune réservation" : "No bookings found"}</h3>
                 <p className="text-muted-foreground max-w-sm mx-auto">
                   {isHebrew
                     ? "גלו את החוויות המיוחדות שלנו והזמינו את ההרפתקה הבאה שלכם!"
+                    : isFrench
+                    ? "Découvrez nos expériences uniques et réservez votre prochaine aventure !"
                     : "Start exploring our curated experiences and book your next adventure!"}
                 </p>
               </div>
               <Button onClick={() => navigate("/")} variant="cta">
-                {isHebrew ? "גלו חוויות" : "Explore Experiences"}
+                {isHebrew ? "גלו חוויות" : isFrench ? "Découvrir les expériences" : "Explore Experiences"}
               </Button>
             </div>
           </CardContent>
@@ -324,6 +429,8 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
           {allBookings.map((booking) => {
             const _isUpcoming = !isPast(parseISO(booking.checkin));
             const showCancel = booking.type === "v2" && canCancel(booking.raw);
+            // ✅ #8: Modify button — same conditions as cancel
+            const showModify = showCancel;
 
             return (
               <Card key={booking.id} className={`hover:shadow-lg transition-shadow overflow-hidden ${booking.isCancelled ? "opacity-60" : ""}`}>
@@ -352,21 +459,21 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="text-sm min-w-0">
-                        <p className="text-muted-foreground text-xs">{isHebrew ? "צ'ק-אין" : "Check-in"}</p>
+                        <p className="text-muted-foreground text-xs">{isHebrew ? "צ'ק-אין" : isFrench ? "Arrivée" : "Check-in"}</p>
                         <p className="font-medium truncate">{format(parseISO(booking.checkin), "MMM d, yyyy")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="text-sm min-w-0">
-                        <p className="text-muted-foreground text-xs">{isHebrew ? "צ'ק-אאוט" : "Check-out"}</p>
+                        <p className="text-muted-foreground text-xs">{isHebrew ? "צ'ק-אאוט" : isFrench ? "Départ" : "Check-out"}</p>
                         <p className="font-medium truncate">{format(parseISO(booking.checkout), "MMM d, yyyy")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="text-sm">
-                        <p className="text-muted-foreground text-xs">{isHebrew ? "אורחים" : "Guests"}</p>
+                        <p className="text-muted-foreground text-xs">{isHebrew ? "אורחים" : isFrench ? "Voyageurs" : "Guests"}</p>
                         <p className="font-medium">{booking.partySize}</p>
                       </div>
                     </div>
@@ -381,16 +488,43 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                       </p>
                     </div>
                     <div className="flex gap-2">
+                      {/* ✅ #8: Modify button — simple redirect message */}
+                      {showModify && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            toast.info(
+                              isHebrew
+                                ? "כדי לשנות את ההזמנה, בטל את ההזמנה הנוכחית וצור חדשה."
+                                : isFrench
+                                ? "Pour modifier votre réservation, annulez-la et créez-en une nouvelle."
+                                : "To modify your booking, cancel the current one and create a new one.",
+                              { duration: 6000 }
+                            );
+                            if ((booking as any).slug) {
+                              navigate(booking.type === "v2" ? `/experience2/${(booking as any).slug}` : `/experience/${(booking as any).slug}`);
+                            }
+                          }}
+                        >
+                          <Pencil className="h-4 w-4 mr-1" />
+                          {isHebrew ? "שינוי" : isFrench ? "Modifier" : "Modify"}
+                        </Button>
+                      )}
                       {showCancel && (
                         <Button
                           variant="outline"
                           size="sm"
                           className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                          onClick={() => setCancellingBookingId(booking.id)}
-                          disabled={cancelMutation.isPending}
+                          onClick={() => handleCancelClick(booking.id)}
+                          disabled={cancelMutation.isPending || isSimulating}
                         >
-                          <X className="h-4 w-4 mr-1" />
-                          {isHebrew ? "ביטול" : "Cancel"}
+                          {isSimulating && cancellingBookingId === booking.id ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <X className="h-4 w-4 mr-1" />
+                          )}
+                          {isHebrew ? "ביטול" : isFrench ? "Annuler" : "Cancel"}
                         </Button>
                       )}
                       {booking.slug && (
@@ -399,7 +533,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                           size="sm"
                           onClick={() => navigate(booking.type === "v2" ? `/experience2/${booking.slug}` : `/experience/${booking.slug}`)}
                         >
-                          {isHebrew ? "צפה" : "View"}
+                          {isHebrew ? "צפה" : isFrench ? "Voir" : "View"}
                           <ChevronRight className="ml-1 h-4 w-4" />
                         </Button>
                       )}
@@ -418,23 +552,66 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         </div>
       )}
 
-      {/* Cancel Confirmation Dialog */}
-      <AlertDialog open={!!cancellingBookingId} onOpenChange={(open) => !open && setCancellingBookingId(null)}>
+      {/* ✅ #4: Cancel Confirmation Dialog with simulation result */}
+      <AlertDialog open={!!cancellingBookingId && !isSimulating} onOpenChange={(open) => {
+        if (!open) {
+          setCancellingBookingId(null);
+          setSimulationResult(null);
+          setSimulationError(false);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              {isHebrew ? "ביטול הזמנה" : "Cancel Booking"}
+              {isHebrew ? "ביטול הזמנה" : isFrench ? "Annuler la réservation" : "Cancel Booking"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {isHebrew
-                ? "האם אתה בטוח שברצונך לבטל הזמנה זו? פעולה זו אינה ניתנת לביטול. יתכן שתחולנה עמלות ביטול בהתאם למדיניות המלון."
-                : "Are you sure you want to cancel this booking? This action cannot be undone. Cancellation fees may apply depending on the hotel's policy."}
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  {isHebrew
+                    ? "האם אתה בטוח שברצונך לבטל הזמנה זו? פעולה זו אינה ניתנת לביטול."
+                    : isFrench
+                    ? "Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible."
+                    : "Are you sure you want to cancel this booking? This action cannot be undone."}
+                </p>
+                {/* ✅ #4: Simulation result display */}
+                {(() => {
+                  const simInfo = getCancelSimulationDisplay();
+                  if (!simInfo) return null;
+
+                  if (simInfo.isFree) {
+                    return (
+                      <div className="p-3 rounded-md bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
+                        ✓ {simInfo.message}
+                      </div>
+                    );
+                  }
+
+                  if (simInfo.hasPenalty) {
+                    return (
+                      <div className="p-3 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm font-medium">
+                        ⚠ {simInfo.message}
+                      </div>
+                    );
+                  }
+
+                  if (simInfo.isWarning) {
+                    return (
+                      <div className="p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                        ⚠ {simInfo.message}
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })()}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={cancelMutation.isPending}>
-              {isHebrew ? "חזור" : "Go Back"}
+              {isHebrew ? "שמור את ההזמנה" : isFrench ? "Garder ma réservation" : "Keep my booking"}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -448,7 +625,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
               {cancelMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              {isHebrew ? "כן, בטל הזמנה" : "Yes, Cancel Booking"}
+              {isHebrew ? "כן, בטל הזמנה" : isFrench ? "Oui, annuler" : "Yes, Cancel Booking"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

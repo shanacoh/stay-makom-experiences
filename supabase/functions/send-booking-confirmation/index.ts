@@ -32,6 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
     const {
+      type, // ✅ #9: 'cancellation' or undefined (confirmation)
       to,
       guestName,
       experienceTitle,
@@ -50,15 +51,20 @@ const handler = async (req: Request): Promise<Response> => {
       specialRequests,
       lang,
       cancellationPolicy,
+      displayTaxesTotal, // ✅ #2d: Display taxes amount
+      cancellationPenalty, // ✅ #9: Penalty for cancellation emails
     } = body;
 
-    console.log("Processing booking confirmation for:", to, "ref:", bookingRef);
+    const isCancellation = type === 'cancellation';
+
+    console.log(`Processing ${isCancellation ? 'cancellation' : 'booking confirmation'} for:`, to, "ref:", bookingRef);
 
     if (!to) {
       throw new Error("Recipient email (to) is required");
     }
 
     const isHebrew = lang === 'he';
+    const isFrench = lang === 'fr';
     const customerName = escapeHTML(guestName || 'Guest');
     const safeTitle = escapeHTML(experienceTitle || 'Experience');
     const safeHotel = escapeHTML(hotelName || 'Hotel');
@@ -78,17 +84,51 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Build cancellation policy HTML
     let cancellationHtml = '';
-    if (cancellationPolicy?.summaryText) {
+    if (!isCancellation && cancellationPolicy?.summaryText) {
       const bgColor = cancellationPolicy.isNonRefundable ? '#ffebee' : '#e8f5e9';
       const textColor = cancellationPolicy.isNonRefundable ? '#c62828' : '#2e7d32';
       const icon = cancellationPolicy.isNonRefundable ? '⚠️' : '✓';
-      const label = isHebrew ? 'מדיניות ביטול' : 'Cancellation Policy';
+      const label = isHebrew ? 'מדיניות ביטול' : isFrench ? "Politique d'annulation" : 'Cancellation Policy';
       cancellationHtml = `
         <div style="background-color:${bgColor};border-radius:8px;padding:15px;margin-bottom:20px;">
           <p style="color:${textColor};font-size:14px;font-weight:600;margin:0 0 4px;">${icon} ${label}</p>
           <p style="color:${textColor};font-size:13px;margin:0;">${escapeHTML(cancellationPolicy.summaryText)}</p>
         </div>`;
     }
+
+    // ✅ #2d: Display taxes HTML
+    let displayTaxesHtml = '';
+    if (!isCancellation && displayTaxesTotal && Number(displayTaxesTotal) > 0) {
+      const taxLabel = isHebrew ? 'מסים ועמלות לתשלום במלון' : isFrench ? "Taxes et frais à régler à l'hôtel" : 'Taxes & fees payable at the hotel';
+      displayTaxesHtml = `
+        <div style="background-color:#fff3e0;border-radius:8px;padding:15px;margin-bottom:20px;">
+          <p style="color:#e65100;font-size:14px;font-weight:600;margin:0;">⚠ ${taxLabel}: ${formatCurrency(Number(displayTaxesTotal), currency)}</p>
+          <p style="color:#e65100;font-size:12px;margin:4px 0 0;">${isHebrew ? 'סכום זה אינו כלול במחיר המקוון' : isFrench ? 'Ce montant n\'est pas inclus dans le total en ligne' : 'This amount is not included in the online total'}</p>
+        </div>`;
+    }
+
+    // ✅ #9: Cancellation penalty HTML
+    let penaltyHtml = '';
+    if (isCancellation && cancellationPenalty && Number(cancellationPenalty) > 0) {
+      const penaltyLabel = isHebrew ? 'עמלת ביטול' : isFrench ? "Frais d'annulation" : 'Cancellation fee';
+      penaltyHtml = `
+        <div style="background-color:#ffebee;border-radius:8px;padding:15px;margin-bottom:20px;">
+          <p style="color:#c62828;font-size:14px;font-weight:600;margin:0;">⚠ ${penaltyLabel}: ${formatCurrency(Number(cancellationPenalty), currency)}</p>
+        </div>`;
+    }
+
+    // Status badge
+    const statusBadge = isCancellation
+      ? `<div style="display:inline-block;background-color:#ffebee;color:#c62828;padding:8px 20px;border-radius:20px;font-size:14px;font-weight:600;">
+           ✕ ${isHebrew ? 'הזמנה בוטלה' : isFrench ? 'Réservation annulée' : 'Booking Cancelled'}
+         </div>`
+      : `<div style="display:inline-block;background-color:#e8f5e9;color:#2e7d32;padding:8px 20px;border-radius:20px;font-size:14px;font-weight:600;">
+           ✓ ${isHebrew ? 'הזמנה אושרה' : isFrench ? 'Réservation confirmée' : 'Booking Confirmed'}
+         </div>`;
+
+    const greeting = isCancellation
+      ? (isHebrew ? 'ההזמנה שלך בוטלה.' : isFrench ? 'Votre réservation a été annulée.' : 'Your booking has been cancelled.')
+      : (isHebrew ? 'ההזמנה שלך אושרה בהצלחה!' : isFrench ? 'Votre réservation a été confirmée !' : 'Your booking has been confirmed!');
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -100,81 +140,85 @@ const handler = async (req: Request): Promise<Response> => {
       <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
         <tr><td style="background:linear-gradient(135deg,#1a1a1a 0%,#333 100%);padding:40px;text-align:center;">
           <h1 style="color:#fff;margin:0;font-size:28px;font-weight:300;letter-spacing:2px;">STAYMAKOM</h1>
-          <p style="color:#c9a87c;margin:10px 0 0;font-size:14px;letter-spacing:1px;">${isHebrew ? 'יותר משהייה, זו חוויה' : "MORE THAN A STAY, IT'S AN EXPERIENCE"}</p>
+          <p style="color:#c9a87c;margin:10px 0 0;font-size:14px;letter-spacing:1px;">${isHebrew ? 'יותר משהייה, זו חוויה' : isFrench ? "PLUS QU'UN SÉJOUR, C'EST UNE EXPÉRIENCE" : "MORE THAN A STAY, IT'S AN EXPERIENCE"}</p>
         </td></tr>
         <tr><td style="padding:40px;">
           <div style="text-align:center;margin-bottom:30px;">
-            <div style="display:inline-block;background-color:#e8f5e9;color:#2e7d32;padding:8px 20px;border-radius:20px;font-size:14px;font-weight:600;">
-              ✓ ${isHebrew ? 'הזמנה אושרה' : 'Booking Confirmed'}
-            </div>
+            ${statusBadge}
           </div>
           <h2 style="color:#1a1a1a;margin:0 0 10px;font-size:24px;font-weight:500;text-align:center;">
-            ${isHebrew ? `שלום ${customerName},` : `Hello ${customerName},`}
+            ${isHebrew ? `שלום ${customerName},` : isFrench ? `Bonjour ${customerName},` : `Hello ${customerName},`}
           </h2>
           <p style="color:#666;font-size:16px;line-height:1.6;text-align:center;margin-bottom:30px;">
-            ${isHebrew ? 'ההזמנה שלך אושרה בהצלחה!' : 'Your booking has been confirmed!'}
+            ${greeting}
           </p>
+          ${penaltyHtml}
           <div style="background-color:#f9f9f6;border-radius:8px;padding:25px;margin-bottom:30px;">
             <h3 style="color:#1a1a1a;margin:0 0 20px;font-size:18px;font-weight:600;border-bottom:2px solid #c9a87c;padding-bottom:10px;">
-              ${isHebrew ? 'פרטי ההזמנה' : 'Booking Details'}
+              ${isHebrew ? 'פרטי ההזמנה' : isFrench ? 'Détails de la réservation' : 'Booking Details'}
             </h3>
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'מספר הזמנה' : 'Reference'}</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'מספר הזמנה' : isFrench ? 'Référence' : 'Reference'}</p>
                 <p style="color:#1a1a1a;font-size:16px;margin:0;font-weight:600;">${safeRef}</p>
               </td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'חוויה' : 'Experience'}</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'חוויה' : isFrench ? 'Expérience' : 'Experience'}</p>
                 <p style="color:#1a1a1a;font-size:16px;margin:0;font-weight:600;">${safeTitle}</p>
               </td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'מלון' : 'Hotel'}</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'מלון' : isFrench ? 'Hôtel' : 'Hotel'}</p>
                 <p style="color:#1a1a1a;font-size:16px;margin:0;">${safeHotel}</p>
               </td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? "צ'ק-אין" : 'Check-in'}</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? "צ'ק-אין" : isFrench ? 'Arrivée' : 'Check-in'}</p>
                 <p style="color:#1a1a1a;font-size:16px;margin:0;">${formatDate(checkIn, isHebrew)}</p>
               </td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? "צ'ק-אאוט" : 'Check-out'}</p>
-                <p style="color:#1a1a1a;font-size:16px;margin:0;">${formatDate(checkOut, isHebrew)} (${nights} ${isHebrew ? 'לילות' : nights === 1 ? 'night' : 'nights'})</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? "צ'ק-אאוט" : isFrench ? 'Départ' : 'Check-out'}</p>
+                <p style="color:#1a1a1a;font-size:16px;margin:0;">${formatDate(checkOut, isHebrew)} (${nights} ${isHebrew ? 'לילות' : isFrench ? 'nuits' : nights === 1 ? 'night' : 'nights'})</p>
               </td></tr>
               <tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'אורחים' : 'Guests'}</p>
-                <p style="color:#1a1a1a;font-size:16px;margin:0;">${partySize} ${isHebrew ? 'אורחים' : partySize === 1 ? 'guest' : 'guests'}</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'אורחים' : isFrench ? 'Voyageurs' : 'Guests'}</p>
+                <p style="color:#1a1a1a;font-size:16px;margin:0;">${partySize} ${isHebrew ? 'אורחים' : isFrench ? 'voyageurs' : partySize === 1 ? 'guest' : 'guests'}</p>
               </td></tr>
               ${safeRoom ? `<tr><td style="padding:12px 0;border-bottom:1px solid #eee;">
-                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'חדר' : 'Room'}</p>
+                <p style="color:#999;font-size:12px;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">${isHebrew ? 'חדר' : isFrench ? 'Chambre' : 'Room'}</p>
                 <p style="color:#1a1a1a;font-size:16px;margin:0;">${safeRoom}</p>
               </td></tr>` : ''}
             </table>
-            <div style="margin-top:20px;padding-top:20px;border-top:2px solid #1a1a1a;">
+            ${!isCancellation ? `<div style="margin-top:20px;padding-top:20px;border-top:2px solid #1a1a1a;">
               <table width="100%"><tr>
                 <td><p style="color:#1a1a1a;font-size:18px;margin:0;font-weight:600;">${isHebrew ? 'סה"כ' : 'Total'}</p></td>
                 <td style="text-align:${isHebrew ? 'left' : 'right'};"><p style="color:#1a1a1a;font-size:24px;margin:0;font-weight:700;">${formatCurrency(totalPrice || 0, currency)}</p></td>
               </tr></table>
-            </div>
+            </div>` : ''}
           </div>
+          ${displayTaxesHtml}
           ${cancellationHtml}
           ${remarksHtml}
-          ${specialRequests ? `<div style="background-color:#f0f4ff;border-radius:8px;padding:15px;margin-bottom:20px;">
-            <p style="color:#666;font-size:13px;margin:0;"><strong>${isHebrew ? 'בקשות מיוחדות:' : 'Special requests:'}</strong> ${escapeHTML(specialRequests)}</p>
+          ${specialRequests && !isCancellation ? `<div style="background-color:#f0f4ff;border-radius:8px;padding:15px;margin-bottom:20px;">
+            <p style="color:#666;font-size:13px;margin:0;"><strong>${isHebrew ? 'בקשות מיוחדות:' : isFrench ? 'Demandes spéciales :' : 'Special requests:'}</strong> ${escapeHTML(specialRequests)}</p>
           </div>` : ''}
           <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
             <a href="https://staymakom.com/account" style="display:inline-block;background-color:#c9a87c;color:#fff;text-decoration:none;padding:16px 40px;border-radius:4px;font-size:14px;font-weight:600;letter-spacing:1px;">
-              ${isHebrew ? 'צפה בהזמנות שלי' : 'VIEW MY BOOKINGS'}
+              ${isHebrew ? 'צפה בהזמנות שלי' : isFrench ? 'VOIR MES RÉSERVATIONS' : 'VIEW MY BOOKINGS'}
             </a>
           </td></tr></table>
         </td></tr>
         <tr><td style="background-color:#f9f9f6;padding:30px;text-align:center;border-top:1px solid #eee;">
-          <p style="color:#999;font-size:12px;margin:0;">© ${new Date().getFullYear()} Staymakom. ${isHebrew ? 'כל הזכויות שמורות.' : 'All rights reserved.'}</p>
-          <p style="color:#999;font-size:12px;margin:10px 0 0;">${isHebrew ? 'שאלות? צור/י קשר' : 'Questions? Contact us at'} <a href="mailto:shana@staymakom.com" style="color:#c9a87c;">shana@staymakom.com</a></p>
+          <p style="color:#999;font-size:12px;margin:0;">© ${new Date().getFullYear()} Staymakom. ${isHebrew ? 'כל הזכויות שמורות.' : isFrench ? 'Tous droits réservés.' : 'All rights reserved.'}</p>
+          <p style="color:#999;font-size:12px;margin:10px 0 0;">${isHebrew ? 'שאלות? צור/י קשר' : isFrench ? 'Questions ? Contactez-nous à' : 'Questions? Contact us at'} <a href="mailto:shana@staymakom.com" style="color:#c9a87c;">shana@staymakom.com</a></p>
         </td></tr>
       </table>
     </td></tr>
   </table>
 </body>
 </html>`;
+
+    const subject = isCancellation
+      ? (isHebrew ? `✕ הזמנתך בוטלה - ${experienceTitle || 'Experience'}` : isFrench ? `✕ Réservation annulée - ${experienceTitle || 'Experience'}` : `✕ Booking cancelled - ${experienceTitle || 'Experience'}`)
+      : (isHebrew ? `✓ הזמנתך אושרה - ${experienceTitle || 'Experience'}` : isFrench ? `✓ Réservation confirmée - ${experienceTitle || 'Experience'}` : `✓ Booking confirmed - ${experienceTitle || 'Experience'}`);
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -186,9 +230,7 @@ const handler = async (req: Request): Promise<Response> => {
         from: "Staymakom Reservations <reservations@staymakom.com>",
         to: [to],
         reply_to: "shana@staymakom.com",
-        subject: isHebrew
-          ? `✓ הזמנתך אושרה - ${experienceTitle || 'Experience'}`
-          : `✓ Booking confirmed - ${experienceTitle || 'Experience'}`,
+        subject,
         html: emailHtml,
       }),
     });
@@ -199,10 +241,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to send email: ${error}`);
     }
 
-    console.log("Booking confirmation sent successfully to:", to);
+    console.log(`${isCancellation ? 'Cancellation' : 'Booking confirmation'} sent successfully to:`, to);
 
     return new Response(
-      JSON.stringify({ success: true, message: "Booking confirmation sent successfully" }),
+      JSON.stringify({ success: true, message: `${isCancellation ? 'Cancellation' : 'Booking confirmation'} sent successfully` }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {

@@ -6,10 +6,14 @@
  * ✅ V4: Property remarks display
  * ✅ V5: Optional hotel extras (Spice it up) affecting total price
  * ✅ V6: Full booking flow — pre-book → create-booking → save DB → confirmation
+ * ✅ #3b: isImmediate warning for on-request bookings
+ * ✅ #5b: Progressive booking messages
+ * ✅ #7: Children/infants selector
+ * ✅ #10b: Structured error codes
  */
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2 } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2, Clock, Baby, Minus, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DateRangePicker from "./DateRangePicker";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,6 +36,7 @@ import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { useExperience2Price } from "@/hooks/useExperience2Price";
 import { formatGuests, calculateNights, preBook, createBooking } from "@/services/hyperguest";
+import { extractTaxBreakdown } from "@/utils/taxesDisplay";
 import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -70,6 +76,30 @@ interface BookingPanel2Props {
   selectedExtras?: SelectedExtra[];
 }
 
+// ✅ #10b: Structured error messages by HG error code
+const hgErrorMessages: Record<string, Record<string, string>> = {
+  'BN.402': {
+    en: "The price has changed since your search. Please search again.",
+    he: "המחיר השתנה מאז החיפוש שלך. אנא חפש שוב.",
+    fr: "Le prix a changé depuis votre recherche. Veuillez relancer une recherche.",
+  },
+  'BN.502': {
+    en: "This room is no longer available. Please choose another option.",
+    he: "החדר אינו זמין עוד. אנא בחר אפשרות אחרת.",
+    fr: "Cette chambre n'est plus disponible. Veuillez choisir une autre option.",
+  },
+  'BN.506': {
+    en: "Processing error. Please try again or contact support.",
+    he: "שגיאת עיבוד. אנא נסה שוב או פנה לתמיכה.",
+    fr: "Erreur de traitement. Veuillez réessayer ou contacter le support.",
+  },
+  'BN.507': {
+    en: "Payment could not be processed. Please check your card details.",
+    he: "התשלום לא בוצע. אנא בדק את פרטי הכרטיס.",
+    fr: "Le paiement n'a pas pu être traité. Vérifiez vos informations de carte.",
+  },
+};
+
 export function BookingPanel2({
   experienceId,
   experienceTitle = "",
@@ -87,6 +117,10 @@ export function BookingPanel2({
       title: "Book this experience",
       dates: "Dates",
       guests: "Number of guests",
+      adults: "Adults",
+      children: "Children (2-12)",
+      infants: "Infants (0-1)",
+      childAge: "Age",
       book: "Book",
       selectDates: "Select dates",
       noHyperguest: "This experience is not available for online booking yet.",
@@ -98,16 +132,23 @@ export function BookingPanel2({
       orSeeSuggested: "See suggested dates",
       verifying: "Verifying price...",
       booking: "Booking...",
+      bookingLong: "Confirmation in progress, please wait...",
+      bookingVeryLong: "Taking longer than expected. Do not close this page...",
       importantNotices: "Important notices",
       priceChanged: "Price has changed",
       priceChangedConfirm: "The price changed. Do you want to continue with the new price?",
       fillGuestInfo: "Please fill in guest information (name, email, phone, birth date)",
       bookingError: "Booking failed. Your information has been saved — please try again.",
+      onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
     },
     he: {
       title: "הזמן חוויה זו",
       dates: "תאריכים",
       guests: "מספר אורחים",
+      adults: "מבוגרים",
+      children: "ילדים (2-12)",
+      infants: "תינוקות (0-1)",
+      childAge: "גיל",
       book: "הזמן",
       selectDates: "בחר תאריכים",
       noHyperguest: "חוויה זו אינה זמינה עדיין להזמנה מקוונת.",
@@ -119,16 +160,23 @@ export function BookingPanel2({
       orSeeSuggested: "ראה תאריכים מוצעים",
       verifying: "בודק מחיר...",
       booking: "...מזמין",
+      bookingLong: "...אישור בתהליך, אנא המתן",
+      bookingVeryLong: "...לוקח יותר זמן מהצפוי. אל תסגור את הדף",
       importantNotices: "הערות חשובות",
       priceChanged: "המחיר השתנה",
       priceChangedConfirm: "המחיר השתנה. האם תרצה להמשיך עם המחיר החדש?",
       fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון, תאריך לידה)",
       bookingError: "ההזמנה נכשלה. הפרטים שלך נשמרו — אנא נסה שוב.",
+      onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
     },
     fr: {
       title: "Réserver cette expérience",
       dates: "Dates",
       guests: "Nombre de voyageurs",
+      adults: "Adultes",
+      children: "Enfants (2-12 ans)",
+      infants: "Bébés (0-1 an)",
+      childAge: "Âge",
       book: "Réserver",
       selectDates: "Sélectionnez des dates",
       noHyperguest: "Cette expérience n'est pas encore disponible pour la réservation en ligne.",
@@ -140,11 +188,14 @@ export function BookingPanel2({
       orSeeSuggested: "Voir les dates suggérées",
       verifying: "Vérification du prix...",
       booking: "Réservation en cours...",
+      bookingLong: "Confirmation en cours, veuillez patienter...",
+      bookingVeryLong: "La réservation prend plus de temps que prévu. Ne fermez pas cette page...",
       importantNotices: "Remarques importantes",
       priceChanged: "Le prix a changé",
       priceChangedConfirm: "Le prix a changé. Voulez-vous continuer avec le nouveau prix ?",
       fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone, date de naissance)",
       bookingError: "La réservation a échoué. Vos informations ont été conservées — veuillez réessayer.",
+      onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
     },
   }[lang];
 
@@ -170,10 +221,13 @@ export function BookingPanel2({
   const [selectedDateOptionId, setSelectedDateOptionId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [adults, setAdults] = useState(minParty);
+  // ✅ #7: Children ages array
+  const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingStep, setBookingStep] = useState<"idle" | "prebook" | "booking">("idle");
+  const [bookingElapsed, setBookingElapsed] = useState(0);
   const [specialRequests, setSpecialRequests] = useState("");
   const [leadGuest, setLeadGuest] = useState<LeadGuestData>(EMPTY_LEAD_GUEST);
   const [confirmationData, setConfirmationData] = useState<BookingConfirmationData | null>(null);
@@ -181,7 +235,34 @@ export function BookingPanel2({
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [showGuestErrors, setShowGuestErrors] = useState(false);
   const pendingBookAfterAuth = useRef(false);
+  const bookingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { user } = useAuth();
+
+  // ✅ #5b: Progressive booking timer
+  useEffect(() => {
+    if (isBooking) {
+      setBookingElapsed(0);
+      bookingTimerRef.current = setInterval(() => {
+        setBookingElapsed(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (bookingTimerRef.current) {
+        clearInterval(bookingTimerRef.current);
+        bookingTimerRef.current = null;
+      }
+      setBookingElapsed(0);
+    }
+    return () => {
+      if (bookingTimerRef.current) clearInterval(bookingTimerRef.current);
+    };
+  }, [isBooking]);
+
+  const getBookingMessage = () => {
+    if (bookingStep === "prebook") return t.verifying;
+    if (bookingElapsed > 30) return t.bookingVeryLong;
+    if (bookingElapsed > 10) return t.bookingLong;
+    return t.booking;
+  };
 
   // Fetch real availability for 1/2/3 nights tabs
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
@@ -218,9 +299,10 @@ export function BookingPanel2({
     const checkIn = dateRange.from.toISOString().split("T")[0];
     const rawNights = calculateNights(checkIn, dateRange.to.toISOString().split("T")[0]);
     const nights = Math.min(rawNights, MAX_NIGHTS);
-    const guests = formatGuests([{ adults, children: [] }]);
+    // ✅ #7: Include children ages in guest format
+    const guests = formatGuests([{ adults, children: childrenAges }]);
     return { checkIn, nights, guests, hotelIds: [parseInt(hyperguestPropertyId)], customerNationality: "IL", currency };
-  }, [dateRange, adults, hyperguestPropertyId, currency]);
+  }, [dateRange, adults, childrenAges, hyperguestPropertyId, currency]);
 
   const {
     data: searchResult,
@@ -261,11 +343,11 @@ export function BookingPanel2({
     } else if ((searchResult as any).remarks) {
       raw = (searchResult as any).remarks;
     }
-    // Filter out generic placeholder messages from HyperGuest
     return raw.filter((r: string) => !/general message that should be shown/i.test(r));
   }, [searchResult]);
 
   const nights = searchParams?.nights || 0;
+  const totalPartySize = adults + childrenAges.length;
   const ratePlanPrices = selectedRatePlan?.prices || null;
   const priceBreakdown = useExperience2Price(experienceId, null, currency, nights, adults, ratePlanPrices);
 
@@ -303,7 +385,6 @@ export function BookingPanel2({
   useEffect(() => {
     if (user && pendingBookAfterAuth.current) {
       pendingBookAfterAuth.current = false;
-      // Small delay to let state settle
       setTimeout(() => handleBookInternal(), 300);
     }
   }, [user]);
@@ -349,7 +430,7 @@ export function BookingPanel2({
           dates: { from: checkIn, to: checkOut },
           propertyId: parseInt(hyperguestPropertyId!),
           nationality: leadGuest.country || "IL",
-          pax: [{ adults, children: [] as number[] }],
+          pax: [{ adults, children: childrenAges }],
         },
         rooms: [{
           roomId: selectedRoomId,
@@ -382,8 +463,27 @@ export function BookingPanel2({
 
       const staymakomRef = `SM-${experienceId.substring(0, 8).toUpperCase()}-${Date.now()}`;
 
-      // ✅ Sanitize guest data to ensure HyperGuest-compatible formats
       const safe = sanitizeLeadGuest(leadGuest);
+
+      // ✅ #7: Build guests list with children
+      const adultGuests = [
+        {
+          birthDate: safe.birthDate,
+          title: safe.title,
+          name: { first: safe.firstName, last: safe.lastName },
+        },
+        ...Array.from({ length: Math.max(0, adults - 1) }, (_, i) => ({
+          birthDate: "1990-01-01",
+          title: "MR" as const,
+          name: { first: `Guest`, last: `${i + 2}` },
+        })),
+      ];
+
+      const childGuests = childrenAges.map((age, i) => ({
+        birthDate: `${new Date().getFullYear() - age}-01-01`,
+        title: "C" as const, // ✅ Children and infants always use "C"
+        name: { first: `Child`, last: `${i + 1}` },
+      }));
 
       const bookingData = {
         dates: { from: checkIn, to: checkOut },
@@ -408,19 +508,7 @@ export function BookingPanel2({
           ratePlanId: selectedRatePlanId,
           expectedPrice: { amount: expectedAmount, currency: expectedCurrency },
           specialRequests: specialRequests || undefined,
-          guests: [
-            {
-              birthDate: safe.birthDate,
-              title: safe.title,
-              name: { first: safe.firstName, last: safe.lastName },
-            },
-            // Add additional adult guests as placeholders
-            ...Array.from({ length: Math.max(0, adults - 1) }, (_, i) => ({
-              birthDate: "1990-01-01",
-              title: "MR" as const,
-              name: { first: `Guest`, last: `${i + 2}` },
-            })),
-          ],
+          guests: [...adultGuests, ...childGuests],
         }],
       };
 
@@ -443,9 +531,9 @@ export function BookingPanel2({
         checkin: checkIn,
         checkout: checkOut,
         nights,
-        party_size: adults,
+        party_size: totalPartySize,
         sell_price: sellPrice,
-        net_price: 0, // Will be populated by sync
+        net_price: 0,
         commission_amount: priceBreakdown?.totalCommissions ?? 0,
         currency: bookingCurrency,
         status: hgStatus.toLowerCase(),
@@ -462,8 +550,10 @@ export function BookingPanel2({
 
       if (dbError) {
         console.error("Failed to save booking to DB:", dbError);
-        // Don't fail the flow — HG booking is already created
       }
+
+      // ✅ #2: Extract display taxes for confirmation
+      const taxBreakdown = extractTaxBreakdown(selectedRatePlan);
 
       // ── Step 4: Show confirmation ──
       const allRemarks = [
@@ -480,19 +570,20 @@ export function BookingPanel2({
         checkIn,
         checkOut,
         nights,
-        partySize: adults,
+        partySize: totalPartySize,
         sellPrice,
         currency: bookingCurrency,
         remarks: allRemarks,
         specialRequests,
         experienceTitle: experienceTitle || "Experience",
         staymakomRef,
+        displayTaxesTotal: taxBreakdown.totalDisplayAmount,
+        isOnRequest: selectedRatePlan?.isImmediate === false,
       });
       setShowConfirmation(true);
 
       // ── Step 5: Send confirmation email ──
       try {
-        // Compute cancellation info for email
         const emailCancellation = analyzeCancellationPolicies(
           selectedRatePlan?.cancellationPolicies,
           checkIn,
@@ -510,7 +601,7 @@ export function BookingPanel2({
             checkIn,
             checkOut,
             nights,
-            partySize: adults,
+            partySize: totalPartySize,
             totalPrice: sellPrice,
             currency: bookingCurrency,
             bookingRef: staymakomRef,
@@ -518,6 +609,7 @@ export function BookingPanel2({
             remarks: allRemarks,
             specialRequests,
             lang,
+            displayTaxesTotal: taxBreakdown.totalDisplayAmount,
             cancellationPolicy: {
               summaryText: emailCancellation.summaryText,
               isNonRefundable: emailCancellation.isNonRefundable,
@@ -527,14 +619,19 @@ export function BookingPanel2({
         });
       } catch (emailError) {
         console.error("Email sending failed:", emailError);
-        // Non-blocking — booking is confirmed regardless
       }
 
     } catch (error: any) {
       console.error("Pre-book/Booking error:", error);
       const detail = error?.message || "";
+
+      // ✅ #10b: Parse structured error code
+      const codeMatch = detail.match(/BN\.\d+/);
+      const errorCode = codeMatch?.[0] || "";
+      const friendlyMsg = hgErrorMessages[errorCode]?.[lang];
+
       toast.error(t.bookingError, {
-        description: detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined,
+        description: friendlyMsg || (detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined),
         duration: 8000,
       });
     } finally {
@@ -556,6 +653,9 @@ export function BookingPanel2({
   const isReadyToBook = dateRange.from && dateRange.to && selectedRoomId && selectedRatePlanId && priceBreakdown && isGuestValid;
   const displayTotal = (priceBreakdown?.finalTotal ?? 0) + extrasTotal;
   const totalIsNaN = Number.isNaN(displayTotal);
+
+  // ✅ #3b: Check if selected rate plan is on-request
+  const isOnRequest = selectedRatePlan?.isImmediate === false;
 
   if (!hyperguestPropertyId) {
     console.log("[BookingPanel2] ⛔ No hyperguestPropertyId — props received:", {
@@ -582,17 +682,83 @@ export function BookingPanel2({
           <CardTitle className="text-lg">{t.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Guests */}
-          <div className="space-y-2">
+          {/* Guests — ✅ #7: Adults + Children + Infants */}
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Users className="h-4 w-4" />
               {t.guests}
             </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>-</Button>
-              <span className="text-lg font-medium w-8 text-center">{adults}</span>
-              <Button variant="outline" size="sm" onClick={() => setAdults(Math.min(maxParty, adults + 1))} disabled={adults >= maxParty}>+</Button>
+
+            {/* Adults */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm">{t.adults}</span>
+              <div className="flex items-center gap-4">
+                <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
+                  <Minus className="h-3 w-3" />
+                </Button>
+                <span className="text-lg font-medium w-8 text-center">{adults}</span>
+                <Button variant="outline" size="sm" onClick={() => setAdults(Math.min(maxParty, adults + 1))} disabled={adults >= maxParty}>
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
+
+            {/* Children (2-12) */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm">{t.children}</span>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setChildrenAges(prev => prev.slice(0, -1))}
+                  disabled={childrenAges.length === 0}
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+                <span className="text-lg font-medium w-8 text-center">{childrenAges.filter(a => a >= 2).length}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setChildrenAges(prev => [...prev, 5])}
+                  disabled={childrenAges.length >= 4}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Age selectors for children */}
+            {childrenAges.length > 0 && (
+              <div className="pl-4 space-y-2">
+                {childrenAges.map((age, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Baby className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground w-16">
+                      {age < 2 ? (lang === "he" ? "תינוק" : lang === "fr" ? "Bébé" : "Infant") : (lang === "he" ? `ילד ${idx + 1}` : lang === "fr" ? `Enfant ${idx + 1}` : `Child ${idx + 1}`)}
+                    </span>
+                    <Select
+                      value={String(age)}
+                      onValueChange={(v) => {
+                        const newAges = [...childrenAges];
+                        newAges[idx] = parseInt(v);
+                        setChildrenAges(newAges);
+                      }}
+                    >
+                      <SelectTrigger className="w-20 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 13 }, (_, i) => (
+                          <SelectItem key={i} value={String(i)}>
+                            {i} {lang === "he" ? (i < 2 ? "שנים" : "שנים") : lang === "fr" ? "ans" : i === 1 ? "yr" : "yrs"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Separator />
@@ -723,7 +889,17 @@ export function BookingPanel2({
             />
           )}
 
-          {searchParams && <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} />}
+          {searchParams && <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} ratePlanPrices={ratePlanPrices} />}
+
+          {/* ✅ #3b: On-request warning */}
+          {isOnRequest && selectedRatePlan && (
+            <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
+              <Clock className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-700 dark:text-blue-400">
+                {t.onRequestWarning}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* ✅ V5: Selected extras summary */}
           {selectedExtras.length > 0 && (
@@ -823,7 +999,7 @@ export function BookingPanel2({
               ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {bookingStep === "prebook" ? t.verifying : t.booking}
+                  {getBookingMessage()}
                 </span>
               )
               : isReadyToBook && !totalIsNaN
