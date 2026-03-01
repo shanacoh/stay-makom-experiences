@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -38,17 +38,14 @@ export default function OAuthButtons({ lang = "en", disabled = false }: OAuthBut
   const handleGoogleSignIn = async () => {
     setLoadingGoogle(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/account`,
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
 
-      if (error) {
-        toast.error(error.message);
+      if (result?.error) {
+        toast.error(result.error.message || "Failed to connect with Google");
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to connect with Google");
     } finally {
       setLoadingGoogle(false);
