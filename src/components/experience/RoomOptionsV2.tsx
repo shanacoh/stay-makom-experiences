@@ -1,16 +1,20 @@
 /**
  * Room selection component — filter chips for room types + rate plans for selected room
  * Matches the visual style of the nights selector tabs in BookingPanel2
+ * ✅ #1: BAR price check — never display sell < BAR
+ * ✅ #3a: isImmediate badge for on-request rate plans
+ * ✅ #6: No fallback to net price
  */
 
 import { useState, useEffect, useMemo } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, Info, BedDouble, X, AlertTriangle } from "lucide-react";
+import { Check, Info, BedDouble, X, AlertTriangle, Clock } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
 import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
+import { extractTaxBreakdown, formatTaxAmount } from "@/utils/taxesDisplay";
 import {
   Popover,
   PopoverContent,
@@ -22,9 +26,12 @@ interface RoomRatePlan {
   ratePlanName: string;
   board: string;
   remarks?: string[];
+  isImmediate?: boolean;
   prices?: {
-    sell?: { price?: number; amount?: number; currency?: string };
+    sell?: { price?: number; amount?: number; currency?: string; taxes?: any[] };
     net?: { price?: number; amount?: number; currency?: string };
+    bar?: { price?: number; amount?: number; currency?: string };
+    fees?: any[];
   };
   cancellationPolicies?: any[];
 }
@@ -59,6 +66,27 @@ interface RoomOptionsV2Props {
 const filterGenericRemarks = (remarks: string[]) =>
   remarks.filter((r) => !/general message that should be shown/i.test(r));
 
+/**
+ * ✅ #1 BAR check: returns true if rate plan should be hidden
+ * ✅ #6: returns true if no sell price
+ */
+function shouldHideRatePlan(ratePlan: RoomRatePlan): boolean {
+  const sellPrice = ratePlan.prices?.sell;
+  if (!sellPrice) return true; // #6: no sell → hide
+
+  const sellAmount = Number(sellPrice.price ?? sellPrice.amount) || 0;
+  if (sellAmount <= 0) return true;
+
+  // #1 BAR check
+  const barPrice = ratePlan.prices?.bar;
+  if (barPrice) {
+    const barAmount = Number(barPrice.price ?? barPrice.amount) || 0;
+    if (barAmount > 0 && sellAmount < barAmount) return true;
+  }
+
+  return false;
+}
+
 export function RoomOptionsV2({
   searchResult,
   isLoading,
@@ -72,20 +100,29 @@ export function RoomOptionsV2({
     en: {
       title: "Room type",
       noRooms: "No rooms available for these dates",
+      noRates: "No available rates for this room",
       totalStay: "Total for stay",
       seeDetails: "See details",
+      onRequest: "Subject to confirmation",
+      taxesAtHotel: "taxes at hotel",
     },
     he: {
       title: "סוג חדר",
       noRooms: "אין חדרים זמינים לתאריכים אלה",
+      noRates: "אין תעריפים זמינים לחדר זה",
       totalStay: 'סה"כ לשהייה',
       seeDetails: "פרטים",
+      onRequest: "בכפוף לאישור",
+      taxesAtHotel: "מסים במלון",
     },
     fr: {
       title: "Type de chambre",
       noRooms: "Aucune chambre disponible pour ces dates",
+      noRates: "Aucun tarif disponible pour cette chambre",
       totalStay: "Total du séjour",
       seeDetails: "Voir détails",
+      onRequest: "Confirmation sous réserve",
+      taxesAtHotel: "taxes à l'hôtel",
     },
   }[lang];
 
@@ -111,19 +148,27 @@ export function RoomOptionsV2({
 
   const activeRoom = rooms.find((r) => r.roomId === activeRoomId) ?? null;
 
+  // Filter visible rate plans for active room
+  const visibleRatePlans = useMemo(() => {
+    if (!activeRoom) return [];
+    return activeRoom.ratePlans.filter(rp => !shouldHideRatePlan(rp));
+  }, [activeRoom]);
+
   const formatPrice = (amount: number, currency: string) =>
     new Intl.NumberFormat(lang === "he" ? "he-IL" : lang === "fr" ? "fr-FR" : "en-US", {
       style: "currency",
       currency,
     }).format(amount);
 
-  // Get cheapest price for a room (for display on chip)
+  // Get cheapest price for a room (for display on chip) — sell only
   const getCheapestPrice = (room: Room) => {
     let cheapest: { amount: number; currency: string } | null = null;
     for (const rp of room.ratePlans) {
-      const priceObj = rp.prices?.sell || rp.prices?.net;
-      const amount = priceObj != null ? Number(priceObj.price ?? priceObj.amount) || 0 : 0;
-      const currency = priceObj?.currency ?? "ILS";
+      if (shouldHideRatePlan(rp)) continue;
+      const priceObj = rp.prices?.sell;
+      if (!priceObj) continue;
+      const amount = Number(priceObj.price ?? priceObj.amount) || 0;
+      const currency = priceObj.currency ?? "ILS";
       if (amount > 0 && (!cheapest || amount < cheapest.amount)) {
         cheapest = { amount, currency };
       }
@@ -190,7 +235,11 @@ export function RoomOptionsV2({
         </div>
 
         {/* Rate plans for selected room */}
-        {activeRoom && (
+        {activeRoom && visibleRatePlans.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">{t.noRates}</p>
+        )}
+
+        {activeRoom && visibleRatePlans.length > 0 && (
           <RadioGroup
             value={selectedRoomId === activeRoom.roomId && selectedRatePlanId != null
               ? `${activeRoom.roomId}-${selectedRatePlanId}`
@@ -202,12 +251,19 @@ export function RoomOptionsV2({
             }}
             className="space-y-1.5"
           >
-            {activeRoom.ratePlans.map((ratePlan) => {
-              const priceObj = ratePlan.prices?.sell || ratePlan.prices?.net;
-              const amount = priceObj != null ? Number(priceObj.price ?? priceObj.amount) || 0 : 0;
-              const currency = priceObj?.currency ?? "ILS";
+            {visibleRatePlans.map((ratePlan) => {
+              // ✅ #6: Only use sell price
+              const priceObj = ratePlan.prices?.sell!;
+              const amount = Number(priceObj.price ?? priceObj.amount) || 0;
+              const currency = priceObj.currency ?? "ILS";
               const isSelected = selectedRoomId === activeRoom.roomId && selectedRatePlanId === ratePlan.ratePlanId;
               const filteredRemarks = filterGenericRemarks(ratePlan.remarks || []);
+
+              // ✅ #2b: Display taxes under price
+              const taxBreakdown = extractTaxBreakdown(ratePlan);
+
+              // ✅ #3a: isImmediate badge
+              const isOnRequest = ratePlan.isImmediate === false;
 
               // Dynamic cancellation badge
               const cancellation = analyzeCancellationPolicies(
@@ -225,7 +281,7 @@ export function RoomOptionsV2({
                       isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
                     )}
                   >
-                    {/* Left: radio + name + board type */}
+                    {/* Left: radio + name + board type + on-request badge */}
                     <div className="flex items-start gap-3">
                       <RadioGroupItem
                         value={`${activeRoom.roomId}-${ratePlan.ratePlanId}`}
@@ -234,17 +290,31 @@ export function RoomOptionsV2({
                       />
                       <div className="space-y-1">
                         <p className="text-sm font-medium">{ratePlan.ratePlanName}</p>
-                        <Badge variant="secondary" className="text-xs">
-                          {getBoardTypeLabel(ratePlan.board)}
-                        </Badge>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {getBoardTypeLabel(ratePlan.board)}
+                          </Badge>
+                          {isOnRequest && (
+                            <Badge variant="outline" className="text-xs text-blue-600 border-blue-300 bg-blue-50">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {t.onRequest}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Right: price + cancellation badge below */}
+                    {/* Right: price + taxes + cancellation badge below */}
                     <div className="text-right shrink-0 space-y-1.5">
                       <div>
-                        <p className="font-semibold">{amount > 0 ? formatPrice(amount, currency) : "N/A"}</p>
-                        {priceObj && <p className="text-xs text-muted-foreground">{t.totalStay}</p>}
+                        <p className="font-semibold">{formatPrice(amount, currency)}</p>
+                        <p className="text-xs text-muted-foreground">{t.totalStay}</p>
+                        {/* ✅ #2b: Display taxes at hotel */}
+                        {taxBreakdown.totalDisplayAmount > 0 && (
+                          <p className="text-[10px] text-orange-600">
+                            + {formatTaxAmount(taxBreakdown.totalDisplayAmount, taxBreakdown.currency)} {t.taxesAtHotel}
+                          </p>
+                        )}
                       </div>
 
                       {/* Cancellation badge — right-aligned under price */}

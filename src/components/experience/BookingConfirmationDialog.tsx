@@ -1,13 +1,14 @@
 /**
  * Booking Confirmation Dialog — Shown after successful HyperGuest booking
- * Displays: confirmation number, hotel, room, board type, dates, price, remarks
+ * ✅ #2c: Display taxes at hotel
+ * ✅ #3c: On-request status handling
  */
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Check, CalendarDays, Hotel, Users, MessageSquare, Copy } from "lucide-react";
+import { Check, CalendarDays, Hotel, Users, MessageSquare, Copy, Clock, AlertTriangle } from "lucide-react";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { toast } from "sonner";
@@ -29,6 +30,10 @@ export interface BookingConfirmationData {
   specialRequests: string;
   experienceTitle: string;
   staymakomRef: string;
+  /** ✅ #2c: Display taxes payable at hotel */
+  displayTaxesTotal?: number;
+  /** ✅ #3c: Whether booking is on-request */
+  isOnRequest?: boolean;
 }
 
 interface BookingConfirmationDialogProps {
@@ -40,8 +45,10 @@ interface BookingConfirmationDialogProps {
 
 const translations = {
   en: {
-    title: "Booking Confirmed!",
-    subtitle: "Your experience has been booked successfully.",
+    confirmed: "Booking Confirmed!",
+    confirmedSub: "Your experience has been booked successfully.",
+    pending: "Booking Submitted",
+    pendingSub: "Your booking is subject to hotel confirmation. You will be notified of the status.",
     ref: "Reference",
     hgRef: "Confirmation #",
     hotel: "Hotel",
@@ -55,11 +62,14 @@ const translations = {
     close: "Close",
     copyRef: "Copy reference",
     nights: "nights",
+    taxesAtHotel: "To pay at the hotel (taxes & fees)",
     vatNote: "Prices do not include VAT. Israeli residents are subject to 18% VAT payable at the hotel.",
   },
   he: {
-    title: "!ההזמנה אושרה",
-    subtitle: "החוויה שלך הוזמנה בהצלחה.",
+    confirmed: "!ההזמנה אושרה",
+    confirmedSub: "החוויה שלך הוזמנה בהצלחה.",
+    pending: "ההזמנה נשלחה",
+    pendingSub: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
     ref: "מספר הפניה",
     hgRef: "מספר אישור",
     hotel: "מלון",
@@ -73,11 +83,14 @@ const translations = {
     close: "סגור",
     copyRef: "העתק מספר הפניה",
     nights: "לילות",
+    taxesAtHotel: "לתשלום במלון (מסים ועמלות)",
     vatNote: "המחירים אינם כוללים מע\"מ. תושבי ישראל חייבים ב-18% מע\"מ המשולם ישירות במלון.",
   },
   fr: {
-    title: "Réservation confirmée !",
-    subtitle: "Votre expérience a été réservée avec succès.",
+    confirmed: "Réservation confirmée !",
+    confirmedSub: "Votre expérience a été réservée avec succès.",
+    pending: "Réservation soumise",
+    pendingSub: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
     ref: "Référence",
     hgRef: "N° de confirmation",
     hotel: "Hôtel",
@@ -91,14 +104,24 @@ const translations = {
     close: "Fermer",
     copyRef: "Copier la référence",
     nights: "nuits",
+    taxesAtHotel: "À régler sur place (taxes et frais)",
     vatNote: "Les prix n'incluent pas la TVA. Les résidents israéliens sont soumis à 18% de TVA payable à l'hôtel.",
   },
 };
+
+function fmt(amount: number, currency: string): string {
+  const symbol = currency === "ILS" ? "₪" : currency === "EUR" ? "€" : currency === "USD" ? "$" : currency;
+  return `${symbol}${amount.toLocaleString("en-IL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: BookingConfirmationDialogProps) {
   const t = translations[lang];
 
   if (!data) return null;
+
+  // ✅ #3c: Determine if confirmed or on-request
+  const isConfirmed = data.status?.toLowerCase() === "confirmed";
+  const isOnRequest = data.isOnRequest || (!isConfirmed && data.status?.toLowerCase() !== "confirmed");
 
   const copyRef = () => {
     navigator.clipboard.writeText(data.staymakomRef);
@@ -110,12 +133,20 @@ export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: 
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-              <Check className="h-5 w-5 text-green-600" />
+            <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isConfirmed ? 'bg-green-100' : 'bg-blue-100'}`}>
+              {isConfirmed ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <Clock className="h-5 w-5 text-blue-600" />
+              )}
             </div>
             <div>
-              <DialogTitle className="text-lg">{t.title}</DialogTitle>
-              <DialogDescription className="text-sm">{t.subtitle}</DialogDescription>
+              <DialogTitle className="text-lg">
+                {isConfirmed ? t.confirmed : t.pending}
+              </DialogTitle>
+              <DialogDescription className="text-sm">
+                {isConfirmed ? t.confirmedSub : t.pendingSub}
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -141,8 +172,12 @@ export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: 
                 <span className="font-mono text-xs">{data.hgBookingId}</span>
               </div>
             )}
-            <Badge variant={data.status === "Confirmed" ? "default" : "secondary"} className="text-xs">
-              {data.status}
+            <Badge variant={isConfirmed ? "default" : "secondary"} className="text-xs">
+              {isConfirmed ? (
+                <><Check className="h-3 w-3 mr-1" />{data.status}</>
+              ) : (
+                <><Clock className="h-3 w-3 mr-1" />{data.status}</>
+              )}
             </Badge>
           </div>
 
@@ -179,6 +214,16 @@ export function BookingConfirmationDialog({ open, onClose, data, lang = "en" }: 
             <span className="font-medium">{t.price}</span>
             <DualPrice amount={data.sellPrice} currency={data.currency} className="text-primary text-lg items-end" />
           </div>
+
+          {/* ✅ #2c: Display taxes at hotel */}
+          {data.displayTaxesTotal != null && data.displayTaxesTotal > 0 && (
+            <div className="flex items-start gap-2 p-3 rounded-md bg-orange-50 border border-orange-200 dark:bg-orange-950/30 dark:border-orange-800">
+              <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-orange-700 dark:text-orange-400">
+                {t.taxesAtHotel}: {fmt(data.displayTaxesTotal, data.currency)}
+              </p>
+            </div>
+          )}
 
           {/* VAT note */}
           <p className="text-xs text-muted-foreground">{t.vatNote}</p>
