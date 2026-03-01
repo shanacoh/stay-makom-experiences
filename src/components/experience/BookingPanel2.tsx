@@ -524,6 +524,8 @@ export function BookingPanel2({
       const currentSession = await supabase.auth.getSession();
       const currentUserId = currentSession.data.session?.user?.id || null;
 
+      const confirmationToken = crypto.randomUUID();
+
       const { error: dbError } = await supabase.from("bookings_hg").insert({
         hg_booking_id: hgBookingId,
         hotel_id: hotelId,
@@ -546,6 +548,7 @@ export function BookingPanel2({
         customer_email: leadGuest.email,
         hg_raw_data: bookingResult,
         user_id: currentUserId,
+        confirmation_token: confirmationToken,
       } as any);
 
       if (dbError) {
@@ -579,6 +582,7 @@ export function BookingPanel2({
         staymakomRef,
         displayTaxesTotal: taxBreakdown.totalDisplayAmount,
         isOnRequest: selectedRatePlan?.isImmediate === false,
+        confirmationToken,
       });
       setShowConfirmation(true);
 
@@ -610,6 +614,7 @@ export function BookingPanel2({
             specialRequests,
             lang,
             displayTaxesTotal: taxBreakdown.totalDisplayAmount,
+            confirmationToken,
             cancellationPolicy: {
               summaryText: emailCancellation.summaryText,
               isNonRefundable: emailCancellation.isNonRefundable,
