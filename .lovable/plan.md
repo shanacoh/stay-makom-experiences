@@ -1,30 +1,57 @@
 
 
-# Fix RLS Policies for experiences2 & experience2_hotels
+# Implémentation complète des Cancellation Policies HyperGuest
 
-## Current Issues Found
+## Étape 1 — Créer `src/utils/cancellationPolicy.ts`
 
-After querying the actual database, the policies are **permissive** (not restrictive as previously thought), but there are 3 real security/access issues:
+Fonction utilitaire `analyzeCancellationPolicies(policies, checkInDate, lang)` qui :
+- Prend le tableau brut `cancellationPolicies[]` du JSON HyperGuest + date de check-in + langue
+- Détecte `isNonRefundable` (daysBefore ≥ 999 + amount 100 + penaltyType "percent")
+- Détecte `isFreeCancellation` (aucune pénalité > 0 applicable à la date actuelle)
+- Calcule `effectiveDeadline` : checkInDate à `cancellationDeadlineHour` (HH:mm) - `timeFromCheckIn` (hours/days)
+- Retourne `penalties[]` formatées et `summaryText` multilingue (en/fr/he)
+- Gère les 3 penaltyType : "nights" → "X night(s)", "percent" → "X%", "currency" → "X [symbol]"
 
-1. **`experience2_hotels`** — "Authenticated users can manage experience hotels" allows **ANY logged-in user** to insert/update/delete experience-hotel links. This is a security hole.
-2. **`experiences2`** — No `hotel_admin` policy exists, so hotel admins cannot manage their own experiences.
-3. **`experiences2`** — Public SELECT doesn't verify the linked hotel is also `published`, so experiences can leak if the hotel is unpublished.
+## Étape 2 — Mettre à jour `RoomOptionsV2.tsx`
 
-## Migration SQL
+- Importer `analyzeCancellationPolicies`
+- Recevoir `checkInDate?: string` en prop (passé depuis BookingPanel2)
+- Remplacer lignes 237-247 (la logique `cancellationPolicy?.type === "FREE_CANCELLATION"`) par :
+  - Appel à `analyzeCancellationPolicies(ratePlan.cancellationPolicies || [], checkInDate)`
+  - Badge vert si `isFreeCancellation` avec deadline
+  - Badge rouge si `isNonRefundable`
+  - Badge orange sinon avec `summaryText`
+- Supprimer l'interface `CancellationPolicy` locale (lignes 15-22) devenue inutile
 
-One migration that drops the 4 existing policies and creates 6 new ones:
+## Étape 3 — Afficher dans le récap de BookingPanel2
 
-### `experiences2` (3 policies)
-- **Admin ALL** — `has_role(auth.uid(), 'admin')` — full access
-- **Public SELECT** — `status = 'published' AND (hotel_id IS NULL OR hotel_id IN (SELECT id FROM hotels2 WHERE status = 'published'))` — ensures both experience AND hotel are published
-- **Hotel admin ALL** — `has_role(auth.uid(), 'hotel_admin') AND hotel_id = get_user_hotel_id(auth.uid())` — scoped to their hotel
+- Après la sélection de room/ratePlan et avant le bouton Book (vers ligne 774), ajouter une section affichant la politique d'annulation du rate plan sélectionné
+- Utiliser `analyzeCancellationPolicies(selectedRatePlan?.cancellationPolicies, checkIn)`
+- Afficher le `summaryText` complet avec icône appropriée (vert/rouge/orange)
 
-### `experience2_hotels` (3 policies)
-- **Admin ALL** — `has_role(auth.uid(), 'admin')`
-- **Public SELECT** — only for links where the experience is published
-- **Hotel admin ALL** — scoped to experiences linked to their hotel
+## Étape 4 — Remplacer le texte hardcodé sur les cards
 
-## No Code Changes Needed
+**`StickyPriceBar.tsx`** (ligne 70-72) et **`HeroBookingPreview.tsx`** (ligne 43-45) :
+- Supprimer le texte "Free cancellation" / "ביטול חינם" / "Annulation gratuite" statique
+- Ne rien afficher tant qu'aucune recherche n'a été faite (ces composants n'ont pas accès aux données de search — le texte est simplement retiré)
 
-The frontend queries (e.g., `useExperience2.ts`) already use standard Supabase selects — they'll automatically benefit from the corrected RLS rules. No application code changes required.
+## Étape 5 — Email de confirmation
+
+Dans `send-booking-confirmation/index.ts` :
+- Ajouter un champ `cancellationPolicy` au body (objet `{ summaryText, isNonRefundable, deadline }`)
+- Le frontend envoie ce champ dans l'appel `invoke` (BookingPanel2 ligne ~494)
+- Ajouter un bloc HTML dans l'email entre le total et les remarks affichant la politique
+
+## Étape 6 — Passer les données au BookingPanel2 → RoomOptionsV2
+
+- BookingPanel2 passe `checkInDate={searchParams?.checkIn}` à `RoomOptionsV2`
+- BookingPanel2 calcule aussi la cancellation du ratePlan sélectionné pour l'affichage récap et l'envoi email
+
+### Fichiers modifiés
+1. **Nouveau** : `src/utils/cancellationPolicy.ts`
+2. `src/components/experience/RoomOptionsV2.tsx`
+3. `src/components/experience/BookingPanel2.tsx`
+4. `src/components/experience-test/StickyPriceBar.tsx`
+5. `src/components/experience-test/HeroBookingPreview.tsx`
+6. `supabase/functions/send-booking-confirmation/index.ts`
 
