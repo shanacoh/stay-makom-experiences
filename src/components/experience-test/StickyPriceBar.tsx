@@ -67,9 +67,7 @@ const StickyPriceBar = ({
               <DualPrice amount={basePrice} currency={currency} inline className="text-base font-semibold" />
               <span className="text-xs text-muted-foreground ml-1">{priceLabel}</span>
             </div>
-            <p className="text-sm text-cta font-medium">
-              {lang === 'he' ? 'ביטול חינם' : lang === 'fr' ? 'Annulation gratuite' : 'Free cancellation'}
-            </p>
+            {/* Cancellation info removed — dynamic data not available at this level */}
           </div>
 
           {/* Right: CTA - rounded style */}

@@ -5,21 +5,12 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, Info, BedDouble } from "lucide-react";
+import { Check, Info, BedDouble, X, AlertTriangle } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
-
-interface CancellationPolicy {
-  type?: string;
-  description?: string;
-  deadline?: string;
-  penaltyAmount?: number;
-  penaltyCurrency?: string;
-  penaltyNights?: number;
-}
+import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
 
 interface RoomRatePlan {
   ratePlanId: number;
@@ -30,8 +21,7 @@ interface RoomRatePlan {
     sell?: { price?: number; amount?: number; currency?: string };
     net?: { price?: number; amount?: number; currency?: string };
   };
-  cancellationPolicy?: CancellationPolicy;
-  cancellationPolicies?: CancellationPolicy[];
+  cancellationPolicies?: any[];
 }
 
 interface Room {
@@ -58,6 +48,7 @@ interface RoomOptionsV2Props {
   selectedRatePlanId: number | null;
   onSelect: (roomId: number, ratePlanId: number) => void;
   lang?: "en" | "he" | "fr";
+  checkInDate?: string;
 }
 
 const filterGenericRemarks = (remarks: string[]) =>
@@ -70,27 +61,22 @@ export function RoomOptionsV2({
   selectedRatePlanId,
   onSelect,
   lang = "en",
+  checkInDate,
 }: RoomOptionsV2Props) {
   const t = {
     en: {
       title: "Room type",
       noRooms: "No rooms available for these dates",
-      freeCancellation: "Free cancellation",
-      cancellationTerms: "Cancellation terms apply",
       totalStay: "Total for stay",
     },
     he: {
       title: "סוג חדר",
       noRooms: "אין חדרים זמינים לתאריכים אלה",
-      freeCancellation: "ביטול חינם",
-      cancellationTerms: "תנאי ביטול",
       totalStay: 'סה"כ לשהייה',
     },
     fr: {
       title: "Type de chambre",
       noRooms: "Aucune chambre disponible pour ces dates",
-      freeCancellation: "Annulation gratuite",
-      cancellationTerms: "Conditions d'annulation",
       totalStay: "Total du séjour",
     },
   }[lang];
@@ -214,6 +200,13 @@ export function RoomOptionsV2({
             const isSelected = selectedRoomId === activeRoom.roomId && selectedRatePlanId === ratePlan.ratePlanId;
             const filteredRemarks = filterGenericRemarks(ratePlan.remarks || []);
 
+            // Dynamic cancellation badge
+            const cancellation = analyzeCancellationPolicies(
+              ratePlan.cancellationPolicies,
+              checkInDate,
+              lang,
+            );
+
             return (
               <div key={ratePlan.ratePlanId} className="space-y-1">
                 <label
@@ -234,15 +227,22 @@ export function RoomOptionsV2({
                         <Badge variant="secondary" className="text-xs">
                           {getBoardTypeLabel(ratePlan.board)}
                         </Badge>
-                        {ratePlan.cancellationPolicy?.type === "FREE_CANCELLATION" && (
+                        {cancellation.isFreeCancellation && (
                           <Badge variant="outline" className="text-xs text-green-600 border-green-600">
                             <Check className="h-3 w-3 mr-1" />
-                            {t.freeCancellation}
+                            {cancellation.summaryText}
                           </Badge>
                         )}
-                        {ratePlan.cancellationPolicy?.type && ratePlan.cancellationPolicy.type !== "FREE_CANCELLATION" && (
-                          <Badge variant="outline" className="text-xs">
-                            {t.cancellationTerms}
+                        {cancellation.isNonRefundable && (
+                          <Badge variant="outline" className="text-xs text-destructive border-destructive">
+                            <X className="h-3 w-3 mr-1" />
+                            {cancellation.summaryText}
+                          </Badge>
+                        )}
+                        {!cancellation.isFreeCancellation && !cancellation.isNonRefundable && cancellation.summaryText && (
+                          <Badge variant="outline" className="text-xs text-orange-600 border-orange-600">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            {cancellation.summaryText}
                           </Badge>
                         )}
                       </div>
