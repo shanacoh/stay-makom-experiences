@@ -7,7 +7,7 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
-import { Check, CalendarDays, Hotel, Users, Copy, Clock, Info, MessageSquare, AlertCircle } from "lucide-react";
+import { Check, CalendarDays, Hotel, Users, Copy, Clock, Info, MessageSquare, AlertCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +23,9 @@ import { SEOHead } from "@/components/SEOHead";
 const t = {
   en: {
     title: "Your experience is booked!",
+    cancelledTitle: "Booking cancelled",
+    cancelledSub: (email: string) => `A cancellation confirmation has been sent to ${email}`,
+    cancelledOn: "Cancelled on",
     emailSent: (email: string) => `A confirmation email has been sent to ${email}`,
     notFound: "Booking not found",
     notFoundDesc: "This confirmation link is invalid or has expired.",
@@ -47,6 +50,9 @@ const t = {
   },
   he: {
     title: "!החוויה שלך הוזמנה",
+    cancelledTitle: "ההזמנה בוטלה",
+    cancelledSub: (email: string) => `אישור ביטול נשלח אל ${email}`,
+    cancelledOn: "בוטלה בתאריך",
     emailSent: (email: string) => `מייל אישור נשלח אל ${email}`,
     notFound: "הזמנה לא נמצאה",
     notFoundDesc: "קישור אישור זה אינו תקין או שפג תוקפו.",
@@ -71,6 +77,9 @@ const t = {
   },
   fr: {
     title: "Votre expérience est réservée !",
+    cancelledTitle: "Réservation annulée",
+    cancelledSub: (email: string) => `Une confirmation d'annulation a été envoyée à ${email}`,
+    cancelledOn: "Annulée le",
     emailSent: (email: string) => `Un email de confirmation a été envoyé à ${email}`,
     notFound: "Réservation introuvable",
     notFoundDesc: "Ce lien de confirmation est invalide ou a expiré.",
@@ -188,8 +197,9 @@ export default function BookingConfirmationPage() {
     );
   }
 
-  const isConfirmed = booking.status?.toLowerCase() === "confirmed";
-  const isOnRequest = !isConfirmed && booking.hg_status?.toLowerCase() !== "confirmed";
+  const isCancelled = booking.is_cancelled || booking.status === "cancelled";
+  const isConfirmed = !isCancelled && booking.status?.toLowerCase() === "confirmed";
+  const isOnRequest = !isCancelled && !isConfirmed && booking.hg_status?.toLowerCase() !== "confirmed";
   const hgRaw = booking.hg_raw_data as any;
   const experienceTitle = experience ? (getLocalizedField(experience, "title", lang) as string || experience.title) : "";
   const hotelName = hotel ? (getLocalizedField(hotel, "name", lang) as string || hotel.name) : "";
@@ -231,21 +241,34 @@ export default function BookingConfirmationPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Animated check icon */}
           <div className="flex flex-col items-center text-center gap-3">
-            <div className={`h-16 w-16 rounded-full flex items-center justify-center animate-in zoom-in-50 duration-500 ${isConfirmed ? "bg-emerald-100" : "bg-blue-100"}`}>
-              {isConfirmed ? (
+            <div className={`h-16 w-16 rounded-full flex items-center justify-center animate-in zoom-in-50 duration-500 ${
+              isCancelled ? "bg-destructive/10" : isConfirmed ? "bg-emerald-100" : "bg-blue-100"
+            }`}>
+              {isCancelled ? (
+                <XCircle className="h-8 w-8 text-destructive" />
+              ) : isConfirmed ? (
                 <Check className="h-8 w-8 text-emerald-600" />
               ) : (
                 <Clock className="h-8 w-8 text-blue-600" />
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-semibold">{labels.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold">
+              {isCancelled ? labels.cancelledTitle : labels.title}
+            </h1>
             {booking.customer_email && (
-              <p className="text-muted-foreground text-sm">{labels.emailSent(booking.customer_email)}</p>
+              <p className="text-muted-foreground text-sm">
+                {isCancelled ? labels.cancelledSub(booking.customer_email) : labels.emailSent(booking.customer_email)}
+              </p>
+            )}
+            {isCancelled && booking.cancelled_at && (
+              <p className="text-xs text-muted-foreground">
+                {labels.cancelledOn}: {formatDate(booking.cancelled_at, lang)}
+              </p>
             )}
           </div>
 
-          {/* On-request warning */}
-          {isOnRequest && (
+          {/* On-request warning — hide if cancelled */}
+          {isOnRequest && !isCancelled && (
             <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border">
               <Clock className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">{labels.onRequest}</p>
@@ -319,7 +342,7 @@ export default function BookingConfirmationPage() {
               </div>
 
               {/* Cancellation policy */}
-              {cancellation.badgeText && (
+              {!isCancelled && cancellation.badgeText && (
                 <>
                   <Separator />
                   <div className="space-y-1">
@@ -373,8 +396,14 @@ export default function BookingConfirmationPage() {
                   <span className="font-mono text-xs">{booking.hg_booking_id}</span>
                 </div>
               )}
-              <Badge variant={isConfirmed ? "default" : "secondary"} className="text-xs">
-                {isConfirmed ? <><Check className="h-3 w-3 mr-1" />{booking.hg_status}</> : <><Clock className="h-3 w-3 mr-1" />{booking.hg_status}</>}
+              <Badge variant={isCancelled ? "destructive" : isConfirmed ? "default" : "secondary"} className="text-xs">
+                {isCancelled ? (
+                  <><XCircle className="h-3 w-3 mr-1" />{lang === "he" ? "בוטל" : lang === "fr" ? "Annulé" : "Cancelled"}</>
+                ) : isConfirmed ? (
+                  <><Check className="h-3 w-3 mr-1" />{booking.hg_status}</>
+                ) : (
+                  <><Clock className="h-3 w-3 mr-1" />{booking.hg_status}</>
+                )}
               </Badge>
             </CardContent>
           </Card>
