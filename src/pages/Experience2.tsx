@@ -423,6 +423,8 @@ export default function Experience2() {
         maxParty={experience.max_party || 4}
         averageRating={averageRating}
         reviewsCount={reviewsCount}
+        currency={experience.currency || "ILS"}
+        onViewDates={() => setIsSheetOpen(true)}
       />
 
       {/* Contenu principal */}
