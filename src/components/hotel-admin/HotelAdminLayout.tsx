@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Outlet, NavLink, useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
@@ -13,7 +13,8 @@ import {
   Star,
   Wallet,
   MessageSquare,
-  Settings
+  Settings,
+  ArrowLeft
 } from "lucide-react";
 
 const navigation = [
@@ -36,8 +37,12 @@ export const HotelAdminLayout = () => {
       {/* Sidebar */}
       <aside className="w-64 border-r bg-card">
         <div className="sticky top-0 flex h-full flex-col">
-          <div className="p-6 border-b">
+          <div className="p-6 border-b flex items-center justify-between">
             <h2 className="font-sans text-2xl font-bold">Hotel Admin</h2>
+            <Link to="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-4 w-4" />
+              Site
+            </Link>
           </div>
           
           <nav className="flex-1 space-y-1 p-4">
