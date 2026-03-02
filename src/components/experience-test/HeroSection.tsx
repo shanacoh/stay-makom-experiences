@@ -2,6 +2,10 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, Share, Heart, ChevronRight } from "lucide-react";
 import { Grid3X3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useExperienceAddons } from "@/hooks/useExperience2Price";
+import { DualPrice } from "@/components/ui/DualPrice";
+import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
 import {
   Carousel,
   CarouselContent,
@@ -88,6 +92,25 @@ const HeroSection = ({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
+
+  // Compute starting price from active pricing addons
+  const { data: addons } = useExperienceAddons(experienceId || null);
+  const startingPrice = useMemo(() => {
+    if (!addons || addons.length === 0) return null;
+    const pricingAddons = addons.filter((a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active);
+    if (pricingAddons.length === 0) return null;
+    // Sum all addon unit values as the "starting from" price (1 guest, 1 night minimum)
+    const total = pricingAddons.reduce((sum, a) => sum + a.value, 0);
+    return total > 0 ? total : null;
+  }, [addons]);
+
+  // Determine price label from addons
+  const startingPriceType = useMemo(() => {
+    if (!addons) return 'per_person';
+    const pricingAddons = addons.filter((a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active);
+    if (pricingAddons.length === 1) return pricingAddons[0].type;
+    return 'per_person'; // default
+  }, [addons]);
 
   // 4 photos for the 2x2 grid
   const displayPhotos = photos.slice(0, 4);
@@ -508,6 +531,39 @@ const HeroSection = ({
                       </p>
                     </div>
                   </div>
+                )}
+
+                {/* Pricing Banner — "From X € per person" + View dates */}
+                {startingPrice && startingPrice > 0 && (
+                  <>
+                    <div className="border-t border-border" />
+                    <div className="bg-muted/30 rounded-xl p-3 lg:p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-sm text-foreground">
+                              {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
+                            </span>
+                            <DualPrice amount={startingPrice} currency={currency} inline className="text-base lg:text-lg font-semibold underline" />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {startingPriceType === 'per_person' || startingPriceType === 'per_person_per_night'
+                              ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
+                              : startingPriceType === 'per_night'
+                                ? (lang === 'he' ? 'ללילה' : lang === 'fr' ? 'par nuit' : 'per night')
+                                : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking')}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={onViewDates}
+                          variant="cta"
+                          className="px-4 text-sm uppercase tracking-wide"
+                        >
+                          {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
                 )}
 
               </div>
