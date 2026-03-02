@@ -1,26 +1,17 @@
 /**
- * BookingPanel V2 – Hybrid: predefined dates + free calendar
+ * BookingPanel V2 – 3-step wizard: Dates/Room → Guest Info → Summary & Confirm
  * Fetches real-time prices/rooms from HyperGuest
  * Max 30 nights (API limit SN.400)
- * ✅ B1: Pre-book before booking + price change detection
- * ✅ V4: Property remarks display
- * ✅ V5: Optional hotel extras (Spice it up) affecting total price
- * ✅ V6: Full booking flow — pre-book → create-booking → save DB → confirmation
- * ✅ #3b: isImmediate warning for on-request bookings
- * ✅ #5b: Progressive booking messages
- * ✅ #7: Children/infants selector
- * ✅ #10b: Structured error codes
  */
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2, Clock, Baby, Minus, Plus, Check } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Users, AlertCircle, CalendarDays, Info, Sparkles, MessageSquare, Loader2, Clock, Baby, Minus, Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DateRangePicker from "./DateRangePicker";
@@ -76,7 +67,6 @@ interface BookingPanel2Props {
   selectedExtras?: SelectedExtra[];
 }
 
-// ✅ #10b: Structured error messages by HG error code
 const hgErrorMessages: Record<string, Record<string, string>> = {
   'BN.402': {
     en: "The price has changed since your search. Please search again.",
@@ -100,6 +90,8 @@ const hgErrorMessages: Record<string, Record<string, string>> = {
   },
 };
 
+type WizardStep = 1 | 2 | 3;
+
 export function BookingPanel2({
   experienceId,
   experienceTitle = "",
@@ -121,25 +113,34 @@ export function BookingPanel2({
       children: "Children (2-12)",
       infants: "Infants (0-1)",
       childAge: "Age",
-      book: "Book",
+      book: "Confirm booking",
       selectDates: "Select dates",
       noHyperguest: "This experience is not available for online booking yet.",
       error: "Error loading availability. Please try again.",
-      note: "Prices are calculated in real-time based on HyperGuest availability",
       suggestedDates: "Suggested dates",
       pickDates: "Choose your dates",
-      orPickOwn: "Or choose your own dates",
-      orSeeSuggested: "See suggested dates",
       verifying: "Verifying price...",
       booking: "Booking...",
       bookingLong: "Confirmation in progress, please wait...",
       bookingVeryLong: "Taking longer than expected. Do not close this page...",
       importantNotices: "Important notices",
       priceChanged: "Price has changed",
-      priceChangedConfirm: "The price changed. Do you want to continue with the new price?",
       fillGuestInfo: "Please fill in guest information (name, email, phone, birth date)",
       bookingError: "Booking failed. Your information has been saved — please try again.",
       onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
+      next: "Continue",
+      back: "Back",
+      step1Title: "Select your dates",
+      step2Title: "Guest information",
+      step3Title: "Review & confirm",
+      summary: "Booking summary",
+      guestDetails: "Guest details",
+      stayDetails: "Stay details",
+      room: "Room",
+      nightsLabel: "Nights",
+      guestsLabel: "Guests",
+      total: "Total",
+      specialRequests: "Special requests",
     },
     he: {
       title: "הזמן חוויה זו",
@@ -149,25 +150,34 @@ export function BookingPanel2({
       children: "ילדים (2-12)",
       infants: "תינוקות (0-1)",
       childAge: "גיל",
-      book: "הזמן",
+      book: "אשר הזמנה",
       selectDates: "בחר תאריכים",
       noHyperguest: "חוויה זו אינה זמינה עדיין להזמנה מקוונת.",
       error: "שגיאה בטעינת הזמינות. אנא נסה שוב.",
-      note: "המחירים מחושבים בזמן אמת על פי זמינות HyperGuest",
       suggestedDates: "תאריכים מוצעים",
       pickDates: "בחר תאריכים",
-      orPickOwn: "או בחר תאריכים משלך",
-      orSeeSuggested: "ראה תאריכים מוצעים",
       verifying: "בודק מחיר...",
       booking: "...מזמין",
       bookingLong: "...אישור בתהליך, אנא המתן",
       bookingVeryLong: "...לוקח יותר זמן מהצפוי. אל תסגור את הדף",
       importantNotices: "הערות חשובות",
       priceChanged: "המחיר השתנה",
-      priceChangedConfirm: "המחיר השתנה. האם תרצה להמשיך עם המחיר החדש?",
       fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון, תאריך לידה)",
       bookingError: "ההזמנה נכשלה. הפרטים שלך נשמרו — אנא נסה שוב.",
       onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
+      next: "המשך",
+      back: "חזרה",
+      step1Title: "בחר תאריכים",
+      step2Title: "פרטי אורח",
+      step3Title: "סיכום ואישור",
+      summary: "סיכום הזמנה",
+      guestDetails: "פרטי אורח",
+      stayDetails: "פרטי שהייה",
+      room: "חדר",
+      nightsLabel: "לילות",
+      guestsLabel: "אורחים",
+      total: "סה\"כ",
+      specialRequests: "בקשות מיוחדות",
     },
     fr: {
       title: "Réserver cette expérience",
@@ -177,29 +187,41 @@ export function BookingPanel2({
       children: "Enfants (2-12 ans)",
       infants: "Bébés (0-1 an)",
       childAge: "Âge",
-      book: "Réserver",
+      book: "Confirmer la réservation",
       selectDates: "Sélectionnez des dates",
       noHyperguest: "Cette expérience n'est pas encore disponible pour la réservation en ligne.",
       error: "Erreur lors de la récupération des disponibilités. Veuillez réessayer.",
-      note: "Les prix sont calculés en temps réel selon les disponibilités HyperGuest",
       suggestedDates: "Dates suggérées",
       pickDates: "Choisir vos dates",
-      orPickOwn: "Ou choisissez vos propres dates",
-      orSeeSuggested: "Voir les dates suggérées",
       verifying: "Vérification du prix...",
       booking: "Réservation en cours...",
       bookingLong: "Confirmation en cours, veuillez patienter...",
       bookingVeryLong: "La réservation prend plus de temps que prévu. Ne fermez pas cette page...",
       importantNotices: "Remarques importantes",
       priceChanged: "Le prix a changé",
-      priceChangedConfirm: "Le prix a changé. Voulez-vous continuer avec le nouveau prix ?",
       fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone, date de naissance)",
       bookingError: "La réservation a échoué. Vos informations ont été conservées — veuillez réessayer.",
       onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
+      next: "Continuer",
+      back: "Retour",
+      step1Title: "Choisir vos dates",
+      step2Title: "Informations voyageur",
+      step3Title: "Résumé & confirmation",
+      summary: "Résumé de la réservation",
+      guestDetails: "Détails voyageur",
+      stayDetails: "Détails du séjour",
+      room: "Chambre",
+      nightsLabel: "Nuits",
+      guestsLabel: "Voyageurs",
+      total: "Total",
+      specialRequests: "Demandes spéciales",
     },
   }[lang];
 
-  // Fetch predefined date options
+  // ── Wizard state ──
+  const [wizardStep, setWizardStep] = useState<WizardStep>(1);
+
+  // ── Existing state ──
   const { data: dateOptions } = useQuery({
     queryKey: ["experience2-date-options-public", experienceId],
     queryFn: async () => {
@@ -214,14 +236,11 @@ export function BookingPanel2({
     },
   });
 
-  const hasPredefinedDates = (dateOptions ?? []).length > 0;
-
   type NightsTab = 1 | 2 | 3 | "pick";
   const [selectedTab, setSelectedTab] = useState<NightsTab>(1);
   const [selectedDateOptionId, setSelectedDateOptionId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [adults, setAdults] = useState(minParty);
-  // ✅ #7: Children ages array
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
@@ -238,7 +257,7 @@ export function BookingPanel2({
   const bookingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { user } = useAuth();
 
-  // ✅ #5b: Progressive booking timer
+  // Progressive booking timer
   useEffect(() => {
     if (isBooking) {
       setBookingElapsed(0);
@@ -274,7 +293,6 @@ export function BookingPanel2({
     enabled: selectedTab !== "pick",
   });
 
-  // When a quick date option is selected, set the dateRange
   useEffect(() => {
     if (selectedDateOptionId && selectedTab !== "pick" && quickDates) {
       const opt = quickDates.find((d) => d.id === selectedDateOptionId);
@@ -284,7 +302,6 @@ export function BookingPanel2({
     }
   }, [selectedDateOptionId, quickDates, selectedTab]);
 
-  // Reset selection when tab changes
   useEffect(() => {
     setSelectedDateOptionId(null);
     setDateRange({});
@@ -299,7 +316,6 @@ export function BookingPanel2({
     const checkIn = dateRange.from.toISOString().split("T")[0];
     const rawNights = calculateNights(checkIn, dateRange.to.toISOString().split("T")[0]);
     const nights = Math.min(rawNights, MAX_NIGHTS);
-    // ✅ #7: Include children ages in guest format
     const guests = formatGuests([{ adults, children: childrenAges }]);
     return { checkIn, nights, guests, hotelIds: [parseInt(hyperguestPropertyId)], customerNationality: "IL", currency };
   }, [dateRange, adults, childrenAges, hyperguestPropertyId, currency]);
@@ -322,7 +338,6 @@ export function BookingPanel2({
     return room?.ratePlans?.find((rp: any) => rp.ratePlanId === selectedRatePlanId) || null;
   }, [searchResult, selectedRoomId, selectedRatePlanId]);
 
-  // Get selected room name
   const selectedRoomName = useMemo(() => {
     if (!searchResult || !selectedRoomId) return "";
     let rooms: any[] = [];
@@ -334,7 +349,7 @@ export function BookingPanel2({
     return rooms.find((r: any) => r.roomId === selectedRoomId)?.roomName || "";
   }, [searchResult, selectedRoomId]);
 
-  // ✅ V4 FIX: Extract property-level remarks from search result
+  // Extract property-level remarks for Step 3
   const propertyRemarks = useMemo(() => {
     let raw: string[] = [];
     if (!searchResult) return raw;
@@ -374,14 +389,12 @@ export function BookingPanel2({
     setSelectedRatePlanId(null);
   }, [dateRange.from, dateRange.to]);
 
-  // Validate lead guest data
   const isGuestValid = leadGuest.firstName.trim() !== "" &&
     leadGuest.lastName.trim() !== "" &&
     leadGuest.email.trim() !== "" &&
     leadGuest.phone.trim() !== "" &&
     leadGuest.birthDate !== "";
 
-  // Auto-trigger booking after auth
   useEffect(() => {
     if (user && pendingBookAfterAuth.current) {
       pendingBookAfterAuth.current = false;
@@ -389,7 +402,6 @@ export function BookingPanel2({
     }
   }, [user]);
 
-  // ✅ Auth gate: check login before booking
   const handleBook = () => {
     if (!user) {
       pendingBookAfterAuth.current = true;
@@ -399,12 +411,13 @@ export function BookingPanel2({
     handleBookInternal();
   };
 
-  // ✅ V6: Full booking flow — Pre-book → Create booking → Save to DB
+  // ── Full booking flow ──
   const handleBookInternal = async () => {
     if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId || !selectedRatePlan) return;
 
     if (!isGuestValid) {
       setShowGuestErrors(true);
+      setWizardStep(2);
       toast.error(t.fillGuestInfo);
       return;
     }
@@ -424,7 +437,6 @@ export function BookingPanel2({
         ?? selectedRatePlan.prices?.sell?.currency
         ?? "EUR";
 
-      // ── Step 1: Pre-book ──
       const preBookData = {
         search: {
           dates: { from: checkIn, to: checkOut },
@@ -441,7 +453,6 @@ export function BookingPanel2({
 
       const preBookResult = await preBook(preBookData);
 
-      // Detect price change
       const roomResult = preBookResult.rooms?.[0];
       if (roomResult?.priceChange) {
         const { fromAmount, toAmount } = roomResult.priceChange;
@@ -458,14 +469,11 @@ export function BookingPanel2({
         return;
       }
 
-      // ── Step 2: Create Booking ──
       setBookingStep("booking");
 
       const staymakomRef = `SM-${experienceId.substring(0, 8).toUpperCase()}-${Date.now()}`;
-
       const safe = sanitizeLeadGuest(leadGuest);
 
-      // ✅ #7: Build guests list with children
       const adultGuests = [
         {
           birthDate: safe.birthDate,
@@ -481,7 +489,7 @@ export function BookingPanel2({
 
       const childGuests = childrenAges.map((age, i) => ({
         birthDate: `${new Date().getFullYear() - age}-01-01`,
-        title: "C" as const, // ✅ Children and infants always use "C"
+        title: "C" as const,
         name: { first: `Child`, last: `${i + 1}` },
       }));
 
@@ -515,7 +523,6 @@ export function BookingPanel2({
       console.log("[Book] body:", JSON.stringify(bookingData, null, 2));
       const bookingResult = await createBooking(bookingData);
 
-      // ── Step 3: Save to bookings_hg ──
       const hgBookingId = bookingResult.id || bookingResult.bookingId || "";
       const hgStatus = bookingResult.status || "Confirmed";
       const sellPrice = bookingResult.totalPrice?.amount ?? expectedAmount;
@@ -555,10 +562,8 @@ export function BookingPanel2({
         console.error("Failed to save booking to DB:", dbError);
       }
 
-      // ✅ #2: Extract display taxes for confirmation
       const taxBreakdown = extractTaxBreakdown(selectedRatePlan);
 
-      // ── Step 4: Show confirmation ──
       const allRemarks = [
         ...propertyRemarks,
         ...(selectedRatePlan?.remarks || []),
@@ -586,7 +591,6 @@ export function BookingPanel2({
       });
       setShowConfirmation(true);
 
-      // ── Step 5: Send confirmation email ──
       try {
         const emailCancellation = analyzeCancellationPolicies(
           selectedRatePlan?.cancellationPolicies,
@@ -630,7 +634,6 @@ export function BookingPanel2({
       console.error("Pre-book/Booking error:", error);
       const detail = error?.message || "";
 
-      // ✅ #10b: Parse structured error code
       const codeMatch = detail.match(/BN\.\d+/);
       const errorCode = codeMatch?.[0] || "";
       const friendlyMsg = hgErrorMessages[errorCode]?.[lang];
@@ -645,7 +648,6 @@ export function BookingPanel2({
     }
   };
 
-  // Calculate extras total based on pricing type
   const extrasTotal = useMemo(() => {
     return selectedExtras.reduce((sum, extra) => {
       let multiplier = 1;
@@ -655,19 +657,12 @@ export function BookingPanel2({
     }, 0);
   }, [selectedExtras, adults, nights]);
 
-  const isReadyToBook = dateRange.from && dateRange.to && selectedRoomId && selectedRatePlanId && priceBreakdown && isGuestValid;
+  const isStep1Complete = !!(dateRange.from && dateRange.to && selectedRoomId && selectedRatePlanId);
   const displayTotal = (priceBreakdown?.finalTotal ?? 0) + extrasTotal;
   const totalIsNaN = Number.isNaN(displayTotal);
-
-  // ✅ #3b: Check if selected rate plan is on-request
   const isOnRequest = selectedRatePlan?.isImmediate === false;
 
   if (!hyperguestPropertyId) {
-    console.log("[BookingPanel2] ⛔ No hyperguestPropertyId — props received:", {
-      experienceId,
-      hotelId,
-      hyperguestPropertyId,
-    });
     return (
       <Card>
         <CardContent className="pt-6">
@@ -680,349 +675,522 @@ export function BookingPanel2({
     );
   }
 
+  // ── Step indicator ──
+  const stepLabels = [t.step1Title, t.step2Title, t.step3Title];
+
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-lg">{t.title}</CardTitle>
+          {/* Progress bar */}
+          <div className="flex items-center gap-2 mt-3">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex-1 flex flex-col items-center gap-1">
+                <div
+                  className={cn(
+                    "w-full h-1.5 rounded-full transition-colors",
+                    step <= wizardStep ? "bg-primary" : "bg-muted"
+                  )}
+                />
+                <span className={cn(
+                  "text-[10px]",
+                  step === wizardStep ? "text-foreground font-medium" : "text-muted-foreground"
+                )}>
+                  {stepLabels[step - 1]}
+                </span>
+              </div>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Guests — ✅ #7: Adults + Children + Infants */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Users className="h-4 w-4" />
-              {t.guests}
-            </div>
 
-            {/* Adults */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm">{t.adults}</span>
-              <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <span className="text-lg font-medium w-8 text-center">{adults}</span>
-                <Button variant="outline" size="sm" onClick={() => setAdults(Math.min(maxParty, adults + 1))} disabled={adults >= maxParty}>
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Children (2-12) */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm">{t.children}</span>
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setChildrenAges(prev => prev.slice(0, -1))}
-                  disabled={childrenAges.length === 0}
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <span className="text-lg font-medium w-8 text-center">{childrenAges.filter(a => a >= 2).length}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setChildrenAges(prev => [...prev, 5])}
-                  disabled={childrenAges.length >= 4}
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Age selectors for children */}
-            {childrenAges.length > 0 && (
-              <div className="pl-4 space-y-2">
-                {childrenAges.map((age, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <Baby className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground w-16">
-                      {age < 2 ? (lang === "he" ? "תינוק" : lang === "fr" ? "Bébé" : "Infant") : (lang === "he" ? `ילד ${idx + 1}` : lang === "fr" ? `Enfant ${idx + 1}` : `Child ${idx + 1}`)}
-                    </span>
-                    <Select
-                      value={String(age)}
-                      onValueChange={(v) => {
-                        const newAges = [...childrenAges];
-                        newAges[idx] = parseInt(v);
-                        setChildrenAges(newAges);
-                      }}
-                    >
-                      <SelectTrigger className="w-20 h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 13 }, (_, i) => (
-                          <SelectItem key={i} value={String(i)}>
-                            {i} {lang === "he" ? (i < 2 ? "שנים" : "שנים") : lang === "fr" ? "ans" : i === 1 ? "yr" : "yrs"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* Date Selection */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <CalendarDays className="h-4 w-4" />
-              {t.dates}
-            </div>
-
-            {/* Nights tabs: 1 night / 2 nights / 3 nights / Pick dates */}
-            <div className="flex gap-1.5">
-              {([1, 2, 3] as const).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setSelectedTab(n)}
-                  className={cn(
-                    "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
-                    "hover:border-primary/50",
-                    selectedTab === n
-                      ? "border-primary bg-primary/5 font-medium"
-                      : "border-border"
-                  )}
-                >
-                  {n} {n === 1
-                    ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
-                    : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
-                  }
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => setSelectedTab("pick")}
-                className={cn(
-                  "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
-                  "hover:border-primary/50",
-                  selectedTab === "pick"
-                    ? "border-primary bg-primary/5 font-medium"
-                    : "border-border"
-                )}
-              >
-                {lang === "he" ? "בחר תאריכים" : lang === "fr" ? "Choisir" : "Pick dates"}
-              </button>
-            </div>
-
-            {/* Quick date options for 1/2/3 nights — real HyperGuest availability */}
-            {selectedTab !== "pick" && (
-              <>
-                {isLoadingQuickDates && (
-                  <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {lang === "he" ? "בודק זמינות..." : lang === "fr" ? "Vérification des disponibilités..." : "Checking availability..."}
-                  </div>
-                )}
-                {!isLoadingQuickDates && quickDates && quickDates.length === 0 && (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    {lang === "he" ? "אין תאריכים זמינים כרגע" : lang === "fr" ? "Aucune date disponible pour le moment" : "No available dates at the moment"}
-                  </p>
-                )}
-                {!isLoadingQuickDates && quickDates && quickDates.length > 0 && (
-                  <RadioGroup
-                    value={selectedDateOptionId ?? ""}
-                    onValueChange={(val) => setSelectedDateOptionId(val)}
-                    className="space-y-1.5"
-                  >
-                    {quickDates.map((opt) => (
-                      <label
-                        key={opt.id}
-                        className={cn(
-                          "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                          selectedDateOptionId === opt.id
-                            ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <RadioGroupItem value={opt.id} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">
-                            {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {opt.nights} {opt.nights === 1
-                              ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
-                              : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
-                            }
-                          </p>
-                        </div>
-                        {opt.cheapestPrice != null && (
-                          <div className="text-right shrink-0">
-                            <p className="text-[10px] text-muted-foreground">
-                              {lang === "he" ? "מ-" : lang === "fr" ? "à partir de" : "from"}
-                            </p>
-                            <DualPrice amount={opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
-                          </div>
-                        )}
-                      </label>
-                    ))}
-                  </RadioGroup>
-                )}
-              </>
-            )}
-
-            {/* Free calendar mode */}
-            {selectedTab === "pick" && (
-              <div className="space-y-3">
-                <DateRangePicker value={dateRange} onChange={(range) => setDateRange(range)} />
-              </div>
-            )}
-          </div>
-
-          <Separator />
-
-
-          {searchParams && (
-            <RoomOptionsV2
-              searchResult={searchResult}
-              isLoading={isLoadingAvailability}
-              selectedRoomId={selectedRoomId}
-              selectedRatePlanId={selectedRatePlanId}
-              onSelect={(roomId, ratePlanId) => {
-                setSelectedRoomId(roomId);
-                setSelectedRatePlanId(ratePlanId);
-              }}
-              lang={lang}
-              checkInDate={searchParams?.checkIn}
-            />
-          )}
-
-          {searchParams && <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} ratePlanPrices={ratePlanPrices} />}
-
-          {/* ✅ #3b: On-request warning */}
-          {isOnRequest && selectedRatePlan && (
-            <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
-              <Clock className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-700 dark:text-blue-400">
-                {t.onRequestWarning}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* ✅ V5: Selected extras summary */}
-          {selectedExtras.length > 0 && (
-            <div className="space-y-2">
-              <Separator />
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Sparkles className="h-4 w-4 text-primary" />
-                {lang === "he" ? "תוספות נבחרות" : lang === "fr" ? "Extras sélectionnés" : "Selected extras"}
-              </div>
-              {selectedExtras.map((extra) => {
-                const name = lang === "he" ? extra.name_he || extra.name : extra.name;
-                let multiplier = 1;
-                if (extra.pricing_type === "per_guest") multiplier = adults;
-                if (extra.pricing_type === "per_night") multiplier = nights;
-                const lineTotal = extra.price * multiplier;
-                return (
-                  <div key={extra.id} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{name}</span>
-                    <DualPrice amount={lineTotal} currency={extra.currency} inline className="text-sm" />
-                  </div>
-                );
-              })}
-              <div className="flex justify-between text-sm font-medium pt-1 border-t border-border">
-                <span>{lang === "he" ? "סה\"כ תוספות" : lang === "fr" ? "Total extras" : "Extras total"}</span>
-                <DualPrice amount={extrasTotal} currency={currency} inline className="text-sm" />
-              </div>
-            </div>
-          )}
-
-          {availabilityError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{t.error}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* V4: Property-level remarks — hidden from public UI */}
-
-          {/* ✅ V5: Special requests */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <MessageSquare className="h-4 w-4" />
-              {lang === "he" ? "בקשות מיוחדות" : lang === "fr" ? "Demandes spéciales" : "Special requests"}
-            </div>
-            <Textarea
-              placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
-              value={specialRequests}
-              onChange={(e) => setSpecialRequests(e.target.value)}
-              className="min-h-[60px] text-sm resize-none"
-              rows={2}
-            />
-          </div>
-
-          {/* ✅ V6: Lead guest form — shown when room is selected */}
-          {selectedRoomId && selectedRatePlanId && (
+          {/* ════════════ STEP 1: Dates / Room / Extras ════════════ */}
+          {wizardStep === 1 && (
             <>
-              <Separator />
-              <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
+              {/* Guests */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Users className="h-4 w-4" />
+                  {t.guests}
+                </div>
 
-              {/* Cancellation policy recap — subtle inline text */}
-              {selectedRatePlan?.cancellationPolicies && searchParams?.checkIn && (() => {
-                const cancellation = analyzeCancellationPolicies(
-                  selectedRatePlan.cancellationPolicies,
-                  searchParams.checkIn,
-                  lang,
-                );
-                if (!cancellation.badgeText) return null;
-
-                if (cancellation.isFreeCancellation) {
-                  return (
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-600">
-                      <Check className="h-3.5 w-3.5 shrink-0" />
-                      <span>{cancellation.badgeText}</span>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    {cancellation.detailLines.length > 0 && <Info className="h-3.5 w-3.5 shrink-0" />}
-                    <span>{cancellation.isNonRefundable ? cancellation.badgeText : cancellation.summaryText}</span>
+                {/* Adults */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">{t.adults}</span>
+                  <div className="flex items-center gap-4">
+                    <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <span className="text-lg font-medium w-8 text-center">{adults}</span>
+                    <Button variant="outline" size="sm" onClick={() => setAdults(Math.min(maxParty, adults + 1))} disabled={adults >= maxParty}>
+                      <Plus className="h-3 w-3" />
+                    </Button>
                   </div>
-                );
-              })()}
+                </div>
+
+                {/* Children */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">{t.children}</span>
+                  <div className="flex items-center gap-4">
+                    <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => prev.slice(0, -1))} disabled={childrenAges.length === 0}>
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <span className="text-lg font-medium w-8 text-center">{childrenAges.filter(a => a >= 2).length}</span>
+                    <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => [...prev, 5])} disabled={childrenAges.length >= 4}>
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Age selectors */}
+                {childrenAges.length > 0 && (
+                  <div className="pl-4 space-y-2">
+                    {childrenAges.map((age, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <Baby className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground w-16">
+                          {age < 2 ? (lang === "he" ? "תינוק" : lang === "fr" ? "Bébé" : "Infant") : (lang === "he" ? `ילד ${idx + 1}` : lang === "fr" ? `Enfant ${idx + 1}` : `Child ${idx + 1}`)}
+                        </span>
+                        <Select
+                          value={String(age)}
+                          onValueChange={(v) => {
+                            const newAges = [...childrenAges];
+                            newAges[idx] = parseInt(v);
+                            setChildrenAges(newAges);
+                          }}
+                        >
+                          <SelectTrigger className="w-20 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 13 }, (_, i) => (
+                              <SelectItem key={i} value={String(i)}>
+                                {i} {lang === "he" ? "שנים" : lang === "fr" ? "ans" : i === 1 ? "yr" : "yrs"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Date Selection */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <CalendarDays className="h-4 w-4" />
+                  {t.dates}
+                </div>
+
+                <div className="flex gap-1.5">
+                  {([1, 2, 3] as const).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setSelectedTab(n)}
+                      className={cn(
+                        "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
+                        "hover:border-primary/50",
+                        selectedTab === n ? "border-primary bg-primary/5 font-medium" : "border-border"
+                      )}
+                    >
+                      {n} {n === 1
+                        ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
+                        : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
+                      }
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTab("pick")}
+                    className={cn(
+                      "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
+                      "hover:border-primary/50",
+                      selectedTab === "pick" ? "border-primary bg-primary/5 font-medium" : "border-border"
+                    )}
+                  >
+                    {lang === "he" ? "בחר תאריכים" : lang === "fr" ? "Choisir" : "Pick dates"}
+                  </button>
+                </div>
+
+                {/* Quick date options */}
+                {selectedTab !== "pick" && (
+                  <>
+                    {isLoadingQuickDates && (
+                      <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {lang === "he" ? "בודק זמינות..." : lang === "fr" ? "Vérification des disponibilités..." : "Checking availability..."}
+                      </div>
+                    )}
+                    {!isLoadingQuickDates && quickDates && quickDates.length === 0 && (
+                      <p className="text-sm text-muted-foreground py-4 text-center">
+                        {lang === "he" ? "אין תאריכים זמינים כרגע" : lang === "fr" ? "Aucune date disponible pour le moment" : "No available dates at the moment"}
+                      </p>
+                    )}
+                    {!isLoadingQuickDates && quickDates && quickDates.length > 0 && (
+                      <RadioGroup
+                        value={selectedDateOptionId ?? ""}
+                        onValueChange={(val) => setSelectedDateOptionId(val)}
+                        className="space-y-1.5"
+                      >
+                        {quickDates.map((opt) => (
+                          <label
+                            key={opt.id}
+                            className={cn(
+                              "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                              selectedDateOptionId === opt.id
+                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                : "border-border hover:border-primary/50"
+                            )}
+                          >
+                            <RadioGroupItem value={opt.id} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium">
+                                {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {opt.nights} {opt.nights === 1
+                                  ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
+                                  : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
+                                }
+                              </p>
+                            </div>
+                            {opt.cheapestPrice != null && (
+                              <div className="text-right shrink-0">
+                                <p className="text-[10px] text-muted-foreground">
+                                  {lang === "he" ? "מ-" : lang === "fr" ? "à partir de" : "from"}
+                                </p>
+                                <DualPrice amount={opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
+                              </div>
+                            )}
+                          </label>
+                        ))}
+                      </RadioGroup>
+                    )}
+                  </>
+                )}
+
+                {selectedTab === "pick" && (
+                  <div className="space-y-3">
+                    <DateRangePicker value={dateRange} onChange={(range) => setDateRange(range)} />
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Room options */}
+              {searchParams && (
+                <RoomOptionsV2
+                  searchResult={searchResult}
+                  isLoading={isLoadingAvailability}
+                  selectedRoomId={selectedRoomId}
+                  selectedRatePlanId={selectedRatePlanId}
+                  onSelect={(roomId, ratePlanId) => {
+                    setSelectedRoomId(roomId);
+                    setSelectedRatePlanId(ratePlanId);
+                  }}
+                  lang={lang}
+                  checkInDate={searchParams?.checkIn}
+                />
+              )}
+
+              {/* Price breakdown */}
+              {searchParams && <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} ratePlanPrices={ratePlanPrices} />}
+
+              {/* On-request warning */}
+              {isOnRequest && selectedRatePlan && (
+                <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-400">
+                    {t.onRequestWarning}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Selected extras summary */}
+              {selectedExtras.length > 0 && (
+                <div className="space-y-2">
+                  <Separator />
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    {lang === "he" ? "תוספות נבחרות" : lang === "fr" ? "Extras sélectionnés" : "Selected extras"}
+                  </div>
+                  {selectedExtras.map((extra) => {
+                    const name = lang === "he" ? extra.name_he || extra.name : extra.name;
+                    let multiplier = 1;
+                    if (extra.pricing_type === "per_guest") multiplier = adults;
+                    if (extra.pricing_type === "per_night") multiplier = nights;
+                    const lineTotal = extra.price * multiplier;
+                    return (
+                      <div key={extra.id} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{name}</span>
+                        <DualPrice amount={lineTotal} currency={extra.currency} inline className="text-sm" />
+                      </div>
+                    );
+                  })}
+                  <div className="flex justify-between text-sm font-medium pt-1 border-t border-border">
+                    <span>{lang === "he" ? "סה\"כ תוספות" : lang === "fr" ? "Total extras" : "Extras total"}</span>
+                    <DualPrice amount={extrasTotal} currency={currency} inline className="text-sm" />
+                  </div>
+                </div>
+              )}
+
+              {availabilityError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{t.error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Next button */}
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={!isStep1Complete}
+                onClick={() => setWizardStep(2)}
+              >
+                {isStep1Complete ? (
+                  <span className="flex items-center gap-2">
+                    {t.next}
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                ) : t.selectDates}
+              </Button>
             </>
           )}
 
-          <Button
-            className="w-full"
-            size="lg"
-            disabled={!isReadyToBook || totalIsNaN || isBooking}
-            onClick={handleBook}
-          >
-            {isBooking
-              ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {getBookingMessage()}
-                </span>
-              )
-              : isReadyToBook && !totalIsNaN
-                ? <span className="flex items-center gap-2">
-                    {t.book} - <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
-                  </span>
-                : t.selectDates}
-          </Button>
+          {/* ════════════ STEP 2: Guest Information ════════════ */}
+          {wizardStep === 2 && (
+            <>
+              <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
 
-          {/* VAT info notice */}
-          <div className="flex gap-2 p-3 rounded-md bg-muted/50 border border-border">
-            <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Prices do not include VAT. In accordance with Israeli tax law, Israeli citizens and residents are subject to 18% VAT on top of the listed rates, payable directly at the hotel. Foreign visitors holding a B2/3/4 visa are exempt from VAT.
-            </p>
-          </div>
+              <Separator />
+
+              {/* Special requests */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <MessageSquare className="h-4 w-4" />
+                  {t.specialRequests}
+                </div>
+                <Textarea
+                  placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
+                  value={specialRequests}
+                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  className="min-h-[60px] text-sm resize-none"
+                  rows={2}
+                />
+              </div>
+
+              {/* Navigation */}
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setWizardStep(1)}>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t.back}
+                </Button>
+                <Button
+                  className="flex-1"
+                  disabled={!isGuestValid}
+                  onClick={() => {
+                    if (!isGuestValid) {
+                      setShowGuestErrors(true);
+                      toast.error(t.fillGuestInfo);
+                      return;
+                    }
+                    setWizardStep(3);
+                  }}
+                >
+                  {t.next}
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* ════════════ STEP 3: Summary & Confirm ════════════ */}
+          {wizardStep === 3 && (
+            <>
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold">{t.summary}</h3>
+
+                {/* Stay details */}
+                <div className="space-y-2 p-3 rounded-lg bg-muted/50 border border-border">
+                  <p className="text-xs font-medium text-foreground">{t.stayDetails}</p>
+                  {experienceTitle && (
+                    <p className="text-sm font-medium">{experienceTitle}</p>
+                  )}
+                  {hotelName && (
+                    <p className="text-xs text-muted-foreground">{hotelName}</p>
+                  )}
+                  <Separator className="my-2" />
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">{t.dates}</span>
+                      <p className="font-medium">
+                        {dateRange.from && format(dateRange.from, "dd MMM")} → {dateRange.to && format(dateRange.to, "dd MMM yyyy")}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{t.nightsLabel}</span>
+                      <p className="font-medium">{nights}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{t.guestsLabel}</span>
+                      <p className="font-medium">{totalPartySize}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{t.room}</span>
+                      <p className="font-medium truncate">{selectedRoomName}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Guest details */}
+                <div className="space-y-2 p-3 rounded-lg bg-muted/50 border border-border">
+                  <p className="text-xs font-medium text-foreground">{t.guestDetails}</p>
+                  <div className="text-xs space-y-1">
+                    <p>{leadGuest.firstName} {leadGuest.lastName}</p>
+                    <p className="text-muted-foreground">{leadGuest.email}</p>
+                    <p className="text-muted-foreground">{leadGuest.phone}</p>
+                  </div>
+                  {specialRequests && (
+                    <>
+                      <Separator className="my-2" />
+                      <p className="text-xs text-muted-foreground italic">"{specialRequests}"</p>
+                    </>
+                  )}
+                </div>
+
+                {/* Price breakdown */}
+                {priceBreakdown && (
+                  <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={false} lang={lang} ratePlanPrices={ratePlanPrices} />
+                )}
+
+                {/* Extras recap */}
+                {selectedExtras.length > 0 && (
+                  <div className="space-y-1">
+                    {selectedExtras.map((extra) => {
+                      const name = lang === "he" ? extra.name_he || extra.name : extra.name;
+                      let multiplier = 1;
+                      if (extra.pricing_type === "per_guest") multiplier = adults;
+                      if (extra.pricing_type === "per_night") multiplier = nights;
+                      const lineTotal = extra.price * multiplier;
+                      return (
+                        <div key={extra.id} className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">{name}</span>
+                          <DualPrice amount={lineTotal} currency={extra.currency} inline className="text-xs" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Total */}
+                {!totalIsNaN && (
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <span className="text-sm font-semibold">{t.total}</span>
+                    <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline className="text-lg font-bold text-primary" showSecondary />
+                  </div>
+                )}
+
+                {/* Cancellation policy */}
+                {selectedRatePlan?.cancellationPolicies && searchParams?.checkIn && (() => {
+                  const cancellation = analyzeCancellationPolicies(
+                    selectedRatePlan.cancellationPolicies,
+                    searchParams.checkIn,
+                    lang,
+                  );
+                  if (!cancellation.badgeText) return null;
+
+                  if (cancellation.isFreeCancellation) {
+                    return (
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+                        <Check className="h-3.5 w-3.5 shrink-0" />
+                        <span>{cancellation.badgeText}</span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      {cancellation.detailLines.length > 0 && <Info className="h-3.5 w-3.5 shrink-0" />}
+                      <span>{cancellation.isNonRefundable ? cancellation.badgeText : cancellation.summaryText}</span>
+                    </div>
+                  );
+                })()}
+
+                {/* On-request warning */}
+                {isOnRequest && selectedRatePlan && (
+                  <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+                    <Clock className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-700 dark:text-amber-400">
+                      {t.onRequestWarning}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Hotel remarks (pets, taxes, visa info) */}
+                {propertyRemarks.length > 0 && (
+                  <div className="space-y-1.5 p-3 rounded-md bg-muted/50 border border-border">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                      <p className="text-xs font-medium text-foreground">{t.importantNotices}</p>
+                    </div>
+                    {propertyRemarks.map((remark: string, idx: number) => (
+                      <p key={idx} className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
+                    ))}
+                  </div>
+                )}
+
+                {/* VAT info notice */}
+                <div className="flex gap-2 p-3 rounded-md bg-muted/50 border border-border">
+                  <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {lang === "he"
+                      ? "המחירים אינם כוללים מע\"מ. בהתאם לחוק המס הישראלי, אזרחי ותושי ישראל חייבים ב-18% מע\"מ, לתשלום ישיר במלון. מבקרים זרים עם אשרת B2/3/4 פטורים ממע\"מ."
+                      : lang === "fr"
+                        ? "Les prix n'incluent pas la TVA. Conformément à la législation fiscale israélienne, les citoyens et résidents israéliens sont soumis à 18% de TVA, payable directement à l'hôtel. Les visiteurs étrangers munis d'un visa B2/3/4 en sont exemptés."
+                        : "Prices do not include VAT. In accordance with Israeli tax law, Israeli citizens and residents are subject to 18% VAT on top of the listed rates, payable directly at the hotel. Foreign visitors holding a B2/3/4 visa are exempt from VAT."
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <div className="flex gap-3">
+                <Button variant="outline" className="shrink-0" onClick={() => setWizardStep(2)}>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t.back}
+                </Button>
+                <Button
+                  className="flex-1"
+                  size="lg"
+                  disabled={totalIsNaN || isBooking}
+                  onClick={handleBook}
+                >
+                  {isBooking ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {getBookingMessage()}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      {t.book} — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
+
         </CardContent>
       </Card>
 
-      {/* ✅ V6: Booking confirmation dialog */}
+      {/* Confirmation dialog */}
       <BookingConfirmationDialog
         open={showConfirmation}
         onClose={() => setShowConfirmation(false)}
@@ -1030,7 +1198,7 @@ export function BookingPanel2({
         lang={lang}
       />
 
-      {/* Auth prompt for unauthenticated booking */}
+      {/* Auth prompt */}
       <AuthPromptDialog
         open={showAuthPrompt}
         onOpenChange={(open) => {
