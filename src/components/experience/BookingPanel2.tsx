@@ -941,14 +941,7 @@ export function BookingPanel2({
             </Alert>
           )}
 
-          {/* ✅ V4 FIX: Property-level remarks */}
-          {propertyRemarks.length > 0 && (
-            <div className="space-y-1.5 p-3 rounded-md bg-muted/50 border border-border">
-              {propertyRemarks.map((remark: string, idx: number) => (
-                <p key={idx} className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
-              ))}
-            </div>
-          )}
+          {/* V4: Property-level remarks — hidden from public UI */}
 
           {/* ✅ V5: Special requests */}
           <div className="space-y-2">
