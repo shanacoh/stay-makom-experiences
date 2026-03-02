@@ -118,8 +118,9 @@ function validateSearchParams(params: SearchParams): { isValid: boolean; errors:
 }
 
 function getAuthHeaders(): Record<string, string> {
-  const token = Deno.env.get('HYPERGUEST_BEARER_TOKEN');
-  if (!token) throw new Error('HYPERGUEST_BEARER_TOKEN not configured');
+  // Priority: HYPERGUEST_TOKEN (new unified env var) > HYPERGUEST_BEARER_TOKEN (legacy/cert fallback)
+  const token = Deno.env.get('HYPERGUEST_TOKEN') || Deno.env.get('HYPERGUEST_BEARER_TOKEN');
+  if (!token) throw new Error('HYPERGUEST_TOKEN (or HYPERGUEST_BEARER_TOKEN) not configured');
   return {
     'Authorization': `Bearer ${token}`,
     'Accept-Encoding': 'gzip, deflate',
