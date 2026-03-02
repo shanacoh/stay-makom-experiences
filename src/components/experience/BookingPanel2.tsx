@@ -311,11 +311,11 @@ export function BookingPanel2({
   }
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">{t.title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 overflow-x-hidden">
         {/* Guests */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">

@@ -530,12 +530,14 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                       s === step ? "bg-primary text-primary-foreground" :
                       "bg-muted text-muted-foreground"
                     )}>
-                      {s < step ? <Check className="h-4 w-4" /> : i + 1}
+                      {s < step ? <Check className="h-4 w-4" /> : s}
                     </div>
-                    <div className={cn(
-                      "flex-1 h-1 rounded-full transition-colors",
-                      s <= step ? "bg-primary" : "bg-muted"
-                    )} />
+                    {i < 1 && (
+                      <div className={cn(
+                        "flex-1 h-1 rounded-full transition-colors",
+                        step > 2 ? "bg-primary" : "bg-muted"
+                      )} />
+                    )}
                   </div>
                   <span className={cn(
                     "text-xs",
