@@ -493,6 +493,7 @@ export default function Experience2() {
                 experienceId={experience.id}
                 currency={experience.currency || "ILS"}
                 lang={lang as "en" | "he" | "fr"}
+                hyperguestPropertyId={hyperguestPropertyId || null}
                 onViewDates={() => {
                   const bookingPanel = document.getElementById('booking-panel-v2');
                   if (bookingPanel) {
