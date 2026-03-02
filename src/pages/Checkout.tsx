@@ -1,0 +1,829 @@
+/**
+ * Checkout page — Steps 2 (Guest Info) & 3 (Summary & Confirm)
+ * Receives booking selections from BookingPanel2 via router state
+ */
+
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
+import { DualPrice } from "@/components/ui/DualPrice";
+import { PriceBreakdownV2 } from "@/components/experience/PriceBreakdownV2";
+import { LeadGuestForm, EMPTY_LEAD_GUEST, sanitizeLeadGuest, type LeadGuestData } from "@/components/experience/LeadGuestForm";
+import { BookingConfirmationDialog, type BookingConfirmationData } from "@/components/experience/BookingConfirmationDialog";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useExperience2Price } from "@/hooks/useExperience2Price";
+import { preBook, createBooking } from "@/services/hyperguest";
+import { extractTaxBreakdown } from "@/utils/taxesDisplay";
+import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
+interface SelectedExtra {
+  id: string;
+  name: string;
+  name_he: string | null;
+  price: number;
+  currency: string;
+  pricing_type: string;
+}
+
+export interface CheckoutState {
+  experienceId: string;
+  experienceTitle: string;
+  hotelId: string;
+  hotelName: string;
+  hyperguestPropertyId: string;
+  currency: string;
+  lang: "en" | "he" | "fr";
+  adults: number;
+  childrenAges: number[];
+  dateRange: { from: string; to: string };
+  nights: number;
+  selectedRoomId: number;
+  selectedRatePlanId: number;
+  selectedRoomName: string;
+  selectedRatePlan: any;
+  propertyRemarks: string[];
+  selectedExtras: SelectedExtra[];
+  searchParams: any;
+  experienceSlug: string;
+}
+
+const hgErrorMessages: Record<string, Record<string, string>> = {
+  'BN.402': {
+    en: "The price has changed since your search. Please search again.",
+    he: "המחיר השתנה מאז החיפוש שלך. אנא חפש שוב.",
+    fr: "Le prix a changé depuis votre recherche. Veuillez relancer une recherche.",
+  },
+  'BN.502': {
+    en: "This room is no longer available. Please choose another option.",
+    he: "החדר אינו זמין עוד. אנא בחר אפשרות אחרת.",
+    fr: "Cette chambre n'est plus disponible. Veuillez choisir une autre option.",
+  },
+  'BN.506': {
+    en: "Processing error. Please try again or contact support.",
+    he: "שגיאת עיבוד. אנא נסה שוב או פנה לתמיכה.",
+    fr: "Erreur de traitement. Veuillez réessayer ou contacter le support.",
+  },
+  'BN.507': {
+    en: "Payment could not be processed. Please check your card details.",
+    he: "התשלום לא בוצע. אנא בדק את פרטי הכרטיס.",
+    fr: "Le paiement n'a pas pu être traité. Vérifiez vos informations de carte.",
+  },
+};
+
+type CheckoutStep = 2 | 3;
+
+export default function Checkout() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const state = location.state as CheckoutState | null;
+
+  // Redirect if no state
+  useEffect(() => {
+    if (!state) {
+      navigate("/", { replace: true });
+    }
+  }, [state, navigate]);
+
+  if (!state) return null;
+
+  return <CheckoutContent state={state} />;
+}
+
+function CheckoutContent({ state }: { state: CheckoutState }) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const lang = state.lang;
+
+  const t = {
+    en: {
+      step2Title: "Guest information",
+      step3Title: "Review & confirm",
+      back: "Back",
+      next: "Continue",
+      book: "Confirm booking",
+      summary: "Booking summary",
+      guestDetails: "Guest details",
+      stayDetails: "Stay details",
+      dates: "Dates",
+      room: "Room",
+      nightsLabel: "Nights",
+      guestsLabel: "Guests",
+      total: "Total",
+      specialRequests: "Special requests",
+      importantNotices: "Important notices",
+      fillGuestInfo: "Please fill in guest information (name, email, phone, birth date)",
+      bookingError: "Booking failed. Your information has been saved — please try again.",
+      onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
+      verifying: "Verifying price...",
+      booking: "Booking...",
+      bookingLong: "Confirmation in progress, please wait...",
+      bookingVeryLong: "Taking longer than expected. Do not close this page...",
+      priceChanged: "Price has changed",
+      backToSelection: "Back to selection",
+      secureCheckout: "Secure checkout",
+    },
+    he: {
+      step2Title: "פרטי אורח",
+      step3Title: "סיכום ואישור",
+      back: "חזרה",
+      next: "המשך",
+      book: "אשר הזמנה",
+      summary: "סיכום הזמנה",
+      guestDetails: "פרטי אורח",
+      stayDetails: "פרטי שהייה",
+      dates: "תאריכים",
+      room: "חדר",
+      nightsLabel: "לילות",
+      guestsLabel: "אורחים",
+      total: "סה\"כ",
+      specialRequests: "בקשות מיוחדות",
+      importantNotices: "הערות חשובות",
+      fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון, תאריך לידה)",
+      bookingError: "ההזמנה נכשלה. הפרטים שלך נשמרו — אנא נסה שוב.",
+      onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
+      verifying: "בודק מחיר...",
+      booking: "...מזמין",
+      bookingLong: "...אישור בתהליך, אנא המתן",
+      bookingVeryLong: "...לוקח יותר זמן מהצפוי. אל תסגור את הדף",
+      priceChanged: "המחיר השתנה",
+      backToSelection: "חזרה לבחירה",
+      secureCheckout: "הזמנה מאובטחת",
+    },
+    fr: {
+      step2Title: "Informations voyageur",
+      step3Title: "Résumé & confirmation",
+      back: "Retour",
+      next: "Continuer",
+      book: "Confirmer la réservation",
+      summary: "Résumé de la réservation",
+      guestDetails: "Détails voyageur",
+      stayDetails: "Détails du séjour",
+      dates: "Dates",
+      room: "Chambre",
+      nightsLabel: "Nuits",
+      guestsLabel: "Voyageurs",
+      total: "Total",
+      specialRequests: "Demandes spéciales",
+      importantNotices: "Remarques importantes",
+      fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone, date de naissance)",
+      bookingError: "La réservation a échoué. Vos informations ont été conservées — veuillez réessayer.",
+      onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
+      verifying: "Vérification du prix...",
+      booking: "Réservation en cours...",
+      bookingLong: "Confirmation en cours, veuillez patienter...",
+      bookingVeryLong: "La réservation prend plus de temps que prévu. Ne fermez pas cette page...",
+      priceChanged: "Le prix a changé",
+      backToSelection: "Retour à la sélection",
+      secureCheckout: "Paiement sécurisé",
+    },
+  }[lang];
+
+  const [step, setStep] = useState<CheckoutStep>(2);
+  const [leadGuest, setLeadGuest] = useState<LeadGuestData>(EMPTY_LEAD_GUEST);
+  const [specialRequests, setSpecialRequests] = useState("");
+  const [showGuestErrors, setShowGuestErrors] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingStep, setBookingStep] = useState<"idle" | "prebook" | "booking">("idle");
+  const [bookingElapsed, setBookingElapsed] = useState(0);
+  const [confirmationData, setConfirmationData] = useState<BookingConfirmationData | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const pendingBookAfterAuth = useRef(false);
+  const bookingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const dateFrom = new Date(state.dateRange.from);
+  const dateTo = new Date(state.dateRange.to);
+  const totalPartySize = state.adults + state.childrenAges.length;
+
+  const ratePlanPrices = state.selectedRatePlan?.prices || null;
+  const priceBreakdown = useExperience2Price(state.experienceId, null, state.currency, state.nights, state.adults, ratePlanPrices);
+
+  const extrasTotal = useMemo(() => {
+    return state.selectedExtras.reduce((sum, extra) => {
+      let multiplier = 1;
+      if (extra.pricing_type === "per_guest") multiplier = state.adults;
+      if (extra.pricing_type === "per_night") multiplier = state.nights;
+      return sum + extra.price * multiplier;
+    }, 0);
+  }, [state.selectedExtras, state.adults, state.nights]);
+
+  const displayTotal = (priceBreakdown?.finalTotal ?? 0) + extrasTotal;
+  const totalIsNaN = Number.isNaN(displayTotal);
+  const isOnRequest = state.selectedRatePlan?.isImmediate === false;
+
+  const isGuestValid = leadGuest.firstName.trim() !== "" &&
+    leadGuest.lastName.trim() !== "" &&
+    leadGuest.email.trim() !== "" &&
+    leadGuest.phone.trim() !== "" &&
+    leadGuest.birthDate !== "";
+
+  // Progressive booking timer
+  useEffect(() => {
+    if (isBooking) {
+      setBookingElapsed(0);
+      bookingTimerRef.current = setInterval(() => {
+        setBookingElapsed(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (bookingTimerRef.current) {
+        clearInterval(bookingTimerRef.current);
+        bookingTimerRef.current = null;
+      }
+      setBookingElapsed(0);
+    }
+    return () => {
+      if (bookingTimerRef.current) clearInterval(bookingTimerRef.current);
+    };
+  }, [isBooking]);
+
+  const getBookingMessage = () => {
+    if (bookingStep === "prebook") return t.verifying;
+    if (bookingElapsed > 30) return t.bookingVeryLong;
+    if (bookingElapsed > 10) return t.bookingLong;
+    return t.booking;
+  };
+
+  useEffect(() => {
+    if (user && pendingBookAfterAuth.current) {
+      pendingBookAfterAuth.current = false;
+      setTimeout(() => handleBookInternal(), 300);
+    }
+  }, [user]);
+
+  const handleBook = () => {
+    if (!user) {
+      pendingBookAfterAuth.current = true;
+      setShowAuthPrompt(true);
+      return;
+    }
+    handleBookInternal();
+  };
+
+  const handleBookInternal = async () => {
+    if (!isGuestValid) {
+      setShowGuestErrors(true);
+      setStep(2);
+      toast.error(t.fillGuestInfo);
+      return;
+    }
+
+    setIsBooking(true);
+    setBookingStep("prebook");
+
+    try {
+      const checkIn = state.dateRange.from;
+      const checkOut = state.dateRange.to;
+
+      const expectedAmount = state.selectedRatePlan.payment?.chargeAmount?.price
+        ?? state.selectedRatePlan.prices?.sell?.price
+        ?? state.selectedRatePlan.prices?.sell?.amount
+        ?? 0;
+      const expectedCurrency = state.selectedRatePlan.payment?.chargeAmount?.currency
+        ?? state.selectedRatePlan.prices?.sell?.currency
+        ?? "EUR";
+
+      const preBookData = {
+        search: {
+          dates: { from: checkIn, to: checkOut },
+          propertyId: parseInt(state.hyperguestPropertyId),
+          nationality: leadGuest.country || "IL",
+          pax: [{ adults: state.adults, children: state.childrenAges }],
+        },
+        rooms: [{
+          roomId: state.selectedRoomId,
+          ratePlanId: state.selectedRatePlanId,
+          expectedPrice: { amount: expectedAmount, currency: expectedCurrency },
+        }],
+      };
+
+      const preBookResult = await preBook(preBookData);
+      const roomResult = preBookResult.rooms?.[0];
+      if (roomResult?.priceChange) {
+        const { fromAmount, toAmount } = roomResult.priceChange;
+        const priceDiff = toAmount.amount - fromAmount.amount;
+        const priceDiffPercent = Math.round((priceDiff / fromAmount.amount) * 100);
+        toast.warning(
+          `${t.priceChanged}: ${fromAmount.amount} ${fromAmount.currency} → ${toAmount.amount} ${toAmount.currency} (${priceDiff > 0 ? '+' : ''}${priceDiffPercent}%)`,
+          { duration: 8000 }
+        );
+        setIsBooking(false);
+        setBookingStep("idle");
+        return;
+      }
+
+      setBookingStep("booking");
+
+      const staymakomRef = `SM-${state.experienceId.substring(0, 8).toUpperCase()}-${Date.now()}`;
+      const safe = sanitizeLeadGuest(leadGuest);
+
+      const adultGuests = [
+        {
+          birthDate: safe.birthDate,
+          title: safe.title,
+          name: { first: safe.firstName, last: safe.lastName },
+        },
+        ...Array.from({ length: Math.max(0, state.adults - 1) }, (_, i) => ({
+          birthDate: "1990-01-01",
+          title: "MR" as const,
+          name: { first: `Guest`, last: `${i + 2}` },
+        })),
+      ];
+
+      const childGuests = state.childrenAges.map((age, i) => ({
+        birthDate: `${new Date().getFullYear() - age}-01-01`,
+        title: "C" as const,
+        name: { first: `Child`, last: `${i + 1}` },
+      }));
+
+      const bookingData = {
+        dates: { from: checkIn, to: checkOut },
+        propertyId: parseInt(state.hyperguestPropertyId),
+        leadGuest: {
+          birthDate: safe.birthDate,
+          title: safe.title,
+          name: { first: safe.firstName, last: safe.lastName },
+          contact: {
+            address: safe.address,
+            city: safe.city,
+            country: safe.country,
+            email: safe.email,
+            phone: safe.phone,
+            state: "N/A",
+            zip: "00000",
+          },
+        },
+        reference: { agency: staymakomRef },
+        rooms: [{
+          roomId: state.selectedRoomId,
+          ratePlanId: state.selectedRatePlanId,
+          expectedPrice: { amount: expectedAmount, currency: expectedCurrency },
+          specialRequests: specialRequests || undefined,
+          guests: [...adultGuests, ...childGuests],
+        }],
+      };
+
+      const bookingResult = await createBooking(bookingData);
+      const hgBookingId = bookingResult.id || bookingResult.bookingId || "";
+      const hgStatus = bookingResult.status || "Confirmed";
+      const sellPrice = bookingResult.totalPrice?.amount ?? expectedAmount;
+      const bookingCurrency = bookingResult.totalPrice?.currency ?? expectedCurrency;
+
+      const currentSession = await supabase.auth.getSession();
+      const currentUserId = currentSession.data.session?.user?.id || null;
+      const confirmationToken = crypto.randomUUID();
+
+      const { error: dbError } = await supabase.from("bookings_hg").insert({
+        hg_booking_id: hgBookingId,
+        hotel_id: state.hotelId,
+        experience_id: state.experienceId,
+        checkin: checkIn,
+        checkout: checkOut,
+        nights: state.nights,
+        party_size: totalPartySize,
+        sell_price: sellPrice,
+        net_price: 0,
+        commission_amount: priceBreakdown?.totalCommissions ?? 0,
+        currency: bookingCurrency,
+        status: hgStatus.toLowerCase(),
+        hg_status: hgStatus,
+        board_type: state.selectedRatePlan?.board || "RO",
+        room_code: String(state.selectedRoomId),
+        room_name: state.selectedRoomName,
+        rate_plan: String(state.selectedRatePlanId),
+        customer_name: `${leadGuest.firstName} ${leadGuest.lastName}`,
+        customer_email: leadGuest.email,
+        hg_raw_data: bookingResult,
+        user_id: currentUserId,
+        confirmation_token: confirmationToken,
+      } as any);
+
+      if (dbError) console.error("Failed to save booking to DB:", dbError);
+
+      const taxBreakdown = extractTaxBreakdown(state.selectedRatePlan);
+      const allRemarks = [
+        ...state.propertyRemarks,
+        ...(state.selectedRatePlan?.remarks || []),
+      ].filter((r: string) => !/general message that should be shown/i.test(r));
+
+      setConfirmationData({
+        hgBookingId,
+        status: hgStatus,
+        hotelName: state.hotelName || "Hotel",
+        roomName: state.selectedRoomName,
+        boardType: state.selectedRatePlan?.board || "RO",
+        checkIn,
+        checkOut,
+        nights: state.nights,
+        partySize: totalPartySize,
+        sellPrice,
+        currency: bookingCurrency,
+        remarks: allRemarks,
+        specialRequests,
+        experienceTitle: state.experienceTitle || "Experience",
+        staymakomRef,
+        displayTaxesTotal: taxBreakdown.totalDisplayAmount,
+        isOnRequest: state.selectedRatePlan?.isImmediate === false,
+        confirmationToken,
+      });
+      setShowConfirmation(true);
+
+      try {
+        const emailCancellation = analyzeCancellationPolicies(
+          state.selectedRatePlan?.cancellationPolicies,
+          checkIn,
+          lang,
+        );
+        await supabase.functions.invoke("send-booking-confirmation", {
+          body: {
+            to: leadGuest.email,
+            guestName: `${leadGuest.firstName} ${leadGuest.lastName}`,
+            experienceTitle: state.experienceTitle,
+            hotelName: state.hotelName,
+            roomName: state.selectedRoomName,
+            boardType: state.selectedRatePlan?.board || "RO",
+            checkIn,
+            checkOut,
+            nights: state.nights,
+            partySize: totalPartySize,
+            totalPrice: sellPrice,
+            currency: bookingCurrency,
+            bookingRef: staymakomRef,
+            hgBookingId,
+            remarks: allRemarks,
+            specialRequests,
+            lang,
+            displayTaxesTotal: taxBreakdown.totalDisplayAmount,
+            confirmationToken,
+            cancellationPolicy: {
+              summaryText: emailCancellation.summaryText,
+              isNonRefundable: emailCancellation.isNonRefundable,
+              deadline: emailCancellation.effectiveDeadline?.toISOString() || null,
+            },
+          },
+        });
+      } catch (emailError) {
+        console.error("Email sending failed:", emailError);
+      }
+    } catch (error: any) {
+      console.error("Pre-book/Booking error:", error);
+      const detail = error?.message || "";
+      const codeMatch = detail.match(/BN\.\d+/);
+      const errorCode = codeMatch?.[0] || "";
+      const friendlyMsg = hgErrorMessages[errorCode]?.[lang];
+      toast.error(t.bookingError, {
+        description: friendlyMsg || (detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined),
+        duration: 8000,
+      });
+    } finally {
+      setIsBooking(false);
+      setBookingStep("idle");
+    }
+  };
+
+  const goBackToExperience = () => {
+    navigate(`/experience2/${state.experienceSlug}?lang=${lang}`);
+  };
+
+  const stepLabels = [t.step2Title, t.step3Title];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+
+      <main className="flex-1 w-full">
+        {/* Top bar with secure checkout + progress */}
+        <div className="border-b border-border bg-card">
+          <div className="max-w-2xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={goBackToExperience}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t.backToSelection}
+              </button>
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <ShieldCheck className="h-4 w-4" />
+                {t.secureCheckout}
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="flex items-center gap-3">
+              {[2, 3].map((s, i) => (
+                <div key={s} className="flex-1 flex flex-col items-center gap-1.5">
+                  <div className="w-full flex items-center gap-2">
+                    <div className={cn(
+                      "h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 transition-colors",
+                      s < step ? "bg-primary text-primary-foreground" :
+                      s === step ? "bg-primary text-primary-foreground" :
+                      "bg-muted text-muted-foreground"
+                    )}>
+                      {s < step ? <Check className="h-4 w-4" /> : i + 1}
+                    </div>
+                    <div className={cn(
+                      "flex-1 h-1 rounded-full transition-colors",
+                      s <= step ? "bg-primary" : "bg-muted"
+                    )} />
+                  </div>
+                  <span className={cn(
+                    "text-xs",
+                    s === step ? "text-foreground font-medium" : "text-muted-foreground"
+                  )}>
+                    {stepLabels[i]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+
+          {/* ═══ STEP 2: Guest Info ═══ */}
+          {step === 2 && (
+            <div className="space-y-6">
+              {/* Mini recap card */}
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
+                    </p>
+                  </div>
+                  {!totalIsNaN && (
+                    <div className="text-right shrink-0">
+                      <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline className="text-sm font-semibold text-primary" showSecondary />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Guest form */}
+              <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
+
+              <Separator />
+
+              {/* Special requests */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <MessageSquare className="h-4 w-4" />
+                  {t.specialRequests}
+                </div>
+                <Textarea
+                  placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
+                  value={specialRequests}
+                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  className="min-h-[60px] text-sm resize-none"
+                  rows={2}
+                />
+              </div>
+
+              {/* Navigation */}
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="shrink-0" onClick={goBackToExperience}>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t.back}
+                </Button>
+                <Button
+                  className="flex-1"
+                  size="lg"
+                  disabled={!isGuestValid}
+                  onClick={() => {
+                    if (!isGuestValid) {
+                      setShowGuestErrors(true);
+                      toast.error(t.fillGuestInfo);
+                      return;
+                    }
+                    setStep(3);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                >
+                  {t.next}
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 3: Summary & Confirm ═══ */}
+          {step === 3 && (
+            <div className="space-y-6">
+              {/* Stay details */}
+              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                <p className="text-sm font-semibold">{t.stayDetails}</p>
+                {state.experienceTitle && (
+                  <p className="text-sm font-medium">{state.experienceTitle}</p>
+                )}
+                {state.hotelName && (
+                  <p className="text-xs text-muted-foreground">{state.hotelName}</p>
+                )}
+                <Separator />
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">{t.dates}</span>
+                    <p className="font-medium mt-0.5">
+                      {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t.nightsLabel}</span>
+                    <p className="font-medium mt-0.5">{state.nights}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t.guestsLabel}</span>
+                    <p className="font-medium mt-0.5">{totalPartySize}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t.room}</span>
+                    <p className="font-medium mt-0.5 truncate">{state.selectedRoomName}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Guest details */}
+              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                <p className="text-sm font-semibold">{t.guestDetails}</p>
+                <div className="text-xs space-y-1">
+                  <p className="font-medium">{leadGuest.firstName} {leadGuest.lastName}</p>
+                  <p className="text-muted-foreground">{leadGuest.email}</p>
+                  <p className="text-muted-foreground">{leadGuest.phone}</p>
+                </div>
+                {specialRequests && (
+                  <>
+                    <Separator />
+                    <p className="text-xs text-muted-foreground italic">"{specialRequests}"</p>
+                  </>
+                )}
+              </div>
+
+              {/* Price breakdown */}
+              {priceBreakdown && (
+                <div className="rounded-xl border border-border bg-card p-4">
+                  <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={false} lang={lang} ratePlanPrices={ratePlanPrices} />
+                </div>
+              )}
+
+              {/* Extras recap */}
+              {state.selectedExtras.length > 0 && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    {lang === "he" ? "תוספות נבחרות" : lang === "fr" ? "Extras sélectionnés" : "Selected extras"}
+                  </div>
+                  {state.selectedExtras.map((extra) => {
+                    const name = lang === "he" ? extra.name_he || extra.name : extra.name;
+                    let multiplier = 1;
+                    if (extra.pricing_type === "per_guest") multiplier = state.adults;
+                    if (extra.pricing_type === "per_night") multiplier = state.nights;
+                    const lineTotal = extra.price * multiplier;
+                    return (
+                      <div key={extra.id} className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{name}</span>
+                        <DualPrice amount={lineTotal} currency={extra.currency} inline className="text-xs" />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Total */}
+              {!totalIsNaN && (
+                <div className="flex justify-between items-center p-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <span className="text-sm font-semibold">{t.total}</span>
+                  <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline className="text-lg font-bold text-primary" showSecondary />
+                </div>
+              )}
+
+              {/* Cancellation policy */}
+              {state.selectedRatePlan?.cancellationPolicies && state.searchParams?.checkIn && (() => {
+                const cancellation = analyzeCancellationPolicies(
+                  state.selectedRatePlan.cancellationPolicies,
+                  state.searchParams.checkIn,
+                  lang,
+                );
+                if (!cancellation.badgeText) return null;
+                if (cancellation.isFreeCancellation) {
+                  return (
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+                      <Check className="h-3.5 w-3.5 shrink-0" />
+                      <span>{cancellation.badgeText}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Info className="h-3.5 w-3.5 shrink-0" />
+                    <span>{cancellation.isNonRefundable ? cancellation.badgeText : cancellation.summaryText}</span>
+                  </div>
+                );
+              })()}
+
+              {/* On-request warning */}
+              {isOnRequest && (
+                <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-400">
+                    {t.onRequestWarning}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Hotel remarks (pets, taxes, visa info) */}
+              {state.propertyRemarks.length > 0 && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-xs font-medium">{t.importantNotices}</p>
+                  </div>
+                  {state.propertyRemarks.map((remark: string, idx: number) => (
+                    <p key={idx} className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
+                  ))}
+                </div>
+              )}
+
+              {/* VAT info notice */}
+              <div className="flex gap-3 p-4 rounded-xl border border-border bg-card">
+                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {lang === "he"
+                    ? "המחירים אינם כוללים מע\"מ. בהתאם לחוק המס הישראלי, אזרחי ותושי ישראל חייבים ב-18% מע\"מ, לתשלום ישיר במלון. מבקרים זרים עם אשרת B2/3/4 פטורים ממע\"מ."
+                    : lang === "fr"
+                      ? "Les prix n'incluent pas la TVA. Conformément à la législation fiscale israélienne, les citoyens et résidents israéliens sont soumis à 18% de TVA, payable directement à l'hôtel. Les visiteurs étrangers munis d'un visa B2/3/4 en sont exemptés."
+                      : "Prices do not include VAT. In accordance with Israeli tax law, Israeli citizens and residents are subject to 18% VAT on top of the listed rates, payable directly at the hotel. Foreign visitors holding a B2/3/4 visa are exempt from VAT."
+                  }
+                </p>
+              </div>
+
+              {/* Navigation */}
+              <div className="flex gap-3 pt-2 pb-8">
+                <Button variant="outline" className="shrink-0" onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t.back}
+                </Button>
+                <Button
+                  className="flex-1"
+                  size="lg"
+                  disabled={totalIsNaN || isBooking}
+                  onClick={handleBook}
+                >
+                  {isBooking ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {getBookingMessage()}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      {t.book} — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+
+      {/* Confirmation dialog */}
+      <BookingConfirmationDialog
+        open={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          navigate(`/experience2/${state.experienceSlug}?lang=${lang}`);
+        }}
+        data={confirmationData}
+        lang={lang}
+      />
+
+      {/* Auth prompt */}
+      <AuthPromptDialog
+        open={showAuthPrompt}
+        onOpenChange={(open) => {
+          setShowAuthPrompt(open);
+          if (!open && !user) {
+            pendingBookAfterAuth.current = false;
+          }
+        }}
+        lang={lang}
+        defaultTab="login"
+        context="account"
+      />
+    </div>
+  );
+}
