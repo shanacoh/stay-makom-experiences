@@ -34,8 +34,13 @@ export default function Experience2() {
   const { lang } = useLanguage();
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
+  const reviewsRef = useRef<HTMLDivElement>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<SelectedExtra[]>([]);
+
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleToggleExtra = useCallback((extra: SelectedExtra) => {
     setSelectedExtras((prev) => {
@@ -397,7 +402,7 @@ export default function Experience2() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <SEOHead
         title={title}
         description={subtitle || undefined}
@@ -406,8 +411,10 @@ export default function Experience2() {
 
       <Header />
 
-      {/* Hero Section */}
-      <HeroSection
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section>
+          <HeroSection
         photos={photos.filter(Boolean)}
         title={title}
         subtitle={subtitle || undefined}
@@ -424,7 +431,9 @@ export default function Experience2() {
         maxParty={experience.max_party || 4}
         averageRating={averageRating}
         reviewsCount={reviewsCount}
+        onScrollToReviews={scrollToReviews}
       />
+        </section>
 
       {/* Contenu principal — aligned to V1 layout */}
       <div className="max-w-6xl mx-auto pb-24 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
@@ -459,7 +468,9 @@ export default function Experience2() {
             {renderMaps()}
 
             {/* Reviews */}
-            <ReviewsGrid2 experienceId={experience.id} lang={lang} />
+            <div ref={reviewsRef}>
+              <ReviewsGrid2 experienceId={experience.id} lang={lang} />
+            </div>
 
             {/* Practical Info - Things to know */}
             <PracticalInfo experience={experience} lang={lang as "en" | "he" | "fr"} />
@@ -509,10 +520,7 @@ export default function Experience2() {
         </div>
       </div>
 
-      <Footer />
-
-      {/* Sticky Price Bar (Mobile) */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        {/* Mobile Sticky Price Bar */}
         <StickyPriceBar
           basePrice={experience.base_price}
           basePriceType={experience.base_price_type || "per_person"}
@@ -521,21 +529,31 @@ export default function Experience2() {
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
         />
-        <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
-          <BookingPanel2
-            experienceId={experience.id}
-            experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
-            hotelId={primaryHotel?.id || ""}
-            hotelName={primaryHotel?.name || ""}
-            hyperguestPropertyId={hyperguestPropertyId || null}
-            currency={experience.currency || "ILS"}
-            minParty={experience.min_party || 2}
-            maxParty={experience.max_party || 4}
-            lang={lang as "en" | "he" | "fr"}
-            selectedExtras={selectedExtras}
-          />
-        </SheetContent>
-      </Sheet>
+
+        {/* Mobile Booking Sheet */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto p-0">
+            <div className="p-6">
+              <BookingPanel2
+                experienceId={experience.id}
+                experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
+                hotelId={primaryHotel?.id || ""}
+                hotelName={primaryHotel?.name || ""}
+                hyperguestPropertyId={hyperguestPropertyId || null}
+                currency={experience.currency || "ILS"}
+                minParty={experience.min_party || 2}
+                maxParty={experience.max_party || 4}
+                lang={lang as "en" | "he" | "fr"}
+                selectedExtras={selectedExtras}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </main>
+
+      <footer ref={footerRef as React.RefObject<HTMLElement>}>
+        <Footer />
+      </footer>
     </div>
   );
 }
