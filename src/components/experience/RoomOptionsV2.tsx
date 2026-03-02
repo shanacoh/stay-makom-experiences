@@ -63,8 +63,6 @@ interface RoomOptionsV2Props {
   checkInDate?: string;
 }
 
-const filterGenericRemarks = (remarks: string[]) =>
-  remarks.filter((r) => !/general message that should be shown/i.test(r));
 
 /**
  * ✅ #1 BAR check: returns true if rate plan should be hidden
@@ -257,7 +255,7 @@ export function RoomOptionsV2({
               const amount = Number(priceObj.price ?? priceObj.amount) || 0;
               const currency = priceObj.currency ?? "ILS";
               const isSelected = selectedRoomId === activeRoom.roomId && selectedRatePlanId === ratePlan.ratePlanId;
-              const filteredRemarks = filterGenericRemarks(ratePlan.remarks || []);
+              
 
               // ✅ #2b: Display taxes under price
               const taxBreakdown = extractTaxBreakdown(ratePlan);
@@ -321,17 +319,6 @@ export function RoomOptionsV2({
                     </div>
                   </label>
 
-                  {/* Rate plan remarks */}
-                  {filteredRemarks.length > 0 && (
-                    <div className="ml-8 space-y-1 px-3 py-2 rounded-md bg-muted/50 border border-border">
-                      {filteredRemarks.map((remark, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <Info className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
-                          <p className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               );
             })}
