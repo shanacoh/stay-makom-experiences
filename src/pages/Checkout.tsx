@@ -3,7 +3,7 @@
  * Receives booking selections from BookingPanel2 via router state
  */
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -520,10 +520,10 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
             </div>
 
             {/* Progress bar */}
-            <div className="flex items-center gap-3">
-              {[2, 3].map((s, i) => (
-                <div key={s} className="flex-1 flex flex-col items-center gap-1.5">
-                  <div className="w-full flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              {[1, 2, 3].map((s, i) => (
+                <React.Fragment key={s}>
+                  <div className="flex flex-col items-center gap-1.5">
                     <div className={cn(
                       "h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 transition-colors",
                       s < step ? "bg-primary text-primary-foreground" :
@@ -532,20 +532,20 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                     )}>
                       {s < step ? <Check className="h-4 w-4" /> : s}
                     </div>
-                    {i < 1 && (
-                      <div className={cn(
-                        "flex-1 h-1 rounded-full transition-colors",
-                        step > 2 ? "bg-primary" : "bg-muted"
-                      )} />
-                    )}
+                    <span className={cn(
+                      "text-xs whitespace-nowrap",
+                      s === step ? "text-foreground font-medium" : "text-muted-foreground"
+                    )}>
+                      {[lang === 'he' ? 'בחירה' : 'Selection', ...stepLabels][i]}
+                    </span>
                   </div>
-                  <span className={cn(
-                    "text-xs",
-                    s === step ? "text-foreground font-medium" : "text-muted-foreground"
-                  )}>
-                    {stepLabels[i]}
-                  </span>
-                </div>
+                  {i < 2 && (
+                    <div className={cn(
+                      "flex-1 h-1 rounded-full transition-colors mt-[-1.25rem]",
+                      s < step ? "bg-primary" : "bg-muted"
+                    )} />
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>
