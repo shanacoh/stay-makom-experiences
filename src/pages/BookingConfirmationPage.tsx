@@ -104,9 +104,8 @@ const t = {
   },
 };
 
-function fmt(amount: number, currency: string): string {
-  const symbol = currency === "ILS" ? "₪" : currency === "EUR" ? "€" : currency === "USD" ? "$" : currency;
-  return `${symbol}${amount.toLocaleString("en-IL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function fmt(amount: number, _currency: string): string {
+  return `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatDate(dateStr: string, lang: string): string {

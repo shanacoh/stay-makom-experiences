@@ -166,7 +166,7 @@ export function RoomOptionsV2({
       const priceObj = rp.prices?.sell;
       if (!priceObj) continue;
       const amount = Number(priceObj.price ?? priceObj.amount) || 0;
-      const currency = priceObj.currency ?? "ILS";
+      const currency = priceObj.currency ?? "USD";
       if (amount > 0 && (!cheapest || amount < cheapest.amount)) {
         cheapest = { amount, currency };
       }
@@ -253,7 +253,7 @@ export function RoomOptionsV2({
               // ✅ #6: Only use sell price
               const priceObj = ratePlan.prices?.sell!;
               const amount = Number(priceObj.price ?? priceObj.amount) || 0;
-              const currency = priceObj.currency ?? "ILS";
+              const currency = priceObj.currency ?? "USD";
               const isSelected = selectedRoomId === activeRoom.roomId && selectedRatePlanId === ratePlan.ratePlanId;
               
 

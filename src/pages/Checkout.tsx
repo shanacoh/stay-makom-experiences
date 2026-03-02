@@ -569,7 +569,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                   </div>
                   {!totalIsNaN && (
                     <div className="text-right shrink-0">
-                      <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline className="text-sm font-semibold text-primary" showSecondary />
+                      <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
                     </div>
                   )}
                 </div>
@@ -707,7 +707,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
               {!totalIsNaN && (
                 <div className="flex justify-between items-center p-4 rounded-xl bg-primary/5 border border-primary/20">
                   <span className="text-sm font-semibold">{t.total}</span>
-                  <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline className="text-lg font-bold text-primary" showSecondary />
+                  <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-lg font-bold text-primary" showSecondary />
                 </div>
               )}
 
@@ -790,7 +790,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      {t.book} — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary />
+                      {t.book} — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline showSecondary />
                     </span>
                   )}
                 </Button>

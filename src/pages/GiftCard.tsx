@@ -22,15 +22,13 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 
-type Currency = "ILS" | "USD";
+type Currency = "USD";
 
 const currencySymbols: Record<Currency, string> = {
-  ILS: "₪",
   USD: "$"
 };
 
 const predefinedAmounts: Record<Currency, number[]> = {
-  ILS: [250, 500, 1000],
   USD: [50, 100, 250]
 };
 
@@ -52,7 +50,7 @@ export default function GiftCard() {
   const isRTL = lang === 'he';
   
   // Form state
-  const [currency, setCurrency] = useState<Currency>("ILS");
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [message, setMessage] = useState("");
@@ -215,23 +213,7 @@ export default function GiftCard() {
                 <CardDescription className="text-sm">{t(lang, 'giftCardSelectAmountDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
-                {/* Currency Selector */}
-                <div className="space-y-1.5">
-                  <Label className="text-sm">{t(lang, 'giftCardCurrency')}</Label>
-                  <Select value={currency} onValueChange={(val) => {
-                    setCurrency(val as Currency);
-                    setSelectedAmount(null);
-                    setCustomAmount("");
-                  }}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ILS">ILS (₪)</SelectItem>
-                      <SelectItem value="USD">USD ($)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Currency fixed to USD */}
 
                 {/* Predefined Amounts */}
                 <div className="grid grid-cols-3 gap-2">

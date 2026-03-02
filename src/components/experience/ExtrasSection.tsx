@@ -133,9 +133,8 @@ const ExtrasSection = ({ extras, selectedExtras, onUpdateQuantity }: ExtrasSecti
     return texts[key]?.[lang] || texts[key]?.en || key;
   };
 
-  const formatPrice = (price: number, currency: string) => {
-    const symbol = currency === 'USD' ? '$' : currency === 'ILS' ? '₪' : '€';
-    return `+${symbol}${price}`;
+  const formatPrice = (price: number, _currency: string) => {
+    return `+$${price}`;
   };
 
   // Check if image_url is an actual image URL

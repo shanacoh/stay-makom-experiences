@@ -71,7 +71,7 @@ const OtherExperiences2 = ({ hotelId, currentExperienceId, lang = "en" }: OtherE
                   </div>
                 )}
                 <div className="text-xs sm:text-sm font-bold">
-                  {exp.base_price}{exp.currency === "EUR" ? "€" : "₪"}
+                  ${exp.base_price}
                   <span className="text-[10px] sm:text-xs font-normal text-muted-foreground ml-0.5">
                     / {exp.base_price_type === "per_person"
                       ? (lang === "he" ? "אדם" : "pers.")
