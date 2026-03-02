@@ -275,7 +275,7 @@ const Experience = () => {
                 <HeroBookingPreview 
                   basePrice={experience.base_price}
                   basePriceType={experience.base_price_type || "per_person"}
-                  currency={experience.currency || "EUR"}
+                  currency={experience.currency || "USD"}
                   lang={lang}
                   onViewDates={() => {
                     const bookingPanel = document.getElementById('booking-panel');
@@ -305,7 +305,7 @@ const Experience = () => {
         <StickyPriceBar
           basePrice={experience.base_price}
           basePriceType={experience.base_price_type || "per_person"}
-          currency={experience.currency || "EUR"}
+          currency={experience.currency || "USD"}
           lang={lang}
           onViewDates={() => setIsBookingSheetOpen(true)}
           footerRef={footerRef}

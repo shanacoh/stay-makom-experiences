@@ -82,7 +82,7 @@ export function ExperienceAvailabilityPreview({
   hyperguestPropertyId,
   hotelName,
   experienceId,
-  currency = "ILS",
+  currency = "USD",
   lang = "en",
   nights: propNights,
   minParty = 1,

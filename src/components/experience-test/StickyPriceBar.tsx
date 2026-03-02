@@ -43,10 +43,8 @@ const StickyPriceBar = ({
     ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
     : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking');
 
-  const currencySymbol = currency === 'USD' ? '$' : '€';
-  const formattedPrice = lang === 'he' 
-    ? `${currencySymbol}${basePrice}`
-    : `${basePrice}${currencySymbol}`;
+  const currencySymbol = '$';
+  const formattedPrice = `${currencySymbol}${basePrice}`;
 
   // Only show on mobile - desktop has sticky booking panel
   return (

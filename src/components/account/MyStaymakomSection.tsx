@@ -350,8 +350,8 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       }
 
       const booking = bookingsHg?.find((b: any) => b.id === cancellingBookingId);
-      const curr = booking?.currency || "ILS";
-      const symbol = curr === "ILS" ? "₪" : curr === "EUR" ? "€" : "$";
+      const curr = booking?.currency || "USD";
+      const symbol = "$";
 
       return {
         loading: false,
@@ -483,8 +483,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                     <div>
                       <p className="text-xs text-muted-foreground">{isHebrew ? "סה\"כ" : "Total"}</p>
                       <p className="text-xl font-bold">
-                        {booking.currency === "ILS" ? "₪" : booking.currency === "EUR" ? "€" : "$"}
-                        {Number(booking.totalPrice).toLocaleString()}
+                        ${Number(booking.totalPrice).toLocaleString()}
                       </p>
                     </div>
                     <div className="flex gap-2">

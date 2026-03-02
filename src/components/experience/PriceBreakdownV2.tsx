@@ -94,9 +94,8 @@ const translations = {
 // Format currency
 // ---------------------------------------------------------------------------
 
-function fmt(amount: number, currency: string): string {
-  const symbol = currency === "ILS" ? "₪" : currency === "EUR" ? "€" : currency === "USD" ? "$" : currency;
-  return `${symbol}${amount.toLocaleString("en-IL", {
+function fmt(amount: number, _currency: string): string {
+  return `$${amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

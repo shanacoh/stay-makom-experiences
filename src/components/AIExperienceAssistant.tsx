@@ -255,7 +255,7 @@ const AIExperienceAssistant = () => {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="font-semibold text-sm sm:text-base">
-                            {rec.currency === 'ILS' ? '₪' : rec.currency}{rec.price}
+                            ${rec.price}
                           </p>
                         </div>
                       </div>

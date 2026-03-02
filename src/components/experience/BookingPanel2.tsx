@@ -580,7 +580,7 @@ export function BookingPanel2({
           {isStep1Complete ? (
             <span className="flex items-center gap-2">
               {t.next}
-              {!totalIsNaN && <> — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "EUR"} inline showSecondary /></>}
+              {!totalIsNaN && <> — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline showSecondary /></>}
               <ChevronRight className="h-4 w-4" />
             </span>
           ) : t.selectDates}
