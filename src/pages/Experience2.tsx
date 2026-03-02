@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingPanel2 } from "@/components/experience/BookingPanel2";
 import HeroSection from "@/components/experience-test/HeroSection";
+import HeroBookingPreview2 from "@/components/experience-test/HeroBookingPreview2";
 
 import YourStaySection from "@/components/experience-test/YourStaySection";
 import LocationMap from "@/components/experience-test/LocationMap";
@@ -423,19 +424,17 @@ export default function Experience2() {
         maxParty={experience.max_party || 4}
         averageRating={averageRating}
         reviewsCount={reviewsCount}
-        currency={experience.currency || "ILS"}
-        onViewDates={() => setIsSheetOpen(true)}
       />
 
-      {/* Contenu principal */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-8 lg:gap-12">
-          {/* Colonne gauche - Contenu */}
-          <div className="space-y-12">
+      {/* Contenu principal — aligned to V1 layout */}
+      <div className="max-w-6xl mx-auto pb-24 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
+        <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
+          {/* Left Column - Content */}
+          <div className="space-y-10 md:space-y-12">
             {/* Journey Overview (multi-hotel) */}
             {renderJourneyOverview()}
 
-            {/* What's on the program (always shown with long_copy as intro + experience2_includes grid) */}
+            {/* What's on the program */}
             <WhatsIncludedPhotos2 experienceId={experience.id} lang={lang} longCopy={longCopy || undefined} />
 
             {/* Extras / Add-ons */}
@@ -445,6 +444,12 @@ export default function Experience2() {
               currency={experience.currency || "ILS"}
               selectedExtras={selectedExtras}
               onToggleExtra={handleToggleExtra}
+            />
+
+            {/* Share with Friends */}
+            <ShareWithFriendsSection
+              title={title}
+              lang={lang as "en" | "he" | "fr"}
             />
 
             {/* Hotel stay section(s) */}
@@ -459,12 +464,6 @@ export default function Experience2() {
             {/* Practical Info - Things to know */}
             <PracticalInfo experience={experience} lang={lang as "en" | "he" | "fr"} />
 
-            {/* Share */}
-            <ShareWithFriendsSection
-              title={title}
-              lang={lang as "en" | "he" | "fr"}
-            />
-
             {/* Other Experiences */}
             {primaryHotel?.id && (
               <OtherExperiences2
@@ -475,21 +474,36 @@ export default function Experience2() {
             )}
           </div>
 
-          {/* Colonne droite - Booking Panel (Desktop) */}
-          <div className="hidden lg:block">
-            <div className="sticky top-8">
-              <BookingPanel2
+          {/* Right Column - Sticky Booking Panel (Desktop) */}
+          <div className="hidden md:block pr-1">
+            <div className="sticky top-4 space-y-4">
+              {/* Price Callout CTA */}
+              <HeroBookingPreview2
                 experienceId={experience.id}
-                experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
-                hotelId={primaryHotel?.id || ""}
-                hotelName={primaryHotel?.name || ""}
-                hyperguestPropertyId={hyperguestPropertyId || null}
                 currency={experience.currency || "ILS"}
-                minParty={experience.min_party || 2}
-                maxParty={experience.max_party || 4}
                 lang={lang as "en" | "he" | "fr"}
-                selectedExtras={selectedExtras}
+                onViewDates={() => {
+                  const bookingPanel = document.getElementById('booking-panel-v2');
+                  if (bookingPanel) {
+                    bookingPanel.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
               />
+
+              <div id="booking-panel-v2">
+                <BookingPanel2
+                  experienceId={experience.id}
+                  experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
+                  hotelId={primaryHotel?.id || ""}
+                  hotelName={primaryHotel?.name || ""}
+                  hyperguestPropertyId={hyperguestPropertyId || null}
+                  currency={experience.currency || "ILS"}
+                  minParty={experience.min_party || 2}
+                  maxParty={experience.max_party || 4}
+                  lang={lang as "en" | "he" | "fr"}
+                  selectedExtras={selectedExtras}
+                />
+              </div>
             </div>
           </div>
         </div>
