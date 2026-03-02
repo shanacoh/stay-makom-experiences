@@ -505,6 +505,7 @@ export default function Experience2() {
                 <BookingPanel2
                   experienceId={experience.id}
                   experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
+                  experienceSlug={experience.slug}
                   hotelId={primaryHotel?.id || ""}
                   hotelName={primaryHotel?.name || ""}
                   hyperguestPropertyId={hyperguestPropertyId || null}
@@ -537,6 +538,7 @@ export default function Experience2() {
               <BookingPanel2
                 experienceId={experience.id}
                 experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
+                experienceSlug={experience.slug}
                 hotelId={primaryHotel?.id || ""}
                 hotelName={primaryHotel?.name || ""}
                 hyperguestPropertyId={hyperguestPropertyId || null}
