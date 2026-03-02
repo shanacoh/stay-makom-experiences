@@ -157,6 +157,21 @@ export function BookingPanel2({
     enabled: selectedTab !== "pick",
   });
 
+  // Auto-select the cheapest available date when quickDates load
+  useEffect(() => {
+    if (selectedTab !== "pick" && quickDates && quickDates.length > 0 && !selectedDateOptionId) {
+      // Find the cheapest date option
+      const cheapest = quickDates.reduce((best, curr) => {
+        if (curr.cheapestPrice == null) return best;
+        if (!best || best.cheapestPrice == null || curr.cheapestPrice < best.cheapestPrice) return curr;
+        return best;
+      }, null as typeof quickDates[0] | null);
+      if (cheapest) {
+        setSelectedDateOptionId(cheapest.id);
+      }
+    }
+  }, [quickDates, selectedTab, selectedDateOptionId]);
+
   useEffect(() => {
     if (selectedDateOptionId && selectedTab !== "pick" && quickDates) {
       const opt = quickDates.find((d) => d.id === selectedDateOptionId);
