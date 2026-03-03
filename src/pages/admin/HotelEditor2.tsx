@@ -336,6 +336,11 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
         description_room_he: (h.description_room_he as string) ?? "",
         description_location_he: (h.description_location_he as string) ?? "",
       });
+
+      // Restore hyperguestId from existing hotel data
+      if (h.hyperguest_property_id) {
+        setHyperguestId(Number(h.hyperguest_property_id));
+      }
     }
   }, [hotel]);
 
@@ -378,8 +383,12 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
       const dataWithSlug = {
         ...data,
         slug: hotelId ? (hotel as { slug?: string })?.slug : generateSlug(data.name),
-        hyperguest_property_id: hyperguestId ? String(hyperguestId) : null,
-        hyperguest_imported_at: hyperguestId ? new Date().toISOString() : null,
+        hyperguest_property_id: hyperguestId
+          ? String(hyperguestId)
+          : (hotelId ? (hotel as any)?.hyperguest_property_id ?? null : null),
+        hyperguest_imported_at: hyperguestId
+          ? new Date().toISOString()
+          : (hotelId ? (hotel as any)?.hyperguest_imported_at ?? null : null),
         star_rating: data.star_rating,
         property_type: data.property_type || null,
         room_capacities: data.room_capacities?.length ? (data.room_capacities as unknown as Json) : null,
@@ -517,6 +526,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           <Button
             type="button"
             onClick={() => {
+              if (!hyperguestId) {
+                toast.warning("This hotel has no HyperGuest connection. Experiences linked to it won't support online booking.");
+              }
               setFormData(prev => ({ ...prev, status: "published" }));
               saveMutation.mutate({ ...formData, status: "published" });
             }}
@@ -548,10 +560,16 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
             </CardHeader>
             <CardContent>
               <HyperGuestHotelSearch onSelect={handleHyperGuestSelect} fetchFullDetails={true} />
-              {hyperguestId && (
+              {hyperguestId ? (
                 <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
-                    ✓ Lié à HyperGuest ID : {hyperguestId}
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full text-green-700 font-medium">
+                    ✓ Connected to HyperGuest (ID: {hyperguestId})
+                  </span>
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center gap-2 text-sm text-orange-600">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full text-orange-700 font-medium">
+                    ⚠ No HyperGuest connection — online booking will be unavailable
                   </span>
                 </div>
               )}
@@ -1390,6 +1408,9 @@ export const HotelEditor2 = ({ hotelId, onClose }: HotelEditor2Props) => {
           <Button
             type="button"
             onClick={() => {
+              if (!hyperguestId) {
+                toast.warning("This hotel has no HyperGuest connection. Experiences linked to it won't support online booking.");
+              }
               setFormData(prev => ({ ...prev, status: "published" }));
               saveMutation.mutate({ ...formData, status: "published" });
             }}
