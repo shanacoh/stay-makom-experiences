@@ -9,6 +9,7 @@ import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
 import { SEOHead } from "@/components/SEOHead";
 import MarqueeBanner from "@/components/MarqueeBanner";
+import TailoredRequestSection from "@/components/TailoredRequestSection";
 import HowItWorksBanner from "@/components/HowItWorksBanner";
 import CategoryCard from "@/components/CategoryCard";
 import ExperienceCard from "@/components/ExperienceCard";
@@ -481,6 +482,9 @@ const LaunchIndex = () => {
             </div>
           </div>
         </section>
+
+        {/* ─── 8. TAILORED REQUEST ─── */}
+        <TailoredRequestSection categories={categories || []} />
       </main>
 
       <LaunchFooter />
