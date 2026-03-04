@@ -1,45 +1,58 @@
 
 
-## Problème identifié
+## Plan: Premium "Tailored Experience Request" Section
 
-**Bug critique** : quand on édite un hôtel existant, le `hyperguest_property_id` est **écrasé à `null`** à chaque sauvegarde.
+### What
+A new elegant section inserted before the footer on `/launch`, allowing visitors to describe their dream stay. Data is captured as a "simple" lead via the existing `collect-lead` Edge Function with source `tailored_request`, storing all form answers in `metadata`.
 
-**Cause racine** (ligne 381 de `HotelEditor2.tsx`) :
-```tsx
-hyperguest_property_id: hyperguestId ? String(hyperguestId) : null,
+### Database Change
+Add `tailored_request` to the `leads_source_check` constraint so the edge function can store this new source. The collect-lead function already handles simple sources — we just need to add the new value to the allowed list.
+
+**Migration SQL:**
+```sql
+ALTER TABLE public.leads DROP CONSTRAINT IF EXISTS leads_source_check;
+ALTER TABLE public.leads ADD CONSTRAINT leads_source_check 
+  CHECK (source IN ('landing_page', 'ai_assistant_save', 'coming_soon', 'category_waitlist', 'tailored_request'));
 ```
 
-L'état `hyperguestId` est initialisé à `null` et n'est mis à jour que lorsqu'on importe un hôtel depuis HyperGuest (`handleHyperGuestSelect`). Lors de l'édition d'un hôtel existant, le `useEffect` qui charge les données (lignes 277-340) ne restaure jamais `hyperguestId` depuis `hotel.hyperguest_property_id`. Résultat : chaque fois qu'un admin édite et sauvegarde un hôtel, le lien HyperGuest est perdu.
+### Edge Function Update
+Add `'tailored_request'` to the simple sources array in `collect-lead/index.ts` (line 159).
 
-## Plan de correction
+### New Component: `src/components/TailoredRequestSection.tsx`
 
-### 1. Restaurer `hyperguestId` au chargement de l'hôtel existant
-Dans le `useEffect` qui peuple `formData` depuis `hotel` (~ligne 278), ajouter :
-```tsx
-if (h.hyperguest_property_id) {
-  setHyperguestId(Number(h.hyperguest_property_id));
-}
-```
+A self-contained component with:
 
-### 2. Préserver la valeur existante lors de la sauvegarde
-Modifier la logique de sauvegarde (ligne 381) pour ne pas écraser une valeur existante :
-```tsx
-hyperguest_property_id: hyperguestId
-  ? String(hyperguestId)
-  : (hotelId ? (hotel as any)?.hyperguest_property_id ?? null : null),
-```
+**Layout & Design:**
+- Max-width ~640px, centered, generous vertical padding
+- Soft background (bg-muted/30 or similar), no hard borders
+- Inputs styled as refined cards: rounded-xl, subtle shadow, elegant focus ring using accent color
+- Button uses the existing `cta` variant (terracotta rounded-full)
+- Subtle hover transitions on all interactive elements
+- Mobile-first, single column
 
-### 3. Afficher le statut HyperGuest dans l'éditeur (guidage léger)
-Ajouter un petit indicateur visuel sous le bloc HyperGuest Search :
-- **Si connecté** : badge vert "✓ Connected to HyperGuest (ID: XXXX)" 
-- **Si non connecté** : badge orange "⚠ No HyperGuest connection — online booking will be unavailable"
+**Fields (all stored in metadata JSON):**
+1. **Mood** — Multi-select chips from categories (fetched from DB) + "Other" with text input
+2. **Occasion** — Custom Select dropdown (9 options + Other with text input)
+3. **When** — Select dropdown (5 options)
+4. **Budget** — Select dropdown (5 options)
+5. **Number of people** — Select dropdown (4 options)
+6. **Tell us what you have in mind** — Textarea (placeholder: "Describe your dream stay...")
+7. **Email** — Required text input
 
-Cela reste discret mais informe l'admin du statut sans modifier l'interface.
+**Submission:** Calls `collect-lead` with `source: "tailored_request"` and all form data in `metadata`.
 
-### 4. Avertissement au publish sans HyperGuest
-Lors du changement de statut vers "published", si `hyperguestId` est null, afficher un toast d'avertissement (pas bloquant) :  
-"This hotel has no HyperGuest connection. Experiences linked to it won't support online booking."
+**Success state:** Replaces form with a refined confirmation (title "Thank you", message about matching upcoming experiences).
 
-### Fichiers modifiés
-- `src/pages/admin/HotelEditor2.tsx` — les 4 points ci-dessus
+**Legal microcopy:** Small text under button linking to Terms & Privacy.
+
+**Bilingual:** Full EN/HE support matching existing getCopy pattern.
+
+### LaunchIndex.tsx Changes
+- Import and render `<TailoredRequestSection />` between the Gift Card section and `<LaunchFooter />`.
+- Pass categories data to avoid duplicate fetch.
+
+### Files Modified
+1. `supabase/functions/collect-lead/index.ts` — add `tailored_request` to simple sources
+2. `src/components/TailoredRequestSection.tsx` — new component
+3. `src/pages/LaunchIndex.tsx` — insert section before footer
 
