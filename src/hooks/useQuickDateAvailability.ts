@@ -25,6 +25,8 @@ interface UseQuickDateAvailabilityOptions {
   enabled?: boolean;
 }
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function scanAvailability(
   propertyId: number,
   nights: number,
@@ -32,67 +34,78 @@ async function scanAvailability(
   currency: string,
 ): Promise<AvailableDate[]> {
   const today = new Date();
-  // Lead time: start 3 days from now (hotels often need lead time)
   const startOffset = 3;
-  const datesToScan = 30; // scan 30 dates to find at least 5 available
+  const datesToScan = 30;
   const maxResults = 5;
+  const batchSize = 5; // Send 5 requests at a time to avoid rate-limiting
 
   const guests = formatGuests([{ adults, children: [] }]);
+  const results: (AvailableDate | null)[] = [];
 
-  // Build all search promises in parallel
-  const promises = Array.from({ length: datesToScan }, (_, i) => {
-    const checkin = addDays(today, startOffset + i);
-    const checkInStr = format(checkin, 'yyyy-MM-dd');
+  // Process in batches of 5 with 200ms delay between batches
+  for (let batchStart = 0; batchStart < datesToScan; batchStart += batchSize) {
+    // Check if we already have enough results
+    const foundSoFar = results.filter((r): r is AvailableDate => r !== null).length;
+    if (foundSoFar >= maxResults) break;
 
-    return searchHotelsRaw({
-      checkIn: checkInStr,
-      nights,
-      guests,
-      hotelIds: [propertyId],
-      customerNationality: 'IL',
-      currency,
-    })
-      .then((res) => {
-        const property = res?.results?.[0];
-        const rooms = property?.rooms || [];
-        if (rooms.length === 0) return null;
+    if (batchStart > 0) await delay(200);
 
-        // Find cheapest sell price
-        let cheapest: number | null = null;
-        let cur = currency;
-        for (const room of rooms) {
-          for (const rp of room.ratePlans || []) {
-            const sellPrice =
-              rp.payment?.chargeAmount?.price ??
-              rp.prices?.sell?.price ??
-              null;
-            const sellCur =
-              rp.payment?.chargeAmount?.currency ??
-              rp.prices?.sell?.currency ??
-              currency;
-            if (sellPrice != null && (cheapest === null || sellPrice < cheapest)) {
-              cheapest = sellPrice;
-              cur = sellCur;
-            }
-          }
-        }
+    const batchPromises = Array.from(
+      { length: Math.min(batchSize, datesToScan - batchStart) },
+      (_, i) => {
+        const checkin = addDays(today, startOffset + batchStart + i);
+        const checkInStr = format(checkin, 'yyyy-MM-dd');
 
-        const checkout = addDays(checkin, nights);
-        return {
-          id: `avail-${nights}-${checkInStr}`,
-          checkin,
-          checkout,
+        return searchHotelsRaw({
+          checkIn: checkInStr,
           nights,
-          cheapestPrice: cheapest,
-          currency: cur,
-        } satisfies AvailableDate;
-      })
-      .catch(() => null); // If one date fails, skip it
-  });
+          guests,
+          hotelIds: [propertyId],
+          customerNationality: 'IL',
+          currency,
+        })
+          .then((res) => {
+            const property = res?.results?.[0];
+            const rooms = property?.rooms || [];
+            if (rooms.length === 0) return null;
 
-  const results = await Promise.all(promises);
+            let cheapest: number | null = null;
+            let cur = currency;
+            for (const room of rooms) {
+              for (const rp of room.ratePlans || []) {
+                const sellPrice =
+                  rp.payment?.chargeAmount?.price ??
+                  rp.prices?.sell?.price ??
+                  null;
+                const sellCur =
+                  rp.payment?.chargeAmount?.currency ??
+                  rp.prices?.sell?.currency ??
+                  currency;
+                if (sellPrice != null && (cheapest === null || sellPrice < cheapest)) {
+                  cheapest = sellPrice;
+                  cur = sellCur;
+                }
+              }
+            }
 
-  // Filter nulls (unavailable), keep order (chronological), take first 3
+            const checkout = addDays(checkin, nights);
+            return {
+              id: `avail-${nights}-${checkInStr}`,
+              checkin,
+              checkout,
+              nights,
+              cheapestPrice: cheapest,
+              currency: cur,
+            } satisfies AvailableDate;
+          })
+          .catch(() => null);
+      }
+    );
+
+    const batchResults = await Promise.all(batchPromises);
+    results.push(...batchResults);
+  }
+
   return results.filter((r): r is AvailableDate => r !== null).slice(0, maxResults);
 }
 
