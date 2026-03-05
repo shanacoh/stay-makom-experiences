@@ -64,6 +64,7 @@ import AdminAIInsights from "./pages/admin/AIInsights";
 import AdminLeads from "./pages/admin/Leads";
 import AdminFavorites from "./pages/admin/Favorites";
 import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
+import CertificationSetup from "./pages/admin/CertificationSetup";
 import LaunchIndex from "./pages/LaunchIndex";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import Checkout from "./pages/Checkout";
@@ -170,6 +171,7 @@ const App = () => (
               <Route path="favorites" element={<AdminFavorites />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
+              <Route path="certification-setup" element={<CertificationSetup />} />
             </Route>
             <Route
               path="/hotel-admin"
