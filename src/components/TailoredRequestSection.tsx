@@ -144,7 +144,7 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
           <div className={cn("flex-1", isRTL ? "text-right" : "text-left")}>
             <h2 className="font-sans text-lg sm:text-xl md:text-2xl font-bold tracking-[-0.02em] leading-tight mb-2">
-              {getCopy("Looking for something specific?", "מחפש משהו ספציפי?")}
+              {getCopy("Looking for something truly unique ?", "מחפשים משהו באמת ייחודי?")}
             </h2>
             <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
               {getCopy(
