@@ -61,6 +61,7 @@ interface BookingPanel2Props {
   maxParty?: number;
   lang?: "en" | "he" | "fr";
   selectedExtras?: SelectedExtra[];
+  basePrice?: number | null;
 }
 
 export function BookingPanel2({
@@ -75,6 +76,7 @@ export function BookingPanel2({
   maxParty = 4,
   lang = "en",
   selectedExtras = [],
+  basePrice,
 }: BookingPanel2Props) {
   const navigate = useNavigate();
 
@@ -315,10 +317,34 @@ export function BookingPanel2({
   if (!hyperguestPropertyId) {
     return (
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-4">
+          {basePrice && basePrice > 0 ? (
+            <>
+              <div className="text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  {lang === "he" ? "מ-" : lang === "fr" ? "À partir de" : "Starting from"}
+                </p>
+                <DualPrice
+                  amount={basePrice}
+                  currency={currency}
+                  className="text-2xl font-semibold"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {lang === "he" ? "לאדם" : lang === "fr" ? "par personne" : "per person"}
+                </p>
+              </div>
+              <Separator />
+            </>
+          ) : null}
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{t.noHyperguest}</AlertDescription>
+            <AlertDescription>
+              {lang === "he" 
+                ? "להזמנה, צרו איתנו קשר ישירות." 
+                : lang === "fr" 
+                  ? "Pour réserver, contactez-nous directement." 
+                  : "To book this experience, please contact us directly."}
+            </AlertDescription>
           </Alert>
         </CardContent>
       </Card>

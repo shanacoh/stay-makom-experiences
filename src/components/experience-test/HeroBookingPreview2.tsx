@@ -13,6 +13,7 @@ interface HeroBookingPreview2Props {
   lang: 'en' | 'he' | 'fr';
   onViewDates: () => void;
   hyperguestPropertyId?: string | null;
+  basePrice?: number | null;
 }
 
 const HeroBookingPreview2 = ({
@@ -21,6 +22,7 @@ const HeroBookingPreview2 = ({
   lang,
   onViewDates,
   hyperguestPropertyId,
+  basePrice,
 }: HeroBookingPreview2Props) => {
   const { data: addons } = useExperienceAddons(experienceId);
 
@@ -64,8 +66,8 @@ const HeroBookingPreview2 = ({
     return "per_person";
   }, [addons]);
 
-  // Use real price if available, otherwise fallback
-  const displayPrice = cheapestDate?.cheapestPrice ?? fallbackPrice;
+  // Use real price if available, then addons fallback, then base_price fallback
+  const displayPrice = cheapestDate?.cheapestPrice ?? fallbackPrice ?? (basePrice && basePrice > 0 ? basePrice : null);
   const displayCurrency = cheapestDate?.currency ?? currency;
   const hasRealDate = !!cheapestDate;
 
