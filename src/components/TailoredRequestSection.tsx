@@ -148,8 +148,8 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
             </h2>
             <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
               {getCopy(
-                "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate an experience around it.",
-                "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור חוויה סביב זה."
+                "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate it just for you.",
+                "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור את זה במיוחד בשבילכם."
               )}
             </p>
             
