@@ -11,7 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CheckCircle, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
@@ -67,6 +73,7 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
   const { lang } = useLanguage();
   const isRTL = lang === "he";
 
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [moods, setMoods] = useState<string[]>([]);
   const [otherMood, setOtherMood] = useState("");
   const [occasion, setOccasion] = useState("");
@@ -75,6 +82,9 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
   const [budget, setBudget] = useState("");
   const [people, setPeople] = useState("");
   const [description, setDescription] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -89,12 +99,15 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || submitting) return;
+    if (!email || !firstName.trim() || !lastName.trim() || submitting) return;
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("collect-lead", {
         body: {
           email,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          phone: phone.trim() || undefined,
           source: "tailored_request",
           metadata: {
             moods,
@@ -125,246 +138,315 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
     "rounded-xl border-border/40 bg-card shadow-soft focus-within:shadow-medium focus-within:ring-1 focus-within:ring-accent/40 transition-all duration-300";
 
   return (
-    <section className="py-14 sm:py-20 px-4" dir={isRTL ? "rtl" : "ltr"}>
-      <div className="max-w-[640px] mx-auto">
-        {submitted ? (
-          /* ─── Success state ─── */
-          <div className="text-center py-16 space-y-4 animate-in fade-in duration-500">
-            <CheckCircle className="h-10 w-10 text-accent mx-auto" />
-            <h3 className="font-sans text-2xl sm:text-3xl font-bold tracking-[-0.02em]">
-              {getCopy("Thank you", "תודה")}
-            </h3>
-            <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+    <>
+      {/* ─── Banner Section ─── */}
+      <section className="py-10 sm:py-14 px-4" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
+          <div className={cn("flex-1", isRTL ? "text-right" : "text-left")}>
+            <h2 className="font-sans text-lg sm:text-xl md:text-2xl font-bold tracking-[-0.02em] leading-tight mb-2">
+              {getCopy("Looking for something specific?", "מחפש משהו ספציפי?")}
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
               {getCopy(
-                "Your request has been received. If your idea matches upcoming experiences, we will reach out to you.",
-                "הבקשה שלך התקבלה. אם הרעיון שלך מתאים לחוויות קרובות, ניצור איתך קשר."
+                "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate an experience around it.",
+                "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור חוויה סביב זה."
+              )}
+            </p>
+            <p className="text-muted-foreground/60 text-xs mt-1.5 italic">
+              {getCopy(
+                "We currently curate a limited number of tailored stays.",
+                "אנו אוצרים כרגע מספר מצומצם של שהיות מותאמות אישית."
               )}
             </p>
           </div>
-        ) : (
-          <>
-            {/* ─── Header ─── */}
-            <div className="text-center mb-10">
-              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight mb-3">
-                {getCopy("Looking for something specific?", "מחפש משהו ספציפי?")}
-              </h2>
-              <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto leading-relaxed">
+          <div className="shrink-0">
+            <Button
+              variant="cta"
+              onClick={() => { setDialogOpen(true); setSubmitted(false); }}
+              className="rounded-full px-8 py-5 text-sm font-semibold uppercase tracking-[0.1em] group"
+            >
+              {getCopy("Share your idea", "שתפו את הרעיון שלכם")}
+              <ArrowRight className={cn(
+                "h-4 w-4 transition-transform group-hover:translate-x-1",
+                isRTL ? "mr-2 rotate-180 group-hover:-translate-x-1" : "ml-2"
+              )} />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Dialog with Form ─── */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto" dir={isRTL ? "rtl" : "ltr"}>
+          {submitted ? (
+            <div className="text-center py-12 space-y-4 animate-in fade-in duration-500">
+              <CheckCircle className="h-10 w-10 text-accent mx-auto" />
+              <h3 className="font-sans text-2xl sm:text-3xl font-bold tracking-[-0.02em]">
+                {getCopy("Thank you", "תודה")}
+              </h3>
+              <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
                 {getCopy(
-                  "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate an experience around it.",
-                  "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור חוויה סביב זה."
-                )}
-              </p>
-              <p className="text-muted-foreground/70 text-xs mt-2 italic">
-                {getCopy(
-                  "We currently curate a limited number of tailored stays.",
-                  "אנו אוצרים כרגע מספר מצומצם של שהיות מותאמות אישית."
+                  "Your request has been received. If your idea matches upcoming experiences, we will reach out to you.",
+                  "הבקשה שלך התקבלה. אם הרעיון שלך מתאים לחוויות קרובות, ניצור איתך קשר."
                 )}
               </p>
             </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-sans text-xl font-bold tracking-[-0.02em]">
+                  {getCopy("Tell us about your dream stay", "ספרו לנו על השהייה החלומית שלכם")}
+                </DialogTitle>
+              </DialogHeader>
 
-            {/* ─── Form ─── */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 1. Mood — multi-select chips */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("Mood of experience", "אווירת החוויה")}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {categories?.map((cat) => {
-                    const label = (getLocalizedField(cat, "name", lang) as string) || cat.name;
-                    const active = moods.includes(cat.slug);
-                    return (
-                      <button
-                        type="button"
-                        key={cat.slug}
-                        onClick={() => toggleMood(cat.slug)}
-                        className={cn(
-                          "px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200",
-                          active
-                            ? "bg-foreground text-background border-foreground"
-                            : "bg-card border-border/40 text-foreground/70 hover:border-foreground/30 hover:text-foreground shadow-soft"
-                        )}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() => toggleMood("__other__")}
-                    className={cn(
-                      "px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200",
-                      moods.includes("__other__")
-                        ? "bg-foreground text-background border-foreground"
-                        : "bg-card border-border/40 text-foreground/70 hover:border-foreground/30 hover:text-foreground shadow-soft"
-                    )}
-                  >
-                    {getCopy("Other", "אחר")}
-                  </button>
-                </div>
-                {moods.includes("__other__") && (
-                  <Input
-                    value={otherMood}
-                    onChange={(e) => setOtherMood(e.target.value)}
-                    placeholder={getCopy("Describe your mood…", "תאר את האווירה…")}
-                    className={cn("mt-2", cardInput)}
-                    maxLength={200}
-                  />
-                )}
-              </div>
-
-              {/* 2. Occasion */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("Occasion", "אירוע")}
-                </label>
-                <Select value={occasion} onValueChange={setOccasion}>
-                  <SelectTrigger className={cn("w-full", cardInput)}>
-                    <SelectValue placeholder={getCopy("Select an occasion", "בחר אירוע")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {occasions.map((o, i) => (
-                      <SelectItem key={i} value={OCCASIONS_EN[i]}>
-                        {o}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {occasion === "Other" && (
-                  <Input
-                    value={otherOccasion}
-                    onChange={(e) => setOtherOccasion(e.target.value)}
-                    placeholder={getCopy("Tell us more…", "ספר לנו עוד…")}
-                    className={cn("mt-2", cardInput)}
-                    maxLength={200}
-                  />
-                )}
-              </div>
-
-              {/* 3. When */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("When would you like to travel?", "מתי תרצו לטייל?")}
-                </label>
-                <Select value={timing} onValueChange={setTiming}>
-                  <SelectTrigger className={cn("w-full", cardInput)}>
-                    <SelectValue placeholder={getCopy("Select timing", "בחר תזמון")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timings.map((t, i) => (
-                      <SelectItem key={i} value={TIMING_EN[i]}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 4. Budget */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("Budget", "תקציב")}
-                </label>
-                <Select value={budget} onValueChange={setBudget}>
-                  <SelectTrigger className={cn("w-full", cardInput)}>
-                    <SelectValue placeholder={getCopy("Select budget", "בחר תקציב")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {budgets.map((b, i) => (
-                      <SelectItem key={i} value={BUDGET[i]}>
-                        {b}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 5. Number of people */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("Number of people", "מספר אנשים")}
-                </label>
-                <Select value={people} onValueChange={setPeople}>
-                  <SelectTrigger className={cn("w-full", cardInput)}>
-                    <SelectValue placeholder={getCopy("Select", "בחר")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PEOPLE.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 6. Description */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("Tell us what you have in mind", "ספרו לנו מה יש לכם בראש")}
-                </label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={getCopy(
-                    "Describe your dream stay in a few words.",
-                    "תארו את השהייה החלומית שלכם בכמה מילים."
+              <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+                {/* Mood — multi-select chips */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Mood of experience", "אווירת החוויה")}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {categories?.map((cat) => {
+                      const label = (getLocalizedField(cat, "name", lang) as string) || cat.name;
+                      const active = moods.includes(cat.slug);
+                      return (
+                        <button
+                          type="button"
+                          key={cat.slug}
+                          onClick={() => toggleMood(cat.slug)}
+                          className={cn(
+                            "px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200",
+                            active
+                              ? "bg-foreground text-background border-foreground"
+                              : "bg-card border-border/40 text-foreground/70 hover:border-foreground/30 hover:text-foreground shadow-soft"
+                          )}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => toggleMood("__other__")}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200",
+                        moods.includes("__other__")
+                          ? "bg-foreground text-background border-foreground"
+                          : "bg-card border-border/40 text-foreground/70 hover:border-foreground/30 hover:text-foreground shadow-soft"
+                      )}
+                    >
+                      {getCopy("Other", "אחר")}
+                    </button>
+                  </div>
+                  {moods.includes("__other__") && (
+                    <Input
+                      value={otherMood}
+                      onChange={(e) => setOtherMood(e.target.value)}
+                      placeholder={getCopy("Describe your mood…", "תאר את האווירה…")}
+                      className={cn("mt-2", cardInput)}
+                      maxLength={200}
+                    />
                   )}
-                  className={cn("min-h-[100px] resize-none", cardInput)}
-                  maxLength={1000}
-                />
-              </div>
+                </div>
 
-              {/* 7. Email */}
-              <div>
-                <label className={fieldLabel}>
-                  {getCopy("Email", "אימייל")} *
-                </label>
-                <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={getCopy("Your email", "כתובת האימייל שלך")}
-                  className={cardInput}
-                  maxLength={255}
-                />
-              </div>
+                {/* Occasion */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Occasion", "אירוע")}
+                  </label>
+                  <Select value={occasion} onValueChange={setOccasion}>
+                    <SelectTrigger className={cn("w-full", cardInput)}>
+                      <SelectValue placeholder={getCopy("Select an occasion", "בחר אירוע")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {occasions.map((o, i) => (
+                        <SelectItem key={i} value={OCCASIONS_EN[i]}>
+                          {o}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {occasion === "Other" && (
+                    <Input
+                      value={otherOccasion}
+                      onChange={(e) => setOtherOccasion(e.target.value)}
+                      placeholder={getCopy("Tell us more…", "ספר לנו עוד…")}
+                      className={cn("mt-2", cardInput)}
+                      maxLength={200}
+                    />
+                  )}
+                </div>
 
-              {/* Submit */}
-              <Button
-                type="submit"
-                disabled={submitting}
-                variant="cta"
-                className="w-full rounded-full py-6 text-sm font-semibold uppercase tracking-[0.12em]"
-              >
-                {submitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  getCopy("Share your idea", "שתפו את הרעיון שלכם")
-                )}
-              </Button>
+                {/* When */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("When would you like to travel?", "מתי תרצו לטייל?")}
+                  </label>
+                  <Select value={timing} onValueChange={setTiming}>
+                    <SelectTrigger className={cn("w-full", cardInput)}>
+                      <SelectValue placeholder={getCopy("Select timing", "בחר תזמון")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timings.map((t, i) => (
+                        <SelectItem key={i} value={TIMING_EN[i]}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Legal microcopy */}
-              <p className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
-                {getCopy(
-                  "By submitting this form you agree to receive Staymakom updates and accept our ",
-                  "בשליחת טופס זה אתם מסכימים לקבל עדכונים מ-Staymakom ומקבלים את "
-                )}
-                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground/60">
-                  {getCopy("Terms", "התנאים")}
-                </Link>
-                {getCopy(" and ", " ו")}
-                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground/60">
-                  {getCopy("Privacy Policy", "מדיניות הפרטיות")}
-                </Link>
-                .
-              </p>
-            </form>
-          </>
-        )}
-      </div>
-    </section>
+                {/* Budget */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Budget", "תקציב")}
+                  </label>
+                  <Select value={budget} onValueChange={setBudget}>
+                    <SelectTrigger className={cn("w-full", cardInput)}>
+                      <SelectValue placeholder={getCopy("Select budget", "בחר תקציב")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {budgets.map((b, i) => (
+                        <SelectItem key={i} value={BUDGET[i]}>
+                          {b}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Number of people */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Number of people", "מספר אנשים")}
+                  </label>
+                  <Select value={people} onValueChange={setPeople}>
+                    <SelectTrigger className={cn("w-full", cardInput)}>
+                      <SelectValue placeholder={getCopy("Select", "בחר")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PEOPLE.map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Tell us what you have in mind", "ספרו לנו מה יש לכם בראש")}
+                  </label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder={getCopy(
+                      "Describe your dream stay in a few words.",
+                      "תארו את השהייה החלומית שלכם בכמה מילים."
+                    )}
+                    className={cn("min-h-[100px] resize-none", cardInput)}
+                    maxLength={1000}
+                  />
+                </div>
+
+                {/* First Name & Last Name */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={fieldLabel}>
+                      {getCopy("First name", "שם פרטי")} *
+                    </label>
+                    <Input
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder={getCopy("First name", "שם פרטי")}
+                      className={cardInput}
+                      maxLength={100}
+                    />
+                  </div>
+                  <div>
+                    <label className={fieldLabel}>
+                      {getCopy("Last name", "שם משפחה")} *
+                    </label>
+                    <Input
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder={getCopy("Last name", "שם משפחה")}
+                      className={cardInput}
+                      maxLength={100}
+                    />
+                  </div>
+                </div>
+
+                {/* Phone (optional) */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Phone", "טלפון")}
+                  </label>
+                  <Input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder={getCopy("Your phone number (optional)", "מספר טלפון (אופציונלי)")}
+                    className={cardInput}
+                    maxLength={50}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className={fieldLabel}>
+                    {getCopy("Email", "אימייל")} *
+                  </label>
+                  <Input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={getCopy("Your email", "כתובת האימייל שלך")}
+                    className={cardInput}
+                    maxLength={255}
+                  />
+                </div>
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  variant="cta"
+                  className="w-full rounded-full py-6 text-sm font-semibold uppercase tracking-[0.12em]"
+                >
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    getCopy("Share your idea", "שתפו את הרעיון שלכם")
+                  )}
+                </Button>
+
+                {/* Legal microcopy */}
+                <p className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
+                  {getCopy(
+                    "By submitting this form you agree to receive Staymakom updates and accept our ",
+                    "בשליחת טופס זה אתם מסכימים לקבל עדכונים מ-Staymakom ומקבלים את "
+                  )}
+                  <Link to="/terms" className="underline underline-offset-2 hover:text-foreground/60">
+                    {getCopy("Terms", "התנאים")}
+                  </Link>
+                  {getCopy(" and ", " ו")}
+                  <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground/60">
+                    {getCopy("Privacy Policy", "מדיניות הפרטיות")}
+                  </Link>
+                  .
+                </p>
+              </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

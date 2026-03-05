@@ -164,16 +164,28 @@ serve(async (req) => {
         );
       }
 
+      const leadRecord: any = {
+        source: requestData.source,
+        email: requestData.email.toLowerCase().trim(),
+        cta_id: requestData.cta_id || null,
+        metadata: requestData.metadata || {},
+        marketing_opt_in: true,
+        is_b2b: false,
+      };
+
+      // For tailored_request, also store name and phone
+      if (requestData.source === 'tailored_request') {
+        if (requestData.firstName) leadRecord.first_name = requestData.firstName.trim();
+        if (requestData.lastName) leadRecord.last_name = requestData.lastName.trim();
+        if (requestData.firstName && requestData.lastName) {
+          leadRecord.name = `${requestData.firstName.trim()} ${requestData.lastName.trim()}`;
+        }
+        if (requestData.phone) leadRecord.phone = requestData.phone.trim();
+      }
+
       const { data, error } = await supabase
         .from('leads')
-        .insert([{
-          source: requestData.source,
-          email: requestData.email.toLowerCase().trim(),
-          cta_id: requestData.cta_id || null,
-          metadata: requestData.metadata || {},
-          marketing_opt_in: true,
-          is_b2b: false,
-        }])
+        .insert([leadRecord])
         .select('id')
         .single();
 

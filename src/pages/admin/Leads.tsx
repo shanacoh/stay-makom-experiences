@@ -58,6 +58,8 @@ const sourceColors: Record<string, string> = {
   corporate: "bg-red-100 text-red-800",
   ai_assistant_save: "bg-cyan-100 text-cyan-800",
   landing_page: "bg-indigo-100 text-indigo-800",
+  tailored_request: "bg-amber-100 text-amber-800",
+  category_waitlist: "bg-pink-100 text-pink-800",
 };
 
 const statusColors: Record<string, string> = {
@@ -397,6 +399,54 @@ const AdminLeads = () => {
                     <p className="mt-1 p-3 bg-muted rounded-md text-sm">
                       {selectedLead.message}
                     </p>
+                  </div>
+                )}
+
+                {/* Tailored request metadata */}
+                {selectedLead.source === "tailored_request" && selectedLead.metadata && (
+                  <div className="space-y-3 border-t pt-3">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tailored Request Details</span>
+                    {selectedLead.metadata.moods?.length > 0 && (
+                      <div>
+                        <span className="text-muted-foreground text-sm">Moods:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {selectedLead.metadata.moods.map((m: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-xs">{m}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {selectedLead.metadata.otherMood && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Other mood:</span> {selectedLead.metadata.otherMood}
+                      </div>
+                    )}
+                    {selectedLead.metadata.occasion && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Occasion:</span> {selectedLead.metadata.occasion}
+                      </div>
+                    )}
+                    {selectedLead.metadata.timing && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Timing:</span> {selectedLead.metadata.timing}
+                      </div>
+                    )}
+                    {selectedLead.metadata.budget && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Budget:</span> {selectedLead.metadata.budget}
+                      </div>
+                    )}
+                    {selectedLead.metadata.people && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">People:</span> {selectedLead.metadata.people}
+                      </div>
+                    )}
+                    {selectedLead.metadata.description && (
+                      <div>
+                        <span className="text-muted-foreground text-sm">Dream stay:</span>
+                        <p className="mt-1 p-3 bg-muted rounded-md text-sm">{selectedLead.metadata.description}</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
