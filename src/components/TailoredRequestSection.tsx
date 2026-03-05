@@ -422,7 +422,7 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
                   {submitting ?
                 <Loader2 className="h-4 w-4 animate-spin" /> :
 
-                getCopy("Share your idea", "שתפו את הרעיון שלכם")
+                getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")
                 }
                 </Button>
 
