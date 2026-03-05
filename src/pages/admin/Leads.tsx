@@ -58,6 +58,8 @@ const sourceColors: Record<string, string> = {
   corporate: "bg-red-100 text-red-800",
   ai_assistant_save: "bg-cyan-100 text-cyan-800",
   landing_page: "bg-indigo-100 text-indigo-800",
+  tailored_request: "bg-amber-100 text-amber-800",
+  category_waitlist: "bg-pink-100 text-pink-800",
 };
 
 const statusColors: Record<string, string> = {
