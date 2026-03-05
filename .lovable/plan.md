@@ -1,45 +1,28 @@
 
 
-## Problème identifié
+## Diagnostic: Hotel Prices Not Showing
 
-**Bug critique** : quand on édite un hôtel existant, le `hyperguest_property_id` est **écrasé à `null`** à chaque sauvegarde.
+### Root Cause
 
-**Cause racine** (ligne 381 de `HotelEditor2.tsx`) :
-```tsx
-hyperguest_property_id: hyperguestId ? String(hyperguestId) : null,
-```
+The hotel linked to your experience ("The Farmhouse Batshlomo") has **no HyperGuest property ID** (`hyperguest_property_id: null`). This means the system cannot fetch real-time room prices from the booking API.
 
-L'état `hyperguestId` est initialisé à `null` et n'est mis à jour que lorsqu'on importe un hôtel depuis HyperGuest (`handleHyperGuestSelect`). Lors de l'édition d'un hôtel existant, le `useEffect` qui charge les données (lignes 277-340) ne restaure jamais `hyperguestId` depuis `hotel.hyperguest_property_id`. Résultat : chaque fois qu'un admin édite et sauvegarde un hôtel, le lien HyperGuest est perdu.
+The pricing banner (`HeroBookingPreview2`) requires a valid `hyperguest_property_id` to call the HyperGuest availability API. Without it, the price scan is skipped entirely. The fallback only shows addon-based prices (per person fees, etc.), not room prices.
 
-## Plan de correction
+### Two Possible Solutions
 
-### 1. Restaurer `hyperguestId` au chargement de l'hôtel existant
-Dans le `useEffect` qui peuple `formData` depuis `hotel` (~ligne 278), ajouter :
-```tsx
-if (h.hyperguest_property_id) {
-  setHyperguestId(Number(h.hyperguest_property_id));
-}
-```
+**Option A — Import the hotel from HyperGuest (recommended if available)**
+If this hotel exists in HyperGuest's system, use the admin hotel import tool to re-import it with a valid property ID. This will automatically populate `hyperguest_property_id` and enable real-time pricing.
 
-### 2. Préserver la valeur existante lors de la sauvegarde
-Modifier la logique de sauvegarde (ligne 381) pour ne pas écraser une valeur existante :
-```tsx
-hyperguest_property_id: hyperguestId
-  ? String(hyperguestId)
-  : (hotelId ? (hotel as any)?.hyperguest_property_id ?? null : null),
-```
+**Option B — Manual base price fallback**
+If the hotel is NOT on HyperGuest (manual property), we can implement a fallback that uses the experience's `base_price` field or a new manual room price field on `hotels2` to display a static "Starting from" price in the booking banner when no HyperGuest ID is present.
 
-### 3. Afficher le statut HyperGuest dans l'éditeur (guidage léger)
-Ajouter un petit indicateur visuel sous le bloc HyperGuest Search :
-- **Si connecté** : badge vert "✓ Connected to HyperGuest (ID: XXXX)" 
-- **Si non connecté** : badge orange "⚠ No HyperGuest connection — online booking will be unavailable"
+### What I Can Implement (Option B)
 
-Cela reste discret mais informe l'admin du statut sans modifier l'interface.
+1. **Update `HeroBookingPreview2`** — Add fallback logic to show `experience.base_price` when `hyperguestPropertyId` is null, so the "Starting from" banner still appears with a manually set price.
+2. **Update `BookingPanel2`** — Allow manual pricing mode when HyperGuest is unavailable, using `base_price` from the experience record.
 
-### 4. Avertissement au publish sans HyperGuest
-Lors du changement de statut vers "published", si `hyperguestId` est null, afficher un toast d'avertissement (pas bloquant) :  
-"This hotel has no HyperGuest connection. Experiences linked to it won't support online booking."
+### What You Need to Check
 
-### Fichiers modifiés
-- `src/pages/admin/HotelEditor2.tsx` — les 4 points ci-dessus
+- Does "The Farmhouse Batshlomo" exist in HyperGuest? If yes, you need to set the `hyperguest_property_id` in the admin hotel editor.
+- If it doesn't exist in HyperGuest, do you want to set a manual `base_price` on the experience to show a static price?
 
