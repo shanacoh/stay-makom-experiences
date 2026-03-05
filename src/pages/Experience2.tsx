@@ -494,6 +494,7 @@ export default function Experience2() {
                 currency={experience.currency || "ILS"}
                 lang={lang as "en" | "he" | "fr"}
                 hyperguestPropertyId={hyperguestPropertyId || null}
+                basePrice={experience.base_price}
                 onViewDates={() => {
                   const bookingPanel = document.getElementById('booking-panel-v2');
                   if (bookingPanel) {
@@ -515,6 +516,7 @@ export default function Experience2() {
                   maxParty={experience.max_party || 4}
                   lang={lang as "en" | "he" | "fr"}
                   selectedExtras={selectedExtras}
+                  basePrice={experience.base_price}
                 />
               </div>
             </div>
