@@ -486,7 +486,7 @@ export default function Experience2() {
           </div>
 
           {/* Right Column - Sticky Booking Panel (Desktop) */}
-          <div className="hidden md:block pr-1 md:-mt-32 lg:-mt-40">
+          <div className="hidden md:block pr-1">
             <div className="sticky top-20 space-y-4">
               {/* Price Callout CTA */}
               <HeroBookingPreview2
