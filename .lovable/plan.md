@@ -1,28 +1,72 @@
 
 
-## Diagnostic: Hotel Prices Not Showing
+## Plan: Create Certification Test Hotel + Experience for Live HyperGuest Booking
 
-### Root Cause
+### Context
+The project already has a certification system for property 19912 (sandbox). Now we need a **live certification** setup with a configurable property ID that Reshma will provide. The V2 architecture uses `hotels2` and `experiences2` tables, with the `experience2_hotels` junction table for multi-hotel support.
 
-The hotel linked to your experience ("The Farmhouse Batshlomo") has **no HyperGuest property ID** (`hyperguest_property_id: null`). This means the system cannot fetch real-time room prices from the booking API.
+### Approach
+Create a dedicated **admin page** (`/admin/certification-setup`) that lets you:
+1. Input a HyperGuest property ID
+2. One-click create (or reuse) a hotel + experience
+3. See the certification constraints as a reminder
+4. Link directly to the created experience page
 
-The pricing banner (`HeroBookingPreview2`) requires a valid `hyperguest_property_id` to call the HyperGuest availability API. Without it, the price scan is skipped entirely. The fallback only shows addon-based prices (per person fees, etc.), not room prices.
+This is better than a raw script because you can change the property ID later and re-run.
 
-### Two Possible Solutions
+---
 
-**Option A — Import the hotel from HyperGuest (recommended if available)**
-If this hotel exists in HyperGuest's system, use the admin hotel import tool to re-import it with a valid property ID. This will automatically populate `hyperguest_property_id` and enable real-time pricing.
+### Step 1 — Create the Certification Setup Admin Page
 
-**Option B — Manual base price fallback**
-If the hotel is NOT on HyperGuest (manual property), we can implement a fallback that uses the experience's `base_price` field or a new manual room price field on `hotels2` to display a static "Starting from" price in the booking banner when no HyperGuest ID is present.
+**New file: `src/pages/admin/CertificationSetup.tsx`**
 
-### What I Can Implement (Option B)
+A single-page form with:
+- **Input field**: HyperGuest Property ID (default empty, user enters the ID from Reshma)
+- **"Create / Update" button** that:
+  1. Checks if a `hotels2` record with that `hyperguest_property_id` already exists
+  2. If yes, reuses it; if no, creates one with:
+     - `name`: "HyperGuest Certification Hotel"
+     - `name_he`: "מלון אישור HyperGuest"
+     - `region`: "Israel"
+     - `status`: "published"
+     - `hyperguest_property_id`: the entered value
+     - Reasonable defaults for other fields (slug auto-generated, placeholder hero image)
+  3. Checks if an `experiences2` record with slug `certification-test-live` exists
+  4. If yes, updates its `hotel_id` to point to the hotel; if no, creates one with:
+     - `title`: "Certification Test Experience"
+     - `slug`: "certification-test-live"
+     - `hotel_id`: the hotel from step 2
+     - `base_price`: 100, `currency`: "USD"
+     - `min_nights`: 1, `max_nights`: 7
+     - `min_party`: 1, `max_party`: 4
+     - `status`: "published"
+     - `long_copy`: "Test experience for HyperGuest live certification"
+  5. Creates/updates the `experience2_hotels` junction record linking hotel to experience
+- **Certification constraints reminder panel** (always visible):
+  - Guest name: "Test Test"
+  - Rate plan: Fully refundable only
+  - Check-in: September 2026+ (6+ months in future)
+  - Max amount: $500 USD
+  - Cancel within 7 days after booking
+- **Quick links**: Direct link to `/experience2/certification-test-live` and to the hotel editor
 
-1. **Update `HeroBookingPreview2`** — Add fallback logic to show `experience.base_price` when `hyperguestPropertyId` is null, so the "Starting from" banner still appears with a manually set price.
-2. **Update `BookingPanel2`** — Allow manual pricing mode when HyperGuest is unavailable, using `base_price` from the experience record.
+### Step 2 — Register the Route
 
-### What You Need to Check
+**Edit: `src/App.tsx`**
+- Import `CertificationSetup` and add route `/admin/certification-setup`
 
-- Does "The Farmhouse Batshlomo" exist in HyperGuest? If yes, you need to set the `hyperguest_property_id` in the admin hotel editor.
-- If it doesn't exist in HyperGuest, do you want to set a manual `base_price` on the experience to show a static price?
+### Step 3 — Add Sidebar Link
+
+**Edit: `src/components/admin/AdminSidebar.tsx`**
+- Add "Live Cert Setup" entry near the existing "HG Certification" link
+
+### No Database Changes Needed
+All tables (`hotels2`, `experiences2`, `experience2_hotels`) already exist with the right columns. The page will use standard Supabase insert/upsert operations.
+
+### What This Enables
+Once the property ID is entered and the setup is run:
+- `/experience2/certification-test-live` will load the experience
+- The `BookingPanel2` will pick up `hyperguest_property_id` from the linked hotel
+- The full flow (search → room selection → pre-book → book) will work
+- You can toggle the hotel/experience status between draft/published as needed
 
