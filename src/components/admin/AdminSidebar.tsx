@@ -49,6 +49,7 @@ const mainMenuItems = [
   { title: "AI Insights", url: "/admin/ai-insights", icon: Brain },
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "HG Certification", url: "/admin/hyperguest-certification", icon: ShieldCheck },
+  { title: "Live Cert Setup", url: "/admin/certification-setup", icon: ShieldCheck },
 ];
 
 const backupMenuItems = [
