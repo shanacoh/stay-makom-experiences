@@ -165,7 +165,7 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
               onClick={() => {setDialogOpen(true);setSubmitted(false);}}
               className="rounded-full px-8 py-5 text-sm font-semibold uppercase tracking-[0.1em] group">
               
-              {getCopy("Share your idea", "שתפו את הרעיון שלכם")}
+              {getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")}
               <ArrowRight className={cn(
                 "h-4 w-4 transition-transform group-hover:translate-x-1",
                 isRTL ? "mr-2 rotate-180 group-hover:-translate-x-1" : "ml-2"
