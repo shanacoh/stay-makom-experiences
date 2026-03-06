@@ -444,7 +444,10 @@ const LaunchIndex = () => {
           </div>
         </section>
 
-        {/* ─── 7. GIFT CARD ─── */}
+        {/* ─── 7. TAILORED REQUEST ─── */}
+        <TailoredRequestSection categories={categories || []} />
+
+        {/* ─── 8. GIFT CARD ─── */}
         <section className="container py-8 md:py-14 px-4">
           <div className={`grid md:grid-cols-2 gap-5 md:gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
 
@@ -483,8 +486,6 @@ const LaunchIndex = () => {
           </div>
         </section>
 
-        {/* ─── 8. TAILORED REQUEST ─── */}
-        <TailoredRequestSection categories={categories || []} />
       </main>
 
       <LaunchFooter />

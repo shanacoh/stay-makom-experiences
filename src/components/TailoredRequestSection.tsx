@@ -21,6 +21,7 @@ import { CheckCircle, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import tailoredHero from "@/assets/tailored-request-hero.png";
 
 interface TailoredRequestSectionProps {
   categories?: Array<{id: string;name: string;name_he?: string | null;slug: string;}>;
@@ -139,39 +140,33 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
 
   return (
     <>
-      {/* ─── Banner Section ─── */}
-      <section className="py-10 sm:py-14 px-4" dir={isRTL ? "rtl" : "ltr"}>
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
-          <div className={cn("flex-1", isRTL ? "text-right" : "text-left")}>
-            <h2 className="font-sans text-lg sm:text-xl md:text-2xl font-bold tracking-[-0.02em] leading-tight mb-2">
-              {getCopy("Looking for something truly unique ?", "מחפשים משהו באמת ייחודי?")}
-            </h2>
-            <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
-              {getCopy(
-                "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate it just for you.",
-                "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור את זה במיוחד בשבילכם."
-              )}
-            </p>
-            
-
-
-
-
-            
-          </div>
-          <div className="shrink-0">
-            <Button
-              variant="cta"
-              onClick={() => {setDialogOpen(true);setSubmitted(false);}}
-              className="rounded-full px-8 py-5 text-sm font-semibold uppercase tracking-[0.1em] group">
-              
-              {getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")}
-              <ArrowRight className={cn(
-                "h-4 w-4 transition-transform group-hover:translate-x-1",
-                isRTL ? "mr-2 rotate-180 group-hover:-translate-x-1" : "ml-2"
-              )} />
-            </Button>
-          </div>
+      {/* ─── Photo Hero Banner ─── */}
+      <section
+        className="relative w-full bg-cover bg-center py-16 sm:py-20 md:py-24"
+        style={{ backgroundImage: `url(${tailoredHero})` }}
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative z-10 max-w-2xl mx-auto text-center px-4 space-y-4">
+          <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight text-white">
+            {getCopy("Looking for something truly unique?", "מחפשים משהו באמת ייחודי?")}
+          </h2>
+          <p className="text-white/85 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+            {getCopy(
+              "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate it just for you.",
+              "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור את זה במיוחד בשבילכם."
+            )}
+          </p>
+          <Button
+            onClick={() => { setDialogOpen(true); setSubmitted(false); }}
+            className="group mt-2"
+          >
+            {getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")}
+            <ArrowRight className={cn(
+              "h-4 w-4 transition-transform group-hover:translate-x-1",
+              isRTL ? "mr-2 rotate-180 group-hover:-translate-x-1" : "ml-2"
+            )} />
+          </Button>
         </div>
       </section>
 
