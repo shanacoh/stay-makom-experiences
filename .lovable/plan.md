@@ -1,72 +1,50 @@
 
 
-## Plan: Create Certification Test Hotel + Experience for Live HyperGuest Booking
+## Current Scroll Flow
 
-### Context
-The project already has a certification system for property 19912 (sandbox). Now we need a **live certification** setup with a configurable property ID that Reshma will provide. The V2 architecture uses `hotels2` and `experiences2` tables, with the `experience2_hotels` junction table for multi-hotel support.
+```text
+1. Hero (full-bleed photo)
+2. How It Works banner
+3. Handpicked Hotels + Experience Grid
+4. Marquee Banner
+5. Brand Statement (full-bleed photo + text)
+6. "More Experiences on the Way" + Category Cards
+7. Gift Card section
+8. "Looking for something truly unique?" ← plain text banner, feels flat
+9. Footer
+```
 
-### Approach
-Create a dedicated **admin page** (`/admin/certification-setup`) that lets you:
-1. Input a HyperGuest property ID
-2. One-click create (or reuse) a hotel + experience
-3. See the certification constraints as a reminder
-4. Link directly to the created experience page
+The problem: Section 8 is a simple text+button row at the very bottom with no visual weight. After the gift card section (which has a photo), it feels like an afterthought. Users scroll past it without engaging.
 
-This is better than a raw script because you can change the property ID later and re-run.
+## Proposed Solution
 
----
+Transform the Tailored Request section into a **full-bleed visual block with a background image** (similar to section 5, the Brand Statement), and move it **right after the category cards** (end of section 6), before the Gift Card section. This creates a natural flow:
 
-### Step 1 — Create the Certification Setup Admin Page
+> "More experiences are coming" → category cards → **"Can't find what you want? Let us design it for you"** → Gift Card → Footer
 
-**New file: `src/pages/admin/CertificationSetup.tsx`**
+### Changes
 
-A single-page form with:
-- **Input field**: HyperGuest Property ID (default empty, user enters the ID from Reshma)
-- **"Create / Update" button** that:
-  1. Checks if a `hotels2` record with that `hyperguest_property_id` already exists
-  2. If yes, reuses it; if no, creates one with:
-     - `name`: "HyperGuest Certification Hotel"
-     - `name_he`: "מלון אישור HyperGuest"
-     - `region`: "Israel"
-     - `status`: "published"
-     - `hyperguest_property_id`: the entered value
-     - Reasonable defaults for other fields (slug auto-generated, placeholder hero image)
-  3. Checks if an `experiences2` record with slug `certification-test-live` exists
-  4. If yes, updates its `hotel_id` to point to the hotel; if no, creates one with:
-     - `title`: "Certification Test Experience"
-     - `slug`: "certification-test-live"
-     - `hotel_id`: the hotel from step 2
-     - `base_price`: 100, `currency`: "USD"
-     - `min_nights`: 1, `max_nights`: 7
-     - `min_party`: 1, `max_party`: 4
-     - `status`: "published"
-     - `long_copy`: "Test experience for HyperGuest live certification"
-  5. Creates/updates the `experience2_hotels` junction record linking hotel to experience
-- **Certification constraints reminder panel** (always visible):
-  - Guest name: "Test Test"
-  - Rate plan: Fully refundable only
-  - Check-in: September 2026+ (6+ months in future)
-  - Max amount: $500 USD
-  - Cancel within 7 days after booking
-- **Quick links**: Direct link to `/experience2/certification-test-live` and to the hotel editor
+**`src/components/TailoredRequestSection.tsx`** — Redesign the banner portion:
+- Replace the plain `py-10` section with a full-width block using a background image (reuse `desert-journey.jpg` or `handpicked-hero.jpg` — one of the existing atmospheric assets) with a dark overlay
+- Center the text and CTA button over the image, white text
+- Increase heading size to match other full-bleed sections (`text-xl sm:text-2xl md:text-3xl font-bold`)
+- Keep the "DESIGN MY STAY" button prominent with a white/light style that pops against the dark overlay
+- The dialog form stays exactly as-is (no changes to functionality)
 
-### Step 2 — Register the Route
+**`src/pages/LaunchIndex.tsx`** — Move the `<TailoredRequestSection>` from after the Gift Card section (line 487) to **inside section 6**, right after the category cards grid (after line 443, before the closing `</section>` of the "More experiences" block). This places it as the natural conclusion of the "coming soon" section.
 
-**Edit: `src/App.tsx`**
-- Import `CertificationSetup` and add route `/admin/certification-setup`
+### Visual Result
 
-### Step 3 — Add Sidebar Link
+```text
+1. Hero
+2. How It Works
+3. Experience Grid
+4. Marquee
+5. Brand Statement (photo)
+6. "More Experiences" + Categories + "Design My Stay" (photo CTA)
+7. Gift Card
+8. Footer
+```
 
-**Edit: `src/components/admin/AdminSidebar.tsx`**
-- Add "Live Cert Setup" entry near the existing "HG Certification" link
-
-### No Database Changes Needed
-All tables (`hotels2`, `experiences2`, `experience2_hotels`) already exist with the right columns. The page will use standard Supabase insert/upsert operations.
-
-### What This Enables
-Once the property ID is entered and the setup is run:
-- `/experience2/certification-test-live` will load the experience
-- The `BookingPanel2` will pick up `hyperguest_property_id` from the linked hotel
-- The full flow (search → room selection → pre-book → book) will work
-- You can toggle the hotel/experience status between draft/published as needed
+The tailored request becomes a visually striking call-to-action embedded in the discovery flow, not an isolated afterthought.
 
