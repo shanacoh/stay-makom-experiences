@@ -442,9 +442,6 @@ const LaunchIndex = () => {
               </div>
             }
           </div>
-
-          {/* ─── TAILORED REQUEST (after categories) ─── */}
-          <TailoredRequestSection categories={categories || []} />
         </section>
 
         {/* ─── 7. GIFT CARD ─── */}
@@ -485,6 +482,9 @@ const LaunchIndex = () => {
             </div>
           </div>
         </section>
+
+        {/* ─── 8. TAILORED REQUEST ─── */}
+        <TailoredRequestSection categories={categories || []} />
       </main>
 
       <LaunchFooter />

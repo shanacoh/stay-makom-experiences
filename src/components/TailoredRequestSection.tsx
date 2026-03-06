@@ -139,40 +139,39 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
 
   return (
     <>
-      {/* ─── Banner Section — Full-bleed visual CTA ─── */}
-      <section
-        className="relative w-full py-20 sm:py-28 md:py-32 overflow-hidden"
-        dir={isRTL ? "rtl" : "ltr"}
-      >
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(/src/assets/desert-journey.jpg)` }}
-        />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/60" />
+      {/* ─── Banner Section ─── */}
+      <section className="py-10 sm:py-14 px-4" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
+          <div className={cn("flex-1", isRTL ? "text-right" : "text-left")}>
+            <h2 className="font-sans text-lg sm:text-xl md:text-2xl font-bold tracking-[-0.02em] leading-tight mb-2">
+              {getCopy("Looking for something truly unique ?", "מחפשים משהו באמת ייחודי?")}
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-lg leading-relaxed">
+              {getCopy(
+                "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate it just for you.",
+                "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור את זה במיוחד בשבילכם."
+              )}
+            </p>
+            
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 max-w-3xl mx-auto space-y-5">
-          <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-[-0.02em] leading-tight text-white">
-            {getCopy("Looking for something truly unique?", "מחפשים משהו באמת ייחודי?")}
-          </h2>
-          <p className="text-white/80 text-sm sm:text-base max-w-lg leading-relaxed">
-            {getCopy(
-              "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate it just for you.",
-              "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור את זה במיוחד בשבילכם."
-            )}
-          </p>
-          <Button
-            onClick={() => {setDialogOpen(true);setSubmitted(false);}}
-            className="rounded-full px-10 py-6 text-sm font-semibold uppercase tracking-[0.12em] group bg-white text-foreground hover:bg-white/90 shadow-lg"
-          >
-            {getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")}
-            <ArrowRight className={cn(
-              "h-4 w-4 transition-transform group-hover:translate-x-1",
-              isRTL ? "mr-2 rotate-180 group-hover:-translate-x-1" : "ml-2"
-            )} />
-          </Button>
+
+
+
+            
+          </div>
+          <div className="shrink-0">
+            <Button
+              variant="cta"
+              onClick={() => {setDialogOpen(true);setSubmitted(false);}}
+              className="rounded-full px-8 py-5 text-sm font-semibold uppercase tracking-[0.1em] group">
+              
+              {getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")}
+              <ArrowRight className={cn(
+                "h-4 w-4 transition-transform group-hover:translate-x-1",
+                isRTL ? "mr-2 rotate-180 group-hover:-translate-x-1" : "ml-2"
+              )} />
+            </Button>
+          </div>
         </div>
       </section>
 
