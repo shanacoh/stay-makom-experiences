@@ -397,14 +397,10 @@ const LaunchIndex = () => {
             {!isLoadingCategories && categories && categories.length > 0 &&
             <div className="max-w-4xl mx-auto">
                 {/* All screens: 4-col grid */}
-                <div className="grid grid-cols-4 gap-2 md:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
                   {categories.map((category) => {
                     const catTitle = getLocalizedField(category, "name", lang) as string;
                     const image = category.hero_image || "";
-                    const words = catTitle.split(" ");
-                    const midpoint = Math.ceil(words.length / 2);
-                    const line1 = words.slice(0, midpoint).join(" ");
-                    const line2 = words.slice(midpoint).join(" ");
 
                     const desc = getLocalizedField(category, "launch_description", lang) as string | null;
 
@@ -413,23 +409,19 @@ const LaunchIndex = () => {
                         key={`waitlist-${category.slug}`}
                         onClick={() => handleCategoryClick(category)}
                         className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
-                          <div className="aspect-square relative">
+                          <div className="aspect-[4/3] md:aspect-square relative">
                             <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-black/25 group-hover:bg-black/55 transition-all duration-300" />
-                            {/* Title - visible by default, hidden on hover when description exists */}
-                            <div className={cn(
-                              "absolute inset-0 flex items-center justify-center p-2 md:p-4 transition-opacity duration-300",
-                              desc ? "group-hover:opacity-0" : ""
-                            )}>
-                              <h3 className="font-sans text-xs sm:text-sm md:text-xl lg:text-2xl font-bold text-white text-center uppercase tracking-tight leading-tight">
-                                <span className="block">{line1}</span>
-                                {line2 && <span className="block -mt-1.5">{line2}</span>}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent group-hover:from-black/80 group-hover:via-black/40 transition-all duration-300" />
+                            {/* Title - always visible at bottom */}
+                            <div className="absolute bottom-0 left-0 right-0 p-2.5 md:p-4">
+                              <h3 className="font-sans text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight">
+                                {catTitle}
                               </h3>
                             </div>
-                            {/* Description - shown on hover */}
+                            {/* Description - shown on hover (desktop only) */}
                             {desc && (
-                              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/55">
-                                <p className="font-sans text-[10px] sm:text-xs md:text-sm text-white/95 text-center leading-snug line-clamp-6 md:line-clamp-8">
+                              <div className="absolute inset-0 hidden md:flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
+                                <p className="font-sans text-xs md:text-sm text-white/95 text-center leading-snug line-clamp-8">
                                   {desc}
                                 </p>
                               </div>
