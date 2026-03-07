@@ -224,15 +224,8 @@ export default function ExperienceCard({
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           
-          {/* Bottom gradient overlay - stronger for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-          
-          {/* Experience name - bottom left with more padding */}
-          <div className="absolute bottom-2 left-2 right-2 sm:bottom-1.5 sm:left-1.5 sm:right-1.5">
-            <h3 className="font-sans text-[13px] sm:text-base md:text-lg font-bold text-white uppercase tracking-tight leading-snug line-clamp-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-              {title}
-            </h3>
-          </div>
+          {/* Bottom gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
           
           {/* Optional badge - top left */}
           {badge && (
@@ -265,24 +258,31 @@ export default function ExperienceCard({
         </div>
 
         {/* Content under image */}
-        <div className="space-y-0.5">
-          {/* Line 1: Hotel name (left) + Rating (right) */}
-          <div className="flex items-center justify-between gap-2">
-            <h4 className="font-semibold text-sm text-foreground leading-tight line-clamp-1 flex-1 min-w-0">
-              {hotelName}{region ? ` • ${region}` : ''}
-            </h4>
-            {rating && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <span className="text-yellow-500 text-sm">★</span>
-                <span className="font-bold text-sm">{rating.toFixed(1)}</span>
-                {reviewCount && (
-                  <span className="text-muted-foreground text-xs">({reviewCount})</span>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="space-y-0.5 pt-1.5">
+          {/* Title */}
+          <h3 className="font-sans text-sm sm:text-base font-bold text-foreground leading-tight line-clamp-2">
+            {title}
+          </h3>
 
-          {/* Line 3: Highlight Tags as badges */}
+          {/* Hotel + Region */}
+          {hotelName && (
+            <p className="text-xs sm:text-sm text-muted-foreground leading-snug line-clamp-1">
+              {hotelName}{region ? ` · ${region}` : ''}
+            </p>
+          )}
+
+          {/* Rating */}
+          {rating && (
+            <div className="flex items-center gap-1">
+              <span className="text-yellow-500 text-xs">★</span>
+              <span className="font-semibold text-xs">{rating.toFixed(1)}</span>
+              {reviewCount && (
+                <span className="text-muted-foreground text-[10px]">({reviewCount})</span>
+              )}
+            </div>
+          )}
+
+          {/* Tags */}
           {highlightTags.length > 0 && (
             <div className="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1 overflow-hidden pt-0.5">
               {highlightTags.slice(0, maxTags).map((tag) => (
@@ -301,23 +301,26 @@ export default function ExperienceCard({
             </div>
           )}
 
-          {/* Line 4: Price (hidden if 0) */}
+          {/* Price */}
           {displayPrice > 0 && (
-            <div className="flex items-baseline gap-1 pt-0.5">
-              <span className="font-bold text-sm">
+            <div className="flex items-baseline gap-1 pt-1">
+              <span className="text-xs text-muted-foreground">
+                {lang === 'he' ? 'החל מ-' : 'From'}
+              </span>
+              <span className="font-bold text-sm sm:text-base">
                 {currencySymbol}{displayPrice}
               </span>
               <span className="text-[10px] text-muted-foreground">
                 / {lang === 'he' ? 'לילה' : 'night'}
               </span>
               {originalPrice && originalPrice > displayPrice && (
-                <span className="text-[10px] text-muted-foreground line-through">
+                <span className="text-[10px] text-muted-foreground line-through ml-0.5">
                   {currencySymbol}{originalPrice}
                 </span>
               )}
               {discountPercent && (
-                <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded">
-                  -{discountPercent} %
+                <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded ml-0.5">
+                  -{discountPercent}%
                 </span>
               )}
             </div>
