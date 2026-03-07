@@ -224,15 +224,8 @@ export default function ExperienceCard({
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           
-          {/* Bottom gradient overlay - stronger for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-          
-          {/* Experience name - bottom left with more padding */}
-          <div className="absolute bottom-2 left-2 right-2 sm:bottom-1.5 sm:left-1.5 sm:right-1.5">
-            <h3 className="font-sans text-[13px] sm:text-base md:text-lg font-bold text-white uppercase tracking-tight leading-snug line-clamp-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-              {title}
-            </h3>
-          </div>
+          {/* Bottom gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
           
           {/* Optional badge - top left */}
           {badge && (
