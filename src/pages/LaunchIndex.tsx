@@ -405,23 +405,30 @@ const LaunchIndex = () => {
                     const desc = getLocalizedField(category, "launch_description", lang) as string | null;
 
                     return (
-                      <button
+                    <button
                         key={`waitlist-${category.slug}`}
                         onClick={() => handleCategoryClick(category)}
                         className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
                           <div className="aspect-[4/3] md:aspect-square relative">
                             <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent group-hover:from-black/80 group-hover:via-black/40 transition-all duration-300" />
-                            {/* Title - always visible at bottom */}
-                            <div className="absolute bottom-0 left-0 right-0 p-2.5 md:p-4">
-                              <h3 className="font-sans text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight">
-                                {catTitle}
+                            <div className="absolute inset-0 bg-black/25 group-hover:bg-black/55 transition-all duration-300" />
+                            {/* Title - centered */}
+                            <div className="absolute inset-0 flex items-center justify-center p-3 md:p-4 group-hover:opacity-0 transition-opacity duration-300">
+                              <h3 className="font-sans text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+                                {(() => {
+                                  const words = catTitle.split(' ');
+                                  const mid = Math.ceil(words.length / 2);
+                                  const l1 = words.slice(0, mid).join(' ');
+                                  const l2 = words.slice(mid).join(' ');
+                                  return <>{l1}{l2 && <><br />{l2}</>}</>;
+                                })()}
                               </h3>
                             </div>
-                            {/* Description - shown on hover (desktop only) */}
+                            {/* Description - shown on hover */}
                             {desc && (
-                              <div className="absolute inset-0 hidden md:flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                                <p className="font-sans text-xs md:text-sm text-white/95 text-center leading-snug line-clamp-8">
+                              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <h4 className="font-sans text-xs sm:text-sm font-bold text-white uppercase tracking-tight mb-1.5 text-center">{catTitle}</h4>
+                                <p className="font-sans text-[11px] sm:text-xs md:text-sm text-white/95 text-center leading-snug line-clamp-6 sm:line-clamp-8">
                                   {desc}
                                 </p>
                               </div>
