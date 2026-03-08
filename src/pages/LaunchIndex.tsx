@@ -498,7 +498,9 @@ const LaunchIndex = () => {
 
       </main>
 
-      <LaunchFooter />
+      <div className="hidden md:block">
+        <LaunchFooter />
+      </div>
 
       {/* ─── WAITLIST POPUP ─── */}
       <Dialog
