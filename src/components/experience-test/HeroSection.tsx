@@ -10,6 +10,7 @@ import {
 import GalleryModal from "@/components/experience/GalleryModal";
 import ShareDialog from "@/components/experience/ShareDialog";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
