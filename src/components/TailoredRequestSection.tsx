@@ -134,7 +134,7 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
   const timings = isRTL ? TIMING_HE : TIMING_EN;
   const budgets = isRTL ? BUDGET_HE : BUDGET;
 
-  const fieldLabel = "block uppercase text-foreground/60 mb-2 font-semibold" + " " + "tracking-[2px]";
+  const fieldLabel = "block uppercase text-foreground/60 mb-2" + " " + "tracking-[2px] text-[11px] font-semibold";
   const cardInput =
   "rounded-xl border-border/40 bg-card shadow-soft focus-within:shadow-medium focus-within:ring-1 focus-within:ring-accent/40 transition-all duration-300";
 

@@ -472,7 +472,7 @@ const LaunchIndex = () => {
                             <div className="absolute inset-0 bg-black/25 group-hover:bg-black/55 transition-all duration-300" />
                             {/* Title - centered */}
                             <div className="absolute inset-0 flex items-center justify-center p-3 md:p-4 group-hover:opacity-0 transition-opacity duration-300">
-                              <h3 className="font-sans text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+                              <h3 className="font-sans text-white uppercase tracking-tight leading-tight text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" style={{ fontSize: 15, fontWeight: 600 }}>
                                 {(() => {
                                   const words = catTitle.split(' ');
                                   const mid = Math.ceil(words.length / 2);
