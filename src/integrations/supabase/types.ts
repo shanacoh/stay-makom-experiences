@@ -2535,6 +2535,62 @@ export type Database = {
           },
         ]
       }
+      saved_carts: {
+        Row: {
+          checkin: string | null
+          checkout: string | null
+          created_at: string
+          experience_id: string
+          id: string
+          notes: string | null
+          party_size: number | null
+          reminder_hours: number | null
+          reminder_sent_at: string | null
+          room_code: string | null
+          room_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checkin?: string | null
+          checkout?: string | null
+          created_at?: string
+          experience_id: string
+          id?: string
+          notes?: string | null
+          party_size?: number | null
+          reminder_hours?: number | null
+          reminder_sent_at?: string | null
+          room_code?: string | null
+          room_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checkin?: string | null
+          checkout?: string | null
+          created_at?: string
+          experience_id?: string
+          id?: string
+          notes?: string | null
+          party_size?: number | null
+          reminder_hours?: number | null
+          reminder_sent_at?: string | null
+          room_code?: string | null
+          room_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_carts_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
