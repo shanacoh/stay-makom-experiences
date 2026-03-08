@@ -266,6 +266,8 @@ export default function Experience2() {
       check_out_time: hotel.check_out_time || undefined,
       number_of_rooms: hotel.number_of_rooms ?? undefined,
       property_type: hotel.property_type || undefined,
+      latitude: hotel.latitude ?? undefined,
+      longitude: hotel.longitude ?? undefined,
     };
   };
 
@@ -426,6 +428,8 @@ export default function Experience2() {
         hotelImage={primaryHotel?.hero_image || undefined}
         city={city || undefined}
         region={region || undefined}
+        latitude={primaryHotel?.latitude ?? undefined}
+        longitude={primaryHotel?.longitude ?? undefined}
         lang={lang as "en" | "he" | "fr"}
         experienceId={experience.id}
         hotelId={primaryHotel?.id}

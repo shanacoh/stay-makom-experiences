@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
+import LocationPopover from "@/components/experience/LocationPopover";
 
 interface Review {
   id: string;
@@ -35,6 +36,8 @@ interface HeroSectionProps {
   city?: string;
   region?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   averageRating?: number | null;
   reviewsCount?: number;
   reviews?: Review[];
@@ -61,6 +64,8 @@ const HeroSection = ({
   city,
   region,
   address,
+  latitude,
+  longitude,
   averageRating,
   reviewsCount = 0,
   reviews = [],
@@ -274,6 +279,14 @@ const HeroSection = ({
               {lang === 'he' ? 'מתארחים ב' : 'Hosted at'}
             </p>
             <p className="text-sm font-medium text-foreground">{hotelName}</p>
+            <LocationPopover
+              city={city}
+              region={region}
+              hotelName={hotelName}
+              latitude={latitude}
+              longitude={longitude}
+              lang={lang}
+            />
           </div>
         </div>
       )}
