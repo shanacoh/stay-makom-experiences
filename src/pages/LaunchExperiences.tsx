@@ -154,33 +154,13 @@ const LaunchExperiences = () => {
                 const primaryHotelLink = experience.experience2_hotels
                   ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))?.[0]?.hotel;
 
-                const pricingTypes = ["per_person", "per_night", "per_person_per_night", "fixed"];
-                const minGuests = experience.min_party || 2;
-                const minNights = experience.min_nights || 1;
-                const addonPrice =
-                  (experience as any).experience2_addons
-                    ?.filter((a: any) => a.is_active && pricingTypes.includes(a.type))
-                    .reduce((sum: number, a: any) => {
-                      const v = Number(a.value) || 0;
-                      switch (a.type) {
-                        case 'per_person': return sum + v * minGuests;
-                        case 'per_night': return sum + v * minNights;
-                        case 'per_person_per_night': return sum + v * minGuests * minNights;
-                        default: return sum + v;
-                      }
-                    }, 0) || 0;
-
-                const cardExperience = {
-                  ...experience,
-                  hotels: primaryHotelLink || null,
-                  experience_highlight_tags: experience.experience2_highlight_tags || [],
-                  base_price: addonPrice || experience.base_price,
-                };
-
                 return (
-                  <ExperienceCard
+                  <Experience2CardWithPrice
                     key={experience.id}
-                    experience={cardExperience}
+                    experience={experience}
+                    primaryHotel={primaryHotelLink}
+                    hyperguestPropertyId={primaryHotelLink?.hyperguest_property_id}
+                    addons={(experience as any).experience2_addons}
                     linkPrefix="/experience"
                     linkSuffix="?context=launch"
                   />
