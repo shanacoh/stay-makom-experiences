@@ -212,7 +212,7 @@ export default function ExperienceCard({
       />
       
       <Link
-        to={`${linkPrefix}/${experience.slug}?lang=${lang}`}
+        to={`${linkPrefix}/${experience.slug}?lang=${lang}${linkSuffix ? `&${linkSuffix.replace(/^\?/, '')}` : ''}`}
         className="group block"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

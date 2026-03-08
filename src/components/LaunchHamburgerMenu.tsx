@@ -70,7 +70,15 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
           )}
 
           <Link
-            to={getLocalizedPath("/about")}
+            to="/launch"
+            onClick={handleNavClick}
+            className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
+          >
+            {isRTL ? "דף הבית" : "Home"}
+          </Link>
+
+          <Link
+            to={getLocalizedPath("/about?context=launch")}
             onClick={handleNavClick}
             className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
           >
@@ -78,7 +86,7 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
           </Link>
 
           <Link
-            to={getLocalizedPath("/contact")}
+            to={getLocalizedPath("/contact?context=launch")}
             onClick={handleNavClick}
             className="px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors"
           >
