@@ -190,6 +190,7 @@ const LaunchExperiences = () => {
       </main>
 
       <LaunchFooter />
+      <MobileBottomNav />
     </div>
   );
 };
