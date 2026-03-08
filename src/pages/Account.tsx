@@ -14,6 +14,7 @@ import RecommendedExperiences from "@/components/account/RecommendedExperiences"
 import RecommendedJournal from "@/components/account/RecommendedJournal";
 import PersonalizedRequestSection from "@/components/account/PersonalizedRequestSection";
 import GiftCardsSection from "@/components/account/GiftCardsSection";
+import SavedCartsSection from "@/components/account/SavedCartsSection";
 import AccountSidebar from "@/components/account/AccountSidebar";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 import MobileAccountHome from "@/components/account/MobileAccountHome";
@@ -24,6 +25,7 @@ const MOBILE_TAB_TITLES: Record<string, string> = {
   wishlist: "Saved Escapes",
   giftcards: "Gift Cards",
   profile: "Personal Information",
+  savedcarts: "Saved for Later",
 };
 
 const Account = () => {
@@ -37,7 +39,7 @@ const Account = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile"].includes(tabFromUrl)) {
+    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile", "savedcarts"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
@@ -130,6 +132,7 @@ const Account = () => {
           {tabFromUrl === "profile" && (
             <MyAccountSection userId={user.id} userEmail={user.email} mobile />
           )}
+          {tabFromUrl === "savedcarts" && <SavedCartsSection userId={user.id} />}
         </div>
       </div>
     );
@@ -172,6 +175,8 @@ const Account = () => {
             />
           </>
         );
+      case "savedcarts":
+        return <SavedCartsSection userId={user.id} />;
       case "giftcards":
         return (
           <>

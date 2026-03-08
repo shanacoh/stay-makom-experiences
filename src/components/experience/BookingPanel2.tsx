@@ -8,6 +8,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, AlertCircle, CalendarDays, Sparkles, Loader2, Clock, Baby, Minus, Plus, ChevronRight } from "lucide-react";
+import { SaveForLaterButton } from "./SaveForLaterButton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -587,6 +588,18 @@ export function BookingPanel2({
         >
           {isStep1Complete ? t.next : t.selectDates}
         </Button>
+
+        {/* Save for later */}
+        <SaveForLaterButton
+          experienceId={experienceId}
+          checkin={dateRange.from ? dateRange.from.toISOString().split("T")[0] : undefined}
+          checkout={dateRange.to ? dateRange.to.toISOString().split("T")[0] : undefined}
+          partySize={adults}
+          roomCode={selectedRoomId?.toString()}
+          roomName={selectedRoomName}
+          lang={lang}
+          variant="full"
+        />
       </CardContent>
     </Card>
   );
