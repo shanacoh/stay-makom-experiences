@@ -90,7 +90,7 @@ const LaunchExperiences = () => {
       />
 
       <LaunchHeader />
-      <MobileStickyHeader />
+
 
       <main className="flex-1 pt-[88px] md:pt-20 pb-[80px] md:pb-0">
         <section className="container py-10 px-4">
