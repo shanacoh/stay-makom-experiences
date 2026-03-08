@@ -126,7 +126,7 @@ const Experiences2HomeSection = ({ lang, isRTL }: { lang: string; isRTL: boolean
           {lang === 'he' ? 'חוויות חדשות' : 'New Experiences'}
         </h2>
         <Button variant="link" asChild className="text-foreground underline underline-offset-4 text-xs sm:text-sm p-0 h-auto">
-          <Link to={`/experiences2${lang === 'he' ? '?lang=he' : ''}`}>
+          <Link to={`/experiences${lang === 'he' ? '?lang=he' : ''}`}>
             {lang === 'he' ? 'צפו בכולן' : 'View all'}
           </Link>
         </Button>
