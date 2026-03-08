@@ -41,17 +41,24 @@ const HeroBookingPreview2 = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  const fallbackPrice = useMemo(() => {
-    if (!addons || addons.length === 0) return null;
+  // Calculate addon total (experience extras on top of room)
+  const addonTotal = useMemo(() => {
+    if (!addons || addons.length === 0) return 0;
     const pricingAddons = addons.filter(
       (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
     );
-    if (pricingAddons.length === 0) return null;
-    const total = pricingAddons.reduce((sum, a) => sum + a.value, 0);
-    return total > 0 ? total : null;
+    return pricingAddons.reduce((sum, a) => sum + a.value, 0);
   }, [addons]);
 
-  const displayPrice = cheapestDate?.cheapestPrice ?? fallbackPrice;
+  // Total price = room price + addon extras (or addon-only fallback)
+  const displayPrice = useMemo(() => {
+    const roomPrice = cheapestDate?.cheapestPrice;
+    if (roomPrice != null && roomPrice > 0) {
+      return roomPrice + addonTotal; // Room + addons = true total
+    }
+    return addonTotal > 0 ? addonTotal : null; // Fallback: addons only
+  }, [cheapestDate, addonTotal]);
+
   const hasRealDate = !!cheapestDate;
 
   const getCurrencySymbol = (cur: string) => {
