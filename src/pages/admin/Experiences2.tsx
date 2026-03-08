@@ -65,10 +65,10 @@ const AdminExperiences2 = () => {
         .select(
           `
           *,
-          hotels2 (id, name),
+          hotels2 (id, name, hyperguest_property_id),
           categories (id, name),
-          experience2_addons (id, type, name, value, is_percentage),
-          experience2_hotels (id, position, nights, hotels2 (id, name))
+          experience2_addons (id, type, name, value, is_percentage, is_active),
+          experience2_hotels (id, position, nights, hotels2 (id, name, hyperguest_property_id))
         `,
         )
         .order("updated_at", { ascending: false });
