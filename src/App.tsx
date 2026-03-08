@@ -99,6 +99,7 @@ const App = () => (
             <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/consulting" element={<Consulting />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/cancellation-policy" element={<CancellationPolicy />} />
