@@ -734,8 +734,6 @@ const Index = () => {
           )}
         </section>
 
-        {/* New Experiences (V2) Section */}
-        <Experiences2HomeSection lang={lang} isRTL={isRTL} />
 
         {/* Journal Section */}
         <JournalSection lang={lang} />
