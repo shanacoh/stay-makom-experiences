@@ -26,10 +26,9 @@ const MobileStickyHeader = () => {
       <div className="flex justify-center items-center h-full">
         <Link
           to="/launch"
-          className={`font-sans font-bold uppercase leading-none transition-colors duration-300 ${
+          className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
             isScrolled ? "text-mobile-logo" : "text-white"
           }`}
-          style={{ fontSize: 17, fontWeight: 700, letterSpacing: 3 }}
         >
           STAYMAKOM
         </Link>

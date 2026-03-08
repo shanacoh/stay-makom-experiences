@@ -240,8 +240,8 @@ const LaunchIndex = () => {
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
             <h1
-              className="font-sans uppercase opacity-0 animate-hero-fade-up text-white md:text-5xl lg:text-6xl"
-              style={{ fontSize: 34, fontWeight: 800, letterSpacing: 0.5, lineHeight: 1.15, animationDelay: '0ms' }}>
+              className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
+              style={{ animationDelay: '0ms' }}>
               {isRTL ? (
                 <><span className="whitespace-nowrap">אל תבחר עיר,</span><br /><span className="whitespace-nowrap">בחר את הבריחה שלך</span></>
               ) : (
@@ -249,8 +249,8 @@ const LaunchIndex = () => {
               )}
             </h1>
             <p
-              className="font-sans italic text-white/90 max-w-xl mx-auto opacity-0 animate-hero-fade-up md:text-xl"
-              style={{ fontSize: 15, fontWeight: 300, marginTop: 12, marginBottom: 24, animationDelay: '250ms' }}>
+              className="font-sans italic text-white/90 mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up text-base sm:text-lg md:text-xl"
+              style={{ animationDelay: '250ms' }}>
               {isRTL ? "הישראל שרוב האנשים לא מוצאים." : "The Israel most people never find."}
             </p>
             <button
@@ -258,8 +258,8 @@ const LaunchIndex = () => {
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="bg-white text-foreground uppercase shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all duration-300 opacity-0 animate-hero-fade-up cursor-pointer w-full md:w-auto"
-              style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, padding: '16px 32px', borderRadius: 3, minHeight: 52, animationDelay: '500ms' }}>
+              className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all duration-300 opacity-0 animate-hero-fade-up cursor-pointer"
+              style={{ animationDelay: '500ms' }}>
               {isRTL ? "מצא את הבריחה שלך" : "Find your escape"}
             </button>
           </div>
@@ -269,15 +269,13 @@ const LaunchIndex = () => {
         <HowItWorksBanner />
 
         {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
-        <section id="launch-experiences" className="container px-4 scroll-mt-24" style={{ paddingTop: 48, paddingBottom: 48 }}>
+        <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-24">
           {/* Title block — static, not the sticky parent */}
-          <div className="text-center" style={{ marginBottom: 12 }}>
-            <h2
-              className="font-sans uppercase md:text-3xl"
-              style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2, marginBottom: 12 }}>
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
               {isRTL ? (<>זה לא תיירות.<br />זו חוויה.</>) : (<>This is not tourism.<br />This is something else.</>)}
             </h2>
-            <p className="text-muted-foreground" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6 }}>
+            <p className="text-muted-foreground text-xs sm:text-sm mb-5">
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
             </p>
           </div>
@@ -393,20 +391,18 @@ const LaunchIndex = () => {
         <MarqueeBanner />
 
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
-        <section className="relative overflow-hidden" style={{ paddingTop: 48, paddingBottom: 48 }}>
+        <section className="relative py-8 sm:py-14 md:py-18 overflow-hidden">
           <div className="absolute inset-0">
             <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
           <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2
-              className="font-sans md:text-3xl text-white"
-              style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2, marginBottom: 12 }}>
+            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
               {t(lang, 'handpickedTitle1')}<br />
               {t(lang, 'handpickedTitle2')}
             </h2>
-            <div className="text-white/95 max-w-2xl mx-auto space-y-2" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6 }}>
+            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-2xl mx-auto space-y-2">
               <p>{t(lang, 'handpickedP1')}</p>
               <p>{t(lang, 'handpickedP2')}</p>
               <p>{t(lang, 'handpickedP3')}</p>
@@ -415,18 +411,16 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 6. MORE EXPERIENCES + CATEGORIES (unified) ─── */}
-        <section className="bg-muted/50" style={{ paddingTop: 48, paddingBottom: 48 }}>
+        <section className="py-8 sm:py-16 bg-muted/50">
           <div className="container px-4 mx-auto">
-            <div className="max-w-2xl mx-auto text-center" style={{ marginBottom: 12 }}>
-              <h2
-                className="font-sans uppercase md:text-3xl"
-                style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2 }}>
+            <div className="max-w-2xl mx-auto text-center mb-3">
+              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] uppercase">
                 {isRTL ? "עוד בריחות בדרך" : "More escapes are on the way."}
               </h2>
             </div>
 
             <div className="max-w-sm sm:max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6 sm:mb-10">
-              <p className="text-muted-foreground whitespace-nowrap" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6 }}>
+              <p className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
                 {isRTL ? "היו הראשונים." : "Be the first in."}
               </p>
 
@@ -445,7 +439,7 @@ const LaunchIndex = () => {
                   placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
                   className="flex-1 sm:w-56 h-9 text-sm" />
 
-                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-[52px] bg-[#1A1814] text-white hover:bg-[#1A1814]/90 uppercase" style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, paddingLeft: 32, paddingRight: 32, borderRadius: 3, minHeight: 52 }}>
+                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4 bg-[#1A1814] text-white hover:bg-[#1A1814]/90">
                     {isRTL ? "הצטרפו לרשימה" : "Join the list"}
                   </Button>
                 </form>
@@ -472,7 +466,7 @@ const LaunchIndex = () => {
                             <div className="absolute inset-0 bg-black/25 group-hover:bg-black/55 transition-all duration-300" />
                             {/* Title - centered */}
                             <div className="absolute inset-0 flex items-center justify-center p-3 md:p-4 group-hover:opacity-0 transition-opacity duration-300">
-                              <h3 className="font-sans text-white uppercase tracking-tight leading-tight text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" style={{ fontSize: 15, fontWeight: 600 }}>
+                              <h3 className="font-sans text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
                                 {(() => {
                                   const words = catTitle.split(' ');
                                   const mid = Math.ceil(words.length / 2);
@@ -505,7 +499,7 @@ const LaunchIndex = () => {
         <TailoredRequestSection categories={categories || []} />
 
         {/* ─── 8. GIFT CARD ─── */}
-        <section className="container px-4" style={{ paddingTop: 48, paddingBottom: 48 }}>
+        <section className="container py-8 md:py-14 px-4">
           <div className={`grid md:grid-cols-2 gap-5 md:gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
 
             <div
@@ -520,16 +514,14 @@ const LaunchIndex = () => {
 
             </div>
 
-            <div className={`${isRTL ? "text-right md:order-1" : ""}`}>
-              <h2
-                className="font-sans md:text-3xl"
-                style={{ fontSize: 20, fontWeight: 600, letterSpacing: 0, lineHeight: 1.2, marginBottom: 12 }}>
+            <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
+              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
                 {isRTL ? (<>מתנה מושלמת.<br />מתנת הבריחה.</>) : (<>Perfect gift.<br />The gift of escape.</>)}
               </h2>
-              <p className="text-muted-foreground max-w-md" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6, marginBottom: 24 }}>
+              <p className="text-muted-foreground text-sm md:text-base max-w-md">
                 {t(lang, "giftCardSectionDesc")}
               </p>
-              <Button asChild className="group uppercase" style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, padding: '16px 32px', borderRadius: 3, minHeight: 52 }}>
+              <Button asChild className="group">
                 <Link to={getLocalizedPath("/gift-card")}>
                   {t(lang, "giftCardSectionCTA")}
                   <ArrowRight
@@ -538,6 +530,7 @@ const LaunchIndex = () => {
                     "mr-2 rotate-180 group-hover:-translate-x-1" :
                     "ml-2"}`
                     } />
+
                 </Link>
               </Button>
             </div>
