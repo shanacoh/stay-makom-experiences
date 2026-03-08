@@ -57,7 +57,7 @@ const MobileAuthPrompt = () => {
           </button>
         </p>
       </div>
-      <MobileBottomNav />
+      
     </div>
   );
 };

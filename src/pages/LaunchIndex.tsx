@@ -595,7 +595,7 @@ const LaunchIndex = () => {
           }
         </DialogContent>
       </Dialog>
-      <MobileBottomNav />
+      
     </div>);
 
 };

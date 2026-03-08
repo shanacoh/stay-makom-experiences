@@ -190,7 +190,7 @@ const LaunchExperiences = () => {
       <div className="hidden md:block">
         <LaunchFooter />
       </div>
-      <MobileBottomNav />
+      
     </div>
   );
 };
