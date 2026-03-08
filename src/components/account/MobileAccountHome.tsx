@@ -14,7 +14,7 @@ import {
   MessageCircle,
   LogOut,
   ChevronRight,
-  Compass,
+  Bookmark,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
