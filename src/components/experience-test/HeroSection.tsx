@@ -35,6 +35,8 @@ interface HeroSectionProps {
   city?: string;
   region?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   averageRating?: number | null;
   reviewsCount?: number;
   reviews?: Review[];
