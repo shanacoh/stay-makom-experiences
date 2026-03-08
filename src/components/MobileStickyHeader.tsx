@@ -28,7 +28,7 @@ const MobileStickyHeader = () => {
       <div className="relative flex items-center h-full px-4">
         <Link
           to="/launch"
-          className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
+          className={`absolute left-1/2 -translate-x-1/2 font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
             isScrolled ? "text-mobile-logo" : "text-white"
           }`}
         >
