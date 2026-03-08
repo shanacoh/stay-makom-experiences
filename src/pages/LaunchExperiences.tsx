@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
-import MobileStickyHeader from "@/components/MobileStickyHeader";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import { SEOHead } from "@/components/SEOHead";
 import ExperienceCard from "@/components/ExperienceCard";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -92,7 +90,7 @@ const LaunchExperiences = () => {
       />
 
       <LaunchHeader />
-      <MobileStickyHeader />
+
 
       <main className="flex-1 pt-[88px] md:pt-20 pb-[80px] md:pb-0">
         <section className="container py-10 px-4">
@@ -192,7 +190,7 @@ const LaunchExperiences = () => {
       <div className="hidden md:block">
         <LaunchFooter />
       </div>
-      <MobileBottomNav />
+      
     </div>
   );
 };

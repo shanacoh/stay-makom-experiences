@@ -25,6 +25,7 @@ import Header from "@/components/Header";
 import LaunchHeader from "@/components/LaunchHeader";
 import Footer from "@/components/Footer";
 import LaunchFooter from "@/components/LaunchFooter";
+import MobileFooterMinimal from "@/components/MobileFooterMinimal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -444,7 +445,7 @@ export default function Experience2() {
         </section>
 
       {/* Contenu principal — aligned to V1 layout */}
-      <div className="max-w-6xl mx-auto pb-24 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
+      <div className="max-w-6xl mx-auto pb-40 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
         <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
           {/* Left Column - Content */}
           <div className="space-y-10 md:space-y-12">
@@ -530,7 +531,7 @@ export default function Experience2() {
         </div>
       </div>
 
-        {/* Mobile Sticky Price Bar */}
+        {/* Mobile Sticky Price Bar — sits above bottom nav */}
         <StickyPriceBar
           basePrice={experience.base_price}
           basePriceType={experience.base_price_type || "per_person"}
@@ -539,6 +540,7 @@ export default function Experience2() {
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
           hasHyperguest={!!hyperguestPropertyId}
+          selectedExtrasTotal={selectedExtras.reduce((sum, e) => sum + e.price, 0)}
         />
 
         {/* Mobile Booking Sheet */}
@@ -564,7 +566,11 @@ export default function Experience2() {
       </main>
 
       <footer ref={footerRef as React.RefObject<HTMLElement>}>
-        {isLaunch ? <LaunchFooter /> : <Footer />}
+        {/* Desktop: full footer, Mobile: minimal copyright */}
+        <div className="hidden md:block">
+          {isLaunch ? <LaunchFooter /> : <Footer />}
+        </div>
+        <MobileFooterMinimal />
       </footer>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Heart, CalendarDays, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import MobileBottomNav from "@/components/MobileBottomNav";
+
 
 const contextConfig = {
   wishlist: {
@@ -57,7 +57,7 @@ const MobileAuthPrompt = () => {
           </button>
         </p>
       </div>
-      <MobileBottomNav />
+      
     </div>
   );
 };
