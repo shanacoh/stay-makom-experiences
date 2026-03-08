@@ -197,7 +197,7 @@ export default function Experience2() {
   if (error || !experience) {
     return (
       <div className="min-h-screen bg-background">
-        {isLaunch ? <LaunchHeader /> : <Header />}
+        {isLaunch ? <LaunchHeader forceScrolled /> : <Header />}
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-semibold">{t.notFound}</h1>
