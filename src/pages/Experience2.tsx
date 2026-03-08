@@ -25,6 +25,7 @@ import Header from "@/components/Header";
 import LaunchHeader from "@/components/LaunchHeader";
 import Footer from "@/components/Footer";
 import LaunchFooter from "@/components/LaunchFooter";
+import MobileFooterMinimal from "@/components/MobileFooterMinimal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
