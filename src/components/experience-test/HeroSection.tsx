@@ -213,9 +213,9 @@ const HeroSection = ({
         </Link>
       )}
       
-      {/* 2. Title — serif */}
+      {/* 2. Title — Inter bold */}
       <h1 className={cn(
-        "font-display font-light text-foreground leading-tight",
+        "font-sans font-bold text-foreground leading-tight",
         isMobile ? "text-2xl" : "text-3xl xl:text-4xl"
       )}>
         {title}
