@@ -529,7 +529,7 @@ const LaunchIndex = () => {
               <p className="text-muted-foreground max-w-md" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6, marginBottom: 24 }}>
                 {t(lang, "giftCardSectionDesc")}
               </p>
-              <Button asChild className="group">
+              <Button asChild className="group uppercase" style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, padding: '16px 32px', borderRadius: 3, minHeight: 52 }}>
                 <Link to={getLocalizedPath("/gift-card")}>
                   {t(lang, "giftCardSectionCTA")}
                   <ArrowRight
@@ -538,7 +538,6 @@ const LaunchIndex = () => {
                     "mr-2 rotate-180 group-hover:-translate-x-1" :
                     "ml-2"}`
                     } />
-
                 </Link>
               </Button>
             </div>
