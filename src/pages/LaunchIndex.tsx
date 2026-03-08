@@ -7,6 +7,8 @@ import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import { t } from "@/lib/translations";
 import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
+import MobileStickyHeader from "@/components/MobileStickyHeader";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { SEOHead } from "@/components/SEOHead";
 import MarqueeBanner from "@/components/MarqueeBanner";
 import TailoredRequestSection from "@/components/TailoredRequestSection";

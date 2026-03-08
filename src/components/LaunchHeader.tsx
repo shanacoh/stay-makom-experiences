@@ -66,7 +66,7 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
   const isRTL = lang === "he";
 
   return (
-    <header className={headerClasses} dir="ltr">
+    <header className={`${headerClasses} hidden md:block`} dir="ltr">
       <div className={cn(
         "container flex items-center bg-transparent h-14",
         isRTL ? "flex-row-reverse" : "flex-row"
