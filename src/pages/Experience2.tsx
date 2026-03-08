@@ -4,7 +4,7 @@
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
 import { useRef, useState, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
