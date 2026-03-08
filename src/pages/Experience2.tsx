@@ -545,6 +545,8 @@ export default function Experience2() {
           footerRef={footerRef}
           hyperguestPropertyId={hyperguestPropertyId || null}
           selectedExtrasTotal={selectedExtras.reduce((sum, e) => sum + e.price, 0)}
+          minParty={experience.min_party || 2}
+          minNights={experience.min_nights || 1}
         />
 
         {/* Mobile Booking Sheet */}
