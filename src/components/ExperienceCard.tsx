@@ -9,6 +9,7 @@ import { t } from "@/lib/translations";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import LoginBottomSheet from "@/components/LoginBottomSheet";
 import HeartBurst from "@/components/ui/HeartBurst";
 import { useIsMobile } from "@/hooks/use-mobile";
 
