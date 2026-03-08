@@ -799,7 +799,12 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         </div>
       </main>
 
-      <Footer />
+      {/* Minimal trust footer */}
+      <div className="border-t border-border py-4 text-center">
+        <p className="text-xs text-muted-foreground">
+          🔒 {lang === "he" ? "הזמנה מאובטחת · לא תחויבו עד לאישור" : lang === "fr" ? "Réservation sécurisée · Aucun débit avant confirmation" : "Secure booking · No charge until confirmed"}
+        </p>
+      </div>
 
       {/* Confirmation dialog */}
       <BookingConfirmationDialog
