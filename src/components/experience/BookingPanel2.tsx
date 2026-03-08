@@ -361,8 +361,8 @@ export function BookingPanel2({
           </div>
 
           {/* Children */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm">{t.children}</span>
+          <div className="flex items-center justify-between" dir="ltr">
+            <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.children}</span>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => prev.slice(0, -1))} disabled={childrenAges.length === 0}>
                 <Minus className="h-3 w-3" />

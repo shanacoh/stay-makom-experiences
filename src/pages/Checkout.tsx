@@ -642,7 +642,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                   }}
                 >
                   {t.next}
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  {lang === 'he' ? <ChevronLeft className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 ml-1" />}
                 </Button>
               </div>
             </div>
