@@ -346,9 +346,9 @@ export function BookingPanel2({
             {t.guests}
           </div>
 
-          {/* Adults */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm">{t.adults}</span>
+           {/* Adults */}
+          <div className="flex items-center justify-between" dir="ltr">
+            <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.adults}</span>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
                 <Minus className="h-3 w-3" />
@@ -361,8 +361,8 @@ export function BookingPanel2({
           </div>
 
           {/* Children */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm">{t.children}</span>
+          <div className="flex items-center justify-between" dir="ltr">
+            <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.children}</span>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => prev.slice(0, -1))} disabled={childrenAges.length === 0}>
                 <Minus className="h-3 w-3" />
@@ -417,7 +417,7 @@ export function BookingPanel2({
             {t.dates}
           </div>
 
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5" dir="ltr">
             {([1, 2, 3] as const).map((n) => (
               <button
                 key={n}

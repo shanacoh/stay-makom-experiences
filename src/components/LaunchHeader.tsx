@@ -9,6 +9,7 @@ import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import UserDropdown from "@/components/auth/UserDropdown";
+import { cn } from "@/lib/utils";
 
 const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) => {
   const [isScrolled, setIsScrolled] = useState(forceScrolled);
@@ -62,9 +63,14 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
 
   const logoClasses = !isScrolled ? "text-white" : "text-logo";
 
+  const isRTL = lang === "he";
+
   return (
     <header className={headerClasses} dir="ltr">
-      <div className="container flex items-center justify-between bg-transparent h-14">
+      <div className={cn(
+        "container flex items-center bg-transparent h-14",
+        isRTL ? "flex-row-reverse" : "flex-row"
+      )}>
         <Link to="/launch" className="flex items-center space-x-2">
           <span className={`font-sans font-bold tracking-[-0.04em] uppercase text-xl ${logoClasses}`}>
             STAYMAKOM
@@ -73,8 +79,14 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
 
         <div className="flex-1"></div>
 
-        <div className="flex items-center space-x-3">
-          <div className="hidden md:flex items-center space-x-2">
+        <div className={cn(
+          "flex items-center space-x-3",
+          isRTL && "flex-row-reverse space-x-reverse"
+        )}>
+          <div className={cn(
+            "hidden md:flex items-center space-x-2",
+            isRTL && "space-x-reverse"
+          )}>
             <button
               onClick={() => setLanguage("en")}
               className={`text-xs transition-colors ${

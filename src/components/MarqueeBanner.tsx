@@ -5,7 +5,12 @@ const MarqueeBanner = () => {
   const isRTL = lang === 'he';
   
   // Create the formatted text with proper styling
-  const createContent = () => (
+  const createContent = () => isRTL ? (
+    <>
+      <span className="font-normal">מלונות נבחרים.</span>
+      <span className="font-bold"> חוויות בלתי נשכחות.</span>
+    </>
+  ) : (
     <>
       <span className="font-normal">HANDPICKED HOTELS.</span>
       <span className="font-bold"> UNFORGETTABLE EXPERIENCES.</span>

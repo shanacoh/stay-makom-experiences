@@ -510,7 +510,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const stepLabels = [t.step2Title, t.step3Title];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <Header />
 
       <main className="flex-1 w-full">
@@ -532,7 +532,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
             </div>
 
             {/* Progress bar */}
-            <div className="flex items-center gap-2">
+            <div className={cn("flex items-center gap-2", lang === 'he' && "flex-row-reverse")}>
               {[1, 2, 3].map((s, i) => (
                 <React.Fragment key={s}>
                   <div className="flex flex-col items-center gap-1.5">
@@ -617,9 +617,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
               </div>
 
               {/* Navigation */}
-              <div className="flex gap-3 pt-2">
+              <div className={cn("flex gap-3 pt-2", lang === 'he' && "flex-row-reverse")}>
                 <Button variant="outline" className="shrink-0" onClick={goBackToExperience}>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
                   {t.back}
                 </Button>
                 <Button
@@ -642,7 +642,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                   }}
                 >
                   {t.next}
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  {lang === 'he' ? <ChevronLeft className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 ml-1" />}
                 </Button>
               </div>
             </div>
@@ -798,9 +798,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
               </div>
 
               {/* Navigation */}
-              <div className="flex gap-3 pt-2 pb-8">
+              <div className={cn("flex gap-3 pt-2 pb-8", lang === 'he' && "flex-row-reverse")}>
                 <Button variant="outline" className="shrink-0" onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
                   {t.back}
                 </Button>
                 <Button
