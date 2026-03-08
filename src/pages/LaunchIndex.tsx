@@ -283,7 +283,7 @@ const LaunchIndex = () => {
             {/* Premium segmented text toggle — sticky on mobile */}
             <div
               className={cn(
-                "sticky top-[36px] z-40 -mx-4 px-4 transition-all duration-300 md:static md:mx-0 md:px-0",
+                "sticky top-[44px] z-40 -mx-4 px-4 transition-all duration-300 md:static md:mx-0 md:px-0",
                 tabsSticky ? "bg-mobile-header border-b border-mobile-border" : ""
               )}
             >
