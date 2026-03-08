@@ -132,6 +132,7 @@ const Account = () => {
           {tabFromUrl === "profile" && (
             <MyAccountSection userId={user.id} userEmail={user.email} mobile />
           )}
+          {tabFromUrl === "savedcarts" && <SavedCartsSection userId={user.id} />}
         </div>
       </div>
     );
