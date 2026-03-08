@@ -338,7 +338,7 @@ const LaunchIndex = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div> :
           filteredExperiences && filteredExperiences.length > 0 ?
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5 transition-all duration-500">
+          <div className="mt-3 md:mt-0 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5 transition-all duration-500">
               {filteredExperiences.map((experience: any) => {
               const primaryHotelLink = experience.experience2_hotels?.
               sort(
