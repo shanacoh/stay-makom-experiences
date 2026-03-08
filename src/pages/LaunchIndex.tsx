@@ -415,10 +415,12 @@ const LaunchIndex = () => {
         </section>
 
         {/* ─── 6. MORE EXPERIENCES + CATEGORIES (unified) ─── */}
-        <section className="py-8 sm:py-16 bg-muted/50">
+        <section className="bg-muted/50" style={{ paddingTop: 48, paddingBottom: 48 }}>
           <div className="container px-4 mx-auto">
-            <div className="max-w-2xl mx-auto text-center mb-3">
-              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] uppercase">
+            <div className="max-w-2xl mx-auto text-center" style={{ marginBottom: 12 }}>
+              <h2
+                className="font-sans uppercase md:text-3xl"
+                style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2 }}>
                 {isRTL ? "עוד בריחות בדרך" : "More escapes are on the way."}
               </h2>
             </div>
