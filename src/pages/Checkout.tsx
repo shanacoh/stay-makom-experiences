@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { useQuery } from "@tanstack/react-query";
 
 interface SelectedExtra {
   id: string;
