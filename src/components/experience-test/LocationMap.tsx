@@ -34,7 +34,7 @@ const LocationMap = ({
     if (!latitude || !longitude) return;
 
     // Initialize map
-    const map = L.map(mapContainer.current).setView([latitude, longitude], 13);
+    const map = L.map(mapContainer.current).setView([latitude, longitude], 14);
     mapRef.current = map;
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
