@@ -16,7 +16,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
 import cardBg1 from "@/assets/desert-journey.jpg";
-import cardBg2 from "@/assets/desert-hotel-pool.jpg";
+import cardBg2 from "@/assets/desert-kiosk-hero.png";
 import cardBg3 from "@/assets/coming-soon-road.png";
 import { useLanguage } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
