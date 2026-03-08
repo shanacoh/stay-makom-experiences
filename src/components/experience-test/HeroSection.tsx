@@ -170,7 +170,14 @@ const HeroSection = ({
   });
 
   const handleFavorite = () => {
-    if (!user) { setAuthDialogOpen(true); return; }
+    if (!user) {
+      if (window.innerWidth < 768) {
+        setMobileSheetOpen(true);
+      } else {
+        setAuthDialogOpen(true);
+      }
+      return;
+    }
     wishlistMutation.mutate({ isAdding: !isInWishlist });
   };
 
