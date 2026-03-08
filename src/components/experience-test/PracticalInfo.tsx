@@ -112,20 +112,29 @@ const PracticalInfo = ({ experience, lang = "en" }: PracticalInfoProps) => {
   };
 
   return (
-    <section className="py-6 border-b border-border">
-      <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-5">
-        {lang === "he" ? "חשוב לדעת" : "Things to know"}
+    <section className="py-8">
+      <div className="h-px bg-border/60 mb-8" />
+      <h2 className="font-serif text-[20px] md:text-2xl font-bold uppercase tracking-wide text-foreground mb-6">
+        {lang === "he" ? "חשוב לדעת" : "THINGS TO KNOW"}
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-0">
         {displayItems.map((item: any, index: number) => {
           const IconComp = getIcon(item.icon);
+          // Add separator styling: border-bottom except last row, border-right on left column
+          const isLeftCol = index % 2 === 0;
+          const isLastRow = index >= displayItems.length - (displayItems.length % 2 === 0 ? 2 : (index === displayItems.length - 1 ? 1 : 2));
           return (
-            <div key={index} className="flex items-start gap-3 py-2">
+            <div
+              key={index}
+              className={`flex items-start gap-3 py-4 px-3 min-h-[52px] ${
+                !isLastRow ? "border-b border-border/40" : ""
+              } ${isLeftCol ? "border-r border-border/40" : ""}`}
+            >
               <IconComp className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">{item.label}</p>
-                <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{item.value}</p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-[14px] md:text-sm font-medium text-foreground mt-0.5 leading-snug">{item.value}</p>
               </div>
             </div>
           );
