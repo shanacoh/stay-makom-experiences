@@ -8,6 +8,7 @@ interface LocationPopoverProps {
   latitude?: number;
   longitude?: number;
   lang?: "en" | "he" | "fr";
+  variant?: "default" | "light";
 }
 
 const LocationPopover = ({
