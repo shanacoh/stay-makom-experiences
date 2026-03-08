@@ -12,7 +12,7 @@ interface HeroBookingPreview2Props {
   onViewDates: () => void;
   hyperguestPropertyId?: string | null;
   minParty?: number;
-  minNights?: number;
+  minParty?: number;
 }
 
 const HeroBookingPreview2 = ({
