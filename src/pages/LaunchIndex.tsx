@@ -7,6 +7,8 @@ import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import { t } from "@/lib/translations";
 import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
+import MobileStickyHeader from "@/components/MobileStickyHeader";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { SEOHead } from "@/components/SEOHead";
 import MarqueeBanner from "@/components/MarqueeBanner";
 import TailoredRequestSection from "@/components/TailoredRequestSection";
@@ -199,8 +201,9 @@ const LaunchIndex = () => {
         description={isRTL ? "אנחנו אוצרים את המלונות הבוטיק הטובים בישראל ומשלבים אותם עם חוויות מקומיות ייחודיות." : "We curate Israel's best boutique hotels and pair them with unique local experiences."} />
 
       <LaunchHeader />
+      <MobileStickyHeader />
 
-      <main className="flex-1">
+      <main className="flex-1 md:pt-0 pt-[88px] pb-[80px] md:pb-0">
         {/* ─── 1. HERO ─── */}
         <section className="relative h-[70vh] min-h-[480px] flex items-center justify-center">
           <div
@@ -551,6 +554,7 @@ const LaunchIndex = () => {
           }
         </DialogContent>
       </Dialog>
+      <MobileBottomNav />
     </div>);
 
 };
