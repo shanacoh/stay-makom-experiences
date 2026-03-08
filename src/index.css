@@ -69,8 +69,8 @@ All colors MUST be HSL.
     --shadow-strong: 0 8px 32px -8px hsl(23 10% 15% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
-    /* Hebrew input background */
-    --input-hebrew-bg: 211 100% 96%;
+    /* Hebrew input background – warm neutral */
+    --input-hebrew-bg: 30 25% 94%;
   }
 
   .dark {
