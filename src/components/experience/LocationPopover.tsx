@@ -8,6 +8,7 @@ interface LocationPopoverProps {
   latitude?: number;
   longitude?: number;
   lang?: "en" | "he" | "fr";
+  variant?: "default" | "light";
 }
 
 const LocationPopover = ({
@@ -17,7 +18,9 @@ const LocationPopover = ({
   latitude,
   longitude,
   lang = "en",
+  variant = "default",
 }: LocationPopoverProps) => {
+  const color = variant === "light" ? "#FFFFFF" : "#8C7B6B";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -62,9 +65,9 @@ const LocationPopover = ({
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 cursor-pointer hover:underline transition-colors"
-        style={{ fontSize: "13px", color: "#8C7B6B" }}
+        style={{ fontSize: "13px", color }}
       >
-        <MapPin className="h-3.5 w-3.5" style={{ color: "#8C7B6B" }} />
+        <MapPin className="h-3.5 w-3.5" style={{ color }} />
         <span>{locationText}</span>
       </button>
 
