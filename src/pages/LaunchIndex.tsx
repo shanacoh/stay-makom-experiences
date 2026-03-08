@@ -191,7 +191,7 @@ const LaunchIndex = () => {
   const isPageLoading = isLoadingCategories || isLoadingExp;
 
   return (
-    <div className="min-h-screen flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
+    <div className="min-h-screen flex flex-col overflow-x-hidden" dir={isRTL ? "rtl" : "ltr"}>
       <LoadingScreen isLoading={isPageLoading} />
       <SEOHead
         title={isRTL ? "STAYMAKOM — מלונות וחוויות נבחרים בישראל" : "STAYMAKOM — Handpicked Hotels & Experiences in Israel"}
