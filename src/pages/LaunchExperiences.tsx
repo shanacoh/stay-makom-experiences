@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
-import MobileStickyHeader from "@/components/MobileStickyHeader";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import { SEOHead } from "@/components/SEOHead";
 import ExperienceCard from "@/components/ExperienceCard";
 import LoadingScreen from "@/components/LoadingScreen";
