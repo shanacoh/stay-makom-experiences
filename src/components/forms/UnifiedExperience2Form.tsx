@@ -556,6 +556,8 @@ export function UnifiedExperience2Form({
       promo_type: data.promo_type === "none" || !data.promo_type ? null : data.promo_type,
       promo_value: data.promo_type === "none" || !data.promo_type ? null : (data.promo_value ?? null),
       promo_is_percentage: data.promo_is_percentage ?? true,
+      featured_on_home: featuredOnHome,
+      home_display_order: homeDisplayOrder,
     };
   };
 
