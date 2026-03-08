@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
-import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 
 interface StickyPriceBarProps {
   basePrice: number;
@@ -14,7 +13,6 @@ interface StickyPriceBarProps {
   onViewDates: () => void;
   footerRef: React.RefObject<HTMLElement>;
   hasHyperguest?: boolean;
-  hyperguestPropertyId?: string | null;
   selectedExtrasTotal?: number;
 }
 
@@ -26,19 +24,14 @@ const StickyPriceBar = ({
   onViewDates,
   footerRef,
   hasHyperguest = false,
-  hyperguestPropertyId,
   selectedExtrasTotal = 0,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
 
-  // Try to get real-time price from HyperGuest
-  const { data: quickAvail } = useQuickDateAvailability(hyperguestPropertyId || null);
-
   const displayPrice = useMemo(() => {
-    if (quickAvail?.cheapestRate) return Math.round(quickAvail.cheapestRate + selectedExtrasTotal);
     if (basePrice > 0) return Math.round(basePrice + selectedExtrasTotal);
     return null;
-  }, [quickAvail, basePrice, selectedExtrasTotal]);
+  }, [basePrice, selectedExtrasTotal]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,14 +54,12 @@ const StickyPriceBar = ({
   const symbol = getCurrencySymbol(currency);
   const nightLabel = lang === 'he' ? 'ללילה' : lang === 'fr' ? '/ nuit' : '/ night';
 
-  const ctaLabel = hasHyperguest
-    ? (lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'VIEW DATES')
-    : (lang === 'he' ? 'בקשו שהייה' : lang === 'fr' ? 'Demander ce séjour' : 'VIEW DATES');
+  const ctaLabel = lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'VIEW DATES';
 
   return (
     <div
       className={cn(
-        "md:hidden fixed left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)] transition-all duration-300",
+        "md:hidden fixed left-0 right-0 z-40 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)] transition-all duration-300",
         isHidden ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
       )}
       style={{ bottom: `calc(${MOBILE_BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))` }}
