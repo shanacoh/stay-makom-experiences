@@ -53,7 +53,7 @@ const LaunchFooter = () => {
         className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary"
         required
       />
-      <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full">
+      <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full bg-accent hover:bg-accent/90 text-white border-none">
         {isRTL ? "הרשמה" : "Subscribe"}
       </Button>
     </form>
