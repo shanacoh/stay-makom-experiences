@@ -289,19 +289,19 @@ const LaunchIndex = () => {
                   : ""
               )}
             >
-              <div className="relative inline-flex items-center gap-6 justify-center w-full" dir="ltr">
+              <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center gap-3 px-4" dir="ltr">
                 <button
                   ref={toggleBtn1Ref}
                   onClick={() => handleFilterClick(FILTER_ADVENTURE)}
                   className={cn(
-                    "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
+                    "flex-1 min-w-0 uppercase tracking-[0.08em] sm:tracking-[0.12em] text-[11px] transition-all duration-300 pb-2",
                     activeFilter === FILTER_ADVENTURE
                       ? "font-medium text-mobile-active"
                       : "font-light text-mobile-inactive hover:text-mobile-active/70"
                   )}
                 >
-                  <span className="inline-flex items-center gap-1.5">
-                    <Compass size={13} strokeWidth={1.5} />
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                    <Compass size={12} strokeWidth={1.5} />
                     {isRTL ? "הרפתקה" : "Feel adventurous"}
                   </span>
                 </button>
@@ -310,14 +310,14 @@ const LaunchIndex = () => {
                   ref={toggleBtn2Ref}
                   onClick={() => handleFilterClick(FILTER_ROMANTIC)}
                   className={cn(
-                    "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
+                    "flex-1 min-w-0 uppercase tracking-[0.08em] sm:tracking-[0.12em] text-[11px] transition-all duration-300 pb-2",
                     activeFilter === FILTER_ROMANTIC
                       ? "font-medium text-mobile-active"
                       : "font-light text-mobile-inactive hover:text-mobile-active/70"
                   )}
                 >
-                  <span className="inline-flex items-center gap-1.5">
-                    <Heart size={13} strokeWidth={1.5} />
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                    <Heart size={12} strokeWidth={1.5} />
                     {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
                   </span>
                 </button>
@@ -327,6 +327,9 @@ const LaunchIndex = () => {
                 />
               </div>
             </div>
+
+            {/* Keep document flow when tabs become fixed (prevents overlap with cards) */}
+            {tabsSticky && <div className="h-[46px] md:hidden" aria-hidden="true" />}
           </div>
 
           {isLoadingExp ?
