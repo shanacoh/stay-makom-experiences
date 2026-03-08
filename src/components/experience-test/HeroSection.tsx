@@ -279,6 +279,14 @@ const HeroSection = ({
               {lang === 'he' ? 'מתארחים ב' : 'Hosted at'}
             </p>
             <p className="text-sm font-medium text-foreground">{hotelName}</p>
+            <LocationPopover
+              city={city}
+              region={region}
+              hotelName={hotelName}
+              latitude={latitude}
+              longitude={longitude}
+              lang={lang}
+            />
           </div>
         </div>
       )}
