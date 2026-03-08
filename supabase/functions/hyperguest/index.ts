@@ -199,7 +199,7 @@ function ensureDateString(dateVal: unknown): string {
 
 // ✅ #5a: Create booking with 300s timeout + booking list fallback
 async function createBooking(bookingData: BookingData) {
-  const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
+  const isProduction = getEnvMode() === 'production';
 
   const safeLeadGuest = { ...bookingData.leadGuest, birthDate: ensureDateString(bookingData.leadGuest.birthDate) };
   const safeRooms = bookingData.rooms.map(room => ({
