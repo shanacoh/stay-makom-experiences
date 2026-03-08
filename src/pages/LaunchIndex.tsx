@@ -53,7 +53,9 @@ const LaunchIndex = () => {
   // Toggle underline refs
   const toggleBtn1Ref = useRef<HTMLButtonElement>(null);
   const toggleBtn2Ref = useRef<HTMLButtonElement>(null);
+  const toggleBarRef = useRef<HTMLDivElement>(null);
   const [toggleUnderline, setToggleUnderline] = useState({ left: 0, width: 0 });
+  const [tabsSticky, setTabsSticky] = useState(false);
 
   useEffect(() => {
     // Small timeout to allow text/fonts to render at correct size after language change
@@ -66,6 +68,18 @@ const LaunchIndex = () => {
     }, 50);
     return () => clearTimeout(timeout);
   }, [activeFilter, lang]);
+
+  // Sticky tabs observer: stick when tabs scroll past the mobile header (~44px)
+  useEffect(() => {
+    const el = toggleBarRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setTabsSticky(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "-44px 0px 0px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Waitlist popup state
   const [waitlistOpen, setWaitlistOpen] = useState(false);
