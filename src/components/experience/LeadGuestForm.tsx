@@ -290,9 +290,19 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="MR">Mr</SelectItem>
-              <SelectItem value="MS">Ms</SelectItem>
-              <SelectItem value="MRS">Mrs</SelectItem>
+              {lang === "he" ? (
+                <>
+                  <SelectItem value="MR">מר</SelectItem>
+                  <SelectItem value="MS">גב׳</SelectItem>
+                  <SelectItem value="MRS">גב׳</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="MR">Mr</SelectItem>
+                  <SelectItem value="MS">Ms</SelectItem>
+                  <SelectItem value="MRS">Mrs</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
         </div>

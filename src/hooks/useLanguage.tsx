@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export type Language = "en" | "he" | "fr";
 
@@ -6,6 +7,20 @@ export const useLanguage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const lang: Language = (searchParams.get("lang") as Language) || "en";
+  
+  // Set html dir and lang attributes based on language
+  useEffect(() => {
+    const html = document.documentElement;
+    if (lang === "he") {
+      html.setAttribute("dir", "rtl");
+      html.setAttribute("lang", "he");
+      document.body.style.direction = "rtl";
+    } else {
+      html.setAttribute("dir", "ltr");
+      html.setAttribute("lang", lang === "fr" ? "fr" : "en");
+      document.body.style.direction = "ltr";
+    }
+  }, [lang]);
   
   const setLanguage = (newLang: Language) => {
     setSearchParams((prev) => {
