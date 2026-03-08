@@ -34,7 +34,7 @@ const MobileStickyHeader = () => {
         >
           STAYMAKOM
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5">
           <button
             onClick={() => setLanguage("en")}
             className={`text-[11px] transition-colors ${
