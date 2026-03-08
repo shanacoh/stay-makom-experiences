@@ -1,4 +1,4 @@
-import { Heart, Calendar, Gift, User, Sparkles } from "lucide-react";
+import { Heart, Calendar, Gift, User, Sparkles, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -14,6 +14,7 @@ const getCopy = (lang: string) => {
       bookings: "הזמנות",
       giftCards: "כרטיסי מתנה",
       myAccount: "החשבון שלי",
+      savedCarts: "שמור להמשך",
     };
   }
   return {
@@ -21,6 +22,7 @@ const getCopy = (lang: string) => {
     bookings: "My Bookings",
     giftCards: "Gift Cards",
     myAccount: "My Account",
+    savedCarts: "Saved for Later",
   };
 };
 
@@ -31,6 +33,7 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
   const navItems = [
     { id: "bookings", icon: Calendar, label: copy.bookings },
     { id: "wishlist", icon: Heart, label: copy.wishlist },
+    { id: "savedcarts", icon: Bookmark, label: copy.savedCarts },
     { id: "giftcards", icon: Gift, label: copy.giftCards },
     { id: "profile", icon: User, label: copy.myAccount },
   ];
