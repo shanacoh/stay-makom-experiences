@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
-export function useParallax(speed: number = 0.4) {
-  const ref = useRef<HTMLDivElement>(null);
+export function useParallax<T extends HTMLElement = HTMLDivElement>(speed: number = 0.4) {
+  const ref = useRef<T>(null);
 
   useEffect(() => {
     // Respect reduced motion preference
