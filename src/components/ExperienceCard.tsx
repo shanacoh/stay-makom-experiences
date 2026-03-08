@@ -60,6 +60,7 @@ interface ExperienceCardProps {
   onWishlistToggle?: (experienceId: string, isAdding: boolean) => void;
   userId?: string | null;
   linkPrefix?: string;
+  linkSuffix?: string;
 }
 
 export default function ExperienceCard({
