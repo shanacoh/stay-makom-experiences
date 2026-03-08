@@ -426,7 +426,7 @@ const LaunchIndex = () => {
             </div>
 
             <div className="max-w-sm sm:max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6 sm:mb-10">
-              <p className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
+              <p className="text-muted-foreground whitespace-nowrap" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6 }}>
                 {isRTL ? "היו הראשונים." : "Be the first in."}
               </p>
 
