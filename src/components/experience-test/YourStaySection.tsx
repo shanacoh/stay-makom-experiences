@@ -128,6 +128,7 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
                   latitude={hotel.latitude}
                   longitude={hotel.longitude}
                   lang={lang}
+                  variant="light"
                 />
               </div>
               <Link to={`/hotel2/${hotel.slug}`}>
