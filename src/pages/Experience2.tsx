@@ -266,6 +266,8 @@ export default function Experience2() {
       check_out_time: hotel.check_out_time || undefined,
       number_of_rooms: hotel.number_of_rooms ?? undefined,
       property_type: hotel.property_type || undefined,
+      latitude: hotel.latitude ?? undefined,
+      longitude: hotel.longitude ?? undefined,
     };
   };
 
