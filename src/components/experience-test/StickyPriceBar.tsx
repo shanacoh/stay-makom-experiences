@@ -48,21 +48,24 @@ const StickyPriceBar = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  const fallbackPrice = useMemo(() => {
-    if (!addons || addons.length === 0) return null;
+  // Calculate addon total (experience extras on top of room)
+  const addonTotal = useMemo(() => {
+    if (!addons || addons.length === 0) return 0;
     const pricingAddons = addons.filter(
       (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
     );
-    if (pricingAddons.length === 0) return null;
     return pricingAddons.reduce((sum, a) => sum + a.value, 0);
   }, [addons]);
 
+  // Total price = room + addons + selected extras
   const displayPrice = useMemo(() => {
-    const hgPrice = cheapestDate?.cheapestPrice;
-    const base = hgPrice ?? fallbackPrice;
-    if (base && base > 0) return Math.round(base + selectedExtrasTotal);
+    const roomPrice = cheapestDate?.cheapestPrice;
+    if (roomPrice != null && roomPrice > 0) {
+      return Math.round(roomPrice + addonTotal + selectedExtrasTotal);
+    }
+    if (addonTotal > 0) return Math.round(addonTotal + selectedExtrasTotal);
     return null;
-  }, [cheapestDate, fallbackPrice, selectedExtrasTotal]);
+  }, [cheapestDate, addonTotal, selectedExtrasTotal]);
 
   useEffect(() => {
     const handleScroll = () => {
