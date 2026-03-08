@@ -95,9 +95,8 @@ export default function ExperienceCard({
   // Get highlight tags
   const highlightTags = experience.experience_highlight_tags?.map(eht => eht.highlight_tags) || [];
 
-  // Always show USD
-  const currencySymbol = '$';
-
+  // Currency symbol from context
+  const displaySymbol = currencySymbol;
   // Limit tags on mobile
   const maxTags = isMobile ? 2 : 4;
 
