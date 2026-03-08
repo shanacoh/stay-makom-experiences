@@ -108,7 +108,8 @@ const LaunchIndex = () => {
             highlight_tags(
               id, slug, label_en, label_he
             )
-          )
+          ),
+          experience2_addons(type, value, is_active)
         `).
       eq("status", "published").
       order("created_at", { ascending: false });
