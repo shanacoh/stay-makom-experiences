@@ -26,6 +26,8 @@ const StickyPriceBar = ({
   footerRef,
   hyperguestPropertyId,
   selectedExtrasTotal = 0,
+  minParty = 2,
+  minNights = 1,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
 
