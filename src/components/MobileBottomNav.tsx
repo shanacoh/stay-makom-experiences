@@ -17,8 +17,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Compass, labelEn: "Explore", labelHe: "גלה", path: "/launch" },
-  { icon: Heart, labelEn: "Saved", labelHe: "שמור", path: "/account?tab=wishlist", requiresAuth: true, authContext: "favorites" },
-  { icon: CalendarDays, labelEn: "Bookings", labelHe: "הזמנות", path: "/account?tab=my-staymakom", requiresAuth: true, authContext: "account" },
+  { icon: Heart, labelEn: "Saved", labelHe: "שמור", path: "/account?tab=wishlist", requiresAuth: true, authContext: "wishlist" },
+  { icon: CalendarDays, labelEn: "Bookings", labelHe: "הזמנות", path: "/account?tab=my-staymakom", requiresAuth: true, authContext: "bookings" },
   { icon: User, labelEn: "My Account", labelHe: "החשבון שלי", path: "/account", requiresAuth: true, authContext: "account" },
 ];
 
