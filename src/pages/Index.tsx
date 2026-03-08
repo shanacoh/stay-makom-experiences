@@ -184,12 +184,18 @@ const Index = () => {
     queryKey: ["latest-experiences"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select(`
-          *, 
-          hotels(name, name_he, city, city_he, region, region_he, hero_image),
-          experience_highlight_tags (
-            highlight_tags (
+          *,
+          experience2_hotels(
+            position,
+            nights,
+            hotel:hotels2(
+              id, name, name_he, city, city_he, region, region_he, hero_image
+            )
+          ),
+          experience2_highlight_tags(
+            highlight_tags(
               id,
               slug,
               label_en,
@@ -201,7 +207,17 @@ const Index = () => {
         .order("created_at", { ascending: false })
         .limit(4);
       if (error) throw error;
-      return data;
+      // Map to ExperienceCard-compatible shape
+      return (data || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return {
+          ...exp,
+          hotels: primaryHotel || null,
+          experience_highlight_tags: exp.experience2_highlight_tags || [],
+        };
+      });
     }
   });
 
@@ -209,13 +225,18 @@ const Index = () => {
     queryKey: ["all-experiences"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select(`
-          *, 
-          hotels(name, name_he, city, city_he, region, region_he, hero_image), 
-          experience_reviews(rating),
-          experience_highlight_tags (
-            highlight_tags (
+          *,
+          experience2_hotels(
+            position,
+            nights,
+            hotel:hotels2(
+              id, name, name_he, city, city_he, region, region_he, hero_image
+            )
+          ),
+          experience2_highlight_tags(
+            highlight_tags(
               id,
               slug,
               label_en,
@@ -225,7 +246,16 @@ const Index = () => {
         `)
         .eq("status", "published");
       if (error) throw error;
-      return data;
+      return (data || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return {
+          ...exp,
+          hotels: primaryHotel || null,
+          experience_highlight_tags: exp.experience2_highlight_tags || [],
+        };
+      });
     }
   });
 
