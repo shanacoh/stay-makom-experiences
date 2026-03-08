@@ -35,6 +35,7 @@ const Header = () => {
 
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const hasCart = useCartExists();
   const { lang, setLanguage } = useLanguage();
   const { setDisplayCurrency } = useCurrency();
   const handleLang = (l: "en" | "he") => {
