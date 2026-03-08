@@ -21,10 +21,21 @@ const LocationPopover = ({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Close on click outside
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   const locationText = [city, region].filter(Boolean).join(", ");
   if (!locationText) return null;
 
-  // Build URLs
   const hasCoords = typeof latitude === "number" && typeof longitude === "number";
   const query = encodeURIComponent([hotelName, city].filter(Boolean).join(" "));
 
@@ -39,18 +50,6 @@ const LocationPopover = ({
   const appleUrl = hasCoords
     ? `https://maps.apple.com/?ll=${latitude},${longitude}`
     : `https://maps.apple.com/?q=${query}`;
-
-  // Close on click outside
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
 
   const options = [
     { icon: "🗺", label: lang === "he" ? "פתח ב-Google Maps" : "Open in Google Maps", url: googleUrl },
