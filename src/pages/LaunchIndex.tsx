@@ -278,7 +278,7 @@ const LaunchIndex = () => {
               className={cn(
                 "transition-all duration-300 md:relative md:bg-transparent md:shadow-none md:py-0 md:border-none",
                 tabsSticky
-                  ? "fixed top-[44px] left-0 right-0 z-40 bg-background/95 backdrop-blur-[12px] py-2.5 border-b border-foreground/8 shadow-sm md:hidden"
+                  ? "fixed top-[44px] left-0 right-0 z-40 bg-mobile-header py-2.5 border-b border-mobile-border shadow-sm md:hidden"
                   : ""
               )}
             >
@@ -289,8 +289,8 @@ const LaunchIndex = () => {
                   className={cn(
                     "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
                     activeFilter === FILTER_ADVENTURE
-                      ? "font-medium text-foreground"
-                      : "font-light text-foreground/40 hover:text-foreground/70"
+                      ? "font-medium text-mobile-active"
+                      : "font-light text-mobile-inactive hover:text-mobile-active/70"
                   )}
                 >
                   <span className="inline-flex items-center gap-1.5">
@@ -298,15 +298,15 @@ const LaunchIndex = () => {
                     {isRTL ? "הרפתקה" : "Feel adventurous"}
                   </span>
                 </button>
-                <div className="w-px h-4 bg-foreground/20" />
+                <div className="w-px h-4 bg-mobile-border" />
                 <button
                   ref={toggleBtn2Ref}
                   onClick={() => handleFilterClick(FILTER_ROMANTIC)}
                   className={cn(
                     "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
                     activeFilter === FILTER_ROMANTIC
-                      ? "font-medium text-foreground"
-                      : "font-light text-foreground/40 hover:text-foreground/70"
+                      ? "font-medium text-mobile-active"
+                      : "font-light text-mobile-inactive hover:text-mobile-active/70"
                   )}
                 >
                   <span className="inline-flex items-center gap-1.5">
@@ -315,7 +315,7 @@ const LaunchIndex = () => {
                   </span>
                 </button>
                 <div
-                  className="absolute bottom-0 h-px bg-foreground transition-all duration-300 ease-in-out"
+                  className="absolute bottom-0 h-px bg-mobile-active transition-all duration-300 ease-in-out"
                   style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
                 />
               </div>

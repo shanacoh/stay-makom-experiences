@@ -10,13 +10,13 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 40 33% 93%;
+    --background: 36 40% 93%;
     --foreground: 23 10% 15%;
 
-    --card: 40 33% 96%;
+    --card: 0 0% 100%;
     --card-foreground: 23 10% 15%;
 
-    --popover: 40 33% 93%;
+    --popover: 37 40% 96%;
     --popover-foreground: 23 10% 15%;
 
     --primary: 207 62% 15%;
@@ -38,6 +38,13 @@ All colors MUST be HSL.
     --cta-foreground: 0 0% 100%;
     --cta-border: 15 40% 42%;
     --cta-shadow: 15 45% 35%;
+
+    /* Mobile warm system */
+    --mobile-header: 37 40% 96%;
+    --mobile-border: 34 33% 86%;
+    --mobile-logo: 16 47% 12%;
+    --mobile-active: 16 52% 36%;
+    --mobile-inactive: 30 15% 65%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 40 33% 93%;
@@ -62,7 +69,7 @@ All colors MUST be HSL.
 
     /* Custom tokens */
     --gradient-primary: linear-gradient(135deg, hsl(207 62% 15%), hsl(208 61% 20%));
-    --gradient-warm: linear-gradient(180deg, hsl(40 33% 93%), hsl(36 38% 78%));
+    --gradient-warm: linear-gradient(180deg, hsl(36 40% 93%), hsl(36 38% 78%));
     --gradient-hero: linear-gradient(135deg, hsl(207 62% 15%) 0%, hsl(208 61% 20%) 50%, hsl(29 48% 55%) 100%);
     --shadow-soft: 0 2px 8px -2px hsl(23 10% 15% / 0.06);
     --shadow-medium: 0 4px 16px -4px hsl(23 10% 15% / 0.08);

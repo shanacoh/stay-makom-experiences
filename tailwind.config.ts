@@ -72,6 +72,11 @@ export default {
         },
         logo: "hsl(var(--logo))",
         "hebrew-input": "hsl(var(--input-hebrew-bg))",
+        "mobile-header": "hsl(var(--mobile-header))",
+        "mobile-border": "hsl(var(--mobile-border))",
+        "mobile-logo": "hsl(var(--mobile-logo))",
+        "mobile-active": "hsl(var(--mobile-active))",
+        "mobile-inactive": "hsl(var(--mobile-inactive))",
       },
       borderRadius: {
         lg: "var(--radius)",
