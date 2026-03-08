@@ -77,13 +77,13 @@ const LaunchIndex = () => {
     return () => clearTimeout(timeout);
   }, [tabsSticky]);
 
-  // Sticky tabs observer: stick when tabs scroll past the mobile header (~44px)
+  // Sticky tabs observer: stick when sentinel scrolls past the mobile header
   useEffect(() => {
     const el = toggleBarRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setTabsSticky(!entry.isIntersecting),
-      { threshold: 0, rootMargin: "-36px 0px 0px 0px" }
+      { threshold: 0, rootMargin: `-${MOBILE_HEADER_HEIGHT}px 0px 0px 0px` }
     );
     observer.observe(el);
     return () => observer.disconnect();
