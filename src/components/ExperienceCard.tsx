@@ -215,112 +215,118 @@ export default function ExperienceCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Photo section */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-1">
-          {/* Image with zoom on hover - fallback to hotel hero_image if no experience image */}
+        {/* Photo section with title overlay */}
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-2">
           <img
             src={(experience as any).thumbnail_image || experience.hero_image || experience.photos?.[0] || experience.hotels?.hero_image || '/placeholder.svg'}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           
-          {/* Bottom gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+          {/* Gradient overlay for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           
-          {/* Optional badge - top left */}
+          {/* Badge - top left */}
           {badge && (
-            <div className="absolute top-1.5 left-1.5">
-              <span className="inline-block px-1.5 py-0.5 bg-black rounded text-white text-[9px] font-semibold uppercase tracking-wide">
+            <div className="absolute top-2.5 left-2.5">
+              <span className="inline-block px-2 py-0.5 bg-white/95 backdrop-blur-sm rounded text-foreground text-[10px] font-semibold uppercase tracking-wider">
                 {badge === "NEW" ? t(lang, 'badgeNew') : badge === "ON SALE" ? t(lang, 'badgeOnSale') : badge === "POPULAR" ? t(lang, 'badgePopular') : badge}
               </span>
             </div>
           )}
           
-          {/* Heart button - top right (appears on hover) */}
+          {/* Heart button - top right */}
           <button
             onClick={handleHeartClick}
             disabled={wishlistMutation.isPending}
             className={cn(
-              "absolute top-2 right-2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm transition-all duration-300 hover:bg-white",
-              isHovered || isInWishlist ? 'opacity-100' : 'opacity-0'
+              "absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/40",
+              isHovered || isInWishlist ? 'opacity-100' : 'opacity-0 sm:opacity-0',
+              'opacity-100 sm:opacity-0'
             )}
             aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart
               className={cn(
                 "h-5 w-5 transition-all",
-                isInWishlist ? 'fill-red-500 text-red-500' : 'text-foreground',
+                isInWishlist ? 'fill-destructive text-destructive' : 'text-white',
                 animateHeart && 'animate-heart-pop'
               )}
             />
             <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
           </button>
+
+          {/* Title on image - bottom left */}
+          <div className="absolute bottom-3 left-3 right-3">
+            <h3 className="font-serif text-base sm:text-lg md:text-xl font-bold text-white leading-tight line-clamp-2 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+              {title}
+            </h3>
+          </div>
         </div>
 
-        {/* Content under image */}
-        <div className="space-y-0.5 pt-1.5">
-          {/* Title */}
-          <h3 className="font-sans text-sm sm:text-base font-bold text-foreground leading-tight line-clamp-2">
-            {title}
-          </h3>
+        {/* Metadata below image */}
+        <div className="space-y-1 px-0.5">
+          {/* Row: City | Region + Rating */}
+          <div className="flex items-center justify-between">
+            {hotelName ? (
+              <p className="text-[11px] sm:text-xs text-muted-foreground tracking-wide truncate">
+                {experience.hotels?.city ? (getLocalizedField(experience.hotels, 'city', lang) as string) : ''}{region ? ` | ${region}` : ''}
+              </p>
+            ) : <span />}
+            {rating && (
+              <div className="flex items-center gap-0.5 shrink-0">
+                <span className="text-foreground text-[11px]">★</span>
+                <span className="font-semibold text-[11px] text-foreground">{rating.toFixed(1)}</span>
+                {reviewCount != null && reviewCount > 0 && (
+                  <span className="text-muted-foreground text-[10px]">({reviewCount})</span>
+                )}
+              </div>
+            )}
+          </div>
 
-          {/* Hotel + Region */}
+          {/* Hotel name */}
           {hotelName && (
-            <p className="text-xs sm:text-sm text-muted-foreground leading-snug line-clamp-1">
-              {hotelName}{region ? ` · ${region}` : ''}
+            <p className="text-xs sm:text-sm font-semibold text-foreground leading-snug line-clamp-1">
+              {hotelName}
             </p>
           )}
 
-          {/* Rating */}
-          {rating && (
-            <div className="flex items-center gap-1">
-              <span className="text-yellow-500 text-xs">★</span>
-              <span className="font-semibold text-xs">{rating.toFixed(1)}</span>
-              {reviewCount && (
-                <span className="text-muted-foreground text-[10px]">({reviewCount})</span>
-              )}
-            </div>
-          )}
-
-          {/* Tags */}
+          {/* Tags - single line, thinner */}
           {highlightTags.length > 0 && (
-            <div className="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1 overflow-hidden pt-0.5">
+            <div className="flex flex-nowrap gap-1 overflow-hidden">
               {highlightTags.slice(0, maxTags).map((tag) => (
                 <span
                   key={tag.id}
-                  className="inline-block whitespace-nowrap px-1.5 md:px-2 py-0.5 bg-muted rounded-full text-[9px] md:text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                  className="inline-block whitespace-nowrap px-1.5 py-px bg-muted/60 rounded-full text-[9px] font-normal tracking-wide text-muted-foreground border border-border/40"
                 >
                   {lang === 'he' && tag.label_he ? tag.label_he : tag.label_en}
                 </span>
               ))}
               {highlightTags.length > maxTags && (
-                <span className="inline-block whitespace-nowrap px-1 py-0.5 text-[9px] md:text-[10px] text-muted-foreground">
+                <span className="inline-block whitespace-nowrap px-1 py-px text-[9px] text-muted-foreground">
                   +{highlightTags.length - maxTags}
                 </span>
               )}
             </div>
           )}
 
-          {/* Price */}
+          {/* Price row */}
           {displayPrice > 0 && (
-            <div className="flex items-baseline gap-1 pt-1">
-              <span className="text-xs text-muted-foreground">
-                {lang === 'he' ? 'החל מ-' : 'From'}
-              </span>
-              <span className="font-bold text-sm sm:text-base">
+            <div className="flex items-baseline gap-1 pt-0.5">
+              <span className="font-bold text-sm sm:text-base text-foreground">
                 {currencySymbol}{displayPrice}
               </span>
-              <span className="text-[10px] text-muted-foreground">
-                / {lang === 'he' ? 'לילה' : 'night'}
-              </span>
               {originalPrice && originalPrice > displayPrice && (
-                <span className="text-[10px] text-muted-foreground line-through ml-0.5">
+                <span className="text-[11px] text-muted-foreground line-through">
                   {currencySymbol}{originalPrice}
                 </span>
               )}
+              <span className="text-[10px] text-muted-foreground">
+                / {lang === 'he' ? 'לילה' : 'night'}
+              </span>
               {discountPercent && (
-                <span className="inline-block px-1 py-0.5 bg-black text-white text-[9px] font-semibold rounded ml-0.5">
-                  -{discountPercent}%
+                <span className="inline-block ml-1 px-1.5 py-px bg-accent text-accent-foreground text-[9px] font-medium rounded">
+                  -{discountPercent} %
                 </span>
               )}
             </div>
