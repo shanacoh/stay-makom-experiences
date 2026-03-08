@@ -1,11 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Loader2, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import ExperienceCard from "@/components/ExperienceCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WishlistSectionProps {
   userId?: string;
@@ -14,13 +13,12 @@ interface WishlistSectionProps {
 export default function WishlistSection({ userId }: WishlistSectionProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: wishlist, isLoading } = useQuery({
     queryKey: ["wishlist", userId],
     queryFn: async () => {
       if (!userId) return [];
-
-      // Fetch wishlist entries
       const { data: wishlistData, error } = await supabase
         .from("wishlist")
         .select("id, experience_id, created_at")
@@ -31,7 +29,6 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
       if (error) throw error;
       if (!wishlistData || wishlistData.length === 0) return [];
 
-      // Fetch V2 experiences
       const expIds = wishlistData.map((w) => w.experience_id).filter(Boolean);
       if (expIds.length === 0) return [];
 
@@ -47,7 +44,6 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
         .in("id", expIds)
         .eq("status", "published");
 
-      // Map to card-compatible shape
       const mapped = (experiences || []).map((exp: any) => {
         const primaryHotel = exp.experience2_hotels
           ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
@@ -81,8 +77,11 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
     },
   });
 
-  const handleRemove = (wishlistId: string) => {
-    removeMutation.mutate(wishlistId);
+  const handleWishlistRemove = (experienceId: string) => {
+    const wishlistItem = wishlist?.find((item) => item.experience?.id === experienceId);
+    if (wishlistItem) {
+      removeMutation.mutate(wishlistItem.id);
+    }
   };
 
   if (isLoading) {
@@ -93,35 +92,39 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
     );
   }
 
+  // === Empty State ===
   if (!wishlist || wishlist.length === 0) {
+    if (isMobile) {
+      return (
+        <div className="flex flex-col items-center justify-center pt-24 text-center px-6">
+          <Heart className="h-10 w-10 text-muted-foreground/40 mb-4" />
+          <p className="text-[15px] text-foreground mb-1">Nothing saved yet.</p>
+          <button
+            onClick={() => navigate("/launch")}
+            className="text-sm text-muted-foreground underline underline-offset-2"
+          >
+            Start exploring →
+          </button>
+        </div>
+      );
+    }
+
     return (
-      <Card className="border-dashed">
-        <CardContent className="py-16">
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2">
-              <Heart className="h-10 w-10 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-serif text-xl mb-2">Your wishlist is empty</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto">
-                Explore our curated experiences and save your favorites to plan your next extraordinary getaway.
-              </p>
-            </div>
-            <Button onClick={() => navigate("/")} variant="cta" className="mt-2">
-              Discover Experiences
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-16">
+        <Heart className="h-10 w-10 text-muted-foreground/40 mx-auto mb-4" />
+        <h3 className="font-serif text-xl mb-2">Your wishlist is empty</h3>
+        <p className="text-muted-foreground max-w-sm mx-auto mb-4">
+          Explore our curated experiences and save your favorites to plan your next extraordinary getaway.
+        </p>
+        <button
+          onClick={() => navigate("/launch")}
+          className="text-sm text-muted-foreground underline underline-offset-2"
+        >
+          Discover experiences →
+        </button>
+      </div>
     );
   }
-
-  const handleWishlistRemove = (experienceId: string) => {
-    const wishlistItem = wishlist?.find((item) => item.experience?.id === experienceId);
-    if (wishlistItem) {
-      removeMutation.mutate(wishlistItem.id);
-    }
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

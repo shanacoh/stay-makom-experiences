@@ -5,8 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Calendar, User, Gift, Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft } from "lucide-react";
 import WishlistSection from "@/components/account/WishlistSection";
 import MyStaymakomSection from "@/components/account/MyStaymakomSection";
 import MyAccountSection from "@/components/account/MyAccountSection";
@@ -17,29 +16,36 @@ import PersonalizedRequestSection from "@/components/account/PersonalizedRequest
 import GiftCardsSection from "@/components/account/GiftCardsSection";
 import AccountSidebar from "@/components/account/AccountSidebar";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
+import MobileAccountHome from "@/components/account/MobileAccountHome";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const MOBILE_TAB_TITLES: Record<string, string> = {
+  bookings: "My Bookings",
+  wishlist: "Saved Escapes",
+  giftcards: "Gift Cards",
+  profile: "Personal Information",
+};
 
 const Account = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
+  const isMobile = useIsMobile();
   
   const [activeTab, setActiveTab] = useState(tabFromUrl || "bookings");
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Sync tab with URL query param
   useEffect(() => {
     if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
 
-  // Scroll to top when tab changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [activeTab]);
 
-  // Check if onboarding is needed and get user profile
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile-onboarding", user?.id],
     queryFn: async () => {
@@ -54,14 +60,12 @@ const Account = () => {
     enabled: !!user?.id,
   });
 
-  // Show onboarding if not completed and user just signed up
   useEffect(() => {
     if (profile && !profile.onboarding_completed_at && !profile.display_name) {
       setShowOnboarding(true);
     }
   }, [profile]);
 
-  // Redirect to auth if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
@@ -76,25 +80,76 @@ const Account = () => {
     );
   }
 
-  if (!user) {
-    return null;
+  if (!user) return null;
+
+  // === MOBILE LAYOUT ===
+  if (isMobile) {
+    // No tab param = show profile hub
+    if (!tabFromUrl) {
+      return (
+        <>
+          <MobileAccountHome />
+          {user && (
+            <OnboardingFlow
+              open={showOnboarding}
+              onComplete={() => setShowOnboarding(false)}
+              userId={user.id}
+            />
+          )}
+        </>
+      );
+    }
+
+    // Tab param = show that section full-screen
+    const pageTitle = MOBILE_TAB_TITLES[tabFromUrl] || "Account";
+
+    return (
+      <div className="min-h-screen pb-24">
+        {/* Mobile sub-page header */}
+        <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-border/50 md:hidden">
+          <div className="flex items-center h-14 px-2">
+            <button
+              onClick={() => navigate("/account")}
+              className="flex items-center justify-center w-11 h-11"
+              aria-label="Back"
+            >
+              <ChevronLeft className="h-5 w-5 text-foreground" />
+            </button>
+            <h1 className="absolute left-1/2 -translate-x-1/2 text-[15px] font-semibold text-foreground">
+              {pageTitle}
+            </h1>
+          </div>
+        </div>
+
+        <div className="pt-16 px-4">
+          {tabFromUrl === "bookings" && <MyStaymakomSection userId={user.id} />}
+          {tabFromUrl === "wishlist" && <WishlistSection userId={user.id} />}
+          {tabFromUrl === "giftcards" && (
+            <GiftCardsSection userId={user.id} userEmail={user.email} />
+          )}
+          {tabFromUrl === "profile" && (
+            <MyAccountSection userId={user.id} userEmail={user.email} mobile />
+          )}
+        </div>
+      </div>
+    );
   }
 
-  // Render the active section content
+  // === DESKTOP LAYOUT (unchanged) ===
   const renderContent = () => {
     switch (activeTab) {
       case "wishlist":
         return (
           <>
             <WishlistSection userId={user.id} />
-            <RecommendedExperiences 
-              userId={user.id} 
+            <RecommendedExperiences
+              userId={user.id}
               title="You might also like"
               subtitle="Based on your favorites and interests"
               compact
               limit={4}
             />
-            <PersonalizedRequestSection 
+            <PersonalizedRequestSection
               userName={profile?.display_name || undefined}
               userEmail={user.email}
             />
@@ -104,14 +159,14 @@ const Account = () => {
         return (
           <>
             <MyStaymakomSection userId={user.id} />
-            <RecommendedExperiences 
-              userId={user.id} 
+            <RecommendedExperiences
+              userId={user.id}
               title="Your next adventure awaits"
               subtitle="Discover more extraordinary experiences"
               compact
               limit={4}
             />
-            <PersonalizedRequestSection 
+            <PersonalizedRequestSection
               userName={profile?.display_name || undefined}
               userEmail={user.email}
             />
@@ -121,7 +176,7 @@ const Account = () => {
         return (
           <>
             <GiftCardsSection userId={user.id} userEmail={user.email} />
-            <PersonalizedRequestSection 
+            <PersonalizedRequestSection
               userName={profile?.display_name || undefined}
               userEmail={user.email}
             />
@@ -131,7 +186,7 @@ const Account = () => {
         return (
           <>
             <MyAccountSection userId={user.id} userEmail={user.email} />
-            <PersonalizedRequestSection 
+            <PersonalizedRequestSection
               userName={profile?.display_name || undefined}
               userEmail={user.email}
             />
@@ -146,67 +201,16 @@ const Account = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
       <main className="flex-1 container pt-24 pb-16">
-        {/* Account Header with Welcome & Points */}
         <AccountHeader userId={user.id} userEmail={user.email} />
-
-        {/* Desktop/Tablet Layout with Sidebar */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar - visible on tablet and desktop */}
           <aside className="hidden md:block w-64 flex-shrink-0">
-            <AccountSidebar 
-              activeTab={activeTab} 
-              onTabChange={setActiveTab} 
-            />
+            <AccountSidebar activeTab={activeTab} onTabChange={setActiveTab} />
           </aside>
-
-          {/* Mobile Tabs - visible on mobile only */}
-          <div className="md:hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-6 p-1 bg-muted/60 rounded-full h-12">
-                <TabsTrigger 
-                  value="bookings" 
-                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <Calendar className="h-4 w-4" />
-                  <span className="hidden sm:inline">Bookings</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="wishlist" 
-                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span className="hidden sm:inline">Wishlist</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="giftcards" 
-                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <Gift className="h-4 w-4" />
-                  <span className="hidden sm:inline">Gift Cards</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="profile" 
-                  className="flex items-center gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-                >
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">Account</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            {renderContent()}
-          </div>
+          <div className="flex-1 min-w-0">{renderContent()}</div>
         </div>
       </main>
-
       <Footer />
-
-      {/* Onboarding Flow for new users */}
       {user && (
         <OnboardingFlow
           open={showOnboarding}
