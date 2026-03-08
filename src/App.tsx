@@ -86,9 +86,9 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <Routes>
-            {/* Page principale */}
-            <Route path="/" element={<Index />} />
-            <Route path="/coming-soon" element={<ComingSoon />} />
+            {/* Coming Soon en page d'accueil (temporaire) */}
+            <Route path="/" element={<ComingSoon />} />
+            <Route path="/home" element={<Index />} />
             <Route path="/launch" element={<LaunchIndex />} />
             <Route path="/launch/experiences" element={<LaunchExperiences />} />
             <Route path="/auth" element={<Auth />} />
