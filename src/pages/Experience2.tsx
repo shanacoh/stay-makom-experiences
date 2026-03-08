@@ -533,13 +533,12 @@ export default function Experience2() {
 
         {/* Mobile Sticky Price Bar — sits above bottom nav */}
         <StickyPriceBar
-          basePrice={experience.base_price}
-          basePriceType={experience.base_price_type || "per_person"}
+          experienceId={experience.id}
           currency={experience.currency || "ILS"}
           lang={lang as "en" | "he" | "fr"}
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
-          hasHyperguest={!!hyperguestPropertyId}
+          hyperguestPropertyId={hyperguestPropertyId || null}
           selectedExtrasTotal={selectedExtras.reduce((sum, e) => sum + e.price, 0)}
         />
 

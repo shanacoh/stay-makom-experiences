@@ -2,36 +2,67 @@ import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
+import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
+import { useExperienceAddons } from "@/hooks/useExperience2Price";
+import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
 
 interface StickyPriceBarProps {
-  basePrice: number;
-  basePriceType: string;
+  experienceId: string;
   currency: string;
-  averageRating?: number | null;
-  reviewsCount?: number;
   lang: 'en' | 'he' | 'fr';
   onViewDates: () => void;
   footerRef: React.RefObject<HTMLElement>;
-  hasHyperguest?: boolean;
+  hyperguestPropertyId?: string | null;
   selectedExtrasTotal?: number;
 }
 
 const StickyPriceBar = ({
-  basePrice,
-  basePriceType,
+  experienceId,
   currency,
   lang,
   onViewDates,
   footerRef,
-  hasHyperguest = false,
+  hyperguestPropertyId,
   selectedExtrasTotal = 0,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
 
+  // Fetch real-time HyperGuest price (same as HeroBookingPreview2)
+  const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+  const { data: quickDates } = useQuickDateAvailability({
+    propertyId: propId,
+    nights: 1,
+    adults: 2,
+    currency,
+    enabled: !!propId,
+  });
+
+  const { data: addons } = useExperienceAddons(experienceId);
+
+  const cheapestDate = useMemo(() => {
+    if (!quickDates || quickDates.length === 0) return null;
+    return quickDates.reduce((best, curr) => {
+      if (curr.cheapestPrice == null) return best;
+      if (!best || best.cheapestPrice == null || curr.cheapestPrice < best.cheapestPrice) return curr;
+      return best;
+    }, null as typeof quickDates[0] | null);
+  }, [quickDates]);
+
+  const fallbackPrice = useMemo(() => {
+    if (!addons || addons.length === 0) return null;
+    const pricingAddons = addons.filter(
+      (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
+    );
+    if (pricingAddons.length === 0) return null;
+    return pricingAddons.reduce((sum, a) => sum + a.value, 0);
+  }, [addons]);
+
   const displayPrice = useMemo(() => {
-    if (basePrice > 0) return Math.round(basePrice + selectedExtrasTotal);
+    const hgPrice = cheapestDate?.cheapestPrice;
+    const base = hgPrice ?? fallbackPrice;
+    if (base && base > 0) return Math.round(base + selectedExtrasTotal);
     return null;
-  }, [basePrice, selectedExtrasTotal]);
+  }, [cheapestDate, fallbackPrice, selectedExtrasTotal]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,7 +84,6 @@ const StickyPriceBar = ({
 
   const symbol = getCurrencySymbol(currency);
   const nightLabel = lang === 'he' ? 'ללילה' : lang === 'fr' ? '/ nuit' : '/ night';
-
   const ctaLabel = lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'VIEW DATES';
 
   return (
@@ -66,7 +96,6 @@ const StickyPriceBar = ({
     >
       <div className="px-4">
         <div className="flex items-center justify-between py-3">
-          {/* Left: Price */}
           <div>
             {displayPrice ? (
               <div className="flex items-baseline gap-1">
@@ -85,7 +114,6 @@ const StickyPriceBar = ({
             )}
           </div>
 
-          {/* Right: CTA */}
           <Button 
             onClick={onViewDates}
             className="px-5 h-10 rounded-full font-semibold text-xs tracking-wider uppercase bg-foreground text-background hover:bg-foreground/90"

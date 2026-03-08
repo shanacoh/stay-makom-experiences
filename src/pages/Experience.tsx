@@ -305,8 +305,7 @@ const Experience = () => {
 
         {/* Mobile Sticky Price Bar */}
         <StickyPriceBar
-          basePrice={experience.base_price}
-          basePriceType={experience.base_price_type || "per_person"}
+          experienceId={experience.id}
           currency={experience.currency || "USD"}
           lang={lang}
           onViewDates={() => setIsBookingSheetOpen(true)}
