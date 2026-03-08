@@ -31,17 +31,31 @@ export default function WishlistSection({ userId }: WishlistSectionProps) {
       if (error) throw error;
       if (!wishlistData || wishlistData.length === 0) return [];
 
-      // Fetch experiences separately
+      // Fetch V2 experiences
       const expIds = wishlistData.map((w) => w.experience_id).filter(Boolean);
       if (expIds.length === 0) return [];
 
       const { data: experiences } = await supabase
-        .from("experiences")
-        .select("id, slug, title, title_he, subtitle, hero_image, photos, base_price, currency, hotel_id, hotels(name, city, hero_image)")
+        .from("experiences2")
+        .select(`
+          id, slug, title, title_he, subtitle, hero_image, thumbnail_image, photos, base_price, currency,
+          experience2_hotels(
+            position,
+            hotel:hotels2(id, name, name_he, city, city_he, hero_image)
+          )
+        `)
         .in("id", expIds)
         .eq("status", "published");
 
-      const expMap = new Map((experiences || []).map((e) => [e.id, e]));
+      // Map to card-compatible shape
+      const mapped = (experiences || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return { ...exp, hotels: primaryHotel || null };
+      });
+
+      const expMap = new Map(mapped.map((e) => [e.id, e]));
 
       return wishlistData
         .map((w) => ({ ...w, experience: expMap.get(w.experience_id) || null }))

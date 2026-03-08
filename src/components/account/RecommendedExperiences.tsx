@@ -45,7 +45,7 @@ export default function RecommendedExperiences({
         const expIds = wishlistData.map((w) => w.experience_id).filter(Boolean);
         if (expIds.length > 0) {
           const { data: exps } = await supabase
-            .from("experiences")
+            .from("experiences2")
             .select("category_id")
             .in("id", expIds);
           wishlistCategoryIds = [...new Set((exps || []).map((e) => e.category_id).filter(Boolean) as string[])];
@@ -60,13 +60,19 @@ export default function RecommendedExperiences({
     enabled: !!userId,
   });
 
-  // Fetch recommended experiences
+  // Fetch recommended experiences from V2
   const { data: recommendations, isLoading } = useQuery({
     queryKey: ["recommended-experiences", userId, userPreferences, excludeIds, limit],
     queryFn: async () => {
       let query = supabase
-        .from("experiences")
-        .select("id, slug, title, title_he, subtitle, hero_image, photos, base_price, currency, category_id, hotels(name, city, hero_image)")
+        .from("experiences2")
+        .select(`
+          id, slug, title, title_he, subtitle, hero_image, thumbnail_image, photos, base_price, currency, category_id,
+          experience2_hotels(
+            position,
+            hotel:hotels2(id, name, name_he, city, city_he, hero_image)
+          )
+        `)
         .eq("status", "published")
         .limit(limit + excludeIds.length);
 
@@ -77,7 +83,14 @@ export default function RecommendedExperiences({
       const { data, error } = await query;
       if (error) throw error;
 
-      const filtered = (data || []).filter((exp) => !excludeIds.includes(exp.id));
+      const mapped = (data || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return { ...exp, hotels: primaryHotel || null };
+      });
+
+      const filtered = mapped.filter((exp) => !excludeIds.includes(exp.id));
       return filtered.slice(0, limit);
     },
     enabled: !!userId,
