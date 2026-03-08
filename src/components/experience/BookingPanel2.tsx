@@ -90,7 +90,7 @@ export function BookingPanel2({
       selectDates: "Select dates",
       noHyperguest: "This experience is not available for online booking yet.",
       error: "Error loading availability. Please try again.",
-      next: "Continue to checkout",
+      next: "Book this stay",
       onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
     },
     he: {
@@ -104,7 +104,7 @@ export function BookingPanel2({
       selectDates: "בחר תאריכים",
       noHyperguest: "חוויה זו אינה זמינה עדיין להזמנה מקוונת.",
       error: "שגיאה בטעינת הזמינות. אנא נסה שוב.",
-      next: "המשך להזמנה",
+      next: "הזמן שהייה זו",
       onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
     },
     fr: {
@@ -118,7 +118,7 @@ export function BookingPanel2({
       selectDates: "Sélectionnez des dates",
       noHyperguest: "Cette expérience n'est pas encore disponible pour la réservation en ligne.",
       error: "Erreur lors de la récupération des disponibilités. Veuillez réessayer.",
-      next: "Continuer vers le paiement",
+      next: "Réserver ce séjour",
       onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
     },
   }[lang];
