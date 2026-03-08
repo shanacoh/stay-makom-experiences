@@ -41,7 +41,7 @@ const LaunchIndex = () => {
   const { getLocalizedPath } = useLocalizedNavigation();
   const isRTL = lang === "he";
   const heroParallaxRef = useParallax(0.4);
-  const editorialParallaxRef = useParallax(0.3);
+  const editorialParallaxRef = useParallax<HTMLImageElement>(0.3);
 
   // Lead capture state
   const [email, setEmail] = useState("");
