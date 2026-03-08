@@ -242,7 +242,7 @@ const HeroSection = ({
         >
           <Heart className={cn(
             "h-4 w-4 transition-all",
-            isInWishlist && "fill-cta text-cta",
+            isInWishlist && "fill-rose-500 text-rose-500",
             animateHeart && "animate-heart-pop"
           )} />
           <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />

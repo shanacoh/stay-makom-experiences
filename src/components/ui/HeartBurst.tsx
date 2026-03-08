@@ -6,26 +6,27 @@ interface HeartBurstProps {
   onComplete?: () => void;
 }
 
-const HEART_COUNT = 6;
+const HEART_COUNT = 10;
 
 export default function HeartBurst({ trigger, onComplete }: HeartBurstProps) {
-  const [hearts, setHearts] = useState<Array<{ id: number; x: number; delay: number }>>([]);
+  const [hearts, setHearts] = useState<Array<{ id: number; x: number; y: number; delay: number; scale: number; rotation: number }>>([]);
 
   useEffect(() => {
     if (trigger) {
-      // Generate random hearts
       const newHearts = Array.from({ length: HEART_COUNT }, (_, i) => ({
         id: Date.now() + i,
-        x: (Math.random() - 0.5) * 40, // Random horizontal spread
-        delay: Math.random() * 100, // Random delay up to 100ms
+        x: (Math.random() - 0.5) * 80,
+        y: -20 - Math.random() * 50,
+        delay: Math.random() * 150,
+        scale: 0.5 + Math.random() * 0.8,
+        rotation: (Math.random() - 0.5) * 60,
       }));
       setHearts(newHearts);
 
-      // Clear hearts after animation
       const timeout = setTimeout(() => {
         setHearts([]);
         onComplete?.();
-      }, 700);
+      }, 1000);
 
       return () => clearTimeout(timeout);
     }
@@ -38,9 +39,13 @@ export default function HeartBurst({ trigger, onComplete }: HeartBurstProps) {
       {hearts.map((heart) => (
         <Heart
           key={heart.id}
-          className="absolute left-1/2 top-1/2 h-3 w-3 fill-cta text-cta animate-heart-float"
+          className="absolute left-1/2 top-1/2 fill-rose-500 text-rose-500 animate-heart-float"
           style={{
             '--float-x': `${heart.x}px`,
+            '--float-y': `${heart.y}px`,
+            '--float-rotate': `${heart.rotation}deg`,
+            width: `${10 * heart.scale}px`,
+            height: `${10 * heart.scale}px`,
             animationDelay: `${heart.delay}ms`,
           } as React.CSSProperties}
         />
