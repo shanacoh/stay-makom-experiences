@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { MOBILE_HEADER_HEIGHT } from "@/constants/layout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
