@@ -65,7 +65,7 @@ const LaunchHeader = () => {
   return (
     <header className={headerClasses} dir="ltr">
       <div className="container flex items-center justify-between bg-transparent h-14">
-        <Link to={getLocalizedPath("/")} className="flex items-center space-x-2">
+        <Link to="/launch" className="flex items-center space-x-2">
           <span className={`font-sans font-bold tracking-[-0.04em] uppercase text-xl ${logoClasses}`}>
             STAYMAKOM
           </span>

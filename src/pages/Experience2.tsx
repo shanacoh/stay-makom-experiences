@@ -4,7 +4,7 @@
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
 import { useRef, useState, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,9 @@ import ShareWithFriendsSection from "@/components/experience/ShareWithFriendsSec
 import OtherExperiences2 from "@/components/experience-test/OtherExperiences2";
 import WhatsIncludedPhotos2 from "@/components/experience-test/WhatsIncludedPhotos2";
 import Header from "@/components/Header";
+import LaunchHeader from "@/components/LaunchHeader";
 import Footer from "@/components/Footer";
+import LaunchFooter from "@/components/LaunchFooter";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -31,6 +33,8 @@ import { MapPin, Moon } from "lucide-react";
 
 export default function Experience2() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const isLaunch = searchParams.get("context") === "launch";
   const { lang } = useLanguage();
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
@@ -168,7 +172,7 @@ export default function Experience2() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        {isLaunch ? <LaunchHeader /> : <Header />}
         <div className="pt-20 max-w-6xl mx-auto px-4">
           <Skeleton className="h-[60vh] w-full rounded-xl" />
           <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-8 mt-8">
@@ -193,14 +197,14 @@ export default function Experience2() {
   if (error || !experience) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        {isLaunch ? <LaunchHeader /> : <Header />}
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-semibold">{t.notFound}</h1>
             <p className="text-muted-foreground">{t.notFoundDesc}</p>
           </div>
         </div>
-        <Footer />
+        {isLaunch ? <LaunchFooter /> : <Footer />}
       </div>
     );
   }
@@ -409,7 +413,7 @@ export default function Experience2() {
         ogImage={experience.hero_image || primaryHotel?.hero_image || undefined}
       />
 
-      <Header />
+      {isLaunch ? <LaunchHeader /> : <Header />}
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -556,7 +560,7 @@ export default function Experience2() {
       </main>
 
       <footer ref={footerRef as React.RefObject<HTMLElement>}>
-        <Footer />
+        {isLaunch ? <LaunchFooter /> : <Footer />}
       </footer>
     </div>
   );

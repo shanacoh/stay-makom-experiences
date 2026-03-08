@@ -1,55 +1,72 @@
 
 
-## Plan: Launch Universe — Pages d'expériences et navigation cohérente
+## Plan: Create Certification Test Hotel + Experience for Live HyperGuest Booking
 
-### Problème actuel
-Les liens depuis la page `/launch` (menu hamburger, cartes d'expériences, footer) renvoient vers des pages qui utilisent le Header/Footer classique, ce qui casse l'univers launch. De plus, il manque une page dédiée "Feeling Adventurous".
+### Context
+The project already has a certification system for property 19912 (sandbox). Now we need a **live certification** setup with a configurable property ID that Reshma will provide. The V2 architecture uses `hotels2` and `experiences2` tables, with the `experience2_hotels` junction table for multi-hotel support.
 
-### Architecture proposée
+### Approach
+Create a dedicated **admin page** (`/admin/certification-setup`) that lets you:
+1. Input a HyperGuest property ID
+2. One-click create (or reuse) a hotel + experience
+3. See the certification constraints as a reminder
+4. Link directly to the created experience page
 
-**Approche : Paramètre `?context=launch` propagé via les URLs**
+This is better than a raw script because you can change the property ID later and re-run.
 
-Plutôt que de dupliquer toutes les pages, on utilise un query param `context=launch` pour indiquer qu'on est dans l'univers launch. Les composants Experience2 et la future page de listing détectent ce param et swappent Header/Footer pour LaunchHeader/LaunchFooter.
+---
 
-### Changements
+### Step 1 — Create the Certification Setup Admin Page
 
-**1. Créer une page `/launch/experiences` (listing filtré)**
-- Nouvelle page `src/pages/LaunchExperiences.tsx` qui affiche les expériences V2 filtrées par catégorie (`?filter=romantic` ou `?filter=adventure`)
-- Utilise LaunchHeader + LaunchFooter
-- Toggle "Feel Adventurous" / "Romantic Escape" comme sur LaunchIndex
-- Titre adapté au filtre actif
-- Les cartes d'expérience linkent vers `/experience/:slug?context=launch`
+**New file: `src/pages/admin/CertificationSetup.tsx`**
 
-**2. Modifier Experience2.tsx pour supporter le contexte launch**
-- Détecter `?context=launch` dans l'URL
-- Si présent : afficher LaunchHeader + LaunchFooter au lieu de Header + Footer
-- S'assurer que les liens internes (autres expériences, etc.) propagent `context=launch`
+A single-page form with:
+- **Input field**: HyperGuest Property ID (default empty, user enters the ID from Reshma)
+- **"Create / Update" button** that:
+  1. Checks if a `hotels2` record with that `hyperguest_property_id` already exists
+  2. If yes, reuses it; if no, creates one with:
+     - `name`: "HyperGuest Certification Hotel"
+     - `name_he`: "מלון אישור HyperGuest"
+     - `region`: "Israel"
+     - `status`: "published"
+     - `hyperguest_property_id`: the entered value
+     - Reasonable defaults for other fields (slug auto-generated, placeholder hero image)
+  3. Checks if an `experiences2` record with slug `certification-test-live` exists
+  4. If yes, updates its `hotel_id` to point to the hotel; if no, creates one with:
+     - `title`: "Certification Test Experience"
+     - `slug`: "certification-test-live"
+     - `hotel_id`: the hotel from step 2
+     - `base_price`: 100, `currency`: "USD"
+     - `min_nights`: 1, `max_nights`: 7
+     - `min_party`: 1, `max_party`: 4
+     - `status`: "published"
+     - `long_copy`: "Test experience for HyperGuest live certification"
+  5. Creates/updates the `experience2_hotels` junction record linking hotel to experience
+- **Certification constraints reminder panel** (always visible):
+  - Guest name: "Test Test"
+  - Rate plan: Fully refundable only
+  - Check-in: September 2026+ (6+ months in future)
+  - Max amount: $500 USD
+  - Cancel within 7 days after booking
+- **Quick links**: Direct link to `/experience2/certification-test-live` and to the hotel editor
 
-**3. Mettre à jour les liens dans l'univers launch**
-- `LaunchIndex.tsx` : les cartes d'expérience linkent vers `/experience/:slug?context=launch` (au lieu de `/experience2/:slug`)
-- `LaunchHamburgerMenu.tsx` :
-  - "Feel Adventurous" → `/launch/experiences?filter=adventure`
-  - "Romantic Escape" → `/launch/experiences?filter=romantic`
-  - "Home" remplacé par un lien vers `/launch`
-  - About → `/about?context=launch`
-  - Contact → `/contact?context=launch`
-- `LaunchHeader.tsx` : logo STAYMAKOM linke vers `/launch` (pas `/`)
-- `LaunchFooter.tsx` : liens "Explore" pointent vers `/launch/experiences?filter=adventure` et `?filter=romantic`
+### Step 2 — Register the Route
 
-**4. Route dans App.tsx**
-- Ajouter `<Route path="/launch/experiences" element={<LaunchExperiences />} />`
+**Edit: `src/App.tsx`**
+- Import `CertificationSetup` and add route `/admin/certification-setup`
 
-**5. Propagation du contexte**
-- Créer un petit hook `useLaunchContext()` qui lit `context=launch` depuis l'URL et expose une fonction helper pour ajouter ce param aux liens
-- L'utiliser dans ExperienceCard quand `linkPrefix` inclut le contexte launch
+### Step 3 — Add Sidebar Link
 
-### Fichiers impactés
-- `src/pages/LaunchExperiences.tsx` — nouveau
-- `src/hooks/useLaunchContext.ts` — nouveau (petit helper)
-- `src/pages/Experience2.tsx` — swap Header/Footer conditionnellement
-- `src/pages/LaunchIndex.tsx` — update linkPrefix
-- `src/components/LaunchHamburgerMenu.tsx` — update liens
-- `src/components/LaunchHeader.tsx` — logo → `/launch`
-- `src/components/LaunchFooter.tsx` — update liens explore
-- `src/App.tsx` — nouvelle route
+**Edit: `src/components/admin/AdminSidebar.tsx`**
+- Add "Live Cert Setup" entry near the existing "HG Certification" link
+
+### No Database Changes Needed
+All tables (`hotels2`, `experiences2`, `experience2_hotels`) already exist with the right columns. The page will use standard Supabase insert/upsert operations.
+
+### What This Enables
+Once the property ID is entered and the setup is run:
+- `/experience2/certification-test-live` will load the experience
+- The `BookingPanel2` will pick up `hyperguest_property_id` from the linked hotel
+- The full flow (search → room selection → pre-book → book) will work
+- You can toggle the hotel/experience status between draft/published as needed
 

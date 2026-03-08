@@ -93,8 +93,8 @@ const LaunchFooter = () => {
             <div>
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{exploreLabel}</h4>
               <ul className="space-y-2">
-                <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{adventureLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{romanticLabel}</Link></li>
+                <li><Link to="/launch/experiences?filter=adventure" className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{adventureLabel}</Link></li>
+                <li><Link to="/launch/experiences?filter=romantic" className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{romanticLabel}</Link></li>
               </ul>
             </div>
             <div>
@@ -125,8 +125,8 @@ const LaunchFooter = () => {
               <div>
                 <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-3 text-slate-50">{exploreLabel}</h4>
                 <ul className="space-y-2">
-                  <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white hover:text-primary transition-smooth">{adventureLabel}</Link></li>
-                  <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white hover:text-primary transition-smooth">{romanticLabel}</Link></li>
+                   <li><Link to="/launch/experiences?filter=adventure" className="text-sm text-white hover:text-primary transition-smooth">{adventureLabel}</Link></li>
+                   <li><Link to="/launch/experiences?filter=romantic" className="text-sm text-white hover:text-primary transition-smooth">{romanticLabel}</Link></li>
                 </ul>
               </div>
             </div>
@@ -162,8 +162,8 @@ const LaunchFooter = () => {
             <div>
               <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">{exploreLabel}</h4>
               <ul className="space-y-1.5">
-                <li><Link to={getLocalizedPath("/category/adventure")} className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{adventureLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/category/romantic")} className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{romanticLabel}</Link></li>
+                <li><Link to="/launch/experiences?filter=adventure" className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{adventureLabel}</Link></li>
+                <li><Link to="/launch/experiences?filter=romantic" className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{romanticLabel}</Link></li>
               </ul>
             </div>
           </div>
