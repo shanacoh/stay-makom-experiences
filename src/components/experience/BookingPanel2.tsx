@@ -346,9 +346,9 @@ export function BookingPanel2({
             {t.guests}
           </div>
 
-          {/* Adults */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm">{t.adults}</span>
+           {/* Adults */}
+          <div className="flex items-center justify-between" dir="ltr">
+            <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.adults}</span>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
                 <Minus className="h-3 w-3" />
