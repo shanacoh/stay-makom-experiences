@@ -225,8 +225,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const isGuestValid = leadGuest.firstName.trim() !== "" &&
     leadGuest.lastName.trim() !== "" &&
     leadGuest.email.trim() !== "" &&
-    leadGuest.phone.trim() !== "" &&
-    leadGuest.birthDate !== "";
+    leadGuest.phone.trim() !== "";
 
   // Progressive booking timer
   useEffect(() => {
