@@ -11,9 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink, Archive } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,15 +24,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HotelEditor2 } from "./HotelEditor2";
 import { formatDistanceToNow } from "date-fns";
+import { StatusBadge, WarningBadge } from "@/components/admin/StatusBadge";
 
 const AdminHotels2 = () => {
   const { hotelId } = useParams();
   const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [archiveId, setArchiveId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const queryClient = useQueryClient();
@@ -80,6 +86,12 @@ const AdminHotels2 = () => {
     return hotels.filter((hotel) => {
       const matchesStatus = statusFilter === "all" || hotel.status === statusFilter;
       const matchesRegion = regionFilter === "all" || hotel.region === regionFilter;
+
+      // Special filter for missing HyperGuest ID
+      if (statusFilter === "missing_hg") {
+        return !hotel.hyperguest_property_id && (regionFilter === "all" || hotel.region === regionFilter);
+      }
+
       return matchesStatus && matchesRegion;
     });
   }, [hotels, statusFilter, regionFilter]);
@@ -92,7 +104,6 @@ const AdminHotels2 = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Check for experiences2 linked to this hotel
       const { count } = await supabase
         .from("experiences2")
         .select("*", { count: "exact", head: true })
@@ -102,7 +113,6 @@ const AdminHotels2 = () => {
         throw new Error(`EXPERIENCES_EXIST:${count}`);
       }
       
-      // No experiences, proceed with deletion
       const { error } = await supabase.from("hotels2").delete().eq("id", id);
       if (error) throw error;
     },
@@ -115,31 +125,12 @@ const AdminHotels2 = () => {
       if (error.message.startsWith("EXPERIENCES_EXIST:")) {
         const count = error.message.split(":")[1];
         toast.error(
-          `Cannot delete: This hotel has ${count} linked experience(s). Delete them first or archive the hotel.`,
+          `Cannot delete: This hotel has ${count} linked experience(s). Delete them first.`,
           { duration: 5000 }
         );
       } else {
         toast.error("Failed to delete hotel");
       }
-    }
-  });
-
-  const archiveMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("hotels2")
-        .update({ status: 'archived' })
-        .eq("id", id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-hotels2"] });
-      toast.success("Hotel archived successfully");
-      setArchiveId(null);
-    },
-    onError: () => {
-      toast.error("Failed to archive hotel");
     }
   });
 
@@ -169,244 +160,235 @@ const AdminHotels2 = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Hotels 2</h2>
-          <p className="text-muted-foreground">Manage hotel properties (Copy)</p>
-        </div>
-        <Button onClick={() => navigate("/admin/hotels2/new")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Hotel
-        </Button>
-      </div>
-
-      <div className="flex gap-4">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={regionFilter} onValueChange={setRegionFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by region" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Regions</SelectItem>
-            {regions.map((region) => (
-              <SelectItem key={region} value={region}>
-                {region}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center py-12">Loading...</div>
-      ) : filteredHotels && filteredHotels.length > 0 ? (
-        <div className="border rounded-lg bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Hotel</TableHead>
-                <TableHead>HyperGuest ID</TableHead>
-                <TableHead className="text-center">Experiences V2</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredHotels.map((hotel) => {
-                const stats = experienceStats?.[hotel.id] || { published: 0, draft: 0 };
-                
-                return (
-                  <TableRow key={hotel.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {hotel.hero_image ? (
-                          <img
-                            src={hotel.hero_image}
-                            alt={hotel.name}
-                            className="w-10 h-10 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-muted" />
-                        )}
-                        <div>
-                          <p className="font-medium">{hotel.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {hotel.region && hotel.city ? `${hotel.city}, ${hotel.region}` : hotel.region || hotel.city || "-"}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {hotel.hyperguest_property_id ? (
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {hotel.hyperguest_property_id}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-semibold">{stats.published}</span>
-                      {stats.draft > 0 && (
-                        <span className="text-muted-foreground text-sm"> / {stats.draft} draft</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          hotel.status === "published"
-                            ? "default"
-                            : hotel.status === "archived"
-                            ? "destructive"
-                            : hotel.status === "pending"
-                            ? "outline"
-                            : "secondary"
-                        }
-                        className={
-                          hotel.status === "published"
-                            ? "bg-green-500 hover:bg-green-600"
-                            : hotel.status === "archived"
-                            ? "bg-gray-500 hover:bg-gray-600"
-                            : hotel.status === "pending"
-                            ? "border-orange-500 text-orange-500"
-                            : ""
-                        }
-                      >
-                        {hotel.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {hotel.updated_at
-                        ? formatDistanceToNow(new Date(hotel.updated_at), { addSuffix: true })
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/admin/hotels2/edit/${hotel.id}`)}
-                          title="Edit Hotel"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Link to={`/admin/experiences?hotel=${hotel.id}`}>
-                        <Button variant="ghost" size="sm" title="Manage Experiences V2">
-                            <ExternalLink className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            togglePublishMutation.mutate({
-                              id: hotel.id,
-                              currentStatus: hotel.status,
-                            })
-                          }
-                          title={hotel.status === "published" ? "Unpublish" : "Publish"}
-                        >
-                          {hotel.status === "published" ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4 text-green-600" />
-                          )}
-                        </Button>
-                        {hotel.status !== 'archived' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setArchiveId(hotel.id)}
-                            title="Archive Hotel"
-                          >
-                            <Archive className="w-4 h-4 text-orange-600" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteId(hotel.id)}
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <div className="text-center py-12 border rounded-lg bg-card">
-          <p className="text-muted-foreground mb-4">
-            {statusFilter !== "all" || regionFilter !== "all"
-              ? "No hotels match the selected filters"
-              : "No hotels yet"}
-          </p>
+    <TooltipProvider>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold">Hotels</h2>
+            <p className="text-muted-foreground">Manage your hotel properties</p>
+          </div>
           <Button onClick={() => navigate("/admin/hotels2/new")}>
             <Plus className="w-4 h-4 mr-2" />
-            Add your first hotel
+            Add Hotel
           </Button>
         </div>
-      )}
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Hotel</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure? This will permanently delete the hotel and all related data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <div className="flex gap-4">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+              <SelectItem value="missing_hg">⚠ Missing HyperGuest ID</SelectItem>
+            </SelectContent>
+          </Select>
 
-      <AlertDialog open={!!archiveId} onOpenChange={() => setArchiveId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Archive Hotel</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will hide the hotel from public view and prevent new bookings.
-              Existing bookings will remain intact. You can unarchive it later.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => archiveId && archiveMutation.mutate(archiveId)}
-              className="bg-orange-600 text-white hover:bg-orange-700"
-            >
-              Archive
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+          <Select value={regionFilter} onValueChange={setRegionFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by region" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Regions</SelectItem>
+              {regions.map((region) => (
+                <SelectItem key={region} value={region}>
+                  {region}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {isLoading ? (
+          <div className="text-center py-12">Loading...</div>
+        ) : filteredHotels && filteredHotels.length > 0 ? (
+          <div className="border rounded-lg bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Hotel</TableHead>
+                  <TableHead>HyperGuest ID</TableHead>
+                  <TableHead className="text-center">Experiences</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Updated</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredHotels.map((hotel) => {
+                  const stats = experienceStats?.[hotel.id] || { published: 0, draft: 0 };
+                  
+                  return (
+                    <TableRow key={hotel.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {hotel.hero_image ? (
+                            <img
+                              src={hotel.hero_image}
+                              alt={hotel.name}
+                              className="w-10 h-10 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-muted" />
+                          )}
+                          <div>
+                            <p className="font-medium">{hotel.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {hotel.region && hotel.city ? `${hotel.city}, ${hotel.region}` : hotel.region || hotel.city || "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {hotel.hyperguest_property_id ? (
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {hotel.hyperguest_property_id}
+                          </Badge>
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <WarningBadge label="Missing ID" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              HyperGuest ID is required for booking integration
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-semibold">{stats.published}</span>
+                        {stats.draft > 0 && (
+                          <span className="text-muted-foreground text-sm"> / {stats.draft} draft</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={hotel.status || "draft"} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {hotel.updated_at
+                          ? formatDistanceToNow(new Date(hotel.updated_at), { addSuffix: true })
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {/* 1. Edit */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate(`/admin/hotels2/edit/${hotel.id}`)}
+                                className="text-[#6B7280] hover:text-[#1A1814]"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit</TooltipContent>
+                          </Tooltip>
+                          {/* 2. Preview */}
+                          {hotel.slug && hotel.status === "published" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  asChild
+                                  className="text-[#6B7280] hover:text-[#1A1814]"
+                                >
+                                  <a href={`/hotel/${hotel.slug}`} target="_blank" rel="noopener noreferrer">
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Preview on site</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {/* 3. Hide/Show */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  togglePublishMutation.mutate({
+                                    id: hotel.id,
+                                    currentStatus: hotel.status,
+                                  })
+                                }
+                                className="text-[#6B7280] hover:text-[#1A1814]"
+                              >
+                                {hotel.status === "published" ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{hotel.status === "published" ? "Unpublish" : "Publish"}</TooltipContent>
+                          </Tooltip>
+                          {/* 4. Delete */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteId(hotel.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="text-center py-12 border rounded-lg bg-card">
+            <p className="text-muted-foreground mb-4">
+              {statusFilter !== "all" || regionFilter !== "all"
+                ? "No hotels match the selected filters"
+                : "No hotels yet"}
+            </p>
+            <Button onClick={() => navigate("/admin/hotels2/new")}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add your first hotel
+            </Button>
+          </div>
+        )}
+
+        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Hotel</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure? This will permanently delete the hotel and all related data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteId && deleteMutation.mutate(deleteId)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </TooltipProvider>
   );
 };
 
