@@ -1,44 +1,72 @@
 
 
-## Analyse du Hero Mobile — État actuel & Améliorations UX/UI
+## Plan: Create Certification Test Hotel + Experience for Live HyperGuest Booking
 
-### État actuel (390×844)
+### Context
+The project already has a certification system for property 19912 (sandbox). Now we need a **live certification** setup with a configurable property ID that Reshma will provide. The V2 architecture uses `hotels2` and `experiences2` tables, with the `experience2_hotels` junction table for multi-hotel support.
 
-| Élément | Taille actuelle | Observation |
-|---------|----------------|-------------|
-| H1 titre | `text-3xl` (30px), bold, uppercase | Très imposant, bon impact mais prend beaucoup de place verticale |
-| Sous-titre | `text-base` (16px), italic, white/90 | Un peu petit par rapport au titre — manque de hiérarchie claire |
-| CTA bouton | `text-sm` (14px), `px-10 py-4` | Texte trop petit pour un CTA principal ; bon padding mais le label se perd |
-| Hero hauteur | `62vh` (~520px sur iPhone 13) | Correct mais le contenu flotte un peu haut |
-| Overlay | `bg-black/45` | Un poil lourd, réduit la qualité visuelle de la photo |
+### Approach
+Create a dedicated **admin page** (`/admin/certification-setup`) that lets you:
+1. Input a HyperGuest property ID
+2. One-click create (or reuse) a hotel + experience
+3. See the certification constraints as a reminder
+4. Link directly to the created experience page
 
-### Améliorations proposées
+This is better than a raw script because you can change the property ID later and re-run.
 
-1. **Agrandir le sous-titre** — passer de `text-base` (16px) à `text-lg` (18px) sur mobile pour mieux compléter le H1 et renforcer la hiérarchie visuelle.
+---
 
-2. **Agrandir le texte du CTA** — passer de `text-sm` (14px) à `text-base` (16px) avec un tracking un peu plus large. Le bouton est le seul call-to-action visible : il doit être lisible et impactant au premier regard.
+### Step 1 — Create the Certification Setup Admin Page
 
-3. **Réduire légèrement l'overlay** — de `bg-black/45` à `bg-black/35` pour laisser la photo respirer davantage tout en gardant la lisibilité du texte blanc.
+**New file: `src/pages/admin/CertificationSetup.tsx`**
 
-4. **Ajuster l'espacement** — réduire le `mb-7` sous le sous-titre à `mb-6` et augmenter le `mb-4` sous le H1 à `mb-5` pour un rythme vertical plus équilibré entre titre → sous-titre → bouton.
+A single-page form with:
+- **Input field**: HyperGuest Property ID (default empty, user enters the ID from Reshma)
+- **"Create / Update" button** that:
+  1. Checks if a `hotels2` record with that `hyperguest_property_id` already exists
+  2. If yes, reuses it; if no, creates one with:
+     - `name`: "HyperGuest Certification Hotel"
+     - `name_he`: "מלון אישור HyperGuest"
+     - `region`: "Israel"
+     - `status`: "published"
+     - `hyperguest_property_id`: the entered value
+     - Reasonable defaults for other fields (slug auto-generated, placeholder hero image)
+  3. Checks if an `experiences2` record with slug `certification-test-live` exists
+  4. If yes, updates its `hotel_id` to point to the hotel; if no, creates one with:
+     - `title`: "Certification Test Experience"
+     - `slug`: "certification-test-live"
+     - `hotel_id`: the hotel from step 2
+     - `base_price`: 100, `currency`: "USD"
+     - `min_nights`: 1, `max_nights`: 7
+     - `min_party`: 1, `max_party`: 4
+     - `status`: "published"
+     - `long_copy`: "Test experience for HyperGuest live certification"
+  5. Creates/updates the `experience2_hotels` junction record linking hotel to experience
+- **Certification constraints reminder panel** (always visible):
+  - Guest name: "Test Test"
+  - Rate plan: Fully refundable only
+  - Check-in: September 2026+ (6+ months in future)
+  - Max amount: $500 USD
+  - Cancel within 7 days after booking
+- **Quick links**: Direct link to `/experience2/certification-test-live` and to the hotel editor
 
-5. **Ajuster la hauteur hero mobile** — passer de `62vh` à `60vh` pour laisser entrevoir légèrement le contenu sous le fold (le bandeau "How it works"), ce qui incite au scroll — un pattern UX éprouvé.
+### Step 2 — Register the Route
 
-### Fichier touché
-- `src/pages/LaunchIndex.tsx` — section Hero uniquement (lignes ~234-265)
+**Edit: `src/App.tsx`**
+- Import `CertificationSetup` and add route `/admin/certification-setup`
 
-### Résumé des changements CSS
+### Step 3 — Add Sidebar Link
 
-```text
-Avant                          →  Après
-─────────────────────────────────────────────
-H1 mb-4                        →  mb-5
-Subtitle text-base              →  text-lg (mobile)
-Subtitle mb-7                   →  mb-6
-CTA text-sm                     →  text-base
-Overlay bg-black/45             →  bg-black/35
-Hero h-[62vh]                   →  h-[60vh]
-```
+**Edit: `src/components/admin/AdminSidebar.tsx`**
+- Add "Live Cert Setup" entry near the existing "HG Certification" link
 
-Tous les changements sont subtils et ciblés — pas de restructuration, juste un meilleur calibrage typographique et d'espacement pour un hero mobile plus premium.
+### No Database Changes Needed
+All tables (`hotels2`, `experiences2`, `experience2_hotels`) already exist with the right columns. The page will use standard Supabase insert/upsert operations.
+
+### What This Enables
+Once the property ID is entered and the setup is run:
+- `/experience2/certification-test-live` will load the experience
+- The `BookingPanel2` will pick up `hyperguest_property_id` from the linked hotel
+- The full flow (search → room selection → pre-book → book) will work
+- You can toggle the hotel/experience status between draft/published as needed
 
