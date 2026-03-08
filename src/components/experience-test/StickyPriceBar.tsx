@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
-import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
-import { useExperienceAddons, useExperiencePricingConfig, calculatePriceV2 } from "@/hooks/useExperience2Price";
+import { useFromPrice } from "@/hooks/useExperience2Price";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface StickyPriceBarProps {
@@ -32,54 +31,9 @@ const StickyPriceBar = ({
   const [isHidden, setIsHidden] = useState(false);
   const { displayCurrency, symbol, altSymbol, setDisplayCurrency, convert } = useCurrency();
 
-  const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+  const { fromPriceILS, hasHyperguest } = useFromPrice(experienceId, hyperguestPropertyId ?? null);
 
-  // Always fetch in ILS to match addon currency
-  const { data: quickDates } = useQuickDateAvailability({
-    propertyId: propId,
-    nights: 1,
-    adults: 2,
-    currency: "ILS",
-    enabled: !!propId,
-  });
-
-  const { data: addons } = useExperienceAddons(experienceId);
-  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
-
-  const cheapestDate = useMemo(() => {
-    if (!quickDates || quickDates.length === 0) return null;
-    return quickDates.reduce((best, curr) => {
-      if (curr.cheapestPrice == null) return best;
-      if (!best || best.cheapestPrice == null || curr.cheapestPrice < best.cheapestPrice) return curr;
-      return best;
-    }, null as typeof quickDates[0] | null);
-  }, [quickDates]);
-
-  // Calculate in ILS, then convert
-  const displayPrice = useMemo(() => {
-    const roomPrice = cheapestDate?.cheapestPrice ?? 0;
-    const breakdown = calculatePriceV2(
-      roomPrice,
-      minParty,
-      minNights,
-      (addons ?? []) as any,
-      pricingConfig ?? {
-        commission_room_pct: 0,
-        commission_addons_pct: 0,
-        tax_pct: 0,
-        promo_type: null,
-        promo_value: null,
-        promo_is_percentage: true,
-      },
-      "ILS"
-    );
-
-    const ilsTotal = breakdown.finalTotal + selectedExtrasTotal;
-    if (ilsTotal > 0) {
-      return Math.round(convert(ilsTotal));
-    }
-    return null;
-  }, [cheapestDate, addons, pricingConfig, minParty, minNights, selectedExtrasTotal, convert]);
+  const displayPrice = fromPriceILS ? Math.round(convert(fromPriceILS)) : null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -125,14 +79,13 @@ const StickyPriceBar = ({
                   <span className="text-xs text-muted-foreground">{nightLabel}</span>
                   <button
                     onClick={handleInlineToggle}
-                    className="text-[10px] leading-none transition-colors"
-                    style={{ color: '#9e9e9e' }}
+                    className="text-[10px] leading-none transition-colors text-muted-foreground/60"
                   >
                     · {lang === 'he' ? `ראה ב${altSymbol}` : `see in ${altSymbol}`}
                   </button>
                 </div>
                 {isShowingUSD && (
-                  <p className="text-[10px] leading-tight mt-0.5" style={{ color: '#9e9e9e' }}>
+                  <p className="text-[10px] leading-tight mt-0.5 text-muted-foreground/60">
                     {lang === 'he' ? 'החיוב בשקלים' : 'Charged in NIS'}
                   </p>
                 )}
