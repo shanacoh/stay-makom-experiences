@@ -105,11 +105,13 @@ const App = () => (
             <Route path="/cancellation-policy" element={<CancellationPolicy />} />
             <Route path="/cookies" element={<Cookies />} />
             <Route path="/legal" element={<Legal />} />
-            <Route path="/experiences" element={<Experiences />} />
+            <Route path="/experiences" element={<Experiences2 />} />
             <Route path="/experiences2" element={<Experiences2 />} />
+            <Route path="/experiences-old" element={<Experiences />} />
             <Route path="/category/:slug" element={<Category />} />
-            <Route path="/experience/:slug" element={<Experience />} />
+            <Route path="/experience/:slug" element={<Experience2 />} />
             <Route path="/experience2/:slug" element={<Experience2 />} />
+            <Route path="/experience-old/:slug" element={<Experience />} />
             <Route path="/hotel/:slug" element={<Hotel />} />
             <Route path="/hotels/:slug" element={<Hotel />} />
             <Route path="/hotel2/:slug" element={<Hotel2 />} />

@@ -126,7 +126,7 @@ const Experiences2HomeSection = ({ lang, isRTL }: { lang: string; isRTL: boolean
           {lang === 'he' ? 'חוויות חדשות' : 'New Experiences'}
         </h2>
         <Button variant="link" asChild className="text-foreground underline underline-offset-4 text-xs sm:text-sm p-0 h-auto">
-          <Link to={`/experiences2${lang === 'he' ? '?lang=he' : ''}`}>
+          <Link to={`/experiences${lang === 'he' ? '?lang=he' : ''}`}>
             {lang === 'he' ? 'צפו בכולן' : 'View all'}
           </Link>
         </Button>
@@ -147,7 +147,7 @@ const Experiences2HomeSection = ({ lang, isRTL }: { lang: string; isRTL: boolean
             <ExperienceCard
               key={experience.id}
               experience={cardExperience}
-              linkPrefix="/experience2"
+              linkPrefix="/experience"
             />
           );
         })}
@@ -184,12 +184,18 @@ const Index = () => {
     queryKey: ["latest-experiences"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select(`
-          *, 
-          hotels(name, name_he, city, city_he, region, region_he, hero_image),
-          experience_highlight_tags (
-            highlight_tags (
+          *,
+          experience2_hotels(
+            position,
+            nights,
+            hotel:hotels2(
+              id, name, name_he, city, city_he, region, region_he, hero_image
+            )
+          ),
+          experience2_highlight_tags(
+            highlight_tags(
               id,
               slug,
               label_en,
@@ -201,7 +207,17 @@ const Index = () => {
         .order("created_at", { ascending: false })
         .limit(4);
       if (error) throw error;
-      return data;
+      // Map to ExperienceCard-compatible shape
+      return (data || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return {
+          ...exp,
+          hotels: primaryHotel || null,
+          experience_highlight_tags: exp.experience2_highlight_tags || [],
+        };
+      });
     }
   });
 
@@ -209,13 +225,18 @@ const Index = () => {
     queryKey: ["all-experiences"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select(`
-          *, 
-          hotels(name, name_he, city, city_he, region, region_he, hero_image), 
-          experience_reviews(rating),
-          experience_highlight_tags (
-            highlight_tags (
+          *,
+          experience2_hotels(
+            position,
+            nights,
+            hotel:hotels2(
+              id, name, name_he, city, city_he, region, region_he, hero_image
+            )
+          ),
+          experience2_highlight_tags(
+            highlight_tags(
               id,
               slug,
               label_en,
@@ -225,7 +246,16 @@ const Index = () => {
         `)
         .eq("status", "published");
       if (error) throw error;
-      return data;
+      return (data || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return {
+          ...exp,
+          hotels: primaryHotel || null,
+          experience_highlight_tags: exp.experience2_highlight_tags || [],
+        };
+      });
     }
   });
 
@@ -245,15 +275,6 @@ const Index = () => {
 
   const filteredExperiences = selectedCategoryId
     ? allExperiences?.filter(exp => exp.category_id === selectedCategoryId)
-        .sort((a, b) => {
-          const avgRatingA = a.experience_reviews?.length
-            ? a.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / a.experience_reviews.length
-            : 0;
-          const avgRatingB = b.experience_reviews?.length
-            ? b.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / b.experience_reviews.length
-            : 0;
-          return avgRatingB - avgRatingA;
-        })
         .slice(0, 4)
     : latestExperiences?.slice(0, 8);
 
