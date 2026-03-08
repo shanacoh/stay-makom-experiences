@@ -45,21 +45,21 @@ const LocationMap = ({
     const customIcon = L.divIcon({
       className: "custom-marker",
       html: `<div style="
-        background-color: hsl(var(--primary));
-        width: 28px;
-        height: 28px;
+        background-color: hsl(0 0% 15%);
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: bold;
-        font-size: 12px;
-        border: 2px solid white;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        font-size: 13px;
+        border: 2.5px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
       ">📍</div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
     });
 
     // Add marker
