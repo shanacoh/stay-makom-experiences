@@ -531,7 +531,7 @@ export default function Experience2() {
         </div>
       </div>
 
-        {/* Mobile Sticky Price Bar */}
+        {/* Mobile Sticky Price Bar — sits above bottom nav */}
         <StickyPriceBar
           basePrice={experience.base_price}
           basePriceType={experience.base_price_type || "per_person"}
@@ -540,6 +540,7 @@ export default function Experience2() {
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
           hasHyperguest={!!hyperguestPropertyId}
+          selectedExtrasTotal={selectedExtras.reduce((sum, e) => sum + e.price, 0)}
         />
 
         {/* Mobile Booking Sheet */}
