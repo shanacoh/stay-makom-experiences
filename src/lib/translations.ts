@@ -354,7 +354,7 @@ export const translations = {
     giftCardSectionTag: "Perfect Gift",
     giftCardSectionTitle: "Give the Gift of Escape",
     giftCardSectionDesc: "Make someone's day unforgettable with a gift card for our handpicked hotels and unique experiences.",
-    giftCardSectionCTA: "Send a Gift Card",
+    giftCardSectionCTA: "Give an Escape",
   },
   he: {
     // Category page

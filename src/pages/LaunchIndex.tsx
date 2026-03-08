@@ -392,7 +392,7 @@ const LaunchIndex = () => {
                   className="flex-1 sm:w-56 h-9 text-sm" />
 
                   <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4">
-                    {isRTL ? "עדכנו אותי" : "Notify me"}
+                    {isRTL ? "הצטרפו לרשימה" : "Join the list"}
                   </Button>
                 </form>
               }
