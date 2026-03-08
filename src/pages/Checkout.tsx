@@ -510,7 +510,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const stepLabels = [t.step2Title, t.step3Title];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <Header />
 
       <main className="flex-1 w-full">
