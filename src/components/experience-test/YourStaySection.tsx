@@ -121,10 +121,14 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
             <div className="flex items-end justify-between gap-4">
               <div className="text-white">
                 <h3 className="text-lg md:text-xl font-semibold mb-1">{name}</h3>
-                <div className="flex items-center gap-1.5 text-white/80 text-sm">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span>{city}{region ? `, ${region}` : ''}</span>
-                </div>
+                <LocationPopover
+                  city={city || undefined}
+                  region={region || undefined}
+                  hotelName={name}
+                  latitude={hotel.latitude}
+                  longitude={hotel.longitude}
+                  lang={lang}
+                />
               </div>
               <Link to={`/hotel2/${hotel.slug}`}>
                 <Button 
