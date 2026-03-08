@@ -75,6 +75,7 @@ interface PreBookData {
     ratePlanId?: number;
     expectedPrice: { amount: number; currency: string };
   }>;
+  isTest?: boolean;
 }
 
 async function verifyAuth(req: Request, action: string): Promise<{ authenticated: boolean; userId?: string; error?: string }> {
@@ -117,13 +118,20 @@ function validateSearchParams(params: SearchParams): { isValid: boolean; errors:
   return { isValid: errors.length === 0, errors };
 }
 
+function getEnvMode(): 'production' | 'dev' {
+  const raw = (Deno.env.get('ENVIRONMENT') || '').trim().toLowerCase();
+  return (raw === 'production' || raw === 'prod' || raw === 'live') ? 'production' : 'dev';
+}
+
 function getAuthHeaders(): Record<string, string> {
-  const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
-  // Use prod token in production, dev token otherwise
+  const envMode = getEnvMode();
+  const isProduction = envMode === 'production';
   const token = isProduction
-    ? (Deno.env.get('HYPERGUEST_TOKEN_PROD') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'))
-    : (Deno.env.get('HYPERGUEST_TOKEN_DEV') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'));
-  if (!token) throw new Error('HyperGuest token not configured for env: ' + (isProduction ? 'production' : 'dev'));
+    ? (Deno.env.get('HYPERGUEST_TOKEN_PROD') || Deno.env.get('HYPERGUEST_TOKEN') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'))
+    : (Deno.env.get('HYPERGUEST_TOKEN_DEV') || Deno.env.get('HYPERGUEST_TOKEN') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'));
+
+  if (!token) throw new Error('HyperGuest token not configured for env: ' + envMode);
+
   console.log('🔑 Using HyperGuest token for env:', isProduction ? 'PRODUCTION' : 'DEV', 'token length:', token.length);
   return {
     'Authorization': `Bearer ${token}`,
@@ -159,9 +167,15 @@ async function searchHotels(params: SearchParams) {
 }
 
 async function preBook(preBookData: PreBookData) {
-  console.log('📋 Pre-booking for property:', preBookData.search.propertyId);
+  const isProduction = getEnvMode() === 'production';
+  const payload: PreBookData = {
+    ...preBookData,
+    isTest: !isProduction,
+  };
+
+  console.log('📋 Pre-booking for property:', preBookData.search.propertyId, 'isTest:', payload.isTest);
   const url = `${BOOKING_DOMAIN}booking/pre-book`;
-  const response = await fetch(url, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(preBookData) });
+  const response = await fetch(url, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -185,7 +199,7 @@ function ensureDateString(dateVal: unknown): string {
 
 // ✅ #5a: Create booking with 300s timeout + booking list fallback
 async function createBooking(bookingData: BookingData) {
-  const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
+  const isProduction = getEnvMode() === 'production';
 
   const safeLeadGuest = { ...bookingData.leadGuest, birthDate: ensureDateString(bookingData.leadGuest.birthDate) };
   const safeRooms = bookingData.rooms.map(room => ({
