@@ -68,6 +68,7 @@ import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
 import CertificationSetup from "./pages/admin/CertificationSetup";
 import LaunchIndex from "./pages/LaunchIndex";
 import LaunchExperiences from "./pages/LaunchExperiences";
+import MobileAuthPrompt from "./pages/MobileAuthPrompt";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
@@ -91,6 +92,7 @@ const App = () => (
             <Route path="/home" element={<Index />} />
             <Route path="/launch" element={<LaunchIndex />} />
             <Route path="/launch/experiences" element={<LaunchExperiences />} />
+            <Route path="/mobile-login" element={<MobileAuthPrompt />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
             <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
