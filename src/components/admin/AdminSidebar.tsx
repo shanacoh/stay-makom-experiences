@@ -95,7 +95,7 @@ export function AdminSidebar() {
                     asChild
                     className={
                       isActive(item.url, item.exact)
-                        ? "bg-[#D72638] text-white hover:bg-[#D72638]/90"
+                        ? "bg-[#1B2A4A] text-white hover:bg-[#1B2A4A]/90"
                         : "hover:bg-muted"
                     }
                   >
