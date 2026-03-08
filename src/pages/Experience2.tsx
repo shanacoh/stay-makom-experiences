@@ -455,12 +455,6 @@ export default function Experience2() {
               onToggleExtra={handleToggleExtra}
             />
 
-            {/* Share with Friends */}
-            <ShareWithFriendsSection
-              title={title}
-              lang={lang as "en" | "he" | "fr"}
-            />
-
             {/* Hotel stay section(s) */}
             {renderStaySections()}
 
@@ -483,6 +477,12 @@ export default function Experience2() {
                 lang={lang}
               />
             )}
+
+            {/* Share with Friends — bottom of left column */}
+            <ShareWithFriendsSection
+              title={title}
+              lang={lang as "en" | "he" | "fr"}
+            />
           </div>
 
           {/* Right Column - Sticky Booking Panel (Desktop) */}
