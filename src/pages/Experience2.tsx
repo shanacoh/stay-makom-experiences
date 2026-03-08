@@ -530,6 +530,7 @@ export default function Experience2() {
           lang={lang as "en" | "he" | "fr"}
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
+          hasHyperguest={!!hyperguestPropertyId}
         />
 
         {/* Mobile Booking Sheet */}
