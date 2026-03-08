@@ -18,7 +18,6 @@ import SavedCartsSection from "@/components/account/SavedCartsSection";
 import AccountSidebar from "@/components/account/AccountSidebar";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 import MobileAccountHome from "@/components/account/MobileAccountHome";
-import TiersDrawer from "@/components/account/TiersDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const MOBILE_TAB_TITLES: Record<string, string> = {
@@ -27,7 +26,6 @@ const MOBILE_TAB_TITLES: Record<string, string> = {
   giftcards: "Gift Cards",
   profile: "Personal Information",
   savedcarts: "Saved for Later",
-  club: "My Club",
 };
 
 const Account = () => {
@@ -36,13 +34,12 @@ const Account = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const isMobile = useIsMobile();
-
+  
   const [activeTab, setActiveTab] = useState(tabFromUrl || "bookings");
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [tiersOpen, setTiersOpen] = useState(false);
 
   useEffect(() => {
-    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile", "savedcarts", "club"].includes(tabFromUrl)) {
+    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile", "savedcarts"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
@@ -51,20 +48,13 @@ const Account = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [activeTab]);
 
-  // Handle "club" tab — open drawer instead of navigating
-  useEffect(() => {
-    if (activeTab === "club") {
-      setTiersOpen(true);
-    }
-  }, [activeTab]);
-
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile-onboarding", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       const { data } = await supabase
         .from("user_profiles")
-        .select("onboarding_completed_at, display_name, membership_progress, loyalty_tier")
+        .select("onboarding_completed_at, display_name")
         .eq("user_id", user.id)
         .maybeSingle();
       return data;
@@ -94,11 +84,9 @@ const Account = () => {
 
   if (!user) return null;
 
-  const tier = (profile?.loyalty_tier as string) || "explorer";
-  const points = profile?.membership_progress || 0;
-
   // === MOBILE LAYOUT ===
   if (isMobile) {
+    // No tab param = show profile hub
     if (!tabFromUrl) {
       return (
         <>
@@ -114,27 +102,12 @@ const Account = () => {
       );
     }
 
-    // "club" on mobile → show home with drawer auto-opened
-    if (tabFromUrl === "club") {
-      return (
-        <>
-          <MobileAccountHome />
-          <TiersDrawer
-            open={true}
-            onOpenChange={(open) => {
-              if (!open) navigate("/account");
-            }}
-            currentTier={tier}
-            currentPoints={points}
-          />
-        </>
-      );
-    }
-
+    // Tab param = show that section full-screen
     const pageTitle = MOBILE_TAB_TITLES[tabFromUrl] || "Account";
 
     return (
       <div className="min-h-screen pb-24">
+        {/* Mobile sub-page header */}
         <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-border/50 md:hidden">
           <div className="flex items-center h-14 px-2">
             <button
@@ -165,15 +138,7 @@ const Account = () => {
     );
   }
 
-  // === DESKTOP LAYOUT ===
-  const handleTabChange = (tab: string) => {
-    if (tab === "club") {
-      setTiersOpen(true);
-      return;
-    }
-    setActiveTab(tab);
-  };
-
+  // === DESKTOP LAYOUT (unchanged) ===
   const renderContent = () => {
     switch (activeTab) {
       case "wishlist":
@@ -245,7 +210,7 @@ const Account = () => {
         <AccountHeader userId={user.id} userEmail={user.email} />
         <div className="flex flex-col md:flex-row gap-8">
           <aside className="hidden md:block w-64 flex-shrink-0">
-            <AccountSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+            <AccountSidebar activeTab={activeTab} onTabChange={setActiveTab} />
           </aside>
           <div className="flex-1 min-w-0">{renderContent()}</div>
         </div>
@@ -258,12 +223,6 @@ const Account = () => {
           userId={user.id}
         />
       )}
-      <TiersDrawer
-        open={tiersOpen}
-        onOpenChange={setTiersOpen}
-        currentTier={tier}
-        currentPoints={points}
-      />
     </div>
   );
 };

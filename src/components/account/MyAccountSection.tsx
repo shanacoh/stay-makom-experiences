@@ -8,19 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import MarketingOptInDialog from "./MarketingOptInDialog";
-import AvatarUpload from "./AvatarUpload";
 
 interface MyAccountSectionProps {
   userId?: string;
   userEmail?: string;
   mobile?: boolean;
 }
-
-const TRAVEL_PREFS = [
-  "Nature", "Culture", "Wellness", "Gastronomy", "Adventure", "Romantic",
-];
 
 export default function MyAccountSection({ userId, userEmail, mobile }: MyAccountSectionProps) {
   const queryClient = useQueryClient();
@@ -65,7 +59,6 @@ export default function MyAccountSection({ userId, userEmail, mobile }: MyAccoun
     city: "",
     country: "",
     marketing_optin: true,
-    interests: [] as string[],
   });
 
   useEffect(() => {
@@ -78,7 +71,6 @@ export default function MyAccountSection({ userId, userEmail, mobile }: MyAccoun
         city: customer.city || "",
         country: customer.address_country || "",
         marketing_optin: profile?.marketing_opt_in ?? true,
-        interests: (profile?.interests as string[]) || [],
       });
     }
   }, [customer, profile]);
@@ -101,10 +93,7 @@ export default function MyAccountSection({ userId, userEmail, mobile }: MyAccoun
 
       const { error: profileError } = await supabase
         .from("user_profiles")
-        .update({
-          marketing_opt_in: formData.marketing_optin,
-          interests: formData.interests,
-        })
+        .update({ marketing_opt_in: formData.marketing_optin })
         .eq("user_id", userId);
       if (profileError) throw profileError;
     },
@@ -134,15 +123,6 @@ export default function MyAccountSection({ userId, userEmail, mobile }: MyAccoun
     setShowMarketingDialog(false);
   };
 
-  const toggleInterest = (interest: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter((i) => i !== interest)
-        : [...prev.interests, interest],
-    }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveMutation.mutate();
@@ -156,186 +136,118 @@ export default function MyAccountSection({ userId, userEmail, mobile }: MyAccoun
     );
   }
 
-  const inputClass = mobile
-    ? "border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
-    : undefined;
-
-  const labelClass = mobile
-    ? "text-xs text-muted-foreground uppercase tracking-wider"
-    : undefined;
-
-  const formContent = (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Avatar */}
-      <div className="flex justify-center mb-2">
-        <AvatarUpload
-          userId={userId!}
-          avatarUrl={profile?.avatar_url}
-          displayName={formData.first_name ? `${formData.first_name} ${formData.last_name}` : "Member"}
-          size={mobile ? "sm" : "md"}
-          onUploaded={() => {
-            queryClient.invalidateQueries({ queryKey: ["user-profile", userId] });
-            queryClient.invalidateQueries({ queryKey: ["user-profile-header", userId] });
-          }}
-        />
-      </div>
-
-      <div className={mobile ? "space-y-5" : "grid grid-cols-1 md:grid-cols-2 gap-6"}>
-        <div className="space-y-1.5">
-          <Label htmlFor="first_name" className={labelClass}>First Name *</Label>
-          <Input
-            id="first_name"
-            value={formData.first_name}
-            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-            required
-            className={inputClass}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="last_name" className={labelClass}>Last Name *</Label>
-          <Input
-            id="last_name"
-            value={formData.last_name}
-            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-            required
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="email" className={labelClass}>Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={userEmail || ""}
-          disabled
-          className={cn(inputClass, "opacity-50")}
-        />
-        {!mobile && (
-          <p className="text-xs text-muted-foreground">Email is linked to your authentication account</p>
-        )}
-      </div>
-
-      <div className={mobile ? "space-y-5" : "grid grid-cols-1 md:grid-cols-2 gap-6"}>
-        <div className="space-y-1.5">
-          <Label htmlFor="phone" className={labelClass}>Phone</Label>
-          <Input
-            id="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="+1 234 567 8900"
-            className={inputClass}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="birthdate" className={labelClass}>Date of Birth</Label>
-          <Input
-            id="birthdate"
-            type="date"
-            value={formData.birthdate}
-            onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div className={mobile ? "space-y-5" : "grid grid-cols-1 md:grid-cols-2 gap-6"}>
-        <div className="space-y-1.5">
-          <Label htmlFor="city" className={labelClass}>City</Label>
-          <Input
-            id="city"
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            placeholder="Tel Aviv"
-            className={inputClass}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="country" className={labelClass}>Country</Label>
-          <Input
-            id="country"
-            value={formData.country}
-            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-            placeholder="Israel"
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      {/* Travel Preferences */}
-      <div className="pt-4 border-t border-border/50">
-        <Label className={cn(labelClass, "mb-2 block")}>Travel Preferences</Label>
-        <p className="text-xs text-muted-foreground mb-3">
-          Used to personalize your recommendations
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {TRAVEL_PREFS.map((pref) => {
-            const selected = formData.interests.includes(pref);
-            return (
-              <button
-                key={pref}
-                type="button"
-                onClick={() => toggleInterest(pref)}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
-                  selected
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/50"
-                )}
-              >
-                {pref}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Marketing toggle */}
-      <div className="pt-4 border-t border-border/50">
-        <div className="flex items-center justify-between">
-          <div className="flex-1 space-y-0.5">
-            <Label htmlFor="marketing_optin" className="text-sm font-medium">
-              Newsletter & Marketing
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              Exclusive experiences, early releases & special deals
-            </p>
-          </div>
-          <Switch
-            id="marketing_optin"
-            checked={formData.marketing_optin}
-            onCheckedChange={handleMarketingToggle}
-          />
-        </div>
-      </div>
-
-      {/* Save */}
-      {mobile ? (
-        <button
-          type="submit"
-          disabled={saveMutation.isPending}
-          className="w-full h-12 mt-6 rounded-lg bg-foreground text-background text-[15px] font-medium disabled:opacity-50 transition-colors"
-        >
-          {saveMutation.isPending ? "Saving…" : "Save Changes"}
-        </button>
-      ) : (
-        <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={saveMutation.isPending} size="lg">
-            {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
-          </Button>
-        </div>
-      )}
-    </form>
-  );
-
+  // === MOBILE: clean form, no card wrapper ===
   if (mobile) {
     return (
       <>
-        {formContent}
+        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="first_name" className="text-xs text-muted-foreground uppercase tracking-wider">First Name *</Label>
+            <Input
+              id="first_name"
+              value={formData.first_name}
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              required
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="last_name" className="text-xs text-muted-foreground uppercase tracking-wider">Last Name *</Label>
+            <Input
+              id="last_name"
+              value={formData.last_name}
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              required
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-xs text-muted-foreground uppercase tracking-wider">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={userEmail || ""}
+              disabled
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 opacity-50"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="phone" className="text-xs text-muted-foreground uppercase tracking-wider">Phone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="+1 234 567 8900"
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="birthdate" className="text-xs text-muted-foreground uppercase tracking-wider">Date of Birth</Label>
+            <Input
+              id="birthdate"
+              type="date"
+              value={formData.birthdate}
+              onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="city" className="text-xs text-muted-foreground uppercase tracking-wider">City</Label>
+            <Input
+              id="city"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              placeholder="Tel Aviv"
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="country" className="text-xs text-muted-foreground uppercase tracking-wider">Country</Label>
+            <Input
+              id="country"
+              value={formData.country}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              placeholder="Israel"
+              className="border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground"
+            />
+          </div>
+
+          {/* Marketing toggle */}
+          <div className="pt-4 border-t border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 space-y-0.5">
+                <Label htmlFor="marketing_optin" className="text-sm font-medium">
+                  Newsletter & Marketing
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Exclusive experiences, early releases & special deals
+                </p>
+              </div>
+              <Switch
+                id="marketing_optin"
+                checked={formData.marketing_optin}
+                onCheckedChange={handleMarketingToggle}
+              />
+            </div>
+          </div>
+
+          {/* Save button — full width, dark */}
+          <button
+            type="submit"
+            disabled={saveMutation.isPending}
+            className="w-full h-12 mt-6 rounded-lg bg-[#1A1A1A] text-white text-[15px] font-medium disabled:opacity-50 transition-colors active:bg-[#333]"
+          >
+            {saveMutation.isPending ? "Saving…" : "Save Changes"}
+          </button>
+        </form>
+
         <MarketingOptInDialog
           open={showMarketingDialog}
           onOpenChange={setShowMarketingDialog}
@@ -345,9 +257,116 @@ export default function MyAccountSection({ userId, userEmail, mobile }: MyAccoun
     );
   }
 
+  // === DESKTOP: original card layout ===
   return (
     <>
-      <div>{formContent}</div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First Name *</Label>
+                <Input
+                  id="first_name"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last Name *</Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email (Read-only)</Label>
+              <Input id="email" type="email" value={userEmail || ""} disabled />
+              <p className="text-xs text-muted-foreground">
+                Email is linked to your authentication account
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+1 234 567 8900"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="birthdate">Date of Birth</Label>
+                <Input
+                  id="birthdate"
+                  type="date"
+                  value={formData.birthdate}
+                  onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  placeholder="Tel Aviv"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  placeholder="Israel"
+                />
+              </div>
+            </div>
+
+            <div className="border-t pt-6">
+              <div className="flex items-center justify-between space-x-4">
+                <div className="flex-1 space-y-1">
+                  <Label htmlFor="marketing_optin" className="text-base font-semibold">
+                    Newsletter & Marketing
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive exclusive experiences, early releases, and special deals from StayMakom
+                  </p>
+                </div>
+                <Switch
+                  id="marketing_optin"
+                  checked={formData.marketing_optin}
+                  onCheckedChange={handleMarketingToggle}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={saveMutation.isPending} size="lg">
+                {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       <MarketingOptInDialog
         open={showMarketingDialog}
         onOpenChange={setShowMarketingDialog}

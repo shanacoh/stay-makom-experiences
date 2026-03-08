@@ -1,4 +1,4 @@
-import { Heart, Calendar, Gift, User, Bookmark, Trophy } from "lucide-react";
+import { Heart, Calendar, Gift, User, Sparkles, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -10,21 +10,19 @@ interface AccountSidebarProps {
 const getCopy = (lang: string) => {
   if (lang === "he") {
     return {
-      bookings: "הזמנות",
-      club: "המועדון שלי",
       wishlist: "מועדפים",
-      savedCarts: "שמור להמשך",
+      bookings: "הזמנות",
       giftCards: "כרטיסי מתנה",
       myAccount: "החשבון שלי",
+      savedCarts: "שמור להמשך",
     };
   }
   return {
-    bookings: "My Bookings",
-    club: "My Club",
     wishlist: "Wishlist",
-    savedCarts: "Saved for Later",
+    bookings: "My Bookings",
     giftCards: "Gift Cards",
     myAccount: "My Account",
+    savedCarts: "Saved for Later",
   };
 };
 
@@ -34,7 +32,6 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
 
   const navItems = [
     { id: "bookings", icon: Calendar, label: copy.bookings },
-    { id: "club", icon: Trophy, label: copy.club },
     { id: "wishlist", icon: Heart, label: copy.wishlist },
     { id: "savedcarts", icon: Bookmark, label: copy.savedCarts },
     { id: "giftcards", icon: Gift, label: copy.giftCards },
@@ -42,7 +39,14 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
   ];
 
   return (
-    <nav className="sticky top-24 space-y-1">
+    <nav className="sticky top-24 space-y-1.5">
+      <div className="px-3 mb-4">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Sparkles className="h-4 w-4" />
+          <span className="text-xs font-medium uppercase tracking-wider">Menu</span>
+        </div>
+      </div>
+      
       {navItems.map((item) => {
         const isActive = activeTab === item.id;
         return (
@@ -55,11 +59,11 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
               isActive && "bg-accent/10 text-accent border-l-2 border-accent"
             )}
           >
-            <item.icon
+            <item.icon 
               className={cn(
                 "h-5 w-5 transition-colors",
                 isActive ? "text-accent" : "text-muted-foreground"
-              )}
+              )} 
             />
             <span className={cn(
               "transition-colors",
