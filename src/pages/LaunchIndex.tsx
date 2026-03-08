@@ -308,10 +308,17 @@ const LaunchIndex = () => {
               )?.[
               0]?.hotel;
 
+              // Compute display price from active pricing addons
+              const pricingTypes = ['per_person', 'per_night', 'per_person_per_night', 'fixed'];
+              const addonPrice = (experience as any).experience2_addons
+                ?.filter((a: any) => a.is_active && pricingTypes.includes(a.type))
+                .reduce((sum: number, a: any) => sum + (Number(a.value) || 0), 0) || 0;
+
               const cardExperience = {
                 ...experience,
                 hotels: primaryHotelLink || null,
-                experience_highlight_tags: experience.experience2_highlight_tags || []
+                experience_highlight_tags: experience.experience2_highlight_tags || [],
+                base_price: addonPrice || experience.base_price,
               };
 
               return (
