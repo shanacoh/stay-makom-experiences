@@ -269,13 +269,15 @@ const LaunchIndex = () => {
         <HowItWorksBanner />
 
         {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
-        <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-24">
+        <section id="launch-experiences" className="container px-4 scroll-mt-24" style={{ paddingTop: 48, paddingBottom: 48 }}>
           {/* Title block — static, not the sticky parent */}
-          <div className="text-center mb-4 sm:mb-6">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
+          <div className="text-center" style={{ marginBottom: 12 }}>
+            <h2
+              className="font-sans uppercase md:text-3xl"
+              style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2, marginBottom: 12 }}>
               {isRTL ? (<>זה לא תיירות.<br />זו חוויה.</>) : (<>This is not tourism.<br />This is something else.</>)}
             </h2>
-            <p className="text-muted-foreground text-xs sm:text-sm mb-5">
+            <p className="text-muted-foreground" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6 }}>
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
             </p>
           </div>
