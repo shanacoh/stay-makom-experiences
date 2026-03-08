@@ -487,6 +487,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       });
       setShowConfirmation(true);
 
+      // Clear persisted cart after successful booking
+      try { localStorage.removeItem("staymakom_cart"); } catch {}
+
       try {
         const emailCancellation = analyzeCancellationPolicies(
           state.selectedRatePlan?.cancellationPolicies,
