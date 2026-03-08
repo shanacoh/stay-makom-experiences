@@ -1335,10 +1335,12 @@ export type Database = {
           currency: string | null
           duration: string | null
           duration_he: string | null
+          featured_on_home: boolean | null
           good_to_know: string[] | null
           good_to_know_he: string[] | null
           google_maps_link: string | null
           hero_image: string | null
+          home_display_order: number | null
           hotel_id: string | null
           id: string
           includes: string[] | null
@@ -1404,10 +1406,12 @@ export type Database = {
           currency?: string | null
           duration?: string | null
           duration_he?: string | null
+          featured_on_home?: boolean | null
           good_to_know?: string[] | null
           good_to_know_he?: string[] | null
           google_maps_link?: string | null
           hero_image?: string | null
+          home_display_order?: number | null
           hotel_id?: string | null
           id?: string
           includes?: string[] | null
@@ -1473,10 +1477,12 @@ export type Database = {
           currency?: string | null
           duration?: string | null
           duration_he?: string | null
+          featured_on_home?: boolean | null
           good_to_know?: string[] | null
           good_to_know_he?: string[] | null
           google_maps_link?: string | null
           hero_image?: string | null
+          home_display_order?: number | null
           hotel_id?: string | null
           id?: string
           includes?: string[] | null
