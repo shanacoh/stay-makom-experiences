@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Check } from "lucide-react";
 import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -15,16 +15,27 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
+import cardBg1 from "@/assets/desert-journey.jpg";
+import cardBg2 from "@/assets/desert-hotel-pool.jpg";
+import cardBg3 from "@/assets/coming-soon-road.png";
 import { useLanguage } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 
-type Currency = "USD";
+type Currency = "USD" | "ILS";
 
-const AMOUNTS = [150, 300, 500, 750];
-const MIN_CUSTOM = 100;
+const AMOUNTS_USD = [150, 300, 500, 750];
+const AMOUNTS_ILS = [500, 1000, 1800, 2500];
 const MAX_MESSAGE = 150;
+
+const CARD_BACKGROUNDS = [
+  { id: "desert", src: cardBg1, label: "Desert" },
+  { id: "pool", src: cardBg2, label: "Pool" },
+  { id: "road", src: cardBg3, label: "Road" },
+];
+
+const CURRENCY_SYMBOLS: Record<Currency, string> = { USD: "$", ILS: "₪" };
 
 function generateGiftCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -40,23 +51,22 @@ function generateGiftCode(): string {
 /* ─── Live Gift Card Preview ─── */
 function GiftCardPreview({
   amount,
+  currency,
   recipientName,
+  bgSrc,
 }: {
   amount: number | null;
+  currency: Currency;
   recipientName: string;
+  bgSrc: string;
 }) {
+  const sym = CURRENCY_SYMBOLS[currency];
   return (
-    <div className="aspect-video w-full max-w-[480px] mx-auto rounded-2xl overflow-hidden relative select-none"
-      style={{
-        background: "linear-gradient(135deg, hsl(23 10% 12%) 0%, hsl(23 10% 22%) 50%, hsl(23 10% 16%) 100%)",
-      }}
-    >
-      {/* Subtle texture overlay */}
-      <div className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
-        }}
-      />
+    <div className="aspect-video w-full max-w-[480px] mx-auto rounded-2xl overflow-hidden relative select-none">
+      {/* Background image */}
+      <img src={bgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
 
       {/* Content */}
       <div className="relative h-full flex flex-col justify-between p-5 sm:p-6">
@@ -69,17 +79,17 @@ function GiftCardPreview({
 
         {/* Center: Amount */}
         <div className="text-center space-y-1">
-          <p className="text-white text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            {amount ? `$${amount}` : "$—"}
+          <p className="text-white text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight drop-shadow-lg">
+            {amount ? `${sym}${amount}` : `${sym}—`}
           </p>
-          <p className="text-white/50 text-xs sm:text-sm italic font-light">
+          <p className="text-white/60 text-xs sm:text-sm italic font-light">
             Gift of Escape
           </p>
         </div>
 
         {/* Bottom: Recipient */}
         <div className="flex justify-between items-end">
-          <p className="text-white/60 text-xs sm:text-sm truncate max-w-[60%]">
+          <p className="text-white/70 text-xs sm:text-sm truncate max-w-[60%]">
             {recipientName ? `For ${recipientName}` : ""}
           </p>
           <p className="text-white/30 text-[10px] sm:text-xs">
@@ -104,15 +114,28 @@ export default function GiftCard() {
   const isRTL = lang === "he";
 
   // Form state
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [message, setMessage] = useState("");
   const [recipientName, setRecipientName] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [senderName, setSenderName] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
   const [deliveryType, setDeliveryType] = useState<"now" | "scheduled">("now");
   const [scheduledDate, setScheduledDate] = useState<Date>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBg, setSelectedBg] = useState(CARD_BACKGROUNDS[0].id);
+
+  const amounts = currency === "USD" ? AMOUNTS_USD : AMOUNTS_ILS;
+  const sym = CURRENCY_SYMBOLS[currency];
+  const bgSrc = CARD_BACKGROUNDS.find((b) => b.id === selectedBg)?.src ?? CARD_BACKGROUNDS[0].src;
+
+  // Reset selected amount when switching currency
+  useEffect(() => {
+    setSelectedAmount(null);
+    setCustomAmount("");
+  }, [currency]);
 
   // Auto-fill from logged-in user
   const isLoggedIn = !!user;
@@ -130,11 +153,11 @@ export default function GiftCard() {
   const handleSubmit = async () => {
     const amount = effectiveAmount;
 
-    if (!amount || amount < MIN_CUSTOM) {
+    if (!amount || amount <= 0) {
       toast.error(
         lang === "he"
-          ? `הסכום המינימלי הוא $${MIN_CUSTOM}`
-          : `Minimum amount is $${MIN_CUSTOM}`
+          ? "אנא בחרו או הזינו סכום תקין"
+          : "Please select or enter a valid amount"
       );
       return;
     }
@@ -166,22 +189,31 @@ export default function GiftCard() {
       );
       return;
     }
+    if (recipientEmail && !emailRegex.test(recipientEmail)) {
+      toast.error(
+        lang === "he"
+          ? "אנא הזינו אימייל נמען תקין"
+          : "Please enter a valid recipient email"
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     const code = generateGiftCode();
     const now = new Date();
     const validUntil = addYears(now, 1);
+    const targetEmail = recipientEmail || senderEmail;
 
     try {
       const { error } = await supabase.from("gift_cards").insert({
         code,
         type: "amount",
         amount,
-        currency: "USD",
+        currency,
         sender_name: senderName,
         sender_email: senderEmail,
         recipient_name: recipientName || null,
-        recipient_email: senderEmail, // use sender email as fallback since recipient email removed
+        recipient_email: targetEmail,
         message: message || null,
         delivery_type: deliveryType,
         delivery_date:
@@ -202,10 +234,10 @@ export default function GiftCard() {
             body: {
               code,
               amount,
-              currency: "USD",
+              currency,
               sender_name: senderName,
               recipient_name: recipientName || "Friend",
-              recipient_email: senderEmail,
+              recipient_email: targetEmail,
               message: message || null,
               valid_until: validUntil.toISOString(),
               language: lang,
@@ -242,7 +274,7 @@ export default function GiftCard() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section — shorter */}
+      {/* Hero Section */}
       <section className="relative h-[35vh] min-h-[260px] sm:min-h-[300px] overflow-hidden">
         <img
           src={giftCardHero}
@@ -267,15 +299,45 @@ export default function GiftCard() {
         className="max-w-5xl mx-auto px-4 py-8 md:py-12"
         dir={isRTL ? "rtl" : "ltr"}
       >
-        {/* Desktop: 2-column / Mobile: stacked */}
         <div className="md:grid md:grid-cols-[1fr_1.1fr] md:gap-12 md:items-start">
           {/* LEFT: Gift Card Preview (sticky on desktop) */}
-          <div className="mb-8 md:mb-0 md:sticky md:top-24">
+          <div className="mb-8 md:mb-0 md:sticky md:top-24 space-y-4">
             <GiftCardPreview
               amount={effectiveAmount}
+              currency={currency}
               recipientName={recipientName}
+              bgSrc={bgSrc}
             />
-            <p className="text-center text-xs text-muted-foreground mt-3">
+
+            {/* Background chooser */}
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground text-center">
+                {lang === "he" ? "בחרו עיצוב" : "Choose a design"}
+              </p>
+              <div className="flex justify-center gap-2">
+                {CARD_BACKGROUNDS.map((bg) => (
+                  <button
+                    key={bg.id}
+                    onClick={() => setSelectedBg(bg.id)}
+                    className={cn(
+                      "w-16 h-10 sm:w-20 sm:h-12 rounded-lg overflow-hidden border-2 transition-all relative",
+                      selectedBg === bg.id
+                        ? "border-foreground ring-1 ring-foreground/20"
+                        : "border-transparent opacity-60 hover:opacity-100"
+                    )}
+                  >
+                    <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" />
+                    {selectedBg === bg.id && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-center text-xs text-muted-foreground">
               {lang === "he"
                 ? "תצוגה מקדימה — מתעדכנת בזמן אמת"
                 : "Preview — updates as you go"}
@@ -284,13 +346,36 @@ export default function GiftCard() {
 
           {/* RIGHT: Form */}
           <div className="space-y-0">
+            {/* ── Currency toggle ── */}
+            <div className="mb-4">
+              <Label className={labelClass}>
+                {lang === "he" ? "מטבע" : "Currency"}
+              </Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {(["USD", "ILS"] as Currency[]).map((cur) => (
+                  <button
+                    key={cur}
+                    onClick={() => setCurrency(cur)}
+                    className={cn(
+                      "h-11 rounded-[10px] text-sm font-medium border-[1.5px] transition-all",
+                      currency === cur
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-secondary/40 text-foreground border-border hover:border-foreground/30"
+                    )}
+                  >
+                    {cur === "USD" ? "$ USD" : "₪ NIS"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* ── Section 1: Amount ── */}
             <div>
               <Label className={labelClass}>
                 {lang === "he" ? "בחרו סכום" : "Select amount"}
               </Label>
               <div className="grid grid-cols-2 gap-2 mt-3">
-                {AMOUNTS.map((amt) => (
+                {amounts.map((amt) => (
                   <button
                     key={amt}
                     onClick={() => {
@@ -304,7 +389,7 @@ export default function GiftCard() {
                         : "bg-secondary/40 text-foreground border-border hover:border-foreground/30"
                     )}
                   >
-                    ${amt}
+                    {sym}{amt}
                   </button>
                 ))}
               </div>
@@ -321,14 +406,15 @@ export default function GiftCard() {
                       isRTL ? "right-4" : "left-4"
                     )}
                   >
-                    $
+                    {sym}
                   </span>
                   <Input
                     id="custom-amount"
                     type="number"
-                    min={MIN_CUSTOM}
                     placeholder={
-                      lang === "he" ? "למשל $400" : "e.g. $400"
+                      lang === "he"
+                        ? `למשל ${sym}400`
+                        : `e.g. ${sym}400`
                     }
                     value={customAmount}
                     onChange={(e) => {
@@ -338,11 +424,6 @@ export default function GiftCard() {
                     className={cn(inputClass, isRTL ? "pr-10" : "pl-10")}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {lang === "he"
-                    ? `מינימום $${MIN_CUSTOM}`
-                    : `Minimum $${MIN_CUSTOM}`}
-                </p>
               </div>
             </div>
 
@@ -366,7 +447,33 @@ export default function GiftCard() {
 
             <SectionDivider />
 
-            {/* ── Section 3: Message ── */}
+            {/* ── Section 3: Recipient Email (optional) ── */}
+            <div className="space-y-1.5">
+              <Label htmlFor="recipient-email" className={labelClass}>
+                {lang === "he" ? "שליחה למייל" : "Send to email"}
+              </Label>
+              <Input
+                id="recipient-email"
+                type="email"
+                value={recipientEmail}
+                onChange={(e) => setRecipientEmail(e.target.value)}
+                placeholder={
+                  lang === "he"
+                    ? "אימייל הנמען (אופציונלי)"
+                    : "Recipient email (optional)"
+                }
+                className={inputClass}
+              />
+              <p className="text-xs text-muted-foreground">
+                {lang === "he"
+                  ? "השאירו ריק כדי לשתף בעצמכם דרך קישור"
+                  : "Leave empty to share via link yourself"}
+              </p>
+            </div>
+
+            <SectionDivider />
+
+            {/* ── Section 4: Message ── */}
             <div className="space-y-1.5">
               <Label htmlFor="message" className={labelClass}>
                 {lang === "he" ? "הודעה אישית" : "Personal message"}
@@ -391,7 +498,7 @@ export default function GiftCard() {
 
             <SectionDivider />
 
-            {/* ── Section 4: Delivery ── */}
+            {/* ── Section 5: Delivery ── */}
             <div className="space-y-3">
               <Label className={labelClass}>
                 {lang === "he" ? "מועד שליחה" : "Delivery"}
@@ -456,7 +563,7 @@ export default function GiftCard() {
 
             <SectionDivider />
 
-            {/* ── Section 5: Sender info ── */}
+            {/* ── Section 6: Sender info ── */}
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
