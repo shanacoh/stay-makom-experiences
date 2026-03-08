@@ -250,7 +250,7 @@ const LaunchIndex = () => {
             </p>
 
             {/* Premium segmented text toggle */}
-            <div className="relative inline-flex items-center gap-6">
+            <div className="relative inline-flex items-center gap-6" dir="ltr">
               <button
                 ref={toggleBtn1Ref}
                 onClick={() => setActiveFilter(FILTER_ADVENTURE)}
