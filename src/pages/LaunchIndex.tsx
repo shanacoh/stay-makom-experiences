@@ -214,9 +214,9 @@ const LaunchIndex = () => {
               className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
               style={{ animationDelay: '0ms' }}>
               {isRTL ? (
-                <>אל תבחר עיר,<br />בחר את הבריחה שלך</>
+                <><span className="whitespace-nowrap">אל תבחר עיר,</span><br /><span className="whitespace-nowrap">בחר את הבריחה שלך</span></>
               ) : (
-                <>Don't choose a city,<br />choose your escape</>
+                <><span className="whitespace-nowrap">Don't choose a city,</span><br /><span className="whitespace-nowrap">choose your escape</span></>
               )}
             </h1>
             <p
