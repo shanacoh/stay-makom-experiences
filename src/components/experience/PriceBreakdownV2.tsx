@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Hotel, Percent, Receipt, Tag, DollarSign, AlertTriangle, Info } from "lucide-react";
 import type { PriceBreakdownV2 as PriceBreakdownType } from "@/types/experience2_addons";
 import { DualPrice } from "@/components/ui/DualPrice";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface PriceBreakdownV2Props {
   breakdown: PriceBreakdownType | null;
