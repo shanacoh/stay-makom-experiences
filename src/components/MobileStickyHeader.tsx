@@ -30,9 +30,7 @@ const MobileStickyHeader = () => {
       <div className="flex justify-center py-2">
         <Link
           to="/launch"
-          className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] transition-colors duration-300 ${
-            isScrolled ? "text-foreground" : "text-white"
-          }`}
+          className="font-sans font-bold tracking-[-0.04em] uppercase text-[20px] text-foreground"
         >
           STAYMAKOM
         </Link>
