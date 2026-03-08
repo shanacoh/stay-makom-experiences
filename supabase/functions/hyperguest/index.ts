@@ -75,6 +75,7 @@ interface PreBookData {
     ratePlanId?: number;
     expectedPrice: { amount: number; currency: string };
   }>;
+  isTest?: boolean;
 }
 
 async function verifyAuth(req: Request, action: string): Promise<{ authenticated: boolean; userId?: string; error?: string }> {
