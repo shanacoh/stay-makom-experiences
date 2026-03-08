@@ -254,3 +254,30 @@ All colors MUST be HSL.
     @apply line-through;
   }
 }
+
+/* Scroll-down indicator animation */
+@keyframes scroll-line {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 1;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 1;
+  }
+  50.1% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0.6;
+  }
+}
+
+.scroll-indicator-line {
+  animation: scroll-line 2s ease-in-out infinite;
+}
