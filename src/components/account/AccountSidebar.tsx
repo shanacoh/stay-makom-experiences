@@ -1,6 +1,9 @@
-import { Heart, Calendar, Gift, User, Sparkles, Bookmark } from "lucide-react";
+import { Heart, Calendar, Gift, User, Bookmark, ChevronRight, LogOut, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface AccountSidebarProps {
   activeTab: string;
@@ -15,19 +18,25 @@ const getCopy = (lang: string) => {
       giftCards: "כרטיסי מתנה",
       myAccount: "החשבון שלי",
       savedCarts: "שמור להמשך",
+      helpSupport: "עזרה ותמיכה",
+      signOut: "התנתק",
     };
   }
   return {
-    wishlist: "Wishlist",
+    wishlist: "Saved Escapes",
     bookings: "My Bookings",
     giftCards: "Gift Cards",
-    myAccount: "My Account",
+    myAccount: "Personal Information",
     savedCarts: "Saved for Later",
+    helpSupport: "Help & Support",
+    signOut: "Sign Out",
   };
 };
 
 export default function AccountSidebar({ activeTab, onTabChange }: AccountSidebarProps) {
   const { lang } = useLanguage();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const copy = getCopy(lang);
 
   const navItems = [
@@ -38,15 +47,13 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
     { id: "profile", icon: User, label: copy.myAccount },
   ];
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/launch");
+  };
+
   return (
-    <nav className="sticky top-24 space-y-1.5">
-      <div className="px-3 mb-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Sparkles className="h-4 w-4" />
-          <span className="text-xs font-medium uppercase tracking-wider">Menu</span>
-        </div>
-      </div>
-      
+    <nav className="sticky top-24 space-y-0.5">
       {navItems.map((item) => {
         const isActive = activeTab === item.id;
         return (
@@ -54,26 +61,44 @@ export default function AccountSidebar({ activeTab, onTabChange }: AccountSideba
             key={item.id}
             onClick={() => onTabChange(item.id)}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-              "hover:bg-muted/50",
-              isActive && "bg-accent/10 text-accent border-l-2 border-accent"
+              "w-full flex items-center gap-3 px-3 py-3 rounded-lg text-[14px] transition-all duration-200",
+              "hover:bg-muted/40",
+              isActive
+                ? "bg-foreground/[0.04] text-foreground font-medium"
+                : "text-muted-foreground"
             )}
           >
-            <item.icon 
+            <item.icon
               className={cn(
-                "h-5 w-5 transition-colors",
-                isActive ? "text-accent" : "text-muted-foreground"
-              )} 
+                "h-[18px] w-[18px] transition-colors flex-shrink-0",
+                isActive ? "text-foreground" : "text-muted-foreground"
+              )}
             />
-            <span className={cn(
-              "transition-colors",
-              isActive ? "text-foreground" : "text-muted-foreground"
-            )}>
-              {item.label}
-            </span>
+            <span className="flex-1 text-left">{item.label}</span>
+            {isActive && (
+              <div className="w-1 h-1 rounded-full bg-foreground" />
+            )}
           </button>
         );
       })}
+
+      <Separator className="!my-3" />
+
+      <button
+        onClick={() => navigate("/contact")}
+        className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-[14px] text-muted-foreground hover:bg-muted/40 transition-all"
+      >
+        <MessageCircle className="h-[18px] w-[18px] flex-shrink-0" />
+        <span className="flex-1 text-left">{copy.helpSupport}</span>
+      </button>
+
+      <button
+        onClick={handleSignOut}
+        className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-[14px] text-destructive/70 hover:bg-destructive/5 transition-all"
+      >
+        <LogOut className="h-[18px] w-[18px] flex-shrink-0" />
+        <span className="flex-1 text-left">{copy.signOut}</span>
+      </button>
     </nav>
   );
 }
