@@ -283,11 +283,14 @@ const LaunchIndex = () => {
           {/* Sentinel for IntersectionObserver — sits right before sticky bar */}
           <div ref={toggleBarRef} />
 
-          {/* Premium segmented text toggle — sticky on mobile, parent is full <section> */}
+          {/* Premium segmented toggle — fixed under logo after crossing sentinel on mobile */}
+          {tabsSticky && <div className="h-10 md:hidden" aria-hidden="true" />}
           <div
             className={cn(
-              "sticky z-40 -mx-4 px-4 transition-all duration-300 md:static md:mx-0 md:px-0",
-              tabsSticky ? "bg-mobile-header border-b border-mobile-border" : ""
+              "transition-all duration-300 md:static md:mx-0 md:px-0",
+              tabsSticky
+                ? "fixed left-0 right-0 z-40 px-4 bg-mobile-header border-b border-mobile-border"
+                : "sticky z-30 -mx-4 px-4"
             )}
             style={{ top: MOBILE_HEADER_HEIGHT }}
           >
