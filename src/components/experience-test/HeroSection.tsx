@@ -372,12 +372,12 @@ const HeroSection = ({
               </Carousel>
               
               {/* Dots indicator */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                 {photos.slice(0, 8).map((_, index) => (
                   <div 
                     key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                      index === carouselIndex ? 'bg-white' : 'bg-white/50'
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === carouselIndex ? 'bg-white' : 'bg-white/40'
                     }`}
                   />
                 ))}

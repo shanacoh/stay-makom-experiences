@@ -32,18 +32,13 @@ const ReviewsGrid2 = ({ experienceId, lang = "en" }: ReviewsGrid2Props) => {
   if (!reviews || reviews.length === 0) {
     return (
       <section className="py-8 border-b border-border">
-        <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-6">
-          {lang === "he" ? "ביקורות" : lang === "fr" ? "Avis" : "Reviews"}
-        </h2>
-        <div className="border border-border/60 rounded-xl py-10 px-6 text-center">
-          <p className="italic text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
-            {lang === "he" 
-              ? "היו מהראשונים לחוות את השהייה הזו. ביקורות יגיעו בקרוב."
-              : lang === "fr"
-                ? "Soyez parmi les premiers à vivre cette expérience. Les avis arrivent bientôt."
-                : "Be among the first to experience this stay. Reviews coming soon."}
-          </p>
-        </div>
+        <p className="italic text-muted-foreground text-sm">
+          {lang === "he" 
+            ? "ביקורות ראשונות בקרוב."
+            : lang === "fr"
+              ? "Les premiers avis arrivent bientôt."
+              : "First reviews coming soon."}
+        </p>
       </section>
     );
   }
