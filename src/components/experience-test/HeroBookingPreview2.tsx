@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { DualPrice } from "@/components/ui/DualPrice";
 import { useExperienceAddons } from "@/hooks/useExperience2Price";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
@@ -24,7 +23,6 @@ const HeroBookingPreview2 = ({
 }: HeroBookingPreview2Props) => {
   const { data: addons } = useExperienceAddons(experienceId);
 
-  // Fetch real 1-night availability to show actual cheapest price + date
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
   const { data: quickDates, isLoading: isLoadingDates } = useQuickDateAvailability({
     propertyId: propId,
@@ -34,7 +32,6 @@ const HeroBookingPreview2 = ({
     enabled: !!propId,
   });
 
-  // Find cheapest real date
   const cheapestDate = useMemo(() => {
     if (!quickDates || quickDates.length === 0) return null;
     return quickDates.reduce((best, curr) => {
@@ -44,7 +41,6 @@ const HeroBookingPreview2 = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  // Fallback to addons-based price if no real data
   const fallbackPrice = useMemo(() => {
     if (!addons || addons.length === 0) return null;
     const pricingAddons = addons.filter(
@@ -55,28 +51,45 @@ const HeroBookingPreview2 = ({
     return total > 0 ? total : null;
   }, [addons]);
 
-  const priceType = useMemo(() => {
-    if (!addons) return "per_person";
-    const pricingAddons = addons.filter(
-      (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
-    );
-    if (pricingAddons.length === 1) return pricingAddons[0].type;
-    return "per_person";
-  }, [addons]);
-
-  // Use real price if available, otherwise fallback
   const displayPrice = cheapestDate?.cheapestPrice ?? fallbackPrice;
-  const displayCurrency = cheapestDate?.currency ?? currency;
   const hasRealDate = !!cheapestDate;
 
+  const getCurrencySymbol = (cur: string) => {
+    if (cur === 'ILS') return '₪';
+    if (cur === 'EUR') return '€';
+    return '$';
+  };
+
+  const symbol = getCurrencySymbol(currency);
+  const nightLabel = lang === "he" ? "ללילה" : "/ night";
+
+  // If no hyperguest, show "Request this stay" panel instead
+  if (!propId) {
+    return (
+      <div className="hidden md:block">
+        <div className="bg-muted/30 rounded-xl p-5 space-y-3">
+          <Button
+            onClick={onViewDates}
+            className="w-full bg-foreground text-background hover:bg-foreground/90 font-medium uppercase tracking-wide"
+          >
+            {lang === "he" ? "בקשו שהייה זו" : "Request this stay"}
+          </Button>
+          <p className="text-xs text-center text-muted-foreground">
+            {lang === "he" ? "נאשר זמינות תוך 24 שעות" : "We'll confirm availability within 24h"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!displayPrice || displayPrice <= 0) {
-    if (isLoadingDates && propId) {
+    if (isLoadingDates) {
       return (
         <div className="hidden md:block">
           <div className="bg-muted/30 rounded-xl p-3 lg:p-4">
             <div className="flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              {lang === "he" ? "בודק מחירים..." : lang === "fr" ? "Vérification des prix..." : "Checking prices..."}
+              {lang === "he" ? "בודק מחירים..." : "Checking prices..."}
             </div>
           </div>
         </div>
@@ -85,13 +98,6 @@ const HeroBookingPreview2 = ({
     return null;
   }
 
-  const priceLabel =
-    priceType === "per_person" || priceType === "per_person_per_night"
-      ? lang === "he" ? "לאדם" : lang === "fr" ? "par voyageur" : "per person"
-      : priceType === "per_night"
-        ? lang === "he" ? "ללילה" : lang === "fr" ? "par nuit" : "per night"
-        : lang === "he" ? "להזמנה" : lang === "fr" ? "par réservation" : "per booking";
-
   return (
     <div className="hidden md:block">
       <div className="bg-muted/30 rounded-xl p-3 lg:p-4">
@@ -99,32 +105,27 @@ const HeroBookingPreview2 = ({
           {/* Left: Price info */}
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-sm text-foreground">
-                {lang === "he" ? "מ-" : lang === "fr" ? "À partir de " : "From "}
+              <span className="text-sm text-muted-foreground">
+                {lang === "he" ? "מ-" : "From "}
               </span>
-              <DualPrice
-                amount={displayPrice}
-                currency={displayCurrency}
-                inline
-                className="text-base lg:text-lg font-semibold underline"
-              />
+              <span className="text-lg font-semibold text-foreground">
+                {symbol}{Math.round(displayPrice)}
+              </span>
+              <span className="text-sm text-muted-foreground">{nightLabel}</span>
             </div>
-            {hasRealDate ? (
+            {hasRealDate && (
               <p className="text-xs text-muted-foreground">
-                {format(cheapestDate.checkin, "dd MMM")} · 1 {lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night"}
+                {format(cheapestDate.checkin, "dd MMM")} · 1 {lang === "he" ? "לילה" : "night"}
               </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">{priceLabel}</p>
             )}
           </div>
 
           {/* Right: CTA Button */}
           <Button
             onClick={onViewDates}
-            variant="cta"
-            className="px-4 text-sm uppercase tracking-wide"
+            className="px-4 text-sm uppercase tracking-wide bg-foreground text-background hover:bg-foreground/90"
           >
-            {lang === "he" ? "לתאריכים" : lang === "fr" ? "Voir les dates" : "View dates"}
+            {lang === "he" ? "לתאריכים" : "View dates"}
           </Button>
         </div>
       </div>

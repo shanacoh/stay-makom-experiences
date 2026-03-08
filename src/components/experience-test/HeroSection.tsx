@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Star, Share, Heart, ChevronRight } from "lucide-react";
+import { Star, Share, Heart, ChevronRight, Sparkles } from "lucide-react";
 import { Grid3X3 } from "lucide-react";
 import {
   Carousel,
@@ -43,12 +43,10 @@ interface HeroSectionProps {
   lang: 'en' | 'he' | 'fr';
   onViewDates?: () => void;
   onScrollToReviews?: () => void;
-  // Booking panel props
   experienceId?: string;
   hotelId?: string;
   minParty?: number;
   maxParty?: number;
-  // Category props
   categoryName?: string;
   categorySlug?: string;
 }
@@ -89,45 +87,20 @@ const HeroSection = ({
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
 
-
-  // 4 photos for the 2x2 grid
   const displayPhotos = photos.slice(0, 4);
 
-  const handlePrevious = () => {
-    setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
-  };
-
-  // Get most recent review for the preview
-  const recentReview = reviews[0];
-
-  // Share functionality
   const handleShare = async () => {
     const url = window.location.href;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    // On mobile, try native share first
     if (isMobile && navigator.share) {
       try {
         await navigator.share({ title, url });
-        return; // Success, exit
+        return;
       } catch (err) {
-        // User cancelled or share failed - fall through to clipboard
-        if (err instanceof Error && err.name === 'AbortError') {
-          return; // User cancelled, don't show any message
-        }
+        if (err instanceof Error && err.name === 'AbortError') return;
       }
     }
-
-    // Desktop: copy to clipboard and open share dialog
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // Clipboard failed, still open dialog
-    }
+    try { await navigator.clipboard.writeText(url); } catch {}
     setShareDialogOpen(true);
   };
 
@@ -153,44 +126,26 @@ const HeroSection = ({
   const wishlistMutation = useMutation({
     mutationFn: async ({ isAdding }: { isAdding: boolean }) => {
       if (!user?.id || !experienceId) throw new Error("Not authenticated");
-      
       if (isAdding) {
-        // Check if row exists with soft delete
         if (wishlistStatus?.deleted_at) {
-          // Reactivate existing row
-          const { error } = await supabase
-            .from("wishlist")
-            .update({ deleted_at: null })
-            .eq("id", wishlistStatus.id);
+          const { error } = await supabase.from("wishlist").update({ deleted_at: null }).eq("id", wishlistStatus.id);
           if (error) throw error;
         } else {
-          // Insert new row
-          const { error } = await supabase
-            .from("wishlist")
-            .insert({ user_id: user.id, experience_id: experienceId });
+          const { error } = await supabase.from("wishlist").insert({ user_id: user.id, experience_id: experienceId });
           if (error) throw error;
         }
       } else {
-        // Soft delete
-        const { error } = await supabase
-          .from("wishlist")
-          .update({ deleted_at: new Date().toISOString() })
-          .eq("user_id", user.id)
-          .eq("experience_id", experienceId);
+        const { error } = await supabase.from("wishlist").update({ deleted_at: new Date().toISOString() }).eq("user_id", user.id).eq("experience_id", experienceId);
         if (error) throw error;
       }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wishlist-status", experienceId, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-      
       if (variables.isAdding) {
-        // Trigger animations
         setAnimateHeart(true);
         setShowBurst(true);
         setTimeout(() => setAnimateHeart(false), 400);
-        
-        // Show success toast
         const messages = {
           en: { title: "Added to favorites", desc: "You can find it in your account" },
           fr: { title: "Ajouté aux favoris", desc: "Retrouvez-le dans votre compte" },
@@ -206,12 +161,114 @@ const HeroSection = ({
   });
 
   const handleFavorite = () => {
-    if (!user) {
-      setAuthDialogOpen(true);
-      return;
-    }
+    if (!user) { setAuthDialogOpen(true); return; }
     wishlistMutation.mutate({ isAdding: !isInWishlist });
   };
+
+  // Curated badge or rating display
+  const renderSocialProof = () => {
+    if (averageRating && reviewsCount > 0) {
+      return (
+        <div className="flex items-center gap-1.5 text-sm">
+          <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
+          <span className="font-medium">{averageRating.toFixed(1)}</span>
+          <span className="text-muted-foreground">·</span>
+          <button 
+            onClick={onScrollToReviews}
+            className="text-muted-foreground underline hover:text-foreground transition-colors"
+          >
+            {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-accent uppercase tracking-wider font-medium">
+        <Sparkles className="h-3.5 w-3.5" />
+        <span>{lang === 'he' ? 'נבחר ע״י STAYMAKOM' : 'Curated by STAYMAKOM'}</span>
+      </div>
+    );
+  };
+
+  // Header info block (reusable for mobile & desktop)
+  const renderHeaderBlock = (isMobile: boolean) => (
+    <div className={cn("space-y-3", isMobile ? "text-center" : "text-center")}>
+      {/* 1. Category tag — gold, uppercase */}
+      {categoryName && categorySlug && (
+        <Link 
+          to={getLocalizedPath(`/category/${categorySlug}`)}
+          className="inline-block text-[11px] font-semibold uppercase tracking-[0.15em] text-accent hover:text-accent/80 transition-colors"
+        >
+          {categoryName}
+        </Link>
+      )}
+      
+      {/* 2. Title — serif */}
+      <h1 className={cn(
+        "font-display font-light text-foreground leading-tight",
+        isMobile ? "text-2xl" : "text-3xl xl:text-4xl"
+      )}>
+        {title}
+      </h1>
+
+      {/* 3. Subtitle — italic, muted */}
+      {subtitle && (
+        <p className={cn(
+          "italic text-muted-foreground leading-relaxed line-clamp-1",
+          isMobile ? "text-sm" : "text-sm"
+        )}>
+          {subtitle}
+        </p>
+      )}
+
+      {/* 4. Rating or Curated badge */}
+      <div className={cn("flex items-center gap-2", isMobile ? "justify-center" : "justify-center")}>
+        {renderSocialProof()}
+      </div>
+
+      {/* 5. Share + Wishlist — inline */}
+      <div className={cn("flex items-center gap-2", isMobile ? "justify-center" : "justify-center")}>
+        <button 
+          onClick={handleShare}
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+          aria-label="Share"
+        >
+          <Share className="h-4 w-4" />
+        </button>
+        <button 
+          onClick={handleFavorite}
+          className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors" 
+          aria-label="Save"
+        >
+          <Heart className={cn(
+            "h-4 w-4 transition-all",
+            isInWishlist && "fill-cta text-cta",
+            animateHeart && "animate-heart-pop"
+          )} />
+          <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
+        </button>
+      </div>
+
+      {/* 6. Hotel with "Hosted at" prefix */}
+      {hotelName && (
+        <div className={cn("flex items-center gap-3 pt-1", isMobile ? "justify-center" : "justify-center")}>
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground overflow-hidden flex-shrink-0">
+            {hotelImage ? (
+              <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />
+            ) : (
+              hotelName.charAt(0)
+            )}
+          </div>
+          <div className={isMobile ? "text-center" : ""}>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              {lang === 'he' ? 'מתארחים ב' : 'Hosted at'}
+            </p>
+            <p className="text-sm font-medium text-foreground">{hotelName}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -224,31 +281,23 @@ const HeroSection = ({
               {lang === 'he' ? 'בית' : 'Home'}
             </Link>
             <ChevronRight className="h-3 w-3 flex-shrink-0" />
-            <Link 
-              to={getLocalizedPath("/#choose-escape")} 
-              className="hover:text-foreground hover:underline underline-offset-2 transition-colors"
-            >
+            <Link to={getLocalizedPath("/#choose-escape")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
               {lang === 'he' ? 'קטגוריות' : 'Categories'}
             </Link>
             {categoryName && categorySlug && (
               <>
                 <ChevronRight className="h-3 w-3 flex-shrink-0" />
-                <Link
-                  to={getLocalizedPath(`/category/${categorySlug}`)}
-                  className="hover:text-foreground hover:underline underline-offset-2 transition-colors"
-                >
+                <Link to={getLocalizedPath(`/category/${categorySlug}`)} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
                   {categoryName}
                 </Link>
               </>
             )}
             <ChevronRight className="h-3 w-3 flex-shrink-0" />
-            <span className="text-foreground font-medium truncate max-w-[180px] sm:max-w-none">
-              {title}
-            </span>
+            <span className="text-foreground font-medium truncate max-w-[180px] sm:max-w-none">{title}</span>
           </div>
         </nav>
 
-        {/* MOBILE: Full-width carousel with rounded corners */}
+        {/* MOBILE: Full-width carousel */}
         <div className="block md:hidden">
           <div className="px-4 pt-3">
             <div className="relative">
@@ -298,227 +347,49 @@ const HeroSection = ({
             </div>
           </div>
 
-          {/* Mobile: Content below photos - centered */}
-          <div className="px-4 pt-5 space-y-3 text-center">
-            {/* Category Badge - centered */}
-            {categoryName && categorySlug && (
-              <Link 
-                to={getLocalizedPath(`/category/${categorySlug}`)}
-                className="inline-block text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {categoryName}
-              </Link>
-            )}
-            
-            {/* Title - centered */}
-            <h1 className="text-xl font-semibold text-foreground leading-tight">
-              {title}
-            </h1>
-
-            {/* Subtitle/Description - centered */}
-            {subtitle && (
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {subtitle}
-              </p>
-            )}
-
-            {/* Rating, Reviews row - centered */}
-            <div className="flex items-center justify-center gap-1.5 text-sm">
-              {averageRating && (
-                <>
-                  <Star className="h-3.5 w-3.5 fill-foreground text-foreground" />
-                  <span className="font-medium">{averageRating.toFixed(1)}</span>
-                  <span className="text-muted-foreground">·</span>
-                  <button 
-                    onClick={onScrollToReviews}
-                    className="text-muted-foreground underline hover:text-foreground transition-colors"
-                  >
-                    {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
-                  </button>
-                </>
-              )}
-              {city && (
-                <>
-                  {averageRating && <span className="text-muted-foreground">·</span>}
-                  <span className="text-muted-foreground">{city}</span>
-                </>
-              )}
-            </div>
-
-            {/* Share and Save buttons - centered - MOBILE */}
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <button 
-                onClick={handleShare}
-                className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
-                aria-label="Share"
-              >
-                <Share className="h-5 w-5" />
-              </button>
-              <button 
-                onClick={handleFavorite}
-                className="relative p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
-                aria-label="Save"
-              >
-                <Heart className={cn(
-                  "h-5 w-5 transition-all",
-                  isInWishlist && "fill-cta text-cta",
-                  animateHeart && "animate-heart-pop"
-                )} />
-                <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
-              </button>
-            </div>
-
-            {/* Host info - centered */}
-            {hotelName && (
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground overflow-hidden">
-                  {hotelImage ? (
-                    <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />
-                  ) : (
-                    hotelName.charAt(0)
-                  )}
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {lang === 'he' ? `מאת ${hotelName}` : lang === 'en' ? `By ${hotelName}` : `Par ${hotelName}`}
-                </span>
-              </div>
-            )}
+          {/* Mobile: Header block below photos */}
+          <div className="px-4 pt-5">
+            {renderHeaderBlock(true)}
           </div>
         </div>
 
-        {/* DESKTOP & TABLET: 2-column layout with single large photo */}
+        {/* DESKTOP: 2-column layout */}
         <div className="hidden md:block max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
           <div className="grid grid-cols-[65fr_35fr] gap-4 md:gap-6 xl:gap-8 items-center">
-            
             {/* LEFT: Single large photo */}
             <div className="relative h-[calc(100vh-12rem)]">
               <div 
                 className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer"
-                onClick={() => {
-                  setCurrentPhotoIndex(0);
-                  setIsGalleryOpen(true);
-                }}
+                onClick={() => { setCurrentPhotoIndex(0); setIsGalleryOpen(true); }}
               >
                 <img
                   src={photos[0] || "/placeholder.svg"}
                   alt={title}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 />
-                {/* Button to open gallery */}
                 {photos.length > 1 && (
                   <button
                     className="absolute bottom-4 right-4 z-10 px-3 py-2 rounded-lg bg-white/90 hover:bg-white shadow-md transition-all flex items-center gap-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentPhotoIndex(0);
-                      setIsGalleryOpen(true);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); setCurrentPhotoIndex(0); setIsGalleryOpen(true); }}
                   >
                     <Grid3X3 className="h-4 w-4 text-foreground" />
                     <span className="text-sm font-medium text-foreground">
-                      {lang === 'he' ? `הצג את כל ${photos.length} התמונות` : lang === 'fr' ? `Voir les ${photos.length} photos` : `View all ${photos.length} photos`}
+                      {lang === 'he' ? `הצג את כל ${photos.length} התמונות` : `View all ${photos.length} photos`}
                     </span>
                   </button>
                 )}
               </div>
             </div>
 
-            {/* RIGHT: Content + Booking Panel integrated */}
-            <div className="flex flex-col justify-center items-center h-[calc(100vh-12rem)] text-center">
-            {/* Content info section */}
-              <div className="space-y-4 pb-5">
-                {/* Category Badge - centered */}
-                {categoryName && categorySlug && (
-                  <Link 
-                    to={getLocalizedPath(`/category/${categorySlug}`)}
-                    className="inline-block text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {categoryName}
-                  </Link>
-                )}
-                
-                {/* Title - centered */}
-                <h1 className="text-2xl font-semibold text-foreground leading-tight">
-                  {title}
-                </h1>
-
-                {/* Subtitle / Description - centered */}
-                {subtitle && (
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {subtitle}
-                  </p>
-                )}
-
-                {/* Share and Save buttons - centered */}
-                <div className="flex items-center justify-center gap-3">
-                  <button 
-                    onClick={handleShare}
-                    className="p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
-                    aria-label="Share"
-                  >
-                    <Share className="h-5 w-5" />
-                  </button>
-                  <button 
-                    onClick={handleFavorite}
-                    className="relative p-2 text-foreground hover:bg-muted/50 rounded-full transition-colors" 
-                    aria-label="Save"
-                  >
-                    <Heart className={cn(
-                      "h-5 w-5 transition-all",
-                      isInWishlist && "fill-cta text-cta",
-                      animateHeart && "animate-heart-pop"
-                    )} />
-                    <HeartBurst trigger={showBurst} onComplete={() => setShowBurst(false)} />
-                  </button>
-                </div>
-
-                {/* Rating row - centered */}
-                <div className="flex items-center justify-center gap-2">
-                  {averageRating && (
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-foreground text-foreground" />
-                      <span className="font-semibold">{averageRating.toFixed(2)}</span>
-                      <span className="text-muted-foreground mx-1">·</span>
-                      <button 
-                        onClick={onScrollToReviews}
-                        className="text-muted-foreground underline text-sm hover:text-foreground transition-colors"
-                      >
-                        {reviewsCount} {lang === 'he' ? 'ביקורות' : lang === 'en' ? 'reviews' : 'avis'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Separator */}
-                <div className="border-t border-border" />
-
-                {/* Host section - Hotel name only, no "Host:" label */}
-                {hotelName && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-base font-medium text-muted-foreground overflow-hidden flex-shrink-0">
-                      {hotelImage ? (
-                        <img src={hotelImage} alt={hotelName} className="w-full h-full object-cover" />
-                      ) : (
-                        hotelName.charAt(0)
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{hotelName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {city}{city && region && <span className="mx-1">•</span>}{region}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-
-              </div>
+            {/* RIGHT: Header block */}
+            <div className="flex flex-col justify-center items-center h-[calc(100vh-12rem)]">
+              {renderHeaderBlock(false)}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Gallery Modal - Horizontal carousel */}
+      {/* Gallery Modal */}
       <GalleryModal
         open={isGalleryOpen}
         onOpenChange={setIsGalleryOpen}

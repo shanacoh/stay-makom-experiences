@@ -1,35 +1,17 @@
 /**
  * Make it unforgettable – User-facing interactive extras section
- * Matches Experience1 ExtrasSection design exactly
- * Fetches hotel2_extras linked to the experience via experience2_extras
  */
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Wine,
-  Car,
-  Coffee,
-  Flower,
-  Sparkle,
-  Gift,
-  Heart,
-  Camera,
-  MusicNotes,
-  Champagne,
-  Bed,
-  Cake,
-  Drop,
-  Leaf,
-  HandHeart,
-  Star,
+  Wine, Car, Coffee, Flower, Sparkle, Gift, Heart, Camera, MusicNotes,
+  Champagne, Bed, Cake, Drop, Leaf, HandHeart, Star,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 
-// Map icon names to Phosphor icons
 const iconNameMapping: Record<string, PhosphorIcon> = {
   Wine, Champagne, Car, Coffee, Flower, Flower2: Flower, Sparkles: Sparkle, Sparkle, Gift, Heart, Camera, Music: MusicNotes, MusicNotes, Bed, Cake, Drop, Droplets: Drop, Leaf, HandHeart, Star,
 };
@@ -81,7 +63,7 @@ interface ExtrasSection2Props {
 const ExtrasSection2 = ({
   experienceId,
   lang = "en",
-  currency = "USD",
+  currency = "ILS",
   selectedExtras,
   onToggleExtra,
 }: ExtrasSection2Props) => {
@@ -111,25 +93,25 @@ const ExtrasSection2 = ({
 
   const getText = (key: string) => {
     const texts: Record<string, Record<string, string>> = {
-      sectionTitle: {
-        en: "Make it unforgettable",
-        fr: "Rendez-le inoubliable",
-        he: "הפכו את זה לבלתי נשכח"
-      },
-      sectionSubtitle: {
-        en: "Thoughtful touches to elevate your stay",
-        fr: "Des attentions pour sublimer votre séjour",
-        he: "נגיעות מחשבה להעלאת השהייה"
-      },
+      sectionTitle: { en: "Make it unforgettable", fr: "Rendez-le inoubliable", he: "הפכו את זה לבלתי נשכח" },
+      sectionIntro: { en: "Every escape can go a little further.", fr: "Chaque escapade peut aller plus loin.", he: "כל בריחה יכולה ללכת קצת יותר רחוק." },
       add: { en: "Add", fr: "Ajouter", he: "הוסף" },
       added: { en: "Added", fr: "Ajouté", he: "נוסף" },
     };
     return texts[key]?.[lang] || texts[key]?.en || key;
   };
 
-  const formatPrice = (price: number, cur: string) => {
-    const symbol = cur === 'ILS' ? '₪' : '$';
-    return `+${symbol}${price}`;
+  // Use consistent currency symbol based on the experience currency
+  const getCurrencySymbol = (cur: string) => {
+    if (cur === 'ILS') return '₪';
+    if (cur === 'EUR') return '€';
+    return '$';
+  };
+
+  const displaySymbol = getCurrencySymbol(currency);
+
+  const formatPrice = (price: number) => {
+    return `+${displaySymbol}${price}`;
   };
 
   const isImageUrl = (url?: string | null) => url && (url.startsWith('http') || url.startsWith('/'));
@@ -140,8 +122,8 @@ const ExtrasSection2 = ({
         <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-1">
           {getText('sectionTitle')}
         </h2>
-        <p className="text-muted-foreground text-sm">
-          {getText('sectionSubtitle')}
+        <p className="italic text-muted-foreground text-sm">
+          {getText('sectionIntro')}
         </p>
       </div>
       
@@ -157,7 +139,7 @@ const ExtrasSection2 = ({
             name: extra.name,
             name_he: extra.name_he,
             price: extra.price,
-            currency: extra.currency,
+            currency: currency, // Use experience currency consistently
             pricing_type: extra.pricing_type,
           };
           
@@ -169,7 +151,7 @@ const ExtrasSection2 = ({
                 transition-all duration-200 ease-out
                 border flex flex-col items-center text-center
                 ${isSelected 
-                  ? 'border-primary/40 bg-primary/5' 
+                  ? 'border-foreground/30 bg-foreground/5' 
                   : 'border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40'
                 }
               `}
@@ -180,24 +162,14 @@ const ExtrasSection2 = ({
                 ${hasImage ? '' : 'bg-gradient-to-br from-primary/5 via-muted/30 to-primary/10'}
               `}>
                 {hasImage ? (
-                  <img 
-                    src={extra.image_url!} 
-                    alt={name}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={extra.image_url!} alt={name} className="w-full h-full object-cover" />
                 ) : IconComponent ? (
-                  <IconComponent 
-                    size={26} 
-                    weight="duotone" 
-                    className="text-primary/60"
-                  />
+                  <IconComponent size={26} weight="duotone" className="text-primary/60" />
                 ) : null}
               </div>
 
               <div className="flex-1 flex items-start">
-                <p className="text-sm text-foreground/80 leading-snug line-clamp-2">
-                  {name}
-                </p>
+                <p className="text-sm text-foreground/80 leading-snug line-clamp-2">{name}</p>
               </div>
 
               <div className="mt-3">
@@ -205,16 +177,16 @@ const ExtrasSection2 = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-background hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                    className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-transparent hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
                     onClick={() => onToggleExtra(extraData)}
                   >
-                    {formatPrice(extra.price, extra.currency)} {getText('add')}
+                    {formatPrice(extra.price)} · {getText('add')}
                   </Button>
                 ) : (
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className="h-8 text-xs font-medium rounded-full px-4"
+                    className="h-8 text-xs font-medium rounded-full px-4 border-foreground bg-foreground text-background"
                     onClick={() => onToggleExtra(extraData)}
                   >
                     <Check className="w-3 h-3 mr-1" />

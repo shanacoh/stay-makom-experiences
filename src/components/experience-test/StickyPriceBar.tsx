@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { DualPrice } from "@/components/ui/DualPrice";
 
 interface StickyPriceBarProps {
   basePrice: number;
@@ -12,6 +11,7 @@ interface StickyPriceBarProps {
   lang: 'en' | 'he' | 'fr';
   onViewDates: () => void;
   footerRef: React.RefObject<HTMLElement>;
+  hasHyperguest?: boolean;
 }
 
 const StickyPriceBar = ({
@@ -20,33 +20,37 @@ const StickyPriceBar = ({
   currency,
   lang,
   onViewDates,
-  footerRef
+  footerRef,
+  hasHyperguest = false,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Hide when footer is in view
       if (footerRef.current) {
         const footerRect = footerRef.current.getBoundingClientRect();
         setIsHidden(footerRect.top < window.innerHeight);
       }
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
-
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [footerRef]);
 
-  const priceLabel = basePriceType === 'per_person' 
-    ? (lang === 'he' ? 'לאדם' : lang === 'fr' ? 'par voyageur' : 'per person')
-    : (lang === 'he' ? 'להזמנה' : lang === 'fr' ? 'par réservation' : 'per booking');
+  const getCurrencySymbol = (cur: string) => {
+    if (cur === 'ILS') return '₪';
+    if (cur === 'EUR') return '€';
+    return '$';
+  };
 
-  const currencySymbol = '$';
-  const formattedPrice = `${currencySymbol}${basePrice}`;
+  const symbol = getCurrencySymbol(currency);
+  const formattedPrice = `${symbol}${Math.round(basePrice)}`;
+  const nightLabel = lang === 'he' ? 'ללילה' : lang === 'fr' ? '/ nuit' : '/ night';
 
-  // Only show on mobile - desktop has sticky booking panel
+  const ctaLabel = hasHyperguest
+    ? (lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates')
+    : (lang === 'he' ? 'בקשו שהייה' : lang === 'fr' ? 'Demander ce séjour' : 'Request this stay');
+
   return (
     <div
       className={cn(
@@ -56,25 +60,23 @@ const StickyPriceBar = ({
     >
       <div className="container px-4 pb-safe">
         <div className="flex items-center justify-between py-3">
-          {/* Left: Price info */}
+          {/* Left: Price */}
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-sm">
-                {lang === 'he' ? 'מ-' : lang === 'fr' ? 'À partir de ' : 'From '}
+              <span className="text-xs text-muted-foreground">
+                {lang === 'he' ? 'מ-' : 'From '}
               </span>
-              <DualPrice amount={basePrice} currency={currency} inline className="text-base font-semibold" />
-              <span className="text-xs text-muted-foreground ml-1">{priceLabel}</span>
+              <span className="text-base font-semibold text-foreground">{formattedPrice}</span>
+              <span className="text-xs text-muted-foreground">{nightLabel}</span>
             </div>
-            {/* Cancellation info removed — dynamic data not available at this level */}
           </div>
 
-          {/* Right: CTA - rounded style */}
+          {/* Right: CTA */}
           <Button 
             onClick={onViewDates}
-            variant="cta"
-            className="px-6 rounded-full font-medium"
+            className="px-5 rounded-full font-medium bg-foreground text-background hover:bg-foreground/90"
           >
-            {lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates'}
+            {ctaLabel}
           </Button>
         </div>
       </div>
