@@ -45,31 +45,27 @@ const HeroBookingPreview2 = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  // Calculate addon total with proper multipliers
-  const addonTotal = useMemo(() => {
-    if (!addons || addons.length === 0) return 0;
-    const pricingAddons = addons.filter(
-      (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
-    );
-    return pricingAddons.reduce((sum, a) => {
-      const v = Number(a.value) || 0;
-      switch (a.type) {
-        case 'per_person': return sum + v * minParty;
-        case 'per_night': return sum + v * minNights;
-        case 'per_person_per_night': return sum + v * minParty * minNights;
-        default: return sum + v;
-      }
-    }, 0);
-  }, [addons, minParty, minNights]);
-
-  // Total price = room price + addon extras (or addon-only fallback)
+  // Compute exact total with same engine as booking panel (room + addons + commissions + promo)
   const displayPrice = useMemo(() => {
-    const roomPrice = cheapestDate?.cheapestPrice;
-    if (roomPrice != null && roomPrice > 0) {
-      return roomPrice + addonTotal; // Room + addons = true total
-    }
-    return addonTotal > 0 ? addonTotal : null; // Fallback: addons only
-  }, [cheapestDate, addonTotal]);
+    const roomPrice = cheapestDate?.cheapestPrice ?? 0;
+    const breakdown = calculatePriceV2(
+      roomPrice,
+      minParty,
+      1,
+      (addons ?? []) as any,
+      pricingConfig ?? {
+        commission_room_pct: 0,
+        commission_addons_pct: 0,
+        tax_pct: 0,
+        promo_type: null,
+        promo_value: null,
+        promo_is_percentage: true,
+      },
+      currency
+    );
+
+    return breakdown.finalTotal > 0 ? breakdown.finalTotal : null;
+  }, [cheapestDate, addons, pricingConfig, minParty, currency]);
 
   const hasRealDate = !!cheapestDate;
 
