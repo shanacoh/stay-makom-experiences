@@ -120,7 +120,7 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 md:p-6">
             <div className="flex items-end justify-between gap-4">
               <div className="text-white">
-                <h3 className="text-lg md:text-xl font-semibold mb-1">{name}</h3>
+                <h3 className="text-lg md:text-xl font-semibold mb-1 text-white">{name}</h3>
                 <LocationPopover
                   city={city || undefined}
                   region={region || undefined}
