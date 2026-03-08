@@ -75,6 +75,7 @@ export default function ExperienceCard({
   isInWishlist: initialIsInWishlist = false,
   onWishlistToggle,
   linkPrefix = "/experience",
+  linkSuffix = "",
 }: ExperienceCardProps) {
   const { lang } = useLanguage();
   const { user } = useAuth();
