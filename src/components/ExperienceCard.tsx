@@ -260,7 +260,7 @@ export default function ExperienceCard({
 
           {/* Title on image - bottom left */}
           <div className="absolute bottom-3 left-3 right-3">
-            <h3 className="font-serif text-base sm:text-lg md:text-xl font-bold text-white leading-tight line-clamp-2 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+            <h3 className="font-sans text-base sm:text-lg md:text-xl font-bold text-white leading-tight line-clamp-2 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
               {title}
             </h3>
           </div>
