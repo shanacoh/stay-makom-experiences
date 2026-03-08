@@ -220,8 +220,8 @@ export default function Experience2() {
   const category = experience.categories;
   const hyperguestPropertyId = primaryHotel?.hyperguest_property_id;
 
-  // Public display currency — always USD for consistency across all surfaces
-  const displayCurrency = "USD";
+  // Display currency from global context (synced to language)
+  const displayCurrency = displayCurrencyCtx;
 
   // 🔍 DEBUG — à retirer après investigation
   console.log("[Experience2] primaryHotel complet:", primaryHotel);
