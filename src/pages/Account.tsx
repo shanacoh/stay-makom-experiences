@@ -175,6 +175,8 @@ const Account = () => {
             />
           </>
         );
+      case "savedcarts":
+        return <SavedCartsSection userId={user.id} />;
       case "giftcards":
         return (
           <>
