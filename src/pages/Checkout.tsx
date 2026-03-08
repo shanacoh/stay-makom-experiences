@@ -422,6 +422,27 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 
       if (dbError) console.error("Failed to save booking to DB:", dbError);
 
+      // === CERTIFICATION LOG ===
+      const cancellationInfo = analyzeCancellationPolicies(state.selectedRatePlan);
+      console.log(`
+╔══════════════════════════════════════════════════════════╗
+║           🏨 BOOKING CERTIFICATION DETAILS              ║
+╠══════════════════════════════════════════════════════════╣
+║ Property ID:        ${state.hyperguestPropertyId}
+║ HyperGuest Booking: ${hgBookingId}
+║ Guest Name:         ${leadGuest.firstName} ${leadGuest.lastName}
+║ Check-in:           ${checkIn}
+║ Check-out:          ${checkOut} (${state.nights} night${state.nights > 1 ? 's' : ''})
+║ Room:               ${state.selectedRoomName} — ${state.selectedRatePlan?.board || 'RO'}
+║ Amount:             ${sellPrice} ${bookingCurrency}
+║ Rate plan:          ${cancellationInfo?.isRefundable ? 'Fully refundable' : 'Non-refundable'}${cancellationInfo?.freeCancelUntil ? ` (free cancellation until ${cancellationInfo.freeCancelUntil})` : ''}
+║ StayMakom Ref:      ${staymakomRef}
+║ HG Status:          ${hgStatus}
+║ Booking created:    ${new Date().toISOString()}
+║ Hotel Name:         ${state.hotelName || 'N/A'}
+╚══════════════════════════════════════════════════════════╝
+      `);
+
       const taxBreakdown = extractTaxBreakdown(state.selectedRatePlan);
       const allRemarks = [
         ...state.propertyRemarks,
