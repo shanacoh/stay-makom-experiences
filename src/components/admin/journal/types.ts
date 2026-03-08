@@ -1,4 +1,4 @@
-export type BlockType = 'title' | 'text' | 'image' | 'cta' | 'quote' | 'list' | 'experience';
+export type BlockType = 'title' | 'text' | 'image' | 'cta' | 'quote' | 'list' | 'experience' | 'pull_quote' | 'divider';
 
 export interface BaseBlock {
   id: string;
@@ -46,7 +46,16 @@ export interface ExperienceBlock extends BaseBlock {
   experience_id: string;
 }
 
-export type Block = TitleBlock | TextBlock | ImageBlock | CTABlock | QuoteBlock | ListBlock | ExperienceBlock;
+export interface PullQuoteBlock extends BaseBlock {
+  type: 'pull_quote';
+  content: string;
+}
+
+export interface DividerBlock extends BaseBlock {
+  type: 'divider';
+}
+
+export type Block = TitleBlock | TextBlock | ImageBlock | CTABlock | QuoteBlock | ListBlock | ExperienceBlock | PullQuoteBlock | DividerBlock;
 
 export interface ArticleData {
   title_en: string;
@@ -97,6 +106,10 @@ export function createEmptyBlock(type: BlockType): Block {
       return { id, type: 'list', items: [''], style: 'bullet' };
     case 'experience':
       return { id, type: 'experience', experience_id: '' };
+    case 'pull_quote':
+      return { id, type: 'pull_quote', content: '' };
+    case 'divider':
+      return { id, type: 'divider' };
   }
 }
 
@@ -123,6 +136,10 @@ export function mirrorBlocks(sourceBlocks: Block[]): Block[] {
       case 'experience':
         // Experience blocks are copied as-is (same experience)
         return { ...block, id: newId };
+      case 'pull_quote':
+        return { ...block, id: newId, content: '' };
+      case 'divider':
+        return { ...block, id: newId };
     }
   });
 }
@@ -134,7 +151,8 @@ export function calculateReadingTime(blocks: Block[]): { words: number; minutes:
     switch (block.type) {
       case 'title':
       case 'quote':
-        text += ' ' + block.content;
+      case 'pull_quote':
+        text += ' ' + (block as any).content;
         break;
       case 'text':
         // Strip HTML tags for word count

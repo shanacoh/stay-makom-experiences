@@ -17,6 +17,8 @@ import {
   List,
   Sparkles,
   Copy,
+  Minus,
+  MessageSquareQuote,
 } from "lucide-react";
 
 interface BlockEditorProps {
@@ -31,6 +33,8 @@ const blockOptions: { type: BlockType; label: string; icon: React.ReactNode }[] 
   { type: "title", label: "Title", icon: <Type className="w-4 h-4" /> },
   { type: "text", label: "Rich Text", icon: <FileText className="w-4 h-4" /> },
   { type: "image", label: "Image", icon: <Image className="w-4 h-4" /> },
+  { type: "pull_quote", label: "Pull Quote", icon: <MessageSquareQuote className="w-4 h-4" /> },
+  { type: "divider", label: "Divider", icon: <Minus className="w-4 h-4" /> },
   { type: "cta", label: "CTA Button", icon: <MousePointerClick className="w-4 h-4" /> },
   { type: "quote", label: "Quote", icon: <Quote className="w-4 h-4" /> },
   { type: "list", label: "Bullet List", icon: <List className="w-4 h-4" /> },
