@@ -57,8 +57,8 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <div className="pt-20 pb-32 px-4 max-w-lg mx-auto">
+      <div className="hidden md:block"><Header /></div>
+      <div className="pt-4 md:pt-20 pb-32 px-4 max-w-lg mx-auto">
         {cart ? (
           <div className="space-y-6">
             <h1 className="text-xl font-bold tracking-tight">Your saved escape</h1>
