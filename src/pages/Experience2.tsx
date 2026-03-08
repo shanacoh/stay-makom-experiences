@@ -462,7 +462,7 @@ export default function Experience2() {
             <ExtrasSection2
               experienceId={experience.id}
               lang={lang}
-              currency={experience.currency || "ILS"}
+              currency={displayCurrency}
               selectedExtras={selectedExtras}
               onToggleExtra={handleToggleExtra}
             />
