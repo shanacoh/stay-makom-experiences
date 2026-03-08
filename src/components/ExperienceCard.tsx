@@ -243,15 +243,14 @@ export default function ExperienceCard({
             onClick={handleHeartClick}
             disabled={wishlistMutation.isPending}
             className={cn(
-              "absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/40",
-              isHovered || isInWishlist ? 'opacity-100' : 'opacity-0 sm:opacity-0',
-              'opacity-100 sm:opacity-0'
+              "absolute top-2 right-2 sm:top-2.5 sm:right-2.5 p-1 sm:p-1.5 rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/40",
+              isInWishlist ? 'opacity-100' : 'opacity-70 sm:opacity-0 sm:group-hover:opacity-100',
             )}
             aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart
               className={cn(
-                "h-5 w-5 transition-all",
+                "h-4 w-4 sm:h-5 sm:w-5 transition-all",
                 isInWishlist ? 'fill-destructive text-destructive' : 'text-white',
                 animateHeart && 'animate-heart-pop'
               )}
