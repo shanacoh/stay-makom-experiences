@@ -213,10 +213,10 @@ const HeroSection = ({
 
       {/* 3. Subtitle — italic, muted */}
       {subtitle && (
-        <p className={cn(
-          "italic text-muted-foreground leading-relaxed line-clamp-1",
-          isMobile ? "text-sm" : "text-sm"
-        )}>
+         <p className={cn(
+           "text-muted-foreground leading-relaxed line-clamp-3",
+           isMobile ? "text-sm" : "text-sm"
+         )}>
           {subtitle}
         </p>
       )}
