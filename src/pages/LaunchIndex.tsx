@@ -213,15 +213,20 @@ const LaunchIndex = () => {
             <h1
               className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
               style={{ animationDelay: '0ms' }}>
-              {isRTL ? (
-                <><span className="whitespace-nowrap">אל תבחר עיר,</span><br /><span className="whitespace-nowrap">בחר את הבריחה שלך</span></>
-              ) : (
-                <><span className="whitespace-nowrap">Don't choose a city,</span><br /><span className="whitespace-nowrap">choose your escape</span></>
-              )}
+              {isRTL ?
+              <><span className="whitespace-nowrap">אל תבחר עיר,</span><br /><span className="whitespace-nowrap">בחר את הבריחה שלך</span></> :
+
+              <><span className="whitespace-nowrap">Don't choose a city,</span><br /><span className="whitespace-nowrap">choose your escape</span></>
+              }
             </h1>
             <p
-              className="font-sans italic text-white/90 mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
-              style={{ animationDelay: '250ms', fontSize: '22px' }}>
+              className="text-lg sm:text-xl md:text-2xl text-white mb-1 max-w-xl mx-auto opacity-0 animate-hero-fade-up font-normal"
+              style={{ animationDelay: '250ms' }}>
+              {isRTL ? "לא יעד. תחושה." : "Not a destination. A feeling."}
+            </p>
+            <p
+              className="text-sm sm:text-base text-white/80 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
+              style={{ animationDelay: '375ms' }}>
               {isRTL ? "הישראל שרוב האנשים לא מוצאים." : "The Israel most people never find."}
             </p>
             <button
@@ -243,7 +248,7 @@ const LaunchIndex = () => {
         <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-16">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
-              {isRTL ? (<>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</>) : (<>Handpicked Hotels.<br />Unforgettable Experiences.</>)}
+              {isRTL ? <>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</> : <>Handpicked Hotels.<br />Unforgettable Experiences.</>}
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm mb-5">
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
@@ -256,11 +261,11 @@ const LaunchIndex = () => {
                 onClick={() => setActiveFilter(FILTER_ADVENTURE)}
                 className={cn(
                   "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
-                  activeFilter === FILTER_ADVENTURE
-                    ? "font-medium text-foreground"
-                    : "font-light text-foreground/40 hover:text-foreground/70"
-                )}
-              >
+                  activeFilter === FILTER_ADVENTURE ?
+                  "font-medium text-foreground" :
+                  "font-light text-foreground/40 hover:text-foreground/70"
+                )}>
+                
                 <span className="inline-flex items-center gap-1.5">
                   <Compass size={13} strokeWidth={1.5} />
                   {isRTL ? "הרפתקה" : "Feel adventurous"}
@@ -272,11 +277,11 @@ const LaunchIndex = () => {
                 onClick={() => setActiveFilter(FILTER_ROMANTIC)}
                 className={cn(
                   "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
-                  activeFilter === FILTER_ROMANTIC
-                    ? "font-medium text-foreground"
-                    : "font-light text-foreground/40 hover:text-foreground/70"
-                )}
-              >
+                  activeFilter === FILTER_ROMANTIC ?
+                  "font-medium text-foreground" :
+                  "font-light text-foreground/40 hover:text-foreground/70"
+                )}>
+                
                 <span className="inline-flex items-center gap-1.5">
                   <Heart size={13} strokeWidth={1.5} />
                   {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
@@ -284,8 +289,8 @@ const LaunchIndex = () => {
               </button>
               <div
                 className="absolute bottom-0 h-px bg-foreground transition-all duration-300 ease-in-out"
-                style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
-              />
+                style={{ left: toggleUnderline.left, width: toggleUnderline.width }} />
+              
             </div>
           </div>
 
@@ -305,18 +310,18 @@ const LaunchIndex = () => {
 
               // Compute display price from active pricing addons
               const pricingTypes = ['per_person', 'per_night', 'per_person_per_night', 'fixed'];
-              const addonPrice = (experience as any).experience2_addons
-                ?.filter((a: any) => a.is_active && pricingTypes.includes(a.type))
-                .reduce((sum: number, a: any) => sum + (Number(a.value) || 0), 0) || 0;
+              const addonPrice = (experience as any).experience2_addons?.
+              filter((a: any) => a.is_active && pricingTypes.includes(a.type)).
+              reduce((sum: number, a: any) => sum + (Number(a.value) || 0), 0) || 0;
 
               const cardExperience = {
                 ...experience,
                 hotels: primaryHotelLink || null,
                 experience_highlight_tags: experience.experience2_highlight_tags || [],
-                base_price: addonPrice || experience.base_price,
+                base_price: addonPrice || experience.base_price
               };
 
-                return (
+              return (
                 <ExperienceCard
                   key={experience.id}
                   experience={cardExperience}
@@ -395,7 +400,7 @@ const LaunchIndex = () => {
                   placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
                   className="flex-1 sm:w-56 h-9 text-sm" />
 
-                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4 bg-[#1A1814] text-white hover:bg-[#1A1814]/90">
+                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4 bg-foreground text-background hover:bg-foreground/90">
                     {isRTL ? "הצטרפו לרשימה" : "Join the list"}
                   </Button>
                 </form>
@@ -407,16 +412,16 @@ const LaunchIndex = () => {
                 {/* All screens: 4-col grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
                   {categories.map((category) => {
-                    const catTitle = getLocalizedField(category, "name", lang) as string;
-                    const image = category.hero_image || "";
+                  const catTitle = getLocalizedField(category, "name", lang) as string;
+                  const image = category.hero_image || "";
 
-                    const desc = getLocalizedField(category, "launch_description", lang) as string | null;
+                  const desc = getLocalizedField(category, "launch_description", lang) as string | null;
 
-                    return (
+                  return (
                     <button
-                        key={`waitlist-${category.slug}`}
-                        onClick={() => handleCategoryClick(category)}
-                        className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
+                      key={`waitlist-${category.slug}`}
+                      onClick={() => handleCategoryClick(category)}
+                      className="group relative overflow-hidden rounded-xl shadow-soft hover:shadow-strong transition-all duration-300 text-left cursor-pointer">
                           <div className="aspect-[4/3] md:aspect-square relative">
                             <img src={image} alt={catTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             <div className="absolute inset-0 bg-black/25 group-hover:bg-black/55 transition-all duration-300" />
@@ -424,27 +429,27 @@ const LaunchIndex = () => {
                             <div className="absolute inset-0 flex items-center justify-center p-3 md:p-4 group-hover:opacity-0 transition-opacity duration-300">
                               <h3 className="font-sans text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white uppercase tracking-tight leading-tight text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
                                 {(() => {
-                                  const words = catTitle.split(' ');
-                                  const mid = Math.ceil(words.length / 2);
-                                  const l1 = words.slice(0, mid).join(' ');
-                                  const l2 = words.slice(mid).join(' ');
-                                  return <>{l1}{l2 && <><br />{l2}</>}</>;
-                                })()}
+                              const words = catTitle.split(' ');
+                              const mid = Math.ceil(words.length / 2);
+                              const l1 = words.slice(0, mid).join(' ');
+                              const l2 = words.slice(mid).join(' ');
+                              return <>{l1}{l2 && <><br />{l2}</>}</>;
+                            })()}
                               </h3>
                             </div>
                             {/* Description - shown on hover */}
-                            {desc && (
-                              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {desc &&
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <h4 className="font-sans text-xs sm:text-sm font-bold text-white uppercase tracking-tight mb-1.5 text-center">{catTitle}</h4>
                                 <p className="font-sans text-[11px] sm:text-xs md:text-sm text-white/95 text-center leading-snug line-clamp-6 sm:line-clamp-8">
                                   {desc}
                                 </p>
                               </div>
-                            )}
+                        }
                           </div>
-                      </button>
-                    );
-                  })}
+                      </button>);
+
+                })}
                 </div>
               </div>
             }
@@ -472,7 +477,7 @@ const LaunchIndex = () => {
 
             <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
               <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
-                {isRTL ? (<>מתנה מושלמת.<br />מתנת הבריחה.</>) : (<>Perfect gift.<br />The gift of escape.</>)}
+                {isRTL ? <>מתנה מושלמת.<br />מתנת הבריחה.</> : <>Perfect gift.<br />The gift of escape.</>}
               </h2>
               <p className="text-muted-foreground text-sm md:text-base max-w-md">
                 {t(lang, "giftCardSectionDesc")}
