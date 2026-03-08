@@ -150,6 +150,7 @@ export default function MobileAccountHome() {
   };
 
   return (
+    <>
     <div className="px-6 pt-20 pb-32">
       {/* TOP SECTION — Avatar + Name */}
       <div className="flex flex-col items-center text-center pt-4 mb-6">
