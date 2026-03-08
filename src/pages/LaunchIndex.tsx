@@ -236,7 +236,7 @@ const LaunchIndex = () => {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
 
-          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-black/35" />
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
             <h1
