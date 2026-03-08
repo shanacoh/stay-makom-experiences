@@ -249,7 +249,7 @@ export default function ExperienceCard({
             <Heart
               className={cn(
                 "h-5 w-5 transition-all",
-                isInWishlist ? 'fill-red-500 text-red-500' : 'text-white',
+                isInWishlist ? 'fill-destructive text-destructive' : 'text-white',
                 animateHeart && 'animate-heart-pop'
               )}
             />
