@@ -14,7 +14,7 @@ const corsHeaders = {
 
 // API Domains
 const SEARCH_DOMAIN = 'https://search-api.hyperguest.io/2.0/';
-const BOOKING_DOMAIN = 'https://book-api.hyperguest.io/2.0/';
+const BOOKING_DOMAIN = 'https://book-api.hyperguest.com/2.0/';
 const STATIC_DOMAIN = 'https://hg-static.hyperguest.com/';
 
 const PROTECTED_ACTIONS = ['create-booking', 'pre-book', 'cancel-booking', 'list-bookings', 'get-booking'];
