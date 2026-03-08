@@ -278,7 +278,7 @@ const LaunchIndex = () => {
               className={cn(
                 "transition-all duration-300 md:relative md:bg-transparent md:shadow-none md:py-0 md:border-none",
                 tabsSticky
-                  ? "fixed top-[44px] left-0 right-0 z-40 bg-mobile-header py-2.5 border-b border-mobile-border shadow-sm md:hidden"
+                  ? "fixed top-[36px] left-0 right-0 z-40 bg-mobile-header pt-1 pb-2.5 border-b border-mobile-border md:hidden"
                   : ""
               )}
             >

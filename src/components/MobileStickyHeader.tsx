@@ -17,7 +17,7 @@ const MobileStickyHeader = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${
         isScrolled
-          ? "bg-mobile-header border-b border-mobile-border"
+          ? "bg-mobile-header"
           : "bg-transparent"
       }`}
     >
