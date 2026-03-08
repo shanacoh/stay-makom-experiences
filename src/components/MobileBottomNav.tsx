@@ -15,8 +15,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Compass, labelEn: "Explore", labelHe: "גלה", path: "/launch" },
   { icon: Heart, labelEn: "Saved", labelHe: "שמור", path: "/account?tab=wishlist", requiresAuth: true, authContext: "wishlist" },
-  { icon: CalendarDays, labelEn: "Bookings", labelHe: "הזמנות", path: "/account?tab=my-staymakom", requiresAuth: true, authContext: "bookings" },
-  { icon: User, labelEn: "My Account", labelHe: "החשבון שלי", path: "/account", requiresAuth: true, authContext: "account" },
+  { icon: CalendarDays, labelEn: "Bookings", labelHe: "הזמנות", path: "/account?tab=bookings", requiresAuth: true, authContext: "bookings" },
+  { icon: User, labelEn: "Account", labelHe: "חשבון", path: "/account", requiresAuth: true, authContext: "account" },
 ];
 
 const MobileBottomNav = () => {
@@ -25,15 +25,29 @@ const MobileBottomNav = () => {
   const { user } = useAuth();
 
   const isActive = (path: string) => {
-    if (path === "/launch") return location.pathname === "/launch" || location.pathname === "/launch/experiences";
+    const currentFull = location.pathname + location.search;
+
+    if (path === "/launch") {
+      return location.pathname === "/launch" || location.pathname === "/launch/experiences";
+    }
+
+    // "Account" tab: active when on /account with no tab param
+    if (path === "/account") {
+      return location.pathname === "/account" && !location.search;
+    }
+
+    // Wishlist / Bookings: exact match
+    if (currentFull === path) return true;
+
+    // Handle mobile-login context mapping
     if (location.pathname === "/mobile-login") {
       const ctx = new URLSearchParams(location.search).get("context");
       if (path.includes("wishlist") && ctx === "wishlist") return true;
-      if (path.includes("my-staymakom") && ctx === "bookings") return true;
+      if (path.includes("bookings") && ctx === "bookings") return true;
       if (path === "/account" && ctx === "account") return true;
-      return false;
     }
-    return location.pathname + location.search === path;
+
+    return false;
   };
 
   const handleTap = (item: NavItem) => {
