@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ShareDialog from "./ShareDialog";
 
 interface ShareWithFriendsSectionProps {
@@ -42,19 +41,16 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
   return (
     <>
       <section className="py-6">
-        <div className="border border-border/60 rounded-xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            {getText('prompt')}
-          </p>
-          <Button 
-            variant="outline"
-            onClick={handleShare}
-            className="gap-2 rounded-full border-foreground/20 hover:bg-foreground hover:text-background transition-all"
-          >
-            <Share2 className="h-4 w-4" />
-            {getText('shareBtn')}
-          </Button>
-        </div>
+        <p className="text-[15px] md:text-sm text-muted-foreground inline">
+          {getText('prompt')}{" "}
+        </p>
+        <button
+          onClick={handleShare}
+          className="inline-flex items-center gap-1.5 text-[15px] md:text-sm text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          {getText('shareBtn')}
+        </button>
       </section>
 
       <ShareDialog
