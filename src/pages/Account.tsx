@@ -204,15 +204,27 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 container pt-24 pb-16">
-        <AccountHeader userId={user.id} userEmail={user.email} />
-        <div className="flex flex-col md:flex-row gap-8">
-          <aside className="hidden md:block w-64 flex-shrink-0">
-            <AccountSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-          </aside>
-          <div className="flex-1 min-w-0">{renderContent()}</div>
+      <main className="flex-1 pt-24 pb-16">
+        {/* Full-width header area */}
+        <div className="container">
+          <AccountHeader userId={user.id} userEmail={user.email} />
+        </div>
+
+        {/* Content with sidebar */}
+        <div className="container">
+          <div className="flex gap-10">
+            {/* Sidebar */}
+            <aside className="hidden md:block w-56 flex-shrink-0">
+              <AccountSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            </aside>
+
+            {/* Main content area */}
+            <div className="flex-1 min-w-0">
+              {renderContent()}
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
