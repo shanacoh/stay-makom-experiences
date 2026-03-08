@@ -601,7 +601,12 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                   {t.back}
                 </Button>
                 <Button
-                  className="flex-1"
+                  className={cn(
+                    "flex-1 transition-all duration-200",
+                    isGuestValid
+                      ? "bg-[#1A1814] text-white hover:bg-[#1A1814]/90 hover:scale-[1.01] cursor-pointer"
+                      : "bg-[#C8C0B4] text-white cursor-not-allowed hover:bg-[#C8C0B4]"
+                  )}
                   size="lg"
                   disabled={!isGuestValid}
                   onClick={() => {
