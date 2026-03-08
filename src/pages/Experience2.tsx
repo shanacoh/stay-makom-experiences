@@ -4,6 +4,7 @@
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
 import { useRef, useState, useMemo, useCallback } from "react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
