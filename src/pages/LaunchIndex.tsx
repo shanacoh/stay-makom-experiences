@@ -13,7 +13,7 @@ import MarqueeBanner from "@/components/MarqueeBanner";
 import TailoredRequestSection from "@/components/TailoredRequestSection";
 import HowItWorksBanner from "@/components/HowItWorksBanner";
 import CategoryCard from "@/components/CategoryCard";
-import ExperienceCard from "@/components/ExperienceCard";
+import Experience2CardWithPrice from "@/components/Experience2CardWithPrice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
