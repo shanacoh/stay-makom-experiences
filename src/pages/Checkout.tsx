@@ -176,7 +176,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       total: "Total",
       specialRequests: "Demandes spéciales",
       importantNotices: "Remarques importantes",
-      fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone, date de naissance)",
+      fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone)",
       bookingError: "La réservation a échoué. Vos informations ont été conservées — veuillez réessayer.",
       onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
       verifying: "Vérification du prix...",
