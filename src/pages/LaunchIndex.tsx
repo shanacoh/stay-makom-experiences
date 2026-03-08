@@ -393,18 +393,20 @@ const LaunchIndex = () => {
         <MarqueeBanner />
 
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
-        <section className="relative py-8 sm:py-14 md:py-18 overflow-hidden">
+        <section className="relative overflow-hidden" style={{ paddingTop: 48, paddingBottom: 48 }}>
           <div className="absolute inset-0">
             <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
           <div className="container max-w-3xl relative z-10 px-4 text-center">
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] mb-3 text-white">
+            <h2
+              className="font-sans md:text-3xl text-white"
+              style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2, marginBottom: 12 }}>
               {t(lang, 'handpickedTitle1')}<br />
               {t(lang, 'handpickedTitle2')}
             </h2>
-            <div className="text-[11px] sm:text-xs md:text-sm leading-relaxed text-white/95 max-w-2xl mx-auto space-y-2">
+            <div className="text-white/95 max-w-2xl mx-auto space-y-2" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6 }}>
               <p>{t(lang, 'handpickedP1')}</p>
               <p>{t(lang, 'handpickedP2')}</p>
               <p>{t(lang, 'handpickedP3')}</p>
