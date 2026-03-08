@@ -8,6 +8,11 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { lang, setLanguage } = useLanguage();
+  const { setDisplayCurrency } = useCurrency();
+  const handleLang = (l: "en" | "he") => {
+    setLanguage(l);
+    setDisplayCurrency(l === "he" ? "ILS" : "USD");
+  };
   const location = useLocation();
   const navigate = useNavigate();
 
