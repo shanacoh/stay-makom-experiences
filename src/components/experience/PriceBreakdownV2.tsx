@@ -112,6 +112,7 @@ function useFmt() {
 
 export function PriceBreakdownV2({ breakdown, isLoading = false, className = "", lang = "en", ratePlanPrices }: PriceBreakdownV2Props) {
   const t = translations[lang];
+  const fmt = useFmt();
 
   if (isLoading) {
     return (
