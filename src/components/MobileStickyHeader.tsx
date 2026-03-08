@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { MOBILE_HEADER_HEIGHT } from "@/constants/layout";
 
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
