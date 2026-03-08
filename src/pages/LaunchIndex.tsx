@@ -354,7 +354,7 @@ const LaunchIndex = () => {
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
         <section className="relative py-8 sm:py-14 md:py-18 overflow-hidden">
           <div className="absolute inset-0">
-            <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
+            <img ref={editorialParallaxRef} src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover will-change-transform" />
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
