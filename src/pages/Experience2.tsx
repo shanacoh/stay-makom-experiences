@@ -172,7 +172,7 @@ export default function Experience2() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        {isLaunch ? <LaunchHeader /> : <Header />}
+        {isLaunch ? <LaunchHeader forceScrolled /> : <Header />}
         <div className="pt-20 max-w-6xl mx-auto px-4">
           <Skeleton className="h-[60vh] w-full rounded-xl" />
           <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-8 mt-8">
