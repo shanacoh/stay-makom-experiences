@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
+import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 
 interface StickyPriceBarProps {
   basePrice: number;
@@ -12,6 +14,8 @@ interface StickyPriceBarProps {
   onViewDates: () => void;
   footerRef: React.RefObject<HTMLElement>;
   hasHyperguest?: boolean;
+  hyperguestPropertyId?: string | null;
+  selectedExtrasTotal?: number;
 }
 
 const StickyPriceBar = ({
@@ -22,8 +26,19 @@ const StickyPriceBar = ({
   onViewDates,
   footerRef,
   hasHyperguest = false,
+  hyperguestPropertyId,
+  selectedExtrasTotal = 0,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
+
+  // Try to get real-time price from HyperGuest
+  const { data: quickAvail } = useQuickDateAvailability(hyperguestPropertyId || null);
+
+  const displayPrice = useMemo(() => {
+    if (quickAvail?.cheapestRate) return Math.round(quickAvail.cheapestRate + selectedExtrasTotal);
+    if (basePrice > 0) return Math.round(basePrice + selectedExtrasTotal);
+    return null;
+  }, [quickAvail, basePrice, selectedExtrasTotal]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,37 +59,45 @@ const StickyPriceBar = ({
   };
 
   const symbol = getCurrencySymbol(currency);
-  const formattedPrice = `${symbol}${Math.round(basePrice)}`;
   const nightLabel = lang === 'he' ? 'ללילה' : lang === 'fr' ? '/ nuit' : '/ night';
 
   const ctaLabel = hasHyperguest
-    ? (lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'View dates')
-    : (lang === 'he' ? 'בקשו שהייה' : lang === 'fr' ? 'Demander ce séjour' : 'Request this stay');
+    ? (lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'VIEW DATES')
+    : (lang === 'he' ? 'בקשו שהייה' : lang === 'fr' ? 'Demander ce séjour' : 'VIEW DATES');
 
   return (
     <div
       className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] transition-all duration-300",
+        "md:hidden fixed left-0 right-0 z-50 bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)] transition-all duration-300",
         isHidden ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
       )}
+      style={{ bottom: `calc(${MOBILE_BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))` }}
     >
-      <div className="container px-4 pb-safe">
+      <div className="px-4">
         <div className="flex items-center justify-between py-3">
           {/* Left: Price */}
           <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-xs text-muted-foreground">
-                {lang === 'he' ? 'מ-' : 'From '}
+            {displayPrice ? (
+              <div className="flex items-baseline gap-1">
+                <span className="text-xs text-muted-foreground">
+                  {lang === 'he' ? 'מ-' : 'From '}
+                </span>
+                <span className="text-base font-semibold text-foreground">
+                  {symbol}{displayPrice}
+                </span>
+                <span className="text-xs text-muted-foreground">{nightLabel}</span>
+              </div>
+            ) : (
+              <span className="text-sm text-muted-foreground italic">
+                {lang === 'he' ? 'מחיר לפי בקשה' : 'Price on request'}
               </span>
-              <span className="text-base font-semibold text-foreground">{formattedPrice}</span>
-              <span className="text-xs text-muted-foreground">{nightLabel}</span>
-            </div>
+            )}
           </div>
 
           {/* Right: CTA */}
           <Button 
             onClick={onViewDates}
-            className="px-5 rounded-full font-medium bg-foreground text-background hover:bg-foreground/90"
+            className="px-5 h-10 rounded-full font-semibold text-xs tracking-wider uppercase bg-foreground text-background hover:bg-foreground/90"
           >
             {ctaLabel}
           </Button>
