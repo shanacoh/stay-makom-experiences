@@ -9,6 +9,7 @@ import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import UserDropdown from "@/components/auth/UserDropdown";
+import { cn } from "@/lib/utils";
 
 const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) => {
   const [isScrolled, setIsScrolled] = useState(forceScrolled);
