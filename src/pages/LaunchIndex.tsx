@@ -321,11 +321,12 @@ const LaunchIndex = () => {
                 base_price: addonPrice || experience.base_price,
               };
 
-              return (
+                return (
                 <ExperienceCard
                   key={experience.id}
                   experience={cardExperience}
-                  linkPrefix="/experience2" />);
+                  linkPrefix="/experience"
+                  linkSuffix="context=launch" />);
 
 
             })}

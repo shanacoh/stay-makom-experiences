@@ -67,6 +67,7 @@ import AdminFavorites from "./pages/admin/Favorites";
 import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
 import CertificationSetup from "./pages/admin/CertificationSetup";
 import LaunchIndex from "./pages/LaunchIndex";
+import LaunchExperiences from "./pages/LaunchExperiences";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
