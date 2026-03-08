@@ -445,7 +445,7 @@ const LaunchIndex = () => {
                   placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
                   className="flex-1 sm:w-56 h-9 text-sm" />
 
-                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4 bg-[#1A1814] text-white hover:bg-[#1A1814]/90">
+                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-[52px] bg-[#1A1814] text-white hover:bg-[#1A1814]/90 uppercase" style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, paddingLeft: 32, paddingRight: 32, borderRadius: 3, minHeight: 52 }}>
                     {isRTL ? "הצטרפו לרשימה" : "Join the list"}
                   </Button>
                 </form>
