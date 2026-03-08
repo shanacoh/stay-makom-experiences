@@ -12,6 +12,8 @@ import {
   XCircle,
   BedDouble,
   BarChart3,
+  AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import {
   BarChart,
@@ -29,6 +31,8 @@ import {
   CartesianGrid,
 } from "recharts";
 import { format, subDays, startOfDay, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from "date-fns";
+import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 type PeriodFilter = "7d" | "30d" | "90d" | "all";
 type ChartGranularity = "day" | "week" | "month";
@@ -89,6 +93,43 @@ const AdminDashboard = () => {
     },
   });
 
+  // ─── "Actions requises" data ───
+  const { data: pendingBookingsCount } = useQuery({
+    queryKey: ["dashboard-pending-bookings"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("bookings" as any)
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (error) return 0;
+      return count || 0;
+    },
+  });
+
+  const { data: experiencesNoCover } = useQuery({
+    queryKey: ["dashboard-experiences-no-cover"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experiences2")
+        .select("id, hero_image")
+        .eq("status", "published");
+      if (error) return 0;
+      return data?.filter((e) => !e.hero_image).length || 0;
+    },
+  });
+
+  const { data: emptyPublishedCategories } = useQuery({
+    queryKey: ["dashboard-empty-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, experiences(id)")
+        .eq("status", "published");
+      if (error) return 0;
+      return data?.filter((c) => !c.experiences || c.experiences.length === 0).length || 0;
+    },
+  });
+
   const hotelMap = useMemo(() => {
     const map: Record<string, { name: string; rooms: number }> = {};
     hotels?.forEach((h) => {
@@ -109,7 +150,6 @@ const AdminDashboard = () => {
     const totalNights = active.reduce((s: number, b: any) => s + (b.nights || 0), 0);
     const adr = totalNights > 0 ? totalRevenue / totalNights : 0;
 
-    // RevPAR = Revenue / (available rooms * days in period)
     const totalRooms = hotels?.reduce((s, h) => s + (h.number_of_rooms || 0), 0) || 0;
     const daysInPeriod = period === "7d" ? 7 : period === "30d" ? 30 : period === "90d" ? 90 : 365;
     const availableRoomNights = totalRooms * daysInPeriod;
@@ -218,6 +258,8 @@ const AdminDashboard = () => {
 
   const currencySymbol = "$";
 
+  const totalActions = (pendingBookingsCount || 0) + (experiencesNoCover || 0) + (emptyPublishedCategories || 0);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -235,6 +277,61 @@ const AdminDashboard = () => {
           </TabsList>
         </Tabs>
       </div>
+
+      {/* Actions requises */}
+      {totalActions > 0 && (
+        <Card className="border-orange-200 bg-orange-50/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Actions requises
+              <Badge variant="outline" className="ml-2 border-orange-300 text-orange-700">
+                {totalActions}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              {(pendingBookingsCount || 0) > 0 && (
+                <Link
+                  to="/admin/reservations"
+                  className="flex items-center justify-between p-2.5 rounded-md bg-background border hover:bg-accent/50 transition-colors group"
+                >
+                  <span className="text-sm">
+                    <span className="font-semibold text-orange-600">{pendingBookingsCount}</span>{" "}
+                    réservation{(pendingBookingsCount || 0) > 1 ? "s" : ""} en attente
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </Link>
+              )}
+              {(experiencesNoCover || 0) > 0 && (
+                <Link
+                  to="/admin/experiences2"
+                  className="flex items-center justify-between p-2.5 rounded-md bg-background border hover:bg-accent/50 transition-colors group"
+                >
+                  <span className="text-sm">
+                    <span className="font-semibold text-orange-600">{experiencesNoCover}</span>{" "}
+                    expérience{(experiencesNoCover || 0) > 1 ? "s" : ""} sans photo de couverture
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </Link>
+              )}
+              {(emptyPublishedCategories || 0) > 0 && (
+                <Link
+                  to="/admin/categories"
+                  className="flex items-center justify-between p-2.5 rounded-md bg-background border hover:bg-accent/50 transition-colors group"
+                >
+                  <span className="text-sm">
+                    <span className="font-semibold text-orange-600">{emptyPublishedCategories}</span>{" "}
+                    catégorie{(emptyPublishedCategories || 0) > 1 ? "s" : ""} publiée{(emptyPublishedCategories || 0) > 1 ? "s" : ""} sans expériences
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </Link>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPI Cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
@@ -334,9 +431,8 @@ const AdminDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Bottom row: Status + Top Hotels + Board Type */}
+      {/* Bottom row */}
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Status Distribution */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Réservations par statut</CardTitle>
@@ -370,7 +466,6 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Top Hotels */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Top hôtels (CA)</CardTitle>
@@ -400,7 +495,6 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Board Type Distribution */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Répartition board type</CardTitle>
@@ -439,7 +533,6 @@ const AdminDashboard = () => {
   );
 };
 
-// ─── KPI Card component ───
 function KpiCard({
   title,
   value,
