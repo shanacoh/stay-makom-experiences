@@ -41,6 +41,7 @@ const StickyPriceBar = ({
   });
 
   const { data: addons } = useExperienceAddons(experienceId);
+  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
 
   const cheapestDate = useMemo(() => {
     if (!quickDates || quickDates.length === 0) return null;
