@@ -1,6 +1,7 @@
 /**
  * /cart — Shows the user's localStorage-persisted cart.
  * 48-hour TTL. Links back to checkout to continue.
+ * Mobile: same layout as Saved / Account auth prompt screens.
  */
 
 import { useState, useEffect } from "react";
@@ -55,102 +56,122 @@ export default function Cart() {
 
   if (!loaded) return null;
 
+  // Empty state — same style as MobileAuthPrompt / Saved
+  if (!cart) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Desktop header only */}
+        <div className="hidden md:block"><Header /></div>
+
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pb-24">
+          <ShoppingBag size={40} strokeWidth={1.3} className="text-primary mb-4" />
+          <h1 className="text-xl font-semibold text-foreground mb-2 text-center">
+            Cart
+          </h1>
+          <p className="text-sm text-muted-foreground text-center mb-8">
+            No escape saved yet.
+          </p>
+          <Button
+            variant="outline"
+            className="rounded-full px-8 border-primary text-primary hover:bg-primary/5"
+            onClick={() => navigate("/launch")}
+          >
+            <Compass className="h-4 w-4 mr-2" />
+            Start exploring
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Cart exists
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Desktop header only */}
       <div className="hidden md:block"><Header /></div>
-      <div className="pt-4 md:pt-20 pb-32 px-4 max-w-lg mx-auto">
-        {cart ? (
-          <div className="space-y-6">
-            <h1 className="text-xl font-bold tracking-tight">Your saved escape</h1>
 
-            <div className="border border-border rounded-xl p-5 space-y-4 bg-card">
-              {/* Experience name */}
-              <div>
-                <h2 className="text-base font-semibold leading-snug">{cart.experienceTitle}</h2>
-                {cart.hotelName && (
-                  <p className="text-sm text-muted-foreground mt-0.5">{cart.hotelName}</p>
-                )}
-              </div>
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-24">
+        <ShoppingBag size={40} strokeWidth={1.3} className="text-primary mb-6" />
+        <h1 className="text-xl font-semibold text-foreground mb-6 text-center">
+          Your saved escape
+        </h1>
 
-              {/* Dates */}
-              {cart.dateRange?.from && cart.dateRange?.to && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Dates</span>
-                  <span className="ml-auto font-medium">
-                    {format(parseISO(cart.dateRange.from), "dd MMM")} → {format(parseISO(cart.dateRange.to), "dd MMM")}
-                    <span className="text-muted-foreground font-normal ml-1">
-                      · {cart.nights} {cart.nights === 1 ? "night" : "nights"}
-                    </span>
-                  </span>
-                </div>
-              )}
+        <div className="w-full max-w-sm border border-border rounded-xl p-5 space-y-3 bg-card">
+          {/* Experience name */}
+          <div>
+            <h2 className="text-base font-semibold leading-snug">{cart.experienceTitle}</h2>
+            {cart.hotelName && (
+              <p className="text-sm text-muted-foreground mt-0.5">{cart.hotelName}</p>
+            )}
+          </div>
 
-              {/* Guests */}
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Guests</span>
-                <span className="ml-auto font-medium">
-                  {cart.adults} {cart.adults === 1 ? "guest" : "guests"}
-                  {cart.childrenAges?.length > 0 && ` + ${cart.childrenAges.length} children`}
+          {/* Dates */}
+          {cart.dateRange?.from && cart.dateRange?.to && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Dates</span>
+              <span className="font-medium">
+                {format(parseISO(cart.dateRange.from), "dd MMM")} → {format(parseISO(cart.dateRange.to), "dd MMM")}
+                <span className="text-muted-foreground font-normal ml-1">
+                  · {cart.nights} {cart.nights === 1 ? "night" : "nights"}
                 </span>
-              </div>
-
-              {/* Room */}
-              {cart.selectedRoomName && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Room</span>
-                  <span className="ml-auto font-medium">{cart.selectedRoomName}</span>
-                </div>
-              )}
-
-              {/* Extras */}
-              {cart.selectedExtras && cart.selectedExtras.length > 0 && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Extras</span>
-                  <ul className="mt-1 space-y-0.5">
-                    {cart.selectedExtras.map((e) => (
-                      <li key={e.id} className="flex justify-between">
-                        <span>{e.name}</span>
-                        <DualPrice amount={e.price} currency={e.currency} inline className="text-sm" />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Saved time */}
-              {cart.savedAt && (
-                <p className="text-xs text-muted-foreground/70 pt-1">
-                  Saved {formatDistanceToNow(new Date(cart.savedAt), { addSuffix: true })}
-                </p>
-              )}
+              </span>
             </div>
+          )}
 
-            <Button className="w-full" size="lg" onClick={handleContinue}>
-              Continue to booking
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+          {/* Guests */}
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Guests</span>
+            <span className="font-medium">
+              {cart.adults} {cart.adults === 1 ? "guest" : "guests"}
+              {cart.childrenAges?.length > 0 && ` + ${cart.childrenAges.length} children`}
+            </span>
+          </div>
 
-            <button
-              onClick={handleRemove}
-              className="w-full text-center text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center justify-center gap-1"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Remove
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <ShoppingBag className="h-12 w-12 text-muted-foreground/30 mb-4" />
-            <p className="text-base font-medium mb-1">No escape saved yet.</p>
-            <button
-              onClick={() => navigate("/launch")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 mt-2"
-            >
-              <Compass className="h-3.5 w-3.5" />
-              Start exploring →
-            </button>
-          </div>
-        )}
+          {/* Room */}
+          {cart.selectedRoomName && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Room</span>
+              <span className="font-medium">{cart.selectedRoomName}</span>
+            </div>
+          )}
+
+          {/* Extras */}
+          {cart.selectedExtras && cart.selectedExtras.length > 0 && (
+            <div className="text-sm">
+              <span className="text-muted-foreground">Extras</span>
+              <ul className="mt-1 space-y-0.5">
+                {cart.selectedExtras.map((e) => (
+                  <li key={e.id} className="flex justify-between">
+                    <span>{e.name}</span>
+                    <DualPrice amount={e.price} currency={e.currency} inline className="text-sm" />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Saved time */}
+          {cart.savedAt && (
+            <p className="text-xs text-muted-foreground/70 pt-1">
+              Saved {formatDistanceToNow(new Date(cart.savedAt), { addSuffix: true })}
+            </p>
+          )}
+        </div>
+
+        <div className="w-full max-w-sm mt-6 space-y-3">
+          <Button className="w-full" size="lg" onClick={handleContinue}>
+            Continue to booking
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+
+          <button
+            onClick={handleRemove}
+            className="w-full text-center text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center justify-center gap-1"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Remove
+          </button>
+        </div>
       </div>
     </div>
   );
