@@ -23,6 +23,7 @@ import Journal from "./pages/Journal";
 import JournalPost from "./pages/JournalPost";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import Consulting from "./pages/Consulting";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import CancellationPolicy from "./pages/CancellationPolicy";
