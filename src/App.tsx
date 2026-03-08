@@ -73,6 +73,7 @@ import LaunchExperiences from "./pages/LaunchExperiences";
 import MobileAuthPrompt from "./pages/MobileAuthPrompt";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import Checkout from "./pages/Checkout";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
