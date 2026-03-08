@@ -80,6 +80,7 @@ export default function ExperienceCard({
 }: ExperienceCardProps) {
   const { lang } = useLanguage();
   const { symbol: currencySymbol } = useCurrency();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const [isHovered, setIsHovered] = useState(false);
