@@ -505,7 +505,7 @@ const LaunchIndex = () => {
         <TailoredRequestSection categories={categories || []} />
 
         {/* ─── 8. GIFT CARD ─── */}
-        <section className="container py-8 md:py-14 px-4">
+        <section className="container px-4" style={{ paddingTop: 48, paddingBottom: 48 }}>
           <div className={`grid md:grid-cols-2 gap-5 md:gap-8 items-center max-w-4xl mx-auto ${isRTL ? "md:grid-flow-col-dense" : ""}`}>
 
             <div
@@ -520,11 +520,13 @@ const LaunchIndex = () => {
 
             </div>
 
-            <div className={`space-y-4 ${isRTL ? "text-right md:order-1" : ""}`}>
-              <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight">
+            <div className={`${isRTL ? "text-right md:order-1" : ""}`}>
+              <h2
+                className="font-sans md:text-3xl"
+                style={{ fontSize: 20, fontWeight: 600, letterSpacing: 0, lineHeight: 1.2, marginBottom: 12 }}>
                 {isRTL ? (<>מתנה מושלמת.<br />מתנת הבריחה.</>) : (<>Perfect gift.<br />The gift of escape.</>)}
               </h2>
-              <p className="text-muted-foreground text-sm md:text-base max-w-md">
+              <p className="text-muted-foreground max-w-md" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6, marginBottom: 24 }}>
                 {t(lang, "giftCardSectionDesc")}
               </p>
               <Button asChild className="group">
