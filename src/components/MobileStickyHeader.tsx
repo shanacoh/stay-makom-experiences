@@ -9,8 +9,9 @@ const MobileStickyHeader = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show pills after scrolling past ~40% of mobile hero
-      setIsScrolled(window.scrollY > 150);
+      // Show header only after scrolling past the hero
+      const heroHeight = window.innerHeight * 0.62;
+      setIsScrolled(window.scrollY > heroHeight - 50);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
