@@ -218,6 +218,9 @@ export default function Experience2() {
   const category = experience.categories;
   const hyperguestPropertyId = primaryHotel?.hyperguest_property_id;
 
+  // Public display currency — always USD for consistency across all surfaces
+  const displayCurrency = "USD";
+
   // 🔍 DEBUG — à retirer après investigation
   console.log("[Experience2] primaryHotel complet:", primaryHotel);
   console.log("[Experience2] hyperguestPropertyId résolu:", hyperguestPropertyId);
@@ -459,7 +462,7 @@ export default function Experience2() {
             <ExtrasSection2
               experienceId={experience.id}
               lang={lang}
-              currency={experience.currency || "ILS"}
+              currency={displayCurrency}
               selectedExtras={selectedExtras}
               onToggleExtra={handleToggleExtra}
             />
@@ -500,7 +503,7 @@ export default function Experience2() {
               {/* Price Callout CTA */}
               <HeroBookingPreview2
                 experienceId={experience.id}
-                currency={experience.currency || "ILS"}
+                currency={displayCurrency}
                 lang={lang as "en" | "he" | "fr"}
                 hyperguestPropertyId={hyperguestPropertyId || null}
                 onViewDates={() => {
@@ -519,7 +522,7 @@ export default function Experience2() {
                   hotelId={primaryHotel?.id || ""}
                   hotelName={lang === "he" ? (primaryHotel?.name_he || primaryHotel?.name || "") : (primaryHotel?.name || "")}
                   hyperguestPropertyId={hyperguestPropertyId || null}
-                  currency={experience.currency || "ILS"}
+                  currency={displayCurrency}
                   minParty={experience.min_party || 2}
                   maxParty={experience.max_party || 4}
                   lang={lang as "en" | "he" | "fr"}
@@ -534,7 +537,7 @@ export default function Experience2() {
         {/* Mobile Sticky Price Bar — sits above bottom nav */}
         <StickyPriceBar
           experienceId={experience.id}
-          currency={experience.currency || "ILS"}
+          currency={displayCurrency}
           lang={lang as "en" | "he" | "fr"}
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
@@ -553,7 +556,7 @@ export default function Experience2() {
                 hotelId={primaryHotel?.id || ""}
                 hotelName={lang === "he" ? (primaryHotel?.name_he || primaryHotel?.name || "") : (primaryHotel?.name || "")}
                 hyperguestPropertyId={hyperguestPropertyId || null}
-                currency={experience.currency || "ILS"}
+                currency={displayCurrency}
                 minParty={experience.min_party || 2}
                 maxParty={experience.max_party || 4}
                 lang={lang as "en" | "he" | "fr"}
