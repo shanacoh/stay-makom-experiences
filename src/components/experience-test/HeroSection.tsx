@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import LoginBottomSheet from "@/components/LoginBottomSheet";
 import HeartBurst from "@/components/ui/HeartBurst";
 import LocationPopover from "@/components/experience/LocationPopover";
 
