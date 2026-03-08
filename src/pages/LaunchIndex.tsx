@@ -13,7 +13,7 @@ import MarqueeBanner from "@/components/MarqueeBanner";
 import TailoredRequestSection from "@/components/TailoredRequestSection";
 import HowItWorksBanner from "@/components/HowItWorksBanner";
 import CategoryCard from "@/components/CategoryCard";
-import ExperienceCard from "@/components/ExperienceCard";
+import Experience2CardWithPrice from "@/components/Experience2CardWithPrice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -123,7 +123,7 @@ const LaunchIndex = () => {
             position,
             nights,
             hotel:hotels2(
-              id, name, name_he, city, city_he, region, region_he, hero_image
+              id, name, name_he, city, city_he, region, region_he, hero_image, hyperguest_property_id
             )
           ),
           experience2_highlight_tags(
@@ -338,40 +338,16 @@ const LaunchIndex = () => {
           filteredExperiences && filteredExperiences.length > 0 ?
           <div className="mt-4 md:mt-3 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5 transition-all duration-500">
               {filteredExperiences.map((experience: any) => {
-              const primaryHotelLink = experience.experience2_hotels?.
-              sort(
-                (a: any, b: any) =>
-                (a.position || 0) - (b.position || 0)
-              )?.[
-              0]?.hotel;
-
-              // Compute display price from active pricing addons (for min party/nights)
-              const pricingTypes = ['per_person', 'per_night', 'per_person_per_night', 'fixed'];
-              const minGuests = experience.min_party || 2;
-              const minNights = experience.min_nights || 1;
-              const addonPrice = (experience as any).experience2_addons
-                ?.filter((a: any) => a.is_active && pricingTypes.includes(a.type))
-                .reduce((sum: number, a: any) => {
-                  const v = Number(a.value) || 0;
-                  switch (a.type) {
-                    case 'per_person': return sum + v * minGuests;
-                    case 'per_night': return sum + v * minNights;
-                    case 'per_person_per_night': return sum + v * minGuests * minNights;
-                    default: return sum + v;
-                  }
-                }, 0) || 0;
-
-              const cardExperience = {
-                ...experience,
-                hotels: primaryHotelLink || null,
-                experience_highlight_tags: experience.experience2_highlight_tags || [],
-                base_price: addonPrice || experience.base_price,
-              };
+              const primaryHotelLink = experience.experience2_hotels
+                ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))?.[0]?.hotel;
 
                 return (
-                <ExperienceCard
+                <Experience2CardWithPrice
                   key={experience.id}
-                  experience={cardExperience}
+                  experience={experience}
+                  primaryHotel={primaryHotelLink}
+                  hyperguestPropertyId={primaryHotelLink?.hyperguest_property_id}
+                  addons={(experience as any).experience2_addons}
                   linkPrefix="/experience"
                   linkSuffix="context=launch" />);
 

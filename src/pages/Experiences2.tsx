@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ExperienceCard from "@/components/ExperienceCard";
+import Experience2CardWithPrice from "@/components/Experience2CardWithPrice";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SEOHead } from "@/components/SEOHead";
 
@@ -22,7 +22,7 @@ const Experiences2 = () => {
             position,
             nights,
             hotel:hotels2(
-              id, name, name_he, city, city_he, region, region_he, hero_image
+              id, name, name_he, city, city_he, region, region_he, hero_image, hyperguest_property_id
             )
           ),
           categories(name, name_he, slug),
@@ -75,23 +75,13 @@ const Experiences2 = () => {
                   ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
                   ?.[0]?.hotel;
 
-                // Compute display price from active pricing addons
-                const pricingTypes = ['per_person', 'per_night', 'per_person_per_night', 'fixed'];
-                const addonPrice = (experience as any).experience2_addons
-                  ?.filter((a: any) => a.is_active && pricingTypes.includes(a.type))
-                  .reduce((sum: number, a: any) => sum + (Number(a.value) || 0), 0) || 0;
-
-                const cardExperience = {
-                  ...experience,
-                  hotels: primaryHotelLink || null,
-                  experience_highlight_tags: (experience as any).experience2_highlight_tags,
-                  base_price: addonPrice || experience.base_price,
-                };
-
                 return (
-                  <ExperienceCard
+                  <Experience2CardWithPrice
                     key={experience.id}
-                    experience={cardExperience}
+                    experience={experience}
+                    primaryHotel={primaryHotelLink}
+                    hyperguestPropertyId={primaryHotelLink?.hyperguest_property_id}
+                    addons={(experience as any).experience2_addons}
                     linkPrefix="/experience2"
                   />
                 );
