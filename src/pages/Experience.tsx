@@ -183,6 +183,8 @@ const Experience = () => {
             hotelImage={experience.hotels?.hero_image}
             city={city}
             region={region}
+            latitude={experience.hotels?.latitude ?? undefined}
+            longitude={experience.hotels?.longitude ?? undefined}
             averageRating={averageRating}
             reviewsCount={reviews?.length || 0}
             lang={lang}
