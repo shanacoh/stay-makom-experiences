@@ -37,7 +37,6 @@ export default function Experience2() {
   const [searchParams] = useSearchParams();
   const isLaunch = searchParams.get("context") === "launch";
   const { lang } = useLanguage();
-  const { displayCurrency: displayCurrencyCtx, symbol: currencySymbolCtx } = useCurrency();
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
   const reviewsRef = useRef<HTMLDivElement>(null);
