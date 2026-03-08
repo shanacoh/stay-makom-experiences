@@ -310,6 +310,11 @@ export function BookingPanel2({
       experienceSlug,
     };
 
+    // Persist cart so user can resume later
+    try {
+      localStorage.setItem("staymakom_cart", JSON.stringify(checkoutState));
+    } catch {}
+
     navigate("/checkout", { state: checkoutState });
   };
 

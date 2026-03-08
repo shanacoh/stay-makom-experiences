@@ -86,9 +86,19 @@ type CheckoutStep = 2 | 3;
 export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as CheckoutState | null;
+  const routerState = location.state as CheckoutState | null;
 
-  // Redirect if no state
+  // Try router state first, then localStorage
+  const state = React.useMemo(() => {
+    if (routerState) return routerState;
+    try {
+      const saved = localStorage.getItem("staymakom_cart");
+      if (saved) return JSON.parse(saved) as CheckoutState;
+    } catch {}
+    return null;
+  }, [routerState]);
+
+  // Redirect if no state at all
   useEffect(() => {
     if (!state) {
       navigate("/", { replace: true });
@@ -476,6 +486,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         confirmationToken,
       });
       setShowConfirmation(true);
+
+      // Clear persisted cart after successful booking
+      try { localStorage.removeItem("staymakom_cart"); } catch {}
 
       try {
         const emailCancellation = analyzeCancellationPolicies(
