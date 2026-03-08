@@ -275,15 +275,6 @@ const Index = () => {
 
   const filteredExperiences = selectedCategoryId
     ? allExperiences?.filter(exp => exp.category_id === selectedCategoryId)
-        .sort((a, b) => {
-          const avgRatingA = a.experience_reviews?.length
-            ? a.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / a.experience_reviews.length
-            : 0;
-          const avgRatingB = b.experience_reviews?.length
-            ? b.experience_reviews.reduce((sum, r) => sum + r.rating, 0) / b.experience_reviews.length
-            : 0;
-          return avgRatingB - avgRatingA;
-        })
         .slice(0, 4)
     : latestExperiences?.slice(0, 8);
 
