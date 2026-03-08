@@ -68,6 +68,7 @@ const ExtrasSection2 = ({
   selectedExtras,
   onToggleExtra,
 }: ExtrasSection2Props) => {
+  const { symbol: currencySymbol } = useCurrency();
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
