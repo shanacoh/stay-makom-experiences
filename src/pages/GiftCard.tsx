@@ -340,7 +340,7 @@ export default function GiftCard() {
             <p className="text-center text-xs text-muted-foreground">
               {lang === "he"
                 ? "תצוגה מקדימה — מתעדכנת בזמן אמת"
-                : "Preview — updates as you go"}
+                : "Preview, updates as you go !"}
             </p>
           </div>
 
