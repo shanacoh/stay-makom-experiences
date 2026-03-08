@@ -587,6 +587,18 @@ export function BookingPanel2({
         >
           {isStep1Complete ? t.next : t.selectDates}
         </Button>
+
+        {/* Save for later */}
+        <SaveForLaterButton
+          experienceId={experienceId}
+          checkin={dateRange.from ? dateRange.from.toISOString().split("T")[0] : undefined}
+          checkout={dateRange.to ? dateRange.to.toISOString().split("T")[0] : undefined}
+          partySize={adults}
+          roomCode={selectedRoomId?.toString()}
+          roomName={selectedRoomName}
+          lang={lang}
+          variant="full"
+        />
       </CardContent>
     </Card>
   );
