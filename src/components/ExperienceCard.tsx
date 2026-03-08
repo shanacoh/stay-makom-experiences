@@ -192,7 +192,11 @@ export default function ExperienceCard({
     e.stopPropagation();
     
     if (!user) {
-      setAuthDialogOpen(true);
+      if (isMobile) {
+        setMobileSheetOpen(true);
+      } else {
+        setAuthDialogOpen(true);
+      }
       return;
     }
 
