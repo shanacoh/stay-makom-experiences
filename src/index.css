@@ -42,8 +42,8 @@ All colors MUST be HSL.
     /* Mobile warm system */
     --mobile-header: 37 40% 96%;
     --mobile-border: 34 33% 86%;
-    --mobile-logo: 16 47% 12%;
-    --mobile-active: 16 52% 36%;
+    --mobile-logo: 0 0% 10%;
+    --mobile-active: 0 0% 10%;
     --mobile-inactive: 30 15% 65%;
 
     --destructive: 0 84.2% 60.2%;
