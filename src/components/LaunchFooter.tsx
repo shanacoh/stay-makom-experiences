@@ -86,8 +86,8 @@ const LaunchFooter = () => {
             <div>
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">STAYMAKOM</h4>
               <ul className="space-y-2">
-                <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white hover:text-primary transition-smooth">{partnerLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{giftCardLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{partnerLabel}</Link></li>
               </ul>
             </div>
             <div>
