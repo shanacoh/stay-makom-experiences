@@ -271,7 +271,7 @@ const LaunchIndex = () => {
         <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-16">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
-              {isRTL ? "זה לא תיירות." : "This is not tourism."}
+              {isRTL ? (<>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</>) : (<>Handpicked Hotels.<br />Unforgettable Experiences.</>)}
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm mb-5">
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
