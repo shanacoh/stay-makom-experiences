@@ -210,7 +210,7 @@ const LaunchIndex = () => {
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
             <h1
-              className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
+              className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
               style={{ animationDelay: '0ms' }}>
               {isRTL ? (
                 <>אל תבחר עיר,<br />בחר את הבריחה שלך</>
