@@ -33,6 +33,8 @@ import { MapPin, Moon } from "lucide-react";
 
 export default function Experience2() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const isLaunch = searchParams.get("context") === "launch";
   const { lang } = useLanguage();
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
