@@ -155,10 +155,20 @@ const LaunchExperiences = () => {
                   ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))?.[0]?.hotel;
 
                 const pricingTypes = ["per_person", "per_night", "per_person_per_night", "fixed"];
+                const minGuests = experience.min_party || 2;
+                const minNights = experience.min_nights || 1;
                 const addonPrice =
                   (experience as any).experience2_addons
                     ?.filter((a: any) => a.is_active && pricingTypes.includes(a.type))
-                    .reduce((sum: number, a: any) => sum + (Number(a.value) || 0), 0) || 0;
+                    .reduce((sum: number, a: any) => {
+                      const v = Number(a.value) || 0;
+                      switch (a.type) {
+                        case 'per_person': return sum + v * minGuests;
+                        case 'per_night': return sum + v * minNights;
+                        case 'per_person_per_night': return sum + v * minGuests * minNights;
+                        default: return sum + v;
+                      }
+                    }, 0) || 0;
 
                 const cardExperience = {
                   ...experience,
