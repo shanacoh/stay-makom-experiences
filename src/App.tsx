@@ -88,6 +88,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthProvider>
+        <CurrencyProvider>
           <MobileAppShell />
           <Routes>
             {/* Coming Soon en page d'accueil (temporaire) */}
