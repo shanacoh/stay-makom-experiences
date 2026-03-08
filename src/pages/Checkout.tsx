@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { useQuery } from "@tanstack/react-query";
 
 interface SelectedExtra {
   id: string;
@@ -122,7 +122,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       total: "Total",
       specialRequests: "Special requests",
       importantNotices: "Important notices",
-      fillGuestInfo: "Please fill in guest information (name, email, phone, birth date)",
+      fillGuestInfo: "Please fill in guest information (name, email, phone)",
       bookingError: "Booking failed. Your information has been saved — please try again.",
       onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
       verifying: "Verifying price...",
@@ -149,7 +149,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       total: "סה\"כ",
       specialRequests: "בקשות מיוחדות",
       importantNotices: "הערות חשובות",
-      fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון, תאריך לידה)",
+      fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון)",
       bookingError: "ההזמנה נכשלה. הפרטים שלך נשמרו — אנא נסה שוב.",
       onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
       verifying: "בודק מחיר...",
@@ -176,7 +176,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       total: "Total",
       specialRequests: "Demandes spéciales",
       importantNotices: "Remarques importantes",
-      fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone, date de naissance)",
+      fillGuestInfo: "Veuillez remplir les informations voyageur (nom, email, téléphone)",
       bookingError: "La réservation a échoué. Vos informations ont été conservées — veuillez réessayer.",
       onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
       verifying: "Vérification du prix...",
@@ -209,6 +209,19 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const ratePlanPrices = state.selectedRatePlan?.prices || null;
   const priceBreakdown = useExperience2Price(state.experienceId, null, state.currency, state.nights, state.adults, ratePlanPrices);
 
+  // Fetch experience hero image for thumbnail
+  const { data: experienceHeroImage } = useQuery({
+    queryKey: ["experience2-hero", state.experienceId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("experiences2")
+        .select("hero_image")
+        .eq("id", state.experienceId)
+        .single();
+      return data?.hero_image || null;
+    },
+  });
+
   const extrasTotal = useMemo(() => {
     return state.selectedExtras.reduce((sum, extra) => {
       let multiplier = 1;
@@ -225,8 +238,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const isGuestValid = leadGuest.firstName.trim() !== "" &&
     leadGuest.lastName.trim() !== "" &&
     leadGuest.email.trim() !== "" &&
-    leadGuest.phone.trim() !== "" &&
-    leadGuest.birthDate !== "";
+    leadGuest.phone.trim() !== "";
 
   // Progressive booking timer
   useEffect(() => {
@@ -557,21 +569,30 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           {/* ═══ STEP 2: Guest Info ═══ */}
           {step === 2 && (
             <div className="space-y-6">
-              {/* Mini recap card */}
+              {/* Mini recap card with thumbnail */}
               <div className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
-                    </p>
-                  </div>
-                  {!totalIsNaN && (
-                    <div className="text-right shrink-0">
-                      <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
-                    </div>
+                <div className="flex items-start gap-3">
+                  {experienceHeroImage && (
+                    <img
+                      src={experienceHeroImage}
+                      alt={state.experienceTitle}
+                      className="w-16 h-16 object-cover shrink-0"
+                    />
                   )}
+                  <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
+                      </p>
+                    </div>
+                    {!totalIsNaN && (
+                      <div className="text-right shrink-0">
+                        <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -602,7 +623,12 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                   {t.back}
                 </Button>
                 <Button
-                  className="flex-1"
+                  className={cn(
+                    "flex-1 transition-all duration-200",
+                    isGuestValid
+                      ? "bg-[#1A1814] text-white hover:bg-[#1A1814]/90 hover:scale-[1.01] cursor-pointer"
+                      : "bg-[#C8C0B4] text-white cursor-not-allowed hover:bg-[#C8C0B4]"
+                  )}
                   size="lg"
                   disabled={!isGuestValid}
                   onClick={() => {
@@ -800,7 +826,12 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         </div>
       </main>
 
-      <Footer />
+      {/* Minimal trust footer */}
+      <div className="border-t border-border py-4 text-center">
+        <p className="text-xs text-muted-foreground">
+          🔒 {lang === "he" ? "הזמנה מאובטחת · לא תחויבו עד לאישור" : lang === "fr" ? "Réservation sécurisée · Aucun débit avant confirmation" : "Secure booking · No charge until confirmed"}
+        </p>
+      </div>
 
       {/* Confirmation dialog */}
       <BookingConfirmationDialog

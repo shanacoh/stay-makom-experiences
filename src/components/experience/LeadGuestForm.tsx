@@ -178,8 +178,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
            : (show || touched.email) && !isValidEmail(value.email) ? t.invalidEmail : null,
       phone: (show || touched.phone) && !value.phone.trim() ? t.required 
            : (show || touched.phone) && !isValidPhone(value.phone) ? t.invalidPhone : null,
-      birthDate: (show || touched.birthDate) && !value.birthDate ? t.required
-               : (show || touched.birthDate) && !isValidBirthDate(value.birthDate) ? t.invalidDate : null,
+      birthDate: (show || touched.birthDate) && value.birthDate && !isValidBirthDate(value.birthDate) ? t.invalidDate : null,
     };
   }, [value, touched, showErrors, t]);
 
@@ -361,20 +360,25 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
           </div>
         </div>
 
-        {/* Birth date */}
-        <div className="space-y-1">
-          <Label className="text-xs">{t.birthDate} *</Label>
-          <Input
-            type="date"
-            value={value.birthDate}
-            onChange={(e) => update("birthDate", e.target.value)}
-            onBlur={() => markTouched("birthDate")}
-            className={`h-9 ${errors.birthDate ? "border-destructive" : ""}`}
-            max={new Date().toISOString().split("T")[0]}
-            min="1900-01-01"
-          />
-          <FieldError msg={errors.birthDate} />
-        </div>
+        {/* Birth date — optional, in collapsible section */}
+        <details className="group">
+          <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
+            {lang === "he" ? "מידע נוסף (אופציונלי)" : lang === "fr" ? "Informations supplémentaires (optionnel)" : "Additional info (optional)"}
+          </summary>
+          <div className="space-y-1 pt-2">
+            <Label className="text-xs">{t.birthDate}</Label>
+            <Input
+              type="date"
+              value={value.birthDate}
+              onChange={(e) => update("birthDate", e.target.value)}
+              onBlur={() => markTouched("birthDate")}
+              className="h-9"
+              max={new Date().toISOString().split("T")[0]}
+              min="1900-01-01"
+              placeholder={lang === "fr" ? "jj/mm/aaaa" : "dd/mm/yyyy"}
+            />
+          </div>
+        </details>
 
         {/* City & Country */}
         <div className="grid grid-cols-2 gap-2">
