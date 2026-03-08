@@ -87,6 +87,8 @@ const HeroSection = ({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
+  const [searchParams] = useSearchParams();
+  const isLaunch = searchParams.get("context") === "launch";
 
   const displayPhotos = photos.slice(0, 4);
 
