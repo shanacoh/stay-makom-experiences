@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from "react";
-import { useParallax } from "@/hooks/useParallax";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,8 +39,6 @@ const LaunchIndex = () => {
   const { lang } = useLanguage();
   const { getLocalizedPath } = useLocalizedNavigation();
   const isRTL = lang === "he";
-  const heroParallaxRef = useParallax(0.4);
-  const editorialParallaxRef = useParallax<HTMLImageElement>(0.3);
 
   // Lead capture state
   const [email, setEmail] = useState("");
@@ -206,8 +203,7 @@ const LaunchIndex = () => {
         {/* ─── 1. HERO ─── */}
         <section className="relative h-[70vh] min-h-[480px] flex items-end justify-center pb-[79px]">
           <div
-            ref={heroParallaxRef}
-            className="absolute inset-0 bg-cover bg-center will-change-transform"
+            className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
 
           <div className="absolute inset-0 bg-black/45" />
@@ -354,7 +350,7 @@ const LaunchIndex = () => {
         {/* ─── 5. BRAND STATEMENT IMAGE BLOCK ─── */}
         <section className="relative py-8 sm:py-14 md:py-18 overflow-hidden">
           <div className="absolute inset-0">
-            <img ref={editorialParallaxRef} src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover will-change-transform" />
+            <img src={handpickedHero} alt="Israeli countryside road" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40" />
           </div>
           
