@@ -39,7 +39,7 @@ const Account = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile"].includes(tabFromUrl)) {
+    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile", "savedcarts"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
