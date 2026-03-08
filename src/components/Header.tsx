@@ -35,6 +35,11 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { lang, setLanguage } = useLanguage();
+  const { setDisplayCurrency } = useCurrency();
+  const handleLang = (l: "en" | "he") => {
+    setLanguage(l);
+    setDisplayCurrency(l === "he" ? "ILS" : "USD");
+  };
   const { getLocalizedPath, navigateLocalized } = useLocalizedNavigation();
 
   const handleSignOut = async () => {
