@@ -423,7 +423,13 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       if (dbError) console.error("Failed to save booking to DB:", dbError);
 
       // === CERTIFICATION LOG ===
-      const cancellationInfo = analyzeCancellationPolicies(state.selectedRatePlan);
+      const certCancelInfo = analyzeCancellationPolicies(
+        state.selectedRatePlan?.cancellationPolicies,
+        checkIn
+      );
+      const refundLabel = certCancelInfo?.isNonRefundable
+        ? 'Non-refundable'
+        : `Fully refundable${certCancelInfo?.effectiveDeadline ? ` (free cancellation until ${certCancelInfo.effectiveDeadline.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })})` : ''}`;
       console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║           🏨 BOOKING CERTIFICATION DETAILS              ║
@@ -435,7 +441,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 ║ Check-out:          ${checkOut} (${state.nights} night${state.nights > 1 ? 's' : ''})
 ║ Room:               ${state.selectedRoomName} — ${state.selectedRatePlan?.board || 'RO'}
 ║ Amount:             ${sellPrice} ${bookingCurrency}
-║ Rate plan:          ${cancellationInfo?.isRefundable ? 'Fully refundable' : 'Non-refundable'}${cancellationInfo?.freeCancelUntil ? ` (free cancellation until ${cancellationInfo.freeCancelUntil})` : ''}
+║ Rate plan:          ${refundLabel}
 ║ StayMakom Ref:      ${staymakomRef}
 ║ HG Status:          ${hgStatus}
 ║ Booking created:    ${new Date().toISOString()}
