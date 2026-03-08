@@ -84,49 +84,42 @@ const LocationMap = ({
   const sectionTitle = lang === "he" ? "איפה זה קורה" : lang === "fr" ? "Où ça se passe" : "Where you'll be";
 
   return (
-    <section className="pb-6">
-      <div className="h-[280px] rounded-lg overflow-hidden border border-border">
+    <section className="py-8">
+      <div className="h-px bg-border/60 mb-8" />
+      <h2 className="font-serif text-[20px] md:text-2xl font-bold uppercase tracking-wide text-foreground mb-4">
+        {sectionTitle.toUpperCase()}
+      </h2>
+      <div className="h-[140px] md:h-[160px] rounded-lg overflow-hidden border border-border">
         <div ref={mapContainer} className="w-full h-full" />
       </div>
-      <div className="flex items-center justify-between mt-3">
-        <p className="text-sm text-muted-foreground">{hotelName}</p>
+      <div className="mt-3">
+        <p className="text-sm text-muted-foreground mb-3">{hotelName}</p>
         
         {showGetThere && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full md:w-auto gap-2 rounded-full border-border/60 hover:bg-foreground hover:text-background transition-all min-h-[44px] md:min-h-0"
+              >
                 <Navigation className="h-4 w-4" />
-                {getThereLabel}
+                {lang === "he" ? "קבלו הוראות הגעה" : "Get directions"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background z-50">
+            <DropdownMenuContent align="start" className="bg-background z-50">
               <DropdownMenuItem asChild>
-                <a 
-                  href={googleMapsUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="cursor-pointer"
-                >
+                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
                   Google Maps
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a 
-                  href={appleMapsUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="cursor-pointer"
-                >
+                <a href={appleMapsUrl} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
                   Apple Maps
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a 
-                  href={wazeUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="cursor-pointer"
-                >
+                <a href={wazeUrl} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
                   Waze
                 </a>
               </DropdownMenuItem>
