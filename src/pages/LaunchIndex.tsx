@@ -240,8 +240,8 @@ const LaunchIndex = () => {
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
             <h1
-              className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
-              style={{ animationDelay: '0ms' }}>
+              className="font-sans uppercase opacity-0 animate-hero-fade-up text-white md:text-5xl lg:text-6xl"
+              style={{ fontSize: 34, fontWeight: 800, letterSpacing: 0.5, lineHeight: 1.15, animationDelay: '0ms' }}>
               {isRTL ? (
                 <><span className="whitespace-nowrap">אל תבחר עיר,</span><br /><span className="whitespace-nowrap">בחר את הבריחה שלך</span></>
               ) : (
@@ -249,8 +249,8 @@ const LaunchIndex = () => {
               )}
             </h1>
             <p
-              className="font-sans italic text-white/90 mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up text-base sm:text-lg md:text-xl"
-              style={{ animationDelay: '250ms' }}>
+              className="font-sans italic text-white/90 max-w-xl mx-auto opacity-0 animate-hero-fade-up md:text-xl"
+              style={{ fontSize: 15, fontWeight: 300, marginTop: 12, marginBottom: 24, animationDelay: '250ms' }}>
               {isRTL ? "הישראל שרוב האנשים לא מוצאים." : "The Israel most people never find."}
             </p>
             <button
@@ -258,8 +258,8 @@ const LaunchIndex = () => {
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all duration-300 opacity-0 animate-hero-fade-up cursor-pointer"
-              style={{ animationDelay: '500ms' }}>
+              className="bg-white text-foreground uppercase shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all duration-300 opacity-0 animate-hero-fade-up cursor-pointer w-full md:w-auto"
+              style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, padding: '16px 32px', borderRadius: 3, minHeight: 52, animationDelay: '500ms' }}>
               {isRTL ? "מצא את הבריחה שלך" : "Find your escape"}
             </button>
           </div>
