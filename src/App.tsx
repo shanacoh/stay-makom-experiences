@@ -87,6 +87,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthProvider>
+          <MobileAppShell />
           <Routes>
             {/* Coming Soon en page d'accueil (temporaire) */}
             <Route path="/" element={<ComingSoon />} />
