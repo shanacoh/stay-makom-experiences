@@ -33,6 +33,9 @@ const MobileBottomNav = () => {
     if (path === "/launch") {
       return location.pathname === "/launch" || location.pathname === "/launch/experiences";
     }
+    if (path === "/cart") {
+      return location.pathname === "/cart";
+    }
 
     // "Account" tab: active when on /account with no tab param
     if (path === "/account") {
