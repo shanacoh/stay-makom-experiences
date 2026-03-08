@@ -34,7 +34,7 @@ const HowItWorksBanner = () => {
         <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-0 md:gap-0">
           {steps.map((step, index) => <div key={index} className="flex items-center gap-2 sm:gap-0 md:gap-0">
               <span className="flex flex-col items-center sm:flex-row sm:items-center gap-0 sm:gap-2.5 px-3 sm:px-5 md:px-8">
-                <span className="font-bold text-lg sm:text-2xl md:text-3xl text-accent">{step.number}</span>
+                <span className="font-bold text-lg sm:text-2xl md:text-3xl text-card">{step.number}</span>
                 <span className="font-medium text-white text-[10px] sm:text-sm md:text-base uppercase tracking-wide text-center sm:text-left sm:whitespace-nowrap pointer-events-none">
                   {step.line1}<br className="sm:hidden" /> {step.line2}
                 </span>
