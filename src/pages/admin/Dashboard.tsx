@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import { format, subDays, startOfDay, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from "date-fns";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 type PeriodFilter = "7d" | "30d" | "90d" | "all";
 type ChartGranularity = "day" | "week" | "month";
