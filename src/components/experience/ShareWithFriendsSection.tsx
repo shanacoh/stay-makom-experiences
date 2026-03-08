@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import ShareDialog from "./ShareDialog";
-import { toast } from "@/hooks/use-toast";
 
 interface ShareWithFriendsSectionProps {
   title: string;
@@ -18,10 +18,10 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
         fr: "Quelqu'un aimerait cette expérience ?",
         he: "מכירים מישהו שיאהב?"
       },
-      shareLink: {
-        en: "Share",
-        fr: "Partager",
-        he: "שתפו"
+      shareBtn: {
+        en: "Share this escape",
+        fr: "Partager cette escapade",
+        he: "שתפו את הבריחה"
       }
     };
     return texts[key]?.[lang] || texts[key]?.en || key;
@@ -29,37 +29,31 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
 
   const handleShare = async () => {
     const url = window.location.href;
-    
-    // On mobile, try native share first
     if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
       try {
-        await navigator.share({
-          title: title,
-          url: url,
-        });
+        await navigator.share({ title, url });
         return;
-      } catch (err) {
-        // User cancelled or error, fall through to dialog
-      }
+      } catch { /* fall through */ }
     }
-    
-    // Copy link and open share dialog
-    navigator.clipboard.writeText(url);
+    try { await navigator.clipboard.writeText(url); } catch {}
     setShareDialogOpen(true);
   };
 
   return (
     <>
-      <section className="py-4">
-        <div className="flex items-center justify-start gap-2 text-sm text-foreground/60">
-          <span>{getText('prompt')}</span>
-          <button 
+      <section className="py-6">
+        <div className="border border-border/60 rounded-xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            {getText('prompt')}
+          </p>
+          <Button 
+            variant="outline"
             onClick={handleShare}
-            className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 font-medium transition-colors"
+            className="gap-2 rounded-full border-foreground/20 hover:bg-foreground hover:text-background transition-all"
           >
-            <Share2 className="h-3.5 w-3.5" />
-            {getText('shareLink')}
-          </button>
+            <Share2 className="h-4 w-4" />
+            {getText('shareBtn')}
+          </Button>
         </div>
       </section>
 

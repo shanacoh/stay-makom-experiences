@@ -15,18 +15,14 @@ function formatCurrency(amount: number, currency: string, locale = "en-US"): str
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   }).format(amount);
 }
 
-/** Always display USD as the primary currency; no secondary currency for user-facing pages. */
+/** Show the original currency as primary. No secondary conversion for user-facing pages. */
 function getDisplayCurrencies(currency: string): { primaryCur: string; secondaryCur: string | null } {
-  const c = currency.toUpperCase();
-  if (c === "USD") return { primaryCur: "USD", secondaryCur: null };
-  if (c === "ILS") return { primaryCur: "USD", secondaryCur: null };
-  if (c === "EUR") return { primaryCur: "USD", secondaryCur: null };
-  return { primaryCur: currency, secondaryCur: null };
+  return { primaryCur: currency.toUpperCase(), secondaryCur: null };
 }
 
 export function DualPrice({

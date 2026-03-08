@@ -315,11 +315,19 @@ export function BookingPanel2({
   if (!hyperguestPropertyId) {
     return (
       <Card>
-        <CardContent className="pt-6">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{t.noHyperguest}</AlertDescription>
-          </Alert>
+        <CardContent className="pt-6 space-y-4">
+          <Button
+            className="w-full bg-foreground text-background hover:bg-foreground/90 font-medium uppercase tracking-wide py-6 text-base"
+            onClick={() => {
+              // Navigate to contact with pre-filled experience info
+              window.location.href = `/contact?subject=Stay Request: ${experienceTitle}&experience=${experienceSlug}`;
+            }}
+          >
+            {lang === 'he' ? 'בקשו שהייה זו' : lang === 'fr' ? 'Demander ce séjour' : 'Request this stay'}
+          </Button>
+          <p className="text-xs text-center text-muted-foreground">
+            {lang === 'he' ? 'נאשר זמינות תוך 24 שעות' : lang === 'fr' ? 'Nous confirmerons la disponibilité sous 24h' : "We'll confirm availability within 24h"}
+          </p>
         </CardContent>
       </Card>
     );
