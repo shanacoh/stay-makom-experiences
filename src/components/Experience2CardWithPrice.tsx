@@ -25,6 +25,7 @@ export default function Experience2CardWithPrice({
   linkPrefix = "/experience",
   linkSuffix,
 }: Experience2CardWithPriceProps) {
+  const { displayCurrency } = useCurrency();
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
 
   // Fetch cheapest room price from HyperGuest (1 night, 2 adults, USD)
