@@ -89,6 +89,11 @@ export default function MobileAccountHome() {
       onClick: () => navigate("/account?tab=wishlist"),
     },
     {
+      icon: Bookmark,
+      label: "Saved for Later",
+      onClick: () => navigate("/account?tab=savedcarts"),
+    },
+    {
       icon: Gift,
       label: "Gift Cards",
       onClick: () => navigate("/account?tab=giftcards"),
