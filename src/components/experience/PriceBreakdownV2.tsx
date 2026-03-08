@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Hotel, Percent, Receipt, Tag, DollarSign, AlertTriangle, Info } from "lucide-react";
 import type { PriceBreakdownV2 as PriceBreakdownType } from "@/types/experience2_addons";
 import { DualPrice } from "@/components/ui/DualPrice";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface PriceBreakdownV2Props {
   breakdown: PriceBreakdownType | null;
@@ -91,14 +92,18 @@ const translations = {
 };
 
 // ---------------------------------------------------------------------------
-// Format currency
+// Format currency — uses a hook-provided converter, so must be called inside component
 // ---------------------------------------------------------------------------
 
-function fmt(amount: number, _currency: string): string {
-  return `$${amount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+function useFmt() {
+  const { symbol, convert } = useCurrency();
+  return (amount: number, _currency?: string): string => {
+    const converted = convert(amount);
+    return `${symbol}${converted.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -107,6 +112,7 @@ function fmt(amount: number, _currency: string): string {
 
 export function PriceBreakdownV2({ breakdown, isLoading = false, className = "", lang = "en", ratePlanPrices }: PriceBreakdownV2Props) {
   const t = translations[lang];
+  const fmt = useFmt();
 
   if (isLoading) {
     return (
