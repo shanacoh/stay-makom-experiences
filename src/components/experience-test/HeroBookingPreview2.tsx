@@ -7,6 +7,7 @@ import {
   calculatePriceV2,
 } from "@/hooks/useExperience2Price";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Loader2 } from "lucide-react";
 
 interface HeroBookingPreview2Props {
@@ -30,13 +31,16 @@ const HeroBookingPreview2 = ({
 }: HeroBookingPreview2Props) => {
   const { data: addons } = useExperienceAddons(experienceId);
   const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
+  const { symbol, convert } = useCurrency();
 
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+
+  // Always fetch in ILS so room price + addons are in the same currency
   const { data: quickDates, isLoading: isLoadingDates } = useQuickDateAvailability({
     propertyId: propId,
     nights: 1,
     adults: 2,
-    currency,
+    currency: "ILS",
     enabled: !!propId,
   });
 
@@ -49,6 +53,7 @@ const HeroBookingPreview2 = ({
     }, null as (typeof quickDates)[0] | null);
   }, [quickDates]);
 
+  // Calculate total in ILS, then convert
   const displayPrice = useMemo(() => {
     const roomPrice = cheapestDate?.cheapestPrice ?? 0;
     const breakdown = calculatePriceV2(
@@ -64,19 +69,12 @@ const HeroBookingPreview2 = ({
         promo_value: null,
         promo_is_percentage: true,
       },
-      currency
+      "ILS"
     );
 
-    return breakdown.finalTotal > 0 ? breakdown.finalTotal : null;
-  }, [cheapestDate, addons, pricingConfig, minParty, minNights, currency]);
+    return breakdown.finalTotal > 0 ? Math.round(convert(breakdown.finalTotal)) : null;
+  }, [cheapestDate, addons, pricingConfig, minParty, minNights, convert]);
 
-  const getCurrencySymbol = (cur: string) => {
-    if (cur === "ILS") return "₪";
-    if (cur === "EUR") return "€";
-    return "$";
-  };
-
-  const symbol = getCurrencySymbol(currency);
   const nightLabel = lang === "he" ? "ללילה" : "/ night";
 
   if (!propId) {
@@ -120,7 +118,7 @@ const HeroBookingPreview2 = ({
           <div>
             <div className="flex items-baseline gap-1">
               <span className="text-sm text-muted-foreground">{lang === "he" ? "מ-" : "From "}</span>
-              <span className="text-lg font-semibold text-foreground">{symbol}{Math.round(displayPrice)}</span>
+              <span className="text-lg font-semibold text-foreground">{symbol}{displayPrice}</span>
               <span className="text-sm text-muted-foreground">{nightLabel}</span>
             </div>
             {cheapestDate && (

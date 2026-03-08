@@ -30,14 +30,16 @@ const StickyPriceBar = ({
   minNights = 1,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
-  const { displayCurrency, symbol, altSymbol, altCode, setDisplayCurrency, convert } = useCurrency();
+  const { displayCurrency, symbol, altSymbol, setDisplayCurrency, convert } = useCurrency();
 
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+
+  // Always fetch in ILS to match addon currency
   const { data: quickDates } = useQuickDateAvailability({
     propertyId: propId,
     nights: 1,
     adults: 2,
-    currency,
+    currency: "ILS",
     enabled: !!propId,
   });
 
@@ -53,6 +55,7 @@ const StickyPriceBar = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
+  // Calculate in ILS, then convert
   const displayPrice = useMemo(() => {
     const roomPrice = cheapestDate?.cheapestPrice ?? 0;
     const breakdown = calculatePriceV2(
@@ -68,15 +71,15 @@ const StickyPriceBar = ({
         promo_value: null,
         promo_is_percentage: true,
       },
-      currency
+      "ILS"
     );
 
-    if (breakdown.finalTotal > 0) {
-      return Math.round(breakdown.finalTotal + selectedExtrasTotal);
+    const ilsTotal = breakdown.finalTotal + selectedExtrasTotal;
+    if (ilsTotal > 0) {
+      return Math.round(convert(ilsTotal));
     }
-
-    return selectedExtrasTotal > 0 ? Math.round(selectedExtrasTotal) : null;
-  }, [cheapestDate, addons, pricingConfig, minParty, minNights, currency, selectedExtrasTotal]);
+    return null;
+  }, [cheapestDate, addons, pricingConfig, minParty, minNights, selectedExtrasTotal, convert]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -120,7 +123,6 @@ const StickyPriceBar = ({
                     {symbol}{displayPrice}
                   </span>
                   <span className="text-xs text-muted-foreground">{nightLabel}</span>
-                  {/* Inline currency toggle */}
                   <button
                     onClick={handleInlineToggle}
                     className="text-[10px] leading-none transition-colors"
@@ -129,7 +131,6 @@ const StickyPriceBar = ({
                     · {lang === 'he' ? `ראה ב${altSymbol}` : `see in ${altSymbol}`}
                   </button>
                 </div>
-                {/* "Charged in NIS" note when showing USD */}
                 {isShowingUSD && (
                   <p className="text-[10px] leading-tight mt-0.5" style={{ color: '#9e9e9e' }}>
                     {lang === 'he' ? 'החיוב בשקלים' : 'Charged in NIS'}
