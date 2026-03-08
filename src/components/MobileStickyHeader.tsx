@@ -22,8 +22,8 @@ const MobileStickyHeader = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${
         isScrolled
-          ? "bg-background/95 backdrop-blur-[12px] border-b border-foreground/8"
-          : "bg-transparent"
+          ? "bg-background/95 backdrop-blur-[12px] border-b border-foreground/8 translate-y-0"
+          : "-translate-y-full"
       }`}
     >
       {/* Row 1: Logo */}
