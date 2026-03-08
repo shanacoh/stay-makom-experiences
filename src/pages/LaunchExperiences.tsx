@@ -92,8 +92,9 @@ const LaunchExperiences = () => {
       />
 
       <LaunchHeader />
+      <MobileStickyHeader />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-[88px] md:pt-20 pb-[80px] md:pb-0">
         <section className="container py-10 px-4">
           <div className="text-center mb-8">
             <h1 className="font-sans text-2xl sm:text-3xl md:text-4xl font-bold uppercase tracking-[-0.02em] mb-2">
