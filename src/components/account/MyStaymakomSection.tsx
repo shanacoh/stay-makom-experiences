@@ -379,15 +379,15 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
 
   return (
     <div className="space-y-6">
-      {/* Filters — pill buttons on mobile, dropdown on desktop */}
-      <div className="md:hidden flex gap-2">
+      {/* Filters — pill buttons (both mobile + desktop) */}
+      <div className="flex gap-2">
         {["upcoming", "past"].map((filter) => (
           <button
             key={filter}
             onClick={() => setTimeFilter(timeFilter === filter ? "all" : filter)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               timeFilter === filter
-                ? "bg-[#1A1A1A] text-white"
+                ? "bg-foreground text-background"
                 : "bg-muted text-muted-foreground"
             }`}
           >
@@ -397,27 +397,6 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
           </button>
         ))}
       </div>
-
-      {/* Desktop filter */}
-      <Card className="hidden md:block">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">{isHebrew ? "תקופה" : isFrench ? "Période" : "Time Period"}</label>
-              <Select value={timeFilter} onValueChange={setTimeFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
-                  <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
-                  <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Bookings List */}
       {allBookings.length === 0 ? (
