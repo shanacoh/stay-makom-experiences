@@ -23,7 +23,8 @@ import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
 import { useHyperGuestAvailability } from "@/hooks/useHyperGuestAvailability";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
-import { useExperience2Price } from "@/hooks/useExperience2Price";
+import { useExperience2Price, useExperienceAddons, useExperiencePricingConfig, calculateFromPrice } from "@/hooks/useExperience2Price";
+import type { PricingConfig } from "@/types/experience2_addons";
 import { formatGuests, calculateNights } from "@/services/hyperguest";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -157,6 +158,20 @@ export function BookingPanel2({
     currency,
     enabled: selectedTab !== "pick",
   });
+
+  // Fetch addons & pricing config for "from" price on date cards
+  const { data: _addons } = useExperienceAddons(experienceId);
+  const { data: _pricingConfig } = useExperiencePricingConfig(experienceId);
+
+  /** Apply fixed addons + commissions to a raw HyperGuest room price */
+  const applyFromPrice = (rawPrice: number | null): number | null => {
+    if (rawPrice == null || rawPrice <= 0) return rawPrice;
+    const config: PricingConfig = _pricingConfig ?? {
+      commission_room_pct: 0, commission_addons_pct: 0, tax_pct: 0,
+      promo_type: null, promo_value: null, promo_is_percentage: true,
+    };
+    return calculateFromPrice(rawPrice, _addons ?? [], config);
+  };
 
   // Auto-select the cheapest available date when quickDates load
   useEffect(() => {
@@ -504,7 +519,7 @@ export function BookingPanel2({
                           <p className="text-[10px] text-muted-foreground">
                             {lang === "he" ? "מ-" : lang === "fr" ? "à partir de" : "from"}
                           </p>
-                          <DualPrice amount={opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
+                          <DualPrice amount={applyFromPrice(opt.cheapestPrice) ?? opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
                         </div>
                       )}
                     </label>
