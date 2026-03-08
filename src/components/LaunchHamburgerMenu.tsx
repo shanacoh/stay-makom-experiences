@@ -53,14 +53,14 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
           {bookExpanded && (
             <div className={`${isRTL ? "mr-3 border-r pr-2" : "ml-3 border-l pl-2"} border-border/20`}>
               <Link
-                to={getLocalizedPath("/experiences2?filter=adventure")}
+                to="/launch/experiences?filter=adventure"
                 onClick={handleNavClick}
                 className="px-4 py-2.5 text-[14px] text-muted-foreground hover:text-foreground hover:bg-foreground/5 rounded-lg transition-colors block"
               >
-                {isRTL ? "הרפתקה" : "Feel Adventurous"}
+                {isRTL ? "הרפתקה" : "Feeling Adventurous"}
               </Link>
               <Link
-                to={getLocalizedPath("/experiences2?filter=romantic")}
+                to="/launch/experiences?filter=romantic"
                 onClick={handleNavClick}
                 className="px-4 py-2.5 text-[14px] text-muted-foreground hover:text-foreground hover:bg-foreground/5 rounded-lg transition-colors block"
               >
