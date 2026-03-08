@@ -200,9 +200,13 @@ const LaunchIndex = () => {
     setWaitlistOpen(true);
   };
 
-  // Handle filter button click
+  // Handle filter button click — scroll to grid when in sticky mode
   const handleFilterClick = (slug: string) => {
     setActiveFilter((prev) => prev === slug ? null : slug);
+    const grid = document.getElementById("launch-experiences");
+    if (grid && tabsSticky) {
+      grid.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const isPageLoading = isLoadingCategories || isLoadingExp;
