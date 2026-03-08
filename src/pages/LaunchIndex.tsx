@@ -201,7 +201,7 @@ const LaunchIndex = () => {
 
       <main className="flex-1">
         {/* ─── 1. HERO ─── */}
-        <section className="relative h-[70vh] min-h-[480px] flex items-end justify-center pb-[79px]">
+        <section className="relative h-[70vh] min-h-[480px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
@@ -237,11 +237,6 @@ const LaunchIndex = () => {
               style={{ animationDelay: '500ms' }}>
               {isRTL ? "מצא את הבריחה שלך" : "Find your escape"}
             </button>
-
-            {/* Scroll indicator */}
-            <div className="mt-8 flex justify-center opacity-0 animate-hero-fade-up" style={{ animationDelay: '700ms' }}>
-              <div className="w-px h-8 bg-white/50 scroll-indicator-line" />
-            </div>
           </div>
         </section>
 
