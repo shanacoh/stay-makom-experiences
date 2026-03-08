@@ -512,7 +512,7 @@ export default function Experience2() {
                   experienceTitle={lang === "he" ? experience.title_he || experience.title : experience.title}
                   experienceSlug={experience.slug}
                   hotelId={primaryHotel?.id || ""}
-                  hotelName={primaryHotel?.name || ""}
+                  hotelName={lang === "he" ? (primaryHotel?.name_he || primaryHotel?.name || "") : (primaryHotel?.name || "")}
                   hyperguestPropertyId={hyperguestPropertyId || null}
                   currency={experience.currency || "ILS"}
                   minParty={experience.min_party || 2}
