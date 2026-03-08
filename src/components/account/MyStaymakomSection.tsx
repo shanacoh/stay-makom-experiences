@@ -400,44 +400,18 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
 
       {/* Bookings List */}
       {allBookings.length === 0 ? (
-        <>
-          {/* Mobile empty state — clean, minimal */}
-          <div className="md:hidden flex flex-col items-center justify-center pt-20 text-center px-6">
-            <Calendar className="h-10 w-10 text-muted-foreground/40 mb-4" />
-            <p className="text-[15px] text-foreground mb-1">
-              {isHebrew ? "אין הזמנות עדיין." : isFrench ? "Aucune réservation." : "No escapes booked yet."}
-            </p>
-            <button
-              onClick={() => navigate("/launch")}
-              className="text-sm text-muted-foreground underline underline-offset-2"
-            >
-              {isHebrew ? "גלו חוויות" : isFrench ? "Explorer" : "Explore experiences"}
-            </button>
-          </div>
-          {/* Desktop empty state */}
-          <Card className="border-dashed hidden md:block">
-            <CardContent className="py-16">
-              <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2">
-                  <Calendar className="h-10 w-10 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-xl mb-2">{isHebrew ? "אין הזמנות" : isFrench ? "Aucune réservation" : "No bookings found"}</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto">
-                    {isHebrew
-                      ? "גלו את החוויות המיוחדות שלנו והזמינו את ההרפתקה הבאה שלכם!"
-                      : isFrench
-                      ? "Découvrez nos expériences uniques et réservez votre prochaine aventure !"
-                      : "Start exploring our curated experiences and book your next adventure!"}
-                  </p>
-                </div>
-                <Button onClick={() => navigate("/")} variant="cta">
-                  {isHebrew ? "גלו חוויות" : isFrench ? "Découvrir les expériences" : "Explore Experiences"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </>
+        <div className="flex flex-col items-center justify-center pt-16 text-center px-6">
+          <Calendar className="h-10 w-10 text-muted-foreground/40 mb-4" />
+          <p className="text-[15px] text-foreground mb-1">
+            {isHebrew ? "אין הזמנות עדיין." : isFrench ? "Aucune réservation." : "No escapes booked yet."}
+          </p>
+          <button
+            onClick={() => navigate("/launch")}
+            className="text-sm text-muted-foreground underline underline-offset-2"
+          >
+            {isHebrew ? "גלו חוויות →" : isFrench ? "Explorer →" : "Explore experiences →"}
+          </button>
+        </div>
       ) : (
         <div className="grid gap-4">
           {allBookings.map((booking) => {
