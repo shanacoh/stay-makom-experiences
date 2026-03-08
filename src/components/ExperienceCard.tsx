@@ -216,6 +216,10 @@ export default function ExperienceCard({
         lang={lang} 
         defaultTab="login" 
       />
+      <LoginBottomSheet
+        open={mobileSheetOpen}
+        onOpenChange={setMobileSheetOpen}
+      />
       
       <Link
         to={`${linkPrefix}/${experience.slug}?lang=${lang}${linkSuffix ? `&${linkSuffix.replace(/^\?/, '')}` : ''}`}
