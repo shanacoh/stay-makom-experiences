@@ -10,8 +10,8 @@ import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import UserDropdown from "@/components/auth/UserDropdown";
 
-const LaunchHeader = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
+const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) => {
+  const [isScrolled, setIsScrolled] = useState(forceScrolled);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [authDialog, setAuthDialog] = useState<{ open: boolean; tab: "login" | "signup"; context: "favorites" | "account" | "signup" }>({ open: false, tab: "login", context: "account" });
