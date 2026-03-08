@@ -75,7 +75,7 @@ const LaunchIndex = () => {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setTabsSticky(!entry.isIntersecting),
-      { threshold: 0, rootMargin: "-44px 0px 0px 0px" }
+      { threshold: 0, rootMargin: "-36px 0px 0px 0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
