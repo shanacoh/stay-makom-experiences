@@ -33,7 +33,7 @@ export default function Experience2CardWithPrice({
     propertyId: propId,
     nights: 1,
     adults: 2,
-    currency: "USD",
+    currency: displayCurrency,
     enabled: !!propId,
   });
 
