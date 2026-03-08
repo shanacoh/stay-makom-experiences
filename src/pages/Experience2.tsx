@@ -537,7 +537,7 @@ export default function Experience2() {
         {/* Mobile Sticky Price Bar — sits above bottom nav */}
         <StickyPriceBar
           experienceId={experience.id}
-          currency={experience.currency || "ILS"}
+          currency={displayCurrency}
           lang={lang as "en" | "he" | "fr"}
           onViewDates={() => setIsSheetOpen(true)}
           footerRef={footerRef}
