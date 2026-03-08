@@ -12,6 +12,8 @@ interface HeroBookingPreview2Props {
   lang: 'en' | 'he' | 'fr';
   onViewDates: () => void;
   hyperguestPropertyId?: string | null;
+  minParty?: number;
+  minNights?: number;
 }
 
 const HeroBookingPreview2 = ({
@@ -20,6 +22,8 @@ const HeroBookingPreview2 = ({
   lang,
   onViewDates,
   hyperguestPropertyId,
+  minParty = 2,
+  minNights = 1,
 }: HeroBookingPreview2Props) => {
   const { data: addons } = useExperienceAddons(experienceId);
 
@@ -41,14 +45,22 @@ const HeroBookingPreview2 = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  // Calculate addon total (experience extras on top of room)
+  // Calculate addon total with proper multipliers
   const addonTotal = useMemo(() => {
     if (!addons || addons.length === 0) return 0;
     const pricingAddons = addons.filter(
       (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
     );
-    return pricingAddons.reduce((sum, a) => sum + a.value, 0);
-  }, [addons]);
+    return pricingAddons.reduce((sum, a) => {
+      const v = Number(a.value) || 0;
+      switch (a.type) {
+        case 'per_person': return sum + v * minParty;
+        case 'per_night': return sum + v * minNights;
+        case 'per_person_per_night': return sum + v * minParty * minNights;
+        default: return sum + v;
+      }
+    }, 0);
+  }, [addons, minParty, minNights]);
 
   // Total price = room price + addon extras (or addon-only fallback)
   const displayPrice = useMemo(() => {
