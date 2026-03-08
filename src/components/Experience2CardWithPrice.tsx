@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import ExperienceCard from "@/components/ExperienceCard";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Experience2CardWithPriceProps {
   experience: any;
