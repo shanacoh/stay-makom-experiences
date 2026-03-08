@@ -87,6 +87,7 @@ const HeroSection = ({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
   const [animateHeart, setAnimateHeart] = useState(false);
