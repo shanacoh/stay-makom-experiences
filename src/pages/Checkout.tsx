@@ -209,6 +209,19 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const ratePlanPrices = state.selectedRatePlan?.prices || null;
   const priceBreakdown = useExperience2Price(state.experienceId, null, state.currency, state.nights, state.adults, ratePlanPrices);
 
+  // Fetch experience hero image for thumbnail
+  const { data: experienceHeroImage } = useQuery({
+    queryKey: ["experience2-hero", state.experienceId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("experiences2")
+        .select("hero_image")
+        .eq("id", state.experienceId)
+        .single();
+      return data?.hero_image || null;
+    },
+  });
+
   const extrasTotal = useMemo(() => {
     return state.selectedExtras.reduce((sum, extra) => {
       let multiplier = 1;
