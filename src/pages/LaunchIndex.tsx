@@ -224,8 +224,8 @@ const LaunchIndex = () => {
         title={isRTL ? "STAYMAKOM — מלונות וחוויות נבחרים בישראל" : "STAYMAKOM — Handpicked Hotels & Experiences in Israel"}
         description={isRTL ? "אנחנו אוצרים את המלונות הבוטיק הטובים בישראל ומשלבים אותם עם חוויות מקומיות ייחודיות." : "We curate Israel's best boutique hotels and pair them with unique local experiences."} />
 
-      <LaunchHeader />
-      <MobileStickyHeader />
+
+
 
       <main className="flex-1 md:pt-0 pt-0 pb-[80px] md:pb-0">
         {/* ─── 1. HERO ─── */}
