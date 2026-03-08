@@ -94,25 +94,25 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
             isRTL && "space-x-reverse"
           )}>
             <button
-              onClick={() => setLanguage("en")}
+              onClick={() => handleLang("en")}
               className={`text-xs transition-colors ${
                 lang === "en"
                   ? !isScrolled ? "text-white font-semibold" : "text-foreground font-semibold"
                   : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              EN
+              EN · $
             </button>
             <span className={`text-xs ${!isScrolled ? "text-white/40" : "text-muted-foreground/40"}`}>|</span>
             <button
-              onClick={() => setLanguage("he")}
+              onClick={() => handleLang("he")}
               className={`text-xs transition-colors ${
                 lang === "he"
                   ? !isScrolled ? "text-white font-semibold" : "text-foreground font-semibold"
                   : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              עב
+              עב · ₪
             </button>
           </div>
 

@@ -57,25 +57,25 @@ const MobileStickyHeader = () => {
         {/* Right: Language switcher */}
         <div className="ml-auto flex items-center gap-1.5">
           <button
-            onClick={() => setLanguage("en")}
+            onClick={() => handleLang("en")}
             className={`text-[11px] transition-colors ${
               lang === "en"
                 ? "text-mobile-logo font-medium"
                 : "text-mobile-logo/50"
             }`}
           >
-            EN
+            EN · $
           </button>
           <span className="text-[11px] text-mobile-logo/30">|</span>
           <button
-            onClick={() => setLanguage("he")}
+            onClick={() => handleLang("he")}
             className={`text-[11px] transition-colors ${
               lang === "he"
                 ? "text-mobile-logo font-medium"
                 : "text-mobile-logo/50"
             }`}
           >
-            עב
+            עב · ₪
           </button>
         </div>
       </div>
