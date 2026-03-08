@@ -57,17 +57,24 @@ const LaunchIndex = () => {
   const [toggleUnderline, setToggleUnderline] = useState({ left: 0, width: 0 });
   const [tabsSticky, setTabsSticky] = useState(false);
 
+  const recalcUnderline = () => {
+    const activeRef = activeFilter === FILTER_ADVENTURE ? toggleBtn1Ref : toggleBtn2Ref;
+    if (activeRef.current) {
+      const { offsetLeft, offsetWidth } = activeRef.current;
+      setToggleUnderline({ left: offsetLeft, width: offsetWidth });
+    }
+  };
+
   useEffect(() => {
-    // Small timeout to allow text/fonts to render at correct size after language change
-    const timeout = setTimeout(() => {
-      const activeRef = activeFilter === FILTER_ADVENTURE ? toggleBtn1Ref : toggleBtn2Ref;
-      if (activeRef.current) {
-        const { offsetLeft, offsetWidth } = activeRef.current;
-        setToggleUnderline({ left: offsetLeft, width: offsetWidth });
-      }
-    }, 50);
+    const timeout = setTimeout(recalcUnderline, 50);
     return () => clearTimeout(timeout);
   }, [activeFilter, lang]);
+
+  // Recalculate underline when sticky state changes (layout shift)
+  useEffect(() => {
+    const timeout = setTimeout(recalcUnderline, 60);
+    return () => clearTimeout(timeout);
+  }, [tabsSticky]);
 
   // Sticky tabs observer: stick when tabs scroll past the mobile header (~44px)
   useEffect(() => {
