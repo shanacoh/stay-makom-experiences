@@ -134,7 +134,7 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
   const timings = isRTL ? TIMING_HE : TIMING_EN;
   const budgets = isRTL ? BUDGET_HE : BUDGET;
 
-  const fieldLabel = "block text-xs uppercase tracking-[0.12em] text-foreground/60 mb-2 font-medium";
+  const fieldLabel = "block uppercase text-foreground/60 mb-2" + " " + "tracking-[2px] text-[11px] font-semibold";
   const cardInput =
   "rounded-xl border-border/40 bg-card shadow-soft focus-within:shadow-medium focus-within:ring-1 focus-within:ring-accent/40 transition-all duration-300";
 
@@ -142,16 +142,18 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
     <>
       {/* ─── Photo Hero Banner ─── */}
       <section
-        className="relative w-full bg-cover bg-center py-16 sm:py-20 md:py-24"
-        style={{ backgroundImage: `url(${tailoredHero})` }}
+        className="relative w-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${tailoredHero})`, paddingTop: 48, paddingBottom: 48 }}
         dir={isRTL ? "rtl" : "ltr"}
       >
         <div className="absolute inset-0 bg-black/45" />
-        <div className="relative z-10 max-w-2xl mx-auto text-center px-4 space-y-4">
-          <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight text-white">
+        <div className="relative z-10 max-w-2xl mx-auto text-center px-4">
+          <h2
+            className="font-sans md:text-3xl text-white"
+            style={{ fontSize: 24, fontWeight: 700, letterSpacing: 0.3, lineHeight: 1.2, marginBottom: 12 }}>
             {getCopy("Looking for something truly unique?", "מחפשים משהו באמת ייחודי?")}
           </h2>
-          <p className="text-white/85 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+          <p className="text-white/85 max-w-lg mx-auto" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.6, marginBottom: 24 }}>
             {getCopy(
               "Some escapes can't be found in a list. Tell us yours.",
               "יש בריחות שלא ניתן למצוא ברשימה. ספרו לנו על שלכם."
@@ -159,7 +161,8 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
           </p>
           <Button
             onClick={() => { setDialogOpen(true); setSubmitted(false); }}
-            className="group mt-2"
+            className="group uppercase"
+            style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, padding: '16px 32px', borderRadius: 3, minHeight: 52 }}
           >
             {getCopy("DESIGN MY STAY", "עצבו את השהייה שלכם")}
             <ArrowRight className={cn(
