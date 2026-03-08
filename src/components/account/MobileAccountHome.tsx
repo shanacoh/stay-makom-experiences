@@ -165,18 +165,36 @@ export default function MobileAccountHome() {
         <p className="text-xs text-muted-foreground mt-0.5">
           {tierConfig.label} · Since {memberSince}
         </p>
-        <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full border border-border/60 text-xs text-foreground">
+        <button
+          onClick={() => setTierSheetOpen(true)}
+          className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full border border-border/60 text-xs text-foreground active:bg-muted/40 transition-colors"
+        >
           {tierConfig.emoji} {tierConfig.label}
-        </span>
+          <ChevronRight size={12} className="text-muted-foreground" />
+        </button>
       </div>
 
       {/* MEMBERSHIP PROGRESS */}
       {nextPoints && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-muted-foreground">
-              {progress} / {nextPoints} pts
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">
+                {progress} / {nextPoints} pts
+              </span>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="text-muted-foreground hover:text-foreground transition-colors">
+                      <Info size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[220px] text-xs leading-relaxed">
+                    {HOW_TO_EARN[tier] || HOW_TO_EARN.explorer}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <span className="text-xs text-muted-foreground">
               {tierConfig.nextLabel}
             </span>
