@@ -17,7 +17,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
-import LoginBottomSheet from "@/components/LoginBottomSheet";
 import HeartBurst from "@/components/ui/HeartBurst";
 import LocationPopover from "@/components/experience/LocationPopover";
 
@@ -87,7 +86,6 @@ const HeroSection = ({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
   const [animateHeart, setAnimateHeart] = useState(false);
@@ -171,14 +169,7 @@ const HeroSection = ({
   });
 
   const handleFavorite = () => {
-    if (!user) {
-      if (window.innerWidth < 768) {
-        setMobileSheetOpen(true);
-      } else {
-        setAuthDialogOpen(true);
-      }
-      return;
-    }
+    if (!user) { setAuthDialogOpen(true); return; }
     wishlistMutation.mutate({ isAdding: !isInWishlist });
   };
 
@@ -305,7 +296,6 @@ const HeroSection = ({
   return (
     <>
       <AuthPromptDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} lang={lang} defaultTab="login" />
-      <LoginBottomSheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen} />
       <div className="pt-16 md:pt-18">
         {/* Breadcrumb Navigation */}
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
