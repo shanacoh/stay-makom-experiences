@@ -17,7 +17,7 @@ const MobileStickyHeader = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${
         isScrolled
-          ? "bg-background/95 backdrop-blur-[12px] border-b border-foreground/8"
+          ? "bg-mobile-header border-b border-mobile-border"
           : "bg-transparent"
       }`}
     >
@@ -25,7 +25,7 @@ const MobileStickyHeader = () => {
         <Link
           to="/launch"
           className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] transition-colors duration-300 ${
-            isScrolled ? "text-foreground" : "text-white"
+            isScrolled ? "text-mobile-logo" : "text-white"
           }`}
         >
           STAYMAKOM
