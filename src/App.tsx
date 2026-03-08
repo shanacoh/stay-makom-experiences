@@ -126,6 +126,7 @@ const App = () => (
             <Route path="/hotel2/:slug" element={<Hotel2 />} />
             <Route path="/booking/confirmation/:token" element={<BookingConfirmationPage />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/cart" element={<Cart />} />
             <Route
               path="/account"
               element={

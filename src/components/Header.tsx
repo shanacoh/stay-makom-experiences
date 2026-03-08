@@ -180,6 +180,23 @@ const Header = () => {
             />
           )}
 
+          {/* Cart Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/cart")}
+            className={`relative h-8 w-8 ${
+              isTransparentPage && !isScrolled
+                ? "text-white hover:bg-white/10"
+                : "hover:bg-foreground/5"
+            }`}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {hasCart && (
+              <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-[#C4714A]" />
+            )}
+          </Button>
+
           {/* Favorites Button */}
           <Button
             variant="ghost"
