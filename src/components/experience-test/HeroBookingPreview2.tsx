@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { useExperienceAddons } from "@/hooks/useExperience2Price";
+import { useExperienceAddons, useExperiencePricingConfig, calculatePriceV2 } from "@/hooks/useExperience2Price";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
-import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
 import { Loader2 } from "lucide-react";
 
 interface HeroBookingPreview2Props {
