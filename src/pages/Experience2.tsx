@@ -22,7 +22,9 @@ import ShareWithFriendsSection from "@/components/experience/ShareWithFriendsSec
 import OtherExperiences2 from "@/components/experience-test/OtherExperiences2";
 import WhatsIncludedPhotos2 from "@/components/experience-test/WhatsIncludedPhotos2";
 import Header from "@/components/Header";
+import LaunchHeader from "@/components/LaunchHeader";
 import Footer from "@/components/Footer";
+import LaunchFooter from "@/components/LaunchFooter";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
