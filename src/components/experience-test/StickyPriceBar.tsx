@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
-import { useExperienceAddons } from "@/hooks/useExperience2Price";
-import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
+import { useExperienceAddons, useExperiencePricingConfig, calculatePriceV2 } from "@/hooks/useExperience2Price";
 
 interface StickyPriceBarProps {
   experienceId: string;
@@ -42,6 +41,7 @@ const StickyPriceBar = ({
   });
 
   const { data: addons } = useExperienceAddons(experienceId);
+  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
 
   const cheapestDate = useMemo(() => {
     if (!quickDates || quickDates.length === 0) return null;
@@ -52,32 +52,31 @@ const StickyPriceBar = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  // Calculate addon total with proper multipliers
-  const addonTotal = useMemo(() => {
-    if (!addons || addons.length === 0) return 0;
-    const pricingAddons = addons.filter(
-      (a) => (EXPERIENCE_PRICING_TYPES as string[]).includes(a.type) && a.is_active
-    );
-    return pricingAddons.reduce((sum, a) => {
-      const v = Number(a.value) || 0;
-      switch (a.type) {
-        case 'per_person': return sum + v * minParty;
-        case 'per_night': return sum + v * minNights;
-        case 'per_person_per_night': return sum + v * minParty * minNights;
-        default: return sum + v;
-      }
-    }, 0);
-  }, [addons, minParty, minNights]);
-
-  // Total price = room + addons + selected extras
+  // Compute exact total with same engine as booking panel
   const displayPrice = useMemo(() => {
-    const roomPrice = cheapestDate?.cheapestPrice;
-    if (roomPrice != null && roomPrice > 0) {
-      return Math.round(roomPrice + addonTotal + selectedExtrasTotal);
+    const roomPrice = cheapestDate?.cheapestPrice ?? 0;
+    const breakdown = calculatePriceV2(
+      roomPrice,
+      minParty,
+      minNights,
+      (addons ?? []) as any,
+      pricingConfig ?? {
+        commission_room_pct: 0,
+        commission_addons_pct: 0,
+        tax_pct: 0,
+        promo_type: null,
+        promo_value: null,
+        promo_is_percentage: true,
+      },
+      currency
+    );
+
+    if (breakdown.finalTotal > 0) {
+      return Math.round(breakdown.finalTotal + selectedExtrasTotal);
     }
-    if (addonTotal > 0) return Math.round(addonTotal + selectedExtrasTotal);
-    return null;
-  }, [cheapestDate, addonTotal, selectedExtrasTotal]);
+
+    return selectedExtrasTotal > 0 ? Math.round(selectedExtrasTotal) : null;
+  }, [cheapestDate, addons, pricingConfig, minParty, minNights, currency, selectedExtrasTotal]);
 
   useEffect(() => {
     const handleScroll = () => {

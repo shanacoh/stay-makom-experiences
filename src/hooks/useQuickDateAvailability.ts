@@ -71,17 +71,38 @@ async function scanAvailability(
 
             let cheapest: number | null = null;
             let cur = currency;
+
             for (const room of rooms) {
               for (const rp of room.ratePlans || []) {
+                // Never use net/agent prices in public UI. Prefer sell.searchCurrency, then sell.price.
+                const sellSearchPrice = rp.prices?.sell?.searchCurrency;
+                const sellNativePrice = rp.prices?.sell?.price;
                 const sellPrice =
-                  rp.payment?.chargeAmount?.price ??
-                  rp.prices?.sell?.price ??
-                  null;
+                  typeof sellSearchPrice === 'number'
+                    ? sellSearchPrice
+                    : typeof sellNativePrice === 'number'
+                      ? sellNativePrice
+                      : null;
+
+                // Contractual rule: do not display rates if sell is lower than BAR.
+                const barSearchPrice = rp.prices?.bar?.searchCurrency;
+                const barNativePrice = rp.prices?.bar?.price;
+                const barPrice =
+                  typeof barSearchPrice === 'number'
+                    ? barSearchPrice
+                    : typeof barNativePrice === 'number'
+                      ? barNativePrice
+                      : null;
+
+                if (sellPrice == null) continue;
+                if (barPrice != null && sellPrice < barPrice) continue;
+
                 const sellCur =
-                  rp.payment?.chargeAmount?.currency ??
-                  rp.prices?.sell?.currency ??
-                  currency;
-                if (sellPrice != null && (cheapest === null || sellPrice < cheapest)) {
+                  typeof sellSearchPrice === 'number'
+                    ? currency
+                    : rp.prices?.sell?.currency ?? currency;
+
+                if (cheapest === null || sellPrice < cheapest) {
                   cheapest = sellPrice;
                   cur = sellCur;
                 }
