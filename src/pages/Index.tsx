@@ -267,22 +267,7 @@ const Index = () => {
     return () => clearInterval(scrollInterval);
   }, [filteredExperiences]);
 
-  // Auto-scroll for latest experiences carousel
-  useEffect(() => {
-    const carousel = latestCarouselRef.current;
-    if (!carousel || !latestExperiences || latestExperiences.length === 0) return;
-
-    const scrollInterval = setInterval(() => {
-      const scrollAmount = carousel.scrollLeft + (carousel.offsetWidth * 0.75 + 12);
-      const maxScroll = carousel.scrollWidth - carousel.offsetWidth;
-      if (scrollAmount >= maxScroll - 10) {
-        carousel.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        carousel.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-      }
-    }, 3000);
-    return () => clearInterval(scrollInterval);
-  }, [latestExperiences]);
+  // No more interval-based auto-scroll for latest experiences - using CSS animation instead
 
   // Category display names mapping
   const getCategoryDisplay = (slug: string) => {
@@ -627,38 +612,26 @@ const Index = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
             </div>
           ) : (
-            <>
-              {/* Mobile & Tablet Carousel */}
-              <div className="lg:hidden relative">
-                <div ref={latestCarouselRef} className="overflow-x-auto -mx-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide">
-                  <div className="flex gap-3 pb-4">
-                    {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
-                      <div key={`${experience.id}-${index}`} className="flex-shrink-0 w-[75vw] md:w-[30vw] snap-center">
-                        <ExperienceCard
-                          experience={experience}
-                          badge="NEW"
-                          rating={8.5 + Math.random() * 0.5}
-                          reviewCount={50 + Math.floor(Math.random() * 950)}
-                        />
-                      </div>
-                    ))}
+            <div className="overflow-hidden -mx-4 px-0">
+              <div 
+                className="flex gap-3 animate-latest-scroll hover:[animation-play-state:paused]"
+                style={{ 
+                  width: 'max-content',
+                  animationDuration: `${(latestExperiences?.length || 4) * 6}s`
+                }}
+              >
+                {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
+                  <div key={`${experience.id}-${index}`} className="flex-shrink-0 w-[75vw] sm:w-[45vw] md:w-[30vw] lg:w-[22vw]">
+                    <ExperienceCard
+                      experience={experience}
+                      badge="NEW"
+                      rating={8.5 + Math.random() * 0.5}
+                      reviewCount={50 + Math.floor(Math.random() * 950)}
+                    />
                   </div>
-                </div>
-              </div>
-
-              {/* Desktop Grid */}
-              <div className="hidden lg:grid lg:grid-cols-4 gap-2 md:gap-3">
-                {latestExperiences?.map(experience => (
-                  <ExperienceCard
-                    key={experience.id}
-                    experience={experience}
-                    badge="NEW"
-                    rating={8.5 + Math.random() * 0.5}
-                    reviewCount={50 + Math.floor(Math.random() * 950)}
-                  />
                 ))}
               </div>
-            </>
+            </div>
           )}
         </section>
 

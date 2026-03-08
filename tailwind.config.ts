@@ -158,6 +158,14 @@ export default {
             transform: "translateY(0)",
           },
         },
+        "latest-scroll": {
+          "0%": {
+            transform: "translateX(0)",
+          },
+          "100%": {
+            transform: "translateX(-50%)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -168,6 +176,7 @@ export default {
         "heart-pop": "heart-pop 0.4s ease-out",
         "heart-float": "heart-float 0.8s ease-out forwards",
         "hero-fade-up": "hero-fade-up 0.8s ease-out forwards",
+        "latest-scroll": "latest-scroll linear infinite",
       },
     },
   },
