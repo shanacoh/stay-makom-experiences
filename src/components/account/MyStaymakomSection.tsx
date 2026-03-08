@@ -379,15 +379,15 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
 
   return (
     <div className="space-y-6">
-      {/* Filters — pill buttons on mobile, dropdown on desktop */}
-      <div className="md:hidden flex gap-2">
+      {/* Filters — pill buttons (both mobile + desktop) */}
+      <div className="flex gap-2">
         {["upcoming", "past"].map((filter) => (
           <button
             key={filter}
             onClick={() => setTimeFilter(timeFilter === filter ? "all" : filter)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               timeFilter === filter
-                ? "bg-[#1A1A1A] text-white"
+                ? "bg-foreground text-background"
                 : "bg-muted text-muted-foreground"
             }`}
           >
@@ -398,67 +398,20 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         ))}
       </div>
 
-      {/* Desktop filter */}
-      <Card className="hidden md:block">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">{isHebrew ? "תקופה" : isFrench ? "Période" : "Time Period"}</label>
-              <Select value={timeFilter} onValueChange={setTimeFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
-                  <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
-                  <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Bookings List */}
       {allBookings.length === 0 ? (
-        <>
-          {/* Mobile empty state — clean, minimal */}
-          <div className="md:hidden flex flex-col items-center justify-center pt-20 text-center px-6">
-            <Calendar className="h-10 w-10 text-muted-foreground/40 mb-4" />
-            <p className="text-[15px] text-foreground mb-1">
-              {isHebrew ? "אין הזמנות עדיין." : isFrench ? "Aucune réservation." : "No escapes booked yet."}
-            </p>
-            <button
-              onClick={() => navigate("/launch")}
-              className="text-sm text-muted-foreground underline underline-offset-2"
-            >
-              {isHebrew ? "גלו חוויות" : isFrench ? "Explorer" : "Explore experiences"}
-            </button>
-          </div>
-          {/* Desktop empty state */}
-          <Card className="border-dashed hidden md:block">
-            <CardContent className="py-16">
-              <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2">
-                  <Calendar className="h-10 w-10 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-xl mb-2">{isHebrew ? "אין הזמנות" : isFrench ? "Aucune réservation" : "No bookings found"}</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto">
-                    {isHebrew
-                      ? "גלו את החוויות המיוחדות שלנו והזמינו את ההרפתקה הבאה שלכם!"
-                      : isFrench
-                      ? "Découvrez nos expériences uniques et réservez votre prochaine aventure !"
-                      : "Start exploring our curated experiences and book your next adventure!"}
-                  </p>
-                </div>
-                <Button onClick={() => navigate("/")} variant="cta">
-                  {isHebrew ? "גלו חוויות" : isFrench ? "Découvrir les expériences" : "Explore Experiences"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </>
+        <div className="flex flex-col items-center justify-center pt-16 text-center px-6">
+          <Calendar className="h-10 w-10 text-muted-foreground/40 mb-4" />
+          <p className="text-[15px] text-foreground mb-1">
+            {isHebrew ? "אין הזמנות עדיין." : isFrench ? "Aucune réservation." : "No escapes booked yet."}
+          </p>
+          <button
+            onClick={() => navigate("/launch")}
+            className="text-sm text-muted-foreground underline underline-offset-2"
+          >
+            {isHebrew ? "גלו חוויות →" : isFrench ? "Explorer →" : "Explore experiences →"}
+          </button>
+        </div>
       ) : (
         <div className="grid gap-4">
           {allBookings.map((booking) => {
