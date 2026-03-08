@@ -617,7 +617,7 @@ const Index = () => {
                 className="flex gap-3 animate-latest-scroll hover:[animation-play-state:paused]"
                 style={{ 
                   width: 'max-content',
-                  animationDuration: `${(latestExperiences?.length || 4) * 6}s`
+                  animationDuration: `${(latestExperiences?.length || 4) * 20}s`
                 }}
               >
                 {[...(latestExperiences || []), ...(latestExperiences || [])].map((experience, index) => (
