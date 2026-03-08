@@ -6,6 +6,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import type {
   ExperienceAddon,
   PricingConfig,
