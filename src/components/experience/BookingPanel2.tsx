@@ -594,6 +594,14 @@ export function BookingPanel2({
           {isStep1Complete ? t.next : t.selectDates}
         </Button>
 
+        <p className="text-[11px] text-muted-foreground text-center leading-snug">
+          {lang === "he"
+            ? "כל התשלומים מתבצעים בשקלים (₪). המחירים המוצגים במטבע אחר הם להמחשה בלבד לפי שער החליפין הנוכחי. הסכום הסופי בשקלים הוא המחייב."
+            : lang === "fr"
+            ? "Tous les paiements sont effectués en shekels (₪). Les prix affichés dans une autre devise sont indicatifs, basés sur le taux de change actuel. Le montant final en shekels fait foi."
+            : "All payments are processed in Israeli Shekels (₪). Prices shown in other currencies are approximate, based on the current exchange rate. The final amount in ILS is binding."}
+        </p>
+
         {/* Save for later */}
         <SaveForLaterButton
           experienceId={experienceId}
