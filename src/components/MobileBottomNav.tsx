@@ -96,31 +96,4 @@ const MobileBottomNav = () => {
   );
 };
 
-  return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-mobile-header border-t border-mobile-border md:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-    >
-      <div className="flex items-center justify-around h-16">
-        {navItems.map((item) => {
-          const active = isActive(item.path);
-          return (
-            <button
-              key={item.path}
-              onClick={() => handleTap(item)}
-              className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 pt-1.5 transition-colors",
-                active ? "text-mobile-active" : "text-mobile-inactive"
-              )}
-            >
-              <item.icon size={22} strokeWidth={active ? 2 : 1.5} />
-              <span className="text-[10px] leading-tight">{item.labelEn}</span>
-            </button>
-          );
-        })}
-      </div>
-    </nav>
-  );
-};
-
 export default MobileBottomNav;
