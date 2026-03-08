@@ -200,12 +200,11 @@ export function RoomOptionsV2({
               htmlFor={radioValue}
               className={cn(
                 "flex items-start gap-3 w-full cursor-pointer transition-colors",
-                "rounded-none",
+                "p-3 rounded-lg border",
                 isSelected
-                  ? "border-[1.5px] border-[#1A1814] bg-[#FAF8F5]"
-                  : "border border-[#E8E0D4] bg-white",
+                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                  : "border-border hover:border-primary/50",
               )}
-              style={{ padding: "14px 16px" }}
             >
               <RadioGroupItem
                 value={radioValue}
