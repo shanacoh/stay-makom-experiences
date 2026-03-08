@@ -147,7 +147,7 @@ const Experiences2HomeSection = ({ lang, isRTL }: { lang: string; isRTL: boolean
             <ExperienceCard
               key={experience.id}
               experience={cardExperience}
-              linkPrefix="/experience2"
+              linkPrefix="/experience"
             />
           );
         })}
