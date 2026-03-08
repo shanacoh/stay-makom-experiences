@@ -26,6 +26,8 @@ interface Hotel {
   check_out_time?: string;
   number_of_rooms?: number;
   property_type?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface YourStaySectionProps {
