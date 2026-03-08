@@ -204,8 +204,8 @@ const LaunchIndex = () => {
       <MobileStickyHeader />
 
       <main className="flex-1 md:pt-0 pt-0 pb-[80px] md:pb-0">
-        {/* ─── 1. HERO (desktop only) ─── */}
-        <section className="relative hidden md:flex h-[70vh] min-h-[480px] items-center justify-center">
+        {/* ─── 1. HERO ─── */}
+        <section className="relative h-[62vh] md:h-[70vh] min-h-[320px] md:min-h-[480px] flex items-center justify-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }} />
