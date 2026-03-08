@@ -25,6 +25,7 @@ const MobileBottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const hasCart = useCartExists();
 
   const isActive = (path: string) => {
     const currentFull = location.pathname + location.search;
