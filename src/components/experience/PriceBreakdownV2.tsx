@@ -92,14 +92,18 @@ const translations = {
 };
 
 // ---------------------------------------------------------------------------
-// Format currency
+// Format currency — uses a hook-provided converter, so must be called inside component
 // ---------------------------------------------------------------------------
 
-function fmt(amount: number, _currency: string): string {
-  return `$${amount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+function useFmt() {
+  const { symbol, convert } = useCurrency();
+  return (amount: number, _currency?: string): string => {
+    const converted = convert(amount);
+    return `${symbol}${converted.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 }
 
 // ---------------------------------------------------------------------------

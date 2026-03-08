@@ -139,11 +139,11 @@ export function RoomOptionsV2({
     }[];
   }, [rooms]);
 
-  const formatPrice = (amount: number, currency: string) =>
-    new Intl.NumberFormat(lang === "he" ? "he-IL" : lang === "fr" ? "fr-FR" : "en-US", {
-      style: "currency",
-      currency,
-    }).format(amount);
+  const { symbol, convert } = useCurrency();
+  const formatPrice = (amount: number, _currency: string) => {
+    const converted = convert(amount);
+    return `${symbol}${Math.round(converted).toLocaleString("en-US")}`;
+  };
 
   if (isLoading) {
     return (
