@@ -978,6 +978,40 @@ export function UnifiedExperience2Form({
                     />
                     {errors.category_id && <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>}
                   </div>
+                  
+                  {/* Featured on Home */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-primary" />
+                      Featured on Home
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={featuredOnHome}
+                        onCheckedChange={setFeaturedOnHome}
+                      />
+                      {featuredOnHome && (
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="home_display_order" className="text-xs text-muted-foreground whitespace-nowrap">Order:</Label>
+                          <Input
+                            id="home_display_order"
+                            type="number"
+                            min={0}
+                            max={99}
+                            className="w-16 h-8"
+                            value={homeDisplayOrder}
+                            onChange={(e) => setHomeDisplayOrder(parseInt(e.target.value) || 0)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {featuredOnHome 
+                        ? "Cette expérience sera mise en avant sur la homepage. Ordre bas = priorité haute."
+                        : "Activer pour afficher cette expérience en priorité sur la homepage."
+                      }
+                    </p>
+                  </div>
                 </div>
 
                 {/* Party Size & Nights */}
