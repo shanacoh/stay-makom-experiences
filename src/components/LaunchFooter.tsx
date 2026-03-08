@@ -73,7 +73,7 @@ const LaunchFooter = () => {
   const termsLabel = isRTL ? "תנאי שימוש" : "Terms";
 
   return (
-    <footer className="bg-[#1a1a1a] text-white" dir={isRTL ? "rtl" : "ltr"}>
+    <footer className="bg-[#1a1a1a] text-white border-t border-white/10" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container py-8">
 
         {/* ─── DESKTOP (lg+) — 4 compact columns ─── */}
