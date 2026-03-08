@@ -54,12 +54,16 @@ const LaunchIndex = () => {
   const [toggleUnderline, setToggleUnderline] = useState({ left: 0, width: 0 });
 
   useEffect(() => {
-    const activeRef = activeFilter === FILTER_ADVENTURE ? toggleBtn1Ref : toggleBtn2Ref;
-    if (activeRef.current) {
-      const { offsetLeft, offsetWidth } = activeRef.current;
-      setToggleUnderline({ left: offsetLeft, width: offsetWidth });
-    }
-  }, [activeFilter]);
+    // Small timeout to allow text/fonts to render at correct size after language change
+    const timeout = setTimeout(() => {
+      const activeRef = activeFilter === FILTER_ADVENTURE ? toggleBtn1Ref : toggleBtn2Ref;
+      if (activeRef.current) {
+        const { offsetLeft, offsetWidth } = activeRef.current;
+        setToggleUnderline({ left: offsetLeft, width: offsetWidth });
+      }
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [activeFilter, lang]);
 
   // Waitlist popup state
   const [waitlistOpen, setWaitlistOpen] = useState(false);
