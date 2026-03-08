@@ -40,25 +40,29 @@ const Category = () => {
   });
 
   const { data: experiences, isLoading: experiencesLoading } = useQuery({
-    queryKey: ["category-experiences", category?.id],
+    queryKey: ["category-experiences2", category?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select(`
           *,
-          hotels (
-            id,
-            name,
-            name_he,
-            city,
-            city_he,
-            region,
-            region_he,
-            latitude,
-            longitude,
-            hero_image
+          experience2_hotels(
+            position,
+            nights,
+            hotel:hotels2(
+              id,
+              name,
+              name_he,
+              city,
+              city_he,
+              region,
+              region_he,
+              latitude,
+              longitude,
+              hero_image
+            )
           ),
-          experience_highlight_tags (
+          experience2_highlight_tags (
             highlight_tags (
               id,
               slug,
@@ -70,7 +74,19 @@ const Category = () => {
         .eq("category_id", category?.id)
         .eq("status", "published");
       if (error) throw error;
-      return data;
+      // Map to ExperienceCard-compatible shape
+      return (data || []).map((exp: any) => {
+        const primaryHotel = exp.experience2_hotels
+          ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+          ?.[0]?.hotel;
+        return {
+          ...exp,
+          hotels: primaryHotel || null,
+          experience_highlight_tags: exp.experience2_highlight_tags?.map((t: any) => ({
+            highlight_tags: t.highlight_tags,
+          })) || [],
+        };
+      });
     },
     enabled: !!category?.id
   });
