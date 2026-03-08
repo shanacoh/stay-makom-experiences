@@ -560,7 +560,7 @@ export default function Experience2() {
       </main>
 
       <footer ref={footerRef as React.RefObject<HTMLElement>}>
-        <Footer />
+        {isLaunch ? <LaunchFooter /> : <Footer />}
       </footer>
     </div>
   );
