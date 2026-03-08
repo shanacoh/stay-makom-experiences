@@ -25,7 +25,7 @@ const MobileStickyHeader = () => {
       }`}
       style={{ height: MOBILE_HEADER_HEIGHT }}
     >
-      <div className="flex justify-between items-center h-full px-4">
+      <div className="relative flex items-center h-full px-4">
         <Link
           to="/launch"
           className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
