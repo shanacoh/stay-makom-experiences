@@ -9,6 +9,7 @@ import { t } from "@/lib/translations";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import LoginBottomSheet from "@/components/LoginBottomSheet";
 import HeartBurst from "@/components/ui/HeartBurst";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -83,6 +84,7 @@ export default function ExperienceCard({
   const isMobile = useIsMobile();
   const [isHovered, setIsHovered] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
   const [animateHeart, setAnimateHeart] = useState(false);
 
@@ -190,7 +192,11 @@ export default function ExperienceCard({
     e.stopPropagation();
     
     if (!user) {
-      setAuthDialogOpen(true);
+      if (isMobile) {
+        setMobileSheetOpen(true);
+      } else {
+        setAuthDialogOpen(true);
+      }
       return;
     }
 
@@ -209,6 +215,10 @@ export default function ExperienceCard({
         onOpenChange={setAuthDialogOpen} 
         lang={lang} 
         defaultTab="login" 
+      />
+      <LoginBottomSheet
+        open={mobileSheetOpen}
+        onOpenChange={setMobileSheetOpen}
       />
       
       <Link
