@@ -14,6 +14,8 @@ interface StickyPriceBarProps {
   footerRef: React.RefObject<HTMLElement>;
   hyperguestPropertyId?: string | null;
   selectedExtrasTotal?: number;
+  minParty?: number;
+  minNights?: number;
 }
 
 const StickyPriceBar = ({
