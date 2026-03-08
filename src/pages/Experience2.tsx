@@ -413,7 +413,7 @@ export default function Experience2() {
         ogImage={experience.hero_image || primaryHotel?.hero_image || undefined}
       />
 
-      <Header />
+      {isLaunch ? <LaunchHeader /> : <Header />}
 
       <main className="flex-1">
         {/* Hero Section */}
