@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
-import { Calendar, ArrowLeft, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, ArrowLeft, MapPin, ArrowRight, Heart } from "lucide-react";
 import { format } from "date-fns";
 import NotFound from "./NotFound";
 import DOMPurify from "dompurify";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { Block } from "@/components/admin/journal/types";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Reading progress bar
 function ReadingProgressBar() {
