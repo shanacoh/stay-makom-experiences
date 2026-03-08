@@ -204,7 +204,7 @@ export default function Experience2() {
             <p className="text-muted-foreground">{t.notFoundDesc}</p>
           </div>
         </div>
-        <Footer />
+        {isLaunch ? <LaunchFooter /> : <Footer />}
       </div>
     );
   }
