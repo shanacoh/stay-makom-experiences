@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
-import { Calendar, ArrowLeft, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, ArrowLeft, MapPin, ArrowRight, Heart } from "lucide-react";
 import { format } from "date-fns";
 import NotFound from "./NotFound";
 import DOMPurify from "dompurify";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { Block } from "@/components/admin/journal/types";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Reading progress bar
 function ReadingProgressBar() {
@@ -42,6 +46,9 @@ function ReadingProgressBar() {
 // Embedded Experience Card Component
 function EmbeddedExperienceCard({ experienceId }: { experienceId: string }) {
   const { lang } = useLanguage();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   
   const { data: experience, isLoading } = useQuery({
     queryKey: ["embedded-experience", experienceId],
@@ -68,6 +75,57 @@ function EmbeddedExperienceCard({ experienceId }: { experienceId: string }) {
     enabled: !!experienceId,
   });
 
+  const { data: wishlistStatus } = useQuery({
+    queryKey: ["wishlist-status", experienceId, user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select("id, deleted_at")
+        .eq("user_id", user.id)
+        .eq("experience_id", experienceId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id && !!experienceId,
+  });
+
+  const isInWishlist = wishlistStatus && !wishlistStatus.deleted_at;
+
+  const wishlistMutation = useMutation({
+    mutationFn: async ({ isAdding }: { isAdding: boolean }) => {
+      if (!user?.id) throw new Error("Not authenticated");
+      if (isAdding) {
+        if (wishlistStatus?.deleted_at) {
+          const { error } = await supabase.from("wishlist").update({ deleted_at: null }).eq("id", wishlistStatus.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from("wishlist").insert({ user_id: user.id, experience_id: experienceId });
+          if (error) throw error;
+        }
+      } else {
+        const { error } = await supabase.from("wishlist").update({ deleted_at: new Date().toISOString() }).eq("user_id", user.id).eq("experience_id", experienceId).is("deleted_at", null);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["wishlist-status", experienceId, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      toast.success(variables.isAdding ? (lang === "he" ? "נוסף למועדפים" : "Added to favorites") : (lang === "he" ? "הוסר מהמועדפים" : "Removed from favorites"));
+    },
+  });
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      setAuthDialogOpen(true);
+      return;
+    }
+    wishlistMutation.mutate({ isAdding: !isInWishlist });
+  };
+
   if (isLoading) {
     return (
       <div className="my-8 p-4 border rounded-lg bg-muted/30 animate-pulse">
@@ -91,38 +149,49 @@ function EmbeddedExperienceCard({ experienceId }: { experienceId: string }) {
   const imageUrl = experience.hero_image || hotel?.hero_image;
 
   return (
-    <Link to={`/experience/${experience.slug}`} className="block my-8 group">
-      <div className="border rounded-xl overflow-hidden bg-card hover:shadow-lg transition-shadow">
-        <div className="flex flex-col sm:flex-row">
-          {imageUrl && (
-            <div className="sm:w-48 aspect-video sm:aspect-square overflow-hidden">
-              <img
-                src={imageUrl}
-                alt={title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          )}
-          <div className="flex-1 p-4 sm:p-6 flex flex-col justify-center">
-            <p className="text-sm text-muted-foreground mb-1">{hotelName}</p>
-            <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-              {title}
-            </h3>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              {city && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {city}
+    <>
+      <AuthPromptDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} lang={lang} defaultTab="login" context="favorites" />
+      <Link to={`/experience/${experience.slug}`} className="block my-8 group relative">
+        <div className="border rounded-xl overflow-hidden bg-card hover:shadow-lg transition-shadow">
+          <div className="flex flex-col sm:flex-row">
+            {imageUrl && (
+              <div className="sm:w-48 aspect-video sm:aspect-square overflow-hidden relative">
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            )}
+            <div className="flex-1 p-4 sm:p-6 flex flex-col justify-center">
+              <p className="text-sm text-muted-foreground mb-1">{hotelName}</p>
+              <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+                {title}
+              </h3>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                {city && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {city}
+                  </span>
+                )}
+                <span className="font-semibold text-foreground">
+                  {experience.currency} {experience.base_price}
                 </span>
-              )}
-              <span className="font-semibold text-foreground">
-                {experience.currency} {experience.base_price}
-              </span>
+              </div>
             </div>
+            {/* Heart button */}
+            <button
+              onClick={handleHeartClick}
+              className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm transition-all hover:bg-background"
+              aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <Heart className={cn("h-4 w-4 transition-colors", isInWishlist ? "fill-destructive text-destructive" : "text-muted-foreground")} />
+            </button>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </>
   );
 }
 
