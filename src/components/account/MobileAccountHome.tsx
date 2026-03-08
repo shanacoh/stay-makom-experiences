@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -15,9 +16,22 @@ import {
   LogOut,
   ChevronRight,
   Bookmark,
+  Info,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const TIER_CONFIG = {
   explorer: { label: "Explorer", emoji: "🧭", nextLabel: "Traveler", nextPoints: 500, min: 0 },
@@ -26,7 +40,22 @@ const TIER_CONFIG = {
   circle: { label: "Circle", emoji: "💎", nextLabel: null, nextPoints: null, min: 3000 },
 };
 
+const HOW_TO_EARN: Record<string, string> = {
+  explorer: "Book experiences to earn points — 1 USD spent = 1 point, 4 NIS = 1 point. Reach 500 points to unlock Traveler.",
+  traveler: "Keep booking! You need 1,500 points total to reach Insider.",
+  insider: "You're almost at the top. Reach 3,000 points to join Circle.",
+  circle: "You've reached the highest tier. Every booking continues to earn points.",
+};
+
+const ALL_TIERS = [
+  { key: "explorer", label: "Explorer", range: "0 – 499 pts", benefits: ["Access to all public experiences", "Earn 1 point per USD spent", "Save favorites & build wishlists"] },
+  { key: "traveler", label: "Traveler", range: "500 – 1,499 pts", benefits: ["Early access to limited experiences", "Member-only opportunities", "Exclusive seasonal offers"] },
+  { key: "insider", label: "Insider", range: "1,500 – 2,999 pts", benefits: ["Priority reservations", "Curated insider recommendations", "Seasonal perks & surprises"] },
+  { key: "circle", label: "Circle", range: "3,000+ pts", benefits: ["Private concierge service", "Bespoke itineraries", "Invitation-only events"] },
+];
+
 export default function MobileAccountHome() {
+  const [tierSheetOpen, setTierSheetOpen] = useState(false);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
@@ -121,6 +150,7 @@ export default function MobileAccountHome() {
   };
 
   return (
+    <>
     <div className="px-6 pt-20 pb-32">
       {/* TOP SECTION — Avatar + Name */}
       <div className="flex flex-col items-center text-center pt-4 mb-6">
@@ -136,18 +166,36 @@ export default function MobileAccountHome() {
         <p className="text-xs text-muted-foreground mt-0.5">
           {tierConfig.label} · Since {memberSince}
         </p>
-        <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full border border-border/60 text-xs text-foreground">
+        <button
+          onClick={() => setTierSheetOpen(true)}
+          className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full border border-border/60 text-xs text-foreground active:bg-muted/40 transition-colors"
+        >
           {tierConfig.emoji} {tierConfig.label}
-        </span>
+          <ChevronRight size={12} className="text-muted-foreground" />
+        </button>
       </div>
 
       {/* MEMBERSHIP PROGRESS */}
       {nextPoints && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-muted-foreground">
-              {progress} / {nextPoints} pts
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">
+                {progress} / {nextPoints} pts
+              </span>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="text-muted-foreground hover:text-foreground transition-colors">
+                      <Info size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[220px] text-xs leading-relaxed">
+                    {HOW_TO_EARN[tier] || HOW_TO_EARN.explorer}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <span className="text-xs text-muted-foreground">
               {tierConfig.nextLabel}
             </span>
@@ -192,5 +240,50 @@ export default function MobileAccountHome() {
         </button>
       </div>
     </div>
+
+      {/* Tier details sheet */}
+      <Sheet open={tierSheetOpen} onOpenChange={setTierSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="font-serif text-xl text-center">STAYMAKOM Club Tiers</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 pb-6">
+            {ALL_TIERS.map((t) => {
+              const isActive = t.key === tier;
+              return (
+                <div
+                  key={t.key}
+                  className={`rounded-xl border p-4 transition-colors ${
+                    isActive
+                      ? "border-foreground/40 bg-foreground/[0.03]"
+                      : "border-border/50 bg-background"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif text-base text-foreground">{t.label}</span>
+                      {isActive && (
+                        <span className="text-[10px] font-medium tracking-wider uppercase bg-foreground text-background px-2 py-0.5 rounded-full">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">{t.range}</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {t.benefits.map((b, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                        <span className="text-foreground/50 mt-0.5">•</span>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
