@@ -220,13 +220,8 @@ const LaunchIndex = () => {
               )}
             </h1>
             <p
-              className="text-lg sm:text-xl md:text-2xl text-white font-medium mb-1 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
-              style={{ animationDelay: '250ms' }}>
-              {isRTL ? "לא יעד. תחושה." : "Not a destination. A feeling."}
-            </p>
-            <p
-              className="text-sm sm:text-base text-white/80 font-light mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
-              style={{ animationDelay: '375ms' }}>
+              className="font-serif italic text-white/90 mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up"
+              style={{ animationDelay: '250ms', fontSize: '22px' }}>
               {isRTL ? "הישראל שרוב האנשים לא מוצאים." : "The Israel most people never find."}
             </p>
             <button
