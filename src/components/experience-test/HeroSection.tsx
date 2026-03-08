@@ -304,6 +304,7 @@ const HeroSection = ({
   return (
     <>
       <AuthPromptDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} lang={lang} defaultTab="login" />
+      <LoginBottomSheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen} />
       <div className="pt-16 md:pt-18">
         {/* Breadcrumb Navigation */}
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
