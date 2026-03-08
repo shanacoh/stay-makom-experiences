@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Wifi, Car, Coffee, UtensilsCrossed, Waves, TreePine, Clock, DoorOpen, Hotel as HotelIcon } from "lucide-react";
 import { getLocalizedField, type Language } from "@/hooks/useLanguage";
+import LocationPopover from "@/components/experience/LocationPopover";
+import { getLocalizedField, type Language } from "@/hooks/useLanguage";
 
 interface Hotel {
   id: string;
