@@ -44,7 +44,7 @@ export function SmartLinkPicker({ value, onChange, className }: SmartLinkPickerP
     queryKey: ["experiences-for-links"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("experiences")
+        .from("experiences2")
         .select("id, title, slug, status")
         .eq("status", "published")
         .order("title");
