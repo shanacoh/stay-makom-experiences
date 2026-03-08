@@ -92,6 +92,7 @@ const App = () => (
             <Route path="/home" element={<Index />} />
             <Route path="/launch" element={<LaunchIndex />} />
             <Route path="/launch/experiences" element={<LaunchExperiences />} />
+            <Route path="/mobile-login" element={<MobileAuthPrompt />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
             <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
