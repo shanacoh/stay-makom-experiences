@@ -37,7 +37,7 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const scrolled = currentScrollY > 60;
+      const scrolled = forceScrolled || currentScrollY > 60;
 
       if (currentScrollY < 10) {
         setIsVisible(true);
