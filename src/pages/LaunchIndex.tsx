@@ -367,13 +367,13 @@ const LaunchIndex = () => {
           <div className="container px-4 mx-auto">
             <div className="max-w-2xl mx-auto text-center mb-3">
               <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.02em] uppercase">
-                {isRTL ? "עוד חוויות בדרך" : "More experiences are on the way."}
+                {isRTL ? "עוד בריחות בדרך" : "More escapes are on the way."}
               </h2>
             </div>
 
             <div className="max-w-sm sm:max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-6 sm:mb-10">
               <p className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
-                {isRTL ? "היו הראשונים לדעת." : "Be the first to know."}
+                {isRTL ? "היו הראשונים." : "Be the first in."}
               </p>
 
               {submitted ?
