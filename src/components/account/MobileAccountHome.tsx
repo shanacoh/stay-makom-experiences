@@ -239,5 +239,50 @@ export default function MobileAccountHome() {
         </button>
       </div>
     </div>
+
+      {/* Tier details sheet */}
+      <Sheet open={tierSheetOpen} onOpenChange={setTierSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="font-serif text-xl text-center">STAYMAKOM Club Tiers</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 pb-6">
+            {ALL_TIERS.map((t) => {
+              const isActive = t.key === tier;
+              return (
+                <div
+                  key={t.key}
+                  className={`rounded-xl border p-4 transition-colors ${
+                    isActive
+                      ? "border-foreground/40 bg-foreground/[0.03]"
+                      : "border-border/50 bg-background"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif text-base text-foreground">{t.label}</span>
+                      {isActive && (
+                        <span className="text-[10px] font-medium tracking-wider uppercase bg-foreground text-background px-2 py-0.5 rounded-full">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">{t.range}</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {t.benefits.map((b, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                        <span className="text-foreground/50 mt-0.5">•</span>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
