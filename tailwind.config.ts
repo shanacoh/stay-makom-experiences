@@ -166,7 +166,7 @@ export default {
         "marquee": "marquee 30s linear infinite",
         "marquee-rtl": "marquee-rtl 30s linear infinite",
         "heart-pop": "heart-pop 0.4s ease-out",
-        "heart-float": "heart-float 0.6s ease-out forwards",
+        "heart-float": "heart-float 0.8s ease-out forwards",
         "hero-fade-up": "hero-fade-up 0.8s ease-out forwards",
       },
     },
