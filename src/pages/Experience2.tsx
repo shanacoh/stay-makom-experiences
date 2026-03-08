@@ -522,7 +522,7 @@ export default function Experience2() {
                   hotelId={primaryHotel?.id || ""}
                   hotelName={lang === "he" ? (primaryHotel?.name_he || primaryHotel?.name || "") : (primaryHotel?.name || "")}
                   hyperguestPropertyId={hyperguestPropertyId || null}
-                  currency={experience.currency || "ILS"}
+                  currency={displayCurrency}
                   minParty={experience.min_party || 2}
                   maxParty={experience.max_party || 4}
                   lang={lang as "en" | "he" | "fr"}
