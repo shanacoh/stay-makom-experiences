@@ -428,6 +428,8 @@ export default function Experience2() {
         hotelImage={primaryHotel?.hero_image || undefined}
         city={city || undefined}
         region={region || undefined}
+        latitude={primaryHotel?.latitude ?? undefined}
+        longitude={primaryHotel?.longitude ?? undefined}
         lang={lang as "en" | "he" | "fr"}
         experienceId={experience.id}
         hotelId={primaryHotel?.id}
