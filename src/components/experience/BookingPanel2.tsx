@@ -118,7 +118,7 @@ export function BookingPanel2({
       selectDates: "Sélectionnez des dates",
       noHyperguest: "Cette expérience n'est pas encore disponible pour la réservation en ligne.",
       error: "Erreur lors de la récupération des disponibilités. Veuillez réessayer.",
-      next: "Continuer vers le paiement",
+      next: "Réserver ce séjour",
       onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
     },
   }[lang];
