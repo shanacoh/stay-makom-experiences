@@ -50,7 +50,7 @@ const HeroBookingPreview2 = ({
     const breakdown = calculatePriceV2(
       roomPrice,
       minParty,
-      1,
+      minNights,
       (addons ?? []) as any,
       pricingConfig ?? {
         commission_room_pct: 0,
