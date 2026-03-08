@@ -304,6 +304,8 @@ export function UnifiedExperience2Form({
         localIncludes,
         localTags,
         localReviews,
+        featuredOnHome,
+        homeDisplayOrder,
         savedAt: new Date().toISOString(),
       };
       localStorage.setItem(autoSaveKey, JSON.stringify(payload));
@@ -311,7 +313,7 @@ export function UnifiedExperience2Form({
     } catch (e) {
       // silent fail
     }
-  }, [getValues, experienceHotels, heroImagePreview, thumbnailImagePreview, galleryPreviews, localAddons, localIncludes, localTags, localReviews, autoSaveKey]);
+  }, [getValues, experienceHotels, heroImagePreview, thumbnailImagePreview, galleryPreviews, localAddons, localIncludes, localTags, localReviews, featuredOnHome, homeDisplayOrder, autoSaveKey]);
 
   useEffect(() => {
     autoSaveTimerRef.current = setInterval(doAutoSave, 30000);
