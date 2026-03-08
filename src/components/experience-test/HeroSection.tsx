@@ -290,9 +290,25 @@ const HeroSection = ({
             <Link to={isLaunch ? "/launch" : getLocalizedPath("/")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
               {lang === 'he' ? 'בית' : 'Home'}
             </Link>
-            {!isLaunch && (
+            <ChevronRight className="h-3 w-3 flex-shrink-0" />
+            {isLaunch ? (
               <>
-                <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                <Link to="/launch#launch-experiences" className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
+                  {lang === 'he' ? 'קטגוריות' : 'Categories'}
+                </Link>
+                {categorySlug && (
+                  <>
+                    <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                    <Link to={`/launch/experiences?filter=${categorySlug === 'romantic' ? 'romantic' : 'adventure'}`} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
+                      {categorySlug === 'romantic'
+                        ? (lang === 'he' ? 'בריחה רומנטית' : 'Romantic Escape')
+                        : (lang === 'he' ? 'הרפתקה' : 'Feeling Adventurous')}
+                    </Link>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
                 <Link to={getLocalizedPath("/#choose-escape")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
                   {lang === 'he' ? 'קטגוריות' : 'Categories'}
                 </Link>
