@@ -25,6 +25,7 @@ const HeroBookingPreview2 = ({
   minNights = 1,
 }: HeroBookingPreview2Props) => {
   const { data: addons } = useExperienceAddons(experienceId);
+  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
 
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
   const { data: quickDates, isLoading: isLoadingDates } = useQuickDateAvailability({
