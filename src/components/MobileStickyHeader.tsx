@@ -1,15 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { ChevronLeft } from "lucide-react";
 import { MOBILE_HEADER_HEIGHT } from "@/constants/layout";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { lang, setLanguage } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isLaunchHome = location.pathname === "/launch" || location.pathname === "/launch/experiences";
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 150);
+      setIsScrolled(window.scrollY > 50);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -18,40 +23,50 @@ const MobileStickyHeader = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 ${
-        isScrolled
-          ? "bg-mobile-header"
-          : "bg-transparent"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 bg-mobile-header border-b border-mobile-border"
       style={{ height: MOBILE_HEADER_HEIGHT }}
     >
-      <div className="relative flex items-center h-full px-4">
+      <div className="relative flex items-center h-full px-2">
+        {/* Left: Back arrow or spacer */}
+        {!isLaunchHome ? (
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center justify-center w-11 h-11 -ml-1 shrink-0"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="h-5 w-5 text-mobile-logo" />
+          </button>
+        ) : (
+          <div className="w-11 shrink-0" />
+        )}
+
+        {/* Center: Logo */}
         <Link
           to="/launch"
-          className={`absolute left-1/2 -translate-x-1/2 font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
-            isScrolled ? "text-mobile-logo" : "text-white"
-          }`}
+          className="absolute left-1/2 -translate-x-1/2 font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none text-mobile-logo"
         >
           STAYMAKOM
         </Link>
+
+        {/* Right: Language switcher */}
         <div className="ml-auto flex items-center gap-1.5">
           <button
             onClick={() => setLanguage("en")}
             className={`text-[11px] transition-colors ${
               lang === "en"
-                ? isScrolled ? "text-mobile-logo font-medium" : "text-white font-medium"
-                : isScrolled ? "text-mobile-logo/50" : "text-white/50"
+                ? "text-mobile-logo font-medium"
+                : "text-mobile-logo/50"
             }`}
           >
             EN
           </button>
-          <span className={`text-[11px] ${isScrolled ? "text-mobile-logo/30" : "text-white/30"}`}>|</span>
+          <span className="text-[11px] text-mobile-logo/30">|</span>
           <button
             onClick={() => setLanguage("he")}
             className={`text-[11px] transition-colors ${
               lang === "he"
-                ? isScrolled ? "text-mobile-logo font-medium" : "text-white font-medium"
-                : isScrolled ? "text-mobile-logo/50" : "text-white/50"
+                ? "text-mobile-logo font-medium"
+                : "text-mobile-logo/50"
             }`}
           >
             עב
