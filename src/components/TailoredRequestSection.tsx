@@ -153,8 +153,8 @@ const TailoredRequestSection = ({ categories }: TailoredRequestSectionProps) => 
           </h2>
           <p className="text-white/85 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
             {getCopy(
-              "Some stays cannot be found in a list. Tell us what you are dreaming of and we will curate it just for you.",
-              "יש שהיות שלא ניתן למצוא ברשימה. ספרו לנו על מה אתם חולמים ואנחנו ניצור את זה במיוחד בשבילכם."
+              "Some escapes can't be found in a list. Tell us yours.",
+              "יש בריחות שלא ניתן למצוא ברשימה. ספרו לנו על שלכם."
             )}
           </p>
           <Button

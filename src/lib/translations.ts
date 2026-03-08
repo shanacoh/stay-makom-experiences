@@ -56,9 +56,9 @@ export const translations = {
     chooseCitySubtitle: "From the desert to the sea, from vineyards to kibbutzim, (RE)discover Israel through experiences that feel like nowhere else.",
     handpickedTitle1: "Handpicked Hotels.",
     handpickedTitle2: "Unforgettable Experiences.",
-    handpickedP1: "Today, we don't just book a room anymore, we look for something to feel. Staymakom curates the best hotels in the country and pairs them with immersive experiences that turn a simple stay into something unforgettable: farm-to-table workshops in a kibbutz, desert escapes, wellness retreats, local encounters, cultural discoveries…",
-    handpickedP2: "It's about going beyond Tel Aviv, Jerusalem or Eilat, and uncovering a more intimate, vibrant, authentic Israel.",
-    handpickedP3: "Your trip isn't just \"beautiful\" anymore, it becomes meaningful. And that's where the magic happens.",
+    handpickedP1: "There's an Israel most travelers never find. STAYMAKOM pairs the country's best hotels with experiences that actually mean something: desert escapes, vineyard evenings, farm mornings, wellness retreats.",
+    handpickedP2: "Not a longer trip. A deeper one.",
+    handpickedP3: "That's where the magic happens.",
     yourExperiences: "YOUR STAYMAKOM EXPERIENCES",
     followHeart: "Follow your heart's desire",
     viewMoreOf: "View more of",
@@ -354,7 +354,7 @@ export const translations = {
     giftCardSectionTag: "Perfect Gift",
     giftCardSectionTitle: "Give the Gift of Escape",
     giftCardSectionDesc: "Make someone's day unforgettable with a gift card for our handpicked hotels and unique experiences.",
-    giftCardSectionCTA: "Send a Gift Card",
+    giftCardSectionCTA: "Give an Escape",
   },
   he: {
     // Category page
