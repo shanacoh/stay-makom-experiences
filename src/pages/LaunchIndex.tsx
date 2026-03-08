@@ -273,7 +273,7 @@ const LaunchIndex = () => {
           {/* Title block — static, not the sticky parent */}
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
-              {isRTL ? (<>זה לא תיירות.<br />זו חוויה.</>) : (<>This is not tourism.<br />This is something else.</>)}
+              {isRTL ? (<>מלונות שנבחרו בקפידה.<br />חוויות בלתי נשכחות.</>) : (<>Handpicked Hotels.<br />Unforgettable Experiences.</>)}
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm mb-5">
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
