@@ -40,7 +40,22 @@ const TIER_CONFIG = {
   circle: { label: "Circle", emoji: "💎", nextLabel: null, nextPoints: null, min: 3000 },
 };
 
+const HOW_TO_EARN: Record<string, string> = {
+  explorer: "Book experiences to earn points — 1 USD spent = 1 point, 4 NIS = 1 point. Reach 500 points to unlock Traveler.",
+  traveler: "Keep booking! You need 1,500 points total to reach Insider.",
+  insider: "You're almost at the top. Reach 3,000 points to join Circle.",
+  circle: "You've reached the highest tier. Every booking continues to earn points.",
+};
+
+const ALL_TIERS = [
+  { key: "explorer", label: "Explorer", range: "0 – 499 pts", benefits: ["Access to all public experiences", "Earn 1 point per USD spent", "Save favorites & build wishlists"] },
+  { key: "traveler", label: "Traveler", range: "500 – 1,499 pts", benefits: ["Early access to limited experiences", "Member-only opportunities", "Exclusive seasonal offers"] },
+  { key: "insider", label: "Insider", range: "1,500 – 2,999 pts", benefits: ["Priority reservations", "Curated insider recommendations", "Seasonal perks & surprises"] },
+  { key: "circle", label: "Circle", range: "3,000+ pts", benefits: ["Private concierge service", "Bespoke itineraries", "Invitation-only events"] },
+];
+
 export default function MobileAccountHome() {
+  const [tierSheetOpen, setTierSheetOpen] = useState(false);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
