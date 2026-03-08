@@ -13,6 +13,7 @@ import { Check, BedDouble, Clock } from "lucide-react";
 import { getBoardTypeLabel } from "@/services/hyperguest";
 import { cn } from "@/lib/utils";
 import { analyzeCancellationPolicies } from "@/utils/cancellationPolicy";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface RoomRatePlan {
   ratePlanId: number;
