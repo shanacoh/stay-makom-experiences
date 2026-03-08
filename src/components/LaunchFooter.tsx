@@ -178,9 +178,9 @@ const LaunchFooter = () => {
 
         {/* ─── Legal bottom ─── */}
         <div className="mt-6 pt-5 border-t border-white/20 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-white/60">
-          <Link to={getLocalizedPath("/privacy")} className="hover:text-white transition-smooth">{privacyLabel}</Link>
+          <Link to={getLocalizedPath("/privacy")} className="hover:text-white hover:underline underline-offset-4 transition-all duration-200">{privacyLabel}</Link>
           <span className="hidden sm:inline">·</span>
-          <Link to={getLocalizedPath("/terms")} className="hover:text-white transition-smooth">{termsLabel}</Link>
+          <Link to={getLocalizedPath("/terms")} className="hover:text-white hover:underline underline-offset-4 transition-all duration-200">{termsLabel}</Link>
           <span className="hidden sm:inline">·</span>
           <span>© 2026 STAYMAKOM</span>
         </div>
