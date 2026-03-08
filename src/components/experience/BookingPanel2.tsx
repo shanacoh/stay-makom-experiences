@@ -417,7 +417,7 @@ export function BookingPanel2({
             {t.dates}
           </div>
 
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5" dir="ltr">
             {([1, 2, 3] as const).map((n) => (
               <button
                 key={n}
