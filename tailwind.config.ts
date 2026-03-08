@@ -138,11 +138,14 @@ export default {
         "heart-float": {
           "0%": {
             opacity: "1",
-            transform: "translate(-50%, -50%) translateY(0) translateX(0) scale(1)",
+            transform: "translate(-50%, -50%) translateY(0) translateX(0) scale(1) rotate(0deg)",
+          },
+          "50%": {
+            opacity: "0.9",
           },
           "100%": {
             opacity: "0",
-            transform: "translate(-50%, -50%) translateY(-35px) translateX(var(--float-x, 0px)) scale(0.4)",
+            transform: "translate(-50%, -50%) translateY(var(--float-y, -50px)) translateX(var(--float-x, 0px)) scale(0.2) rotate(var(--float-rotate, 0deg))",
           },
         },
         "hero-fade-up": {
