@@ -12,7 +12,7 @@ interface NavItem {
   labelHe: string;
   path: string;
   requiresAuth?: boolean;
-  authContext?: "favorites" | "account";
+  authContext?: "wishlist" | "bookings" | "account";
 }
 
 const navItems: NavItem[] = [
