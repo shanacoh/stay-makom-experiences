@@ -556,21 +556,30 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           {/* ═══ STEP 2: Guest Info ═══ */}
           {step === 2 && (
             <div className="space-y-6">
-              {/* Mini recap card */}
+              {/* Mini recap card with thumbnail */}
               <div className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
-                    </p>
-                  </div>
-                  {!totalIsNaN && (
-                    <div className="text-right shrink-0">
-                      <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
-                    </div>
+                <div className="flex items-start gap-3">
+                  {experienceHeroImage && (
+                    <img
+                      src={experienceHeroImage}
+                      alt={state.experienceTitle}
+                      className="w-16 h-16 object-cover shrink-0"
+                    />
                   )}
+                  <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
+                      </p>
+                    </div>
+                    {!totalIsNaN && (
+                      <div className="text-right shrink-0">
+                        <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

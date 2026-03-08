@@ -178,8 +178,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
            : (show || touched.email) && !isValidEmail(value.email) ? t.invalidEmail : null,
       phone: (show || touched.phone) && !value.phone.trim() ? t.required 
            : (show || touched.phone) && !isValidPhone(value.phone) ? t.invalidPhone : null,
-      birthDate: (show || touched.birthDate) && !value.birthDate ? t.required
-               : (show || touched.birthDate) && !isValidBirthDate(value.birthDate) ? t.invalidDate : null,
+      birthDate: (show || touched.birthDate) && value.birthDate && !isValidBirthDate(value.birthDate) ? t.invalidDate : null,
     };
   }, [value, touched, showErrors, t]);
 
