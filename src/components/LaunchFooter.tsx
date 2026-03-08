@@ -53,7 +53,7 @@ const LaunchFooter = () => {
         className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/50 focus-visible:border-primary"
         required
       />
-      <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full">
+      <Button type="submit" variant="secondary" size="sm" className="mt-2 w-full bg-accent hover:bg-accent/90 text-white border-none">
         {isRTL ? "הרשמה" : "Subscribe"}
       </Button>
     </form>
@@ -73,7 +73,7 @@ const LaunchFooter = () => {
   const termsLabel = isRTL ? "תנאי שימוש" : "Terms";
 
   return (
-    <footer className="bg-[#1a1a1a] text-white" dir={isRTL ? "rtl" : "ltr"}>
+    <footer className="bg-[#1a1a1a] text-white border-t border-white/10" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container py-8">
 
         {/* ─── DESKTOP (lg+) — 4 compact columns ─── */}
@@ -86,15 +86,15 @@ const LaunchFooter = () => {
             <div>
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">STAYMAKOM</h4>
               <ul className="space-y-2">
-                <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white hover:text-primary transition-smooth">{partnerLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/gift-card")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{giftCardLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/partners")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{partnerLabel}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider mb-4 text-slate-50">{exploreLabel}</h4>
               <ul className="space-y-2">
-                <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white hover:text-primary transition-smooth">{adventureLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white hover:text-primary transition-smooth">{romanticLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/category/adventure")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{adventureLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/category/romantic")} className="text-sm text-white hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{romanticLabel}</Link></li>
               </ul>
             </div>
             <div>
@@ -155,15 +155,15 @@ const LaunchFooter = () => {
             <div>
               <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">STAYMAKOM</h4>
               <ul className="space-y-1.5">
-                <li><Link to={getLocalizedPath("/gift-card")} className="text-xs text-white/80 hover:text-primary transition-smooth">{giftCardLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/partners")} className="text-xs text-white/80 hover:text-primary transition-smooth">{partnerLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/gift-card")} className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{giftCardLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/partners")} className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{partnerLabel}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-2 text-slate-50">{exploreLabel}</h4>
               <ul className="space-y-1.5">
-                <li><Link to={getLocalizedPath("/category/adventure")} className="text-xs text-white/80 hover:text-primary transition-smooth">{adventureLabel}</Link></li>
-                <li><Link to={getLocalizedPath("/category/romantic")} className="text-xs text-white/80 hover:text-primary transition-smooth">{romanticLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/category/adventure")} className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{adventureLabel}</Link></li>
+                <li><Link to={getLocalizedPath("/category/romantic")} className="text-xs text-white/80 hover:text-accent hover:underline underline-offset-4 transition-all duration-200">{romanticLabel}</Link></li>
               </ul>
             </div>
           </div>
@@ -178,9 +178,9 @@ const LaunchFooter = () => {
 
         {/* ─── Legal bottom ─── */}
         <div className="mt-6 pt-5 border-t border-white/20 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-white/60">
-          <Link to={getLocalizedPath("/privacy")} className="hover:text-white transition-smooth">{privacyLabel}</Link>
+          <Link to={getLocalizedPath("/privacy")} className="hover:text-white hover:underline underline-offset-4 transition-all duration-200">{privacyLabel}</Link>
           <span className="hidden sm:inline">·</span>
-          <Link to={getLocalizedPath("/terms")} className="hover:text-white transition-smooth">{termsLabel}</Link>
+          <Link to={getLocalizedPath("/terms")} className="hover:text-white hover:underline underline-offset-4 transition-all duration-200">{termsLabel}</Link>
           <span className="hidden sm:inline">·</span>
           <span>© 2026 STAYMAKOM</span>
         </div>

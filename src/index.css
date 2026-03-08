@@ -140,6 +140,8 @@ All colors MUST be HSL.
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-size: 14px;
+    line-height: 1.65;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -251,4 +253,31 @@ All colors MUST be HSL.
   .ProseMirror s {
     @apply line-through;
   }
+}
+
+/* Scroll-down indicator animation */
+@keyframes scroll-line {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 1;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 1;
+  }
+  50.1% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0.6;
+  }
+}
+
+.scroll-indicator-line {
+  animation: scroll-line 2s ease-in-out infinite;
 }

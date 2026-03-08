@@ -37,7 +37,7 @@ const LaunchHeader = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const scrolled = currentScrollY > 80;
+      const scrolled = currentScrollY > 60;
 
       if (currentScrollY < 10) {
         setIsVisible(true);
@@ -57,8 +57,8 @@ const LaunchHeader = () => {
   }, [lastScrollY]);
 
   const headerClasses = !isScrolled
-    ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-none transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`
-    : `fixed left-0 right-0 z-50 w-full bg-background/98 backdrop-blur-sm shadow-[0_1px_8px_-2px_rgba(0,0,0,0.06)] border-none transition-all duration-200 ${isVisible ? "top-0" : "-top-full"}`;
+    ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-b border-transparent transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`
+    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-[12px] border-b border-foreground/8 transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`;
 
   const logoClasses = !isScrolled ? "text-white" : "text-logo";
 

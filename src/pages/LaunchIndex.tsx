@@ -191,7 +191,7 @@ const LaunchIndex = () => {
   const isPageLoading = isLoadingCategories || isLoadingExp;
 
   return (
-    <div className="min-h-screen flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
+    <div className="min-h-screen flex flex-col overflow-x-hidden" dir={isRTL ? "rtl" : "ltr"}>
       <LoadingScreen isLoading={isPageLoading} />
       <SEOHead
         title={isRTL ? "STAYMAKOM — מלונות וחוויות נבחרים בישראל" : "STAYMAKOM — Handpicked Hotels & Experiences in Israel"}
@@ -210,7 +210,7 @@ const LaunchIndex = () => {
 
           <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
             <h1
-              className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
+              className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
               style={{ animationDelay: '0ms' }}>
               {isRTL ? (
                 <>אל תבחר עיר,<br />בחר את הבריחה שלך</>
@@ -233,10 +233,15 @@ const LaunchIndex = () => {
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-10 py-4 bg-white text-foreground font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:bg-white/90 transition-all duration-300 opacity-0 animate-hero-fade-up"
+              className="px-10 py-4 bg-accent text-white font-semibold uppercase tracking-wide text-sm rounded-md shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all duration-300 opacity-0 animate-hero-fade-up cursor-pointer"
               style={{ animationDelay: '500ms' }}>
               {isRTL ? "מצא את הבריחה שלך" : "Find your escape"}
             </button>
+
+            {/* Scroll indicator */}
+            <div className="mt-8 flex justify-center opacity-0 animate-hero-fade-up" style={{ animationDelay: '700ms' }}>
+              <div className="w-px h-8 bg-white/50 scroll-indicator-line" />
+            </div>
           </div>
         </section>
 
@@ -391,7 +396,7 @@ const LaunchIndex = () => {
                   placeholder={isRTL ? "כתובת האימייל שלך" : "Your email address"}
                   className="flex-1 sm:w-56 h-9 text-sm" />
 
-                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4">
+                  <Button type="submit" disabled={isSubmitting} size="sm" className="h-9 text-xs px-4 bg-foreground text-background hover:bg-foreground/90">
                     {isRTL ? "הצטרפו לרשימה" : "Join the list"}
                   </Button>
                 </form>
