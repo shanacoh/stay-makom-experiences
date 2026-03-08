@@ -318,11 +318,11 @@ export default function ExperienceCard({
           {displayPrice > 0 && (
             <div className="flex items-baseline gap-1 pt-0.5">
               <span className="font-bold text-sm sm:text-base text-foreground">
-                {currencySymbol}{displayPrice}
+                {displaySymbol}{displayPrice}
               </span>
               {originalPrice && originalPrice > displayPrice && (
                 <span className="text-[11px] text-muted-foreground line-through">
-                  {currencySymbol}{originalPrice}
+                  {displaySymbol}{originalPrice}
                 </span>
               )}
               <span className="text-[10px] text-muted-foreground">
