@@ -63,6 +63,8 @@ const HeroSection = ({
   city,
   region,
   address,
+  latitude,
+  longitude,
   averageRating,
   reviewsCount = 0,
   reviews = [],
