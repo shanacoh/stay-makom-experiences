@@ -445,7 +445,7 @@ export default function Experience2() {
         </section>
 
       {/* Contenu principal — aligned to V1 layout */}
-      <div className="max-w-6xl mx-auto pb-24 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
+      <div className="max-w-6xl mx-auto pb-40 md:pb-16 px-4 sm:px-6 lg:px-12 xl:px-16 my-8">
         <div className="grid md:grid-cols-[65%_35%] gap-6 lg:gap-10">
           {/* Left Column - Content */}
           <div className="space-y-10 md:space-y-12">
