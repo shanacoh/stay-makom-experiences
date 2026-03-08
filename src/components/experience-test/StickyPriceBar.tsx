@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
-import { useExperienceAddons } from "@/hooks/useExperience2Price";
-import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
+import { useExperienceAddons, useExperiencePricingConfig, calculatePriceV2 } from "@/hooks/useExperience2Price";
 
 interface StickyPriceBarProps {
   experienceId: string;
