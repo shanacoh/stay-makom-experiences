@@ -503,7 +503,7 @@ export default function Experience2() {
               {/* Price Callout CTA */}
               <HeroBookingPreview2
                 experienceId={experience.id}
-                currency={experience.currency || "ILS"}
+                currency={displayCurrency}
                 lang={lang as "en" | "he" | "fr"}
                 hyperguestPropertyId={hyperguestPropertyId || null}
                 onViewDates={() => {
