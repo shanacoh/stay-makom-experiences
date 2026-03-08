@@ -183,7 +183,8 @@ const Index = () => {
   const { data: latestExperiences, isLoading: isLoadingExperiences } = useQuery({
     queryKey: ["latest-experiences"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First fetch featured experiences (manually pinned)
+      const { data: featured, error: featuredError } = await supabase
         .from("experiences2")
         .select(`
           *,
@@ -204,11 +205,51 @@ const Index = () => {
           )
         `)
         .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(4);
-      if (error) throw error;
-      // Map to ExperienceCard-compatible shape
-      return (data || []).map((exp: any) => {
+        .eq("featured_on_home", true)
+        .order("home_display_order", { ascending: true });
+      if (featuredError) throw featuredError;
+
+      const featuredIds = (featured || []).map((e: any) => e.id);
+      let recent: any[] = [];
+
+      // Fill remaining slots with most recent (up to 8 total)
+      if (featuredIds.length < 8) {
+        let query = supabase
+          .from("experiences2")
+          .select(`
+            *,
+            experience2_hotels(
+              position,
+              nights,
+              hotel:hotels2(
+                id, name, name_he, city, city_he, region, region_he, hero_image
+              )
+            ),
+            experience2_highlight_tags(
+              highlight_tags(
+                id,
+                slug,
+                label_en,
+                label_he
+              )
+            )
+          `)
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(8 - featuredIds.length);
+
+        if (featuredIds.length > 0) {
+          query = query.not("id", "in", `(${featuredIds.join(",")})`);
+        }
+
+        const { data: recentData, error: recentError } = await query;
+        if (recentError) throw recentError;
+        recent = recentData || [];
+      }
+
+      const allExps = [...(featured || []), ...recent];
+
+      return allExps.map((exp: any) => {
         const primaryHotel = exp.experience2_hotels
           ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
           ?.[0]?.hotel;
