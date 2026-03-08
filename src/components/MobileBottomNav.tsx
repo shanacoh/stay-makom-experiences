@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Compass, Heart, CalendarDays, User } from "lucide-react";
+import { Compass, Heart, ShoppingBag, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { useCartExists } from "@/hooks/useCart";
 
 interface NavItem {
   icon: React.ElementType;
@@ -10,12 +11,13 @@ interface NavItem {
   path: string;
   requiresAuth?: boolean;
   authContext?: "wishlist" | "bookings" | "account";
+  showCartDot?: boolean;
 }
 
 const navItems: NavItem[] = [
   { icon: Compass, labelEn: "Explore", labelHe: "גלה", path: "/launch" },
   { icon: Heart, labelEn: "Saved", labelHe: "שמור", path: "/account?tab=wishlist", requiresAuth: true, authContext: "wishlist" },
-  { icon: CalendarDays, labelEn: "Bookings", labelHe: "הזמנות", path: "/account?tab=bookings", requiresAuth: true, authContext: "bookings" },
+  { icon: ShoppingBag, labelEn: "Cart", labelHe: "עגלה", path: "/cart", showCartDot: true },
   { icon: User, labelEn: "Account", labelHe: "חשבון", path: "/account", requiresAuth: true, authContext: "account" },
 ];
 
