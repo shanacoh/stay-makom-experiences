@@ -83,78 +83,6 @@ const fallbackImages: Record<string, string> = {
   "active-break": activeImg
 };
 
-const Experiences2HomeSection = ({ lang, isRTL }: { lang: string; isRTL: boolean }) => {
-  const { data: experiences2, isLoading } = useQuery({
-    queryKey: ["home-experiences2"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experiences2")
-        .select(`
-          *,
-          experience2_hotels(
-            position,
-            nights,
-            hotel:hotels2(
-              id, name, name_he, city, city_he, region, region_he, hero_image
-            )
-          )
-        `)
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(4);
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  if (isLoading) {
-    return (
-      <section className="container py-8 sm:py-12 md:py-16 px-4">
-        <div className="text-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-        </div>
-      </section>
-    );
-  }
-
-  if (!experiences2 || experiences2.length === 0) return null;
-
-  return (
-    <section className="container py-8 sm:py-12 md:py-16 px-4">
-      <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-        <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold tracking-[-0.02em]">
-          {lang === 'he' ? 'חוויות חדשות' : 'New Experiences'}
-        </h2>
-        <Button variant="link" asChild className="text-foreground underline underline-offset-4 text-xs sm:text-sm p-0 h-auto">
-          <Link to={`/experiences${lang === 'he' ? '?lang=he' : ''}`}>
-            {lang === 'he' ? 'צפו בכולן' : 'View all'}
-          </Link>
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
-        {experiences2.map((experience: any) => {
-          const primaryHotelLink = experience.experience2_hotels
-            ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
-            ?.[0]?.hotel;
-
-          const cardExperience = {
-            ...experience,
-            hotels: primaryHotelLink || null,
-          };
-
-          return (
-            <ExperienceCard
-              key={experience.id}
-              experience={cardExperience}
-              linkPrefix="/experience"
-            />
-          );
-        })}
-      </div>
-    </section>
-  );
-};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -183,7 +111,8 @@ const Index = () => {
   const { data: latestExperiences, isLoading: isLoadingExperiences } = useQuery({
     queryKey: ["latest-experiences"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First fetch featured experiences (manually pinned)
+      const { data: featured, error: featuredError } = await supabase
         .from("experiences2")
         .select(`
           *,
@@ -204,11 +133,51 @@ const Index = () => {
           )
         `)
         .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(4);
-      if (error) throw error;
-      // Map to ExperienceCard-compatible shape
-      return (data || []).map((exp: any) => {
+        .eq("featured_on_home", true)
+        .order("home_display_order", { ascending: true });
+      if (featuredError) throw featuredError;
+
+      const featuredIds = (featured || []).map((e: any) => e.id);
+      let recent: any[] = [];
+
+      // Fill remaining slots with most recent (up to 8 total)
+      if (featuredIds.length < 8) {
+        let query = supabase
+          .from("experiences2")
+          .select(`
+            *,
+            experience2_hotels(
+              position,
+              nights,
+              hotel:hotels2(
+                id, name, name_he, city, city_he, region, region_he, hero_image
+              )
+            ),
+            experience2_highlight_tags(
+              highlight_tags(
+                id,
+                slug,
+                label_en,
+                label_he
+              )
+            )
+          `)
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(8 - featuredIds.length);
+
+        if (featuredIds.length > 0) {
+          query = query.not("id", "in", `(${featuredIds.join(",")})`);
+        }
+
+        const { data: recentData, error: recentError } = await query;
+        if (recentError) throw recentError;
+        recent = recentData || [];
+      }
+
+      const allExps = [...(featured || []), ...recent];
+
+      return allExps.map((exp: any) => {
         const primaryHotel = exp.experience2_hotels
           ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
           ?.[0]?.hotel;
@@ -693,8 +662,6 @@ const Index = () => {
           )}
         </section>
 
-        {/* New Experiences (V2) Section */}
-        <Experiences2HomeSection lang={lang} isRTL={isRTL} />
 
         {/* Journal Section */}
         <JournalSection lang={lang} />

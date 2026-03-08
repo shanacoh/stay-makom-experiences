@@ -152,6 +152,8 @@ export function UnifiedExperience2Form({
   const [localTags, setLocalTags] = useState<LocalTagEntry[]>([]);
   const [localReviews, setLocalReviews] = useState<LocalReviewEntry[]>([]);
   const [showExtras, setShowExtras] = useState(false);
+  const [featuredOnHome, setFeaturedOnHome] = useState(false);
+  const [homeDisplayOrder, setHomeDisplayOrder] = useState(0);
 
   const currentExperienceId = experienceId || createdExperienceId;
 
@@ -302,6 +304,8 @@ export function UnifiedExperience2Form({
         localIncludes,
         localTags,
         localReviews,
+        featuredOnHome,
+        homeDisplayOrder,
         savedAt: new Date().toISOString(),
       };
       localStorage.setItem(autoSaveKey, JSON.stringify(payload));
@@ -309,7 +313,7 @@ export function UnifiedExperience2Form({
     } catch (e) {
       // silent fail
     }
-  }, [getValues, experienceHotels, heroImagePreview, thumbnailImagePreview, galleryPreviews, localAddons, localIncludes, localTags, localReviews, autoSaveKey]);
+  }, [getValues, experienceHotels, heroImagePreview, thumbnailImagePreview, galleryPreviews, localAddons, localIncludes, localTags, localReviews, featuredOnHome, homeDisplayOrder, autoSaveKey]);
 
   useEffect(() => {
     autoSaveTimerRef.current = setInterval(doAutoSave, 30000);
@@ -361,6 +365,10 @@ export function UnifiedExperience2Form({
       if (existingExperience.hero_image) setHeroImagePreview(existingExperience.hero_image);
       if ((existingExperience as any).thumbnail_image) setThumbnailImagePreview((existingExperience as any).thumbnail_image);
       if (existingExperience.photos && Array.isArray(existingExperience.photos)) setGalleryPreviews(existingExperience.photos);
+      
+      // Featured on home
+      setFeaturedOnHome((existingExperience as any).featured_on_home ?? false);
+      setHomeDisplayOrder((existingExperience as any).home_display_order ?? 0);
     }
   }, [existingExperience, setValue, propHotelId]);
 
@@ -550,6 +558,8 @@ export function UnifiedExperience2Form({
       promo_type: data.promo_type === "none" || !data.promo_type ? null : data.promo_type,
       promo_value: data.promo_type === "none" || !data.promo_type ? null : (data.promo_value ?? null),
       promo_is_percentage: data.promo_is_percentage ?? true,
+      featured_on_home: featuredOnHome,
+      home_display_order: homeDisplayOrder,
     };
   };
 
@@ -969,6 +979,40 @@ export function UnifiedExperience2Form({
                       )}
                     />
                     {errors.category_id && <p className="text-sm text-destructive mt-1">{errors.category_id.message}</p>}
+                  </div>
+                  
+                  {/* Featured on Home */}
+                  <div className="flex flex-col gap-2">
+                    <Label className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-primary" />
+                      Featured on Home
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Switch
+                        checked={featuredOnHome}
+                        onCheckedChange={setFeaturedOnHome}
+                      />
+                      {featuredOnHome && (
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="home_display_order" className="text-xs text-muted-foreground whitespace-nowrap">Order:</Label>
+                          <Input
+                            id="home_display_order"
+                            type="number"
+                            min={0}
+                            max={99}
+                            className="w-16 h-8"
+                            value={homeDisplayOrder}
+                            onChange={(e) => setHomeDisplayOrder(parseInt(e.target.value) || 0)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {featuredOnHome 
+                        ? "Cette expérience sera mise en avant sur la homepage. Ordre bas = priorité haute."
+                        : "Activer pour afficher cette expérience en priorité sur la homepage."
+                      }
+                    </p>
                   </div>
                 </div>
 
