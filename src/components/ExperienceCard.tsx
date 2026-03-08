@@ -264,6 +264,25 @@ export default function ExperienceCard({
           </div>
         </div>
 
+        {/* Tags - just below the photo */}
+        {highlightTags.length > 0 && (
+          <div className="flex flex-nowrap gap-1 overflow-hidden px-0.5 -mt-0.5 mb-1">
+            {highlightTags.slice(0, maxTags).map((tag) => (
+              <span
+                key={tag.id}
+                className="inline-block whitespace-nowrap px-1.5 py-px bg-muted/60 rounded-full text-[9px] font-normal tracking-wide text-muted-foreground border border-border/40"
+              >
+                {lang === 'he' && tag.label_he ? tag.label_he : tag.label_en}
+              </span>
+            ))}
+            {highlightTags.length > maxTags && (
+              <span className="inline-block whitespace-nowrap px-1 py-px text-[9px] text-muted-foreground">
+                +{highlightTags.length - maxTags}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Metadata below image */}
         <div className="space-y-1 px-0.5">
           {/* Row: City | Region + Rating */}
@@ -291,24 +310,6 @@ export default function ExperienceCard({
             </p>
           )}
 
-          {/* Tags - single line, thinner */}
-          {highlightTags.length > 0 && (
-            <div className="flex flex-nowrap gap-1 overflow-hidden">
-              {highlightTags.slice(0, maxTags).map((tag) => (
-                <span
-                  key={tag.id}
-                  className="inline-block whitespace-nowrap px-1.5 py-px bg-muted/60 rounded-full text-[9px] font-normal tracking-wide text-muted-foreground border border-border/40"
-                >
-                  {lang === 'he' && tag.label_he ? tag.label_he : tag.label_en}
-                </span>
-              ))}
-              {highlightTags.length > maxTags && (
-                <span className="inline-block whitespace-nowrap px-1 py-px text-[9px] text-muted-foreground">
-                  +{highlightTags.length - maxTags}
-                </span>
-              )}
-            </div>
-          )}
 
           {/* Price row */}
           {displayPrice > 0 && (
