@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import ExperienceCard from "@/components/ExperienceCard";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { EXPERIENCE_PRICING_TYPES } from "@/types/experience2_addons";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Experience2CardWithPriceProps {
   experience: any;
@@ -24,6 +25,7 @@ export default function Experience2CardWithPrice({
   linkPrefix = "/experience",
   linkSuffix,
 }: Experience2CardWithPriceProps) {
+  const { displayCurrency } = useCurrency();
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
 
   // Fetch cheapest room price from HyperGuest (1 night, 2 adults, USD)
@@ -31,7 +33,7 @@ export default function Experience2CardWithPrice({
     propertyId: propId,
     nights: 1,
     adults: 2,
-    currency: "USD",
+    currency: displayCurrency,
     enabled: !!propId,
   });
 

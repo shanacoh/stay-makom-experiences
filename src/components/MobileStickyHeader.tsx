@@ -3,10 +3,16 @@ import { useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { MOBILE_HEADER_HEIGHT } from "@/constants/layout";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { lang, setLanguage } = useLanguage();
+  const { setDisplayCurrency } = useCurrency();
+  const handleLang = (l: "en" | "he") => {
+    setLanguage(l);
+    setDisplayCurrency(l === "he" ? "ILS" : "USD");
+  };
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -51,25 +57,25 @@ const MobileStickyHeader = () => {
         {/* Right: Language switcher */}
         <div className="ml-auto flex items-center gap-1.5">
           <button
-            onClick={() => setLanguage("en")}
+            onClick={() => handleLang("en")}
             className={`text-[11px] transition-colors ${
               lang === "en"
                 ? "text-mobile-logo font-medium"
                 : "text-mobile-logo/50"
             }`}
           >
-            EN
+            EN · $
           </button>
           <span className="text-[11px] text-mobile-logo/30">|</span>
           <button
-            onClick={() => setLanguage("he")}
+            onClick={() => handleLang("he")}
             className={`text-[11px] transition-colors ${
               lang === "he"
                 ? "text-mobile-logo font-medium"
                 : "text-mobile-logo/50"
             }`}
           >
-            עב
+            עב · ₪
           </button>
         </div>
       </div>

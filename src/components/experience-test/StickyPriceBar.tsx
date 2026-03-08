@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
 import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import { useExperienceAddons, useExperiencePricingConfig, calculatePriceV2 } from "@/hooks/useExperience2Price";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface StickyPriceBarProps {
   experienceId: string;
@@ -29,8 +30,8 @@ const StickyPriceBar = ({
   minNights = 1,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
+  const { displayCurrency, symbol, altSymbol, altCode, setDisplayCurrency, convert } = useCurrency();
 
-  // Fetch real-time HyperGuest price (same as HeroBookingPreview2)
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
   const { data: quickDates } = useQuickDateAvailability({
     propertyId: propId,
@@ -52,7 +53,6 @@ const StickyPriceBar = ({
     }, null as typeof quickDates[0] | null);
   }, [quickDates]);
 
-  // Compute exact total with same engine as booking panel
   const displayPrice = useMemo(() => {
     const roomPrice = cheapestDate?.cheapestPrice ?? 0;
     const breakdown = calculatePriceV2(
@@ -90,15 +90,14 @@ const StickyPriceBar = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [footerRef]);
 
-  const getCurrencySymbol = (cur: string) => {
-    if (cur === 'ILS') return '₪';
-    if (cur === 'EUR') return '€';
-    return '$';
-  };
-
-  const symbol = getCurrencySymbol(currency);
   const nightLabel = lang === 'he' ? 'ללילה' : lang === 'fr' ? '/ nuit' : '/ night';
   const ctaLabel = lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'VIEW DATES';
+
+  const handleInlineToggle = () => {
+    setDisplayCurrency(displayCurrency === "ILS" ? "USD" : "ILS");
+  };
+
+  const isShowingUSD = displayCurrency === "USD";
 
   return (
     <div
@@ -112,15 +111,31 @@ const StickyPriceBar = ({
         <div className="flex items-center justify-between py-3">
           <div>
             {displayPrice ? (
-              <div className="flex items-baseline gap-1">
-                <span className="text-xs text-muted-foreground">
-                  {lang === 'he' ? 'מ-' : 'From '}
-                </span>
-                <span className="text-base font-semibold text-foreground">
-                  {symbol}{displayPrice}
-                </span>
-                <span className="text-xs text-muted-foreground">{nightLabel}</span>
-              </div>
+              <>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xs text-muted-foreground">
+                    {lang === 'he' ? 'מ-' : 'From '}
+                  </span>
+                  <span className="text-base font-semibold text-foreground">
+                    {symbol}{displayPrice}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{nightLabel}</span>
+                  {/* Inline currency toggle */}
+                  <button
+                    onClick={handleInlineToggle}
+                    className="text-[10px] leading-none transition-colors"
+                    style={{ color: '#9e9e9e' }}
+                  >
+                    · {lang === 'he' ? `ראה ב${altSymbol}` : `see in ${altSymbol}`}
+                  </button>
+                </div>
+                {/* "Charged in NIS" note when showing USD */}
+                {isShowingUSD && (
+                  <p className="text-[10px] leading-tight mt-0.5" style={{ color: '#9e9e9e' }}>
+                    {lang === 'he' ? 'החיוב בשקלים' : 'Charged in NIS'}
+                  </p>
+                )}
+              </>
             ) : (
               <span className="text-sm text-muted-foreground italic">
                 {lang === 'he' ? 'מחיר לפי בקשה' : 'Price on request'}

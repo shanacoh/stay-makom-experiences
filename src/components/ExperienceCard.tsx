@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { t } from "@/lib/translations";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -78,6 +79,7 @@ export default function ExperienceCard({
   linkSuffix = "",
 }: ExperienceCardProps) {
   const { lang } = useLanguage();
+  const { symbol: currencySymbol } = useCurrency();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
@@ -93,9 +95,8 @@ export default function ExperienceCard({
   // Get highlight tags
   const highlightTags = experience.experience_highlight_tags?.map(eht => eht.highlight_tags) || [];
 
-  // Always show USD
-  const currencySymbol = '$';
-
+  // Currency symbol from context
+  const displaySymbol = currencySymbol;
   // Limit tags on mobile
   const maxTags = isMobile ? 2 : 4;
 
@@ -317,11 +318,11 @@ export default function ExperienceCard({
           {displayPrice > 0 && (
             <div className="flex items-baseline gap-1 pt-0.5">
               <span className="font-bold text-sm sm:text-base text-foreground">
-                {currencySymbol}{displayPrice}
+                {displaySymbol}{displayPrice}
               </span>
               {originalPrice && originalPrice > displayPrice && (
                 <span className="text-[11px] text-muted-foreground line-through">
-                  {currencySymbol}{originalPrice}
+                  {displaySymbol}{originalPrice}
                 </span>
               )}
               <span className="text-[10px] text-muted-foreground">

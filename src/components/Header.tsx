@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
@@ -34,6 +35,11 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { lang, setLanguage } = useLanguage();
+  const { setDisplayCurrency } = useCurrency();
+  const handleLang = (l: "en" | "he") => {
+    setLanguage(l);
+    setDisplayCurrency(l === "he" ? "ILS" : "USD");
+  };
   const { getLocalizedPath, navigateLocalized } = useLocalizedNavigation();
 
   const handleSignOut = async () => {
@@ -98,7 +104,7 @@ const Header = () => {
         <div className="flex items-center space-x-3">
           <div className="hidden md:flex items-center space-x-2">
             <button
-              onClick={() => setLanguage("en")}
+              onClick={() => handleLang("en")}
               className={`text-xs transition-colors ${
                 lang === "en"
                   ? isTransparentPage && !isScrolled
@@ -109,7 +115,7 @@ const Header = () => {
                     : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              EN
+              EN · $
             </button>
             <span
               className={`text-xs ${
@@ -121,7 +127,7 @@ const Header = () => {
               |
             </span>
             <button
-              onClick={() => setLanguage("he")}
+              onClick={() => handleLang("he")}
               className={`text-xs transition-colors ${
                 lang === "he"
                   ? isTransparentPage && !isScrolled
@@ -132,7 +138,7 @@ const Header = () => {
                     : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              עב
+              עב · ₪
             </button>
           </div>
 

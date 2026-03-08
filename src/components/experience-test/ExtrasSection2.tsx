@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   Wine, Car, Coffee, Flower, Sparkle, Gift, Heart, Camera, MusicNotes,
   Champagne, Bed, Cake, Drop, Leaf, HandHeart, Star,
@@ -67,6 +68,7 @@ const ExtrasSection2 = ({
   selectedExtras,
   onToggleExtra,
 }: ExtrasSection2Props) => {
+  const { symbol: currencySymbol } = useCurrency();
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
@@ -101,14 +103,7 @@ const ExtrasSection2 = ({
     return texts[key]?.[lang] || texts[key]?.en || key;
   };
 
-  // Use consistent currency symbol based on the experience currency
-  const getCurrencySymbol = (cur: string) => {
-    if (cur === 'ILS') return '₪';
-    if (cur === 'EUR') return '€';
-    return '$';
-  };
-
-  const displaySymbol = getCurrencySymbol(currency);
+  const displaySymbol = currencySymbol;
 
   const formatPrice = (price: number) => {
     return `+${displaySymbol}${price}`;
