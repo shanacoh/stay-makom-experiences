@@ -152,6 +152,8 @@ export function UnifiedExperience2Form({
   const [localTags, setLocalTags] = useState<LocalTagEntry[]>([]);
   const [localReviews, setLocalReviews] = useState<LocalReviewEntry[]>([]);
   const [showExtras, setShowExtras] = useState(false);
+  const [featuredOnHome, setFeaturedOnHome] = useState(false);
+  const [homeDisplayOrder, setHomeDisplayOrder] = useState(0);
 
   const currentExperienceId = experienceId || createdExperienceId;
 
