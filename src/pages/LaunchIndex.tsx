@@ -283,13 +283,11 @@ const LaunchIndex = () => {
             {/* Premium segmented text toggle — sticky on mobile */}
             <div
               className={cn(
-                "transition-all duration-300 md:relative md:bg-transparent md:shadow-none md:py-0 md:border-none",
-                tabsSticky
-                  ? "fixed top-[36px] left-0 right-0 z-40 bg-mobile-header pt-1 pb-2.5 border-b border-mobile-border md:hidden"
-                  : ""
+                "sticky top-[36px] z-40 -mx-4 px-4 transition-all duration-300 md:static md:mx-0 md:px-0",
+                tabsSticky ? "bg-mobile-header border-b border-mobile-border" : ""
               )}
             >
-              <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center gap-3 px-4" dir="ltr">
+              <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center gap-3 py-2" dir="ltr">
                 <button
                   ref={toggleBtn1Ref}
                   onClick={() => handleFilterClick(FILTER_ADVENTURE)}
@@ -327,9 +325,6 @@ const LaunchIndex = () => {
                 />
               </div>
             </div>
-
-            {/* Keep document flow when tabs become fixed (prevents overlap with cards) */}
-            {tabsSticky && <div className="h-[46px] md:hidden" aria-hidden="true" />}
           </div>
 
           {isLoadingExp ?
