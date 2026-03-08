@@ -4,7 +4,6 @@
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
 import { useRef, useState, useMemo, useCallback } from "react";
-import { useCurrency } from "@/contexts/CurrencyContext";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
@@ -38,7 +37,6 @@ export default function Experience2() {
   const [searchParams] = useSearchParams();
   const isLaunch = searchParams.get("context") === "launch";
   const { lang } = useLanguage();
-  const { displayCurrency: displayCurrencyCtx, symbol: currencySymbolCtx } = useCurrency();
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
   const reviewsRef = useRef<HTMLDivElement>(null);
@@ -220,15 +218,8 @@ export default function Experience2() {
   const category = experience.categories;
   const hyperguestPropertyId = primaryHotel?.hyperguest_property_id;
 
-  // Display currency from global context (synced to language)
-  const displayCurrency = displayCurrencyCtx;
-
-  // 🔍 DEBUG — à retirer après investigation
-  console.log("[Experience2] primaryHotel complet:", primaryHotel);
-  console.log("[Experience2] hyperguestPropertyId résolu:", hyperguestPropertyId);
-  console.log("[Experience2] hasMultiHotel:", hasMultiHotel);
-  console.log("[Experience2] parcoursHotels[0]?.hotel keys:", Object.keys(parcoursHotels[0]?.hotel || {}));
-  console.log("[Experience2] legacyHotel keys:", Object.keys(legacyHotel || {}));
+  // All prices are computed in ILS internally, converted at display time via CurrencyContext
+  const displayCurrency = "ILS";
 
   // Use experience photos if available, otherwise hotel photos
   const photos =

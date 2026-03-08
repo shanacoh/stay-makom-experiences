@@ -68,7 +68,7 @@ const ExtrasSection2 = ({
   selectedExtras,
   onToggleExtra,
 }: ExtrasSection2Props) => {
-  const { symbol: currencySymbol } = useCurrency();
+  const { symbol: currencySymbol, convert } = useCurrency();
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
@@ -106,7 +106,8 @@ const ExtrasSection2 = ({
   const displaySymbol = currencySymbol;
 
   const formatPrice = (price: number) => {
-    return `+${displaySymbol}${price}`;
+    // Extra prices are in ILS, convert to display currency
+    return `+${displaySymbol}${Math.round(convert(price))}`;
   };
 
   const isImageUrl = (url?: string | null) => url && (url.startsWith('http') || url.startsWith('/'));

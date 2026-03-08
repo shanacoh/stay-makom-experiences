@@ -1,6 +1,9 @@
 /**
  * Wrapper around ExperienceCard that fetches real-time HyperGuest room price
  * and displays the TRUE total (room + addons) as "Starting from".
+ *
+ * All calculations are done in ILS (the base/charging currency).
+ * Conversion to the user's display currency happens in ExperienceCard via useCurrency.
  */
 import { useMemo } from "react";
 import ExperienceCard from "@/components/ExperienceCard";
@@ -25,15 +28,15 @@ export default function Experience2CardWithPrice({
   linkPrefix = "/experience",
   linkSuffix,
 }: Experience2CardWithPriceProps) {
-  const { displayCurrency } = useCurrency();
+  const { convert } = useCurrency();
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
 
-  // Fetch cheapest room price from HyperGuest (1 night, 2 adults, USD)
+  // Always fetch in ILS — addons are in ILS, so everything stays in one currency
   const { data: quickDates } = useQuickDateAvailability({
     propertyId: propId,
     nights: 1,
     adults: 2,
-    currency: displayCurrency,
+    currency: "ILS",
     enabled: !!propId,
   });
 
@@ -47,7 +50,7 @@ export default function Experience2CardWithPrice({
     return best?.cheapestPrice ?? null;
   }, [quickDates]);
 
-  // Calculate addon total (experience pricing extras)
+  // Calculate addon total in ILS (experience pricing extras)
   const addonTotal = useMemo(() => {
     if (!addons || addons.length === 0) return 0;
     const minGuests = experience.min_party || 2;
@@ -65,15 +68,18 @@ export default function Experience2CardWithPrice({
       }, 0);
   }, [addons, experience.min_party, experience.min_nights]);
 
-  // Total = room + addons (same logic as detail page)
+  // Total in ILS, then convert to display currency
   const totalPrice = useMemo(() => {
+    let ilsTotal = 0;
     if (cheapestRoomPrice != null && cheapestRoomPrice > 0) {
-      return Math.round(cheapestRoomPrice + addonTotal);
+      ilsTotal = cheapestRoomPrice + addonTotal;
+    } else if (addonTotal > 0) {
+      ilsTotal = addonTotal;
+    } else {
+      ilsTotal = experience.base_price || 0;
     }
-    // Fallback to addons only if no room data yet
-    if (addonTotal > 0) return Math.round(addonTotal);
-    return experience.base_price || 0;
-  }, [cheapestRoomPrice, addonTotal, experience.base_price]);
+    return Math.round(convert(ilsTotal));
+  }, [cheapestRoomPrice, addonTotal, experience.base_price, convert]);
 
   const cardExperience = {
     ...experience,
