@@ -149,7 +149,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       total: "סה\"כ",
       specialRequests: "בקשות מיוחדות",
       importantNotices: "הערות חשובות",
-      fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון, תאריך לידה)",
+      fillGuestInfo: "אנא מלא פרטי אורח (שם, אימייל, טלפון)",
       bookingError: "ההזמנה נכשלה. הפרטים שלך נשמרו — אנא נסה שוב.",
       onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
       verifying: "בודק מחיר...",
