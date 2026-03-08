@@ -3,9 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { Calendar, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 
@@ -26,15 +25,8 @@ const Journal = () => {
     },
   });
 
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      Stories: "bg-[#D72638]",
-      Places: "bg-amber-500",
-      Guides: "bg-blue-500",
-      People: "bg-green-500",
-    };
-    return colors[category as keyof typeof colors] || "bg-gray-500";
-  };
+  const featuredPost = posts?.[0];
+  const remainingPosts = posts?.slice(1);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
@@ -62,43 +54,90 @@ const Journal = () => {
             ))}
           </div>
         ) : posts && posts.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <Link key={post.id} to={`/journal/${post.slug}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
-                  {post.cover_image && (
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={post.cover_image}
-                        alt={post.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge className={`${getCategoryColor(post.category)} text-white text-xs`}>
-                        {post.category}
-                      </Badge>
-                      {post.published_at && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="space-y-12">
+            {/* Featured Article — Hero Card */}
+            {featuredPost && (
+              <Link to={`/journal/${featuredPost.slug}`} className="block group">
+                <div className="relative rounded-xl overflow-hidden" style={{ height: "420px" }}>
+                  <img
+                    src={featuredPost.cover_image || "/placeholder.svg"}
+                    alt={getLocalizedField(featuredPost, "title", lang) || featuredPost.title_en}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ aspectRatio: "16/9" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="inline-block px-3 py-1 text-[11px] font-medium uppercase tracking-[0.1em] rounded-full bg-[#E8E0D4] text-[#1A1814]">
+                        {featuredPost.category}
+                      </span>
+                      {featuredPost.published_at && (
+                        <span className="text-xs text-white/80 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {format(new Date(post.published_at), "MMM d, yyyy")}
-                        </div>
+                          {format(new Date(featuredPost.published_at), "MMM d, yyyy")}
+                        </span>
                       )}
                     </div>
-                    <h3 className="font-serif text-lg mb-1 line-clamp-2">
-                      {getLocalizedField(post, "title", lang) || post.title_en}
-                    </h3>
-                    {(getLocalizedField(post, "excerpt", lang) || post.excerpt_en) && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {getLocalizedField(post, "excerpt", lang) || post.excerpt_en}
+                    <h2
+                      className="text-white mb-3 line-clamp-2"
+                      style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 500, lineHeight: 1.2 }}
+                    >
+                      {getLocalizedField(featuredPost, "title", lang) || featuredPost.title_en}
+                    </h2>
+                    {(getLocalizedField(featuredPost, "excerpt", lang) || featuredPost.excerpt_en) && (
+                      <p className="text-white/80 text-sm line-clamp-2 max-w-2xl mb-4">
+                        {getLocalizedField(featuredPost, "excerpt", lang) || featuredPost.excerpt_en}
                       </p>
                     )}
-                  </CardContent>
-                </Card>
+                    <span className="inline-flex items-center gap-1 text-[#B8935A] text-sm font-medium group-hover:gap-2 transition-all">
+                      Read the story <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </div>
               </Link>
-            ))}
+            )}
+
+            {/* Remaining Articles Grid */}
+            {remainingPosts && remainingPosts.length > 0 && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {remainingPosts.map((post) => (
+                  <Link key={post.id} to={`/journal/${post.slug}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full border-0 bg-white">
+                      {post.cover_image && (
+                        <div className="aspect-[4/3] overflow-hidden">
+                          <img
+                            src={post.cover_image}
+                            alt={getLocalizedField(post, "title", lang) || post.title_en}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="inline-block px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.1em] rounded-full bg-[#E8E0D4] text-[#1A1814]">
+                            {post.category}
+                          </span>
+                          {post.published_at && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="w-3 h-3" />
+                              {format(new Date(post.published_at), "MMM d, yyyy")}
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="font-serif text-lg mb-1 line-clamp-2">
+                          {getLocalizedField(post, "title", lang) || post.title_en}
+                        </h3>
+                        {(getLocalizedField(post, "excerpt", lang) || post.excerpt_en) && (
+                          <p className="text-sm text-muted-foreground line-clamp-2" style={{ lineHeight: 1.5 }}>
+                            {getLocalizedField(post, "excerpt", lang) || post.excerpt_en}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-12">

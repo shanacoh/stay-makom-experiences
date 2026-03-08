@@ -27,6 +27,8 @@ import {
   Plus,
   X,
   Sparkles,
+  Minus,
+  MessageSquareQuote,
 } from "lucide-react";
 
 interface BlockItemProps {
@@ -48,6 +50,8 @@ const blockTypeIcons: Record<BlockType, React.ReactNode> = {
   quote: <Quote className="w-4 h-4" />,
   list: <List className="w-4 h-4" />,
   experience: <Sparkles className="w-4 h-4" />,
+  pull_quote: <MessageSquareQuote className="w-4 h-4" />,
+  divider: <Minus className="w-4 h-4" />,
 };
 
 const blockTypeLabels: Record<BlockType, string> = {
@@ -58,6 +62,8 @@ const blockTypeLabels: Record<BlockType, string> = {
   quote: "Quote",
   list: "List",
   experience: "Experience",
+  pull_quote: "Pull Quote",
+  divider: "Divider",
 };
 
 // Fetch experiences for the experience block
@@ -209,6 +215,37 @@ export function BlockItem({
               className={inputClass}
               dir={dir}
             />
+          </div>
+        );
+
+      case "pull_quote":
+        return (
+          <div className="space-y-3">
+            <Textarea
+              value={block.content}
+              onChange={(e) => onChange({ ...block, content: e.target.value })}
+              placeholder="Enter pull quote — editorial highlight text..."
+              rows={3}
+              className={`italic ${inputClass}`}
+              dir={dir}
+            />
+            {/* Pull Quote Preview */}
+            {block.content && (
+              <div className="pt-2">
+                <span className="text-xs text-muted-foreground mb-2 block">Preview:</span>
+                <div className="border-l-[3px] border-[#B8935A] pl-6 py-2 italic text-lg text-[#5C4A3A] max-w-md">
+                  {block.content}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case "divider":
+        return (
+          <div className="py-4 text-center">
+            <span className="text-[#B8935A] text-sm tracking-[0.3em]">— ✦ —</span>
+            <p className="text-xs text-muted-foreground mt-2">Decorative divider</p>
           </div>
         );
 

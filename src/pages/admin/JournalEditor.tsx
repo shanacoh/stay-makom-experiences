@@ -18,12 +18,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Eye, EyeOff, Clock, FileText, Check, CalendarIcon, Send } from "lucide-react";
+import { ArrowLeft, Save, Eye, EyeOff, Clock, FileText, Check, CalendarIcon, Send, AlertTriangle } from "lucide-react";
 import { generateSlug, cn } from "@/lib/utils";
 import { Block, calculateReadingTime, mirrorBlocks } from "@/components/admin/journal/types";
 import { BlockEditor } from "@/components/admin/journal/BlockEditor";
 import { ArticlePreview } from "@/components/admin/journal/ArticlePreview";
 import { format } from "date-fns";
+
+const CATEGORIES = [
+  "Stories",
+  "Places",
+  "Guides",
+  "Food & Wine",
+  "Slow Travel",
+  "Behind the Scenes",
+  "People",
+];
 
 const JournalEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +45,8 @@ const JournalEditor = () => {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewLang, setPreviewLang] = useState<"en" | "he">("en");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [excerptError, setExcerptError] = useState(false);
+  const [ogAutoFilled, setOgAutoFilled] = useState({ title: false, description: false });
 
   const [formData, setFormData] = useState({
     title_en: "",
@@ -150,7 +162,6 @@ const JournalEditor = () => {
         .select("id")
         .eq("slug", slug);
       
-      // Exclude current post when editing
       if (currentId) {
         query.neq("id", currentId);
       }
@@ -166,36 +177,62 @@ const JournalEditor = () => {
     }
   };
 
+  // Auto-fill OG fields from title/excerpt before saving
+  const prepareDataForSave = (data: typeof formData) => {
+    const prepared = { ...data };
+    let autoFilledTitle = false;
+    let autoFilledDesc = false;
+
+    if (!prepared.og_title_en && prepared.title_en) {
+      prepared.og_title_en = prepared.title_en;
+      autoFilledTitle = true;
+    }
+    if (!prepared.og_description_en && prepared.excerpt_en) {
+      prepared.og_description_en = prepared.excerpt_en;
+      autoFilledDesc = true;
+    }
+    if (!prepared.og_title_he && prepared.title_he) {
+      prepared.og_title_he = prepared.title_he;
+    }
+    if (!prepared.og_description_he && prepared.excerpt_he) {
+      prepared.og_description_he = prepared.excerpt_he;
+    }
+
+    setOgAutoFilled({ title: autoFilledTitle, description: autoFilledDesc });
+    return prepared;
+  };
+
   const saveToDatabase = useCallback(
     async (data: typeof formData, showToast = false) => {
-      const baseSlug = data.slug || generateSlug(data.title_en);
+      const prepared = prepareDataForSave(data);
+      const baseSlug = prepared.slug || generateSlug(prepared.title_en);
       const uniqueSlug = await generateUniqueSlug(baseSlug, isEdit ? id : undefined);
       
       const dataToSave = {
-        title_en: data.title_en,
-        title_he: data.title_he,
+        title_en: prepared.title_en,
+        title_he: prepared.title_he,
         slug: uniqueSlug,
-        cover_image: data.cover_image,
-        category: data.category,
-        excerpt_en: data.excerpt_en,
-        excerpt_he: data.excerpt_he,
-        content_en: stringifyBlocks(data.blocks_en),
-        content_he: stringifyBlocks(data.blocks_he),
-        author_name: data.author_name,
-        status: data.status,
-        seo_title_en: data.seo_title_en,
-        seo_title_he: data.seo_title_he,
-        seo_title_fr: data.seo_title_fr,
-        meta_description_en: data.meta_description_en,
-        meta_description_he: data.meta_description_he,
-        meta_description_fr: data.meta_description_fr,
-        og_title_en: data.og_title_en,
-        og_title_he: data.og_title_he,
-        og_title_fr: data.og_title_fr,
-        og_description_en: data.og_description_en,
-        og_description_he: data.og_description_he,
-        og_description_fr: data.og_description_fr,
-        og_image: data.og_image,
+        cover_image: prepared.cover_image,
+        category: prepared.category,
+        excerpt_en: prepared.excerpt_en,
+        excerpt_he: prepared.excerpt_he,
+        content_en: stringifyBlocks(prepared.blocks_en),
+        content_he: stringifyBlocks(prepared.blocks_he),
+        author_name: prepared.author_name,
+        status: prepared.status,
+        seo_title_en: prepared.seo_title_en,
+        seo_title_he: prepared.seo_title_he,
+        seo_title_fr: prepared.seo_title_fr,
+        meta_description_en: prepared.meta_description_en,
+        meta_description_he: prepared.meta_description_he,
+        meta_description_fr: prepared.meta_description_fr,
+        og_title_en: prepared.og_title_en,
+        og_title_he: prepared.og_title_he,
+        og_title_fr: prepared.og_title_fr,
+        og_description_en: prepared.og_description_en,
+        og_description_he: prepared.og_description_he,
+        og_description_fr: prepared.og_description_fr,
+        og_image: prepared.og_image,
       };
 
       if (isEdit) {
@@ -211,7 +248,6 @@ const JournalEditor = () => {
           .select()
           .single();
         if (error) throw error;
-        // Navigate to edit mode after first save
         if (inserted && (inserted as any).id) {
           navigate(`/admin/journal/edit/${(inserted as any).id}`, { replace: true });
         }
@@ -227,7 +263,7 @@ const JournalEditor = () => {
 
   // Autosave effect
   useEffect(() => {
-    if (!formData.title_en) return; // Don't autosave without title
+    if (!formData.title_en) return;
 
     if (autosaveTimeoutRef.current) {
       clearTimeout(autosaveTimeoutRef.current);
@@ -246,6 +282,16 @@ const JournalEditor = () => {
     };
   }, [formData, saveToDatabase]);
 
+  const handleSave = () => {
+    if (!formData.excerpt_en.trim()) {
+      setExcerptError(true);
+      toast.error("Excerpt is required for listing cards");
+      return;
+    }
+    setExcerptError(false);
+    saveMutation.mutate();
+  };
+
   const saveMutation = useMutation({
     mutationFn: () => saveToDatabase(formData, true),
     onSuccess: () => {
@@ -258,20 +304,26 @@ const JournalEditor = () => {
 
   const publishMutation = useMutation({
     mutationFn: async (scheduleDate?: Date | null) => {
+      if (!formData.excerpt_en.trim()) {
+        setExcerptError(true);
+        throw new Error("Excerpt is required for listing cards");
+      }
+      setExcerptError(false);
+
+      const prepared = prepareDataForSave(formData);
       const isScheduled = scheduleDate && scheduleDate > new Date();
-      const baseSlug = formData.slug || generateSlug(formData.title_en);
+      const baseSlug = prepared.slug || generateSlug(prepared.title_en);
       const uniqueSlug = await generateUniqueSlug(baseSlug, isEdit ? id : undefined);
       
       const dataToSave = {
-        ...formData,
-        content_en: stringifyBlocks(formData.blocks_en),
-        content_he: stringifyBlocks(formData.blocks_he),
+        ...prepared,
+        content_en: stringifyBlocks(prepared.blocks_en),
+        content_he: stringifyBlocks(prepared.blocks_he),
         slug: uniqueSlug,
         status: "published" as const,
         published_at: isScheduled ? scheduleDate.toISOString() : new Date().toISOString(),
       };
 
-      // Remove non-db fields
       const { blocks_en, blocks_he, scheduled_at, ...dbData } = dataToSave as any;
 
       if (isEdit) {
@@ -307,7 +359,6 @@ const JournalEditor = () => {
   if (isPreviewMode) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Preview Header */}
         <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
           <div className="container flex items-center justify-between h-14">
             <Button variant="ghost" onClick={() => setIsPreviewMode(false)}>
@@ -333,7 +384,6 @@ const JournalEditor = () => {
           </div>
         </div>
         
-        {/* Preview Content */}
         <div className="container py-8" dir={previewLang === "he" ? "rtl" : "ltr"}>
           <ArticlePreview
             title={previewLang === "en" ? formData.title_en : formData.title_he}
@@ -376,7 +426,7 @@ const JournalEditor = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => saveMutation.mutate()}
+            onClick={handleSave}
             disabled={saveMutation.isPending}
           >
             <Save className="w-4 h-4 mr-2" />
@@ -406,7 +456,6 @@ const JournalEditor = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Editor */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Article Meta */}
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Cover Image */}
             <ImageUpload
@@ -438,24 +487,40 @@ const JournalEditor = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Stories">Stories</SelectItem>
-                    <SelectItem value="Places">Places</SelectItem>
-                    <SelectItem value="Guides">Guides</SelectItem>
-                    <SelectItem value="People">People</SelectItem>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* Excerpt */}
+            {/* Excerpt — Required */}
             <div className="space-y-2">
-              <Label>Excerpt (EN)</Label>
+              <Label className="flex items-center gap-1">
+                Excerpt (EN) *
+                {excerptError && (
+                  <span className="text-destructive text-xs flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Required for listing cards
+                  </span>
+                )}
+              </Label>
               <Textarea
                 value={formData.excerpt_en}
-                onChange={(e) => setFormData({ ...formData, excerpt_en: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value.slice(0, 160);
+                  setFormData({ ...formData, excerpt_en: val });
+                  if (val.trim()) setExcerptError(false);
+                }}
                 placeholder="A short introduction that appears in article lists..."
                 rows={2}
+                maxLength={160}
+                className={excerptError ? "border-destructive" : ""}
               />
+              <p className={`text-xs ${formData.excerpt_en.length >= 150 ? "text-amber-600" : "text-muted-foreground"}`}>
+                {formData.excerpt_en.length}/160 characters
+              </p>
             </div>
 
             {/* Word Count & Reading Time */}
@@ -647,21 +712,33 @@ const JournalEditor = () => {
                 <Label className="text-xs">OG Title</Label>
                 <Input
                   value={formData.og_title_en}
-                  onChange={(e) => setFormData({ ...formData, og_title_en: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, og_title_en: e.target.value });
+                    setOgAutoFilled(prev => ({ ...prev, title: false }));
+                  }}
                   placeholder="Social share title..."
                   className="text-sm"
                 />
+                {ogAutoFilled.title && (
+                  <p className="text-xs text-muted-foreground italic">Auto-filled from title</p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label className="text-xs">OG Description</Label>
                 <Textarea
                   value={formData.og_description_en}
-                  onChange={(e) => setFormData({ ...formData, og_description_en: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, og_description_en: e.target.value });
+                    setOgAutoFilled(prev => ({ ...prev, description: false }));
+                  }}
                   placeholder="Social share description..."
                   rows={2}
                   className="text-sm"
                 />
+                {ogAutoFilled.description && (
+                  <p className="text-xs text-muted-foreground italic">Auto-filled from excerpt</p>
+                )}
               </div>
             </div>
 
