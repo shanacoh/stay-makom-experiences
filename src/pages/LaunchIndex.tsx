@@ -206,7 +206,8 @@ const LaunchIndex = () => {
         {/* ─── 1. HERO ─── */}
         <section className="relative h-[70vh] min-h-[480px] flex items-end justify-center pb-[79px]">
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            ref={heroParallaxRef}
+            className="absolute inset-0 bg-cover bg-center will-change-transform"
             style={{ backgroundImage: `url(${heroImage})` }} />
 
           <div className="absolute inset-0 bg-black/45" />
