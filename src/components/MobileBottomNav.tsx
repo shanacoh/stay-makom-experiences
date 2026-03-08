@@ -38,7 +38,7 @@ const MobileBottomNav = () => {
 
   const handleTap = (item: NavItem) => {
     if (item.requiresAuth && !user) {
-      setAuthDialog({ open: true, tab: "login", context: item.authContext || "account" });
+      navigate(`/mobile-login?context=${item.authContext || "account"}`);
       return;
     }
     navigate(item.path);
