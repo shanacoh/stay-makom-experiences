@@ -25,16 +25,16 @@ const MobileStickyHeader = () => {
       }`}
       style={{ height: MOBILE_HEADER_HEIGHT }}
     >
-      <div className="flex justify-between items-center h-full px-4">
+      <div className="relative flex items-center h-full px-4">
         <Link
           to="/launch"
-          className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
+          className={`absolute left-1/2 -translate-x-1/2 font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
             isScrolled ? "text-mobile-logo" : "text-white"
           }`}
         >
           STAYMAKOM
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5">
           <button
             onClick={() => setLanguage("en")}
             className={`text-[11px] transition-colors ${
