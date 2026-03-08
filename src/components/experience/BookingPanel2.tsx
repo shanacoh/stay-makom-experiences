@@ -90,7 +90,7 @@ export function BookingPanel2({
       selectDates: "Select dates",
       noHyperguest: "This experience is not available for online booking yet.",
       error: "Error loading availability. Please try again.",
-      next: "Continue to checkout",
+      next: "Book this stay",
       onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
     },
     he: {
