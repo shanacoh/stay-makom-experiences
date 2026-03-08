@@ -22,7 +22,6 @@ const HeroBookingPreview2 = ({
   onViewDates,
   hyperguestPropertyId,
   minParty = 2,
-  minNights = 1,
 }: HeroBookingPreview2Props) => {
   const { data: addons } = useExperienceAddons(experienceId);
   const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
