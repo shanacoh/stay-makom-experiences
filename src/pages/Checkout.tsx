@@ -122,7 +122,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       total: "Total",
       specialRequests: "Special requests",
       importantNotices: "Important notices",
-      fillGuestInfo: "Please fill in guest information (name, email, phone, birth date)",
+      fillGuestInfo: "Please fill in guest information (name, email, phone)",
       bookingError: "Booking failed. Your information has been saved — please try again.",
       onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
       verifying: "Verifying price...",
