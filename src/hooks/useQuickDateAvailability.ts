@@ -71,6 +71,8 @@ async function scanAvailability(
 
             let cheapest: number | null = null;
             let cur = currency;
+
+            for (const room of rooms) {
               for (const rp of room.ratePlans || []) {
                 // Never use net/agent prices in public UI. Prefer sell.searchCurrency, then sell.price.
                 const sellSearchPrice = rp.prices?.sell?.searchCurrency;
