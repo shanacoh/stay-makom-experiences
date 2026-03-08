@@ -167,9 +167,15 @@ async function searchHotels(params: SearchParams) {
 }
 
 async function preBook(preBookData: PreBookData) {
-  console.log('📋 Pre-booking for property:', preBookData.search.propertyId);
+  const isProduction = getEnvMode() === 'production';
+  const payload: PreBookData = {
+    ...preBookData,
+    isTest: !isProduction,
+  };
+
+  console.log('📋 Pre-booking for property:', preBookData.search.propertyId, 'isTest:', payload.isTest);
   const url = `${BOOKING_DOMAIN}booking/pre-book`;
-  const response = await fetch(url, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(preBookData) });
+  const response = await fetch(url, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
 
   if (!response.ok) {
     const errorText = await response.text();
