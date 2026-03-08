@@ -18,7 +18,9 @@ const LocationPopover = ({
   latitude,
   longitude,
   lang = "en",
+  variant = "default",
 }: LocationPopoverProps) => {
+  const color = variant === "light" ? "#FFFFFF" : "#8C7B6B";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
