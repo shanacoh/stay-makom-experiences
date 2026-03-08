@@ -269,7 +269,8 @@ const LaunchIndex = () => {
         <HowItWorksBanner />
 
         {/* ─── 2. HANDPICKED + TOGGLE + GRID ─── */}
-        <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-16">
+        <section id="launch-experiences" className="container py-[26px] px-4 scroll-mt-24">
+          {/* Title block — static, not the sticky parent */}
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-[-0.02em] mb-1.5 leading-tight">
               {isRTL ? (<>זה לא תיירות.<br />זו חוויה.</>) : (<>This is not tourism.<br />This is something else.</>)}
@@ -277,54 +278,55 @@ const LaunchIndex = () => {
             <p className="text-muted-foreground text-xs sm:text-sm mb-5">
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
             </p>
+          </div>
 
-            {/* Sentinel for IntersectionObserver */}
-            <div ref={toggleBarRef} />
+          {/* Sentinel for IntersectionObserver — sits right before sticky bar */}
+          <div ref={toggleBarRef} />
 
-            {/* Premium segmented text toggle — sticky on mobile */}
-            <div
-              className={cn(
-                "sticky top-[44px] z-40 -mx-4 px-4 transition-all duration-300 md:static md:mx-0 md:px-0",
-                tabsSticky ? "bg-mobile-header border-b border-mobile-border" : ""
-              )}
-            >
-              <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center gap-3 py-2" dir="ltr">
-                <button
-                  ref={toggleBtn1Ref}
-                  onClick={() => handleFilterClick(FILTER_ADVENTURE)}
-                  className={cn(
-                    "flex-1 min-w-0 uppercase tracking-[0.08em] sm:tracking-[0.12em] text-[11px] transition-all duration-300 pb-2",
-                    activeFilter === FILTER_ADVENTURE
-                      ? "font-medium text-mobile-active"
-                      : "font-light text-mobile-inactive hover:text-mobile-active/70"
-                  )}
-                >
-                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                    <Compass size={12} strokeWidth={1.5} />
-                    {isRTL ? "הרפתקה" : "Feel adventurous"}
-                  </span>
-                </button>
-                <div className="w-px h-4 bg-mobile-border" />
-                <button
-                  ref={toggleBtn2Ref}
-                  onClick={() => handleFilterClick(FILTER_ROMANTIC)}
-                  className={cn(
-                    "flex-1 min-w-0 uppercase tracking-[0.08em] sm:tracking-[0.12em] text-[11px] transition-all duration-300 pb-2",
-                    activeFilter === FILTER_ROMANTIC
-                      ? "font-medium text-mobile-active"
-                      : "font-light text-mobile-inactive hover:text-mobile-active/70"
-                  )}
-                >
-                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                    <Heart size={12} strokeWidth={1.5} />
-                    {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
-                  </span>
-                </button>
-                <div
-                  className="absolute bottom-0 h-px bg-mobile-active transition-all duration-300 ease-in-out"
-                  style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
-                />
-              </div>
+          {/* Premium segmented text toggle — sticky on mobile, parent is full <section> */}
+          <div
+            className={cn(
+              "sticky z-40 -mx-4 px-4 transition-all duration-300 md:static md:mx-0 md:px-0",
+              tabsSticky ? "bg-mobile-header border-b border-mobile-border" : ""
+            )}
+            style={{ top: MOBILE_HEADER_HEIGHT }}
+          >
+            <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center gap-3 py-2" dir="ltr">
+              <button
+                ref={toggleBtn1Ref}
+                onClick={() => handleFilterClick(FILTER_ADVENTURE)}
+                className={cn(
+                  "flex-1 min-w-0 uppercase tracking-[0.08em] sm:tracking-[0.12em] text-[11px] transition-all duration-300 pb-2",
+                  activeFilter === FILTER_ADVENTURE
+                    ? "font-medium text-mobile-active"
+                    : "font-light text-mobile-inactive hover:text-mobile-active/70"
+                )}
+              >
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                  <Compass size={12} strokeWidth={1.5} />
+                  {isRTL ? "הרפתקה" : "Feel adventurous"}
+                </span>
+              </button>
+              <div className="w-px h-4 bg-mobile-border" />
+              <button
+                ref={toggleBtn2Ref}
+                onClick={() => handleFilterClick(FILTER_ROMANTIC)}
+                className={cn(
+                  "flex-1 min-w-0 uppercase tracking-[0.08em] sm:tracking-[0.12em] text-[11px] transition-all duration-300 pb-2",
+                  activeFilter === FILTER_ROMANTIC
+                    ? "font-medium text-mobile-active"
+                    : "font-light text-mobile-inactive hover:text-mobile-active/70"
+                )}
+              >
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                  <Heart size={12} strokeWidth={1.5} />
+                  {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
+                </span>
+              </button>
+              <div
+                className="absolute bottom-0 h-px bg-mobile-active transition-all duration-300 ease-in-out"
+                style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
+              />
             </div>
           </div>
 
