@@ -189,7 +189,9 @@ const LaunchExperiences = () => {
         </section>
       </main>
 
-      <LaunchFooter />
+      <div className="hidden md:block">
+        <LaunchFooter />
+      </div>
       <MobileBottomNav />
     </div>
   );
