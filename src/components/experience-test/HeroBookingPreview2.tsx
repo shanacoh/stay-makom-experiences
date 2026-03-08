@@ -64,7 +64,7 @@ const HeroBookingPreview2 = ({
     );
 
     return breakdown.finalTotal > 0 ? breakdown.finalTotal : null;
-  }, [cheapestDate, addons, pricingConfig, minParty, currency]);
+  }, [cheapestDate, addons, pricingConfig, minParty, minNights, currency]);
 
   const hasRealDate = !!cheapestDate;
 
