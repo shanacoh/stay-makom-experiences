@@ -118,13 +118,20 @@ function validateSearchParams(params: SearchParams): { isValid: boolean; errors:
   return { isValid: errors.length === 0, errors };
 }
 
+function getEnvMode(): 'production' | 'dev' {
+  const raw = (Deno.env.get('ENVIRONMENT') || '').trim().toLowerCase();
+  return (raw === 'production' || raw === 'prod' || raw === 'live') ? 'production' : 'dev';
+}
+
 function getAuthHeaders(): Record<string, string> {
-  const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
-  // Use prod token in production, dev token otherwise
+  const envMode = getEnvMode();
+  const isProduction = envMode === 'production';
   const token = isProduction
-    ? (Deno.env.get('HYPERGUEST_TOKEN_PROD') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'))
-    : (Deno.env.get('HYPERGUEST_TOKEN_DEV') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'));
-  if (!token) throw new Error('HyperGuest token not configured for env: ' + (isProduction ? 'production' : 'dev'));
+    ? (Deno.env.get('HYPERGUEST_TOKEN_PROD') || Deno.env.get('HYPERGUEST_TOKEN') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'))
+    : (Deno.env.get('HYPERGUEST_TOKEN_DEV') || Deno.env.get('HYPERGUEST_TOKEN') || Deno.env.get('HYPERGUEST_BEARER_TOKEN'));
+
+  if (!token) throw new Error('HyperGuest token not configured for env: ' + envMode);
+
   console.log('🔑 Using HyperGuest token for env:', isProduction ? 'PRODUCTION' : 'DEV', 'token length:', token.length);
   return {
     'Authorization': `Bearer ${token}`,
