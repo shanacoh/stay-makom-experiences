@@ -89,6 +89,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/launch" element={<LaunchIndex />} />
+            <Route path="/launch/experiences" element={<LaunchExperiences />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/gift-card" element={<GiftCard />} />
             <Route path="/gift-card/confirmation" element={<GiftCardConfirmation />} />
