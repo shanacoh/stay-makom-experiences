@@ -530,8 +530,8 @@ export function BookingPanel2({
           />
         )}
 
-        {/* Price breakdown */}
-        {searchParams && <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={isLoadingAvailability} lang={lang} ratePlanPrices={ratePlanPrices} />}
+
+
 
         {/* On-request warning */}
         {isOnRequest && selectedRatePlan && (
