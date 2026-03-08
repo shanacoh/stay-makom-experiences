@@ -238,9 +238,9 @@ const LaunchIndex = () => {
 
           <div className="absolute inset-0 bg-black/45" />
 
-          <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto">
+          <div className="relative z-10 text-center text-white px-6 max-w-3xl mx-auto pt-6 sm:pt-0">
             <h1
-              className="font-sans text-[26px] sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-4 opacity-0 animate-hero-fade-up text-white"
+              className="font-sans text-[26px] sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.02em] leading-[1.1] mb-2.5 sm:mb-4 opacity-0 animate-hero-fade-up text-white"
               style={{ animationDelay: '0ms' }}>
               {isRTL ? (
                 <><span className="whitespace-nowrap">אל תבחר עיר,</span><br /><span className="whitespace-nowrap">בחר את הבריחה שלך</span></>
@@ -249,7 +249,7 @@ const LaunchIndex = () => {
               )}
             </h1>
             <p
-              className="font-sans italic text-white/90 mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up text-sm sm:text-lg md:text-xl"
+              className="font-sans italic text-white/90 mb-5 sm:mb-7 max-w-xl mx-auto opacity-0 animate-hero-fade-up text-sm sm:text-lg md:text-xl"
               style={{ animationDelay: '250ms' }}>
               {isRTL ? "הישראל שרוב האנשים לא מוצאים." : "The Israel most people never find."}
             </p>
