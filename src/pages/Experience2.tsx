@@ -566,7 +566,11 @@ export default function Experience2() {
       </main>
 
       <footer ref={footerRef as React.RefObject<HTMLElement>}>
-        {isLaunch ? <LaunchFooter /> : <Footer />}
+        {/* Desktop: full footer, Mobile: minimal copyright */}
+        <div className="hidden md:block">
+          {isLaunch ? <LaunchFooter /> : <Footer />}
+        </div>
+        <MobileFooterMinimal />
       </footer>
     </div>
   );
