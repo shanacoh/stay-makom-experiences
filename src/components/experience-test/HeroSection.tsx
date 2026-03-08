@@ -199,10 +199,17 @@ const HeroSection = ({
       {/* 1. Category tag — gold, uppercase */}
       {categoryName && categorySlug && (
         <Link 
-          to={getLocalizedPath(`/category/${categorySlug}`)}
+          to={isLaunch 
+            ? `/launch/experiences?filter=${categorySlug === 'romantic' ? 'romantic' : 'adventure'}`
+            : getLocalizedPath(`/category/${categorySlug}`)
+          }
           className="inline-block text-[11px] font-semibold uppercase tracking-[0.15em] text-accent hover:text-accent/80 transition-colors"
         >
-          {categoryName}
+          {isLaunch 
+            ? (categorySlug === 'romantic' 
+              ? (lang === 'he' ? 'בריחה רומנטית' : 'Romantic Escape')
+              : (lang === 'he' ? 'הרפתקה' : 'Feeling Adventurous'))
+            : categoryName}
         </Link>
       )}
       
