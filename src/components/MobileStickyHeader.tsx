@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { MOBILE_HEADER_HEIGHT } from "@/constants/layout";
 
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,11 +21,12 @@ const MobileStickyHeader = () => {
           ? "bg-mobile-header"
           : "bg-transparent"
       }`}
+      style={{ height: MOBILE_HEADER_HEIGHT }}
     >
-      <div className="flex justify-center py-2">
+      <div className="flex justify-center items-center h-full">
         <Link
           to="/launch"
-          className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] transition-colors duration-300 ${
+          className={`font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none transition-colors duration-300 ${
             isScrolled ? "text-mobile-logo" : "text-white"
           }`}
         >
