@@ -53,7 +53,9 @@ const LaunchIndex = () => {
   // Toggle underline refs
   const toggleBtn1Ref = useRef<HTMLButtonElement>(null);
   const toggleBtn2Ref = useRef<HTMLButtonElement>(null);
+  const toggleBarRef = useRef<HTMLDivElement>(null);
   const [toggleUnderline, setToggleUnderline] = useState({ left: 0, width: 0 });
+  const [tabsSticky, setTabsSticky] = useState(false);
 
   useEffect(() => {
     // Small timeout to allow text/fonts to render at correct size after language change
@@ -66,6 +68,18 @@ const LaunchIndex = () => {
     }, 50);
     return () => clearTimeout(timeout);
   }, [activeFilter, lang]);
+
+  // Sticky tabs observer: stick when tabs scroll past the mobile header (~44px)
+  useEffect(() => {
+    const el = toggleBarRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setTabsSticky(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "-44px 0px 0px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Waitlist popup state
   const [waitlistOpen, setWaitlistOpen] = useState(false);
@@ -186,9 +200,13 @@ const LaunchIndex = () => {
     setWaitlistOpen(true);
   };
 
-  // Handle filter button click
+  // Handle filter button click — scroll to grid when in sticky mode
   const handleFilterClick = (slug: string) => {
     setActiveFilter((prev) => prev === slug ? null : slug);
+    const grid = document.getElementById("launch-experiences");
+    if (grid && tabsSticky) {
+      grid.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const isPageLoading = isLoadingCategories || isLoadingExp;
@@ -252,43 +270,55 @@ const LaunchIndex = () => {
               {isRTL ? "ל-24 שעות, 48 שעות, או חוויות מותאמות אישית." : "For 24 hours, 48 hours, or tailor-made experiences."}
             </p>
 
-            {/* Premium segmented text toggle */}
-            <div className="relative inline-flex items-center gap-6" dir="ltr">
-              <button
-                ref={toggleBtn1Ref}
-                onClick={() => setActiveFilter(FILTER_ADVENTURE)}
-                className={cn(
-                  "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
-                  activeFilter === FILTER_ADVENTURE
-                    ? "font-medium text-foreground"
-                    : "font-light text-foreground/40 hover:text-foreground/70"
-                )}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <Compass size={13} strokeWidth={1.5} />
-                  {isRTL ? "הרפתקה" : "Feel adventurous"}
-                </span>
-              </button>
-              <div className="w-px h-4 bg-foreground/20" />
-              <button
-                ref={toggleBtn2Ref}
-                onClick={() => setActiveFilter(FILTER_ROMANTIC)}
-                className={cn(
-                  "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
-                  activeFilter === FILTER_ROMANTIC
-                    ? "font-medium text-foreground"
-                    : "font-light text-foreground/40 hover:text-foreground/70"
-                )}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <Heart size={13} strokeWidth={1.5} />
-                  {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
-                </span>
-              </button>
-              <div
-                className="absolute bottom-0 h-px bg-foreground transition-all duration-300 ease-in-out"
-                style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
-              />
+            {/* Sentinel for IntersectionObserver */}
+            <div ref={toggleBarRef} />
+
+            {/* Premium segmented text toggle — sticky on mobile */}
+            <div
+              className={cn(
+                "transition-all duration-300 md:relative md:bg-transparent md:shadow-none md:py-0 md:border-none",
+                tabsSticky
+                  ? "fixed top-[44px] left-0 right-0 z-40 bg-background/95 backdrop-blur-[12px] py-2.5 border-b border-foreground/8 shadow-sm md:hidden"
+                  : ""
+              )}
+            >
+              <div className="relative inline-flex items-center gap-6 justify-center w-full" dir="ltr">
+                <button
+                  ref={toggleBtn1Ref}
+                  onClick={() => handleFilterClick(FILTER_ADVENTURE)}
+                  className={cn(
+                    "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
+                    activeFilter === FILTER_ADVENTURE
+                      ? "font-medium text-foreground"
+                      : "font-light text-foreground/40 hover:text-foreground/70"
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <Compass size={13} strokeWidth={1.5} />
+                    {isRTL ? "הרפתקה" : "Feel adventurous"}
+                  </span>
+                </button>
+                <div className="w-px h-4 bg-foreground/20" />
+                <button
+                  ref={toggleBtn2Ref}
+                  onClick={() => handleFilterClick(FILTER_ROMANTIC)}
+                  className={cn(
+                    "uppercase tracking-[0.15em] text-xs transition-all duration-300 pb-2",
+                    activeFilter === FILTER_ROMANTIC
+                      ? "font-medium text-foreground"
+                      : "font-light text-foreground/40 hover:text-foreground/70"
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <Heart size={13} strokeWidth={1.5} />
+                    {isRTL ? "בריחה רומנטית" : "Romantic Escape"}
+                  </span>
+                </button>
+                <div
+                  className="absolute bottom-0 h-px bg-foreground transition-all duration-300 ease-in-out"
+                  style={{ left: toggleUnderline.left, width: toggleUnderline.width }}
+                />
+              </div>
             </div>
           </div>
 
