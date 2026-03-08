@@ -297,8 +297,8 @@ const HeroSection = ({
     <>
       <AuthPromptDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} lang={lang} defaultTab="login" />
       <div className="pt-16 md:pt-18">
-        {/* Breadcrumb Navigation */}
-        <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
+        {/* Breadcrumb Navigation — desktop only */}
+        <nav className="hidden md:block max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
           <div className={cn("flex items-center gap-1.5 text-xs text-muted-foreground", lang === 'he' && "flex-row-reverse")}>
             <Link to={isLaunch ? "/launch" : getLocalizedPath("/")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
               {lang === 'he' ? 'בית' : 'Home'}
