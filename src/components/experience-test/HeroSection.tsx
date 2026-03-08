@@ -10,6 +10,7 @@ import {
 import GalleryModal from "@/components/experience/GalleryModal";
 import ShareDialog from "@/components/experience/ShareDialog";
 import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +87,8 @@ const HeroSection = ({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getLocalizedPath } = useLocalizedNavigation();
+  const [searchParams] = useSearchParams();
+  const isLaunch = searchParams.get("context") === "launch";
 
   const displayPhotos = photos.slice(0, 4);
 
@@ -277,19 +280,23 @@ const HeroSection = ({
         {/* Breadcrumb Navigation */}
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-3">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Link to={getLocalizedPath("/")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
+            <Link to={isLaunch ? "/launch" : getLocalizedPath("/")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
               {lang === 'he' ? 'בית' : 'Home'}
             </Link>
-            <ChevronRight className="h-3 w-3 flex-shrink-0" />
-            <Link to={getLocalizedPath("/#choose-escape")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
-              {lang === 'he' ? 'קטגוריות' : 'Categories'}
-            </Link>
-            {categoryName && categorySlug && (
+            {!isLaunch && (
               <>
                 <ChevronRight className="h-3 w-3 flex-shrink-0" />
-                <Link to={getLocalizedPath(`/category/${categorySlug}`)} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
-                  {categoryName}
+                <Link to={getLocalizedPath("/#choose-escape")} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
+                  {lang === 'he' ? 'קטגוריות' : 'Categories'}
                 </Link>
+                {categoryName && categorySlug && (
+                  <>
+                    <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                    <Link to={getLocalizedPath(`/category/${categorySlug}`)} className="hover:text-foreground hover:underline underline-offset-2 transition-colors">
+                      {categoryName}
+                    </Link>
+                  </>
+                )}
               </>
             )}
             <ChevronRight className="h-3 w-3 flex-shrink-0" />
