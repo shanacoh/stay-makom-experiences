@@ -73,6 +73,7 @@ import LaunchExperiences from "./pages/LaunchExperiences";
 import MobileAuthPrompt from "./pages/MobileAuthPrompt";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import Checkout from "./pages/Checkout";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -125,6 +126,7 @@ const App = () => (
             <Route path="/hotel2/:slug" element={<Hotel2 />} />
             <Route path="/booking/confirmation/:token" element={<BookingConfirmationPage />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/cart" element={<Cart />} />
             <Route
               path="/account"
               element={

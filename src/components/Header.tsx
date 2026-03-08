@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
@@ -10,6 +10,7 @@ import { useLocalizedNavigation } from "@/hooks/useLocalizedNavigation";
 import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import UserDropdown from "@/components/auth/UserDropdown";
+import { useCartExists } from "@/hooks/useCart";
 
 const Header = () => {
   const location = useLocation();
@@ -34,6 +35,7 @@ const Header = () => {
 
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const hasCart = useCartExists();
   const { lang, setLanguage } = useLanguage();
   const { setDisplayCurrency } = useCurrency();
   const handleLang = (l: "en" | "he") => {
@@ -177,6 +179,23 @@ const Header = () => {
               onSignUp={() => setAuthDialog({ open: true, tab: "signup", context: "signup" })}
             />
           )}
+
+          {/* Cart Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/cart")}
+            className={`relative h-8 w-8 ${
+              isTransparentPage && !isScrolled
+                ? "text-white hover:bg-white/10"
+                : "hover:bg-foreground/5"
+            }`}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {hasCart && (
+              <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-[#C4714A]" />
+            )}
+          </Button>
 
           {/* Favorites Button */}
           <Button
