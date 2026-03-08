@@ -28,17 +28,36 @@ const ReviewsGrid2 = ({ experienceId, lang = "en" }: ReviewsGrid2Props) => {
     },
   });
 
-  // Empty state placeholder
+  // Empty state — intentional placeholder
   if (!reviews || reviews.length === 0) {
     return (
-      <section className="py-8 border-b border-border">
-        <p className="italic text-muted-foreground text-sm">
-          {lang === "he" 
-            ? "ביקורות ראשונות בקרוב."
-            : lang === "fr"
-              ? "Les premiers avis arrivent bientôt."
-              : "First reviews coming soon."}
-        </p>
+      <section className="py-8">
+        <div className="h-px bg-border/60 mb-8" />
+        <h2 className="font-serif text-[20px] md:text-2xl font-bold uppercase tracking-wide text-foreground mb-6">
+          {lang === "he" ? "ביקורות" : lang === "fr" ? "AVIS" : "REVIEWS"}
+        </h2>
+        <div className="flex flex-col items-center text-center py-8">
+          {/* 5 outlined stars */}
+          <div className="flex gap-1 mb-4">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-5 w-5 text-amber-300/60" />
+            ))}
+          </div>
+          <p className="text-[15px] md:text-base text-foreground font-medium mb-1">
+            {lang === "he"
+              ? "היו הראשונים לכתוב ביקורת"
+              : lang === "fr"
+                ? "Soyez le premier à donner votre avis"
+                : "Be the first to review this experience"}
+          </p>
+          <p className="text-[13px] md:text-sm text-muted-foreground">
+            {lang === "he"
+              ? "אחרי השהייה, שתפו את החוויה שלכם."
+              : lang === "fr"
+                ? "Après votre séjour, partagez votre escapade."
+                : "After your stay, share your escape."}
+          </p>
+        </div>
       </section>
     );
   }
@@ -48,11 +67,12 @@ const ReviewsGrid2 = ({ experienceId, lang = "en" }: ReviewsGrid2Props) => {
   const displayedReviews = showAll ? reviews : reviews.slice(0, 6);
 
   return (
-    <section className="py-6 border-b border-border">
-      <h2 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-4">
-        {lang === "he" ? "ביקורות" : lang === "fr" ? "Avis" : "Reviews"}
+    <section className="py-8">
+      <div className="h-px bg-border/60 mb-8" />
+      <h2 className="font-serif text-[20px] md:text-2xl font-bold uppercase tracking-wide text-foreground mb-4">
+        {lang === "he" ? "ביקורות" : lang === "fr" ? "AVIS" : "REVIEWS"}
       </h2>
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-6">
         <div className="flex items-center gap-2">
           <Star className="h-5 w-5 fill-foreground text-foreground" />
           <span className="text-xl font-serif font-bold">{averageRating.toFixed(1)}</span>

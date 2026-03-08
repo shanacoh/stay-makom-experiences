@@ -34,7 +34,7 @@ const LocationMap = ({
     if (!latitude || !longitude) return;
 
     // Initialize map
-    const map = L.map(mapContainer.current).setView([latitude, longitude], 13);
+    const map = L.map(mapContainer.current).setView([latitude, longitude], 14);
     mapRef.current = map;
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -45,21 +45,21 @@ const LocationMap = ({
     const customIcon = L.divIcon({
       className: "custom-marker",
       html: `<div style="
-        background-color: hsl(var(--primary));
-        width: 28px;
-        height: 28px;
+        background-color: hsl(0 0% 15%);
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: bold;
-        font-size: 12px;
-        border: 2px solid white;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        font-size: 13px;
+        border: 2.5px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
       ">📍</div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
     });
 
     // Add marker
@@ -84,49 +84,42 @@ const LocationMap = ({
   const sectionTitle = lang === "he" ? "איפה זה קורה" : lang === "fr" ? "Où ça se passe" : "Where you'll be";
 
   return (
-    <section className="pb-6">
-      <div className="h-[280px] rounded-lg overflow-hidden border border-border">
+    <section className="py-8">
+      <div className="h-px bg-border/60 mb-8" />
+      <h2 className="font-serif text-[20px] md:text-2xl font-bold uppercase tracking-wide text-foreground mb-4">
+        {sectionTitle.toUpperCase()}
+      </h2>
+      <div className="h-[140px] md:h-[160px] rounded-lg overflow-hidden border border-border">
         <div ref={mapContainer} className="w-full h-full" />
       </div>
-      <div className="flex items-center justify-between mt-3">
-        <p className="text-sm text-muted-foreground">{hotelName}</p>
+      <div className="mt-3">
+        <p className="text-sm text-muted-foreground mb-3">{hotelName}</p>
         
         {showGetThere && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full md:w-auto gap-2 rounded-full border-border/60 hover:bg-foreground hover:text-background transition-all min-h-[44px] md:min-h-0"
+              >
                 <Navigation className="h-4 w-4" />
-                {getThereLabel}
+                {lang === "he" ? "קבלו הוראות הגעה" : "Get directions"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background z-50">
+            <DropdownMenuContent align="start" className="bg-background z-50">
               <DropdownMenuItem asChild>
-                <a 
-                  href={googleMapsUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="cursor-pointer"
-                >
+                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
                   Google Maps
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a 
-                  href={appleMapsUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="cursor-pointer"
-                >
+                <a href={appleMapsUrl} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
                   Apple Maps
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a 
-                  href={wazeUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="cursor-pointer"
-                >
+                <a href={wazeUrl} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
                   Waze
                 </a>
               </DropdownMenuItem>
