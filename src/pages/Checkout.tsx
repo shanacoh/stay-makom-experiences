@@ -532,7 +532,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
             </div>
 
             {/* Progress bar */}
-            <div className="flex items-center gap-2">
+            <div className={cn("flex items-center gap-2", lang === 'he' && "flex-row-reverse")}>
               {[1, 2, 3].map((s, i) => (
                 <React.Fragment key={s}>
                   <div className="flex flex-col items-center gap-1.5">
