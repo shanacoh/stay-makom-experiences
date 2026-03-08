@@ -363,6 +363,10 @@ export function UnifiedExperience2Form({
       if (existingExperience.hero_image) setHeroImagePreview(existingExperience.hero_image);
       if ((existingExperience as any).thumbnail_image) setThumbnailImagePreview((existingExperience as any).thumbnail_image);
       if (existingExperience.photos && Array.isArray(existingExperience.photos)) setGalleryPreviews(existingExperience.photos);
+      
+      // Featured on home
+      setFeaturedOnHome((existingExperience as any).featured_on_home ?? false);
+      setHomeDisplayOrder((existingExperience as any).home_display_order ?? 0);
     }
   }, [existingExperience, setValue, propHotelId]);
 
