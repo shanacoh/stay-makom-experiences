@@ -103,14 +103,7 @@ const ExtrasSection2 = ({
     return texts[key]?.[lang] || texts[key]?.en || key;
   };
 
-  // Use consistent currency symbol based on the experience currency
-  const getCurrencySymbol = (cur: string) => {
-    if (cur === 'ILS') return '₪';
-    if (cur === 'EUR') return '€';
-    return '$';
-  };
-
-  const displaySymbol = getCurrencySymbol(currency);
+  const displaySymbol = currencySymbol;
 
   const formatPrice = (price: number) => {
     return `+${displaySymbol}${price}`;
