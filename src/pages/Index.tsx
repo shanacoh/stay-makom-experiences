@@ -267,22 +267,7 @@ const Index = () => {
     return () => clearInterval(scrollInterval);
   }, [filteredExperiences]);
 
-  // Auto-scroll for latest experiences carousel
-  useEffect(() => {
-    const carousel = latestCarouselRef.current;
-    if (!carousel || !latestExperiences || latestExperiences.length === 0) return;
-
-    const scrollInterval = setInterval(() => {
-      const scrollAmount = carousel.scrollLeft + (carousel.offsetWidth * 0.75 + 12);
-      const maxScroll = carousel.scrollWidth - carousel.offsetWidth;
-      if (scrollAmount >= maxScroll - 10) {
-        carousel.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        carousel.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-      }
-    }, 3000);
-    return () => clearInterval(scrollInterval);
-  }, [latestExperiences]);
+  // No more interval-based auto-scroll for latest experiences - using CSS animation instead
 
   // Category display names mapping
   const getCategoryDisplay = (slug: string) => {
