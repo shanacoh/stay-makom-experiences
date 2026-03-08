@@ -1,12 +1,6 @@
-import { useMemo } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import {
-  useExperienceAddons,
-  useExperiencePricingConfig,
-  calculatePriceV2,
-} from "@/hooks/useExperience2Price";
-import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
+import { useFromPrice } from "@/hooks/useExperience2Price";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Loader2 } from "lucide-react";
 
@@ -29,55 +23,17 @@ const HeroBookingPreview2 = ({
   minParty = 2,
   minNights = 1,
 }: HeroBookingPreview2Props) => {
-  const { data: addons } = useExperienceAddons(experienceId);
-  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
   const { symbol, convert } = useCurrency();
 
-  const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+  const { fromPriceILS, cheapestDate, isLoading, hasHyperguest } = useFromPrice(
+    experienceId,
+    hyperguestPropertyId ?? null,
+  );
 
-  // Always fetch in ILS so room price + addons are in the same currency
-  const { data: quickDates, isLoading: isLoadingDates } = useQuickDateAvailability({
-    propertyId: propId,
-    nights: 1,
-    adults: 2,
-    currency: "ILS",
-    enabled: !!propId,
-  });
-
-  const cheapestDate = useMemo(() => {
-    if (!quickDates || quickDates.length === 0) return null;
-    return quickDates.reduce((best, curr) => {
-      if (curr.cheapestPrice == null) return best;
-      if (!best || best.cheapestPrice == null || curr.cheapestPrice < best.cheapestPrice) return curr;
-      return best;
-    }, null as (typeof quickDates)[0] | null);
-  }, [quickDates]);
-
-  // Calculate total in ILS, then convert
-  const displayPrice = useMemo(() => {
-    const roomPrice = cheapestDate?.cheapestPrice ?? 0;
-    const breakdown = calculatePriceV2(
-      roomPrice,
-      minParty,
-      minNights,
-      (addons ?? []) as any,
-      pricingConfig ?? {
-        commission_room_pct: 0,
-        commission_addons_pct: 0,
-        tax_pct: 0,
-        promo_type: null,
-        promo_value: null,
-        promo_is_percentage: true,
-      },
-      "ILS"
-    );
-
-    return breakdown.finalTotal > 0 ? Math.round(convert(breakdown.finalTotal)) : null;
-  }, [cheapestDate, addons, pricingConfig, minParty, minNights, convert]);
-
+  const displayPrice = fromPriceILS ? Math.round(convert(fromPriceILS)) : null;
   const nightLabel = lang === "he" ? "ללילה" : "/ night";
 
-  if (!propId) {
+  if (!hasHyperguest) {
     return (
       <div className="hidden md:block">
         <div className="bg-muted/30 rounded-xl p-5 space-y-3">
@@ -96,7 +52,7 @@ const HeroBookingPreview2 = ({
   }
 
   if (!displayPrice || displayPrice <= 0) {
-    if (isLoadingDates) {
+    if (isLoading) {
       return (
         <div className="hidden md:block">
           <div className="bg-muted/30 rounded-xl p-3 lg:p-4">

@@ -6,6 +6,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuickDateAvailability } from "@/hooks/useQuickDateAvailability";
 import type {
   ExperienceAddon,
   PricingConfig,
@@ -331,6 +332,114 @@ export function useExperience2Price(
 
     return calculatePriceV2(roomPrice, numberOfGuests, nights, addons ?? [], config, cur);
   }, [addons, pricingConfig, basePrice, currency, nights, numberOfGuests, ratePlanPrices]);
+}
+
+// ---------------------------------------------------------------------------
+// "From" price — single source of truth for all display surfaces
+// Formula: cheapest_nightly_rate + fixed_addons + commissions
+// Excludes: per_person, per_night, per_person_per_night (shown at booking only)
+// ---------------------------------------------------------------------------
+
+export function calculateFromPrice(
+  nightlyRoomRate: number,
+  allAddons: ExperienceAddon[],
+  config: PricingConfig,
+): number | null {
+  if (nightlyRoomRate <= 0) return null;
+
+  // Only include "fixed" experience pricing addons
+  const fixedAddons = allAddons.filter(
+    (a) => a.type === "fixed" && a.is_active
+  );
+  const fixedTotal = fixedAddons.reduce((sum, a) => sum + a.value, 0);
+
+  const subtotal = nightlyRoomRate + fixedTotal;
+
+  // Apply commissions
+  const commissionAddons = allAddons.filter(
+    (a) => (COMMISSION_TYPES as string[]).includes(a.type) && a.is_active
+  );
+
+  let totalCommissions = 0;
+  for (const addon of commissionAddons) {
+    let baseAmount = 0;
+    switch (addon.type) {
+      case "commission":
+        baseAmount = subtotal;
+        break;
+      case "commission_room":
+        baseAmount = nightlyRoomRate;
+        break;
+      case "commission_experience":
+        baseAmount = fixedTotal;
+        break;
+      case "commission_fixed":
+        baseAmount = 0;
+        break;
+    }
+    const amount =
+      addon.type === "commission_fixed"
+        ? addon.value
+        : addon.is_percentage
+          ? (baseAmount * addon.value) / 100
+          : addon.value;
+    totalCommissions += amount;
+  }
+
+  const total = subtotal + totalCommissions;
+  return total > 0 ? total : null;
+}
+
+/**
+ * Hook: returns the "From" price in ILS for an experience,
+ * using the cheapest 1-night HyperGuest rate + fixed addons + commissions.
+ */
+export function useFromPrice(
+  experienceId: string | null,
+  hyperguestPropertyId: string | null,
+) {
+  const { data: addons } = useExperienceAddons(experienceId);
+  const { data: pricingConfig } = useExperiencePricingConfig(experienceId);
+
+  const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
+
+  const { data: quickDates, isLoading } = useQuickDateAvailability({
+    propertyId: propId,
+    nights: 1,
+    adults: 2,
+    currency: "ILS",
+    enabled: !!propId,
+  });
+
+  const cheapestDate = useMemo(() => {
+    if (!quickDates || quickDates.length === 0) return null;
+    return quickDates.reduce((best, curr) => {
+      if (curr.cheapestPrice == null) return best;
+      if (!best || best.cheapestPrice == null || curr.cheapestPrice < best.cheapestPrice)
+        return curr;
+      return best;
+    }, null as (typeof quickDates)[0] | null);
+  }, [quickDates]);
+
+  const fromPrice = useMemo(() => {
+    const roomPrice = cheapestDate?.cheapestPrice ?? 0;
+    const config: PricingConfig = pricingConfig ?? {
+      commission_room_pct: 0,
+      commission_addons_pct: 0,
+      tax_pct: 0,
+      promo_type: null,
+      promo_value: null,
+      promo_is_percentage: true,
+    };
+    return calculateFromPrice(roomPrice, addons ?? [], config);
+  }, [cheapestDate, addons, pricingConfig]);
+
+  return {
+    fromPriceILS: fromPrice,
+    cheapestDate,
+    isLoading,
+    hasHyperguest: !!propId,
+  };
 }
 
 // ---------------------------------------------------------------------------

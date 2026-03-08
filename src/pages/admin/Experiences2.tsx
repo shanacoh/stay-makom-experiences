@@ -65,10 +65,10 @@ const AdminExperiences2 = () => {
         .select(
           `
           *,
-          hotels2 (id, name),
+          hotels2 (id, name, hyperguest_property_id),
           categories (id, name),
-          experience2_addons (id, type, name, value, is_percentage),
-          experience2_hotels (id, position, nights, hotels2 (id, name))
+          experience2_addons (id, type, name, value, is_percentage, is_active),
+          experience2_hotels (id, position, nights, hotels2 (id, name, hyperguest_property_id))
         `,
         )
         .order("updated_at", { ascending: false });
@@ -294,9 +294,27 @@ const AdminExperiences2 = () => {
         ) : (
           <div className="grid gap-4">
             {filteredExperiences.map((experience) => {
+              const addons = (experience as any).experience2_addons || [];
+              const activeAddons = addons.filter((a: any) => a.is_active !== false);
               const hasNoCategory = !(experience as any).categories?.name;
-              const hasNoPricing = !((experience as any).experience2_addons?.length > 0);
               const hasNoPhoto = !experience.hero_image;
+
+              // Pricing audit checks
+              const hasFixedAddon = activeAddons.some((a: any) => a.type === "fixed");
+              const hasCommission = activeAddons.some((a: any) =>
+                ["commission", "commission_room", "commission_experience", "commission_fixed"].includes(a.type)
+              );
+              const junctionHotels = (experience as any).experience2_hotels || [];
+              const primaryHotel = junctionHotels.length > 0
+                ? junctionHotels.sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))[0]?.hotels2
+                : (experience as any).hotels2;
+              const hasHyperguest = !!primaryHotel?.hyperguest_property_id;
+
+              const hasNoPricing = activeAddons.length === 0;
+              const pricingWarnings: string[] = [];
+              if (!hasFixedAddon) pricingWarnings.push("No experience fee");
+              if (!hasCommission) pricingWarnings.push("No commission");
+              if (!hasHyperguest) pricingWarnings.push("No HG link");
 
               return (
                 <Card key={experience.id}>
@@ -309,6 +327,9 @@ const AdminExperiences2 = () => {
                           {hasNoCategory && <WarningBadge label="No category" />}
                           {hasNoPricing && <WarningBadge label="No pricing" />}
                           {hasNoPhoto && <WarningBadge label="No photo" />}
+                          {experience.status === "published" && pricingWarnings.length > 0 && (
+                            <WarningBadge label={`⚠ ${pricingWarnings.join(" · ")}`} />
+                          )}
                         </div>
                         <div className="space-y-1 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1 flex-wrap">
