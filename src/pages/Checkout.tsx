@@ -83,17 +83,30 @@ const hgErrorMessages: Record<string, Record<string, string>> = {
 
 type CheckoutStep = 2 | 3;
 
+const CART_TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
+
 export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
   const routerState = location.state as CheckoutState | null;
 
-  // Try router state first, then localStorage
+  // Try router state first, then localStorage (with 48h expiry)
   const state = React.useMemo(() => {
     if (routerState) return routerState;
     try {
       const saved = localStorage.getItem("staymakom_cart");
-      if (saved) return JSON.parse(saved) as CheckoutState;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const savedAt = parsed.savedAt ? new Date(parsed.savedAt).getTime() : 0;
+        if (Date.now() - savedAt > CART_TTL_MS) {
+          localStorage.removeItem("staymakom_cart");
+          toast.info(
+            "Your saved escape has expired. Please start a new search."
+          );
+          return null;
+        }
+        return parsed as CheckoutState;
+      }
     } catch {}
     return null;
   }, [routerState]);

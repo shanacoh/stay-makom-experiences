@@ -312,7 +312,10 @@ export function BookingPanel2({
 
     // Persist cart so user can resume later
     try {
-      localStorage.setItem("staymakom_cart", JSON.stringify(checkoutState));
+      localStorage.setItem("staymakom_cart", JSON.stringify({
+        ...checkoutState,
+        savedAt: new Date().toISOString(),
+      }));
     } catch {}
 
     navigate("/checkout", { state: checkoutState });
