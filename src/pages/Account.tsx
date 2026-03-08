@@ -14,6 +14,7 @@ import RecommendedExperiences from "@/components/account/RecommendedExperiences"
 import RecommendedJournal from "@/components/account/RecommendedJournal";
 import PersonalizedRequestSection from "@/components/account/PersonalizedRequestSection";
 import GiftCardsSection from "@/components/account/GiftCardsSection";
+import SavedCartsSection from "@/components/account/SavedCartsSection";
 import AccountSidebar from "@/components/account/AccountSidebar";
 import OnboardingFlow from "@/components/auth/OnboardingFlow";
 import MobileAccountHome from "@/components/account/MobileAccountHome";
@@ -24,6 +25,7 @@ const MOBILE_TAB_TITLES: Record<string, string> = {
   wishlist: "Saved Escapes",
   giftcards: "Gift Cards",
   profile: "Personal Information",
+  savedcarts: "Saved for Later",
 };
 
 const Account = () => {
