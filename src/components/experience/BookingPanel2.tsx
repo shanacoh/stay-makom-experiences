@@ -159,6 +159,20 @@ export function BookingPanel2({
     enabled: selectedTab !== "pick",
   });
 
+  // Fetch addons & pricing config for "from" price on date cards
+  const { data: _addons } = useExperienceAddons(experienceId);
+  const { data: _pricingConfig } = useExperiencePricingConfig(experienceId);
+
+  /** Apply fixed addons + commissions to a raw HyperGuest room price */
+  const applyFromPrice = (rawPrice: number | null): number | null => {
+    if (rawPrice == null || rawPrice <= 0) return rawPrice;
+    const config: PricingConfig = _pricingConfig ?? {
+      commission_room_pct: 0, commission_addons_pct: 0, tax_pct: 0,
+      promo_type: null, promo_value: null, promo_is_percentage: true,
+    };
+    return calculateFromPrice(rawPrice, _addons ?? [], config);
+  };
+
   // Auto-select the cheapest available date when quickDates load
   useEffect(() => {
     if (selectedTab !== "pick" && quickDates && quickDates.length > 0 && !selectedDateOptionId) {
