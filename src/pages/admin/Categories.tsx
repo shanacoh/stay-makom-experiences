@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, EyeOff, FolderOpen, Image, GripVertical, AlertTriangle, Columns } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, FolderOpen, Image, GripVertical, Columns } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
@@ -31,6 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { StatusBadge, WarningBadge } from "@/components/admin/StatusBadge";
 
 const AdminCategories = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -122,63 +123,63 @@ const AdminCategories = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
-          <p className="text-muted-foreground mt-1">
-            Manage experience categories and their visibility
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSlug(!showSlug)}
-            className="gap-1.5"
-          >
-            <Columns className="w-3.5 h-3.5" />
-            {showSlug ? "Hide Slug" : "Show Slug"}
-          </Button>
-          <Link to="/admin/categories/new">
-            <Button size="lg">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Category
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
+            <p className="text-muted-foreground mt-1">
+              Manage experience categories and their visibility
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSlug(!showSlug)}
+              className="gap-1.5"
+            >
+              <Columns className="w-3.5 h-3.5" />
+              {showSlug ? "Hide Slug" : "Show Slug"}
             </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      {categories && categories.length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-card border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground">Total Categories</div>
-            <div className="text-2xl font-bold">{categories.length}</div>
+            <Link to="/admin/categories/new">
+              <Button size="lg">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Category
+              </Button>
+            </Link>
           </div>
-          <div className="bg-card border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground">Published</div>
-            <div className="text-2xl font-bold text-green-600">
-              {categories.filter(c => c.status === "published").length}
+        </div>
+
+        {/* Stats Cards */}
+        {categories && categories.length > 0 && (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-card border rounded-lg p-4">
+              <div className="text-sm text-muted-foreground">Total Categories</div>
+              <div className="text-2xl font-bold">{categories.length}</div>
+            </div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="text-sm text-muted-foreground">Published</div>
+              <div className="text-2xl font-bold text-[#16A34A]">
+                {categories.filter(c => c.status === "published").length}
+              </div>
+            </div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="text-sm text-muted-foreground">Total Experiences</div>
+              <div className="text-2xl font-bold text-primary">
+                {categories.reduce((acc, c) => acc + (c.experiences?.length || 0), 0)}
+              </div>
             </div>
           </div>
-          <div className="bg-card border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground">Total Experiences</div>
-            <div className="text-2xl font-bold text-primary">
-              {categories.reduce((acc, c) => acc + (c.experiences?.length || 0), 0)}
-            </div>
-          </div>
-        </div>
-      )}
+        )}
 
-      {/* Table */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12 border rounded-lg bg-card">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      ) : categories && categories.length > 0 ? (
-        <TooltipProvider>
+        {/* Table */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12 border rounded-lg bg-card">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : categories && categories.length > 0 ? (
           <div className="border rounded-lg bg-card overflow-hidden">
             <Table>
               <TableHeader>
@@ -247,8 +248,8 @@ const AdminCategories = () => {
                           {isEmptyPublished && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold">
-                                  !
+                                <span>
+                                  <WarningBadge label="Empty" />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -259,12 +260,7 @@ const AdminCategories = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={category.status === "published" ? "default" : "secondary"}
-                          className={category.status === "published" ? "bg-green-600" : ""}
-                        >
-                          {category.status}
-                        </Badge>
+                        <StatusBadge status={category.status} />
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {category.updated_at
@@ -273,6 +269,13 @@ const AdminCategories = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                          {/* 1. Edit */}
+                          <Link to={`/admin/categories/edit/${category.id}`}>
+                            <Button variant="ghost" size="icon" className="text-[#6B7280] hover:text-[#1A1814]">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          {/* 2. Hide/Show */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -282,7 +285,7 @@ const AdminCategories = () => {
                                 currentStatus: category.status,
                               })
                             }
-                            title={category.status === "published" ? "Unpublish" : "Publish"}
+                            className="text-[#6B7280] hover:text-[#1A1814]"
                           >
                             {category.status === "published" ? (
                               <EyeOff className="w-4 h-4" />
@@ -290,17 +293,12 @@ const AdminCategories = () => {
                               <Eye className="w-4 h-4" />
                             )}
                           </Button>
-                          <Link to={`/admin/categories/edit/${category.id}`}>
-                            <Button variant="ghost" size="icon" title="Edit">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </Link>
+                          {/* 3. Delete */}
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setDeleteId(category.id)}
                             className="text-destructive hover:text-destructive"
-                            title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -312,43 +310,43 @@ const AdminCategories = () => {
               </TableBody>
             </Table>
           </div>
-        </TooltipProvider>
-      ) : (
-        <div className="text-center py-16 border rounded-lg bg-card">
-          <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No categories yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Create your first category to organize experiences
-          </p>
-          <Link to="/admin/categories/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Create your first category
-            </Button>
-          </Link>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-16 border rounded-lg bg-card">
+            <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No categories yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Create your first category to organize experiences
+            </p>
+            <Link to="/admin/categories/new">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create your first category
+              </Button>
+            </Link>
+          </div>
+        )}
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Category</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure? This will also affect all related experiences.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Category</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure? This will also affect all related experiences.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteId && deleteMutation.mutate(deleteId)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </TooltipProvider>
   );
 };
 
