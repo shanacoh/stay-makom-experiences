@@ -6,7 +6,7 @@ import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import LaunchHeader from "@/components/LaunchHeader";
 import LaunchFooter from "@/components/LaunchFooter";
 import { SEOHead } from "@/components/SEOHead";
-import ExperienceCard from "@/components/ExperienceCard";
+import Experience2CardWithPrice from "@/components/Experience2CardWithPrice";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
 import { Loader2, Compass, Heart } from "lucide-react";
