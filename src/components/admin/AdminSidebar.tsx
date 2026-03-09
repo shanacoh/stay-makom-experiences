@@ -60,8 +60,6 @@ const hyperguestMenuItems = [
   { title: "Debug API", url: "/admin/hyperguest/debug", icon: Bug },
   { title: "Logs", url: "/admin/hyperguest/logs", icon: ScrollText },
   { title: "Configuration", url: "/admin/hyperguest/config", icon: Cog },
-  { title: "HG Certification", url: "/admin/hyperguest-certification", icon: ShieldCheck },
-  { title: "Live Cert Setup", url: "/admin/certification-setup", icon: ShieldCheck },
 ];
 
 const backupMenuItems = [
