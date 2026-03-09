@@ -204,7 +204,7 @@ const ExtrasSection2 = ({
                     variant="outline"
                     size="sm"
                     className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-transparent hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
-                    onClick={() => onToggleExtra(extraData)}
+                    onClick={() => { trackAddonClicked(experienceId, name, extra.price); onToggleExtra(extraData); }}
                   >
                     {formatPrice(extra.price)} · {getText('add')}
                   </Button>

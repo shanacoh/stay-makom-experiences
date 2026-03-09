@@ -221,6 +221,7 @@ export default function ExperienceCard({
         className="group block"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={() => trackExperienceCardClicked(experience.slug, title, displayPrice, index)}
       >
         {/* Photo section with title overlay */}
         <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-2">

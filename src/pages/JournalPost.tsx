@@ -403,7 +403,9 @@ const JournalPost = () => {
 
       case "experience":
         return block.experience_id ? (
-          <EmbeddedExperienceCard experienceId={block.experience_id} />
+          <div onClick={() => trackCtaClickedFromJournal(slug || '', 'experience_link')}>
+            <EmbeddedExperienceCard experienceId={block.experience_id} />
+          </div>
         ) : null;
 
       default:

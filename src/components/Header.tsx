@@ -50,6 +50,7 @@ const Header = () => {
   };
 
   const handleFavoritesClick = () => {
+    trackWishlistIconClicked(0);
     if (user) {
       navigate("/account?tab=wishlist");
     } else {

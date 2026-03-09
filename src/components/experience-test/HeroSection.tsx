@@ -359,7 +359,7 @@ const HeroSection = ({
                     <CarouselItem key={index}>
                       <div 
                         className="aspect-[4/3] w-full cursor-pointer rounded-2xl overflow-hidden"
-                        onClick={() => setIsGalleryOpen(true)}
+                        onClick={() => { trackPhotoGalleryClicked(title); setIsGalleryOpen(true); }}
                       >
                         <img
                           src={photo || "/placeholder.svg"}

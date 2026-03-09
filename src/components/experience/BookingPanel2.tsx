@@ -194,6 +194,8 @@ export function BookingPanel2({
       const opt = quickDates.find((d) => d.id === selectedDateOptionId);
       if (opt) {
         setDateRange({ from: opt.checkin, to: opt.checkout });
+        const checkIn = typeof opt.checkin === 'string' ? opt.checkin : (opt.checkin as Date).toISOString().split('T')[0];
+        trackDateSelected(experienceSlug, checkIn, opt.nights || (typeof selectedTab === 'number' ? selectedTab : 1));
       }
     }
   }, [selectedDateOptionId, quickDates, selectedTab]);

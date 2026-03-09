@@ -29,6 +29,7 @@ const ShareWithFriendsSection = ({ title, lang }: ShareWithFriendsSectionProps) 
   };
 
   const handleShare = async () => {
+    trackShareThisEscapeClicked(window.location.pathname.split('/').pop() || '');
     const url = window.location.href;
     if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
       try {

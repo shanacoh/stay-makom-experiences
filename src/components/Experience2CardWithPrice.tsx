@@ -24,6 +24,7 @@ export default function Experience2CardWithPrice({
   addons,
   linkPrefix = "/experience",
   linkSuffix,
+  index = 0,
 }: Experience2CardWithPriceProps) {
   const { convert } = useCurrency();
 

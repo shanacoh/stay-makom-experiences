@@ -514,7 +514,7 @@ const LaunchIndex = () => {
               <p className="text-muted-foreground text-sm md:text-base max-w-md">
                 {t(lang, "giftCardSectionDesc")}
               </p>
-              <Button asChild className="group">
+              <Button asChild className="group" onClick={() => trackGiftCardClicked('launch_page')}>
                 <Link to={getLocalizedPath("/gift-card")}>
                   {t(lang, "giftCardSectionCTA")}
                   <ArrowRight

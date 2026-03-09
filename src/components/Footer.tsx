@@ -236,15 +236,19 @@ const Footer = () => {
               <ChevronDown className={`h-4 w-4 text-white/70 transition-transform duration-200 ${openSection === 'experiences' ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="py-3 space-y-2">
-              {categories?.map(category => (
-                <Link
-                  key={category.id}
-                  to={`/category/${category.slug}${langParam}`}
-                  className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
-                >
-                  {getLocalizedField(category, 'name', lang) as string}
-                </Link>
-              ))}
+              {categories?.map(category => {
+                const catName = getLocalizedField(category, 'name', lang) as string;
+                return (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.slug}${langParam}`}
+                    className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
+                    onClick={() => trackFooterCategoryClicked(catName)}
+                  >
+                    {catName}
+                  </Link>
+                );
+              })}
               {(!categories || categories.length === 0) && (
                 <span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span>
               )}

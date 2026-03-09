@@ -365,6 +365,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       return;
     }
 
+    trackPaymentInitiated(state.experienceSlug, displayTotal, state.currency);
     setIsBooking(true);
     setBookingStep("prebook");
 
