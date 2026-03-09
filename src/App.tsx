@@ -69,6 +69,9 @@ import AdminFavorites from "./pages/admin/Favorites";
 import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
 import CertificationSetup from "./pages/admin/CertificationSetup";
 import DiagnosticPage from "./pages/admin/DiagnosticPage";
+import HyperGuestDebugPage from "./pages/admin/hyperguest/DebugPage";
+import HyperGuestLogsPage from "./pages/admin/hyperguest/LogsPage";
+import HyperGuestConfigPage from "./pages/admin/hyperguest/ConfigPage";
 import LaunchIndex from "./pages/LaunchIndex";
 import LaunchExperiences from "./pages/LaunchExperiences";
 import MobileAuthPrompt from "./pages/MobileAuthPrompt";
@@ -188,6 +191,9 @@ const App = () => (
               <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
               <Route path="certification-setup" element={<CertificationSetup />} />
               <Route path="diagnostic" element={<DiagnosticPage />} />
+              <Route path="hyperguest/debug" element={<HyperGuestDebugPage />} />
+              <Route path="hyperguest/logs" element={<HyperGuestLogsPage />} />
+              <Route path="hyperguest/config" element={<HyperGuestConfigPage />} />
             </Route>
             <Route
               path="/hotel-admin"
