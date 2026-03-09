@@ -243,7 +243,7 @@ export default function GiftCard() {
               language: lang,
             },
           })
-          .catch((e) => console.error("Email error:", e));
+          .catch(() => {});
       }
 
       navigate(
