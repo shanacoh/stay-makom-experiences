@@ -462,7 +462,7 @@ export function BookingPanel2({
             ))}
             <button
               type="button"
-              onClick={() => setSelectedTab("pick")}
+              onClick={() => { trackViewDatesClicked(experienceSlug); setSelectedTab("pick"); }}
               className={cn(
                 "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
                 "hover:border-primary/50",
