@@ -1,5 +1,5 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchHeader from "@/components/LaunchHeader";
+import LaunchFooter from "@/components/LaunchFooter";
 import { Button } from "@/components/ui/button";
 import aboutHero from "@/assets/about-hero-desert-new.png";
 import founderPhoto from "@/assets/founder-shana.jpg";
