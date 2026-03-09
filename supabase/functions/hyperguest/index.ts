@@ -499,6 +499,35 @@ Deno.serve(async (req) => {
       case 'cancel-booking': {
         const cancelBookingId = (body as { bookingId?: string }).bookingId;
         if (!cancelBookingId) throw new Error('bookingId is required');
+
+        // Ownership check: verify the booking belongs to the authenticated user
+        if (authResult.userId) {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+          const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+          const ownerCheckClient = createClient(supabaseUrl, supabaseServiceKey);
+          const { data: bookingRecord } = await ownerCheckClient
+            .from('bookings_hg')
+            .select('user_id')
+            .eq('hg_booking_id', cancelBookingId)
+            .maybeSingle();
+          
+          if (bookingRecord && bookingRecord.user_id && bookingRecord.user_id !== authResult.userId) {
+            // Check if user is admin
+            const { data: adminRole } = await ownerCheckClient
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', authResult.userId)
+              .eq('role', 'admin')
+              .maybeSingle();
+            
+            if (!adminRole) {
+              return new Response(JSON.stringify({
+                success: false,
+                error: 'You are not authorized to cancel this booking'
+              }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+            }
+          }
+        }
         result = await cancelBooking(cancelBookingId, body as any);
         break;
       }
