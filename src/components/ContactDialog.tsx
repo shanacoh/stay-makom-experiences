@@ -92,7 +92,7 @@ const ContactDialog = ({ open, onOpenChange }: ContactDialogProps) => {
       });
       onOpenChange(false);
     } catch (error) {
-      console.error("Error submitting:", error);
+      
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
