@@ -15,6 +15,7 @@ import {
   Heart,
   ShieldCheck,
   Archive,
+  FlaskConical,
 } from "lucide-react";
 import {
   Sidebar,
@@ -50,6 +51,7 @@ const mainMenuItems = [
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "HG Certification", url: "/admin/hyperguest-certification", icon: ShieldCheck },
   { title: "Live Cert Setup", url: "/admin/certification-setup", icon: ShieldCheck },
+  { title: "Diagnostic", url: "/admin/diagnostic", icon: FlaskConical },
 ];
 
 const backupMenuItems = [
