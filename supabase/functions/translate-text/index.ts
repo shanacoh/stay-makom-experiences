@@ -190,6 +190,7 @@ Return format example: ["translated text 1", "translated text 2"]`;
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });

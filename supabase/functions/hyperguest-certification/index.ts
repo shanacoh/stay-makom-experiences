@@ -552,6 +552,7 @@ async function runTest12(): Promise<TestResult> {
 const ALL_TESTS = [runTest1, runTest2, runTest3, runTest4, runTest5, runTest6, runTest7, runTest8, runTest9, runTest10, runTest11, runTest12];
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeadersFn(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
