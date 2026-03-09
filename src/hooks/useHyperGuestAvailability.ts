@@ -23,14 +23,35 @@ async function fetchHyperGuestAvailability(
   propertyId: number,
   params: HyperGuestSearchParams
 ): Promise<any | null> {
+  trackSearchPerformed({
+    checkIn: params.checkIn,
+    nights: params.nights,
+    guests: parseInt(params.guests) || undefined,
+  });
+
   try {
     const result = await getPropertyAvailability(propertyId, params);
     if (!result) {
+      trackSearchNoResults({
+        checkIn: params.checkIn,
+        nights: params.nights,
+        guests: parseInt(params.guests) || undefined,
+      });
       return null;
     }
+
+    // Check if results have zero rooms
+    const rooms = result?.results?.[0]?.rooms;
+    if (!rooms || rooms.length === 0) {
+      trackSearchNoResults({
+        checkIn: params.checkIn,
+        nights: params.nights,
+        guests: parseInt(params.guests) || undefined,
+      });
+    }
+
     return result;
   } catch (error) {
-    
     throw error;
   }
 }

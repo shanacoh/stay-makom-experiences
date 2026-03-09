@@ -200,6 +200,8 @@ const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
 
+  useEffect(() => { if (slug) trackJournalArticleViewed(slug); }, [slug]);
+
   const { data: post, isLoading } = useQuery({
     queryKey: ["journal-post", slug],
     queryFn: async () => {
