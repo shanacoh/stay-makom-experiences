@@ -451,7 +451,7 @@ export function UnifiedExperienceForm({
       queryClient.invalidateQueries({ queryKey: ["hotel-experiences"] });
       onClose?.();
     } catch (error: any) {
-      console.error("Publish error:", error);
+      
       toast.error(error.message || "Failed to publish");
     } finally {
       setIsSaving(false);
