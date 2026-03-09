@@ -216,8 +216,6 @@ const AppContent = () => {
           <Route path="leads" element={<AdminLeads />} />
           <Route path="favorites" element={<AdminFavorites />} />
           <Route path="settings" element={<AdminSettings />} />
-          <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
-          <Route path="certification-setup" element={<CertificationSetup />} />
           <Route path="diagnostic" element={<DiagnosticPage />} />
           <Route path="hyperguest/debug" element={<HyperGuestDebugPage />} />
           <Route path="hyperguest/logs" element={<HyperGuestLogsPage />} />
