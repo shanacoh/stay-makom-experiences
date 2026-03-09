@@ -11,10 +11,7 @@ interface LaunchHamburgerMenuProps {
 
 const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [bookExpanded, setBookExpanded] = useState(false);
-  const { user } = useAuth();
   const { lang } = useLanguage();
-  const { getLocalizedPath } = useLocalizedNavigation();
   const isRTL = lang === "he";
 
   const handleNavClick = () => {
