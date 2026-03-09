@@ -462,24 +462,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       const refundLabel = certCancelInfo?.isNonRefundable
         ? 'Non-refundable'
         : `Fully refundable${certCancelInfo?.effectiveDeadline ? ` (free cancellation until ${certCancelInfo.effectiveDeadline.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })})` : ''}`;
-      console.log(`
-╔══════════════════════════════════════════════════════════╗
-║           🏨 BOOKING CERTIFICATION DETAILS              ║
-╠══════════════════════════════════════════════════════════╣
-║ Property ID:        ${state.hyperguestPropertyId}
-║ HyperGuest Booking: ${hgBookingId}
-║ Guest Name:         ${leadGuest.firstName} ${leadGuest.lastName}
-║ Check-in:           ${checkIn}
-║ Check-out:          ${checkOut} (${state.nights} night${state.nights > 1 ? 's' : ''})
-║ Room:               ${state.selectedRoomName} — ${state.selectedRatePlan?.board || 'RO'}
-║ Amount:             ${sellPrice} ${bookingCurrency}
-║ Rate plan:          ${refundLabel}
-║ StayMakom Ref:      ${staymakomRef}
-║ HG Status:          ${hgStatus}
-║ Booking created:    ${new Date().toISOString()}
-║ Hotel Name:         ${state.hotelName || 'N/A'}
-╚══════════════════════════════════════════════════════════╝
-      `);
 
       const taxBreakdown = extractTaxBreakdown(state.selectedRatePlan);
       const allRemarks = [
