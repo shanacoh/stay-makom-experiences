@@ -94,30 +94,28 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
           )}>
             <button
               onClick={() => handleLang("en")}
-              className={`text-xs transition-colors ${
+              className={`text-[11px] tracking-[0.05em] transition-colors ${
                 lang === "en"
-                  ? !isScrolled ? "text-white font-semibold" : "text-foreground font-semibold"
-                  : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
+                  ? !isScrolled ? "text-white font-medium" : "text-[#1A1814] font-medium"
+                  : !isScrolled ? "text-white/50 hover:text-white/70" : "text-[#8A8578] hover:text-[#1A1814]"
               }`}
             >
               EN
             </button>
-            <span className={`text-xs ${!isScrolled ? "text-white/40" : "text-muted-foreground/40"}`}>|</span>
+            <span className={`text-[11px] ${!isScrolled ? "text-white/30" : "text-[#C8C0B4]"}`}>|</span>
             <button
               onClick={() => handleLang("he")}
-              className={`text-xs transition-colors ${
+              className={`text-[11px] tracking-[0.05em] transition-colors ${
                 lang === "he"
-                  ? !isScrolled ? "text-white font-semibold" : "text-foreground font-semibold"
-                  : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
+                  ? !isScrolled ? "text-white font-medium" : "text-[#1A1814] font-medium"
+                  : !isScrolled ? "text-white/50 hover:text-white/70" : "text-[#8A8578] hover:text-[#1A1814]"
               }`}
             >
               עב
             </button>
             <button
               onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-              className={`text-xs font-semibold transition-colors ml-1.5 ${
-                !isScrolled ? "text-[#B8935A] hover:text-[#C4A56E]" : "text-[#B8935A] hover:text-[#C4A56E]"
-              }`}
+              className={`text-[11px] font-medium tracking-[0.05em] transition-colors ml-1.5 text-[#B8935A] hover:text-[#A07D4A]`}
             >
               {displayCurrency === "USD" ? "$" : "₪"}
             </button>
