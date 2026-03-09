@@ -145,7 +145,7 @@ const Header = () => {
             </button>
             <button
               onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-              className={`text-xs transition-colors ml-1.5 ${
+              className={`text-xs transition-colors ml-1 ${
                 isTransparentPage && !isScrolled
                   ? "text-foreground/70 hover:text-foreground"
                   : "text-muted-foreground hover:text-foreground"
