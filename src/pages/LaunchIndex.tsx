@@ -257,6 +257,7 @@ const LaunchIndex = () => {
             </p>
             <button
               onClick={() => {
+                trackFindEscapeClicked();
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}
