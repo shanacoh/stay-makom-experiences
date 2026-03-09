@@ -201,7 +201,7 @@ const AdminBookings = () => {
           </Select>
 
           <Select value={hotelFilter} onValueChange={setHotelFilter}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-full sm:w-[220px]">
               <SelectValue placeholder="Filter by hotel" />
             </SelectTrigger>
             <SelectContent>
