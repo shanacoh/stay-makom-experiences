@@ -11,6 +11,7 @@ import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import UserDropdown from "@/components/auth/UserDropdown";
 import { useCartExists } from "@/hooks/useCart";
+import { trackWishlistIconClicked, trackCartIconClicked } from "@/lib/analytics";
 
 const Header = () => {
   const location = useLocation();
