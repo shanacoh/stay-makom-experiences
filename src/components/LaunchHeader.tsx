@@ -24,7 +24,6 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
   const { displayCurrency, setDisplayCurrency } = useCurrency();
   const handleLang = (l: "en" | "he") => {
     setLanguage(l);
-    setDisplayCurrency(l === "he" ? "ILS" : "USD");
   };
   const { getLocalizedPath, navigateLocalized } = useLocalizedNavigation();
 
