@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Navigation } from "lucide-react";
+import { trackMapGetThereClicked } from "@/lib/analytics";
 
 interface LocationMapProps {
   latitude: number | null;
