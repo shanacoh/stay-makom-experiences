@@ -3,10 +3,8 @@
 // Uses HYPERGUEST_CERT_TOKEN (not prod token)
 // Property ID 19912 hardcoded
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = ['https://staymakom.com','https://www.staymakom.com','https://stay-makom-experiences.lovable.app','http://localhost:5173','http://localhost:8080'];
+function getCorsHeadersFn(req: Request) { const o = req.headers.get('Origin')||''; return { 'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(o)?o:ALLOWED_ORIGINS[0], 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Vary': 'Origin' }; }
 
 const SEARCH_DOMAIN = 'https://search-api.hyperguest.io/2.0/';
 const BOOKING_DOMAIN = 'https://book-api.hyperguest.com/2.0/'; // .com as per official email
