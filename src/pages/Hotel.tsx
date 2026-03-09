@@ -11,7 +11,7 @@ import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
 import LocationMap from "@/components/experience-test/LocationMap";
 
-const Hotel2 = () => {
+const Hotel = () => {
   const { slug } = useParams<{slug: string;}>();
   const { lang } = useLanguage();
 
