@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle2, Gift, Users, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchHeader from "@/components/LaunchHeader";
+import LaunchFooter from "@/components/LaunchFooter";
 import corporateHero from "@/assets/corporate-hero.jpg";
 import { useLanguage } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
