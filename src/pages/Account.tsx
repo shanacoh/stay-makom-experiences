@@ -226,7 +226,7 @@ const Account = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      <LaunchFooter />
       {user && (
         <OnboardingFlow
           open={showOnboarding}
