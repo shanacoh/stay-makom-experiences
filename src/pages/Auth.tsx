@@ -75,7 +75,7 @@ const Auth = () => {
         }
       } else {
         toast.success("Welcome back!");
-        navigate("/account");
+        navigate("/account?tab=bookings");
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
