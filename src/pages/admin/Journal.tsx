@@ -108,18 +108,18 @@ const AdminJournal = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Journal</h1>
-          <p className="text-muted-foreground">Manage your blog articles</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Journal</h1>
+            <p className="text-sm text-muted-foreground">Manage your blog articles</p>
+          </div>
+          <Link to="/admin/journal/new">
+            <Button size="sm">
+              <Plus className="w-4 h-4 mr-1.5" />
+              New Article
+            </Button>
+          </Link>
         </div>
-        <Link to="/admin/journal/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Article
-          </Button>
-        </Link>
-      </div>
 
       <div className="flex gap-4">
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
