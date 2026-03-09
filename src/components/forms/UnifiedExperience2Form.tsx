@@ -651,7 +651,7 @@ export function UnifiedExperience2Form({
       localStorage.removeItem(autoSaveKey);
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
     } catch (error: any) {
-      console.error("Save error:", error);
+      
       toast.error(error.message || "Failed to save draft");
     } finally {
       setIsSaving(false);
