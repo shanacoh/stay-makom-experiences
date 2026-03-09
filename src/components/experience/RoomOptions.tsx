@@ -4,14 +4,14 @@
  */
 interface RoomOptionsProps {
   hotelId: string;
-  checkin: string;
-  checkout: string;
+  checkin: string | Date;
+  checkout: string | Date;
   guests: number;
   selectedRoom: any;
   onSelectRoom: (room: any) => void;
 }
 
-const RoomOptions = ({ selectedRoom, onSelectRoom }: RoomOptionsProps) => {
+const RoomOptions = (_props: RoomOptionsProps) => {
   return (
     <div className="space-y-2">
       <p className="text-sm text-muted-foreground">Room selection (V1)</p>

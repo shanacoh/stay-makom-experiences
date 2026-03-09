@@ -5,8 +5,8 @@
 interface ExtrasSelectorProps {
   experienceId: string;
   partySize: number;
-  selectedExtras: any[];
-  onExtrasChange: (extras: any[], total: number) => void;
+  selectedExtras: Record<string, number>;
+  onExtrasChange: (extras: Record<string, number>, total: number) => void;
 }
 
 const ExtrasSelector = (_props: ExtrasSelectorProps) => {
