@@ -426,7 +426,7 @@ const AdminLeads = () => {
         </div>
 
         <Select value={sourceFilter} onValueChange={setSourceFilter}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Source" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Source" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All sources</SelectItem>
             {uniqueSources.map(s => <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>)}
@@ -434,7 +434,7 @@ const AdminLeads = () => {
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="new">New</SelectItem>
@@ -447,7 +447,7 @@ const AdminLeads = () => {
         {/* Date range */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal", (!dateFrom && !dateTo) && "text-muted-foreground")}>
+            <Button variant="outline" className={cn("w-full sm:w-[200px] justify-start text-left font-normal", (!dateFrom && !dateTo) && "text-muted-foreground")}>
               <CalendarIcon className="mr-2 h-4 w-4" />
               {dateFrom ? (dateTo ? `${format(dateFrom, "dd/MM")} - ${format(dateTo, "dd/MM")}` : format(dateFrom, "dd/MM/yy")) : "Date range"}
             </Button>
@@ -463,8 +463,8 @@ const AdminLeads = () => {
       </div>
 
       {/* ─── Table ─── */}
-      <div className="border rounded-lg bg-white">
-        <Table>
+      <div className="border rounded-lg bg-white overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">

@@ -108,22 +108,22 @@ const AdminJournal = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Journal</h1>
-          <p className="text-muted-foreground">Manage your blog articles</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Journal</h1>
+            <p className="text-sm text-muted-foreground">Manage your blog articles</p>
+          </div>
+          <Link to="/admin/journal/new">
+            <Button size="sm">
+              <Plus className="w-4 h-4 mr-1.5" />
+              New Article
+            </Button>
+          </Link>
         </div>
-        <Link to="/admin/journal/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Article
-          </Button>
-        </Link>
-      </div>
 
-      <div className="flex gap-4">
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[180px]">
+        <div className="flex flex-wrap gap-3">
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
@@ -136,7 +136,7 @@ const AdminJournal = () => {
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -150,8 +150,8 @@ const AdminJournal = () => {
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
       ) : posts && posts.length > 0 ? (
-        <div className="border rounded-lg">
-          <Table>
+          <div className="border rounded-lg overflow-x-auto">
+            <Table className="min-w-[600px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>

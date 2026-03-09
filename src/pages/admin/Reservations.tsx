@@ -162,8 +162,8 @@ const AdminBookings = () => {
     <TooltipProvider>
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold">Bookings</h2>
-          <p className="text-muted-foreground">Manage all bookings</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Bookings</h2>
+          <p className="text-sm text-muted-foreground">Manage all bookings</p>
         </div>
 
         <div className="flex flex-wrap gap-3 items-center">
@@ -187,7 +187,7 @@ const AdminBookings = () => {
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
@@ -201,7 +201,7 @@ const AdminBookings = () => {
           </Select>
 
           <Select value={hotelFilter} onValueChange={setHotelFilter}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-full sm:w-[220px]">
               <SelectValue placeholder="Filter by hotel" />
             </SelectTrigger>
             <SelectContent>
@@ -244,8 +244,8 @@ const AdminBookings = () => {
         {isLoading ? (
           <div className="text-center py-12">Loading...</div>
         ) : filteredBookings.length > 0 ? (
-          <div className="border rounded-lg bg-card">
-            <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto">
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>

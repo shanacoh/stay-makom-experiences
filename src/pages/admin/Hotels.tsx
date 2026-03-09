@@ -198,20 +198,20 @@ const AdminHotels = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Hotels</h2>
-          <p className="text-muted-foreground">Manage hotel properties</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">Hotels</h2>
+            <p className="text-sm text-muted-foreground">Manage hotel properties</p>
+          </div>
+          <Button size="sm" onClick={() => navigate("/admin/hotels/new")}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add Hotel
+          </Button>
         </div>
-        <Button onClick={() => navigate("/admin/hotels/new")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Hotel
-        </Button>
-      </div>
 
-      <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -224,7 +224,7 @@ const AdminHotels = () => {
         </Select>
 
         <Select value={regionFilter} onValueChange={setRegionFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by region" />
           </SelectTrigger>
           <SelectContent>
@@ -241,8 +241,8 @@ const AdminHotels = () => {
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
       ) : filteredHotels && filteredHotels.length > 0 ? (
-        <div className="border rounded-lg bg-card">
-          <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto">
+            <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Hotel</TableHead>

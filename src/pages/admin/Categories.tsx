@@ -126,10 +126,10 @@ const AdminCategories = () => {
     <TooltipProvider>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
-            <p className="text-muted-foreground mt-1">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Categories</h2>
+            <p className="text-sm text-muted-foreground mt-1">
               Manage experience categories and their visibility
             </p>
           </div>
@@ -144,8 +144,8 @@ const AdminCategories = () => {
               {showSlug ? "Hide Slug" : "Show Slug"}
             </Button>
             <Link to="/admin/categories/new">
-              <Button size="lg">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-1.5" />
                 Add Category
               </Button>
             </Link>
@@ -180,8 +180,8 @@ const AdminCategories = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : categories && categories.length > 0 ? (
-          <div className="border rounded-lg bg-card overflow-hidden">
-            <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="w-[40px]"></TableHead>

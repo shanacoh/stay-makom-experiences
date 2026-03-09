@@ -382,17 +382,17 @@ const AdminCustomers = () => {
   return (
     <div className="space-y-6">
       {/* ─── Header ─── */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold">User Management</h2>
-          <p className="text-muted-foreground">Manage all user accounts, roles, and permissions</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">User Management</h2>
+          <p className="text-sm text-muted-foreground">Manage all user accounts, roles, and permissions</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => exportToCSV()}>
-            <Download className="w-4 h-4 mr-2" />Export CSV
+          <Button variant="outline" size="sm" onClick={() => exportToCSV()}>
+            <Download className="w-4 h-4 mr-1.5" />Export
           </Button>
-          <Button onClick={() => setAddUserOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />Add User
+          <Button size="sm" onClick={() => setAddUserOpen(true)}>
+            <Plus className="w-4 h-4 mr-1.5" />Add User
           </Button>
         </div>
       </div>
@@ -453,8 +453,8 @@ const AdminCustomers = () => {
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
       ) : sortedCustomers && sortedCustomers.length > 0 ? (
-        <div className="border rounded-lg bg-white">
-          <Table>
+        <div className="border rounded-lg bg-white overflow-x-auto">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <SortableHead col="name">Name</SortableHead>
