@@ -453,8 +453,8 @@ const AdminCustomers = () => {
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
       ) : sortedCustomers && sortedCustomers.length > 0 ? (
-        <div className="border rounded-lg bg-white">
-          <Table>
+        <div className="border rounded-lg bg-white overflow-x-auto">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <SortableHead col="name">Name</SortableHead>

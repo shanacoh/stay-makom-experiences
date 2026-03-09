@@ -463,8 +463,8 @@ const AdminLeads = () => {
       </div>
 
       {/* ─── Table ─── */}
-      <div className="border rounded-lg bg-white">
-        <Table>
+      <div className="border rounded-lg bg-white overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">
