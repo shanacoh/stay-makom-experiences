@@ -346,10 +346,16 @@ const Auth = () => {
                     </button>
                   </div>
 
-                  <Button type="submit" variant="cta" className="w-full h-12" disabled={loading}>
+                  <Button type="submit" variant="cta" className="w-full h-12" disabled={loading || isLocked}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Sign In
+                    {isLocked ? 'Locked...' : 'Sign In'}
                   </Button>
+
+                  {isLocked && (
+                    <p className="text-sm text-destructive text-center">
+                      Too many attempts. Try again in {Math.ceil((lockedUntil! - Date.now()) / 60000)} minute(s).
+                    </p>
+                  )}
                 </form>
 
                 <p className="text-center text-sm text-muted-foreground pt-4">
