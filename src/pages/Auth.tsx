@@ -41,6 +41,11 @@ const Auth = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [newUserId, setNewUserId] = useState<string | null>(null);
   
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const MAX_ATTEMPTS = 5;
+  const LOCK_DURATION = 5 * 60 * 1000; // 5 minutes
+
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
     email: "",
