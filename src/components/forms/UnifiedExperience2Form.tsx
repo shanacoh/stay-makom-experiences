@@ -596,7 +596,7 @@ export function UnifiedExperience2Form({
       published: inc.published,
     }));
     const { error } = await (supabase as any).from("experience2_includes").insert(rows);
-    if (error) console.error("Error saving includes:", error);
+    
   };
 
   const saveLocalTags = async (expId: string) => {
