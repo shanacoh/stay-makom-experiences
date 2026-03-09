@@ -240,6 +240,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   
   // Idempotency key for double-booking protection
   const idempotencyKeyRef = useRef(crypto.randomUUID());
+  const specialRequestTrackedRef = useRef(false);
 
   const dateFrom = new Date(state.dateRange.from);
   const dateTo = new Date(state.dateRange.to);
