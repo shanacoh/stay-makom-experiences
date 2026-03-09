@@ -169,6 +169,9 @@ const ExtrasSection2 = ({
           return (
             <div
               key={extra.id}
+              ref={addonCardRef}
+              data-addon-id={extra.id}
+              data-addon-name={name}
               className={`
                 group rounded-xl p-4
                 transition-all duration-200 ease-out
