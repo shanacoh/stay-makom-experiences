@@ -581,8 +581,7 @@ export function UnifiedExperience2Form({
     }));
     const { error } = await supabase.from("experience2_addons").insert(rows as any);
     if (error) {
-      console.error("Error saving addons:", error);
-      toast.error("Addons saved partially — check console");
+      toast.error("Addons saved partially");
     }
   };
 
