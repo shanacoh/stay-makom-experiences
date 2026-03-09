@@ -186,7 +186,7 @@ const About = () => {
             </h2>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="bg-foreground hover:bg-foreground/90 text-white px-8">
-                <Link to={getLocalizedPath("/experiences")}>{t(lang, 'aboutCTAExplore')}</Link>
+                <Link to="/launch">{t(lang, 'aboutCTAExplore')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 px-8">
                 <Link to={getLocalizedPath("/contact")}>{t(lang, 'aboutCTAList')}</Link>
