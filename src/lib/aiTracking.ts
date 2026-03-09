@@ -40,9 +40,8 @@ export const trackExperienceClick = async (
       position: position,
       metadata: { timestamp: new Date().toISOString() },
     });
-    console.log("AI click tracked:", experienceId);
   } catch (error) {
-    console.error("Failed to track click:", error);
+    // Error handled silently
   }
 };
 
