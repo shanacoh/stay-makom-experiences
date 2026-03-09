@@ -37,12 +37,9 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
       >
         <nav className="flex flex-col" dir={isRTL ? "rtl" : "ltr"}>
           {/* Explore Escapes with sub-items */}
-          <button
-            onClick={() => setBookExpanded(!bookExpanded)}
-            className="flex items-center justify-between px-4 py-3 text-[15px] text-foreground hover:bg-foreground/5 rounded-lg transition-colors w-full text-left"
-          >
+          <div className="px-4 py-3 text-[15px] text-foreground">
             <span>{isRTL ? "גלה חוויות ›" : "Explore Escapes ›"}</span>
-          </button>
+          </div>
           <div className={`${isRTL ? "mr-3 pr-2" : "ml-3 pl-2"}`}>
             <Link
               to="/launch/experiences?filter=adventure&context=launch"
