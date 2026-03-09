@@ -426,7 +426,7 @@ const AdminLeads = () => {
         </div>
 
         <Select value={sourceFilter} onValueChange={setSourceFilter}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Source" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Source" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All sources</SelectItem>
             {uniqueSources.map(s => <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>)}
