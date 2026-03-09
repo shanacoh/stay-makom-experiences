@@ -64,9 +64,9 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
 
   const headerClasses = !isScrolled
     ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-b border-transparent transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`
-    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-[12px] border-b border-foreground/8 transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`;
+    : `fixed left-0 right-0 z-50 w-full bg-[#FAF8F4]/95 backdrop-blur-[12px] border-b border-[#E8E0D4] transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`;
 
-  const logoClasses = !isScrolled ? "text-white" : "text-logo";
+  const logoClasses = !isScrolled ? "text-white" : "text-[#1A1814]";
 
   const isRTL = lang === "he";
 
