@@ -423,26 +423,6 @@ export default function Experience2() {
   // ---------------------------------------------------------------------------
   // Main render
   // ---------------------------------------------------------------------------
-
-  // Analytics: track page view + time on page
-  useScrollDepth(`experience/${slug}`);
-
-  useEffect(() => {
-    trackExperiencePageViewed(experience.slug, title, experience.base_price);
-    const start = Date.now();
-    const handleVisChange = () => {
-      if (document.visibilityState === "hidden") {
-        trackTimeOnExperiencePage(experience.slug, (Date.now() - start) / 1000);
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisChange);
-      trackTimeOnExperiencePage(experience.slug, (Date.now() - start) / 1000);
-    };
-  }, [experience.slug]);
-
-  return (
     <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <SEOHead
         title={title}
