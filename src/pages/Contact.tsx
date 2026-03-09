@@ -220,16 +220,16 @@ const Contact = () => {
         </section>
 
         {/* Direct Contact Info */}
-        <section className="text-center border-t pt-8">
-          <h3 className="font-serif text-xl mb-4">{t(lang, 'contactDirectTitle')}</h3>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-muted-foreground text-sm">
+        <section className="text-center border-t border-[#E8E0D4] pt-10">
+          <h3 className="font-serif text-xl mb-6">{t(lang, 'contactDirectTitle')}</h3>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-[#8C7B6B] text-sm">
             {settings?.contact_email && (
-              <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
+              <a href={`mailto:${settings.contact_email}`} className="flex items-center gap-2 hover:text-[#1A1814] transition-colors">
                 <Mail className="w-4 h-4" />
                 {settings.contact_email}
               </a>
             )}
-            <a href="https://www.instagram.com/staymakom/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D72638] transition-colors">
+            <a href="https://www.instagram.com/staymakom/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#1A1814] transition-colors">
               <Instagram className="w-4 h-4" />
               @staymakom
             </a>
