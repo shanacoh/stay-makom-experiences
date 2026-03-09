@@ -64,9 +64,9 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
 
   const headerClasses = !isScrolled
     ? `fixed left-0 right-0 z-50 w-full bg-transparent backdrop-blur-none border-b border-transparent transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`
-    : `fixed left-0 right-0 z-50 w-full bg-background/95 backdrop-blur-[12px] border-b border-foreground/8 transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`;
+    : `fixed left-0 right-0 z-50 w-full bg-[#FAF8F4]/95 backdrop-blur-[12px] border-b border-[#E8E0D4] transition-all duration-300 ease-in-out ${isVisible ? "top-0" : "-top-full"}`;
 
-  const logoClasses = !isScrolled ? "text-white" : "text-logo";
+  const logoClasses = !isScrolled ? "text-white" : "text-[#1A1814]";
 
   const isRTL = lang === "he";
 
@@ -94,30 +94,28 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
           )}>
             <button
               onClick={() => handleLang("en")}
-              className={`text-xs transition-colors ${
+              className={`text-[11px] tracking-[0.05em] transition-colors ${
                 lang === "en"
-                  ? !isScrolled ? "text-white font-semibold" : "text-foreground font-semibold"
-                  : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
+                  ? !isScrolled ? "text-white font-medium" : "text-[#1A1814] font-medium"
+                  : !isScrolled ? "text-white/50 hover:text-white/70" : "text-[#8A8578] hover:text-[#1A1814]"
               }`}
             >
               EN
             </button>
-            <span className={`text-xs ${!isScrolled ? "text-white/40" : "text-muted-foreground/40"}`}>|</span>
+            <span className={`text-[11px] ${!isScrolled ? "text-white/30" : "text-[#C8C0B4]"}`}>|</span>
             <button
               onClick={() => handleLang("he")}
-              className={`text-xs transition-colors ${
+              className={`text-[11px] tracking-[0.05em] transition-colors ${
                 lang === "he"
-                  ? !isScrolled ? "text-white font-semibold" : "text-foreground font-semibold"
-                  : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
+                  ? !isScrolled ? "text-white font-medium" : "text-[#1A1814] font-medium"
+                  : !isScrolled ? "text-white/50 hover:text-white/70" : "text-[#8A8578] hover:text-[#1A1814]"
               }`}
             >
               עב
             </button>
             <button
               onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-              className={`text-xs font-semibold transition-colors ml-1.5 ${
-                !isScrolled ? "text-[#B8935A] hover:text-[#C4A56E]" : "text-[#B8935A] hover:text-[#C4A56E]"
-              }`}
+              className={`text-[11px] font-medium tracking-[0.05em] transition-colors ml-1.5 text-[#B8935A] hover:text-[#A07D4A]`}
             >
               {displayCurrency === "USD" ? "$" : "₪"}
             </button>
@@ -144,7 +142,7 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
             variant="ghost"
             size="icon"
             onClick={handleFavoritesClick}
-            className={`h-8 w-8 ${!isScrolled ? "text-white hover:bg-white/10" : "hover:bg-foreground/5"}`}
+            className={`h-8 w-8 rounded-none ${!isScrolled ? "text-white hover:bg-white/10" : "text-[#1A1814] hover:bg-[#F0EBE3]"}`}
           >
             <Heart className="h-5 w-5" />
           </Button>

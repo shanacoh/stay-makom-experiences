@@ -29,7 +29,7 @@ const MobileStickyHeader = () => {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 bg-mobile-header border-b border-mobile-border"
+      className="fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-300 bg-[#FAF8F4] border-b border-[#E8E0D4]"
       style={{ height: MOBILE_HEADER_HEIGHT }}
     >
       <div className="relative flex items-center h-full px-2">
@@ -40,7 +40,7 @@ const MobileStickyHeader = () => {
             className="flex items-center justify-center w-11 h-11 -ml-1 shrink-0"
             aria-label="Go back"
           >
-            <ChevronLeft className="h-5 w-5 text-mobile-logo" />
+            <ChevronLeft className="h-5 w-5 text-[#1A1814]" />
           </button>
         ) : (
           <div className="w-11 shrink-0" />
@@ -49,7 +49,7 @@ const MobileStickyHeader = () => {
         {/* Center: Logo */}
         <Link
           to="/launch"
-          className="absolute left-1/2 -translate-x-1/2 font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none text-mobile-logo"
+          className="absolute left-1/2 -translate-x-1/2 font-sans font-bold tracking-[-0.04em] uppercase text-[20px] leading-none text-[#1A1814]"
         >
           STAYMAKOM
         </Link>
@@ -58,21 +58,21 @@ const MobileStickyHeader = () => {
         <div className="ml-auto flex items-center gap-1.5">
           <button
             onClick={() => handleLang("en")}
-            className={`text-[11px] transition-colors ${
+            className={`text-[11px] tracking-[0.05em] transition-colors ${
               lang === "en"
-                ? "text-mobile-logo font-medium"
-                : "text-mobile-logo/50"
+                ? "text-[#1A1814] font-medium"
+                : "text-[#8A8578]"
             }`}
           >
             EN · $
           </button>
-          <span className="text-[11px] text-mobile-logo/30">|</span>
+          <span className="text-[11px] text-[#C8C0B4]">|</span>
           <button
             onClick={() => handleLang("he")}
-            className={`text-[11px] transition-colors ${
+            className={`text-[11px] tracking-[0.05em] transition-colors ${
               lang === "he"
-                ? "text-mobile-logo font-medium"
-                : "text-mobile-logo/50"
+                ? "text-[#1A1814] font-medium"
+                : "text-[#8A8578]"
             }`}
           >
             עב · ₪
