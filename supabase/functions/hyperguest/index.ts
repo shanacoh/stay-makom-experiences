@@ -340,8 +340,9 @@ async function listBookings(params: { dates?: { from: string; to: string }; agen
   return data.content || data;
 }
 
-async function cancelBooking(bookingId: string, options: { reason?: string; simulation?: boolean } = {}) {
-  const isSimulation = options.simulation || false;
+async function cancelBooking(bookingId: string, options: { reason?: string; simulation?: boolean; cancelSimulation?: boolean } = {}) {
+  // Support both `simulation` and `cancelSimulation` field names from frontend
+  const isSimulation = options.simulation === true || options.cancelSimulation === true;
   console.log(isSimulation ? '🔍 Simulating cancellation:' : '🚫 Cancelling booking:', bookingId);
 
   const url = `${BOOKING_DOMAIN}booking/cancel`;

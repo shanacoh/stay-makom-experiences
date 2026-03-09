@@ -570,6 +570,28 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'À vérifier via logs réseau',
+      guide: `VÉRIFICATION F2 — Pas de double appel API
+
+1. Ouvre le site en mode preview
+
+2. Ouvre DevTools (F12) → onglet Network
+
+3. Filtre par "hyperguest" pour ne voir que les appels API
+
+4. Navigue vers une page expérience/hôtel qui déclenche
+   un search HyperGuest
+
+5. Compte le nombre de requêtes "hyperguest" :
+   • 1 seule requête = ✅ OK
+   • 2 requêtes identiques en même temps = ❌ double appel
+
+6. React Query (staleTime 2min) devrait dédupliquer
+   si ExperienceAvailabilityPreview et BookingPanel2
+   sont montés en même temps avec les mêmes params.
+
+✅ PASS si : 1 seul appel par recherche
+⚠️ WARN si : 2 appels mais React Query les déduplique
+❌ FAIL si : 2 appels distincts qui atteignent HyperGuest`,
     });
 
     // F3: Cache/memoization
