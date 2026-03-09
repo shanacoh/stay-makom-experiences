@@ -142,7 +142,7 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
             variant="ghost"
             size="icon"
             onClick={handleFavoritesClick}
-            className={`h-8 w-8 ${!isScrolled ? "text-white hover:bg-white/10" : "hover:bg-foreground/5"}`}
+            className={`h-8 w-8 rounded-none ${!isScrolled ? "text-white hover:bg-white/10" : "text-[#1A1814] hover:bg-[#F0EBE3]"}`}
           >
             <Heart className="h-5 w-5" />
           </Button>
