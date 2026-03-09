@@ -37,7 +37,7 @@ const Header = () => {
   const navigate = useNavigate();
   const hasCart = useCartExists();
   const { lang, setLanguage } = useLanguage();
-  const { setDisplayCurrency } = useCurrency();
+  const { displayCurrency, setDisplayCurrency } = useCurrency();
   const handleLang = (l: "en" | "he") => {
     setLanguage(l);
     setDisplayCurrency(l === "he" ? "ILS" : "USD");
