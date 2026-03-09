@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { trackWishlistToggled } from "@/lib/analytics";
 
 interface HighlightTag {
   id: string;
@@ -159,6 +160,8 @@ export default function ExperienceCard({
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wishlist-status", experience.id, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      
+      trackWishlistToggled(experience.slug, variables.isAdding ? "added" : "removed");
       
       if (variables.isAdding) {
         // Trigger animations

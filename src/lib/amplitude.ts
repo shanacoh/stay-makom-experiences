@@ -1,58 +1,62 @@
 import * as amplitude from "@amplitude/analytics-browser";
 import { sessionReplayPlugin } from "@amplitude/plugin-session-replay-browser";
 
-let isInitialized = false;
+let initialized = false;
 
-export const initAmplitude = () => {
-  if (isInitialized) return;
+export function initAmplitude() {
+  if (initialized) return;
 
   const apiKey = import.meta.env.VITE_AMPLITUDE_API_KEY;
-  if (!apiKey) {
-    // Amplitude API key not found — skipping init
-    return;
-  }
+  if (!apiKey) return;
 
   const sessionReplay = sessionReplayPlugin({
-    sampleRate: 1,
+    sampleRate: 0.3,
     privacyConfig: {
       maskSelector: [
-        'input[name="email"]',
-        'input[name="phone"]',
-        'input[name="first_name"]',
-        'input[name="last_name"]',
-        'input[name="city"]',
-        'input[type="password"]',
+        'input[type="email"]',
         'input[type="tel"]',
-        'input[autocomplete="cc-number"]',
+        'input[name="firstName"]',
+        'input[name="lastName"]',
+        'input[name="city"]',
+        'input[name="cardNumber"]',
+        'input[name="cvv"]',
+        'input[type="password"]',
+        ".pii-field",
       ],
     },
   });
 
   amplitude.add(sessionReplay);
-
   amplitude.init(apiKey, {
-    defaultTracking: false,
-    autocapture: { elementInteractions: false },
+    autocapture: false,
+    defaultTracking: {
+      sessions: true,
+      pageViews: false,
+      formInteractions: false,
+      fileDownloads: false,
+    },
   });
 
-  isInitialized = true;
+  initialized = true;
+}
 
-  // Capture UTMs on first load
-  captureUtmParamsInternal();
-};
+export function isAmplitudeReady(): boolean {
+  return initialized;
+}
 
-export const isAmplitudeReady = () => isInitialized;
+export function safeTrack(eventName: string, properties?: Record<string, any>) {
+  if (!initialized) return;
+  amplitude.track(eventName, properties);
+}
 
-function captureUtmParamsInternal() {
-  if (localStorage.getItem("staymakom_utm")) return;
-  const params = new URLSearchParams(window.location.search);
-  const utm = {
-    utm_source: params.get("utm_source"),
-    utm_medium: params.get("utm_medium"),
-    utm_campaign: params.get("utm_campaign"),
-  };
-  if (utm.utm_source || utm.utm_medium || utm.utm_campaign) {
-    localStorage.setItem("staymakom_utm", JSON.stringify(utm));
-    amplitude.track("utm_captured", utm);
+export function safeIdentify(userId: string, properties?: Record<string, any>) {
+  if (!initialized) return;
+  amplitude.setUserId(userId);
+  if (properties) {
+    const identify = new amplitude.Identify();
+    Object.entries(properties).forEach(([key, value]) => {
+      identify.set(key, value);
+    });
+    amplitude.identify(identify);
   }
 }

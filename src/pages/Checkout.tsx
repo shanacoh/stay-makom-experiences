@@ -4,6 +4,14 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import {
+  trackCheckoutStep2Viewed,
+  trackCheckoutStep3Viewed,
+  trackBookingCompleted,
+  trackBookingFailed,
+  trackBookingAbandoned,
+  trackFormFieldInteracted,
+} from "@/lib/analytics";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -292,6 +300,38 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
     return t.booking;
   };
 
+  // Track step views
+  useEffect(() => {
+    if (step === 2) trackCheckoutStep2Viewed(state.experienceSlug, displayTotal);
+    if (step === 3) trackCheckoutStep3Viewed(state.experienceSlug, displayTotal);
+  }, [step]);
+
+  // Track booking abandonment
+  const bookingCompletedRef = useRef(false);
+  useEffect(() => {
+    const start = Date.now();
+    return () => {
+      if (!bookingCompletedRef.current) {
+        const seconds = (Date.now() - start) / 1000;
+        trackBookingAbandoned(
+          state.experienceSlug,
+          step === 3 ? "step3" : "step2",
+          displayTotal,
+          seconds
+        );
+      }
+    };
+  }, []);
+
+  // Form field tracking
+  const trackedFields = useRef(new Set<string>());
+  const handleFieldFocus = (fieldName: string) => {
+    if (!trackedFields.current.has(fieldName)) {
+      trackedFields.current.add(fieldName);
+      trackFormFieldInteracted(fieldName);
+    }
+  };
+
   useEffect(() => {
     if (user && pendingBookAfterAuth.current) {
       pendingBookAfterAuth.current = false;
@@ -490,6 +530,10 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         confirmationToken,
       });
       setShowConfirmation(true);
+      bookingCompletedRef.current = true;
+
+      // Analytics: booking completed
+      trackBookingCompleted(staymakomRef, state.experienceSlug, sellPrice, bookingCurrency, state.nights, totalPartySize);
 
       // Clear persisted cart after successful booking
       try { localStorage.removeItem("staymakom_cart"); } catch {}
@@ -532,11 +576,15 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         // Error handled silently
       }
     } catch (error: any) {
-      
       const detail = error?.message || "";
       const codeMatch = detail.match(/BN\.\d+/);
       const errorCode = codeMatch?.[0] || "";
       const friendlyMsg = hgErrorMessages[errorCode]?.[lang];
+
+      // Analytics: booking failed
+      const errorType = errorCode.startsWith("BN.5") ? "hg_error" : errorCode === "BN.402" ? "payment_declined" : "network";
+      trackBookingFailed(state.experienceSlug, errorType, detail.substring(0, 200), displayTotal);
+
       toast.error(t.bookingError, {
         description: friendlyMsg || (detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined),
         duration: 8000,

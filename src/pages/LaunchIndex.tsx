@@ -26,6 +26,8 @@ import {
 import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
+import { trackFindEscapeClicked, trackVibeTabClicked, trackWaitlistSignup, trackGiftCardClicked } from "@/lib/analytics";
+import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";
@@ -40,6 +42,9 @@ const LaunchIndex = () => {
   const { lang } = useLanguage();
   const { getLocalizedPath } = useLocalizedNavigation();
   const isRTL = lang === "he";
+
+  // Analytics
+  useScrollDepth("launch");
 
   // Lead capture state
   const [email, setEmail] = useState("");
@@ -163,6 +168,7 @@ const LaunchIndex = () => {
       if (error) throw error;
       setSubmitted(true);
       setEmail("");
+      trackWaitlistSignup(email.split("@")[1] || "unknown");
       toast.success(isRTL ? "נרשמת בהצלחה!" : "You're on the list!");
     } catch {
       toast.error(isRTL ? "שגיאה, נסה שנית" : "Something went wrong. Try again.");
@@ -208,6 +214,7 @@ const LaunchIndex = () => {
 
   // Handle filter button click — scroll to grid when in sticky mode
   const handleFilterClick = (slug: string) => {
+    trackVibeTabClicked(slug);
     setActiveFilter((prev) => prev === slug ? null : slug);
     const grid = document.getElementById("launch-experiences");
     if (grid && tabsSticky) {
@@ -252,6 +259,7 @@ const LaunchIndex = () => {
             </p>
             <button
               onClick={() => {
+                trackFindEscapeClicked();
                 const el = document.getElementById("launch-experiences");
                 el?.scrollIntoView({ behavior: "smooth" });
               }}

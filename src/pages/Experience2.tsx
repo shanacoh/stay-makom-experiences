@@ -3,7 +3,7 @@
  * Supporte le parcours multi-hôtels via experience2_hotels
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
-import { useRef, useState, useMemo, useCallback } from "react";
+import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
@@ -30,6 +30,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SEOHead } from "@/components/SEOHead";
+import { trackExperiencePageViewed, trackTimeOnExperiencePage } from "@/lib/analytics";
+import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { MapPin, Moon } from "lucide-react";
 
 export default function Experience2() {
@@ -165,6 +167,26 @@ export default function Experience2() {
   const averageRating = reviewsCount > 0
     ? reviewsData!.reduce((acc, r) => acc + r.rating, 0) / reviewsCount
     : null;
+
+  // Analytics: scroll depth
+  useScrollDepth(`experience/${slug}`);
+
+  // Analytics: track page view + time on page
+  useEffect(() => {
+    if (!experience?.slug) return;
+    trackExperiencePageViewed(experience.slug, experience.title, experience.base_price);
+    const start = Date.now();
+    const handleVisChange = () => {
+      if (document.visibilityState === "hidden") {
+        trackTimeOnExperiencePage(experience.slug, (Date.now() - start) / 1000);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisChange);
+      trackTimeOnExperiencePage(experience.slug, (Date.now() - start) / 1000);
+    };
+  }, [experience?.slug]);
 
   // ---------------------------------------------------------------------------
   // Loading state
