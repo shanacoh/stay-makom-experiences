@@ -56,7 +56,7 @@ const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps)
   };
 
   const handleMessengerShare = () => {
-    trackExperienceShared(slug, 'native');
+    trackShareClicked(slug, 'native');
     const encodedUrl = encodeURIComponent(url);
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
     if (isMobile) {
