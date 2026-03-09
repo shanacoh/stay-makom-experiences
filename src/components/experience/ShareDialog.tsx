@@ -14,6 +14,8 @@ interface ShareDialogProps {
 
 const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps) => {
   const isRTL = lang === 'he';
+  // Extract slug from url for analytics
+  const slug = url.split('/experience/')[1]?.split('?')[0] || '';
   
   const translations = {
     en: {
