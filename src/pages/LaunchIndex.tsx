@@ -344,7 +344,7 @@ const LaunchIndex = () => {
             </div> :
           filteredExperiences && filteredExperiences.length > 0 ?
           <div className="mt-4 md:mt-3 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5 transition-all duration-500">
-              {filteredExperiences.map((experience: any) => {
+              {filteredExperiences.map((experience: any, idx: number) => {
               const primaryHotelLink = experience.experience2_hotels
                 ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))?.[0]?.hotel;
 
