@@ -694,7 +694,7 @@ export function UnifiedExperience2Form({
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
       onClose?.();
     } catch (error: any) {
-      console.error("Publish error:", error);
+      
       toast.error(error.message || "Failed to publish");
     } finally {
       setIsSaving(false);
