@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Navigation } from "lucide-react";
+import { trackMapGetThereClicked } from "@/lib/analytics";
 
 interface LocationMapProps {
   latitude: number | null;
@@ -94,7 +95,7 @@ const LocationMap = ({
         {showGetThere && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => trackMapGetThereClicked(hotelName)}>
                 <Navigation className="h-4 w-4" />
                 {getThereLabel}
               </Button>

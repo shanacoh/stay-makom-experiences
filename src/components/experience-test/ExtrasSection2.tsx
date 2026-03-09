@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useRef, useEffect, useCallback } from "react";
+import { trackAddonViewed, trackAddonClicked } from "@/lib/analytics";
 import {
   Wine, Car, Coffee, Flower, Sparkle, Gift, Heart, Camera, MusicNotes,
   Champagne, Bed, Cake, Drop, Leaf, HandHeart, Star,
@@ -69,6 +71,31 @@ const ExtrasSection2 = ({
   onToggleExtra,
 }: ExtrasSection2Props) => {
   const { symbol: currencySymbol, convert } = useCurrency();
+  const viewedAddonsRef = useRef(new Set<string>());
+
+  const addonObserverCallback = useCallback((entries: IntersectionObserverEntry[]) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const addonId = entry.target.getAttribute('data-addon-id');
+        const addonName = entry.target.getAttribute('data-addon-name');
+        if (addonId && addonName && !viewedAddonsRef.current.has(addonId)) {
+          viewedAddonsRef.current.add(addonId);
+          trackAddonViewed(experienceId, addonName);
+        }
+      }
+    });
+  }, [experienceId]);
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(addonObserverCallback, { threshold: 0.5 });
+    return () => observerRef.current?.disconnect();
+  }, [addonObserverCallback]);
+
+  const addonCardRef = useCallback((node: HTMLDivElement | null) => {
+    if (node && observerRef.current) observerRef.current.observe(node);
+  }, []);
+
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
@@ -142,6 +169,9 @@ const ExtrasSection2 = ({
           return (
             <div
               key={extra.id}
+              ref={addonCardRef}
+              data-addon-id={extra.id}
+              data-addon-name={name}
               className={`
                 group rounded-xl p-4
                 transition-all duration-200 ease-out
@@ -174,7 +204,7 @@ const ExtrasSection2 = ({
                     variant="outline"
                     size="sm"
                     className="h-8 text-xs font-medium rounded-full px-4 border-foreground/20 bg-transparent hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
-                    onClick={() => onToggleExtra(extraData)}
+                    onClick={() => { trackAddonClicked(experienceId, name, extra.price); onToggleExtra(extraData); }}
                   >
                     {formatPrice(extra.price)} · {getText('add')}
                   </Button>

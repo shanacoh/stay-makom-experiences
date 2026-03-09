@@ -13,6 +13,9 @@ import {
   trackFormFieldInteracted,
   trackCheckoutContinueClicked,
   trackCheckoutBackClicked,
+  trackAdditionalInfoExpanded,
+  trackSpecialRequestTyped,
+  trackPaymentInitiated,
 } from "@/lib/analytics";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
@@ -237,6 +240,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   
   // Idempotency key for double-booking protection
   const idempotencyKeyRef = useRef(crypto.randomUUID());
+  const specialRequestTrackedRef = useRef(false);
 
   const dateFrom = new Date(state.dateRange.from);
   const dateTo = new Date(state.dateRange.to);
@@ -361,6 +365,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       return;
     }
 
+    trackPaymentInitiated(state.experienceSlug, displayTotal, state.currency);
     setIsBooking(true);
     setBookingStep("prebook");
 
@@ -704,7 +709,13 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                 <Textarea
                   placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
                   value={specialRequests}
-                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  onChange={(e) => {
+                    setSpecialRequests(e.target.value);
+                    if (!specialRequestTrackedRef.current && e.target.value.length > 0) {
+                      specialRequestTrackedRef.current = true;
+                      trackSpecialRequestTyped(state.experienceSlug);
+                    }
+                  }}
                   className="min-h-[60px] text-sm resize-none"
                   rows={2}
                 />
@@ -712,7 +723,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 
               {/* Navigation */}
               <div className={cn("flex gap-3 pt-2", lang === 'he' && "flex-row-reverse")}>
-                <Button variant="outline" className="shrink-0" onClick={goBackToExperience}>
+                <Button variant="outline" className="shrink-0" onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step2'); goBackToExperience(); }}>
                   {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
                   {t.back}
                 </Button>
@@ -731,6 +742,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                       toast.error(t.fillGuestInfo);
                       return;
                     }
+                    trackCheckoutContinueClicked(state.experienceSlug, displayTotal);
                     setStep(3);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
@@ -893,7 +905,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 
               {/* Navigation */}
               <div className={cn("flex gap-3 pt-2 pb-8", lang === 'he' && "flex-row-reverse")}>
-                <Button variant="outline" className="shrink-0" onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                <Button variant="outline" className="shrink-0" onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step3'); setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                   {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
                   {t.back}
                 </Button>

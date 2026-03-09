@@ -14,6 +14,7 @@ interface Experience2CardWithPriceProps {
   addons?: Array<{ type: string; value: number; is_active: boolean }>;
   linkPrefix?: string;
   linkSuffix?: string;
+  index?: number;
 }
 
 export default function Experience2CardWithPrice({
@@ -23,6 +24,7 @@ export default function Experience2CardWithPrice({
   addons,
   linkPrefix = "/experience",
   linkSuffix,
+  index = 0,
 }: Experience2CardWithPriceProps) {
   const { convert } = useCurrency();
 
@@ -43,6 +45,7 @@ export default function Experience2CardWithPrice({
       experience={cardExperience}
       linkPrefix={linkPrefix}
       linkSuffix={linkSuffix}
+      index={index}
     />
   );
 }

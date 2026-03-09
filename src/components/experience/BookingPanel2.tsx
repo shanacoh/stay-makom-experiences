@@ -29,6 +29,7 @@ import { formatGuests, calculateNights } from "@/services/hyperguest";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { CheckoutState } from "@/pages/Checkout";
+import { trackDurationTabClicked, trackDateSelected, trackViewDatesClicked, trackGuestsSelected, trackRoomTypeSelected, trackBookThisStayClicked } from "@/lib/analytics";
 
 interface DateOption {
   id: string;
@@ -193,6 +194,8 @@ export function BookingPanel2({
       const opt = quickDates.find((d) => d.id === selectedDateOptionId);
       if (opt) {
         setDateRange({ from: opt.checkin, to: opt.checkout });
+        const checkIn = typeof opt.checkin === 'string' ? opt.checkin : (opt.checkin as Date).toISOString().split('T')[0];
+        trackDateSelected(experienceSlug, checkIn, opt.nights || (typeof selectedTab === 'number' ? selectedTab : 1));
       }
     }
   }, [selectedDateOptionId, quickDates, selectedTab]);
@@ -299,6 +302,7 @@ export function BookingPanel2({
 
   const handleContinue = () => {
     if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId || !selectedRatePlan) return;
+    trackBookThisStayClicked(experienceSlug, displayTotal);
 
     const checkoutState: CheckoutState = {
       experienceId,
@@ -374,11 +378,11 @@ export function BookingPanel2({
           <div className="flex items-center justify-between" dir="ltr">
             <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.adults}</span>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
+              <Button variant="outline" size="sm" onClick={() => { const v = Math.max(minParty, adults - 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults <= minParty}>
                 <Minus className="h-3 w-3" />
               </Button>
               <span className="text-lg font-medium w-8 text-center">{adults}</span>
-              <Button variant="outline" size="sm" onClick={() => setAdults(Math.min(maxParty, adults + 1))} disabled={adults >= maxParty}>
+              <Button variant="outline" size="sm" onClick={() => { const v = Math.min(maxParty, adults + 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults >= maxParty}>
                 <Plus className="h-3 w-3" />
               </Button>
             </div>
@@ -446,7 +450,7 @@ export function BookingPanel2({
               <button
                 key={n}
                 type="button"
-                onClick={() => setSelectedTab(n)}
+                onClick={() => { trackDurationTabClicked(experienceSlug, n); setSelectedTab(n); }}
                 className={cn(
                   "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
                   "hover:border-primary/50",
@@ -461,7 +465,7 @@ export function BookingPanel2({
             ))}
             <button
               type="button"
-              onClick={() => setSelectedTab("pick")}
+              onClick={() => { trackViewDatesClicked(experienceSlug); setSelectedTab("pick"); }}
               className={cn(
                 "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
                 "hover:border-primary/50",
@@ -548,6 +552,12 @@ export function BookingPanel2({
             onSelect={(roomId, ratePlanId) => {
               setSelectedRoomId(roomId);
               setSelectedRatePlanId(ratePlanId);
+              // Find room name for tracking
+              let rooms: any[] = [];
+              if (searchResult?.results?.[0]?.rooms) rooms = searchResult.results[0].rooms;
+              else if (searchResult?.rooms) rooms = searchResult.rooms;
+              const rm = rooms.find((r: any) => r.roomId === roomId);
+              if (rm) trackRoomTypeSelected(experienceSlug, rm.roomName || '', rm.ratePlans?.find((rp: any) => rp.ratePlanId === ratePlanId)?.prices?.sell?.price ?? 0);
             }}
             lang={lang}
             checkInDate={searchParams?.checkIn}

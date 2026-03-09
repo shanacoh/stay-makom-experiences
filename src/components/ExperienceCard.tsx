@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { trackWishlistClicked } from "@/lib/analytics";
+import { trackWishlistClicked, trackExperienceCardClicked } from "@/lib/analytics";
 
 interface HighlightTag {
   id: string;
@@ -78,7 +78,8 @@ export default function ExperienceCard({
   onWishlistToggle,
   linkPrefix = "/experience",
   linkSuffix = "",
-}: ExperienceCardProps) {
+  index = 0,
+}: ExperienceCardProps & { index?: number }) {
   const { lang } = useLanguage();
   const { symbol: currencySymbol } = useCurrency();
   const { user } = useAuth();
@@ -220,6 +221,7 @@ export default function ExperienceCard({
         className="group block"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={() => trackExperienceCardClicked(experience.slug, title, displayPrice, index)}
       >
         {/* Photo section with title overlay */}
         <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-2">

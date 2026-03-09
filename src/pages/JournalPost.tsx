@@ -16,7 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { trackJournalArticleViewed } from "@/lib/analytics";
+import { trackJournalArticleViewed, trackCtaClickedFromJournal } from "@/lib/analytics";
 
 // Reading progress bar
 function ReadingProgressBar() {
@@ -339,7 +339,7 @@ const JournalPost = () => {
       case "cta":
         return block.text ? (
           <div className="my-10 text-center">
-            <Button size="lg" asChild>
+            <Button size="lg" asChild onClick={() => trackCtaClickedFromJournal(slug || '', block.url?.includes('/experience') ? 'experience_link' : 'book_now')}>
               <Link to={block.url}>{block.text}</Link>
             </Button>
           </div>
@@ -403,7 +403,9 @@ const JournalPost = () => {
 
       case "experience":
         return block.experience_id ? (
-          <EmbeddedExperienceCard experienceId={block.experience_id} />
+          <div onClick={() => trackCtaClickedFromJournal(slug || '', 'experience_link')}>
+            <EmbeddedExperienceCard experienceId={block.experience_id} />
+          </div>
         ) : null;
 
       default:

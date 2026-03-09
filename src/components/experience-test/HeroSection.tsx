@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
 import LocationPopover from "@/components/experience/LocationPopover";
+import { trackPhotoGalleryClicked } from "@/lib/analytics";
 
 interface Review {
   id: string;
@@ -358,7 +359,7 @@ const HeroSection = ({
                     <CarouselItem key={index}>
                       <div 
                         className="aspect-[4/3] w-full cursor-pointer rounded-2xl overflow-hidden"
-                        onClick={() => setIsGalleryOpen(true)}
+                        onClick={() => { trackPhotoGalleryClicked(title); setIsGalleryOpen(true); }}
                       >
                         <img
                           src={photo || "/placeholder.svg"}
@@ -403,7 +404,7 @@ const HeroSection = ({
             <div className="relative h-[calc(100vh-12rem)]">
               <div 
                 className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer"
-                onClick={() => { setCurrentPhotoIndex(0); setIsGalleryOpen(true); }}
+                onClick={() => { trackPhotoGalleryClicked(title); setCurrentPhotoIndex(0); setIsGalleryOpen(true); }}
               >
                 <img
                   src={photos[0] || "/placeholder.svg"}

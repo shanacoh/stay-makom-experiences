@@ -26,7 +26,7 @@ import {
 import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
-import { trackFindEscapeClicked, trackVibeTabClicked, trackWaitlistEmailSubmitted, trackGiftCardClicked } from "@/lib/analytics";
+import { trackFindEscapeClicked, trackVibeTabClicked, trackWaitlistEmailSubmitted, trackGiftCardClicked, trackCategoryTileClicked } from "@/lib/analytics";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
@@ -205,6 +205,7 @@ const LaunchIndex = () => {
   // Handle category card click → open waitlist popup
   const handleCategoryClick = (category: any) => {
     const name = getLocalizedField(category, "name", lang) as string;
+    trackCategoryTileClicked(name);
     setWaitlistCategory(name);
     setWaitlistCategoryId(category.id);
     setWaitlistSubmitted(false);
@@ -344,19 +345,20 @@ const LaunchIndex = () => {
             </div> :
           filteredExperiences && filteredExperiences.length > 0 ?
           <div className="mt-4 md:mt-3 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5 transition-all duration-500">
-              {filteredExperiences.map((experience: any) => {
+              {filteredExperiences.map((experience: any, idx: number) => {
               const primaryHotelLink = experience.experience2_hotels
                 ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))?.[0]?.hotel;
 
                 return (
-                <Experience2CardWithPrice
+              <Experience2CardWithPrice
                   key={experience.id}
                   experience={experience}
                   primaryHotel={primaryHotelLink}
                   hyperguestPropertyId={primaryHotelLink?.hyperguest_property_id}
                   addons={(experience as any).experience2_addons}
                   linkPrefix="/experience"
-                  linkSuffix="context=launch" />);
+                  linkSuffix="context=launch"
+                  index={idx} />);
 
 
             })}
@@ -512,7 +514,7 @@ const LaunchIndex = () => {
               <p className="text-muted-foreground text-sm md:text-base max-w-md">
                 {t(lang, "giftCardSectionDesc")}
               </p>
-              <Button asChild className="group">
+              <Button asChild className="group" onClick={() => trackGiftCardClicked('launch_page')}>
                 <Link to={getLocalizedPath("/gift-card")}>
                   {t(lang, "giftCardSectionCTA")}
                   <ArrowRight

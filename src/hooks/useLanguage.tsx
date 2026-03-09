@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+import { trackLanguageSwitched } from "@/lib/analytics";
 
 export type Language = "en" | "he" | "fr";
 
@@ -23,6 +24,7 @@ export const useLanguage = () => {
   }, [lang]);
   
   const setLanguage = (newLang: Language) => {
+    trackLanguageSwitched(lang, newLang);
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
       params.set("lang", newLang);

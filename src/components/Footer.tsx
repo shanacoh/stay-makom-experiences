@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
+import { trackFooterCategoryClicked } from "@/lib/analytics";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -117,13 +118,16 @@ const Footer = () => {
               {t(lang, 'footerExperiences')}
             </h4>
             <ul className="space-y-2">
-              {categories?.map(category => (
-                <li key={category.id}>
-                  <Link to={`/category/${category.slug}${langParam}`} className="text-sm text-white hover:text-primary transition-smooth">
-                    {getLocalizedField(category, 'name', lang) as string}
-                  </Link>
-                </li>
-              ))}
+              {categories?.map(category => {
+                const catName = getLocalizedField(category, 'name', lang) as string;
+                return (
+                  <li key={category.id}>
+                    <Link to={`/category/${category.slug}${langParam}`} className="text-sm text-white hover:text-primary transition-smooth" onClick={() => trackFooterCategoryClicked(catName)}>
+                      {catName}
+                    </Link>
+                  </li>
+                );
+              })}
               {(!categories || categories.length === 0) && (
                 <li><span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span></li>
               )}
@@ -232,15 +236,19 @@ const Footer = () => {
               <ChevronDown className={`h-4 w-4 text-white/70 transition-transform duration-200 ${openSection === 'experiences' ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="py-3 space-y-2">
-              {categories?.map(category => (
-                <Link
-                  key={category.id}
-                  to={`/category/${category.slug}${langParam}`}
-                  className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
-                >
-                  {getLocalizedField(category, 'name', lang) as string}
-                </Link>
-              ))}
+              {categories?.map(category => {
+                const catName = getLocalizedField(category, 'name', lang) as string;
+                return (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.slug}${langParam}`}
+                    className="block text-sm text-white/80 hover:text-primary transition-smooth py-1"
+                    onClick={() => trackFooterCategoryClicked(catName)}
+                  >
+                    {catName}
+                  </Link>
+                );
+              })}
               {(!categories || categories.length === 0) && (
                 <span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span>
               )}

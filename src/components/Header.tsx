@@ -11,6 +11,7 @@ import AccountBubble from "@/components/auth/AccountBubble";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import UserDropdown from "@/components/auth/UserDropdown";
 import { useCartExists } from "@/hooks/useCart";
+import { trackWishlistIconClicked, trackCartIconClicked } from "@/lib/analytics";
 
 const Header = () => {
   const location = useLocation();
@@ -49,6 +50,7 @@ const Header = () => {
   };
 
   const handleFavoritesClick = () => {
+    trackWishlistIconClicked(0);
     if (user) {
       navigate("/account?tab=wishlist");
     } else {
@@ -193,7 +195,7 @@ const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/cart")}
+            onClick={() => { trackCartIconClicked(hasCart ? 1 : 0); navigate("/cart"); }}
             className={`relative h-8 w-8 ${
               isTransparentPage && !isScrolled
                 ? "text-white hover:bg-white/10"
