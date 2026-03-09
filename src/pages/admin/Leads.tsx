@@ -447,7 +447,7 @@ const AdminLeads = () => {
         {/* Date range */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal", (!dateFrom && !dateTo) && "text-muted-foreground")}>
+            <Button variant="outline" className={cn("w-full sm:w-[200px] justify-start text-left font-normal", (!dateFrom && !dateTo) && "text-muted-foreground")}>
               <CalendarIcon className="mr-2 h-4 w-4" />
               {dateFrom ? (dateTo ? `${format(dateFrom, "dd/MM")} - ${format(dateTo, "dd/MM")}` : format(dateFrom, "dd/MM/yy")) : "Date range"}
             </Button>
