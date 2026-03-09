@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
 import LocationPopover from "@/components/experience/LocationPopover";
-import { trackPhotoGalleryClicked, trackHotelLinkClicked } from "@/lib/analytics";
+import { trackPhotoGalleryClicked } from "@/lib/analytics";
 
 interface Review {
   id: string;
