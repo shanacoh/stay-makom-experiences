@@ -198,18 +198,18 @@ const AdminHotels = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Hotels</h2>
-          <p className="text-muted-foreground">Manage hotel properties</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">Hotels</h2>
+            <p className="text-sm text-muted-foreground">Manage hotel properties</p>
+          </div>
+          <Button size="sm" onClick={() => navigate("/admin/hotels/new")}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add Hotel
+          </Button>
         </div>
-        <Button onClick={() => navigate("/admin/hotels/new")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Hotel
-        </Button>
-      </div>
 
-      <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by status" />
