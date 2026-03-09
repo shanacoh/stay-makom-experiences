@@ -255,7 +255,7 @@ const BookingPanel = ({
       
       // Navigate to account page after short delay
       setTimeout(() => {
-        navigate("/account");
+        navigate("/account?tab=bookings");
       }, 2000);
     },
     onError: (error: any) => {

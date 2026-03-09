@@ -28,21 +28,36 @@ const MOBILE_TAB_TITLES: Record<string, string> = {
   savedcarts: "Saved for Later",
 };
 
+const ALLOWED_TABS = ["wishlist", "bookings", "giftcards", "profile", "savedcarts"] as const;
+type AccountTab = (typeof ALLOWED_TABS)[number];
+
 const Account = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const isMobile = useIsMobile();
-  
-  const [activeTab, setActiveTab] = useState(tabFromUrl || "bookings");
+
+  const normalizedTab: AccountTab | null =
+    tabFromUrl && (ALLOWED_TABS as readonly string[]).includes(tabFromUrl)
+      ? (tabFromUrl as AccountTab)
+      : null;
+
+  const effectiveTab: AccountTab = normalizedTab || "bookings";
+
+  const [activeTab, setActiveTab] = useState<AccountTab>(effectiveTab);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // If user lands on /account without a tab param, default to bookings (and keep URL in sync)
   useEffect(() => {
-    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile", "savedcarts"].includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
+    if (!normalizedTab) {
+      navigate("/account?tab=bookings", { replace: true });
     }
-  }, [tabFromUrl]);
+  }, [normalizedTab, navigate]);
+
+  useEffect(() => {
+    setActiveTab(effectiveTab);
+  }, [effectiveTab]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -86,24 +101,8 @@ const Account = () => {
 
   // === MOBILE LAYOUT ===
   if (isMobile) {
-    // No tab param = show profile hub
-    if (!tabFromUrl) {
-      return (
-        <>
-          <MobileAccountHome />
-          {user && (
-            <OnboardingFlow
-              open={showOnboarding}
-              onComplete={() => setShowOnboarding(false)}
-              userId={user.id}
-            />
-          )}
-        </>
-      );
-    }
-
-    // Tab param = show that section full-screen
-    const pageTitle = MOBILE_TAB_TITLES[tabFromUrl] || "Account";
+    const mobileTab = effectiveTab;
+    const pageTitle = MOBILE_TAB_TITLES[mobileTab] || "Account";
 
     return (
       <div className="min-h-screen pb-24">
@@ -111,7 +110,7 @@ const Account = () => {
         <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-border/50 md:hidden">
           <div className="flex items-center h-14 px-2">
             <button
-              onClick={() => navigate("/account")}
+              onClick={() => navigate("/account?tab=bookings")}
               className="flex items-center justify-center w-11 h-11"
               aria-label="Back"
             >
@@ -124,15 +123,15 @@ const Account = () => {
         </div>
 
         <div className="pt-16 px-4">
-          {tabFromUrl === "bookings" && <MyStaymakomSection userId={user.id} />}
-          {tabFromUrl === "wishlist" && <WishlistSection userId={user.id} />}
-          {tabFromUrl === "giftcards" && (
+          {mobileTab === "bookings" && <MyStaymakomSection userId={user.id} />}
+          {mobileTab === "wishlist" && <WishlistSection userId={user.id} />}
+          {mobileTab === "giftcards" && (
             <GiftCardsSection userId={user.id} userEmail={user.email} />
           )}
-          {tabFromUrl === "profile" && (
+          {mobileTab === "profile" && (
             <MyAccountSection userId={user.id} userEmail={user.email} mobile />
           )}
-          {tabFromUrl === "savedcarts" && <SavedCartsSection userId={user.id} />}
+          {mobileTab === "savedcarts" && <SavedCartsSection userId={user.id} />}
         </div>
       </div>
     );
@@ -217,7 +216,7 @@ const Account = () => {
           <div className="flex gap-10">
             {/* Sidebar */}
             <aside className="hidden md:block w-56 flex-shrink-0">
-              <AccountSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+              <AccountSidebar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab as AccountTab)} />
             </aside>
 
             {/* Main content area */}

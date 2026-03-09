@@ -53,7 +53,7 @@ const Auth = () => {
   useEffect(() => {
     // Don't redirect if onboarding is in progress
     if (user && !showOnboarding && !newUserId) {
-      navigate("/account");
+      navigate("/account?tab=bookings");
     }
   }, [user, navigate, showOnboarding, newUserId]);
 
@@ -75,7 +75,7 @@ const Auth = () => {
         }
       } else {
         toast.success("Welcome back!");
-        navigate("/account");
+        navigate("/account?tab=bookings");
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -453,7 +453,7 @@ const Auth = () => {
           open={showOnboarding}
           onComplete={() => {
             setShowOnboarding(false);
-            navigate("/account");
+            navigate("/account?tab=bookings");
           }}
           userId={newUserId}
           lang="en"
