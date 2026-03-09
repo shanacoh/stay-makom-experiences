@@ -128,7 +128,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       const result = await simulateCancellation(booking.hg_booking_id);
       setSimulationResult(result);
     } catch (err: any) {
-      console.error("[Cancel Simulate] Error:", err);
+      
       setSimulationError(true);
     } finally {
       setIsSimulating(false);
