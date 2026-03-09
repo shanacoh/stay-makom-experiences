@@ -139,9 +139,10 @@ export const useDiagnostic = () => {
     updateBlocTests('B', [], true);
     const tests: DiagnosticTest[] = [];
 
+    const checkInStr = getFutureCheckIn();
     try {
       const data = await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: checkInStr,
         nights: 2,
         guests: '2',
         hotelIds: [23860],
@@ -168,11 +169,12 @@ export const useDiagnostic = () => {
         detail: `${rooms.filter((r: any) => r.ratePlans?.length > 0).length}/${rooms.length} rooms avec ratePlans`,
       });
 
-      // B3: Valid prices — guard against empty array
+      // B3: Valid prices — prices are in rp.prices.sell.price per HG response format
       let validPrices = rooms.length > 0;
       rooms.forEach((r: any) => {
         r.ratePlans?.forEach((rp: any) => {
-          if (!rp.sellPrice || rp.sellPrice <= 0) validPrices = false;
+          const price = rp.prices?.sell?.price || rp.sellPrice || 0;
+          if (!price || price <= 0) validPrices = false;
         });
       });
       tests.push({
@@ -196,38 +198,41 @@ export const useDiagnostic = () => {
         detail: hasPolicies ? 'Présent sur chaque ratePlan' : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Absent sur certains ratePlans'),
       });
 
-      // B5: Taxes present (warning if not always)
+      // B5: Taxes present (warning if not always) — taxes is on prices.sell.taxes[]
       let taxesCount = 0;
       let totalRatePlans = 0;
       rooms.forEach((r: any) => {
         r.ratePlans?.forEach((rp: any) => {
           totalRatePlans++;
-          if (rp.taxes) taxesCount++;
+          const taxes = rp.taxes || rp.prices?.sell?.taxes;
+          if (taxes && Array.isArray(taxes) && taxes.length > 0) taxesCount++;
         });
       });
       tests.push({
         id: 'B5',
         name: 'taxes[] présent dans la réponse',
         pass: taxesCount > 0,
-        warning: taxesCount > 0 && taxesCount < totalRatePlans,
-        detail: `${taxesCount}/${totalRatePlans} ratePlans avec taxes`,
+        warning: taxesCount === 0,
+        detail: `${taxesCount}/${totalRatePlans} ratePlans avec taxes (normal si property n'en a pas)`,
       });
 
-      // B6: isImmediateConfirmation present — real check
+      // B6: isImmediate present — HG uses "isImmediate" field on ratePlans
       const hasImmediate = rooms.length > 0 && rooms.some((r: any) =>
-        r.ratePlans?.some((rp: any) => typeof rp.isImmediateConfirmation !== 'undefined')
+        r.ratePlans?.some((rp: any) =>
+          typeof rp.isImmediate !== 'undefined' || typeof rp.isImmediateConfirmation !== 'undefined'
+        )
       );
       tests.push({
         id: 'B6',
-        name: 'isImmediateConfirmation présent',
+        name: 'isImmediate présent sur ratePlans',
         pass: hasImmediate,
-        detail: hasImmediate ? 'Champ présent' : 'Champ absent ou 0 rooms',
+        detail: hasImmediate ? 'Champ isImmediate présent' : 'Champ absent ou 0 rooms',
       });
 
       // B7: Search with child (1 adult + 1 child age 5)
       try {
         const childData = await callHyperGuest('search', {
-          checkIn: '2026-08-14',
+          checkIn: checkInStr,
           nights: 2,
           guests: '1-5',
           hotelIds: [23860],
