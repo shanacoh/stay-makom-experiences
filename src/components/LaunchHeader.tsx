@@ -115,7 +115,7 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
             </button>
             <button
               onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-              className={`ml-2 w-[18px] text-center text-[11px] font-medium leading-none tracking-[0.05em] transition-colors ${
+              className={`ml-1 w-[18px] text-center text-[11px] font-medium leading-none tracking-[0.05em] transition-colors ${
                 !isScrolled ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >

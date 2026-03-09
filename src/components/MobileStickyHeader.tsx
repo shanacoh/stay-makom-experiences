@@ -78,7 +78,7 @@ const MobileStickyHeader = () => {
           </button>
           <button
             onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-            className="ml-2 w-[18px] text-center text-[11px] font-medium leading-none tracking-[0.05em] text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-1 w-[18px] text-center text-[11px] font-medium leading-none tracking-[0.05em] text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Toggle currency"
           >
             {displayCurrency === "USD" ? "$" : "₪"}
