@@ -616,7 +616,7 @@ export function UnifiedExperience2Form({
       is_visible: r.is_visible,
     }));
     const { error } = await supabase.from("experience2_reviews").insert(rows);
-    if (error) console.error("Error saving reviews:", error);
+    
   };
 
   // -------------------------------------------------------------------------
