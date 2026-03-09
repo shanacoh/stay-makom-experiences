@@ -441,7 +441,7 @@ export const useDiagnostic = () => {
     const start = Date.now();
     try {
       await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: getFutureCheckIn(),
         nights: 2,
         guests: '2',
         hotelIds: [23860],
