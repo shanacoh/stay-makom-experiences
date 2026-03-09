@@ -531,6 +531,10 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         confirmationToken,
       });
       setShowConfirmation(true);
+      bookingCompletedRef.current = true;
+
+      // Analytics: booking completed
+      trackBookingCompleted(staymakomRef, state.experienceSlug, sellPrice, bookingCurrency, state.nights, totalPartySize);
 
       // Clear persisted cart after successful booking
       try { localStorage.removeItem("staymakom_cart"); } catch {}
