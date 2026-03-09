@@ -444,7 +444,34 @@ Deno.serve(async (req) => {
     switch (action) {
       case 'search': result = await searchHotels(body as unknown as SearchParams); break;
       case 'pre-book': result = await preBook(body as unknown as PreBookData); break;
-      case 'create-booking': result = await createBooking(body as unknown as BookingData); break;
+      case 'create-booking': {
+        // Idempotency check - prevent double bookings
+        const idempotencyKey = (body as { idempotencyKey?: string }).idempotencyKey;
+        if (idempotencyKey) {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+          const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+          const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+          
+          const { data: existing } = await supabaseAdmin
+            .from('bookings_hg')
+            .select('id, hg_booking_id, status')
+            .eq('idempotency_key', idempotencyKey)
+            .maybeSingle();
+          
+          if (existing) {
+            console.log('⚠️ Duplicate booking detected, returning existing:', existing.hg_booking_id);
+            result = { 
+              id: existing.hg_booking_id, 
+              status: existing.status || 'Confirmed', 
+              duplicate: true,
+              message: 'Booking already exists with this idempotency key'
+            };
+            break;
+          }
+        }
+        result = await createBooking(body as unknown as BookingData);
+        break;
+      }
       case 'get-booking': {
         const bookingId = url.searchParams.get('bookingId');
         if (!bookingId) throw new Error('bookingId is required');
