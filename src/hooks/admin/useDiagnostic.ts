@@ -18,23 +18,27 @@ export interface DiagnosticBloc {
   running: boolean;
 }
 
+// Helper: mask a token/key showing first 8 chars
+function maskToken(token: string): string {
+  if (!token || token.length <= 8) return '***';
+  return token.substring(0, 8) + '...';
+}
+
 // Helper: exact same pattern as callHyperGuestPost in src/services/hyperguest.ts
 async function callHyperGuest(action: string, body: Record<string, any> = {}) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-  const response = await fetch(
-    `${supabaseUrl}/functions/v1/hyperguest?action=${action}`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    }
-  );
+  const url = `${supabaseUrl}/functions/v1/hyperguest?action=${action}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -46,6 +50,12 @@ async function callHyperGuest(action: string, body: Record<string, any> = {}) {
     throw new Error(result.error || 'Unknown error');
   }
   return result.data;
+}
+
+// Helper: build the full URL for display
+function buildUrl(action: string): string {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  return `${supabaseUrl}/functions/v1/hyperguest?action=${action}`;
 }
 
 // Helper: future check-in date (5 months from today)
@@ -75,10 +85,15 @@ export const useDiagnostic = () => {
     updateBlocTests('A', [], true);
     const tests: DiagnosticTest[] = [];
 
-    // A1: Edge Function health check — real call to hyperguest?action=search
+    const currentOrigin = window.location.origin;
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    // A1: Edge Function health check
     let a1Success = false;
     const a1Start = Date.now();
     const checkInStr = getFutureCheckIn();
+    const a1Url = buildUrl('search');
     try {
       const data = await callHyperGuest('search', {
         checkIn: checkInStr,
@@ -93,28 +108,40 @@ export const useDiagnostic = () => {
         id: 'A1',
         name: 'Edge Function accessible (status 200)',
         pass: true,
-        detail: `200 OK, ${(duration / 1000).toFixed(1)}s, ${roomCount} rooms`,
+        detail: `200 OK en ${(duration / 1000).toFixed(1)}s, ${roomCount} rooms. Origin: ${currentOrigin}. URL: ${a1Url}`,
         duration,
       });
     } catch (error: any) {
       const duration = Date.now() - a1Start;
+      const errorMsg = error.message?.substring(0, 120) || 'Unknown error';
+
+      // Try a no-cors fetch to distinguish CORS block vs server down
+      let corsNote = '';
+      try {
+        const noCorsResp = await fetch(a1Url, { method: 'POST', mode: 'no-cors', body: '{}' });
+        // If we get here, server responded but browser blocked CORS
+        corsNote = ` | no-cors fetch status: ${noCorsResp.type} (server reachable, likely CORS block)`;
+      } catch {
+        corsNote = ' | no-cors fetch also failed (server may be unreachable)';
+      }
+
       tests.push({
         id: 'A1',
         name: 'Edge Function accessible (status 200)',
         pass: false,
-        detail: `Error: ${error.message?.substring(0, 100)}, ${(duration / 1000).toFixed(1)}s`,
+        detail: `Error: ${errorMsg}. Origin: ${currentOrigin}. URL: ${a1Url}. Durée: ${(duration / 1000).toFixed(1)}s${corsNote}`,
         duration,
       });
     }
 
-    // A2: Token PROD actif — based on A1 real result
+    // A2: Token PROD actif
     tests.push({
       id: 'A2',
       name: 'Token PROD actif (isTest: false)',
       pass: a1Success,
       detail: a1Success
-        ? 'Token fonctionnel (search retourne des données)'
-        : 'Token non vérifié (A1 en erreur)',
+        ? `Token fonctionnel (search retourne des données). Auth header: Bearer ${maskToken(token)}`
+        : `Token non vérifié (A1 en erreur). Auth header: Bearer ${maskToken(token)}`,
     });
 
     // A3: API Base URL check
@@ -125,12 +152,14 @@ export const useDiagnostic = () => {
       detail: 'URL correcte dans Edge Function (search-api.hyperguest.io / book-api.hyperguest.com)',
     });
 
-    // A4: CORS check — if A1 succeeded, no CORS issue
+    // A4: CORS check
     tests.push({
       id: 'A4',
       name: 'CORS OK depuis staymakom.com',
       pass: a1Success,
-      detail: a1Success ? 'Pas d\'erreur CORS' : 'Non vérifié (A1 en erreur)',
+      detail: a1Success
+        ? `Pas d'erreur CORS. Origin testé: ${currentOrigin}`
+        : `Non vérifié (A1 en erreur). Origin testé: ${currentOrigin}. Vérifier que ${currentOrigin} est dans ALLOWED_ORIGINS de l'Edge Function.`,
     });
 
     updateBlocTests('A', tests, false);
@@ -141,51 +170,55 @@ export const useDiagnostic = () => {
     const tests: DiagnosticTest[] = [];
 
     const checkInStr = getFutureCheckIn();
-    try {
-      const data = await callHyperGuest('search', {
-        checkIn: checkInStr,
-        nights: 2,
-        guests: '2',
-        hotelIds: [23860],
-      });
+    const searchParams = { checkIn: checkInStr, nights: 2, guests: '2', hotelIds: [23860] };
+    const b1Url = buildUrl('search');
 
-      // HG returns { results: [{ propertyId, rooms: [...] }] }
+    try {
+      const data = await callHyperGuest('search', searchParams);
+
       const property = data?.results?.[0];
       const rooms = property?.rooms || [];
 
       // B1: Search returns rooms
+      const firstRoom = rooms[0];
+      const firstRoomInfo = firstRoom ? `Premier room: ${firstRoom.name || firstRoom.roomName || 'N/A'} (ID: ${firstRoom.roomId || firstRoom.id || 'N/A'})` : 'Aucune room';
       tests.push({
         id: 'B1',
         name: 'Search property 23860 retourne des rooms',
         pass: rooms.length > 0,
-        detail: `${rooms.length} rooms retournées`,
+        detail: `${rooms.length} rooms trouvées pour hotelIds=[${searchParams.hotelIds}], checkIn=${searchParams.checkIn}, nights=${searchParams.nights}, guests=${searchParams.guests}. ${firstRoomInfo}. URL: ${b1Url}`,
       });
 
-      // B2: Each room has ratePlans — guard against empty array
+      // B2: Each room has ratePlans
       const allHaveRatePlans = rooms.length > 0 && rooms.every((r: any) => r.ratePlans?.length > 0);
+      const rpCounts = rooms.map((r: any) => r.ratePlans?.length || 0);
       tests.push({
         id: 'B2',
         name: 'Chaque room contient ratePlans[]',
         pass: allHaveRatePlans,
-        detail: `${rooms.filter((r: any) => r.ratePlans?.length > 0).length}/${rooms.length} rooms avec ratePlans`,
+        detail: `${rooms.filter((r: any) => r.ratePlans?.length > 0).length}/${rooms.length} rooms avec ratePlans. Détail: [${rpCounts.join(', ')}] ratePlans par room. ${firstRoom ? `Premier room: ${firstRoom.name || 'N/A'} (ID: ${firstRoom.roomId || 'N/A'})` : ''}`,
       });
 
-      // B3: Valid prices — prices are in rp.prices.sell.price per HG response format
+      // B3: Valid prices
       let validPrices = rooms.length > 0;
+      const priceExamples: string[] = [];
       rooms.forEach((r: any) => {
         r.ratePlans?.forEach((rp: any) => {
           const price = rp.prices?.sell?.price || rp.sellPrice || 0;
           if (!price || price <= 0) validPrices = false;
+          if (priceExamples.length < 3) priceExamples.push(`${rp.board || 'N/A'}: ${price}`);
         });
       });
       tests.push({
         id: 'B3',
         name: 'Prix valides (non null/0)',
         pass: validPrices,
-        detail: validPrices ? 'Tous les prix > 0' : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Prix invalides détectés'),
+        detail: validPrices
+          ? `Tous les prix > 0. Exemples: ${priceExamples.join(', ')}`
+          : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : `Prix invalides détectés. Exemples: ${priceExamples.join(', ')}`),
       });
 
-      // B4: Cancellation policies present — guard against empty array
+      // B4: Cancellation policies present
       let hasPolicies = rooms.length > 0;
       rooms.forEach((r: any) => {
         r.ratePlans?.forEach((rp: any) => {
@@ -196,10 +229,10 @@ export const useDiagnostic = () => {
         id: 'B4',
         name: 'cancellationPolicies[] présent',
         pass: hasPolicies,
-        detail: hasPolicies ? 'Présent sur chaque ratePlan' : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Absent sur certains ratePlans'),
+        detail: hasPolicies ? `Présent sur chaque ratePlan. ${rooms.length} rooms, ${rpCounts.reduce((a: number, b: number) => a + b, 0)} ratePlans vérifiés` : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Absent sur certains ratePlans'),
       });
 
-      // B5: Taxes present — check property 23860, fallback to 19912
+      // B5: Taxes present
       let taxesCount = 0;
       let totalRatePlans = 0;
       rooms.forEach((r: any) => {
@@ -252,7 +285,7 @@ export const useDiagnostic = () => {
         detail: taxDetail,
       });
 
-      // B6: isImmediate present — HG uses "isImmediate" field on ratePlans
+      // B6: isImmediate present
       const hasImmediate = rooms.length > 0 && rooms.some((r: any) =>
         r.ratePlans?.some((rp: any) =>
           typeof rp.isImmediate !== 'undefined' || typeof rp.isImmediateConfirmation !== 'undefined'
@@ -262,10 +295,12 @@ export const useDiagnostic = () => {
         id: 'B6',
         name: 'isImmediate présent sur ratePlans',
         pass: hasImmediate,
-        detail: hasImmediate ? 'Champ isImmediate présent' : 'Champ absent ou 0 rooms',
+        detail: hasImmediate
+          ? `Champ isImmediate présent. ${rooms.length} rooms, ${rpCounts.reduce((a: number, b: number) => a + b, 0)} ratePlans vérifiés`
+          : 'Champ absent ou 0 rooms',
       });
 
-      // B7: Search with child (1 adult + 1 child age 5)
+      // B7: Search with child
       try {
         const childData = await callHyperGuest('search', {
           checkIn: checkInStr,
@@ -274,11 +309,12 @@ export const useDiagnostic = () => {
           hotelIds: [23860],
         });
         const childRooms = childData?.results?.[0]?.rooms || [];
+        const childFirst = childRooms[0];
         tests.push({
           id: 'B7',
           name: 'Search avec enfant (1 adulte + 1 enfant age 5)',
           pass: childRooms.length > 0,
-          detail: `${childRooms.length} rooms retournées`,
+          detail: `${childRooms.length} rooms retournées. ${childFirst ? `Premier room: ${childFirst.name || childFirst.roomName || 'N/A'} (ID: ${childFirst.roomId || childFirst.id || 'N/A'})` : 'Aucune room'}`,
         });
       } catch (error: any) {
         tests.push({
@@ -293,7 +329,7 @@ export const useDiagnostic = () => {
         id: 'B1',
         name: 'Search property 23860 retourne des rooms',
         pass: false,
-        detail: `API call error: ${error.message?.substring(0, 80)}`,
+        detail: `API call error: ${error.message?.substring(0, 80)}. Params: hotelIds=[${searchParams.hotelIds}], checkIn=${searchParams.checkIn}, nights=${searchParams.nights}, guests=${searchParams.guests}. URL: ${b1Url}`,
       });
     }
 
@@ -304,7 +340,7 @@ export const useDiagnostic = () => {
     updateBlocTests('C', [], true);
     const tests: DiagnosticTest[] = [];
 
-    // C1: Required fields check (code inspection)
+    // C1: Required fields check
     tests.push({
       id: 'C1',
       name: 'Champs obligatoires envoyés au booking',
@@ -320,7 +356,7 @@ export const useDiagnostic = () => {
       detail: 'Confirmé par booking live #2157750',
     });
 
-    // C3: Timeout booking = 300s — confirmed in Edge Function code
+    // C3: Timeout booking = 300s
     tests.push({
       id: 'C3',
       name: 'Timeout booking = 300 secondes',
@@ -352,7 +388,7 @@ export const useDiagnostic = () => {
     updateBlocTests('D', [], true);
     const tests: DiagnosticTest[] = [];
 
-    // D1: Non-refundable detection — real unit test
+    // D1: Non-refundable detection
     const nonRefPolicy = { daysBefore: 999, penaltyType: 'percent', amount: 100 };
     const isNonRef = (nonRefPolicy.daysBefore ?? 0) >= 999 &&
                      nonRefPolicy.amount === 100 &&
@@ -403,7 +439,7 @@ export const useDiagnostic = () => {
 ❌ FAIL si : des strings statiques "Free cancellation" existent dans les composants`,
     });
 
-    // D4: Cancel simulation — implemented via simulateCancellation in MyStaymakomSection
+    // D4: Cancel simulation
     tests.push({
       id: 'D4',
       name: 'Cancel simulate (cancelSimulation: true) avant cancel réel',
@@ -449,35 +485,37 @@ export const useDiagnostic = () => {
     const tests: DiagnosticTest[] = [];
 
     const checkInStr = getFutureCheckIn();
+    const invalidPropertyId = 99999999;
 
-    // E1: Invalid property ID — real call
+    // E1: Invalid property ID
     try {
       const data = await callHyperGuest('search', {
         checkIn: checkInStr,
         nights: 2,
         guests: '2',
-        hotelIds: [99999999],
+        hotelIds: [invalidPropertyId],
       });
       const rooms = data?.results?.[0]?.rooms || [];
       tests.push({
         id: 'E1',
         name: 'Property ID invalide retourne erreur propre',
         pass: rooms.length === 0,
-        detail: `${rooms.length === 0 ? 'rooms: [] retourné, pas de crash' : 'Des rooms retournées (inattendu)'}`,
+        detail: `propertyId testé: ${invalidPropertyId}. ${rooms.length === 0 ? 'rooms: [] retourné, pas de crash' : `${rooms.length} rooms retournées (inattendu)`}`,
       });
     } catch (error: any) {
       tests.push({
         id: 'E1',
         name: 'Property ID invalide retourne erreur propre',
         pass: true,
-        detail: `Erreur gérée correctement: ${error.message?.substring(0, 60)}`,
+        detail: `propertyId testé: ${invalidPropertyId}. Erreur gérée: ${error.message?.substring(0, 80)}`,
       });
     }
 
-    // E2: Past dates rejected — intentionally past date
+    // E2: Past dates rejected
+    const pastDate = '2024-01-01';
     try {
       const pastData = await callHyperGuest('search', {
-        checkIn: '2024-01-01',
+        checkIn: pastDate,
         nights: 2,
         guests: '2',
         hotelIds: [23860],
@@ -487,14 +525,16 @@ export const useDiagnostic = () => {
         id: 'E2',
         name: 'Dates passées rejetées',
         pass: pastRooms.length === 0,
-        detail: pastRooms.length === 0 ? 'Réponse vide pour dates passées' : 'Rooms retournées pour dates passées (problème)',
+        detail: `Date passée envoyée: ${pastDate}. ${pastRooms.length === 0 ? 'Réponse vide (attendu)' : `${pastRooms.length} rooms retournées (problème)`}`,
       });
-    } catch (_error) {
+    } catch (error: any) {
+      const errMsg = error.message?.substring(0, 80) || '';
+      const expectedCode = errMsg.includes('SN.400') || errMsg.includes('400');
       tests.push({
         id: 'E2',
         name: 'Dates passées rejetées',
         pass: true,
-        detail: 'Erreur SN.400 retournée correctement pour dates passées',
+        detail: `Date passée envoyée: ${pastDate}. Code erreur reçu: ${errMsg}. ${expectedCode ? 'Code attendu (SN.400/400) ✓' : 'Erreur reçue (non-SN.400 mais rejet OK)'}`,
       });
     }
 
@@ -535,21 +575,21 @@ export const useDiagnostic = () => {
     updateBlocTests('F', [], true);
     const tests: DiagnosticTest[] = [];
 
-    // F1: Response time — real call
+    const searchParams = { checkIn: getFutureCheckIn(), nights: 2, guests: '2', hotelIds: [23860] };
+    const f1Url = buildUrl('search');
+
+    // F1: Response time
     const start = Date.now();
     try {
-      await callHyperGuest('search', {
-        checkIn: getFutureCheckIn(),
-        nights: 2,
-        guests: '2',
-        hotelIds: [23860],
-      });
+      const data = await callHyperGuest('search', searchParams);
       const duration = Date.now() - start;
+      const responseSize = JSON.stringify(data).length;
+      const roomCount = data?.results?.[0]?.rooms?.length || 0;
       tests.push({
         id: 'F1',
         name: 'Temps de réponse search < 10s',
         pass: duration < 10000,
-        detail: `${(duration / 1000).toFixed(1)}s`,
+        detail: `${(duration / 1000).toFixed(1)}s (${duration}ms exact). URL: ${f1Url}. Taille réponse: ~${(responseSize / 1024).toFixed(1)}KB. ${roomCount} rooms.`,
         duration,
       });
     } catch (_error) {
@@ -558,7 +598,7 @@ export const useDiagnostic = () => {
         id: 'F1',
         name: 'Temps de réponse search < 10s',
         pass: false,
-        detail: `Erreur après ${(duration / 1000).toFixed(1)}s`,
+        detail: `Erreur après ${(duration / 1000).toFixed(1)}s (${duration}ms exact). URL: ${f1Url}`,
         duration,
       });
     }
@@ -621,8 +661,7 @@ export const useDiagnostic = () => {
       await runBloc(bloc.id);
     }
 
-    // Save to database — re-read blocs from state after all runs
-    // Use a small delay to ensure state is updated
+    // Save to database
     setTimeout(async () => {
       const currentBlocs = blocs;
       const allTests = currentBlocs.flatMap(b => b.tests);
