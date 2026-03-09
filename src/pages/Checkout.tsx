@@ -904,7 +904,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 
               {/* Navigation */}
               <div className={cn("flex gap-3 pt-2 pb-8", lang === 'he' && "flex-row-reverse")}>
-                <Button variant="outline" className="shrink-0" onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                <Button variant="outline" className="shrink-0" onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step3'); setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
                   {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
                   {t.back}
                 </Button>
