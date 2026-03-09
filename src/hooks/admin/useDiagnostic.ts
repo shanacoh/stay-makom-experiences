@@ -98,7 +98,7 @@ export const useDiagnostic = () => {
     const tests: DiagnosticTest[] = [];
 
     try {
-      const { data, error } = await supabase.functions.invoke('search-hyperguest', {
+      const { data } = await supabase.functions.invoke('search-hyperguest', {
         body: {
           action: 'search',
           propertyId: '23860',
