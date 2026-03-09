@@ -1,4 +1,4 @@
-import { useHyperGuestLogs, type DiagnosticRunLog } from '@/hooks/admin/useHyperGuestLogs';
+import { useHyperGuestLogs } from '@/hooks/admin/useHyperGuestLogs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,7 @@ import { RefreshCw, CheckCircle2, XCircle, AlertTriangle, ChevronRight } from 'l
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export function ApiLogViewer() {
-  const { logs, loading, filter, setFilter, selectedLog, setSelectedLog, refresh } = useHyperGuestLogs();
+  const { logs, loading, filter, setFilter, refresh } = useHyperGuestLogs();
 
   return (
     <div className="space-y-4">

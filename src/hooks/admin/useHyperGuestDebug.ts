@@ -197,7 +197,7 @@ export function useHyperGuestDebug() {
     {
       const tests: DebugSubTest[] = [];
       try {
-        const { data, error } = await supabase.functions.invoke('hyperguest', {
+        await supabase.functions.invoke('hyperguest', {
           body: { action: 'cancel-booking', bookingId: 'TEST-INVALID-ID', cancelSimulation: true },
         });
         tests.push({ id: '5.1', name: 'Cancel simulate endpoint accessible', pass: true, detail: 'Endpoint répond (erreur attendue pour ID invalide)' });
