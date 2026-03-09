@@ -157,6 +157,7 @@ function validateB2BLead(data: any): { valid: boolean; errors: string[] } {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

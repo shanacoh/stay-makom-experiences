@@ -38,6 +38,7 @@ const formatDate = (dateStr: string, isHebrew: boolean): string => {
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-booking-confirmation function called");
+  const corsHeaders = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
