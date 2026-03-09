@@ -577,11 +577,15 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         // Error handled silently
       }
     } catch (error: any) {
-      
       const detail = error?.message || "";
       const codeMatch = detail.match(/BN\.\d+/);
       const errorCode = codeMatch?.[0] || "";
       const friendlyMsg = hgErrorMessages[errorCode]?.[lang];
+
+      // Analytics: booking failed
+      const errorType = errorCode.startsWith("BN.5") ? "hg_error" : errorCode === "BN.402" ? "payment_declined" : "network";
+      trackBookingFailed(state.experienceSlug, errorType, detail.substring(0, 200), displayTotal);
+
       toast.error(t.bookingError, {
         description: friendlyMsg || (detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined),
         duration: 8000,
