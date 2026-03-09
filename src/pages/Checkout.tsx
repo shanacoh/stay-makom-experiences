@@ -309,6 +309,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   };
 
   const handleBookInternal = async () => {
+    // Double-click protection - if already booking, ignore
+    if (isBooking) return;
+    
     if (!isGuestValid) {
       setShowGuestErrors(true);
       setStep(2);
