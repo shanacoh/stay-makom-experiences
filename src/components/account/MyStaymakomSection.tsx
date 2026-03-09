@@ -398,26 +398,20 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         ))}
       </div>
 
-      {/* Desktop filter */}
-      <Card className="hidden md:block">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">{isHebrew ? "תקופה" : isFrench ? "Période" : "Time Period"}</label>
-              <Select value={timeFilter} onValueChange={setTimeFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
-                  <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
-                  <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Desktop filter — simplified */}
+      <div className="hidden md:flex items-center gap-2 text-muted-foreground text-[13px]" style={{ fontFamily: "Inter, sans-serif" }}>
+        <span>Show:</span>
+        <Select value={timeFilter} onValueChange={setTimeFilter}>
+          <SelectTrigger className="w-auto border-0 shadow-none px-0 h-auto font-normal">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
+            <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
+            <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Bookings List */}
       {allBookings.length === 0 ? (
