@@ -206,8 +206,8 @@ const AdminHotels2 = () => {
         {isLoading ? (
           <div className="text-center py-12">Loading...</div>
         ) : filteredHotels && filteredHotels.length > 0 ? (
-          <div className="border rounded-lg bg-card">
-            <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Hotel</TableHead>
