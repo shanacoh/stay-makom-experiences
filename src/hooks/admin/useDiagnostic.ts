@@ -382,7 +382,7 @@ export const useDiagnostic = () => {
         detail: `${(duration / 1000).toFixed(1)}s`,
         duration
       });
-    } catch (e) {
+    } catch (_error) {
       tests.push({
         id: 'F1',
         name: 'Temps de réponse',
