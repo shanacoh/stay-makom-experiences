@@ -204,7 +204,7 @@ const Account = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+      <LaunchHeader forceScrolled={true} />
       <main className="flex-1 pt-24 pb-16">
         {/* Full-width header area */}
         <div className="container">
