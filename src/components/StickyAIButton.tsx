@@ -125,8 +125,6 @@ const StickyAIButton = () => {
       setResponse(data);
       setShowEmailPrompt(false);
     } catch (error: any) {
-      console.error('Error getting recommendations:', error);
-      
       // Distinguish between network/CORS errors and function errors
       const isNetworkError = error?.name === 'FunctionsFetchError' || 
                             error?.message?.includes('Failed to fetch') ||
