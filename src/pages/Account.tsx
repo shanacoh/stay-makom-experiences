@@ -101,24 +101,8 @@ const Account = () => {
 
   // === MOBILE LAYOUT ===
   if (isMobile) {
-    // No tab param = show profile hub
-    if (!tabFromUrl) {
-      return (
-        <>
-          <MobileAccountHome />
-          {user && (
-            <OnboardingFlow
-              open={showOnboarding}
-              onComplete={() => setShowOnboarding(false)}
-              userId={user.id}
-            />
-          )}
-        </>
-      );
-    }
-
-    // Tab param = show that section full-screen
-    const pageTitle = MOBILE_TAB_TITLES[tabFromUrl] || "Account";
+    const mobileTab = effectiveTab;
+    const pageTitle = MOBILE_TAB_TITLES[mobileTab] || "Account";
 
     return (
       <div className="min-h-screen pb-24">
@@ -126,7 +110,7 @@ const Account = () => {
         <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-border/50 md:hidden">
           <div className="flex items-center h-14 px-2">
             <button
-              onClick={() => navigate("/account")}
+              onClick={() => navigate("/account?tab=bookings")}
               className="flex items-center justify-center w-11 h-11"
               aria-label="Back"
             >
@@ -139,15 +123,15 @@ const Account = () => {
         </div>
 
         <div className="pt-16 px-4">
-          {tabFromUrl === "bookings" && <MyStaymakomSection userId={user.id} />}
-          {tabFromUrl === "wishlist" && <WishlistSection userId={user.id} />}
-          {tabFromUrl === "giftcards" && (
+          {mobileTab === "bookings" && <MyStaymakomSection userId={user.id} />}
+          {mobileTab === "wishlist" && <WishlistSection userId={user.id} />}
+          {mobileTab === "giftcards" && (
             <GiftCardsSection userId={user.id} userEmail={user.email} />
           )}
-          {tabFromUrl === "profile" && (
+          {mobileTab === "profile" && (
             <MyAccountSection userId={user.id} userEmail={user.email} mobile />
           )}
-          {tabFromUrl === "savedcarts" && <SavedCartsSection userId={user.id} />}
+          {mobileTab === "savedcarts" && <SavedCartsSection userId={user.id} />}
         </div>
       </div>
     );

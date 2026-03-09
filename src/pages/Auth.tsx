@@ -453,7 +453,7 @@ const Auth = () => {
           open={showOnboarding}
           onComplete={() => {
             setShowOnboarding(false);
-            navigate("/account");
+            navigate("/account?tab=bookings");
           }}
           userId={newUserId}
           lang="en"
