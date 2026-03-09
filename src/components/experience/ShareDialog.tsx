@@ -49,6 +49,7 @@ const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps)
   const truncatedUrl = url.length > 30 ? url.substring(0, 30) + '...' : url;
 
   const handleEmailShare = () => {
+    trackExperienceShared(slug, 'email');
     const subject = encodeURIComponent(title);
     const body = encodeURIComponent(`${title}\n\n${url}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
