@@ -199,7 +199,7 @@ export const useDiagnostic = () => {
         detail: hasPolicies ? 'Présent sur chaque ratePlan' : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Absent sur certains ratePlans'),
       });
 
-      // B5: Taxes present (warning if not always) — taxes is on prices.sell.taxes[]
+      // B5: Taxes present — check property 23860, fallback to 19912
       let taxesCount = 0;
       let totalRatePlans = 0;
       rooms.forEach((r: any) => {
@@ -209,12 +209,47 @@ export const useDiagnostic = () => {
           if (taxes && Array.isArray(taxes) && taxes.length > 0) taxesCount++;
         });
       });
+
+      let taxesFound = taxesCount > 0;
+      let taxDetail = taxesFound
+        ? `${taxesCount}/${totalRatePlans} ratePlans avec taxes sur property 23860`
+        : '';
+
+      if (!taxesFound) {
+        try {
+          const certData = await callHyperGuest('search', {
+            checkIn: checkInStr,
+            nights: 2,
+            guests: '2',
+            hotelIds: [19912],
+          });
+          const certRooms = certData?.results?.[0]?.rooms || [];
+          let certTaxes = 0;
+          let certTotal = 0;
+          certRooms.forEach((r: any) => {
+            r.ratePlans?.forEach((rp: any) => {
+              certTotal++;
+              const taxes = rp.taxes || rp.prices?.sell?.taxes;
+              if (taxes && Array.isArray(taxes) && taxes.length > 0) certTaxes++;
+            });
+          });
+          if (certTaxes > 0) {
+            taxesFound = true;
+            taxDetail = `${certTaxes}/${certTotal} ratePlans avec taxes sur property 19912`;
+          } else {
+            taxDetail = `0 taxes sur properties 23860 et 19912 (peut être normal)`;
+          }
+        } catch {
+          taxDetail = `0/${totalRatePlans} taxes sur 23860, property 19912 inaccessible`;
+        }
+      }
+
       tests.push({
         id: 'B5',
         name: 'taxes[] présent dans la réponse',
-        pass: taxesCount > 0,
-        warning: taxesCount === 0,
-        detail: `${taxesCount}/${totalRatePlans} ratePlans avec taxes (normal si property n'en a pas)`,
+        pass: taxesFound,
+        warning: !taxesFound,
+        detail: taxDetail,
       });
 
       // B6: isImmediate present — HG uses "isImmediate" field on ratePlans
