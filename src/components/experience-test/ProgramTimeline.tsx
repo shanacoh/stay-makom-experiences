@@ -44,7 +44,7 @@ const ProgramTimeline = ({ includes, lang = "en", introText }: ProgramTimelinePr
       {introText && (
         <div 
           className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-6 prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: introText }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(introText) }}
         />
       )}
 

@@ -58,7 +58,7 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
       {longCopy && (
         <div
           className="text-xs md:text-sm text-muted-foreground leading-relaxed mb-6 prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: longCopy }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(longCopy) }}
         />
       )}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
