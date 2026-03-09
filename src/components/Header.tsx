@@ -117,7 +117,7 @@ const Header = () => {
                     : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              EN · $
+              EN
             </button>
             <span
               className={`text-xs ${
@@ -140,7 +140,17 @@ const Header = () => {
                     : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              עב · ₪
+              עב
+            </button>
+            <button
+              onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
+              className={`text-xs font-semibold transition-colors ml-1.5 ${
+                isTransparentPage && !isScrolled
+                  ? "text-[#B8935A] hover:text-[#C4A56E]"
+                  : "text-[#B8935A] hover:text-[#C4A56E]"
+              }`}
+            >
+              {displayCurrency === "USD" ? "$" : "₪"}
             </button>
           </div>
 
