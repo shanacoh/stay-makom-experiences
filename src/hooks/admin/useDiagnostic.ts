@@ -17,10 +17,10 @@ export interface DiagnosticBloc {
   running: boolean;
 }
 
-// Helper: call the hyperguest edge function the same way the service does
+// Helper: exact same pattern as callHyperGuestPost in src/services/hyperguest.ts
 async function callHyperGuest(action: string, body: Record<string, any> = {}) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const session = (await supabase.auth.getSession()).data.session;
+  const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   const response = await fetch(
@@ -28,9 +28,8 @@ async function callHyperGuest(action: string, body: Record<string, any> = {}) {
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
     }
@@ -41,7 +40,18 @@ async function callHyperGuest(action: string, body: Record<string, any> = {}) {
     throw new Error(`${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Unknown error');
+  }
+  return result.data;
+}
+
+// Helper: future check-in date (5 months from today)
+function getFutureCheckIn(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 5);
+  return d.toISOString().split('T')[0];
 }
 
 export const useDiagnostic = () => {
