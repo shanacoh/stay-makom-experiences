@@ -463,7 +463,7 @@ const Hotel = () => {
                       return (
                         <Link
                           key={exp.id}
-                          to={`/experience2/${exp.slug}`}
+                          to={`/experience/${exp.slug}`}
                           className="block p-3 rounded-lg hover:bg-muted transition-colors">
                           
                             <p className="font-medium">{expTitle}</p>
