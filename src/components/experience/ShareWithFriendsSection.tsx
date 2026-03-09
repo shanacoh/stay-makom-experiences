@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareDialog from "./ShareDialog";
+import { trackShareThisEscapeClicked } from "@/lib/analytics";
 
 interface ShareWithFriendsSectionProps {
   title: string;
