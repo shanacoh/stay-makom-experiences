@@ -162,8 +162,8 @@ const AdminBookings = () => {
     <TooltipProvider>
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold">Bookings</h2>
-          <p className="text-muted-foreground">Manage all bookings</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Bookings</h2>
+          <p className="text-sm text-muted-foreground">Manage all bookings</p>
         </div>
 
         <div className="flex flex-wrap gap-3 items-center">
