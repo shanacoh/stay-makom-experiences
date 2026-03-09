@@ -197,7 +197,7 @@ export const useDiagnostic = () => {
         detail: `${childData?.rooms?.length || 0} rooms retournées`
       });
 
-    } catch (e) {
+    } catch (_error) {
       tests.push({
         id: 'B1',
         name: 'Search failed',
