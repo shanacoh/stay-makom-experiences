@@ -8,6 +8,7 @@ import {
   getPropertyAvailability, 
   type HyperGuestSearchParams 
 } from '@/services/hyperguest';
+import { trackSearchPerformed, trackSearchNoResults } from '@/lib/analytics';
 
 export const hyperguestAvailabilityKeys = {
   all: ['hyperguest-availability'] as const,
