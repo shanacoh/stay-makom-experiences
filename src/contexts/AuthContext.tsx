@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { identifyUser } from "@/lib/analytics";
 import { useNavigate } from "react-router-dom";
 
 type AppRole = "admin" | "hotel_admin" | "customer";
