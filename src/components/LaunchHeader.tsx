@@ -21,10 +21,9 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { lang, setLanguage } = useLanguage();
-  const { setDisplayCurrency } = useCurrency();
+  const { displayCurrency, setDisplayCurrency } = useCurrency();
   const handleLang = (l: "en" | "he") => {
     setLanguage(l);
-    setDisplayCurrency(l === "he" ? "ILS" : "USD");
   };
   const { getLocalizedPath, navigateLocalized } = useLocalizedNavigation();
 
@@ -101,7 +100,7 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
                   : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              EN · $
+              EN
             </button>
             <span className={`text-xs ${!isScrolled ? "text-white/40" : "text-muted-foreground/40"}`}>|</span>
             <button
@@ -112,7 +111,15 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
                   : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              עב · ₪
+              עב
+            </button>
+            <button
+              onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
+              className={`text-xs font-semibold transition-colors ml-1.5 ${
+                !isScrolled ? "text-[#B8935A] hover:text-[#C4A56E]" : "text-[#B8935A] hover:text-[#C4A56E]"
+              }`}
+            >
+              {displayCurrency === "USD" ? "$" : "₪"}
             </button>
           </div>
 
