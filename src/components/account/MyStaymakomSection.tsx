@@ -461,8 +461,25 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
             // ✅ #8: Modify button — same conditions as cancel
             const showModify = showCancel;
 
+            const statusAccentColor = booking.isCancelled || booking.status === "cancelled"
+              ? "#C0392B" // red
+              : isPast(parseISO(booking.checkin))
+              ? "#2D6A4F" // green (completed)
+              : "#B8935A"; // gold (pending/upcoming)
+
+            // Determine primary badge to show
+            const primaryBadge = booking.isCancelled || booking.status === "cancelled"
+              ? getStatusBadge(booking.status, booking.isCancelled)
+              : !isPast(parseISO(booking.checkin))
+              ? getTimeBadge(booking.checkin)
+              : getStatusBadge(booking.status, booking.isCancelled);
+
             return (
-              <Card key={booking.id} className={`hover:shadow-lg transition-shadow overflow-hidden ${booking.isCancelled ? "opacity-60" : ""}`}>
+              <Card 
+                key={booking.id} 
+                className={`hover:shadow-lg transition-shadow overflow-hidden ${booking.isCancelled ? "opacity-60" : ""}`}
+                style={{ borderLeft: `3px solid ${statusAccentColor}` }}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 min-w-0">
@@ -478,8 +495,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
-                      {!booking.isCancelled && getTimeBadge(booking.checkin)}
-                      {getStatusBadge(booking.status, booking.isCancelled)}
+                      {primaryBadge}
                     </div>
                   </div>
                 </CardHeader>
