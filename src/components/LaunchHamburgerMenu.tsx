@@ -19,7 +19,7 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) setBookExpanded(false); }}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
