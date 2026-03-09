@@ -549,6 +549,12 @@ export function BookingPanel2({
             onSelect={(roomId, ratePlanId) => {
               setSelectedRoomId(roomId);
               setSelectedRatePlanId(ratePlanId);
+              // Find room name for tracking
+              let rooms: any[] = [];
+              if (searchResult?.results?.[0]?.rooms) rooms = searchResult.results[0].rooms;
+              else if (searchResult?.rooms) rooms = searchResult.rooms;
+              const rm = rooms.find((r: any) => r.roomId === roomId);
+              if (rm) trackRoomTypeSelected(experienceSlug, rm.roomName || '', rm.ratePlans?.find((rp: any) => rp.ratePlanId === ratePlanId)?.prices?.sell?.price ?? 0);
             }}
             lang={lang}
             checkInDate={searchParams?.checkIn}
