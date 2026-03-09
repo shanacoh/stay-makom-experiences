@@ -189,7 +189,7 @@ const AdminHotels2 = () => {
           </Select>
 
           <Select value={regionFilter} onValueChange={setRegionFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by region" />
             </SelectTrigger>
             <SelectContent>
