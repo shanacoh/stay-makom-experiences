@@ -58,9 +58,8 @@ export const trackNewSearch = async (searchId: string) => {
         event_type: "new_search",
         metadata: { new_search_id: searchId },
       });
-      console.log("New search tracked after:", previousSearchId);
     } catch (error) {
-      console.error("Failed to track new search:", error);
+      // Error handled silently
     }
   }
 
