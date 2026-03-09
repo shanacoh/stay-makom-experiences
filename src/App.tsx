@@ -68,6 +68,7 @@ import AdminLeads from "./pages/admin/Leads";
 import AdminFavorites from "./pages/admin/Favorites";
 import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
 import CertificationSetup from "./pages/admin/CertificationSetup";
+import DiagnosticPage from "./pages/admin/DiagnosticPage";
 import LaunchIndex from "./pages/LaunchIndex";
 import LaunchExperiences from "./pages/LaunchExperiences";
 import MobileAuthPrompt from "./pages/MobileAuthPrompt";
@@ -186,6 +187,7 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
               <Route path="certification-setup" element={<CertificationSetup />} />
+              <Route path="diagnostic" element={<DiagnosticPage />} />
             </Route>
             <Route
               path="/hotel-admin"
