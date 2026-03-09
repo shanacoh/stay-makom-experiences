@@ -177,7 +177,7 @@ export function useHyperGuestDebug() {
     {
       const tests: DebugSubTest[] = [];
       try {
-        const { data, error } = await supabase.functions.invoke('hyperguest', {
+        await supabase.functions.invoke('hyperguest', {
           body: { action: 'pre-book', propertyId: 23860 },
         });
         tests.push({ id: '4.1', name: 'Endpoint booking accessible', pass: true, detail: 'Endpoint répond (erreur de validation attendue)' });
