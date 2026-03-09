@@ -3,7 +3,7 @@
  * Supporte le parcours multi-hôtels via experience2_hotels
  * Utilise experiences2 + hotels2 + intégration HyperGuest
  */
-import { useRef, useState, useMemo, useCallback } from "react";
+import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useExperience2 } from "@/hooks/useExperience2";
 import { useQuery } from "@tanstack/react-query";
