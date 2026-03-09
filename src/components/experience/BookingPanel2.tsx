@@ -447,7 +447,7 @@ export function BookingPanel2({
               <button
                 key={n}
                 type="button"
-                onClick={() => setSelectedTab(n)}
+                onClick={() => { trackDurationTabClicked(experienceSlug, n); setSelectedTab(n); }}
                 className={cn(
                   "flex-1 px-1 py-1.5 rounded-lg border-2 transition-all text-xs whitespace-nowrap",
                   "hover:border-primary/50",
