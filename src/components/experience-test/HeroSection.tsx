@@ -404,7 +404,7 @@ const HeroSection = ({
             <div className="relative h-[calc(100vh-12rem)]">
               <div 
                 className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer"
-                onClick={() => { setCurrentPhotoIndex(0); setIsGalleryOpen(true); }}
+                onClick={() => { trackPhotoGalleryClicked(title); setCurrentPhotoIndex(0); setIsGalleryOpen(true); }}
               >
                 <img
                   src={photos[0] || "/placeholder.svg"}
