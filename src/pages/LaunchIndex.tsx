@@ -26,7 +26,7 @@ import {
 import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
-import { trackFindEscapeClicked, trackVibeTabClicked, trackWaitlistEmailSubmitted, trackGiftCardClicked } from "@/lib/analytics";
+import { trackFindEscapeClicked, trackVibeTabClicked, trackWaitlistEmailSubmitted, trackGiftCardClicked, trackCategoryTileClicked, trackDesignMyStayClicked, trackViewAllExperiencesClicked } from "@/lib/analytics";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
