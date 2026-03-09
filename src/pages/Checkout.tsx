@@ -301,6 +301,38 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
     return t.booking;
   };
 
+  // Track step views
+  useEffect(() => {
+    if (step === 2) trackCheckoutStep2Viewed(state.experienceSlug, displayTotal);
+    if (step === 3) trackCheckoutStep3Viewed(state.experienceSlug, displayTotal);
+  }, [step]);
+
+  // Track booking abandonment
+  const bookingCompletedRef = useRef(false);
+  useEffect(() => {
+    const start = Date.now();
+    return () => {
+      if (!bookingCompletedRef.current) {
+        const seconds = (Date.now() - start) / 1000;
+        trackBookingAbandoned(
+          state.experienceSlug,
+          step === 3 ? "step3" : "step2",
+          displayTotal,
+          seconds
+        );
+      }
+    };
+  }, []);
+
+  // Form field tracking
+  const trackedFields = useRef(new Set<string>());
+  const handleFieldFocus = (fieldName: string) => {
+    if (!trackedFields.current.has(fieldName)) {
+      trackedFields.current.add(fieldName);
+      trackFormFieldInteracted(fieldName);
+    }
+  };
+
   useEffect(() => {
     if (user && pendingBookAfterAuth.current) {
       pendingBookAfterAuth.current = false;
