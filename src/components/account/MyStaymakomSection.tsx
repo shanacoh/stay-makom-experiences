@@ -151,7 +151,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       } catch (err: any) {
         const msg = err?.message || "";
         if (msg.includes("booking cannot be found") || msg.includes("BN.500")) {
-          console.warn("[Cancel] Booking not found on HyperGuest, marking as cancelled locally");
+          
           hgCancelSuccess = true;
         } else {
           throw err;
