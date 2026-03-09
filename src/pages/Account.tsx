@@ -216,7 +216,7 @@ const Account = () => {
           <div className="flex gap-10">
             {/* Sidebar */}
             <aside className="hidden md:block w-56 flex-shrink-0">
-              <AccountSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+              <AccountSidebar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab as AccountTab)} />
             </aside>
 
             {/* Main content area */}
