@@ -194,7 +194,7 @@ const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/cart")}
+            onClick={() => { trackCartIconClicked(hasCart ? 1 : 0); navigate("/cart"); }}
             className={`relative h-8 w-8 ${
               isTransparentPage && !isScrolled
                 ? "text-white hover:bg-white/10"
