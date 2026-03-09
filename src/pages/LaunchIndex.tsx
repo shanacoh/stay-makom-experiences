@@ -43,6 +43,9 @@ const LaunchIndex = () => {
   const { getLocalizedPath } = useLocalizedNavigation();
   const isRTL = lang === "he";
 
+  // Analytics
+  useScrollDepth("launch");
+
   // Lead capture state
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
