@@ -29,6 +29,7 @@ import { formatGuests, calculateNights } from "@/services/hyperguest";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { CheckoutState } from "@/pages/Checkout";
+import { trackDurationTabClicked, trackDateSelected, trackViewDatesClicked, trackGuestsSelected, trackRoomTypeSelected, trackBookThisStayClicked } from "@/lib/analytics";
 
 interface DateOption {
   id: string;
