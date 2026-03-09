@@ -15,6 +15,7 @@ import {
   Heart,
   ShieldCheck,
   Archive,
+  FlaskConical,
 } from "lucide-react";
 import {
   Sidebar,
