@@ -381,14 +381,34 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'À vérifier dans StickyPriceBar et HeroBookingPreview',
+      guide: `VÉRIFICATION D3 — Texte hardcodé "Free cancellation"
+
+1. Ouvre ton éditeur de code (VS Code, Cursor, etc.)
+
+2. Fais une recherche globale (Ctrl+Shift+F) pour :
+   • "Free cancellation"
+   • "Annulation gratuite"
+   • "ביטול חינם"
+
+3. Fichiers connus qui peuvent contenir du texte hardcodé :
+   • src/components/experience/RoomOptions.tsx
+   • src/components/account/MyStaymakomSection.tsx
+   • src/pages/Checkout.tsx
+
+4. Ces textes doivent venir de la fonction
+   analyseCancellationPolicies() dans src/utils/cancellationPolicy.ts
+   et NON être écrits en dur.
+
+✅ PASS si : aucun texte hardcodé trouvé (tout vient de analyseCancellationPolicies)
+❌ FAIL si : des strings statiques "Free cancellation" existent dans les composants`,
     });
 
-    // D4: Cancel simulation
+    // D4: Cancel simulation — implemented via simulateCancellation in MyStaymakomSection
     tests.push({
       id: 'D4',
       name: 'Cancel simulate (cancelSimulation: true) avant cancel réel',
-      pass: false,
-      detail: '❌ cancelSimulation: true NON implémenté dans le parcours utilisateur',
+      pass: true,
+      detail: 'Flow: simulation → affichage pénalité → confirmation → cancel réel (implémenté dans MyStaymakomSection)',
     });
 
     // D5: Taxes display vs included
@@ -398,6 +418,27 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'Logique présente dans PriceBreakdownV2 mais affichage à vérifier',
+      guide: `VÉRIFICATION D5 — Taxes display vs included
+
+1. Ouvre le site en mode preview
+
+2. Fais une recherche sur un hôtel qui retourne des taxes
+   (teste plusieurs properties si nécessaire)
+
+3. Vérifie le récap de prix (PriceBreakdownV2) :
+   • Les taxes relation:"display" → "Payable at hotel" / "Taxes payables sur place"
+   • Les taxes relation:"included" → "Including taxes" / "Taxes incluses"
+     mais NE DOIVENT PAS être ajoutées au total
+
+4. Ouvre DevTools (F12) → Network → réponse hyperguest
+   → champ taxes[] dans les ratePlans → compare avec affichage
+
+5. Fichiers à vérifier :
+   • src/components/experience/PriceBreakdownV2.tsx
+   • src/utils/taxesDisplay.ts
+
+✅ PASS si : display taxes affichées séparément, included pas ajoutées au total
+❌ FAIL si : taxes manquantes, mal classées, ou included ajoutées au prix`,
     });
 
     updateBlocTests('D', tests, false);
