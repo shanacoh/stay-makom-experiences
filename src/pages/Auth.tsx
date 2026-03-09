@@ -41,6 +41,11 @@ const Auth = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [newUserId, setNewUserId] = useState<string | null>(null);
   
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const MAX_ATTEMPTS = 5;
+  const LOCK_DURATION = 5 * 60 * 1000; // 5 minutes
+
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
     email: "",
@@ -57,9 +62,17 @@ const Auth = () => {
     }
   }, [user, navigate, showOnboarding, newUserId]);
 
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    if (isLocked) {
+      const remainingMin = Math.ceil((lockedUntil! - Date.now()) / 60000);
+      toast.error(`Too many attempts. Try again in ${remainingMin} minute(s).`);
+      return;
+    }
     
     try {
       const validated = loginSchema.parse(loginData);
@@ -68,12 +81,19 @@ const Auth = () => {
       const { error } = await signIn(validated.email, validated.password);
 
       if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          toast.error("Invalid email or password");
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setLockedUntil(Date.now() + LOCK_DURATION);
+          setLoginAttempts(0);
+          toast.error("Account temporarily locked. Try again in 5 minutes.");
         } else {
-          toast.error(error.message);
+          toast.error("Invalid email or password");
         }
       } else {
+        setLoginAttempts(0);
+        setLockedUntil(null);
         toast.success("Welcome back!");
         navigate("/account?tab=bookings");
       }
@@ -326,10 +346,16 @@ const Auth = () => {
                     </button>
                   </div>
 
-                  <Button type="submit" variant="cta" className="w-full h-12" disabled={loading}>
+                  <Button type="submit" variant="cta" className="w-full h-12" disabled={loading || isLocked}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Sign In
+                    {isLocked ? 'Locked...' : 'Sign In'}
                   </Button>
+
+                  {isLocked && (
+                    <p className="text-sm text-destructive text-center">
+                      Too many attempts. Try again in {Math.ceil((lockedUntil! - Date.now()) / 60000)} minute(s).
+                    </p>
+                  )}
                 </form>
 
                 <p className="text-center text-sm text-muted-foreground pt-4">
