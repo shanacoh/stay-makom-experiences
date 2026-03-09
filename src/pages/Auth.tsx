@@ -53,7 +53,7 @@ const Auth = () => {
   useEffect(() => {
     // Don't redirect if onboarding is in progress
     if (user && !showOnboarding && !newUserId) {
-      navigate("/account");
+      navigate("/account?tab=bookings");
     }
   }, [user, navigate, showOnboarding, newUserId]);
 

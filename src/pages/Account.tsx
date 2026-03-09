@@ -28,21 +28,36 @@ const MOBILE_TAB_TITLES: Record<string, string> = {
   savedcarts: "Saved for Later",
 };
 
+const ALLOWED_TABS = ["wishlist", "bookings", "giftcards", "profile", "savedcarts"] as const;
+type AccountTab = (typeof ALLOWED_TABS)[number];
+
 const Account = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const isMobile = useIsMobile();
-  
-  const [activeTab, setActiveTab] = useState(tabFromUrl || "bookings");
+
+  const normalizedTab: AccountTab | null =
+    tabFromUrl && (ALLOWED_TABS as readonly string[]).includes(tabFromUrl)
+      ? (tabFromUrl as AccountTab)
+      : null;
+
+  const effectiveTab: AccountTab = normalizedTab || "bookings";
+
+  const [activeTab, setActiveTab] = useState<AccountTab>(effectiveTab);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // If user lands on /account without a tab param, default to bookings (and keep URL in sync)
   useEffect(() => {
-    if (tabFromUrl && ["wishlist", "bookings", "giftcards", "profile", "savedcarts"].includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
+    if (!normalizedTab) {
+      navigate("/account?tab=bookings", { replace: true });
     }
-  }, [tabFromUrl]);
+  }, [normalizedTab, navigate]);
+
+  useEffect(() => {
+    setActiveTab(effectiveTab);
+  }, [effectiveTab]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
