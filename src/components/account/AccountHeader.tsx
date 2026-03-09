@@ -3,14 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { Info, X, ChevronRight } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
+import { ChevronRight } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -52,20 +46,6 @@ const TIER_CONFIG = {
     nextPoints: null,
     min: 3000,
   },
-};
-
-const NEXT_UNLOCK_TEXT: Record<string, string> = {
-  explorer: "Next unlock: Early access to limited experiences, member-only opportunities and exclusive offers.",
-  traveler: "Next unlock: Priority reservations, curated insider recommendations and seasonal perks.",
-  insider: "Next unlock: Private concierge, bespoke itineraries and invitation-only events.",
-  circle: "You have unlocked the highest level of membership privileges.",
-};
-
-const HOW_TO_EARN: Record<string, string> = {
-  explorer: "Book experiences to earn points — 1 USD spent = 1 point, 4 NIS = 1 point. Reach 500 points to unlock Traveler.",
-  traveler: "Keep booking! You need 1,500 points total to reach Insider. Every experience you book brings you closer.",
-  insider: "You're almost at the top. Reach 3,000 points to join Circle — our most exclusive tier.",
-  circle: "You've reached the highest tier. Every booking continues to earn points and maintain your status.",
 };
 
 const ALL_TIERS = [
@@ -120,7 +100,7 @@ export default function AccountHeader({ userId, userEmail }: AccountHeaderProps)
       if (!userId) return null;
       const { data, error } = await supabase
         .from("user_profiles")
-        .select("display_name, avatar_url, created_at, membership_progress, loyalty_tier")
+        .select("display_name, avatar_url, membership_progress, loyalty_tier")
         .eq("user_id", userId)
         .maybeSingle();
       if (error) throw error;
@@ -131,14 +111,9 @@ export default function AccountHeader({ userId, userEmail }: AccountHeaderProps)
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-card to-muted/30 rounded-2xl p-6 mb-8 border border-border/50">
-        <div className="flex items-start gap-4">
-          <Skeleton className="h-16 w-16 rounded-full" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-        </div>
+      <div className="bg-[#1A1814] h-16 rounded-lg mb-6 flex items-center px-6">
+        <Skeleton className="h-12 w-12 rounded-full" />
+        <Skeleton className="h-4 w-48 ml-4" />
       </div>
     );
   }
@@ -147,7 +122,6 @@ export default function AccountHeader({ userId, userEmail }: AccountHeaderProps)
   const tier = (profile?.loyalty_tier as keyof typeof TIER_CONFIG) || "explorer";
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.explorer;
   const progress = profile?.membership_progress || 0;
-  const memberSince = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
   // Progress calculation
   const nextPoints = tierConfig.nextPoints;
@@ -159,92 +133,47 @@ export default function AccountHeader({ userId, userEmail }: AccountHeaderProps)
 
   return (
     <>
-      <div className="bg-gradient-to-br from-card to-muted/30 rounded-2xl p-6 mb-8 border border-border/50 shadow-soft">
-        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-          {/* Avatar */}
-          <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-4 border-background shadow-lg">
+      <div className="bg-[#1A1814] h-16 rounded-lg mb-6 flex items-center justify-between px-6">
+        {/* Left: Avatar + Name + Tier */}
+        <div className="flex items-center gap-4">
+          <Avatar className="h-12 w-12 bg-[#B8935A]">
             <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl font-serif">
+            <AvatarFallback className="bg-[#B8935A] text-white text-base font-medium">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground truncate">
-              Welcome, {displayName.split(" ")[0]}!
-            </h2>
-            <p className="text-muted-foreground text-sm">Member since {memberSince}</p>
-          </div>
-
-          {/* Club Box */}
-          <div className="w-full sm:w-auto sm:min-w-[260px] bg-background rounded-xl p-5 border border-border/50 shadow-sm">
-            {/* Title */}
-            <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
-              STAYMAKOM Club
-            </p>
-
-            {/* Current tier — clickable */}
+          
+          <div className="flex items-center gap-2">
+            <span className="text-white text-[15px]" style={{ fontFamily: "Inter, sans-serif" }}>
+              {displayName}
+            </span>
+            <span className="text-white/40">·</span>
             <button
               onClick={() => setTierSheetOpen(true)}
-              className="flex items-center gap-1.5 mb-3 group"
+              className="border border-white/30 px-2 py-0.5 rounded text-white text-[11px] uppercase hover:border-white/50 transition-colors"
+              style={{ fontFamily: "Inter, sans-serif" }}
             >
-              <span className="font-serif text-lg text-foreground border-b border-dashed border-foreground/30 group-hover:border-foreground/60 transition-colors">
-                {tierConfig.label}
-              </span>
-              <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+              {tierConfig.label}
             </button>
-
-            {/* Progress section */}
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <p className="text-[11px] font-medium tracking-[0.08em] uppercase text-muted-foreground">
-                Membership Progress
-              </p>
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="text-muted-foreground hover:text-foreground transition-colors">
-                      <Info size={13} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                    {HOW_TO_EARN[tier] || HOW_TO_EARN.explorer}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Numeric */}
-            <div className="flex items-baseline gap-0.5 mb-2">
-              <span className="text-lg font-semibold text-foreground">{progress.toLocaleString()}</span>
-              {nextPoints && (
-                <span className="text-sm text-muted-foreground">
-                  {" "}/ {nextPoints.toLocaleString()}
-                </span>
-              )}
-            </div>
-
-            {/* Progress bar */}
-            <div className="h-[3px] w-full bg-muted rounded-full overflow-hidden mb-2.5">
-              <div
-                className="h-full bg-foreground/70 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            {/* Distance text */}
-            {nextPoints && tierConfig.nextLabel && (
-              <p className="text-xs text-muted-foreground mb-2">
-                You're {remaining.toLocaleString()} away from {tierConfig.nextLabel}.
-              </p>
-            )}
-
-            {/* Next unlock */}
-            <p className="text-[11px] leading-relaxed text-muted-foreground/80 italic">
-              {NEXT_UNLOCK_TEXT[tier] || NEXT_UNLOCK_TEXT.explorer}
-            </p>
           </div>
         </div>
+
+        {/* Right: Progress bar */}
+        {nextPoints && (
+          <div className="flex items-center gap-3">
+            <span className="text-white/60 text-[11px]" style={{ fontFamily: "Inter, sans-serif" }}>
+              {remaining.toLocaleString()} pts to {tierConfig.nextLabel}
+            </span>
+            <div className="w-[200px]">
+              <div className="h-[3px] w-full bg-white/15 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-1000"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tier details sheet */}

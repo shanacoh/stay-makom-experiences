@@ -90,7 +90,20 @@ export default function RecommendedExperiences({
         return { ...exp, hotels: primaryHotel || null };
       });
 
-      const filtered = mapped.filter((exp) => !excludeIds.includes(exp.id));
+      // Filter out test experiences and zero-price experiences
+      const filtered = mapped.filter((exp) => {
+        if (excludeIds.includes(exp.id)) return false;
+        
+        // Hide if price is 0
+        if (!exp.base_price || exp.base_price === 0) return false;
+        
+        // Hide if title contains "test" (case-insensitive)
+        const title = (exp.title || "").toLowerCase();
+        if (title.includes("test")) return false;
+        
+        return true;
+      });
+
       return filtered.slice(0, limit);
     },
     enabled: !!userId,

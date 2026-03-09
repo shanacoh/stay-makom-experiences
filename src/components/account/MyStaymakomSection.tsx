@@ -398,26 +398,20 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
         ))}
       </div>
 
-      {/* Desktop filter */}
-      <Card className="hidden md:block">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">{isHebrew ? "תקופה" : isFrench ? "Période" : "Time Period"}</label>
-              <Select value={timeFilter} onValueChange={setTimeFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
-                  <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
-                  <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Desktop filter — simplified */}
+      <div className="hidden md:flex items-center gap-2 text-muted-foreground text-[13px]" style={{ fontFamily: "Inter, sans-serif" }}>
+        <span>Show:</span>
+        <Select value={timeFilter} onValueChange={setTimeFilter}>
+          <SelectTrigger className="w-auto border-0 shadow-none px-0 h-auto font-normal">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{isHebrew ? "כל ההזמנות" : isFrench ? "Toutes les réservations" : "All Bookings"}</SelectItem>
+            <SelectItem value="upcoming">{isHebrew ? "עתידיות" : isFrench ? "À venir" : "Upcoming"}</SelectItem>
+            <SelectItem value="past">{isHebrew ? "עברו" : isFrench ? "Passées" : "Past"}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Bookings List */}
       {allBookings.length === 0 ? (
@@ -467,8 +461,25 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
             // ✅ #8: Modify button — same conditions as cancel
             const showModify = showCancel;
 
+            const statusAccentColor = booking.isCancelled || booking.status === "cancelled"
+              ? "#C0392B" // red
+              : isPast(parseISO(booking.checkin))
+              ? "#2D6A4F" // green (completed)
+              : "#B8935A"; // gold (pending/upcoming)
+
+            // Determine primary badge to show
+            const primaryBadge = booking.isCancelled || booking.status === "cancelled"
+              ? getStatusBadge(booking.status, booking.isCancelled)
+              : !isPast(parseISO(booking.checkin))
+              ? getTimeBadge(booking.checkin)
+              : getStatusBadge(booking.status, booking.isCancelled);
+
             return (
-              <Card key={booking.id} className={`hover:shadow-lg transition-shadow overflow-hidden ${booking.isCancelled ? "opacity-60" : ""}`}>
+              <Card 
+                key={booking.id} 
+                className={`hover:shadow-lg transition-shadow overflow-hidden ${booking.isCancelled ? "opacity-60" : ""}`}
+                style={{ borderLeft: `3px solid ${statusAccentColor}` }}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 min-w-0">
@@ -484,8 +495,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
-                      {!booking.isCancelled && getTimeBadge(booking.checkin)}
-                      {getStatusBadge(booking.status, booking.isCancelled)}
+                      {primaryBadge}
                     </div>
                   </div>
                 </CardHeader>
