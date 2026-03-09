@@ -96,9 +96,8 @@ export const trackBookingConversion = async (
         })
         .eq("id", searchId);
 
-      console.log("Booking conversion tracked:", bookingId);
     } catch (error) {
-      console.error("Failed to track booking:", error);
+      // Error handled silently
     }
   }
 };
