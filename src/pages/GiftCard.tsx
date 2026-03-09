@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackGiftCardPageViewed } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,7 +114,7 @@ export default function GiftCard() {
   const { user } = useAuth();
   const isRTL = lang === "he";
 
-  // Form state
+  useEffect(() => { trackGiftCardPageViewed(); }, []);
   const [currency, setCurrency] = useState<Currency>("USD");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");

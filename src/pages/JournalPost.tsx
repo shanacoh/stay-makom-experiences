@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { trackJournalArticleViewed } from "@/lib/analytics";
 
 // Reading progress bar
 function ReadingProgressBar() {
@@ -198,6 +199,8 @@ function EmbeddedExperienceCard({ experienceId }: { experienceId: string }) {
 const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
+
+  useEffect(() => { if (slug) trackJournalArticleViewed(slug); }, [slug]);
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["journal-post", slug],

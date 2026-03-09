@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { trackExperiencesListViewed } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import Header from "@/components/Header";
@@ -10,6 +12,8 @@ import { SEOHead } from "@/components/SEOHead";
 const Experiences2 = () => {
   const { lang } = useLanguage();
   const isRTL = lang === 'he';
+
+  useEffect(() => { trackExperiencesListViewed(); }, []);
 
   const { data: experiences, isLoading } = useQuery({
     queryKey: ["all-experiences2-page"],

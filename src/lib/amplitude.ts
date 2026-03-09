@@ -60,3 +60,10 @@ export function safeIdentify(userId: string, properties?: Record<string, any>) {
     amplitude.identify(identify);
   }
 }
+
+export function safeSetUserProperty(key: string, value: any) {
+  if (!initialized) return;
+  const identify = new amplitude.Identify();
+  identify.set(key, value);
+  amplitude.identify(identify);
+}

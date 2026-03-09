@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Check } from "lucide-react";
 import { ShareNetwork, EnvelopeSimple, MessengerLogo, WhatsappLogo } from "@phosphor-icons/react";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { trackExperienceShared } from "@/lib/analytics";
+import { trackShareClicked } from "@/lib/analytics";
 
 interface ShareDialogProps {
   open: boolean;
@@ -49,14 +49,14 @@ const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps)
   const truncatedUrl = url.length > 30 ? url.substring(0, 30) + '...' : url;
 
   const handleEmailShare = () => {
-    trackExperienceShared(slug, 'email');
+    trackShareClicked(slug, 'email');
     const subject = encodeURIComponent(title);
     const body = encodeURIComponent(`${title}\n\n${url}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
 
   const handleMessengerShare = () => {
-    trackExperienceShared(slug, 'native');
+    trackShareClicked(slug, 'native');
     const encodedUrl = encodeURIComponent(url);
     const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
     if (isMobile) {
@@ -67,7 +67,7 @@ const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps)
   };
 
   const handleWhatsAppShare = () => {
-    trackExperienceShared(slug, 'whatsapp');
+    trackShareClicked(slug, 'whatsapp');
     const text = encodeURIComponent(`${title} ${url}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };

@@ -8,9 +8,11 @@ import {
   trackCheckoutStep2Viewed,
   trackCheckoutStep3Viewed,
   trackBookingCompleted,
-  trackBookingFailed,
+  trackPaymentFailed,
   trackBookingAbandoned,
   trackFormFieldInteracted,
+  trackCheckoutContinueClicked,
+  trackCheckoutBackClicked,
 } from "@/lib/analytics";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
@@ -533,7 +535,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       bookingCompletedRef.current = true;
 
       // Analytics: booking completed
-      trackBookingCompleted(staymakomRef, state.experienceSlug, sellPrice, bookingCurrency, state.nights, totalPartySize);
+      trackBookingCompleted(staymakomRef, state.experienceSlug, sellPrice, bookingCurrency, state.nights, totalPartySize, 0, state.experienceTitle || '', state.selectedRoomName || '');
 
       // Clear persisted cart after successful booking
       try { localStorage.removeItem("staymakom_cart"); } catch {}
@@ -583,7 +585,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 
       // Analytics: booking failed
       const errorType = errorCode.startsWith("BN.5") ? "hg_error" : errorCode === "BN.402" ? "payment_declined" : "network";
-      trackBookingFailed(state.experienceSlug, errorType, detail.substring(0, 200), displayTotal);
+      trackPaymentFailed(state.experienceSlug, errorType, detail.substring(0, 200), displayTotal);
 
       toast.error(t.bookingError, {
         description: friendlyMsg || (detail.length > 120 ? detail.substring(0, 120) + "…" : detail || undefined),

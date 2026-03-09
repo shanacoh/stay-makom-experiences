@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { trackPartnersPageViewed, trackPartnerFormSubmitted } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +34,9 @@ const Partners = () => {
   const { navigateLocalized } = useLocalizedNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+
+  useEffect(() => { trackPartnersPageViewed(); }, []);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,6 +91,7 @@ const Partners = () => {
       });
       
 
+      trackPartnerFormSubmitted();
       setShowSuccess(true);
       form.reset();
       toast.success(lang === 'he' ? "תודה על ההתעניינות!" : "Thank you for your interest!");
