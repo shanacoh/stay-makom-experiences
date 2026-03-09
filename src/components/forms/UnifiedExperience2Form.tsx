@@ -603,7 +603,7 @@ export function UnifiedExperience2Form({
     if (localTags.length === 0) return;
     const rows = localTags.map((t) => ({ experience_id: expId, tag_id: t.tag_id }));
     const { error } = await (supabase as any).from("experience2_highlight_tags").insert(rows);
-    if (error) console.error("Error saving tags:", error);
+    
   };
 
   const saveLocalReviews = async (expId: string) => {
