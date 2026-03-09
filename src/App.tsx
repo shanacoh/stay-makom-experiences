@@ -104,8 +104,23 @@ const AppContent = () => {
 
   // Track page views
   useEffect(() => {
-    trackPageViewed({ pageName: location.pathname });
+    trackPageViewed(location.pathname);
   }, [location.pathname]);
+
+  // UTM capture — once per session
+  useEffect(() => {
+    if (sessionStorage.getItem("staymakom_utm_tracked")) return;
+    const params = new URLSearchParams(window.location.search);
+    const source = params.get("utm_source") || undefined;
+    const medium = params.get("utm_medium") || undefined;
+    const campaign = params.get("utm_campaign") || undefined;
+    const content = params.get("utm_content") || undefined;
+    const term = params.get("utm_term") || undefined;
+    if (source || medium || campaign || content || term) {
+      trackUtmCaptured({ source, medium, campaign, content, term });
+      sessionStorage.setItem("staymakom_utm_tracked", "1");
+    }
+  }, []);
 
   return (
     <>
