@@ -10,19 +10,19 @@ interface CookieConsentProps {
 
 const texts = {
   en: {
-    message: "We use cookies to improve your experience and analyze site usage.",
+    message: "We use cookies to improve your experience and analyze site traffic.",
     learnMore: "Learn more",
     accept: "Accept",
     decline: "Decline",
   },
   fr: {
-    message: "Nous utilisons des cookies pour améliorer votre expérience et analyser l'utilisation du site.",
+    message: "Nous utilisons des cookies pour améliorer votre expérience et analyser le trafic.",
     learnMore: "En savoir plus",
     accept: "Accepter",
     decline: "Refuser",
   },
   he: {
-    message: "אנו משתמשים בעוגיות כדי לשפר את החוויה שלכם ולנתח את השימוש באתר.",
+    message: "אנו משתמשים בעוגיות כדי לשפר את החוויה שלכם ולנתח את התנועה באתר.",
     learnMore: "למידע נוסף",
     accept: "אישור",
     decline: "סירוב",
@@ -42,11 +42,11 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
 
   return (
     <div
-      className="fixed bottom-0 inset-x-0 z-50 animate-slide-up"
-      style={{ animation: "slideUp 300ms ease-out forwards" }}
+      className="fixed bottom-0 inset-x-0 z-50"
+      style={{ animation: "cookieSlideUp 300ms ease-out forwards" }}
     >
       <style>{`
-        @keyframes slideUp {
+        @keyframes cookieSlideUp {
           from { transform: translateY(100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
@@ -57,7 +57,6 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
           dir={lang === "he" ? "rtl" : "ltr"}
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            {/* Icon + text */}
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <Cookie className="h-5 w-5 text-accent shrink-0 mt-0.5" />
               <p className="text-sm text-foreground/85 leading-relaxed">
@@ -71,7 +70,6 @@ const CookieConsent = ({ onAccept, onDecline }: CookieConsentProps) => {
               </p>
             </div>
 
-            {/* Buttons */}
             <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
               <Button
                 variant="outline"

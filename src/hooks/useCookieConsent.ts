@@ -3,14 +3,14 @@ import { initAmplitude } from "@/lib/amplitude";
 
 const CONSENT_KEY = "staymakom_cookie_consent";
 
-type ConsentStatus = "accepted" | "declined" | "pending";
+type ConsentStatus = "accepted" | "declined" | null;
 
 export const useCookieConsent = () => {
   const [consent, setConsent] = useState<ConsentStatus>(() => {
     const stored = localStorage.getItem(CONSENT_KEY);
     if (stored === "accepted") return "accepted";
     if (stored === "declined") return "declined";
-    return "pending";
+    return null;
   });
 
   const acceptCookies = useCallback(() => {
@@ -24,8 +24,8 @@ export const useCookieConsent = () => {
     setConsent("declined");
   }, []);
 
-  const hasConsented = consent === "accepted";
-  const showBanner = consent === "pending";
+  const hasConsented = consent !== null;
+  const showBanner = consent === null;
 
   return { consent, hasConsented, showBanner, acceptCookies, declineCookies };
 };
