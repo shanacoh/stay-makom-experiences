@@ -265,7 +265,7 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Dashboard</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold">Dashboard</h2>
           <p className="text-muted-foreground">Vue d'ensemble – données réelles</p>
         </div>
         <Tabs value={period} onValueChange={(v) => setPeriod(v as PeriodFilter)}>
