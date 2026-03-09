@@ -452,7 +452,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         idempotency_key: idempotencyKeyRef.current,
       } as any);
 
-      if (dbError) console.error("Failed to save booking to DB:", dbError);
+      
 
       // === CERTIFICATION LOG ===
       const certCancelInfo = analyzeCancellationPolicies(
