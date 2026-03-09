@@ -73,7 +73,7 @@ export function useHyperGuestDebug() {
     // STEP 1 — Connexion basique
     const s1Start = Date.now();
     try {
-      const { data, error } = await supabase.functions.invoke('hyperguest', {
+      await supabase.functions.invoke('hyperguest', {
         body: { action: 'ping' },
       });
       const dur = Date.now() - s1Start;
