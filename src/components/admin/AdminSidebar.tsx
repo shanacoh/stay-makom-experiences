@@ -16,6 +16,10 @@ import {
   ShieldCheck,
   Archive,
   FlaskConical,
+  Bug,
+  ScrollText,
+  Cog,
+  Plug,
 } from "lucide-react";
 import {
   Sidebar,
