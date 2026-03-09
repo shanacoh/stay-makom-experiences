@@ -224,6 +224,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const pendingBookAfterAuth = useRef(false);
   const bookingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  
+  // Idempotency key for double-booking protection
+  const idempotencyKeyRef = useRef(crypto.randomUUID());
 
   const dateFrom = new Date(state.dateRange.from);
   const dateTo = new Date(state.dateRange.to);
