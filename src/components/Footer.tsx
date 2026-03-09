@@ -118,13 +118,16 @@ const Footer = () => {
               {t(lang, 'footerExperiences')}
             </h4>
             <ul className="space-y-2">
-              {categories?.map(category => (
-                <li key={category.id}>
-                  <Link to={`/category/${category.slug}${langParam}`} className="text-sm text-white hover:text-primary transition-smooth">
-                    {getLocalizedField(category, 'name', lang) as string}
-                  </Link>
-                </li>
-              ))}
+              {categories?.map(category => {
+                const catName = getLocalizedField(category, 'name', lang) as string;
+                return (
+                  <li key={category.id}>
+                    <Link to={`/category/${category.slug}${langParam}`} className="text-sm text-white hover:text-primary transition-smooth" onClick={() => trackFooterCategoryClicked(catName)}>
+                      {catName}
+                    </Link>
+                  </li>
+                );
+              })}
               {(!categories || categories.length === 0) && (
                 <li><span className="text-sm text-white/50">{t(lang, 'footerMoreToCome')}</span></li>
               )}
