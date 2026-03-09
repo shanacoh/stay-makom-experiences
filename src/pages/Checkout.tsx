@@ -224,6 +224,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const pendingBookAfterAuth = useRef(false);
   const bookingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  
+  // Idempotency key for double-booking protection
+  const idempotencyKeyRef = useRef(crypto.randomUUID());
 
   const dateFrom = new Date(state.dateRange.from);
   const dateTo = new Date(state.dateRange.to);
@@ -306,6 +309,9 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   };
 
   const handleBookInternal = async () => {
+    // Double-click protection - if already booking, ignore
+    if (isBooking) return;
+    
     if (!isGuestValid) {
       setShowGuestErrors(true);
       setStep(2);
@@ -406,6 +412,8 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           specialRequests: specialRequests || undefined,
           guests: [...adultGuests, ...childGuests],
         }],
+        // Idempotency key for double-booking protection
+        idempotencyKey: idempotencyKeyRef.current,
       };
 
       const bookingResult = await createBooking(bookingData);
@@ -441,6 +449,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         hg_raw_data: bookingResult,
         user_id: currentUserId,
         confirmation_token: confirmationToken,
+        idempotency_key: idempotencyKeyRef.current,
       } as any);
 
       if (dbError) console.error("Failed to save booking to DB:", dbError);

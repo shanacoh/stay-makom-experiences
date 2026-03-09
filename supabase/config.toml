@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.hyperguest-certification]
 verify_jwt = false
+
+[functions.hyperguest-health]
+verify_jwt = false

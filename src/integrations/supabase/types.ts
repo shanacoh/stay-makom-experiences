@@ -100,6 +100,39 @@ export type Database = {
         }
         Relationships: []
       }
+      alerts: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          id: string
+          message: string
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          message: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          message?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+          type?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -322,6 +355,7 @@ export type Database = {
           hg_status: string | null
           hotel_id: string | null
           id: string
+          idempotency_key: string | null
           is_cancelled: boolean
           net_price: number
           nights: number
@@ -352,6 +386,7 @@ export type Database = {
           hg_status?: string | null
           hotel_id?: string | null
           id?: string
+          idempotency_key?: string | null
           is_cancelled?: boolean
           net_price?: number
           nights?: number
@@ -382,6 +417,7 @@ export type Database = {
           hg_status?: string | null
           hotel_id?: string | null
           id?: string
+          idempotency_key?: string | null
           is_cancelled?: boolean
           net_price?: number
           nights?: number
@@ -1817,6 +1853,27 @@ export type Database = {
           site_tagline?: string | null
           stripe_publishable_key?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      health_checks: {
+        Row: {
+          created_at: string | null
+          id: string
+          results: Json
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          results: Json
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          results?: Json
+          status?: string
         }
         Relationships: []
       }
