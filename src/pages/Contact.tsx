@@ -91,34 +91,35 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FAF8F4]">
       <LaunchHeader forceScrolled={true} />
 
       {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] flex items-center justify-center">
+      <section className="relative h-[380px] flex items-center justify-center">
         <div className="absolute inset-0">
           <img src={contactHero} alt="Contact us" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} />
         </div>
-        <div className="relative z-10 text-center text-white px-6 max-w-3xl" dir={isRTL ? 'rtl' : 'ltr'}>
-          <p className="text-base sm:text-lg md:text-xl text-slate-100 mb-2">{t(lang, 'contactHeroTagline')}</p>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-50">STAYMAKOM</h1>
+        <div className="relative z-10 text-center text-white px-6 sm:px-24 max-w-3xl" dir={isRTL ? 'rtl' : 'ltr'}>
+          <p className="text-[11px] uppercase tracking-[0.15em] mb-4" style={{ opacity: 0.7 }}>STAYMAKOM</p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-sans font-bold uppercase">LET'S TALK.</h1>
         </div>
       </section>
 
-      <main className="max-w-3xl mx-auto px-6 py-12" dir={isRTL ? 'rtl' : 'ltr'}>
+      <main className="max-w-3xl mx-auto px-6 py-16" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Contact Text */}
-        <section className="text-center mb-10">
-          <p className="text-base text-muted-foreground leading-relaxed">
+        <section className="text-center mb-12">
+          <p className="text-base text-[#5C4A3A] leading-[1.8] max-w-[680px] mx-auto">
             {t(lang, 'contactIntro1')}
           </p>
-          <p className="text-base text-muted-foreground leading-relaxed">
+          <p className="text-base text-[#5C4A3A] leading-[1.8] max-w-[680px] mx-auto mt-4">
             {t(lang, 'contactIntro2')}
           </p>
         </section>
 
         {/* Contact Form */}
-        <section className="max-w-lg mx-auto mb-12">
+        <section className="max-w-[560px] mx-auto mb-16">
+          <p className="text-[11px] uppercase tracking-[0.15em] text-[#8C7B6B] text-center mb-8">GET IN TOUCH</p>
           {showSuccess ? (
             <div className="bg-[#FAF8F5] rounded-lg p-8 text-center">
               <div className="mb-4 text-[#D72638]">
