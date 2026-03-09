@@ -505,6 +505,27 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'Mapping partiel (BN codes), messages user-friendly à compléter',
+      guide: `VÉRIFICATION E3 — Mapping des codes erreur HyperGuest
+
+1. Ouvre src/pages/Checkout.tsx
+
+2. Cherche l'objet hgErrorMessages — il contient les mappings :
+   • BN.402 → Room plus disponible
+   • BN.502 → Erreur serveur
+   • BN.506 → Rate plan expiré
+   • BN.507 → Prix changé
+
+3. Vérifie qu'il y a un message pour chaque code
+   en FR, EN, et HE
+
+4. Vérifie le fallback : quand le code n'est pas mappé,
+   un message générique doit s'afficher (pas un JSON brut)
+
+5. Teste manuellement en simulant des erreurs
+   depuis DevTools → Network → bloquer des requêtes
+
+✅ PASS si : chaque erreur HG affiche un message user-friendly en 3 langues
+❌ FAIL si : l'utilisateur voit un message technique, un JSON, ou rien du tout`,
     });
 
     updateBlocTests('E', tests, false);
