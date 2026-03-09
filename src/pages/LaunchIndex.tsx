@@ -26,6 +26,8 @@ import {
 import { Loader2, ArrowRight, Gift, CheckCircle, Compass, Heart } from "lucide-react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
+import { trackFindEscapeClicked, trackVibeTabClicked, trackWaitlistSignup, trackGiftCardClicked } from "@/lib/analytics";
+import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-image-new.jpg";
 import handpickedHero from "@/assets/handpicked-hero.jpg";

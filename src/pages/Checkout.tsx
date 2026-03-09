@@ -11,7 +11,7 @@ import {
   trackBookingFailed,
   trackBookingAbandoned,
   trackFormFieldInteracted,
-  trackSpecialRequestAdded,
+  
 } from "@/lib/analytics";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
