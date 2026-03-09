@@ -30,6 +30,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SEOHead } from "@/components/SEOHead";
+import { trackExperiencePageViewed, trackTimeOnExperiencePage } from "@/lib/analytics";
+import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { MapPin, Moon } from "lucide-react";
 
 export default function Experience2() {
