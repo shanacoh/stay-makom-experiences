@@ -449,6 +449,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         hg_raw_data: bookingResult,
         user_id: currentUserId,
         confirmation_token: confirmationToken,
+        idempotency_key: idempotencyKeyRef.current,
       } as any);
 
       if (dbError) console.error("Failed to save booking to DB:", dbError);
