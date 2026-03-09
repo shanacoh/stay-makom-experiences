@@ -187,6 +187,7 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
               <Route path="certification-setup" element={<CertificationSetup />} />
+              <Route path="diagnostic" element={<DiagnosticPage />} />
             </Route>
             <Route
               path="/hotel-admin"

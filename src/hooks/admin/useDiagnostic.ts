@@ -433,15 +433,18 @@ export const useDiagnostic = () => {
     const passed = allTests.filter(t => t.pass === true).length;
     const failed = allTests.filter(t => t.pass === false).length;
     const warnings = allTests.filter(t => t.warning).length;
+    const userId = (await supabase.auth.getUser()).data.user?.id;
     
-    await supabase.from('diagnostic_runs').insert({
-      total_tests: allTests.length,
-      passed_tests: passed,
-      failed_tests: failed,
-      warning_tests: warnings,
-      results: blocs,
-      user_id: (await supabase.auth.getUser()).data.user?.id
-    });
+    if (userId) {
+      await supabase.from('diagnostic_runs').insert({
+        user_id: userId,
+        total_tests: allTests.length,
+        passed_tests: passed,
+        failed_tests: failed,
+        warning_tests: warnings,
+        results: blocs as any
+      });
+    }
   };
 
   return { blocs, runBloc, runAll };
