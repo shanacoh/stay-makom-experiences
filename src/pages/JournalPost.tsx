@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { trackJournalArticleViewed } from "@/lib/analytics";
 
 // Reading progress bar
 function ReadingProgressBar() {
