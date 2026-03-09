@@ -299,7 +299,7 @@ const Partners = () => {
         )}
       </main>
 
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 };

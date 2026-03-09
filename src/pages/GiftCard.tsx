@@ -272,7 +272,7 @@ export default function GiftCard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <LaunchHeader forceScrolled={true} />
 
       {/* Hero Section */}
       <section className="relative h-[35vh] min-h-[260px] sm:min-h-[300px] overflow-hidden">

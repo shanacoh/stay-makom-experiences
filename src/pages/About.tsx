@@ -196,7 +196,7 @@ const About = () => {
         </section>
       </main>
 
-      <Footer />
+      <LaunchFooter />
     </div>);
 
 };

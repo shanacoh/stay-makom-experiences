@@ -116,7 +116,7 @@ const Terms = () => {
           </p>
         </article>
       </main>
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 };

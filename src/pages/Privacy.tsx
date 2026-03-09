@@ -105,7 +105,7 @@ const Privacy = () => {
           <p className="text-sm">We may occasionally update this policy.</p>
         </article>
       </main>
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 };

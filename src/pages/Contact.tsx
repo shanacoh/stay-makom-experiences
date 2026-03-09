@@ -214,7 +214,7 @@ const Contact = () => {
         </section>
       </main>
 
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 };
