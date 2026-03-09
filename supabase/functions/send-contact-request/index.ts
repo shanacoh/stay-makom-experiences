@@ -33,6 +33,7 @@ const escapeHTML = (str: string): string => {
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-contact-request function called");
+  const corsHeaders = getCorsHeaders(req);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
