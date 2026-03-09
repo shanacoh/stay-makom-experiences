@@ -62,9 +62,17 @@ const Auth = () => {
     }
   }, [user, navigate, showOnboarding, newUserId]);
 
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    if (isLocked) {
+      const remainingMin = Math.ceil((lockedUntil! - Date.now()) / 60000);
+      toast.error(`Too many attempts. Try again in ${remainingMin} minute(s).`);
+      return;
+    }
     
     try {
       const validated = loginSchema.parse(loginData);
@@ -73,12 +81,19 @@ const Auth = () => {
       const { error } = await signIn(validated.email, validated.password);
 
       if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          toast.error("Invalid email or password");
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setLockedUntil(Date.now() + LOCK_DURATION);
+          setLoginAttempts(0);
+          toast.error("Account temporarily locked. Try again in 5 minutes.");
         } else {
-          toast.error(error.message);
+          toast.error("Invalid email or password");
         }
       } else {
+        setLoginAttempts(0);
+        setLockedUntil(null);
         toast.success("Welcome back!");
         navigate("/account?tab=bookings");
       }
