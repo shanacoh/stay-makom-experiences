@@ -245,7 +245,6 @@ const BookingPanel = ({
           }
         });
       } catch (emailError) {
-        console.error("Email error:", emailError);
         // Don't fail if email fails
       }
       
