@@ -99,7 +99,7 @@ const Contact = () => {
         </div>
         <div className="relative z-10 text-center text-white px-6 sm:px-24 max-w-3xl" dir={isRTL ? 'rtl' : 'ltr'}>
           <p className="text-[11px] uppercase tracking-[0.15em] mb-4" style={{ opacity: 0.7 }}>STAYMAKOM</p>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-sans font-bold uppercase">LET'S TALK.</h1>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-sans font-bold uppercase text-white">LET'S TALK.</h1>
         </div>
       </section>
 
