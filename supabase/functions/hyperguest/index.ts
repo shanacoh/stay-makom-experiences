@@ -434,14 +434,15 @@ Deno.serve(async (req) => {
     const action = url.searchParams.get('action');
     console.log('🚀 HyperGuest API request:', action, 'method:', req.method);
 
+    let authResult: { authenticated: boolean; userId?: string; error?: string } = { authenticated: true };
     if (action) {
-      const auth = await verifyAuth(req, action);
-      if (!auth.authenticated) {
-        return new Response(JSON.stringify({ success: false, error: `Authentication required: ${auth.error}` }), {
+      authResult = await verifyAuth(req, action);
+      if (!authResult.authenticated) {
+        return new Response(JSON.stringify({ success: false, error: `Authentication required: ${authResult.error}` }), {
           status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (auth.userId) console.log('🔓 Authenticated user:', auth.userId, 'for action:', action);
+      if (authResult.userId) console.log('🔓 Authenticated user:', authResult.userId, 'for action:', action);
     }
 
     let body: Record<string, unknown> = {};
