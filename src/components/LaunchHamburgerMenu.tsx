@@ -16,7 +16,6 @@ const LaunchHamburgerMenu = ({ isScrolled = false }: LaunchHamburgerMenuProps) =
 
   const handleNavClick = () => {
     setIsOpen(false);
-    setBookExpanded(false);
   };
 
   return (
