@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { trackCurrencySwitched } from "@/lib/analytics";
 
 type DisplayCurrency = "ILS" | "USD";
 
