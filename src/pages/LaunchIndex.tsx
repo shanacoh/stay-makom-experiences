@@ -213,6 +213,7 @@ const LaunchIndex = () => {
 
   // Handle filter button click — scroll to grid when in sticky mode
   const handleFilterClick = (slug: string) => {
+    trackVibeTabClicked(slug);
     setActiveFilter((prev) => prev === slug ? null : slug);
     const grid = document.getElementById("launch-experiences");
     if (grid && tabsSticky) {
