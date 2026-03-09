@@ -141,7 +141,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       const booking = bookingsHg?.find((b: any) => b.id === bookingId);
       if (!booking) throw new Error("Booking not found");
 
-      console.log("[Cancel] bookingId envoyé:", booking.hg_booking_id);
+      
       const { cancelBooking } = await import("@/services/hyperguest");
       
       let hgCancelSuccess = false;
