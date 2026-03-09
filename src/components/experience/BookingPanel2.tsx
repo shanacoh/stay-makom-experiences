@@ -375,11 +375,11 @@ export function BookingPanel2({
           <div className="flex items-center justify-between" dir="ltr">
             <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.adults}</span>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => setAdults(Math.max(minParty, adults - 1))} disabled={adults <= minParty}>
+              <Button variant="outline" size="sm" onClick={() => { const v = Math.max(minParty, adults - 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults <= minParty}>
                 <Minus className="h-3 w-3" />
               </Button>
               <span className="text-lg font-medium w-8 text-center">{adults}</span>
-              <Button variant="outline" size="sm" onClick={() => setAdults(Math.min(maxParty, adults + 1))} disabled={adults >= maxParty}>
+              <Button variant="outline" size="sm" onClick={() => { const v = Math.min(maxParty, adults + 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults >= maxParty}>
                 <Plus className="h-3 w-3" />
               </Button>
             </div>
