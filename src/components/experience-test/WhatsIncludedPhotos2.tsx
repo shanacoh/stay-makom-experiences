@@ -34,7 +34,7 @@ const WhatsIncludedPhotos2 = ({ experienceId, lang = "en", longCopy }: WhatsIncl
         </h2>
         <div
           className="text-xs md:text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: longCopy }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(longCopy) }}
         />
       </section>
     );
