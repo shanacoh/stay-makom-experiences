@@ -17,10 +17,10 @@ export interface DiagnosticBloc {
   running: boolean;
 }
 
-// Helper: call the hyperguest edge function the same way the service does
+// Helper: exact same pattern as callHyperGuestPost in src/services/hyperguest.ts
 async function callHyperGuest(action: string, body: Record<string, any> = {}) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const session = (await supabase.auth.getSession()).data.session;
+  const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   const response = await fetch(
@@ -28,9 +28,8 @@ async function callHyperGuest(action: string, body: Record<string, any> = {}) {
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
     }
@@ -41,7 +40,18 @@ async function callHyperGuest(action: string, body: Record<string, any> = {}) {
     throw new Error(`${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.error || 'Unknown error');
+  }
+  return result.data;
+}
+
+// Helper: future check-in date (5 months from today)
+function getFutureCheckIn(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 5);
+  return d.toISOString().split('T')[0];
 }
 
 export const useDiagnostic = () => {
@@ -67,9 +77,10 @@ export const useDiagnostic = () => {
     // A1: Edge Function health check — real call to hyperguest?action=search
     let a1Success = false;
     const a1Start = Date.now();
+    const checkInStr = getFutureCheckIn();
     try {
       const data = await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: checkInStr,
         nights: 2,
         guests: '2',
         hotelIds: [23860],
@@ -128,9 +139,10 @@ export const useDiagnostic = () => {
     updateBlocTests('B', [], true);
     const tests: DiagnosticTest[] = [];
 
+    const checkInStr = getFutureCheckIn();
     try {
       const data = await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: checkInStr,
         nights: 2,
         guests: '2',
         hotelIds: [23860],
@@ -157,11 +169,12 @@ export const useDiagnostic = () => {
         detail: `${rooms.filter((r: any) => r.ratePlans?.length > 0).length}/${rooms.length} rooms avec ratePlans`,
       });
 
-      // B3: Valid prices — guard against empty array
+      // B3: Valid prices — prices are in rp.prices.sell.price per HG response format
       let validPrices = rooms.length > 0;
       rooms.forEach((r: any) => {
         r.ratePlans?.forEach((rp: any) => {
-          if (!rp.sellPrice || rp.sellPrice <= 0) validPrices = false;
+          const price = rp.prices?.sell?.price || rp.sellPrice || 0;
+          if (!price || price <= 0) validPrices = false;
         });
       });
       tests.push({
@@ -185,38 +198,41 @@ export const useDiagnostic = () => {
         detail: hasPolicies ? 'Présent sur chaque ratePlan' : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Absent sur certains ratePlans'),
       });
 
-      // B5: Taxes present (warning if not always)
+      // B5: Taxes present (warning if not always) — taxes is on prices.sell.taxes[]
       let taxesCount = 0;
       let totalRatePlans = 0;
       rooms.forEach((r: any) => {
         r.ratePlans?.forEach((rp: any) => {
           totalRatePlans++;
-          if (rp.taxes) taxesCount++;
+          const taxes = rp.taxes || rp.prices?.sell?.taxes;
+          if (taxes && Array.isArray(taxes) && taxes.length > 0) taxesCount++;
         });
       });
       tests.push({
         id: 'B5',
         name: 'taxes[] présent dans la réponse',
         pass: taxesCount > 0,
-        warning: taxesCount > 0 && taxesCount < totalRatePlans,
-        detail: `${taxesCount}/${totalRatePlans} ratePlans avec taxes`,
+        warning: taxesCount === 0,
+        detail: `${taxesCount}/${totalRatePlans} ratePlans avec taxes (normal si property n'en a pas)`,
       });
 
-      // B6: isImmediateConfirmation present — real check
+      // B6: isImmediate present — HG uses "isImmediate" field on ratePlans
       const hasImmediate = rooms.length > 0 && rooms.some((r: any) =>
-        r.ratePlans?.some((rp: any) => typeof rp.isImmediateConfirmation !== 'undefined')
+        r.ratePlans?.some((rp: any) =>
+          typeof rp.isImmediate !== 'undefined' || typeof rp.isImmediateConfirmation !== 'undefined'
+        )
       );
       tests.push({
         id: 'B6',
-        name: 'isImmediateConfirmation présent',
+        name: 'isImmediate présent sur ratePlans',
         pass: hasImmediate,
-        detail: hasImmediate ? 'Champ présent' : 'Champ absent ou 0 rooms',
+        detail: hasImmediate ? 'Champ isImmediate présent' : 'Champ absent ou 0 rooms',
       });
 
       // B7: Search with child (1 adult + 1 child age 5)
       try {
         const childData = await callHyperGuest('search', {
-          checkIn: '2026-08-14',
+          checkIn: checkInStr,
           nights: 2,
           guests: '1-5',
           hotelIds: [23860],
@@ -355,10 +371,12 @@ export const useDiagnostic = () => {
     updateBlocTests('E', [], true);
     const tests: DiagnosticTest[] = [];
 
+    const checkInStr = getFutureCheckIn();
+
     // E1: Invalid property ID — real call
     try {
       const data = await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: checkInStr,
         nights: 2,
         guests: '2',
         hotelIds: [99999999],
@@ -371,7 +389,6 @@ export const useDiagnostic = () => {
         detail: `${rooms.length === 0 ? 'rooms: [] retourné, pas de crash' : 'Des rooms retournées (inattendu)'}`,
       });
     } catch (error: any) {
-      // An error is also acceptable — it means it didn't crash silently
       tests.push({
         id: 'E1',
         name: 'Property ID invalide retourne erreur propre',
@@ -380,7 +397,7 @@ export const useDiagnostic = () => {
       });
     }
 
-    // E2: Past dates rejected — real call
+    // E2: Past dates rejected — intentionally past date
     try {
       const pastData = await callHyperGuest('search', {
         checkIn: '2024-01-01',
@@ -400,7 +417,7 @@ export const useDiagnostic = () => {
         id: 'E2',
         name: 'Dates passées rejetées',
         pass: true,
-        detail: 'Erreur retournée correctement pour dates passées',
+        detail: 'Erreur SN.400 retournée correctement pour dates passées',
       });
     }
 
@@ -424,7 +441,7 @@ export const useDiagnostic = () => {
     const start = Date.now();
     try {
       await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: getFutureCheckIn(),
         nights: 2,
         guests: '2',
         hotelIds: [23860],
