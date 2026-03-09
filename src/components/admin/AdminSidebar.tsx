@@ -53,9 +53,15 @@ const mainMenuItems = [
   { title: "Journal", url: "/admin/journal", icon: BookOpen },
   { title: "AI Insights", url: "/admin/ai-insights", icon: Brain },
   { title: "Settings", url: "/admin/settings", icon: Settings },
+];
+
+const hyperguestMenuItems = [
+  { title: "Diagnostic", url: "/admin/diagnostic", icon: FlaskConical },
+  { title: "Debug API", url: "/admin/hyperguest/debug", icon: Bug },
+  { title: "Logs", url: "/admin/hyperguest/logs", icon: ScrollText },
+  { title: "Configuration", url: "/admin/hyperguest/config", icon: Cog },
   { title: "HG Certification", url: "/admin/hyperguest-certification", icon: ShieldCheck },
   { title: "Live Cert Setup", url: "/admin/certification-setup", icon: ShieldCheck },
-  { title: "Diagnostic", url: "/admin/diagnostic", icon: FlaskConical },
 ];
 
 const backupMenuItems = [
