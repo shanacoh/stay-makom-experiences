@@ -1,5 +1,6 @@
 import { getLocalizedField, type Language } from "@/hooks/useLanguage";
 import { icons, Sparkles } from "lucide-react";
+import DOMPurify from "dompurify";
 import type { LucideIcon } from "lucide-react";
 
 interface IncludeItem {
