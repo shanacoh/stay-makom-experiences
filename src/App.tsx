@@ -71,8 +71,6 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminAIInsights from "./pages/admin/AIInsights";
 import AdminLeads from "./pages/admin/Leads";
 import AdminFavorites from "./pages/admin/Favorites";
-import HyperGuestCertification from "./pages/admin/HyperGuestCertification";
-import CertificationSetup from "./pages/admin/CertificationSetup";
 import DiagnosticPage from "./pages/admin/DiagnosticPage";
 import HyperGuestDebugPage from "./pages/admin/hyperguest/DebugPage";
 import HyperGuestLogsPage from "./pages/admin/hyperguest/LogsPage";
@@ -218,8 +216,6 @@ const AppContent = () => {
           <Route path="leads" element={<AdminLeads />} />
           <Route path="favorites" element={<AdminFavorites />} />
           <Route path="settings" element={<AdminSettings />} />
-          <Route path="hyperguest-certification" element={<HyperGuestCertification />} />
-          <Route path="certification-setup" element={<CertificationSetup />} />
           <Route path="diagnostic" element={<DiagnosticPage />} />
           <Route path="hyperguest/debug" element={<HyperGuestDebugPage />} />
           <Route path="hyperguest/logs" element={<HyperGuestLogsPage />} />
