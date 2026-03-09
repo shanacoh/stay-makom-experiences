@@ -205,6 +205,7 @@ const LaunchIndex = () => {
   // Handle category card click → open waitlist popup
   const handleCategoryClick = (category: any) => {
     const name = getLocalizedField(category, "name", lang) as string;
+    trackCategoryTileClicked(name);
     setWaitlistCategory(name);
     setWaitlistCategoryId(category.id);
     setWaitlistSubmitted(false);
