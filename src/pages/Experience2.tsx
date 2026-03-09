@@ -168,11 +168,29 @@ export default function Experience2() {
     ? reviewsData!.reduce((acc, r) => acc + r.rating, 0) / reviewsCount
     : null;
 
+  // Analytics: scroll depth
+  useScrollDepth(`experience/${slug}`);
+
+  // Analytics: track page view + time on page
+  useEffect(() => {
+    if (!experience?.slug) return;
+    trackExperiencePageViewed(experience.slug, experience.title, experience.base_price);
+    const start = Date.now();
+    const handleVisChange = () => {
+      if (document.visibilityState === "hidden") {
+        trackTimeOnExperiencePage(experience.slug, (Date.now() - start) / 1000);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisChange);
+      trackTimeOnExperiencePage(experience.slug, (Date.now() - start) / 1000);
+    };
+  }, [experience?.slug]);
+
   // ---------------------------------------------------------------------------
   // Loading state
   // ---------------------------------------------------------------------------
-
-  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         {isLaunch ? <LaunchHeader forceScrolled /> : <Header />}
