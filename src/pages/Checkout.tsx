@@ -412,6 +412,8 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           specialRequests: specialRequests || undefined,
           guests: [...adultGuests, ...childGuests],
         }],
+        // Idempotency key for double-booking protection
+        idempotencyKey: idempotencyKeyRef.current,
       };
 
       const bookingResult = await createBooking(bookingData);
