@@ -175,7 +175,7 @@ const AdminHotels2 = () => {
 
         <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
