@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchHeader from "@/components/LaunchHeader";
+import LaunchFooter from "@/components/LaunchFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -104,7 +104,7 @@ const Partners = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
-      <Header />
+      <LaunchHeader forceScrolled={true} />
 
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] flex items-center justify-center">
@@ -299,7 +299,7 @@ const Partners = () => {
         )}
       </main>
 
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 };

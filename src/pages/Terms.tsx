@@ -1,5 +1,5 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchHeader from "@/components/LaunchHeader";
+import LaunchFooter from "@/components/LaunchFooter";
 import { SEOHead } from "@/components/SEOHead";
 
 const Terms = () => {
@@ -9,7 +9,7 @@ const Terms = () => {
         title="Terms & Conditions | STAYMAKOM"
         description="Read STAYMAKOM's Terms & Conditions. Learn about our booking platform, user responsibilities, and policies for discovering unique hospitality experiences in Israel."
       />
-      <Header />
+      <LaunchHeader forceScrolled={true} />
       <main className="flex-1 container py-8 md:py-12">
         <article className="max-w-2xl mx-auto prose prose-sm prose-slate dark:prose-invert">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Terms & Conditions</h1>
@@ -116,7 +116,7 @@ const Terms = () => {
           </p>
         </article>
       </main>
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 };

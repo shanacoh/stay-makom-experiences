@@ -12,8 +12,8 @@ import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchHeader from "@/components/LaunchHeader";
+import LaunchFooter from "@/components/LaunchFooter";
 import giftCardHero from "@/assets/gift-card-hero.jpg";
 import cardBg1 from "@/assets/desert-journey.jpg";
 import cardBg2 from "@/assets/desert-kiosk-hero.png";
@@ -272,7 +272,7 @@ export default function GiftCard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <LaunchHeader forceScrolled={true} />
 
       {/* Hero Section */}
       <section className="relative h-[35vh] min-h-[260px] sm:min-h-[300px] overflow-hidden">
@@ -691,7 +691,7 @@ export default function GiftCard() {
       {/* Bottom padding for mobile sticky CTA */}
       <div className="md:hidden h-24" />
 
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 }
