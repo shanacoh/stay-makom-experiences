@@ -105,10 +105,10 @@ const Header = () => {
         <div className="flex-1"></div>
 
         <div className="flex items-center space-x-3">
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center gap-0.5">
             <button
               onClick={() => handleLang("en")}
-              className={`text-xs transition-colors ${
+              className={`text-xs transition-colors px-0.5 ${
                 lang === "en"
                   ? isTransparentPage && !isScrolled
                     ? "text-white font-semibold"
@@ -121,7 +121,7 @@ const Header = () => {
               EN
             </button>
             <span
-              className={`text-xs ${
+              className={`text-xs select-none ${
                 isTransparentPage && !isScrolled
                   ? "text-white/40"
                   : "text-muted-foreground/40"
@@ -131,7 +131,7 @@ const Header = () => {
             </span>
             <button
               onClick={() => handleLang("he")}
-              className={`text-xs transition-colors ${
+              className={`text-[13px] leading-none transition-colors px-0.5 ${
                 lang === "he"
                   ? isTransparentPage && !isScrolled
                     ? "text-white font-semibold"
@@ -145,10 +145,10 @@ const Header = () => {
             </button>
             <button
               onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-              className={`text-xs font-semibold transition-colors ml-1.5 ${
+              className={`text-xs transition-colors ml-1.5 ${
                 isTransparentPage && !isScrolled
-                  ? "text-[#B8935A] hover:text-[#C4A56E]"
-                  : "text-[#B8935A] hover:text-[#C4A56E]"
+                  ? "text-foreground/70 hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {displayCurrency === "USD" ? "$" : "₪"}
