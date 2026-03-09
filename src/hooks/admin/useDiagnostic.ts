@@ -40,7 +40,7 @@ export const useDiagnostic = () => {
     // A1: Edge Function health check
     const a1Start = Date.now();
     try {
-      const { data, error } = await supabase.functions.invoke('search-hyperguest', {
+      const { error } = await supabase.functions.invoke('search-hyperguest', {
         body: {
           action: 'search',
           propertyId: '23860',
@@ -57,7 +57,7 @@ export const useDiagnostic = () => {
         detail: `${!error ? '200 OK' : 'Error'}, ${(duration / 1000).toFixed(1)}s`,
         duration
       });
-    } catch (e) {
+    } catch (_error) {
       tests.push({
         id: 'A1',
         name: 'Edge Function accessible',
