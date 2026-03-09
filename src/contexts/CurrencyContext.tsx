@@ -22,7 +22,14 @@ const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 const FALLBACK_ILS_TO_USD = 0.27;
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("USD");
+  const [displayCurrency, setDisplayCurrencyRaw] = useState<DisplayCurrency>("USD");
+
+  const setDisplayCurrency = useCallback((c: DisplayCurrency) => {
+    setDisplayCurrencyRaw((prev) => {
+      if (prev !== c) trackCurrencySwitched(prev, c);
+      return c;
+    });
+  }, []);
 
   // Fetch live ILS→USD rate, cache for the session
   const { data: rate } = useQuery<number>({
