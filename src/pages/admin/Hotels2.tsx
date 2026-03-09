@@ -162,18 +162,18 @@ const AdminHotels2 = () => {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-3xl font-bold">Hotels</h2>
-            <p className="text-muted-foreground">Manage your hotel properties</p>
+            <h2 className="text-2xl sm:text-3xl font-bold">Hotels</h2>
+            <p className="text-sm text-muted-foreground">Manage your hotel properties</p>
           </div>
-          <Button onClick={() => navigate("/admin/hotels2/new")}>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={() => navigate("/admin/hotels2/new")} size="sm" className="self-start sm:self-auto">
+            <Plus className="w-4 h-4 mr-1.5" />
             Add Hotel
           </Button>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filter by status" />
