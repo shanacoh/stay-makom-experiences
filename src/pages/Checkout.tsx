@@ -708,7 +708,13 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                 <Textarea
                   placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
                   value={specialRequests}
-                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  onChange={(e) => {
+                    setSpecialRequests(e.target.value);
+                    if (!specialRequestTrackedRef.current && e.target.value.length > 0) {
+                      specialRequestTrackedRef.current = true;
+                      trackSpecialRequestTyped(state.experienceSlug);
+                    }
+                  }}
                   className="min-h-[60px] text-sm resize-none"
                   rows={2}
                 />
