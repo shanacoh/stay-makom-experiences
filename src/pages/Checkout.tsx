@@ -722,7 +722,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
 
               {/* Navigation */}
               <div className={cn("flex gap-3 pt-2", lang === 'he' && "flex-row-reverse")}>
-                <Button variant="outline" className="shrink-0" onClick={goBackToExperience}>
+                <Button variant="outline" className="shrink-0" onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step2'); goBackToExperience(); }}>
                   {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
                   {t.back}
                 </Button>
