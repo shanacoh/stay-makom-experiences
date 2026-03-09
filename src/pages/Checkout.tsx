@@ -741,6 +741,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                       toast.error(t.fillGuestInfo);
                       return;
                     }
+                    trackCheckoutContinueClicked(state.experienceSlug, displayTotal);
                     setStep(3);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
