@@ -337,8 +337,6 @@ export async function getAllHotels(countryCode?: string): Promise<HyperGuestHote
  * Get detailed property information (raw)
  */
 export async function getPropertyDetailsRaw(propertyId: number): Promise<HyperGuestPropertyDetails> {
-  console.log("[HyperGuest Service] getPropertyDetailsRaw called with propertyId:", propertyId, "Type:", typeof propertyId);
-  
   if (propertyId === undefined || propertyId === null) {
     throw new Error(`Invalid propertyId: ${propertyId}`);
   }
