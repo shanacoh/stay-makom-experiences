@@ -91,6 +91,7 @@ const Partners = () => {
       });
       
 
+      trackPartnerFormSubmitted();
       setShowSuccess(true);
       form.reset();
       toast.success(lang === 'he' ? "תודה על ההתעניינות!" : "Thank you for your interest!");
