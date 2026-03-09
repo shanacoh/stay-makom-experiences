@@ -8,10 +8,9 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 const MobileStickyHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { lang, setLanguage } = useLanguage();
-  const { setDisplayCurrency } = useCurrency();
+  const { displayCurrency, setDisplayCurrency } = useCurrency();
   const handleLang = (l: "en" | "he") => {
     setLanguage(l);
-    setDisplayCurrency(l === "he" ? "ILS" : "USD");
   };
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,28 +53,35 @@ const MobileStickyHeader = () => {
           STAYMAKOM
         </Link>
 
-        {/* Right: Language switcher */}
-        <div className="ml-auto flex items-center gap-0.5" dir="ltr">
+        {/* Right: Language + currency switcher */}
+        <div className="ml-auto flex items-center justify-end w-[96px] gap-0" dir="ltr">
           <button
             onClick={() => handleLang("en")}
-            className={`text-[11px] tracking-[0.05em] transition-colors px-0.5 min-w-[20px] text-center ${
+            className={`w-[22px] text-center text-[11px] leading-none tracking-[0.05em] transition-colors ${
               lang === "en"
-                ? "text-[#1A1814] font-medium"
-                : "text-[#8A8578]"
+                ? "text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             EN
           </button>
-          <span className="text-[11px] text-[#C8C0B4] select-none">|</span>
+          <span className="w-[8px] text-center text-[11px] text-muted-foreground/50 select-none">|</span>
           <button
             onClick={() => handleLang("he")}
-            className={`text-[12px] tracking-[0.05em] transition-colors px-0.5 min-w-[20px] text-center ${
+            className={`w-[22px] text-center text-[13px] leading-none tracking-[0.05em] transition-colors ${
               lang === "he"
-                ? "text-[#1A1814] font-medium"
-                : "text-[#8A8578]"
+                ? "text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             עב
+          </button>
+          <button
+            onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
+            className="ml-2 w-[18px] text-center text-[11px] font-medium leading-none tracking-[0.05em] text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Toggle currency"
+          >
+            {displayCurrency === "USD" ? "$" : "₪"}
           </button>
         </div>
       </div>

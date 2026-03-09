@@ -88,34 +88,36 @@ const LaunchHeader = ({ forceScrolled = false }: { forceScrolled?: boolean }) =>
           "flex items-center space-x-3",
           isRTL && "flex-row-reverse space-x-reverse"
         )}>
-          <div className={cn(
-            "hidden md:flex items-center space-x-2",
-            isRTL && "space-x-reverse"
-          )}>
+          <div
+            className="hidden md:flex items-center gap-0"
+            dir="ltr"
+          >
             <button
               onClick={() => handleLang("en")}
-              className={`text-[11px] tracking-[0.05em] transition-colors ${
+              className={`w-[22px] text-center text-[11px] leading-none tracking-[0.05em] transition-colors ${
                 lang === "en"
-                  ? !isScrolled ? "text-white font-medium" : "text-[#1A1814] font-medium"
-                  : !isScrolled ? "text-white/50 hover:text-white/70" : "text-[#8A8578] hover:text-[#1A1814]"
+                  ? !isScrolled ? "text-white font-medium" : "text-foreground font-medium"
+                  : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               EN
             </button>
-            <span className={`text-[11px] ${!isScrolled ? "text-white/30" : "text-[#C8C0B4]"}`}>|</span>
+            <span className={`w-[8px] text-center text-[11px] select-none ${!isScrolled ? "text-white/35" : "text-muted-foreground/50"}`}>|</span>
             <button
               onClick={() => handleLang("he")}
-              className={`text-[11px] tracking-[0.05em] transition-colors ${
+              className={`w-[22px] text-center text-[13px] leading-none tracking-[0.05em] transition-colors ${
                 lang === "he"
-                  ? !isScrolled ? "text-white font-medium" : "text-[#1A1814] font-medium"
-                  : !isScrolled ? "text-white/50 hover:text-white/70" : "text-[#8A8578] hover:text-[#1A1814]"
+                  ? !isScrolled ? "text-white font-medium" : "text-foreground font-medium"
+                  : !isScrolled ? "text-white/60 hover:text-white/80" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               עב
             </button>
             <button
               onClick={() => setDisplayCurrency(displayCurrency === "USD" ? "ILS" : "USD")}
-              className={`text-[11px] font-medium tracking-[0.05em] transition-colors ml-1.5 text-[#B8935A] hover:text-[#A07D4A]`}
+              className={`ml-2 w-[18px] text-center text-[11px] font-medium leading-none tracking-[0.05em] transition-colors ${
+                !isScrolled ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               {displayCurrency === "USD" ? "$" : "₪"}
             </button>
