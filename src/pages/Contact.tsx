@@ -75,9 +75,6 @@ const Contact = () => {
         }
       });
       
-      if (emailError) {
-        console.error("Email error:", emailError);
-      }
 
       setShowSuccess(true);
       form.reset();
