@@ -300,6 +300,7 @@ export function BookingPanel2({
 
   const handleContinue = () => {
     if (!dateRange.from || !dateRange.to || !selectedRoomId || !selectedRatePlanId || !selectedRatePlan) return;
+    trackBookThisStayClicked(experienceSlug, displayTotal);
 
     const checkoutState: CheckoutState = {
       experienceId,
