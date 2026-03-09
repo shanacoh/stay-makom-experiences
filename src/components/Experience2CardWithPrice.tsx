@@ -43,6 +43,7 @@ export default function Experience2CardWithPrice({
       experience={cardExperience}
       linkPrefix={linkPrefix}
       linkSuffix={linkSuffix}
+      index={index}
     />
   );
 }
