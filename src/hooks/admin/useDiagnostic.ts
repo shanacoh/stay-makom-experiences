@@ -329,7 +329,7 @@ export const useDiagnostic = () => {
         pass: !data?.rooms || data.rooms.length === 0,
         detail: 'rooms: [] retourné, pas de crash'
       });
-    } catch (e) {
+    } catch (_error) {
       tests.push({
         id: 'E1',
         name: 'Property ID invalide',
