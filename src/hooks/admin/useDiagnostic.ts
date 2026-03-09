@@ -77,9 +77,10 @@ export const useDiagnostic = () => {
     // A1: Edge Function health check — real call to hyperguest?action=search
     let a1Success = false;
     const a1Start = Date.now();
+    const checkInStr = getFutureCheckIn();
     try {
       const data = await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: checkInStr,
         nights: 2,
         guests: '2',
         hotelIds: [23860],
