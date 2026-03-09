@@ -691,7 +691,7 @@ export default function GiftCard() {
       {/* Bottom padding for mobile sticky CTA */}
       <div className="md:hidden h-24" />
 
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 }
