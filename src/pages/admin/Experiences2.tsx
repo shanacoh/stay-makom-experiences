@@ -214,7 +214,7 @@ const AdminExperiences2 = () => {
 
   if (isFormView) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="mx-auto p-2 sm:p-6">
         <UnifiedExperience2Form experienceId={experienceId} onClose={handleCloseForm} />
       </div>
     );
