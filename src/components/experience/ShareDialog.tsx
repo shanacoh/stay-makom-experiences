@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Check } from "lucide-react";
 import { ShareNetwork, EnvelopeSimple, MessengerLogo, WhatsappLogo } from "@phosphor-icons/react";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { trackExperienceShared } from "@/lib/analytics";
 
 interface ShareDialogProps {
   open: boolean;
