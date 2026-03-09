@@ -459,7 +459,7 @@ export default function Companies() {
         </section>
       </div>
 
-      <Footer />
+      <LaunchFooter />
     </div>
   );
 }
