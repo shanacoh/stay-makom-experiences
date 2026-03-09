@@ -67,7 +67,7 @@ const ShareDialog = ({ open, onOpenChange, url, title, lang }: ShareDialogProps)
   };
 
   const handleWhatsAppShare = () => {
-    trackExperienceShared(slug, 'whatsapp');
+    trackShareClicked(slug, 'whatsapp');
     const text = encodeURIComponent(`${title} ${url}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };

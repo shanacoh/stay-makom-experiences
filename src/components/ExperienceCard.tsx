@@ -161,7 +161,7 @@ export default function ExperienceCard({
       queryClient.invalidateQueries({ queryKey: ["wishlist-status", experience.id, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
       
-      trackWishlistToggled(experience.slug, variables.isAdding ? "added" : "removed");
+      trackWishlistClicked(experience.slug, variables.isAdding ? "added" : "removed");
       
       if (variables.isAdding) {
         // Trigger animations

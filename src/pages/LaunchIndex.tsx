@@ -168,7 +168,7 @@ const LaunchIndex = () => {
       if (error) throw error;
       setSubmitted(true);
       setEmail("");
-      trackWaitlistSignup(email.split("@")[1] || "unknown");
+      trackWaitlistEmailSubmitted(email.split("@")[1] || "unknown");
       toast.success(isRTL ? "נרשמת בהצלחה!" : "You're on the list!");
     } catch {
       toast.error(isRTL ? "שגיאה, נסה שנית" : "Something went wrong. Try again.");
