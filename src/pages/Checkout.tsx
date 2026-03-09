@@ -8,9 +8,11 @@ import {
   trackCheckoutStep2Viewed,
   trackCheckoutStep3Viewed,
   trackBookingCompleted,
-  trackBookingFailed,
+  trackPaymentFailed,
   trackBookingAbandoned,
   trackFormFieldInteracted,
+  trackCheckoutContinueClicked,
+  trackCheckoutBackClicked,
 } from "@/lib/analytics";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
