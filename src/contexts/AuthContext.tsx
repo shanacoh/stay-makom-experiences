@@ -145,7 +145,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data) {
       const userRole = data.role as AppRole;
       setRole(userRole);
-      setRoles([userRole]); // Single role now due to UNIQUE constraint
+      setRoles([userRole]);
+
+      // Analytics identify
+      const isMobile = window.innerWidth < 768;
+      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+      identifyUser(userId, {
+        language: navigator.language?.split("-")[0] || "en",
+        deviceType: isMobile ? "mobile" : isTablet ? "tablet" : "desktop",
+        isReturningUser: true,
+      });
     } else {
       // Fallback to provisioned role
       setRole(provisionedRole);
