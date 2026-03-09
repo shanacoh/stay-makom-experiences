@@ -489,7 +489,7 @@ export function UnifiedExperienceForm({
 
   // Handler for validation errors - shows toast and scrolls to first error
   const onInvalidSubmit = (errors: Record<string, any>) => {
-    console.error("Form validation errors:", errors);
+    
     
     // Create readable field names
     const fieldNames: Record<string, string> = {

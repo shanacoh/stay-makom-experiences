@@ -124,10 +124,9 @@ export const trackBounce = async () => {
           event_type: "bounce",
           metadata: { timestamp: new Date().toISOString() },
         });
-        console.log("Bounce tracked for search:", searchId);
       }
     } catch (error) {
-      console.error("Failed to track bounce:", error);
+      // Error handled silently
     }
   }
 };

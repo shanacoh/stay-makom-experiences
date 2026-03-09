@@ -180,7 +180,7 @@ const StickyAIButton = () => {
       setShowEmailPrompt(false);
       setEmail('');
     } catch (error) {
-      console.error('Error saving email:', error);
+      // Error handled silently
     } finally {
       setIsSubmittingEmail(false);
     }

@@ -532,7 +532,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         // Error handled silently
       }
     } catch (error: any) {
-      console.error("Pre-book/Booking error:", error);
+      
       const detail = error?.message || "";
       const codeMatch = detail.match(/BN\.\d+/);
       const errorCode = codeMatch?.[0] || "";

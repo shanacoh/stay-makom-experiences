@@ -737,7 +737,7 @@ export function UnifiedExperience2Form({
   // -------------------------------------------------------------------------
 
   const onInvalidSubmit = (errors: Record<string, any>) => {
-    console.error("Form validation errors:", errors);
+    
     const fieldNames: Record<string, string> = {
       title: "Title (EN)",
       category_id: "Category",

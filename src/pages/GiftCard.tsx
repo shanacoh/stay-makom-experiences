@@ -255,7 +255,7 @@ export default function GiftCard() {
           : "Gift card created successfully!"
       );
     } catch (error) {
-      console.error("Error creating gift card:", error);
+      
       toast.error(
         lang === "he"
           ? "יצירת כרטיס המתנה נכשלה. אנא נסו שוב."

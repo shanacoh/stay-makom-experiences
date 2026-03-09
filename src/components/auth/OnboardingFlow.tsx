@@ -182,7 +182,7 @@ export default function OnboardingFlow({ open, onComplete, userId, lang = "en" }
       toast.success(lang === "fr" ? "Profil mis à jour !" : lang === "he" ? "הפרופיל עודכן!" : "Profile updated!");
       onComplete();
     } catch (error: any) {
-      console.error("Onboarding error:", error);
+      
       toast.error(error.message || "Failed to save profile");
     } finally {
       setLoading(false);

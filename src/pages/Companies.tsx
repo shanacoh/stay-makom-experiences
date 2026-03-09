@@ -102,7 +102,7 @@ export default function Companies() {
         setShowSuccess(false);
       }, 5000);
     } catch (error) {
-      console.error("Error sending request:", error);
+      
       toast.error(lang === 'he' 
         ? "שליחת הבקשה נכשלה. אנא נסו שוב או צרו קשר ישירות hello@staymakom.com"
         : "Failed to send request. Please try again or contact us directly at hello@staymakom.com"

@@ -190,7 +190,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
             },
           });
         } catch (emailErr) {
-          console.error("[Cancel] Email sending failed:", emailErr);
+          // Error handled silently
         }
       }
 

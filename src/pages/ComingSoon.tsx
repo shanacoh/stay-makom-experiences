@@ -34,7 +34,7 @@ const ComingSoon = () => {
       setIsSubmitted(true);
       toast.success(lang === 'en' ? "You're on the list!" : "נרשמת בהצלחה!");
     } catch (error) {
-      console.error('Error submitting email:', error);
+      
       toast.error(lang === 'en' ? "Something went wrong. Please try again." : "משהו השתבש. נסו שוב.");
     } finally {
       setIsSubmitting(false);

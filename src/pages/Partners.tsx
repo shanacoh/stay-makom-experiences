@@ -92,7 +92,7 @@ const Partners = () => {
       form.reset();
       toast.success(lang === 'he' ? "תודה על ההתעניינות!" : "Thank you for your interest!");
     } catch (error) {
-      console.error("Error:", error);
+      
       toast.error(lang === 'he' ? "משהו השתבש. אנא נסו שוב." : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);

@@ -102,7 +102,7 @@ export default function PersonalizedRequestSection({
       setRequestType("");
       setMessage("");
     } catch (error) {
-      console.error("Error sending request:", error);
+      
       toast.error(copy.error);
     } finally {
       setIsSubmitting(false);
