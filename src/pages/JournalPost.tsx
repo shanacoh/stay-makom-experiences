@@ -339,7 +339,7 @@ const JournalPost = () => {
       case "cta":
         return block.text ? (
           <div className="my-10 text-center">
-            <Button size="lg" asChild>
+            <Button size="lg" asChild onClick={() => trackCtaClickedFromJournal(slug || '', block.url?.includes('/experience') ? 'experience_link' : 'book_now')}>
               <Link to={block.url}>{block.text}</Link>
             </Button>
           </div>
