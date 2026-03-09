@@ -104,7 +104,7 @@ const Partners = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
-      <Header />
+      <LaunchHeader forceScrolled={true} />
 
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[350px] sm:min-h-[400px] flex items-center justify-center">
