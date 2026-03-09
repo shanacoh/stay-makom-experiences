@@ -150,8 +150,8 @@ const AdminJournal = () => {
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
       ) : posts && posts.length > 0 ? (
-        <div className="border rounded-lg">
-          <Table>
+          <div className="border rounded-lg overflow-x-auto">
+            <Table className="min-w-[600px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>

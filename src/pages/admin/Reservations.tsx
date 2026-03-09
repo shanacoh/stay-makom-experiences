@@ -244,8 +244,8 @@ const AdminBookings = () => {
         {isLoading ? (
           <div className="text-center py-12">Loading...</div>
         ) : filteredBookings.length > 0 ? (
-          <div className="border rounded-lg bg-card">
-            <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto">
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>

@@ -180,8 +180,8 @@ const AdminCategories = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : categories && categories.length > 0 ? (
-          <div className="border rounded-lg bg-card overflow-hidden">
-            <Table>
+          <div className="border rounded-lg bg-card overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="w-[40px]"></TableHead>

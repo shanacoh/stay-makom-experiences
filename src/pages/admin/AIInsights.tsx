@@ -312,24 +312,24 @@ const AIInsights = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Brain className="h-8 w-8 text-primary" />
+          <Brain className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">AI Insights</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold">AI Insights</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Analyse complète du funnel IA
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={!queries?.length}>
-            <Download className="h-4 w-4 mr-2" />
-            Exporter CSV
+            <Download className="h-4 w-4 mr-1.5" />
+            Export
           </Button>
           <Button variant="outline" size="sm" onClick={handleClearOldQueries}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Nettoyer +30j
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            +30j
           </Button>
         </div>
       </div>

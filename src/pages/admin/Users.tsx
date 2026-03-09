@@ -64,22 +64,22 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Users</h2>
-          <p className="text-muted-foreground">Manage internal staff and admins</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">Users</h2>
+            <p className="text-sm text-muted-foreground">Manage internal staff and admins</p>
+          </div>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add User
+          </Button>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add User
-        </Button>
-      </div>
 
-      {isLoading ? (
-        <div className="text-center py-12">Loading...</div>
-      ) : users && users.length > 0 ? (
-        <div className="border rounded-lg bg-white">
-          <Table>
+        {isLoading ? (
+          <div className="text-center py-12">Loading...</div>
+        ) : users && users.length > 0 ? (
+          <div className="border rounded-lg bg-white overflow-x-auto">
+            <Table className="min-w-[600px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>

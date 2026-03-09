@@ -389,14 +389,14 @@ const AdminExperiences = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Experiences</h1>
-          <p className="text-muted-foreground">Manage all hotel experiences</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Experiences</h1>
+          <p className="text-sm text-muted-foreground">Manage all hotel experiences</p>
         </div>
-        <Button onClick={handleCreateNew}>
-          <Plus className="w-4 h-4 mr-2" />
+        <Button size="sm" onClick={handleCreateNew}>
+          <Plus className="w-4 h-4 mr-1.5" />
           Create Experience
         </Button>
       </div>
