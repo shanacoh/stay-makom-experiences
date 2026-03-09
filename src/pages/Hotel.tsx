@@ -488,4 +488,4 @@ const Hotel = () => {
 
 };
 
-export default Hotel2;
+export default Hotel;
