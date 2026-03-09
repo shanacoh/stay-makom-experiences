@@ -55,27 +55,27 @@ const MobileStickyHeader = () => {
         </Link>
 
         {/* Right: Language switcher */}
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-0.5" dir="ltr">
           <button
             onClick={() => handleLang("en")}
-            className={`text-[11px] tracking-[0.05em] transition-colors ${
+            className={`text-[11px] tracking-[0.05em] transition-colors px-0.5 min-w-[20px] text-center ${
               lang === "en"
                 ? "text-[#1A1814] font-medium"
                 : "text-[#8A8578]"
             }`}
           >
-            EN · $
+            EN
           </button>
-          <span className="text-[11px] text-[#C8C0B4]">|</span>
+          <span className="text-[11px] text-[#C8C0B4] select-none">|</span>
           <button
             onClick={() => handleLang("he")}
-            className={`text-[11px] tracking-[0.05em] transition-colors ${
+            className={`text-[12px] tracking-[0.05em] transition-colors px-0.5 min-w-[20px] text-center ${
               lang === "he"
                 ? "text-[#1A1814] font-medium"
                 : "text-[#8A8578]"
             }`}
           >
-            עב · ₪
+            עב
           </button>
         </div>
       </div>
