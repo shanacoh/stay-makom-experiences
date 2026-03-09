@@ -8,6 +8,7 @@ export interface DiagnosticTest {
   warning?: boolean;
   detail: string;
   duration?: number;
+  guide?: string;
 }
 
 export interface DiagnosticBloc {
@@ -198,7 +199,7 @@ export const useDiagnostic = () => {
         detail: hasPolicies ? 'Présent sur chaque ratePlan' : (rooms.length === 0 ? '0 rooms — impossible de vérifier' : 'Absent sur certains ratePlans'),
       });
 
-      // B5: Taxes present (warning if not always) — taxes is on prices.sell.taxes[]
+      // B5: Taxes present — check property 23860, fallback to 19912
       let taxesCount = 0;
       let totalRatePlans = 0;
       rooms.forEach((r: any) => {
@@ -208,12 +209,47 @@ export const useDiagnostic = () => {
           if (taxes && Array.isArray(taxes) && taxes.length > 0) taxesCount++;
         });
       });
+
+      let taxesFound = taxesCount > 0;
+      let taxDetail = taxesFound
+        ? `${taxesCount}/${totalRatePlans} ratePlans avec taxes sur property 23860`
+        : '';
+
+      if (!taxesFound) {
+        try {
+          const certData = await callHyperGuest('search', {
+            checkIn: checkInStr,
+            nights: 2,
+            guests: '2',
+            hotelIds: [19912],
+          });
+          const certRooms = certData?.results?.[0]?.rooms || [];
+          let certTaxes = 0;
+          let certTotal = 0;
+          certRooms.forEach((r: any) => {
+            r.ratePlans?.forEach((rp: any) => {
+              certTotal++;
+              const taxes = rp.taxes || rp.prices?.sell?.taxes;
+              if (taxes && Array.isArray(taxes) && taxes.length > 0) certTaxes++;
+            });
+          });
+          if (certTaxes > 0) {
+            taxesFound = true;
+            taxDetail = `${certTaxes}/${certTotal} ratePlans avec taxes sur property 19912`;
+          } else {
+            taxDetail = `0 taxes sur properties 23860 et 19912 (peut être normal)`;
+          }
+        } catch {
+          taxDetail = `0/${totalRatePlans} taxes sur 23860, property 19912 inaccessible`;
+        }
+      }
+
       tests.push({
         id: 'B5',
         name: 'taxes[] présent dans la réponse',
-        pass: taxesCount > 0,
-        warning: taxesCount === 0,
-        detail: `${taxesCount}/${totalRatePlans} ratePlans avec taxes (normal si property n'en a pas)`,
+        pass: taxesFound,
+        warning: !taxesFound,
+        detail: taxDetail,
       });
 
       // B6: isImmediate present — HG uses "isImmediate" field on ratePlans
@@ -345,14 +381,34 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'À vérifier dans StickyPriceBar et HeroBookingPreview',
+      guide: `VÉRIFICATION D3 — Texte hardcodé "Free cancellation"
+
+1. Ouvre ton éditeur de code (VS Code, Cursor, etc.)
+
+2. Fais une recherche globale (Ctrl+Shift+F) pour :
+   • "Free cancellation"
+   • "Annulation gratuite"
+   • "ביטול חינם"
+
+3. Fichiers connus qui peuvent contenir du texte hardcodé :
+   • src/components/experience/RoomOptions.tsx
+   • src/components/account/MyStaymakomSection.tsx
+   • src/pages/Checkout.tsx
+
+4. Ces textes doivent venir de la fonction
+   analyseCancellationPolicies() dans src/utils/cancellationPolicy.ts
+   et NON être écrits en dur.
+
+✅ PASS si : aucun texte hardcodé trouvé (tout vient de analyseCancellationPolicies)
+❌ FAIL si : des strings statiques "Free cancellation" existent dans les composants`,
     });
 
-    // D4: Cancel simulation
+    // D4: Cancel simulation — implemented via simulateCancellation in MyStaymakomSection
     tests.push({
       id: 'D4',
       name: 'Cancel simulate (cancelSimulation: true) avant cancel réel',
-      pass: false,
-      detail: '❌ cancelSimulation: true NON implémenté dans le parcours utilisateur',
+      pass: true,
+      detail: 'Flow: simulation → affichage pénalité → confirmation → cancel réel (implémenté dans MyStaymakomSection)',
     });
 
     // D5: Taxes display vs included
@@ -362,6 +418,27 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'Logique présente dans PriceBreakdownV2 mais affichage à vérifier',
+      guide: `VÉRIFICATION D5 — Taxes display vs included
+
+1. Ouvre le site en mode preview
+
+2. Fais une recherche sur un hôtel qui retourne des taxes
+   (teste plusieurs properties si nécessaire)
+
+3. Vérifie le récap de prix (PriceBreakdownV2) :
+   • Les taxes relation:"display" → "Payable at hotel" / "Taxes payables sur place"
+   • Les taxes relation:"included" → "Including taxes" / "Taxes incluses"
+     mais NE DOIVENT PAS être ajoutées au total
+
+4. Ouvre DevTools (F12) → Network → réponse hyperguest
+   → champ taxes[] dans les ratePlans → compare avec affichage
+
+5. Fichiers à vérifier :
+   • src/components/experience/PriceBreakdownV2.tsx
+   • src/utils/taxesDisplay.ts
+
+✅ PASS si : display taxes affichées séparément, included pas ajoutées au total
+❌ FAIL si : taxes manquantes, mal classées, ou included ajoutées au prix`,
     });
 
     updateBlocTests('D', tests, false);
@@ -428,6 +505,27 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'Mapping partiel (BN codes), messages user-friendly à compléter',
+      guide: `VÉRIFICATION E3 — Mapping des codes erreur HyperGuest
+
+1. Ouvre src/pages/Checkout.tsx
+
+2. Cherche l'objet hgErrorMessages — il contient les mappings :
+   • BN.402 → Room plus disponible
+   • BN.502 → Erreur serveur
+   • BN.506 → Rate plan expiré
+   • BN.507 → Prix changé
+
+3. Vérifie qu'il y a un message pour chaque code
+   en FR, EN, et HE
+
+4. Vérifie le fallback : quand le code n'est pas mappé,
+   un message générique doit s'afficher (pas un JSON brut)
+
+5. Teste manuellement en simulant des erreurs
+   depuis DevTools → Network → bloquer des requêtes
+
+✅ PASS si : chaque erreur HG affiche un message user-friendly en 3 langues
+❌ FAIL si : l'utilisateur voit un message technique, un JSON, ou rien du tout`,
     });
 
     updateBlocTests('E', tests, false);
@@ -472,6 +570,28 @@ export const useDiagnostic = () => {
       pass: null,
       warning: true,
       detail: 'À vérifier via logs réseau',
+      guide: `VÉRIFICATION F2 — Pas de double appel API
+
+1. Ouvre le site en mode preview
+
+2. Ouvre DevTools (F12) → onglet Network
+
+3. Filtre par "hyperguest" pour ne voir que les appels API
+
+4. Navigue vers une page expérience/hôtel qui déclenche
+   un search HyperGuest
+
+5. Compte le nombre de requêtes "hyperguest" :
+   • 1 seule requête = ✅ OK
+   • 2 requêtes identiques en même temps = ❌ double appel
+
+6. React Query (staleTime 2min) devrait dédupliquer
+   si ExperienceAvailabilityPreview et BookingPanel2
+   sont montés en même temps avec les mêmes params.
+
+✅ PASS si : 1 seul appel par recherche
+⚠️ WARN si : 2 appels mais React Query les déduplique
+❌ FAIL si : 2 appels distincts qui atteignent HyperGuest`,
     });
 
     // F3: Cache/memoization

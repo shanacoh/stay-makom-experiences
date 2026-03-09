@@ -1,11 +1,15 @@
 import { DiagnosticTest as TestType } from '@/hooks/admin/useDiagnostic';
-import { CheckCircle2, XCircle, AlertTriangle, Clock } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Clock, Info } from 'lucide-react';
+import { useState } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface DiagnosticTestProps {
   test: TestType;
 }
 
 export const DiagnosticTest = ({ test }: DiagnosticTestProps) => {
+  const [guideOpen, setGuideOpen] = useState(false);
+
   const getIcon = () => {
     if (test.pass === null) return <Clock className="h-4 w-4 text-muted-foreground" />;
     if (test.warning) return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
@@ -33,6 +37,19 @@ export const DiagnosticTest = ({ test }: DiagnosticTestProps) => {
           <span className="text-xs text-muted-foreground mt-1">
             {(test.duration / 1000).toFixed(2)}s
           </span>
+        )}
+        {test.guide && (
+          <Collapsible open={guideOpen} onOpenChange={setGuideOpen}>
+            <CollapsibleTrigger className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 underline cursor-pointer mt-1.5 transition-colors">
+              <Info className="h-3 w-3" />
+              {guideOpen ? 'Masquer le guide' : 'Comment vérifier ?'}
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <pre className="mt-2 p-3 bg-muted/60 rounded text-xs text-muted-foreground font-mono whitespace-pre-wrap leading-relaxed border border-border/50">
+                {test.guide}
+              </pre>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </div>
     </div>
