@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LaunchHeader from "@/components/LaunchHeader";
+import LaunchFooter from "@/components/LaunchFooter";
 import { Loader2, ChevronLeft } from "lucide-react";
 import WishlistSection from "@/components/account/WishlistSection";
 import MyStaymakomSection from "@/components/account/MyStaymakomSection";
@@ -204,7 +204,7 @@ const Account = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+      <LaunchHeader forceScrolled={true} />
       <main className="flex-1 pt-24 pb-16">
         {/* Full-width header area */}
         <div className="container">
@@ -226,7 +226,7 @@ const Account = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      <LaunchFooter />
       {user && (
         <OnboardingFlow
           open={showOnboarding}
