@@ -71,6 +71,31 @@ const ExtrasSection2 = ({
   onToggleExtra,
 }: ExtrasSection2Props) => {
   const { symbol: currencySymbol, convert } = useCurrency();
+  const viewedAddonsRef = useRef(new Set<string>());
+
+  const addonObserverCallback = useCallback((entries: IntersectionObserverEntry[]) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const addonId = entry.target.getAttribute('data-addon-id');
+        const addonName = entry.target.getAttribute('data-addon-name');
+        if (addonId && addonName && !viewedAddonsRef.current.has(addonId)) {
+          viewedAddonsRef.current.add(addonId);
+          trackAddonViewed(experienceId, addonName);
+        }
+      }
+    });
+  }, [experienceId]);
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(addonObserverCallback, { threshold: 0.5 });
+    return () => observerRef.current?.disconnect();
+  }, [addonObserverCallback]);
+
+  const addonCardRef = useCallback((node: HTMLDivElement | null) => {
+    if (node && observerRef.current) observerRef.current.observe(node);
+  }, []);
+
   const { data: extras } = useQuery({
     queryKey: ["experience2-public-extras", experienceId],
     queryFn: async () => {
