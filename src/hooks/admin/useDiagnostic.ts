@@ -8,6 +8,7 @@ export interface DiagnosticTest {
   warning?: boolean;
   detail: string;
   duration?: number;
+  guide?: string;
 }
 
 export interface DiagnosticBloc {
