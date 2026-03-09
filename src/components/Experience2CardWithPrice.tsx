@@ -14,6 +14,7 @@ interface Experience2CardWithPriceProps {
   addons?: Array<{ type: string; value: number; is_active: boolean }>;
   linkPrefix?: string;
   linkSuffix?: string;
+  index?: number;
 }
 
 export default function Experience2CardWithPrice({
