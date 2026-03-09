@@ -129,6 +129,7 @@ const getStatusConfig = (status: string) => {
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-booking-status-update function called");
+  const corsHeaders = getCorsHeaders(req);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
