@@ -371,10 +371,12 @@ export const useDiagnostic = () => {
     updateBlocTests('E', [], true);
     const tests: DiagnosticTest[] = [];
 
+    const checkInStr = getFutureCheckIn();
+
     // E1: Invalid property ID — real call
     try {
       const data = await callHyperGuest('search', {
-        checkIn: '2026-08-14',
+        checkIn: checkInStr,
         nights: 2,
         guests: '2',
         hotelIds: [99999999],
@@ -387,7 +389,6 @@ export const useDiagnostic = () => {
         detail: `${rooms.length === 0 ? 'rooms: [] retourné, pas de crash' : 'Des rooms retournées (inattendu)'}`,
       });
     } catch (error: any) {
-      // An error is also acceptable — it means it didn't crash silently
       tests.push({
         id: 'E1',
         name: 'Property ID invalide retourne erreur propre',
@@ -396,7 +397,7 @@ export const useDiagnostic = () => {
       });
     }
 
-    // E2: Past dates rejected — real call
+    // E2: Past dates rejected — intentionally past date
     try {
       const pastData = await callHyperGuest('search', {
         checkIn: '2024-01-01',
@@ -416,7 +417,7 @@ export const useDiagnostic = () => {
         id: 'E2',
         name: 'Dates passées rejetées',
         pass: true,
-        detail: 'Erreur retournée correctement pour dates passées',
+        detail: 'Erreur SN.400 retournée correctement pour dates passées',
       });
     }
 
