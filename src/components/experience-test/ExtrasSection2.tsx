@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useRef, useEffect, useCallback } from "react";
+import { trackAddonViewed, trackAddonClicked } from "@/lib/analytics";
 import {
   Wine, Car, Coffee, Flower, Sparkle, Gift, Heart, Camera, MusicNotes,
   Champagne, Bed, Cake, Drop, Leaf, HandHeart, Star,
