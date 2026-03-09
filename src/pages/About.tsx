@@ -23,7 +23,7 @@ const About = () => {
         descriptionEn="Discover STAYMAKOM - a curated booking platform combining boutique hotels and immersive local experiences in Israel."
         descriptionHe="גלו את STAYMAKOM - פלטפורמת הזמנות מובחרת המשלבת מלונות בוטיק וחוויות מקומיות סוחפות בישראל." />
 
-      <Header />
+      <LaunchHeader forceScrolled={true} />
 
       {/* HERO */}
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
