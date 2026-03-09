@@ -2,10 +2,16 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGINS = [
+  'https://staymakom.com', 'https://www.staymakom.com',
+  'https://stay-makom-experiences.lovable.app',
+  'http://localhost:5173', 'http://localhost:8080',
+];
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return { 'Access-Control-Allow-Origin': allowedOrigin, 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Vary': 'Origin' };
+}
 
 interface PartnerRequest {
   name: string;
@@ -37,6 +43,7 @@ const propertyTypeLabels: Record<string, string> = {
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-partner-request function called");
+  const corsHeaders = getCorsHeaders(req);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });

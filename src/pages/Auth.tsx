@@ -108,7 +108,11 @@ const Auth = () => {
 
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("This email is already registered. Please sign in instead.");
+          toast.success("If this email is registered, you will receive a confirmation. Please check your inbox.");
+        } else if (error.message.includes("Email not confirmed")) {
+          toast.info("Please check your inbox for a confirmation email.");
+        } else if (error.message.includes("User not found")) {
+          toast.error("Invalid email or password");
         } else {
           toast.error(error.message);
         }

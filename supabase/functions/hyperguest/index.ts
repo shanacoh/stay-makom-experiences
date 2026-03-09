@@ -7,10 +7,24 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = [
+  'https://staymakom.com',
+  'https://www.staymakom.com',
+  'https://stay-makom-experiences.lovable.app',
+  'http://localhost:5173',
+  'http://localhost:8080',
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
 
 // API Domains
 const SEARCH_DOMAIN = 'https://search-api.hyperguest.io/2.0/';
@@ -409,6 +423,8 @@ async function getFacilities() {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -418,14 +434,15 @@ Deno.serve(async (req) => {
     const action = url.searchParams.get('action');
     console.log('🚀 HyperGuest API request:', action, 'method:', req.method);
 
+    let authResult: { authenticated: boolean; userId?: string; error?: string } = { authenticated: true };
     if (action) {
-      const auth = await verifyAuth(req, action);
-      if (!auth.authenticated) {
-        return new Response(JSON.stringify({ success: false, error: `Authentication required: ${auth.error}` }), {
+      authResult = await verifyAuth(req, action);
+      if (!authResult.authenticated) {
+        return new Response(JSON.stringify({ success: false, error: `Authentication required: ${authResult.error}` }), {
           status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (auth.userId) console.log('🔓 Authenticated user:', auth.userId, 'for action:', action);
+      if (authResult.userId) console.log('🔓 Authenticated user:', authResult.userId, 'for action:', action);
     }
 
     let body: Record<string, unknown> = {};
@@ -482,6 +499,35 @@ Deno.serve(async (req) => {
       case 'cancel-booking': {
         const cancelBookingId = (body as { bookingId?: string }).bookingId;
         if (!cancelBookingId) throw new Error('bookingId is required');
+
+        // Ownership check: verify the booking belongs to the authenticated user
+        if (authResult.userId) {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+          const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+          const ownerCheckClient = createClient(supabaseUrl, supabaseServiceKey);
+          const { data: bookingRecord } = await ownerCheckClient
+            .from('bookings_hg')
+            .select('user_id')
+            .eq('hg_booking_id', cancelBookingId)
+            .maybeSingle();
+          
+          if (bookingRecord && bookingRecord.user_id && bookingRecord.user_id !== authResult.userId) {
+            // Check if user is admin
+            const { data: adminRole } = await ownerCheckClient
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', authResult.userId)
+              .eq('role', 'admin')
+              .maybeSingle();
+            
+            if (!adminRole) {
+              return new Response(JSON.stringify({
+                success: false,
+                error: 'You are not authorized to cancel this booking'
+              }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+            }
+          }
+        }
         result = await cancelBooking(cancelBookingId, body as any);
         break;
       }

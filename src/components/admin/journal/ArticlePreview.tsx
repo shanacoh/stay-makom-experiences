@@ -1,5 +1,6 @@
 import { Block } from "./types";
 import { Button } from "@/components/ui/button";
+import DOMPurify from "dompurify";
 
 interface ArticlePreviewProps {
   title: string;
@@ -41,7 +42,7 @@ export function ArticlePreview({
         return block.content ? (
           <div
             style={{ fontSize: "17px", lineHeight: 1.8, color: "#2C2825", marginBottom: "24px" }}
-            dangerouslySetInnerHTML={{ __html: block.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.content) }}
           />
         ) : null;
 
