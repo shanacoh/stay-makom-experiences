@@ -78,7 +78,8 @@ export default function ExperienceCard({
   onWishlistToggle,
   linkPrefix = "/experience",
   linkSuffix = "",
-}: ExperienceCardProps) {
+  index = 0,
+}: ExperienceCardProps & { index?: number }) {
   const { lang } = useLanguage();
   const { symbol: currencySymbol } = useCurrency();
   const { user } = useAuth();
