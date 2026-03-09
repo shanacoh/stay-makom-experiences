@@ -342,7 +342,6 @@ export async function getPropertyDetailsRaw(propertyId: number): Promise<HyperGu
   }
   
   const result = await callHyperGuestGet<HyperGuestPropertyDetails>('get-property', { propertyId: String(propertyId) });
-  console.log("[HyperGuest Service] getPropertyDetailsRaw result:", result);
   return result;
 }
 
