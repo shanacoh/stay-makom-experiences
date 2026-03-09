@@ -4,6 +4,15 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import {
+  trackCheckoutStep2Viewed,
+  trackCheckoutStep3Viewed,
+  trackBookingCompleted,
+  trackBookingFailed,
+  trackBookingAbandoned,
+  trackFormFieldInteracted,
+  trackSpecialRequestAdded,
+} from "@/lib/analytics";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Check, Clock, Loader2, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
