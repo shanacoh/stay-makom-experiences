@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useLanguage, getLocalizedField } from "@/hooks/useLanguage";
 import { t } from "@/lib/translations";
+import { trackFooterCategoryClicked } from "@/lib/analytics";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
