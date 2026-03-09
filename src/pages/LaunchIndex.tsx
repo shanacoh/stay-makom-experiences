@@ -349,14 +349,15 @@ const LaunchIndex = () => {
                 ?.sort((a: any, b: any) => (a.position || 0) - (b.position || 0))?.[0]?.hotel;
 
                 return (
-                <Experience2CardWithPrice
+              <Experience2CardWithPrice
                   key={experience.id}
                   experience={experience}
                   primaryHotel={primaryHotelLink}
                   hyperguestPropertyId={primaryHotelLink?.hyperguest_property_id}
                   addons={(experience as any).experience2_addons}
                   linkPrefix="/experience"
-                  linkSuffix="context=launch" />);
+                  linkSuffix="context=launch"
+                  index={idx} />);
 
 
             })}
