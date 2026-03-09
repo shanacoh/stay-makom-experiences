@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+import { trackLanguageSwitched } from "@/lib/analytics";
 
 export type Language = "en" | "he" | "fr";
 
