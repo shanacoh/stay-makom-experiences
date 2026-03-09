@@ -116,7 +116,7 @@ const AIExperienceAssistant = () => {
 
       setResponse(data);
     } catch (error) {
-      console.error('Error getting recommendations:', error);
+      
       toast({
         title: lang === 'he' ? 'שגיאה' : 'Error',
         description: lang === 'he' 

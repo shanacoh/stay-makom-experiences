@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return userRole;
     } catch (error) {
-      console.error("Error provisioning user:", error);
+      // Error handled silently
       return "customer";
     }
   };

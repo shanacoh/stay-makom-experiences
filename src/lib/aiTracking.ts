@@ -40,9 +40,8 @@ export const trackExperienceClick = async (
       position: position,
       metadata: { timestamp: new Date().toISOString() },
     });
-    console.log("AI click tracked:", experienceId);
   } catch (error) {
-    console.error("Failed to track click:", error);
+    // Error handled silently
   }
 };
 
@@ -59,9 +58,8 @@ export const trackNewSearch = async (searchId: string) => {
         event_type: "new_search",
         metadata: { new_search_id: searchId },
       });
-      console.log("New search tracked after:", previousSearchId);
     } catch (error) {
-      console.error("Failed to track new search:", error);
+      // Error handled silently
     }
   }
 
@@ -98,9 +96,8 @@ export const trackBookingConversion = async (
         })
         .eq("id", searchId);
 
-      console.log("Booking conversion tracked:", bookingId);
     } catch (error) {
-      console.error("Failed to track booking:", error);
+      // Error handled silently
     }
   }
 };
@@ -127,10 +124,9 @@ export const trackBounce = async () => {
           event_type: "bounce",
           metadata: { timestamp: new Date().toISOString() },
         });
-        console.log("Bounce tracked for search:", searchId);
       }
     } catch (error) {
-      console.error("Failed to track bounce:", error);
+      // Error handled silently
     }
   }
 };

@@ -75,15 +75,12 @@ const Contact = () => {
         }
       });
       
-      if (emailError) {
-        console.error("Email error:", emailError);
-      }
 
       setShowSuccess(true);
       form.reset();
       toast.success(lang === 'he' ? "ההודעה נשלחה בהצלחה!" : "Message sent successfully!");
     } catch (error) {
-      console.error("Error:", error);
+      
       toast.error(lang === 'he' ? "משהו השתבש. אנא נסו שוב." : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);

@@ -8,7 +8,7 @@ export const initAmplitude = () => {
 
   const apiKey = import.meta.env.VITE_AMPLITUDE_API_KEY;
   if (!apiKey) {
-    console.warn("[Amplitude] API key not found — skipping init");
+    // Amplitude API key not found — skipping init
     return;
   }
 

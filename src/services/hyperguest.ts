@@ -337,14 +337,11 @@ export async function getAllHotels(countryCode?: string): Promise<HyperGuestHote
  * Get detailed property information (raw)
  */
 export async function getPropertyDetailsRaw(propertyId: number): Promise<HyperGuestPropertyDetails> {
-  console.log("[HyperGuest Service] getPropertyDetailsRaw called with propertyId:", propertyId, "Type:", typeof propertyId);
-  
   if (propertyId === undefined || propertyId === null) {
     throw new Error(`Invalid propertyId: ${propertyId}`);
   }
   
   const result = await callHyperGuestGet<HyperGuestPropertyDetails>('get-property', { propertyId: String(propertyId) });
-  console.log("[HyperGuest Service] getPropertyDetailsRaw result:", result);
   return result;
 }
 
@@ -352,11 +349,8 @@ export async function getPropertyDetailsRaw(propertyId: number): Promise<HyperGu
  * Get detailed property information as Hotel model
  */
 export async function getPropertyDetails(propertyId: number): Promise<Hotel> {
-  console.log("[HyperGuest Service] getPropertyDetails called with propertyId:", propertyId);
   const rawData = await getPropertyDetailsRaw(propertyId);
-  console.log("[HyperGuest Service] Raw data received, creating Hotel model...");
   const hotel = new Hotel(rawData);
-  console.log("[HyperGuest Service] Hotel model created:", hotel);
   return hotel;
 }
 

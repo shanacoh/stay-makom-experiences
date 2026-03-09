@@ -52,7 +52,7 @@ const Footer = () => {
       toast.success(t(lang, 'footerSubscribed'));
       setEmail("");
     } catch (error) {
-      console.error("Error subscribing:", error);
+      
       toast.error("Something went wrong. Please try again.");
     }
   };

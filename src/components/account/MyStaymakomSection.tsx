@@ -128,7 +128,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       const result = await simulateCancellation(booking.hg_booking_id);
       setSimulationResult(result);
     } catch (err: any) {
-      console.error("[Cancel Simulate] Error:", err);
+      
       setSimulationError(true);
     } finally {
       setIsSimulating(false);
@@ -141,7 +141,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       const booking = bookingsHg?.find((b: any) => b.id === bookingId);
       if (!booking) throw new Error("Booking not found");
 
-      console.log("[Cancel] bookingId envoyé:", booking.hg_booking_id);
+      
       const { cancelBooking } = await import("@/services/hyperguest");
       
       let hgCancelSuccess = false;
@@ -151,7 +151,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
       } catch (err: any) {
         const msg = err?.message || "";
         if (msg.includes("booking cannot be found") || msg.includes("BN.500")) {
-          console.warn("[Cancel] Booking not found on HyperGuest, marking as cancelled locally");
+          
           hgCancelSuccess = true;
         } else {
           throw err;
@@ -190,7 +190,7 @@ export default function MyStaymakomSection({ userId }: MyStaymakomSectionProps) 
             },
           });
         } catch (emailErr) {
-          console.error("[Cancel] Email sending failed:", emailErr);
+          // Error handled silently
         }
       }
 

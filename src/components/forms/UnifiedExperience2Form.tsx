@@ -581,8 +581,7 @@ export function UnifiedExperience2Form({
     }));
     const { error } = await supabase.from("experience2_addons").insert(rows as any);
     if (error) {
-      console.error("Error saving addons:", error);
-      toast.error("Addons saved partially — check console");
+      toast.error("Addons saved partially");
     }
   };
 
@@ -597,14 +596,14 @@ export function UnifiedExperience2Form({
       published: inc.published,
     }));
     const { error } = await (supabase as any).from("experience2_includes").insert(rows);
-    if (error) console.error("Error saving includes:", error);
+    
   };
 
   const saveLocalTags = async (expId: string) => {
     if (localTags.length === 0) return;
     const rows = localTags.map((t) => ({ experience_id: expId, tag_id: t.tag_id }));
     const { error } = await (supabase as any).from("experience2_highlight_tags").insert(rows);
-    if (error) console.error("Error saving tags:", error);
+    
   };
 
   const saveLocalReviews = async (expId: string) => {
@@ -617,7 +616,7 @@ export function UnifiedExperience2Form({
       is_visible: r.is_visible,
     }));
     const { error } = await supabase.from("experience2_reviews").insert(rows);
-    if (error) console.error("Error saving reviews:", error);
+    
   };
 
   // -------------------------------------------------------------------------
@@ -652,7 +651,7 @@ export function UnifiedExperience2Form({
       localStorage.removeItem(autoSaveKey);
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
     } catch (error: any) {
-      console.error("Save error:", error);
+      
       toast.error(error.message || "Failed to save draft");
     } finally {
       setIsSaving(false);
@@ -695,7 +694,7 @@ export function UnifiedExperience2Form({
       queryClient.invalidateQueries({ queryKey: ["admin-experiences2"] });
       onClose?.();
     } catch (error: any) {
-      console.error("Publish error:", error);
+      
       toast.error(error.message || "Failed to publish");
     } finally {
       setIsSaving(false);
@@ -738,7 +737,7 @@ export function UnifiedExperience2Form({
   // -------------------------------------------------------------------------
 
   const onInvalidSubmit = (errors: Record<string, any>) => {
-    console.error("Form validation errors:", errors);
+    
     const fieldNames: Record<string, string> = {
       title: "Title (EN)",
       category_id: "Category",

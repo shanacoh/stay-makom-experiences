@@ -63,7 +63,7 @@ export const ImageUpload = ({
       onChange(publicUrl);
       toast.success("Image uploaded successfully");
     } catch (error: any) {
-      console.error("Upload error:", error);
+      
       toast.error(error.message || "Failed to upload image");
     } finally {
       setUploading(false);

@@ -245,7 +245,6 @@ const BookingPanel = ({
           }
         });
       } catch (emailError) {
-        console.error("Email error:", emailError);
         // Don't fail if email fails
       }
       
@@ -259,7 +258,7 @@ const BookingPanel = ({
       }, 2000);
     },
     onError: (error: any) => {
-      console.error("Booking creation error:", error);
+      
       
       if (error.message === "You must be logged in to book") {
         toast.error("Please log in to book", {

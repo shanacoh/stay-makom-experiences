@@ -29,7 +29,7 @@ async function fetchHyperGuestAvailability(
     }
     return result;
   } catch (error) {
-    console.error('Erreur récupération disponibilités HyperGuest:', error);
+    
     throw error;
   }
 }

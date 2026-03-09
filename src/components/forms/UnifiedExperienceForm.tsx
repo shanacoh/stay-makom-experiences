@@ -375,7 +375,7 @@ export function UnifiedExperienceForm({
       queryClient.invalidateQueries({ queryKey: ["hotel-experiences"] });
       onClose?.();
     } catch (error: any) {
-      console.error("Save error:", error);
+      
       toast.error(error.message || "Failed to save draft");
     } finally {
       setIsSaving(false);
@@ -451,7 +451,7 @@ export function UnifiedExperienceForm({
       queryClient.invalidateQueries({ queryKey: ["hotel-experiences"] });
       onClose?.();
     } catch (error: any) {
-      console.error("Publish error:", error);
+      
       toast.error(error.message || "Failed to publish");
     } finally {
       setIsSaving(false);
@@ -489,7 +489,7 @@ export function UnifiedExperienceForm({
 
   // Handler for validation errors - shows toast and scrolls to first error
   const onInvalidSubmit = (errors: Record<string, any>) => {
-    console.error("Form validation errors:", errors);
+    
     
     // Create readable field names
     const fieldNames: Record<string, string> = {

@@ -452,7 +452,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         idempotency_key: idempotencyKeyRef.current,
       } as any);
 
-      if (dbError) console.error("Failed to save booking to DB:", dbError);
+      
 
       // === CERTIFICATION LOG ===
       const certCancelInfo = analyzeCancellationPolicies(
@@ -462,24 +462,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       const refundLabel = certCancelInfo?.isNonRefundable
         ? 'Non-refundable'
         : `Fully refundable${certCancelInfo?.effectiveDeadline ? ` (free cancellation until ${certCancelInfo.effectiveDeadline.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })})` : ''}`;
-      console.log(`
-╔══════════════════════════════════════════════════════════╗
-║           🏨 BOOKING CERTIFICATION DETAILS              ║
-╠══════════════════════════════════════════════════════════╣
-║ Property ID:        ${state.hyperguestPropertyId}
-║ HyperGuest Booking: ${hgBookingId}
-║ Guest Name:         ${leadGuest.firstName} ${leadGuest.lastName}
-║ Check-in:           ${checkIn}
-║ Check-out:          ${checkOut} (${state.nights} night${state.nights > 1 ? 's' : ''})
-║ Room:               ${state.selectedRoomName} — ${state.selectedRatePlan?.board || 'RO'}
-║ Amount:             ${sellPrice} ${bookingCurrency}
-║ Rate plan:          ${refundLabel}
-║ StayMakom Ref:      ${staymakomRef}
-║ HG Status:          ${hgStatus}
-║ Booking created:    ${new Date().toISOString()}
-║ Hotel Name:         ${state.hotelName || 'N/A'}
-╚══════════════════════════════════════════════════════════╝
-      `);
 
       const taxBreakdown = extractTaxBreakdown(state.selectedRatePlan);
       const allRemarks = [
@@ -547,10 +529,10 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           },
         });
       } catch (emailError) {
-        console.error("Email sending failed:", emailError);
+        // Error handled silently
       }
     } catch (error: any) {
-      console.error("Pre-book/Booking error:", error);
+      
       const detail = error?.message || "";
       const codeMatch = detail.match(/BN\.\d+/);
       const errorCode = codeMatch?.[0] || "";
