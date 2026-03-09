@@ -131,7 +131,7 @@ const YourStaySection = ({ hotel, lang = "en" }: YourStaySectionProps) => {
                   variant="light"
                 />
               </div>
-              <Link to={`/hotel2/${hotel.slug}`}>
+              <Link to={`/hotel/${hotel.slug}`}>
                 <Button 
                   variant="secondary" 
                   size="sm"
