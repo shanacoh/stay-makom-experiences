@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import HeartBurst from "@/components/ui/HeartBurst";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { trackWishlistClicked } from "@/lib/analytics";
+import { trackWishlistClicked, trackExperienceCardClicked } from "@/lib/analytics";
 
 interface HighlightTag {
   id: string;
