@@ -13,6 +13,8 @@ const Experiences2 = () => {
   const { lang } = useLanguage();
   const isRTL = lang === 'he';
 
+  useEffect(() => { trackExperiencesListViewed(); }, []);
+
   const { data: experiences, isLoading } = useQuery({
     queryKey: ["all-experiences2-page"],
     queryFn: async () => {

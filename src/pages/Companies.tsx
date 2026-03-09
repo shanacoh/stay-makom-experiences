@@ -41,7 +41,9 @@ export default function Companies() {
   const isRTL = lang === 'he';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+
+  useEffect(() => { trackCompaniesPageViewed(); }, []);
+
   const {
     register,
     handleSubmit,

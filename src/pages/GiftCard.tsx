@@ -114,7 +114,7 @@ export default function GiftCard() {
   const { user } = useAuth();
   const isRTL = lang === "he";
 
-  // Form state
+  useEffect(() => { trackGiftCardPageViewed(); }, []);
   const [currency, setCurrency] = useState<Currency>("USD");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");

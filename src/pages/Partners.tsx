@@ -34,7 +34,9 @@ const Partners = () => {
   const { navigateLocalized } = useLocalizedNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+
+  useEffect(() => { trackPartnersPageViewed(); }, []);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {

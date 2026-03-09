@@ -25,6 +25,8 @@ const Category = () => {
     partySize: 1
   });
 
+  useEffect(() => { if (slug) trackCategoryPageViewed(slug); }, [slug]);
+
   const { data: category, isLoading: categoryLoading } = useQuery({
     queryKey: ["category", slug],
     queryFn: async () => {
