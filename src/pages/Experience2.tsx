@@ -191,6 +191,8 @@ export default function Experience2() {
   // ---------------------------------------------------------------------------
   // Loading state
   // ---------------------------------------------------------------------------
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         {isLaunch ? <LaunchHeader forceScrolled /> : <Header />}
