@@ -1,5 +1,6 @@
 import { Block } from "./types";
 import { Button } from "@/components/ui/button";
+import DOMPurify from "dompurify";
 
 interface ArticlePreviewProps {
   title: string;
