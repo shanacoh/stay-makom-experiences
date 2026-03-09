@@ -423,6 +423,8 @@ export default function Experience2() {
   // ---------------------------------------------------------------------------
   // Main render
   // ---------------------------------------------------------------------------
+
+  return (
     <div className="min-h-screen flex flex-col" dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <SEOHead
         title={title}
