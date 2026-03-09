@@ -568,6 +568,42 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_runs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          failed_tests: number
+          id: string
+          passed_tests: number
+          results: Json
+          total_tests: number
+          user_id: string
+          warning_tests: number
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          failed_tests: number
+          id?: string
+          passed_tests: number
+          results: Json
+          total_tests: number
+          user_id: string
+          warning_tests: number
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          failed_tests?: number
+          id?: string
+          passed_tests?: number
+          results?: Json
+          total_tests?: number
+          user_id?: string
+          warning_tests?: number
+        }
+        Relationships: []
+      }
       experience_extras: {
         Row: {
           created_at: string | null
