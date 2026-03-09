@@ -12,7 +12,7 @@ import MobileAppShell from "@/components/MobileAppShell";
 import CookieConsent from "@/components/CookieConsent";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { initAmplitude } from "@/lib/amplitude";
-import { trackPageViewed } from "@/lib/analytics";
+import { trackPageViewed, trackUtmCaptured } from "@/lib/analytics";
 import Index from "./pages/Index";
 import ComingSoon from "./pages/ComingSoon";
 import Category from "./pages/Category";
