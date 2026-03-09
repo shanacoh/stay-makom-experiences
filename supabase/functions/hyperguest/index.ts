@@ -7,21 +7,23 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const ALLOWED_ORIGINS = [
+const ALLOWED_ORIGINS: (string | RegExp)[] = [
   'https://staymakom.com',
   'https://www.staymakom.com',
-  'https://stay-makom-experiences.lovable.app',
+  /\.lovable\.app$/,
+  /\.lovableproject\.com$/,
   'http://localhost:5173',
-  'http://localhost:8080',
+  'http://localhost:3000',
 ];
 
 function getCorsHeaders(req: Request) {
-  const origin = req.headers.get('Origin') || '';
-  // Support exact matches + any *.lovable.app subdomain (for preview URLs)
-  const isAllowed = ALLOWED_ORIGINS.includes(origin) || /\.lovable\.app$/.test(origin);
-  const allowedOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
+  const origin = req.headers.get('origin') || '';
+  const isAllowed = ALLOWED_ORIGINS.some(o =>
+    typeof o === 'string' ? o === origin : o.test(origin)
+  );
+  const corsOrigin = isAllowed ? origin : 'https://staymakom.com';
   return {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': corsOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin',
