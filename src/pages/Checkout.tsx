@@ -529,7 +529,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           },
         });
       } catch (emailError) {
-        console.error("Email sending failed:", emailError);
+        // Error handled silently
       }
     } catch (error: any) {
       console.error("Pre-book/Booking error:", error);
