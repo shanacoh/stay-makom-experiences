@@ -271,8 +271,8 @@ const Experience = () => {
             </div>
 
             {/* Right Column - Sticky Booking Panel (Desktop) */}
-            <div className="hidden md:block pr-1">
-              <div className="sticky top-4 space-y-4">
+            <div className="hidden md:block pr-1" style={{ height: '100%' }}>
+              <div className="sticky top-16 space-y-4 will-change-transform">
                 {/* Price Callout CTA */}
                 <HeroBookingPreview 
                   basePrice={experience.base_price}

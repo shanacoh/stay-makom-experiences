@@ -5,9 +5,9 @@
  * Max 30 nights (API limit SN.400)
  */
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, AlertCircle, CalendarDays, Sparkles, Loader2, Clock, Baby, Minus, Plus, ChevronRight } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, Sparkles, Loader2, Clock, Baby, Minus, Plus, ChevronRight, ChevronDown } from "lucide-react";
 import { SaveForLaterButton } from "./SaveForLaterButton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import DateRangePicker from "./DateRangePicker";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
@@ -30,6 +31,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { CheckoutState } from "@/pages/Checkout";
 import { trackDurationTabClicked, trackDateSelected, trackViewDatesClicked, trackGuestsSelected, trackRoomTypeSelected, trackBookThisStayClicked } from "@/lib/analytics";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface DateOption {
   id: string;
@@ -64,6 +66,7 @@ interface BookingPanel2Props {
   maxParty?: number;
   lang?: "en" | "he" | "fr";
   selectedExtras?: SelectedExtra[];
+  onToggleExtra?: (extra: SelectedExtra) => void;
 }
 
 export function BookingPanel2({
@@ -78,8 +81,10 @@ export function BookingPanel2({
   maxParty = 4,
   lang = "en",
   selectedExtras = [],
+  onToggleExtra,
 }: BookingPanel2Props) {
   const navigate = useNavigate();
+  const { symbol: currencySymbol, convert } = useCurrency();
 
   const t = {
     en: {
@@ -95,6 +100,9 @@ export function BookingPanel2({
       error: "Error loading availability. Please try again.",
       next: "Book this stay",
       onRequestWarning: "This booking is subject to hotel confirmation. You will be notified of the status.",
+      showMore: "Show more dates ↓",
+      bestRate: "● Best rate",
+      enhanceTitle: "ENHANCE YOUR STAY",
     },
     he: {
       title: "הזמן חוויה זו",
@@ -109,6 +117,9 @@ export function BookingPanel2({
       error: "שגיאה בטעינת הזמינות. אנא נסה שוב.",
       next: "הזמן שהייה זו",
       onRequestWarning: "הזמנה זו כפופה לאישור המלון. תקבל/י עדכון על הסטטוס.",
+      showMore: "הצג עוד תאריכים ↓",
+      bestRate: "● הכי משתלם",
+      enhanceTitle: "שדרגו את השהייה",
     },
     fr: {
       title: "Réserver cette expérience",
@@ -123,6 +134,9 @@ export function BookingPanel2({
       error: "Erreur lors de la récupération des disponibilités. Veuillez réessayer.",
       next: "Réserver ce séjour",
       onRequestWarning: "Cette réservation est soumise à confirmation par l'hôtel. Vous serez notifié du statut.",
+      showMore: "Voir plus de dates ↓",
+      bestRate: "● Meilleur tarif",
+      enhanceTitle: "AMÉLIOREZ VOTRE SÉJOUR",
     },
   }[lang];
 
@@ -149,6 +163,7 @@ export function BookingPanel2({
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
+  const [visibleDateCount, setVisibleDateCount] = useState(3);
 
   // Fetch real availability for 1/2/3 nights tabs
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
@@ -164,6 +179,28 @@ export function BookingPanel2({
   const { data: _addons } = useExperienceAddons(experienceId);
   const { data: _pricingConfig } = useExperiencePricingConfig(experienceId);
 
+  // Fetch available extras for the panel checklist
+  const { data: panelExtras } = useQuery({
+    queryKey: ["experience2-panel-extras", experienceId],
+    queryFn: async () => {
+      const { data: links, error: linksError } = await (supabase as any)
+        .from("experience2_extras")
+        .select("extra_id")
+        .eq("experience_id", experienceId);
+      if (linksError) throw linksError;
+      if (!links || links.length === 0) return [];
+      const extraIds = links.map((l: any) => l.extra_id);
+      const { data, error } = await supabase
+        .from("hotel2_extras")
+        .select("*")
+        .in("id", extraIds)
+        .eq("is_available", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   /** Apply fixed addons + commissions to a raw HyperGuest room price */
   const applyFromPrice = (rawPrice: number | null): number | null => {
     if (rawPrice == null || rawPrice <= 0) return rawPrice;
@@ -174,10 +211,24 @@ export function BookingPanel2({
     return calculateFromPrice(rawPrice, _addons ?? [], config);
   };
 
+  // Find the best rate (cheapest) date index
+  const bestRateDateId = useMemo(() => {
+    if (!quickDates || quickDates.length === 0) return null;
+    let bestId: string | null = null;
+    let bestPrice = Infinity;
+    for (const opt of quickDates) {
+      const price = applyFromPrice(opt.cheapestPrice) ?? opt.cheapestPrice;
+      if (price != null && price < bestPrice) {
+        bestPrice = price;
+        bestId = opt.id;
+      }
+    }
+    return bestId;
+  }, [quickDates, _addons, _pricingConfig]);
+
   // Auto-select the cheapest available date when quickDates load
   useEffect(() => {
     if (selectedTab !== "pick" && quickDates && quickDates.length > 0 && !selectedDateOptionId) {
-      // Find the cheapest date option
       const cheapest = quickDates.reduce((best, curr) => {
         if (curr.cheapestPrice == null) return best;
         if (!best || best.cheapestPrice == null || curr.cheapestPrice < best.cheapestPrice) return curr;
@@ -205,6 +256,7 @@ export function BookingPanel2({
     setDateRange({});
     setSelectedRoomId(null);
     setSelectedRatePlanId(null);
+    setVisibleDateCount(3);
   }, [selectedTab]);
 
   const MAX_NIGHTS = 30;
@@ -247,7 +299,6 @@ export function BookingPanel2({
     return rooms.find((r: any) => r.roomId === selectedRoomId)?.roomName || "";
   }, [searchResult, selectedRoomId]);
 
-  // Extract property-level remarks for checkout
   const propertyRemarks = useMemo(() => {
     let raw: string[] = [];
     if (!searchResult) return raw;
@@ -329,7 +380,6 @@ export function BookingPanel2({
       experienceSlug,
     };
 
-    // Persist cart so user can resume later
     try {
       localStorage.setItem("staymakom_cart", JSON.stringify({
         ...checkoutState,
@@ -340,6 +390,20 @@ export function BookingPanel2({
     navigate("/checkout", { state: checkoutState });
   };
 
+  // Handle extra toggle from panel checklist
+  const handlePanelExtraToggle = useCallback((extra: any) => {
+    if (!onToggleExtra) return;
+    const extraData: SelectedExtra = {
+      id: extra.id,
+      name: extra.name,
+      name_he: extra.name_he,
+      price: extra.price,
+      currency: currency,
+      pricing_type: extra.pricing_type,
+    };
+    onToggleExtra(extraData);
+  }, [onToggleExtra, currency]);
+
   if (!hyperguestPropertyId) {
     return (
       <Card>
@@ -347,7 +411,6 @@ export function BookingPanel2({
           <Button
             className="w-full bg-foreground text-background hover:bg-foreground/90 font-medium uppercase tracking-wide py-6 text-base"
             onClick={() => {
-              // Navigate to contact with pre-filled experience info
               window.location.href = `/contact?subject=Stay Request: ${experienceTitle}&experience=${experienceSlug}`;
             }}
           >
@@ -361,8 +424,11 @@ export function BookingPanel2({
     );
   }
 
+  const visibleQuickDates = quickDates?.slice(0, visibleDateCount) ?? [];
+  const hasMoreDates = quickDates ? quickDates.length > visibleDateCount : false;
+
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden will-change-transform">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">{t.title}</CardTitle>
       </CardHeader>
@@ -491,44 +557,66 @@ export function BookingPanel2({
                 </p>
               )}
               {!isLoadingQuickDates && quickDates && quickDates.length > 0 && (
-                <RadioGroup
-                  value={selectedDateOptionId ?? ""}
-                  onValueChange={(val) => setSelectedDateOptionId(val)}
-                  className="space-y-1.5"
-                >
-                  {quickDates.map((opt) => (
-                    <label
-                      key={opt.id}
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                        selectedDateOptionId === opt.id
-                          ? "border-primary bg-primary/5 ring-1 ring-primary"
-                          : "border-border hover:border-primary/50"
-                      )}
+                <>
+                  <RadioGroup
+                    value={selectedDateOptionId ?? ""}
+                    onValueChange={(val) => setSelectedDateOptionId(val)}
+                    className="space-y-1.5"
+                  >
+                    {visibleQuickDates.map((opt) => {
+                      const isBestRate = opt.id === bestRateDateId;
+                      return (
+                        <label
+                          key={opt.id}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                            selectedDateOptionId === opt.id
+                              ? "border-primary bg-primary/5 ring-1 ring-primary"
+                              : "border-border hover:border-primary/50"
+                          )}
+                        >
+                          <RadioGroupItem value={opt.id} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">
+                              {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {opt.nights} {opt.nights === 1
+                                ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
+                                : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
+                              }
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            {isBestRate && (
+                              <p className="text-[11px] font-medium" style={{ color: '#B8935A' }}>
+                                {t.bestRate}
+                              </p>
+                            )}
+                            {opt.cheapestPrice != null && (
+                              <>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {lang === "he" ? "מ-" : lang === "fr" ? "à partir de" : "from"}
+                                </p>
+                                <DualPrice amount={applyFromPrice(opt.cheapestPrice) ?? opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
+                              </>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </RadioGroup>
+                  {hasMoreDates && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleDateCount((prev) => prev + 5)}
+                      className="w-full text-center text-xs py-2 cursor-pointer hover:underline transition-colors"
+                      style={{ color: '#8C7B6B', fontFamily: 'Inter, sans-serif' }}
                     >
-                      <RadioGroupItem value={opt.id} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">
-                          {format(opt.checkin, "EEE dd MMM")} → {format(opt.checkout, "EEE dd MMM")}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {opt.nights} {opt.nights === 1
-                            ? (lang === "he" ? "לילה" : lang === "fr" ? "nuit" : "night")
-                            : (lang === "he" ? "לילות" : lang === "fr" ? "nuits" : "nights")
-                          }
-                        </p>
-                      </div>
-                      {opt.cheapestPrice != null && (
-                        <div className="text-right shrink-0">
-                          <p className="text-[10px] text-muted-foreground">
-                            {lang === "he" ? "מ-" : lang === "fr" ? "à partir de" : "from"}
-                          </p>
-                          <DualPrice amount={applyFromPrice(opt.cheapestPrice) ?? opt.cheapestPrice} currency={opt.currency} inline className="text-sm font-semibold text-primary" />
-                        </div>
-                      )}
-                    </label>
-                  ))}
-                </RadioGroup>
+                      {t.showMore}
+                    </button>
+                  )}
+                </>
               )}
             </>
           )}
@@ -552,7 +640,6 @@ export function BookingPanel2({
             onSelect={(roomId, ratePlanId) => {
               setSelectedRoomId(roomId);
               setSelectedRatePlanId(ratePlanId);
-              // Find room name for tracking
               let rooms: any[] = [];
               if (searchResult?.results?.[0]?.rooms) rooms = searchResult.results[0].rooms;
               else if (searchResult?.rooms) rooms = searchResult.rooms;
@@ -564,8 +651,46 @@ export function BookingPanel2({
           />
         )}
 
-
-
+        {/* ENHANCE YOUR STAY — extras checklist */}
+        {panelExtras && panelExtras.length > 0 && onToggleExtra && (
+          <div className="space-y-0">
+            <div className="py-2">
+              <p className="text-[10px] uppercase tracking-[0.12em] font-medium" style={{ color: '#8C7B6B' }}>
+                {t.enhanceTitle}
+              </p>
+            </div>
+            <div className="border-t" style={{ borderColor: '#E8E0D4' }}>
+              {panelExtras.map((extra) => {
+                const isChecked = selectedExtras.some((se) => se.id === extra.id);
+                const name = lang === "he" ? extra.name_he || extra.name : extra.name;
+                const displayPrice = `+${currencySymbol}${Math.round(convert(extra.price))}`;
+                return (
+                  <div
+                    key={extra.id}
+                    onClick={() => handlePanelExtraToggle(extra)}
+                    className="flex items-center gap-3 cursor-pointer transition-colors"
+                    style={{ height: '36px', borderBottom: '1px solid #F0EBE3' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FAF8F4')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={() => handlePanelExtraToggle(extra)}
+                      className={cn(
+                        "h-4 w-4 rounded-sm border-[1.5px] shrink-0",
+                        isChecked
+                          ? "bg-[#1A1814] border-[#1A1814] text-white data-[state=checked]:bg-[#1A1814] data-[state=checked]:text-white data-[state=checked]:border-[#1A1814]"
+                          : "border-[#C8C0B4]"
+                      )}
+                    />
+                    <span className="flex-1 text-[13px] truncate" style={{ color: '#2C2520' }}>{name}</span>
+                    <span className="text-[13px] shrink-0" style={{ color: '#8C7B6B' }}>{displayPrice}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* On-request warning */}
         {isOnRequest && selectedRatePlan && (
