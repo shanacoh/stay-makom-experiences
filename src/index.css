@@ -300,3 +300,8 @@ All colors MUST be HSL.
 .scroll-indicator-line {
   animation: scroll-line 2s ease-in-out infinite;
 }
+
+/* Leaflet map z-index — keep below calendar popovers */
+.leaflet-container {
+  z-index: 1 !important;
+}
