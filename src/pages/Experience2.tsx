@@ -42,8 +42,29 @@ export default function Experience2() {
   const { data: experience, isLoading, error } = useExperience2(slug || null);
   const footerRef = useRef<HTMLElement>(null);
   const reviewsRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<SelectedExtra[]>([]);
+  const [stickyTop, setStickyTop] = useState(80);
+
+  // Dynamic sticky top based on header height
+  useEffect(() => {
+    const updateTop = () => {
+      const header = document.querySelector('header') as HTMLElement | null;
+      if (header) {
+        setStickyTop(header.getBoundingClientRect().height + 8);
+      }
+    };
+    updateTop();
+    window.addEventListener('resize', updateTop);
+    const observer = new ResizeObserver(updateTop);
+    const header = document.querySelector('header');
+    if (header) observer.observe(header);
+    return () => {
+      window.removeEventListener('resize', updateTop);
+      observer.disconnect();
+    };
+  }, []);
 
   const scrollToReviews = () => {
     reviewsRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -513,8 +534,11 @@ export default function Experience2() {
           </div>
 
           {/* Right Column - Sticky Booking Panel (Desktop) */}
-          <div className="hidden md:block pr-1 md:-mt-10">
-            <div className="sticky top-20 space-y-4">
+          <div className="hidden md:block pr-1 md:-mt-10" style={{ height: '100%' }}>
+            <div
+              className="sticky space-y-4 will-change-transform"
+              style={{ top: `${stickyTop}px` }}
+            >
               {/* Price Callout CTA */}
               <HeroBookingPreview2
                 experienceId={experience.id}
@@ -544,6 +568,7 @@ export default function Experience2() {
                   maxParty={experience.max_party || 4}
                   lang={lang as "en" | "he" | "fr"}
                   selectedExtras={selectedExtras}
+                  onToggleExtra={handleToggleExtra}
                 />
               </div>
             </div>
@@ -580,6 +605,7 @@ export default function Experience2() {
                 maxParty={experience.max_party || 4}
                 lang={lang as "en" | "he" | "fr"}
                 selectedExtras={selectedExtras}
+                onToggleExtra={handleToggleExtra}
               />
             </div>
           </SheetContent>

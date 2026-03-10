@@ -1,9 +1,7 @@
 /**
  * Room selection component — vertical stacked radio cards (one per room type)
  * Each card shows: room name, price, meal plan, cancellation info
- * ✅ #1: BAR price check — never display sell < BAR
- * ✅ #3a: isImmediate badge for on-request rate plans
- * ✅ #6: No fallback to net price
+ * ✅ Sorted by price ascending (cheapest first), then alphabetically
  */
 
 import { useMemo } from "react";
@@ -106,14 +104,13 @@ export function RoomOptionsV2({
     return [];
   }, [searchResult]);
 
-  // For each room, pick the cheapest visible rate plan
+  // For each room, pick the cheapest visible rate plan, then sort by price ascending
   const roomCards = useMemo(() => {
-    return rooms
+    const cards = rooms
       .map((room) => {
         const visiblePlans = room.ratePlans.filter((rp) => !shouldHideRatePlan(rp));
         if (visiblePlans.length === 0) return null;
 
-        // Find cheapest
         let cheapest = visiblePlans[0];
         let cheapestAmount = Number(cheapest.prices!.sell!.price ?? cheapest.prices!.sell!.amount) || 0;
         for (const rp of visiblePlans) {
@@ -137,6 +134,14 @@ export function RoomOptionsV2({
       price: number;
       currency: string;
     }[];
+
+    // Sort by price ascending, then by room name alphabetically
+    cards.sort((a, b) => {
+      if (a.price !== b.price) return a.price - b.price;
+      return a.room.roomName.localeCompare(b.room.roomName);
+    });
+
+    return cards;
   }, [rooms]);
 
   const { symbol, convert } = useCurrency();
@@ -213,7 +218,6 @@ export function RoomOptionsV2({
               />
 
               <div className="flex-1 min-w-0">
-                {/* First line: room name + price */}
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-sm font-bold leading-tight">
                     {room.roomName}
@@ -223,7 +227,6 @@ export function RoomOptionsV2({
                   </span>
                 </div>
 
-                {/* Second line: meal plan */}
                 {boardLabel && (
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {boardLabel}
@@ -236,7 +239,6 @@ export function RoomOptionsV2({
                   </p>
                 )}
 
-                {/* Third line: cancellation */}
                 {cancellation.badgeText && (
                   <p
                     className={cn(
