@@ -617,7 +617,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   // Booking summary card component — reused in step 2 sidebar and step 3
   const BookingSummaryCard = ({ compact = false }: { compact?: boolean }) => (
     <div className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 mb-3">
         {experienceHeroImage && (
           <img
             src={experienceHeroImage}
@@ -628,19 +628,23 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
           <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
-          </p>
-          {state.selectedRoomName && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{state.selectedRoomName}</p>
-          )}
-          {!totalIsNaN && (
-            <div className="mt-2">
-              <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
-            </div>
-          )}
         </div>
       </div>
+      {/* Full breakdown */}
+      <PriceBreakdownV2
+        breakdown={priceBreakdown}
+        isLoading={false}
+        lang={lang}
+        ratePlanPrices={ratePlanPrices}
+        selectedExtras={state.selectedExtras.length > 0 ? state.selectedExtras : undefined}
+        extrasTotal={extrasTotal}
+        adults={state.adults}
+        nights={state.nights}
+        showFullBreakdown
+        hotelName={state.hotelName}
+        roomName={state.selectedRoomName}
+        dateLabel={`${format(dateFrom, "dd MMM")} → ${format(dateTo, "dd MMM yyyy")} · ${state.nights} ${state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")}`}
+      />
     </div>
   );
 
