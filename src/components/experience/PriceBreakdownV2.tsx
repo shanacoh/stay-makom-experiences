@@ -1,6 +1,6 @@
 // =============================================================================
 // src/components/experience/PriceBreakdownV2.tsx
-// Clean price breakdown — "Your stay" unified model
+// Clean price breakdown — "Your stay" unified model + service fee
 // =============================================================================
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Loader2, Check } from "lucide-react";
 import type { PriceBreakdownV2 as PriceBreakdownType } from "@/types/experience2_addons";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PriceBreakdownV2Props {
   breakdown: PriceBreakdownType | null;
@@ -22,6 +24,14 @@ interface PriceBreakdownV2Props {
   extrasTotal?: number;
   adults?: number;
   nights?: number;
+  /** Show the full breakdown (for checkout step 3) */
+  showFullBreakdown?: boolean;
+  /** Hotel name for display */
+  hotelName?: string;
+  /** Room name for display */
+  roomName?: string;
+  /** Date string for display */
+  dateLabel?: string;
 }
 
 const translations = {
@@ -37,6 +47,7 @@ const translations = {
     guestsPlural: "guests",
     noData: "Select a room and rate plan to see the price breakdown.",
     vatTooltip: "Foreign visitors with a B/2 visa are exempt from VAT.\nIsraeli residents pay 18% VAT directly at the hotel upon check-in.\nThis amount is not collected by STAYMAKOM.",
+    serviceFee: "STAYMAKOM service fee",
   },
   he: {
     title: "פירוט מחיר",
@@ -50,6 +61,7 @@ const translations = {
     guestsPlural: "אורחים",
     noData: "בחר חדר ותכנית תעריף כדי לראות פירוט מחירים.",
     vatTooltip: "מבקרים זרים עם אשרת B/2 פטורים ממע\"מ.\nתושבי ישראל משלמים 18% מע\"מ ישירות במלון בעת הצ'ק-אין.\nסכום זה אינו נגבה על ידי STAYMAKOM.",
+    serviceFee: "עמלת שירות STAYMAKOM",
   },
   fr: {
     title: "DÉTAIL DU PRIX",
@@ -63,6 +75,7 @@ const translations = {
     guestsPlural: "voyageurs",
     noData: "Sélectionnez une chambre et un plan tarifaire pour voir le détail du prix.",
     vatTooltip: "Les visiteurs étrangers munis d'un visa B/2 sont exemptés de TVA.\nLes résidents israéliens paient 18% de TVA directement à l'hôtel lors du check-in.\nCe montant n'est pas perçu par STAYMAKOM.",
+    serviceFee: "Frais de service STAYMAKOM",
   },
 };
 
@@ -77,6 +90,23 @@ function useFmt() {
   };
 }
 
+/** Hook to fetch service fee from global settings */
+function useServiceFee() {
+  return useQuery({
+    queryKey: ["global-service-fee"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("global_settings")
+        .select("service_fee")
+        .eq("key", "site_config")
+        .maybeSingle();
+      if (error || !data) return 0;
+      return (data as any).service_fee ?? 0;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function PriceBreakdownV2({
   breakdown,
   isLoading = false,
@@ -87,9 +117,14 @@ export function PriceBreakdownV2({
   extrasTotal = 0,
   adults,
   nights: nightsProp,
+  showFullBreakdown = false,
+  hotelName,
+  roomName,
+  dateLabel,
 }: PriceBreakdownV2Props) {
   const t = translations[lang];
   const fmt = useFmt();
+  const { data: serviceFee = 0 } = useServiceFee();
 
   if (isLoading) {
     return (
@@ -115,7 +150,7 @@ export function PriceBreakdownV2({
   const nightsCount = nightsProp ?? b.nights;
   const guestsCount = adults ?? b.guests;
   const hasExtras = selectedExtras && selectedExtras.length > 0;
-  const totalWithExtras = b.finalTotal + extrasTotal;
+  const totalWithExtras = b.finalTotal + extrasTotal + (serviceFee || 0);
 
   // Get the first pricing addon name for the "included" line
   const includedAddonName = b.pricingAddonLines.length > 0 ? b.pricingAddonLines[0].name : null;
@@ -133,6 +168,16 @@ export function PriceBreakdownV2({
       </div>
 
       <Separator className="mb-4" />
+
+      {/* Full breakdown details (hotel, dates, room) */}
+      {showFullBreakdown && (hotelName || roomName || dateLabel) && (
+        <div className="mb-3 space-y-1">
+          {hotelName && <p className="text-[12px]" style={{ color: '#8C7B6B' }}>{hotelName}</p>}
+          {dateLabel && <p className="text-[12px]" style={{ color: '#8C7B6B' }}>{dateLabel}</p>}
+          {roomName && <p className="text-[12px]" style={{ color: '#8C7B6B' }}>{roomName}</p>}
+          <Separator className="my-2" />
+        </div>
+      )}
 
       {/* Your stay */}
       <div className="flex justify-between items-center mb-1">
@@ -174,6 +219,14 @@ export function PriceBreakdownV2({
         </>
       )}
 
+      {/* Service fee */}
+      {serviceFee > 0 && (
+        <div className="flex justify-between text-[13px] mb-2">
+          <span style={{ color: '#8C7B6B' }}>{t.serviceFee}</span>
+          <span style={{ color: '#2C2520' }}>₪{serviceFee}</span>
+        </div>
+      )}
+
       <Separator className="my-4" />
 
       {/* Total with VAT tooltip */}
@@ -183,7 +236,7 @@ export function PriceBreakdownV2({
         </span>
         <div className="flex items-center gap-1.5">
           <span className="font-bold" style={{ color: '#1A1814', fontFamily: 'Inter, sans-serif', fontSize: '18px' }}>
-            {fmt(hasExtras ? totalWithExtras : b.finalTotal)}
+            {fmt(totalWithExtras)}
           </span>
           <div className="relative group">
             <span className="text-xs cursor-help" style={{ color: '#8C7B6B' }}>ⓘ</span>

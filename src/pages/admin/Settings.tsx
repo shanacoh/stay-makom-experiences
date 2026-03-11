@@ -20,6 +20,7 @@ const AdminSettings = () => {
     default_commission_rate: 18,
     default_currency: "USD",
     stripe_publishable_key: "",
+    service_fee: 0,
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -47,6 +48,7 @@ const AdminSettings = () => {
         default_commission_rate: settings.default_commission_rate || 18,
         default_currency: settings.default_currency || "USD",
         stripe_publishable_key: settings.stripe_publishable_key || "",
+        service_fee: (settings as any).service_fee ?? 0,
       });
     }
   }, [settings]);
@@ -172,6 +174,21 @@ const AdminSettings = () => {
                 }
                 step="0.1"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="service-fee">STAYMAKOM Service Fee (₪)</Label>
+              <Input
+                id="service-fee"
+                type="number"
+                value={formData.service_fee}
+                onChange={(e) =>
+                  setFormData({ ...formData, service_fee: parseFloat(e.target.value) || 0 })
+                }
+                step="1"
+              />
+              <p className="text-xs text-muted-foreground">
+                Fixed fee in ₪ applied to every booking as a separate line item on checkout.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="currency">Default Currency</Label>
