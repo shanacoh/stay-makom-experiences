@@ -38,9 +38,9 @@ const LocationMap = ({
     if (!latitude || !longitude) return;
 
     // Initialize map
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const map = L.map(mapContainer.current, {
-      dragging: !L.Browser.mobile,
-      tap: false,
+      dragging: !isMobile,
     }).setView([latitude, longitude], 13);
     mapRef.current = map;
 
