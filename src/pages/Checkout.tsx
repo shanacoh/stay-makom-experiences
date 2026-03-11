@@ -25,7 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { PriceBreakdownV2 } from "@/components/experience/PriceBreakdownV2";
-import { LeadGuestForm, EMPTY_LEAD_GUEST, sanitizeLeadGuest, type LeadGuestData } from "@/components/experience/LeadGuestForm";
+import { LeadGuestForm, EMPTY_LEAD_GUEST, sanitizeLeadGuest, saveProfileFields, type LeadGuestData } from "@/components/experience/LeadGuestForm";
 import { BookingConfirmationDialog, type BookingConfirmationData } from "@/components/experience/BookingConfirmationDialog";
 import AuthPromptDialog from "@/components/auth/AuthPromptDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -103,7 +103,6 @@ export default function Checkout() {
   const navigate = useNavigate();
   const routerState = location.state as CheckoutState | null;
 
-  // Try router state first, then localStorage (with 48h expiry)
   const state = React.useMemo(() => {
     if (routerState) return routerState;
     try {
@@ -113,9 +112,7 @@ export default function Checkout() {
         const savedAt = parsed.savedAt ? new Date(parsed.savedAt).getTime() : 0;
         if (Date.now() - savedAt > CART_TTL_MS) {
           localStorage.removeItem("staymakom_cart");
-          toast.info(
-            "Your saved escape has expired. Please start a new search."
-          );
+          toast.info("Your saved escape has expired. Please start a new search.");
           return null;
         }
         return parsed as CheckoutState;
@@ -124,7 +121,6 @@ export default function Checkout() {
     return null;
   }, [routerState]);
 
-  // Redirect if no state at all
   useEffect(() => {
     if (!state) {
       navigate("/", { replace: true });
@@ -147,7 +143,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       step3Title: "Review & confirm",
       back: "Back",
       next: "Continue",
-      book: "Confirm booking",
+      book: "CONFIRM BOOKING",
       summary: "Booking summary",
       guestDetails: "Guest details",
       stayDetails: "Stay details",
@@ -201,7 +197,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       step3Title: "Résumé & confirmation",
       back: "Retour",
       next: "Continuer",
-      book: "Confirmer la réservation",
+      book: "CONFIRMER LA RÉSERVATION",
       summary: "Résumé de la réservation",
       guestDetails: "Détails voyageur",
       stayDetails: "Détails du séjour",
@@ -238,7 +234,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const pendingBookAfterAuth = useRef(false);
   const bookingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
-  // Idempotency key for double-booking protection
   const idempotencyKeyRef = useRef(crypto.randomUUID());
   const specialRequestTrackedRef = useRef(false);
 
@@ -249,7 +244,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   const ratePlanPrices = state.selectedRatePlan?.prices || null;
   const priceBreakdown = useExperience2Price(state.experienceId, null, state.currency, state.nights, state.adults, ratePlanPrices);
 
-  // Fetch experience hero image for thumbnail
   const { data: experienceHeroImage } = useQuery({
     queryKey: ["experience2-hero", state.experienceId],
     queryFn: async () => {
@@ -355,7 +349,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
   };
 
   const handleBookInternal = async () => {
-    // Double-click protection - if already booking, ignore
     if (isBooking) return;
     
     if (!isGuestValid) {
@@ -415,6 +408,11 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       const staymakomRef = `SM-${state.experienceId.substring(0, 8).toUpperCase()}-${Date.now()}`;
       const safe = sanitizeLeadGuest(leadGuest);
 
+      // Save profile fields on booking
+      if (user) {
+        saveProfileFields(user.id, leadGuest);
+      }
+
       const adultGuests = [
         {
           birthDate: safe.birthDate,
@@ -459,7 +457,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
           specialRequests: specialRequests || undefined,
           guests: [...adultGuests, ...childGuests],
         }],
-        // Idempotency key for double-booking protection
         idempotencyKey: idempotencyKeyRef.current,
       };
 
@@ -499,9 +496,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         idempotency_key: idempotencyKeyRef.current,
       } as any);
 
-      
-
-      // === CERTIFICATION LOG ===
       const certCancelInfo = analyzeCancellationPolicies(
         state.selectedRatePlan?.cancellationPolicies,
         checkIn
@@ -539,10 +533,8 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       setShowConfirmation(true);
       bookingCompletedRef.current = true;
 
-      // Analytics: booking completed
       trackBookingCompleted(staymakomRef, state.experienceSlug, sellPrice, bookingCurrency, state.nights, totalPartySize, 0, state.experienceTitle || '', state.selectedRoomName || '');
 
-      // Clear persisted cart after successful booking
       try { localStorage.removeItem("staymakom_cart"); } catch {}
 
       try {
@@ -588,7 +580,6 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       const errorCode = codeMatch?.[0] || "";
       const friendlyMsg = hgErrorMessages[errorCode]?.[lang];
 
-      // Analytics: booking failed
       const errorType = errorCode.startsWith("BN.5") ? "hg_error" : errorCode === "BN.402" ? "payment_declined" : "network";
       trackPaymentFailed(state.experienceSlug, errorType, detail.substring(0, 200), displayTotal);
 
@@ -606,7 +597,52 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
     navigate(`/experience2/${state.experienceSlug}?lang=${lang}`);
   };
 
+  const handleContinueToStep3 = () => {
+    if (!isGuestValid) {
+      setShowGuestErrors(true);
+      toast.error(t.fillGuestInfo);
+      return;
+    }
+    // Save profile on continue
+    if (user) {
+      saveProfileFields(user.id, leadGuest);
+    }
+    trackCheckoutContinueClicked(state.experienceSlug, displayTotal);
+    setStep(3);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const stepLabels = [t.step2Title, t.step3Title];
+
+  // Booking summary card component — reused in step 2 sidebar and step 3
+  const BookingSummaryCard = ({ compact = false }: { compact?: boolean }) => (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-start gap-3">
+        {experienceHeroImage && (
+          <img
+            src={experienceHeroImage}
+            alt={state.experienceTitle}
+            className="w-16 h-16 object-cover shrink-0"
+          />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
+          </p>
+          {state.selectedRoomName && (
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">{state.selectedRoomName}</p>
+          )}
+          {!totalIsNaN && (
+            <div className="mt-2">
+              <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background" dir={lang === 'he' ? 'rtl' : 'ltr'}>
@@ -615,7 +651,7 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
       <main className="flex-1 w-full">
         {/* Top bar with secure checkout + progress */}
         <div className="border-b border-border bg-card">
-          <div className="max-w-2xl mx-auto px-4 py-4">
+          <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={goBackToExperience}
@@ -663,100 +699,85 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
         </div>
 
         {/* Content */}
-        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+        <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
 
           {/* ═══ STEP 2: Guest Info ═══ */}
           {step === 2 && (
-            <div className="space-y-6">
-              {/* Mini recap card with thumbnail */}
-              <div className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-start gap-3">
-                  {experienceHeroImage && (
-                    <img
-                      src={experienceHeroImage}
-                      alt={state.experienceTitle}
-                      className="w-16 h-16 object-cover shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate">{state.experienceTitle}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{state.hotelName}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(dateFrom, "dd MMM")} → {format(dateTo, "dd MMM yyyy")} · {state.nights} {state.nights === 1 ? (lang === "he" ? "לילה" : "night") : (lang === "he" ? "לילות" : "nights")} · {totalPartySize} {lang === "he" ? "אורחים" : "guests"}
-                      </p>
-                    </div>
-                    {!totalIsNaN && (
-                      <div className="text-right shrink-0">
-                        <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-sm font-semibold text-primary" showSecondary />
-                      </div>
-                    )}
+            <div className="grid md:grid-cols-[1fr_320px] gap-6">
+              {/* Left — form */}
+              <div className="space-y-6">
+                {/* Mobile recap */}
+                <div className="md:hidden">
+                  <BookingSummaryCard compact />
+                </div>
+
+                {/* Guest form */}
+                <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
+
+                <Separator />
+
+                {/* Special requests */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <MessageSquare className="h-4 w-4" />
+                    {t.specialRequests}
                   </div>
+                  <Textarea
+                    placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
+                    value={specialRequests}
+                    onChange={(e) => {
+                      setSpecialRequests(e.target.value);
+                      if (!specialRequestTrackedRef.current && e.target.value.length > 0) {
+                        specialRequestTrackedRef.current = true;
+                        trackSpecialRequestTyped(state.experienceSlug);
+                      }
+                    }}
+                    className="min-h-[60px] text-sm resize-none"
+                    style={{ backgroundColor: '#F5F0E8', border: '1px solid #E8E0D4', borderRadius: '0px' }}
+                    rows={2}
+                  />
+                </div>
+
+                {/* Navigation */}
+                <div className={cn("flex gap-3 pt-2", lang === 'he' && "flex-row-reverse")}>
+                  <Button
+                    variant="outline"
+                    className="shrink-0"
+                    style={{ height: '52px', borderRadius: '0px', border: '1px solid #1A1814' }}
+                    onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step2'); goBackToExperience(); }}
+                  >
+                    {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
+                    {t.back}
+                  </Button>
+                  <Button
+                    className={cn(
+                      "flex-1 uppercase tracking-[0.12em] text-[13px] transition-all duration-200",
+                      isGuestValid
+                        ? "bg-[#1A1814] text-white hover:bg-[#1A1814]/90 hover:scale-[1.01] cursor-pointer"
+                        : "bg-[#C8C0B4] text-white cursor-not-allowed hover:bg-[#C8C0B4]"
+                    )}
+                    style={{ height: '52px', borderRadius: '0px' }}
+                    disabled={!isGuestValid}
+                    onClick={handleContinueToStep3}
+                  >
+                    {t.next}
+                    {lang === 'he' ? <ChevronLeft className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 ml-1" />}
+                  </Button>
                 </div>
               </div>
 
-              {/* Guest form */}
-              <LeadGuestForm value={leadGuest} onChange={setLeadGuest} lang={lang} showErrors={showGuestErrors} />
-
-              <Separator />
-
-              {/* Special requests */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <MessageSquare className="h-4 w-4" />
-                  {t.specialRequests}
+              {/* Right — sticky summary (desktop only) */}
+              <div className="hidden md:block">
+                <div className="sticky" style={{ top: '80px' }}>
+                  <BookingSummaryCard />
                 </div>
-                <Textarea
-                  placeholder={lang === "he" ? "כתבו כאן בקשות מיוחדות (אופציונלי)..." : lang === "fr" ? "Écrivez vos demandes spéciales ici (optionnel)..." : "Write any special requests here (optional)..."}
-                  value={specialRequests}
-                  onChange={(e) => {
-                    setSpecialRequests(e.target.value);
-                    if (!specialRequestTrackedRef.current && e.target.value.length > 0) {
-                      specialRequestTrackedRef.current = true;
-                      trackSpecialRequestTyped(state.experienceSlug);
-                    }
-                  }}
-                  className="min-h-[60px] text-sm resize-none"
-                  rows={2}
-                />
-              </div>
-
-              {/* Navigation */}
-              <div className={cn("flex gap-3 pt-2", lang === 'he' && "flex-row-reverse")}>
-                <Button variant="outline" className="shrink-0" onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step2'); goBackToExperience(); }}>
-                  {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
-                  {t.back}
-                </Button>
-                <Button
-                  className={cn(
-                    "flex-1 transition-all duration-200",
-                    isGuestValid
-                      ? "bg-[#1A1814] text-white hover:bg-[#1A1814]/90 hover:scale-[1.01] cursor-pointer"
-                      : "bg-[#C8C0B4] text-white cursor-not-allowed hover:bg-[#C8C0B4]"
-                  )}
-                  size="lg"
-                  disabled={!isGuestValid}
-                  onClick={() => {
-                    if (!isGuestValid) {
-                      setShowGuestErrors(true);
-                      toast.error(t.fillGuestInfo);
-                      return;
-                    }
-                    trackCheckoutContinueClicked(state.experienceSlug, displayTotal);
-                    setStep(3);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                >
-                  {t.next}
-                  {lang === 'he' ? <ChevronLeft className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 ml-1" />}
-                </Button>
               </div>
             </div>
           )}
 
           {/* ═══ STEP 3: Summary & Confirm ═══ */}
           {step === 3 && (
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-2xl mx-auto">
               {/* Stay details */}
               <div className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <p className="text-sm font-semibold">{t.stayDetails}</p>
@@ -805,43 +826,19 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                 )}
               </div>
 
-              {/* Price breakdown */}
-              {priceBreakdown && (
-                <div className="rounded-xl border border-border bg-card p-4">
-                  <PriceBreakdownV2 breakdown={priceBreakdown} isLoading={false} lang={lang} ratePlanPrices={ratePlanPrices} />
-                </div>
-              )}
-
-              {/* Extras recap */}
-              {state.selectedExtras.length > 0 && (
-                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    {lang === "he" ? "תוספות נבחרות" : lang === "fr" ? "Extras sélectionnés" : "Selected extras"}
-                  </div>
-                  {state.selectedExtras.map((extra) => {
-                    const name = lang === "he" ? extra.name_he || extra.name : extra.name;
-                    let multiplier = 1;
-                    if (extra.pricing_type === "per_guest") multiplier = state.adults;
-                    if (extra.pricing_type === "per_night") multiplier = state.nights;
-                    const lineTotal = extra.price * multiplier;
-                    return (
-                      <div key={extra.id} className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">{name}</span>
-                        <DualPrice amount={lineTotal} currency={extra.currency} inline className="text-xs" />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Total */}
-              {!totalIsNaN && (
-                <div className="flex justify-between items-center p-4 rounded-xl bg-primary/5 border border-primary/20">
-                  <span className="text-sm font-semibold">{t.total}</span>
-                  <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline className="text-lg font-bold text-primary" showSecondary />
-                </div>
-              )}
+              {/* Clean price breakdown */}
+              <div className="rounded-xl border border-border bg-card p-4">
+                <PriceBreakdownV2
+                  breakdown={priceBreakdown}
+                  isLoading={false}
+                  lang={lang}
+                  ratePlanPrices={ratePlanPrices}
+                  selectedExtras={state.selectedExtras.length > 0 ? state.selectedExtras : undefined}
+                  extrasTotal={extrasTotal}
+                  adults={state.adults}
+                  nights={state.nights}
+                />
+              </div>
 
               {/* Cancellation policy */}
               {state.selectedRatePlan?.cancellationPolicies && state.searchParams?.checkIn && (() => {
@@ -877,55 +874,61 @@ function CheckoutContent({ state }: { state: CheckoutState }) {
                 </Alert>
               )}
 
-              {/* Hotel remarks (pets, taxes, visa info) */}
-              {state.propertyRemarks.length > 0 && (
-                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-xs font-medium">{t.importantNotices}</p>
-                  </div>
-                  {state.propertyRemarks.map((remark: string, idx: number) => (
-                    <p key={idx} className="text-xs text-muted-foreground leading-relaxed">{remark}</p>
-                  ))}
+              {/* Navigation — desktop: side by side, mobile: stacked */}
+              <div className="pt-2 pb-8">
+                {/* Desktop */}
+                <div className={cn("hidden md:flex gap-3", lang === 'he' && "flex-row-reverse")}>
+                  <Button
+                    variant="outline"
+                    className="shrink-0 uppercase tracking-[0.12em] text-[13px]"
+                    style={{ height: '52px', borderRadius: '0px', border: '1px solid #1A1814', color: '#1A1814' }}
+                    onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step3'); setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  >
+                    {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
+                    {t.back}
+                  </Button>
+                  <Button
+                    className="flex-1 uppercase tracking-[0.12em] text-[13px] bg-[#1A1814] text-white hover:bg-[#1A1814]/90"
+                    style={{ height: '52px', borderRadius: '0px' }}
+                    disabled={totalIsNaN || isBooking}
+                    onClick={handleBook}
+                  >
+                    {isBooking ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {getBookingMessage()}
+                      </span>
+                    ) : (
+                      t.book
+                    )}
+                  </Button>
                 </div>
-              )}
 
-              {/* VAT info notice */}
-              <div className="flex gap-3 p-4 rounded-xl border border-border bg-card">
-                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {lang === "he"
-                    ? "המחירים אינם כוללים מע\"מ. בהתאם לחוק המס הישראלי, אזרחי ותושי ישראל חייבים ב-18% מע\"מ, לתשלום ישיר במלון. מבקרים זרים עם אשרת B2/3/4 פטורים ממע\"מ."
-                    : lang === "fr"
-                      ? "Les prix n'incluent pas la TVA. Conformément à la législation fiscale israélienne, les citoyens et résidents israéliens sont soumis à 18% de TVA, payable directement à l'hôtel. Les visiteurs étrangers munis d'un visa B2/3/4 en sont exemptés."
-                      : "Prices do not include VAT. In accordance with Israeli tax law, Israeli citizens and residents are subject to 18% VAT on top of the listed rates, payable directly at the hotel. Foreign visitors holding a B2/3/4 visa are exempt from VAT."
-                  }
-                </p>
-              </div>
-
-              {/* Navigation */}
-              <div className={cn("flex gap-3 pt-2 pb-8", lang === 'he' && "flex-row-reverse")}>
-                <Button variant="outline" className="shrink-0" onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step3'); setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-                  {lang === 'he' ? <ChevronRight className="h-4 w-4 ml-1" /> : <ChevronLeft className="h-4 w-4 mr-1" />}
-                  {t.back}
-                </Button>
-                <Button
-                  className="flex-1"
-                  size="lg"
-                  disabled={totalIsNaN || isBooking}
-                  onClick={handleBook}
-                >
-                  {isBooking ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {getBookingMessage()}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      {t.book} — <DualPrice amount={displayTotal} currency={priceBreakdown?.currency || "USD"} inline showSecondary />
-                    </span>
-                  )}
-                </Button>
+                {/* Mobile: stacked */}
+                <div className="md:hidden space-y-3">
+                  <Button
+                    className="w-full uppercase tracking-[0.12em] text-[13px] bg-[#1A1814] text-white hover:bg-[#1A1814]/90"
+                    style={{ height: '52px', borderRadius: '0px' }}
+                    disabled={totalIsNaN || isBooking}
+                    onClick={handleBook}
+                  >
+                    {isBooking ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {getBookingMessage()}
+                      </span>
+                    ) : (
+                      t.book
+                    )}
+                  </Button>
+                  <button
+                    className="w-full text-center text-[13px] py-2"
+                    style={{ color: '#8C7B6B' }}
+                    onClick={() => { trackCheckoutBackClicked(state.experienceSlug, 'step3'); setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  >
+                    ← {t.back}
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -1,7 +1,6 @@
 /**
  * Lead Guest Form — Collects guest info required by HyperGuest create-booking
  * Auto-fills from user profile, with option to book for someone else
- * ✅ Enhanced UX: country dropdown, inline validation, phone format, birthDate guidance
  */
 
 import { useState, useEffect, useMemo } from "react";
@@ -15,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface LeadGuestData {
-  title: "MR" | "MS" | "MRS";
+  title: "MR" | "MS" | "MRS" | "";
   firstName: string;
   lastName: string;
   email: string;
@@ -31,6 +30,8 @@ interface LeadGuestFormProps {
   onChange: (data: LeadGuestData) => void;
   lang?: "en" | "he" | "fr";
   showErrors?: boolean;
+  /** Called when CONTINUE is clicked — saves modified fields to profile */
+  onSaveProfile?: boolean;
 }
 
 const COUNTRIES = [
@@ -71,7 +72,7 @@ const COUNTRIES = [
 const translations = {
   en: {
     title: "Guest Information",
-    salutation: "Title",
+    salutation: "Title (optional)",
     firstName: "First name",
     lastName: "Last name",
     email: "Email",
@@ -85,13 +86,13 @@ const translations = {
     autoFilled: "Auto-filled from your account",
     required: "Required",
     invalidEmail: "Invalid email",
-    invalidPhone: "Use international format, e.g. +972501234567",
+    invalidPhone: "Use international format, e.g. +972 XX XXX XXXX",
     invalidDate: "Select a valid date",
-    phonePlaceholder: "+972501234567",
+    phonePlaceholder: "+972 XX XXX XXXX",
   },
   he: {
     title: "פרטי האורח",
-    salutation: "תואר",
+    salutation: "תואר (אופציונלי)",
     firstName: "שם פרטי",
     lastName: "שם משפחה",
     email: "אימייל",
@@ -105,13 +106,13 @@ const translations = {
     autoFilled: "מילוי אוטומטי מהחשבון שלך",
     required: "שדה חובה",
     invalidEmail: "כתובת אימייל לא תקינה",
-    invalidPhone: "השתמש בפורמט בינלאומי, לדוג׳ 972501234567+",
+    invalidPhone: "השתמש בפורמט בינלאומי, לדוג׳ XXXX XXX XX 972+",
     invalidDate: "בחר תאריך תקין",
-    phonePlaceholder: "+972501234567",
+    phonePlaceholder: "+972 XX XXX XXXX",
   },
   fr: {
     title: "Informations voyageur",
-    salutation: "Titre",
+    salutation: "Titre (optionnel)",
     firstName: "Prénom",
     lastName: "Nom",
     email: "Email",
@@ -125,9 +126,9 @@ const translations = {
     autoFilled: "Pré-rempli depuis votre compte",
     required: "Requis",
     invalidEmail: "Email invalide",
-    invalidPhone: "Format international, ex : +972501234567",
+    invalidPhone: "Format international, ex : +972 XX XXX XXXX",
     invalidDate: "Sélectionnez une date valide",
-    phonePlaceholder: "+972501234567",
+    phonePlaceholder: "+972 XX XXX XXXX",
   },
 };
 
@@ -145,7 +146,6 @@ function isValidEmail(e: string): boolean {
 }
 
 function isValidPhone(p: string): boolean {
-  // Accept international format with + and at least 8 digits
   return /^\+?\d[\d\s\-]{7,}$/.test(p.trim());
 }
 
@@ -157,6 +157,12 @@ function normalizePhone(p: string): string {
   }
   return cleaned;
 }
+
+const inputStyle = {
+  backgroundColor: '#F5F0E8',
+  border: '1px solid #E8E0D4',
+  borderRadius: '0px',
+};
 
 export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false }: LeadGuestFormProps) {
   const t = translations[lang];
@@ -170,7 +176,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
 
   // Field-level errors
   const errors = useMemo(() => {
-    const show = showErrors; // show all when booking attempted
+    const show = showErrors;
     return {
       firstName: (show || touched.firstName) && !value.firstName.trim() ? t.required : null,
       lastName: (show || touched.lastName) && !value.lastName.trim() ? t.required : null,
@@ -202,14 +208,13 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
       const displayName = profile?.display_name || user.user_metadata?.display_name || "";
       const nameParts = displayName.split(" ");
 
-      // Normalize birthdate to YYYY-MM-DD
       let birthDate = customer?.birthdate || "";
       if (birthDate && !isValidBirthDate(birthDate)) {
-        birthDate = ""; // Clear if invalid format from DB
+        birthDate = "";
       }
 
       const profileData: LeadGuestData = {
-        title: "MR",
+        title: "",
         firstName: customer?.first_name || nameParts[0] || user.user_metadata?.first_name || "",
         lastName: customer?.last_name || nameParts.slice(1).join(" ") || user.user_metadata?.last_name || "",
         email: user.email || "",
@@ -282,12 +287,12 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
           </div>
         )}
 
-        {/* Title */}
+        {/* Title — optional */}
         <div className="space-y-1">
           <Label className="text-xs">{t.salutation}</Label>
-          <Select value={value.title} onValueChange={(v) => update("title", v)}>
-            <SelectTrigger className="h-9">
-              <SelectValue />
+          <Select value={value.title || undefined} onValueChange={(v) => update("title", v)}>
+            <SelectTrigger className="h-9" style={inputStyle}>
+              <SelectValue placeholder={t.salutation} />
             </SelectTrigger>
             <SelectContent>
               {lang === "he" ? (
@@ -316,6 +321,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               onChange={(e) => update("firstName", e.target.value)}
               onBlur={() => markTouched("firstName")}
               className={`h-9 ${errors.firstName ? "border-destructive" : ""}`}
+              style={inputStyle}
               required
               readOnly={!isForOther && profileLoaded && !!value.firstName}
             />
@@ -328,6 +334,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               onChange={(e) => update("lastName", e.target.value)}
               onBlur={() => markTouched("lastName")}
               className={`h-9 ${errors.lastName ? "border-destructive" : ""}`}
+              style={inputStyle}
               required
               readOnly={!isForOther && profileLoaded && !!value.lastName}
             />
@@ -345,6 +352,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               onChange={(e) => update("email", e.target.value)}
               onBlur={() => markTouched("email")}
               className={`h-9 ${errors.email ? "border-destructive" : ""}`}
+              style={inputStyle}
               required
               readOnly={!isForOther && profileLoaded && !!value.email}
             />
@@ -358,11 +366,11 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               onChange={(e) => update("phone", e.target.value)}
               onBlur={() => {
                 markTouched("phone");
-                // Auto-normalize on blur
                 const normalized = normalizePhone(value.phone);
                 if (normalized !== value.phone) update("phone", normalized);
               }}
               className={`h-9 ${errors.phone ? "border-destructive" : ""}`}
+              style={inputStyle}
               placeholder={t.phonePlaceholder}
               required
             />
@@ -383,6 +391,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               onChange={(e) => update("birthDate", e.target.value)}
               onBlur={() => markTouched("birthDate")}
               className="h-9"
+              style={inputStyle}
               max={new Date().toISOString().split("T")[0]}
               min="1900-01-01"
               placeholder={lang === "fr" ? "jj/mm/aaaa" : "dd/mm/yyyy"}
@@ -398,12 +407,13 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
               value={value.city}
               onChange={(e) => update("city", e.target.value)}
               className="h-9"
+              style={inputStyle}
             />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{t.country}</Label>
             <Select value={value.country} onValueChange={(v) => update("country", v)}>
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-9" style={inputStyle}>
                 <SelectValue placeholder={t.country} />
               </SelectTrigger>
               <SelectContent>
@@ -422,7 +432,7 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
 }
 
 export const EMPTY_LEAD_GUEST: LeadGuestData = {
-  title: "MR",
+  title: "",
   firstName: "",
   lastName: "",
   email: "",
@@ -434,13 +444,14 @@ export const EMPTY_LEAD_GUEST: LeadGuestData = {
 };
 
 /** Sanitize lead guest data before sending to HyperGuest — ensures all formats are correct */
-export function sanitizeLeadGuest(g: LeadGuestData): LeadGuestData {
+export function sanitizeLeadGuest(g: LeadGuestData): LeadGuestData & { title: "MR" | "MS" | "MRS" } {
   let birthDate = g.birthDate;
   if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
     birthDate = "1990-01-01"; // Safe fallback
   }
   return {
     ...g,
+    title: (g.title || "MR") as "MR" | "MS" | "MRS",
     firstName: g.firstName.trim(),
     lastName: g.lastName.trim(),
     email: g.email.trim().toLowerCase(),
@@ -450,4 +461,37 @@ export function sanitizeLeadGuest(g: LeadGuestData): LeadGuestData {
     city: g.city?.trim() || "N/A",
     country: g.country?.trim().toUpperCase() || "IL",
   };
+}
+
+/** Save modified profile fields back to Supabase */
+export async function saveProfileFields(userId: string, data: LeadGuestData) {
+  try {
+    // Update user_profiles
+    await supabase
+      .from("user_profiles")
+      .update({
+        phone: data.phone ? normalizePhone(data.phone) : undefined,
+      })
+      .eq("user_id", userId);
+
+    // Update customers if exists
+    const { data: existing } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("user_id", userId)
+      .single();
+
+    if (existing) {
+      await supabase
+        .from("customers")
+        .update({
+          city: data.city || null,
+          address_country: data.country || null,
+          phone: data.phone ? normalizePhone(data.phone) : null,
+        })
+        .eq("user_id", userId);
+    }
+  } catch {
+    // Silent fail — non-critical
+  }
 }
