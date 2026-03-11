@@ -48,6 +48,7 @@ const AdminSettings = () => {
         default_commission_rate: settings.default_commission_rate || 18,
         default_currency: settings.default_currency || "USD",
         stripe_publishable_key: settings.stripe_publishable_key || "",
+        service_fee: (settings as any).service_fee ?? 0,
       });
     }
   }, [settings]);
