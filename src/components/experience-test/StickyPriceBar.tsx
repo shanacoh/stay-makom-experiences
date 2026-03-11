@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MOBILE_BOTTOM_NAV_HEIGHT } from "@/constants/layout";
 import { useFromPrice } from "@/hooks/useExperience2Price";
@@ -29,7 +28,7 @@ const StickyPriceBar = ({
   minNights = 1,
 }: StickyPriceBarProps) => {
   const [isHidden, setIsHidden] = useState(false);
-  const { displayCurrency, symbol, altSymbol, setDisplayCurrency, convert } = useCurrency();
+  const { symbol, convert } = useCurrency();
 
   const { fromPriceILS, hasHyperguest } = useFromPrice(experienceId, hyperguestPropertyId ?? null);
 
@@ -47,14 +46,14 @@ const StickyPriceBar = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [footerRef]);
 
-  const nightLabel = lang === 'he' ? 'ללילה' : lang === 'fr' ? '/ nuit' : '/ night';
-  const ctaLabel = lang === 'he' ? 'לתאריכים' : lang === 'fr' ? 'Voir les dates' : 'VIEW DATES';
-
-  const handleInlineToggle = () => {
-    setDisplayCurrency(displayCurrency === "ILS" ? "USD" : "ILS");
+  const handleClick = () => {
+    // On mobile, open the sheet; on desktop this would scroll
+    onViewDates();
   };
 
-  const isShowingUSD = displayCurrency === "USD";
+  if (!hasHyperguest || !displayPrice || displayPrice <= 0) {
+    return null;
+  }
 
   return (
     <div
@@ -65,45 +64,25 @@ const StickyPriceBar = ({
       style={{ bottom: `calc(${MOBILE_BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))` }}
     >
       <div className="px-4">
-        <div className="flex items-center justify-between py-3">
-          <div>
-            {displayPrice ? (
-              <>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-xs text-muted-foreground">
-                    {lang === 'he' ? 'מ-' : 'From '}
-                  </span>
-                  <span className="text-base font-semibold text-foreground">
-                    {symbol}{displayPrice}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{nightLabel}</span>
-                  <button
-                    onClick={handleInlineToggle}
-                    className="text-[10px] leading-none transition-colors text-muted-foreground/60"
-                  >
-                    · {lang === 'he' ? `ראה ב${altSymbol}` : `see in ${altSymbol}`}
-                  </button>
-                </div>
-                {isShowingUSD && (
-                  <p className="text-[10px] leading-tight mt-0.5 text-muted-foreground/60">
-                    {lang === 'he' ? 'החיוב בשקלים' : 'Charged in NIS'}
-                  </p>
-                )}
-              </>
-            ) : (
-              <span className="text-sm text-muted-foreground italic">
-                {lang === 'he' ? 'מחיר לפי בקשה' : 'Price on request'}
-              </span>
-            )}
+        <button
+          onClick={handleClick}
+          className="flex items-center justify-between py-3 w-full text-left"
+        >
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-[13px] font-medium" style={{ color: '#B85C4A' }}>
+              ● {lang === 'he' ? 'הכי משתלם' : 'Best rate available'}
+            </span>
+            <span className="text-[13px] text-muted-foreground">—</span>
+            <span className="text-[13px] font-semibold text-foreground">
+              {lang === 'he' ? `מ-${symbol}${displayPrice}` : `from ${symbol}${displayPrice}`}
+            </span>
           </div>
-
-          <Button 
-            onClick={onViewDates}
-            className="px-5 h-10 rounded-full font-semibold text-xs tracking-wider uppercase bg-foreground text-background hover:bg-foreground/90"
+          <span className="text-xs font-medium uppercase tracking-wider text-foreground shrink-0 ml-3"
+            style={{ borderBottom: '1px solid currentColor' }}
           >
-            {ctaLabel}
-          </Button>
-        </div>
+            {lang === 'he' ? 'לתאריכים' : 'VIEW DATES'}
+          </span>
+        </button>
       </div>
     </div>
   );

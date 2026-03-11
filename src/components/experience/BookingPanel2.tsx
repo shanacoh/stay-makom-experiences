@@ -211,20 +211,24 @@ export function BookingPanel2({
     return calculateFromPrice(rawPrice, _addons ?? [], config);
   };
 
-  // Find the best rate (cheapest) date index
-  const bestRateDateId = useMemo(() => {
+  // Find the best rate (cheapest) — now supports MULTIPLE slots
+  const bestRatePrice = useMemo(() => {
     if (!quickDates || quickDates.length === 0) return null;
-    let bestId: string | null = null;
     let bestPrice = Infinity;
     for (const opt of quickDates) {
       const price = applyFromPrice(opt.cheapestPrice) ?? opt.cheapestPrice;
       if (price != null && price < bestPrice) {
         bestPrice = price;
-        bestId = opt.id;
       }
     }
-    return bestId;
+    return bestPrice === Infinity ? null : bestPrice;
   }, [quickDates, _addons, _pricingConfig]);
+
+  const isBestRateSlot = useCallback((opt: any) => {
+    if (bestRatePrice == null) return false;
+    const price = applyFromPrice(opt.cheapestPrice) ?? opt.cheapestPrice;
+    return price != null && Math.abs(price - bestRatePrice) < 0.01;
+  }, [bestRatePrice, _addons, _pricingConfig]);
 
   // Auto-select the cheapest available date when quickDates load
   useEffect(() => {
@@ -432,7 +436,7 @@ export function BookingPanel2({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">{t.title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6 overflow-x-hidden">
+      <CardContent className="space-y-6 overflow-x-hidden overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - 120px)' }}>
         {/* Guests */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -564,7 +568,7 @@ export function BookingPanel2({
                     className="space-y-1.5"
                   >
                     {visibleQuickDates.map((opt) => {
-                      const isBestRate = opt.id === bestRateDateId;
+                      const isBest = isBestRateSlot(opt);
                       return (
                         <label
                           key={opt.id}
@@ -588,8 +592,8 @@ export function BookingPanel2({
                             </p>
                           </div>
                           <div className="text-right shrink-0">
-                            {isBestRate && (
-                              <p className="text-[11px] font-medium" style={{ color: '#B8935A' }}>
+                            {isBest && (
+                              <p className="text-[11px] font-medium" style={{ color: '#B85C4A' }}>
                                 {t.bestRate}
                               </p>
                             )}
@@ -726,6 +730,37 @@ export function BookingPanel2({
             <div className="flex justify-between text-sm font-medium pt-1 border-t border-border">
               <span>{lang === "he" ? "סה\"כ תוספות" : lang === "fr" ? "Total extras" : "Extras total"}</span>
               <DualPrice amount={extrasTotal} currency={currency} inline className="text-sm" />
+            </div>
+          </div>
+        )}
+
+        {/* Price summary with VAT tooltip */}
+        {priceBreakdown && !totalIsNaN && (
+          <div className="space-y-2">
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-bold" style={{ color: '#1A1814' }}>
+                {lang === "he" ? 'סה"כ' : "Total"}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <DualPrice amount={displayTotal} currency={priceBreakdown.currency} inline className="text-lg font-bold" />
+                <div className="relative group">
+                  <span className="text-xs cursor-help" style={{ color: '#8C7B6B' }}>ⓘ</span>
+                  <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50" style={{ width: '260px' }}>
+                    <div className="text-xs text-white leading-relaxed" style={{
+                      background: '#1A1814',
+                      borderRadius: '4px',
+                      padding: '10px 12px',
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '12px',
+                    }}>
+                      {lang === "he"
+                        ? "מבקרים זרים עם אשרת B/2 פטורים ממע\"מ.\nתושבי ישראל משלמים 18% מע\"מ ישירות במלון בעת הצ'ק-אין.\nסכום זה אינו נגבה על ידי STAYMAKOM."
+                        : "Foreign visitors with a B/2 visa are exempt from VAT.\nIsraeli residents pay 18% VAT directly at the hotel upon check-in.\nThis amount is not collected by STAYMAKOM."}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
