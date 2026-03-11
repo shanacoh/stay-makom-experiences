@@ -176,6 +176,21 @@ const AdminSettings = () => {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="service-fee">STAYMAKOM Service Fee (₪)</Label>
+              <Input
+                id="service-fee"
+                type="number"
+                value={formData.service_fee}
+                onChange={(e) =>
+                  setFormData({ ...formData, service_fee: parseFloat(e.target.value) || 0 })
+                }
+                step="1"
+              />
+              <p className="text-xs text-muted-foreground">
+                Fixed fee in ₪ applied to every booking as a separate line item on checkout.
+              </p>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="currency">Default Currency</Label>
               <Input
                 id="currency"
