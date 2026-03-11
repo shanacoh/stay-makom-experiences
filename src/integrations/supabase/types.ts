@@ -1795,6 +1795,7 @@ export type Database = {
           seo_title_en: string | null
           seo_title_fr: string | null
           seo_title_he: string | null
+          service_fee: number | null
           site_name: string | null
           site_tagline: string | null
           stripe_publishable_key: string | null
@@ -1822,6 +1823,7 @@ export type Database = {
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
+          service_fee?: number | null
           site_name?: string | null
           site_tagline?: string | null
           stripe_publishable_key?: string | null
@@ -1849,6 +1851,7 @@ export type Database = {
           seo_title_en?: string | null
           seo_title_fr?: string | null
           seo_title_he?: string | null
+          service_fee?: number | null
           site_name?: string | null
           site_tagline?: string | null
           stripe_publishable_key?: string | null

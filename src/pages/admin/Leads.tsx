@@ -118,7 +118,7 @@ const AdminLeads = () => {
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // For undo delete
-  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string[] | null>(null);
 
   // Slide-over state

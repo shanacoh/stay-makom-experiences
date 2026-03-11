@@ -40,7 +40,7 @@ const JournalEditor = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isEdit = !!id;
-  const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autosaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewLang, setPreviewLang] = useState<"en" | "he">("en");
