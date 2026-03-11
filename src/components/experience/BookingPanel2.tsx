@@ -7,7 +7,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, AlertCircle, CalendarDays, Sparkles, Loader2, Clock, Baby, Minus, Plus, ChevronRight, ChevronDown } from "lucide-react";
+import { Users, AlertCircle, CalendarDays, Sparkles, Loader2, Clock, Baby, Minus, Plus, ChevronRight, ChevronDown, ChevronLeft, ChevronUp } from "lucide-react";
 import { SaveForLaterButton } from "./SaveForLaterButton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import DateRangePicker from "./DateRangePicker";
+import { Calendar } from "@/components/ui/calendar";
 import { DualPrice } from "@/components/ui/DualPrice";
 import { RoomOptionsV2 } from "./RoomOptionsV2";
 import { PriceBreakdownV2 } from "./PriceBreakdownV2";
@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import type { CheckoutState } from "@/pages/Checkout";
 import { trackDurationTabClicked, trackDateSelected, trackViewDatesClicked, trackGuestsSelected, trackRoomTypeSelected, trackBookThisStayClicked } from "@/lib/analytics";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { DateRange } from "react-day-picker";
 
 interface DateOption {
   id: string;
@@ -163,7 +164,8 @@ export function BookingPanel2({
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<number | null>(null);
-  const [visibleDateCount, setVisibleDateCount] = useState(3);
+  const [dateSlotOffset, setDateSlotOffset] = useState(0);
+  const [guestsExpanded, setGuestsExpanded] = useState(false);
 
   // Fetch real availability for 1/2/3 nights tabs
   const propId = hyperguestPropertyId ? parseInt(hyperguestPropertyId) : null;
@@ -260,7 +262,7 @@ export function BookingPanel2({
     setDateRange({});
     setSelectedRoomId(null);
     setSelectedRatePlanId(null);
-    setVisibleDateCount(3);
+    setDateSlotOffset(0);
   }, [selectedTab]);
 
   const MAX_NIGHTS = 30;
@@ -428,8 +430,21 @@ export function BookingPanel2({
     );
   }
 
-  const visibleQuickDates = quickDates?.slice(0, visibleDateCount) ?? [];
-  const hasMoreDates = quickDates ? quickDates.length > visibleDateCount : false;
+  // Date slots with ← → navigation (show 3 at a time)
+  const SLOTS_PER_PAGE = 3;
+  const visibleQuickDates = quickDates?.slice(dateSlotOffset, dateSlotOffset + SLOTS_PER_PAGE) ?? [];
+  const canGoBack = dateSlotOffset > 0;
+  const canGoForward = quickDates ? dateSlotOffset + SLOTS_PER_PAGE < quickDates.length : false;
+
+  // Guests label for collapsed view
+  const guestsLabel = (() => {
+    const parts: string[] = [];
+    parts.push(`${adults} ${adults === 1 ? (lang === 'he' ? 'מבוגר' : lang === 'fr' ? 'adulte' : 'adult') : (lang === 'he' ? 'מבוגרים' : lang === 'fr' ? 'adultes' : 'adults')}`);
+    if (childrenAges.length > 0) {
+      parts.push(`${childrenAges.length} ${lang === 'he' ? 'ילדים' : lang === 'fr' ? 'enfants' : 'children'}`);
+    }
+    return parts.join(', ');
+  })();
 
   return (
     <Card className="overflow-hidden will-change-transform">
@@ -437,71 +452,82 @@ export function BookingPanel2({
         <CardTitle className="text-lg">{t.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 overflow-x-hidden overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - 120px)' }}>
-        {/* Guests */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Users className="h-4 w-4" />
-            {t.guests}
-          </div>
-
-           {/* Adults */}
-          <div className="flex items-center justify-between" dir="ltr">
-            <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.adults}</span>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => { const v = Math.max(minParty, adults - 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults <= minParty}>
-                <Minus className="h-3 w-3" />
-              </Button>
-              <span className="text-lg font-medium w-8 text-center">{adults}</span>
-              <Button variant="outline" size="sm" onClick={() => { const v = Math.min(maxParty, adults + 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults >= maxParty}>
-                <Plus className="h-3 w-3" />
-              </Button>
+        {/* Guests — compact collapsible */}
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setGuestsExpanded(!guestsExpanded)}
+            className="flex items-center justify-between w-full text-sm cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 font-medium">
+              <Users className="h-4 w-4" />
+              <span>{guestsLabel}</span>
             </div>
-          </div>
+            {guestsExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </button>
 
-          {/* Children */}
-          <div className="flex items-center justify-between" dir="ltr">
-            <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.children}</span>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => prev.slice(0, -1))} disabled={childrenAges.length === 0}>
-                <Minus className="h-3 w-3" />
-              </Button>
-              <span className="text-lg font-medium w-8 text-center">{childrenAges.filter(a => a >= 2).length}</span>
-              <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => [...prev, 5])} disabled={childrenAges.length >= 4}>
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Age selectors */}
-          {childrenAges.length > 0 && (
-            <div className="pl-4 space-y-2">
-              {childrenAges.map((age, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <Baby className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground w-16">
-                    {age < 2 ? (lang === "he" ? "תינוק" : lang === "fr" ? "Bébé" : "Infant") : (lang === "he" ? `ילד ${idx + 1}` : lang === "fr" ? `Enfant ${idx + 1}` : `Child ${idx + 1}`)}
-                  </span>
-                  <Select
-                    value={String(age)}
-                    onValueChange={(v) => {
-                      const newAges = [...childrenAges];
-                      newAges[idx] = parseInt(v);
-                      setChildrenAges(newAges);
-                    }}
-                  >
-                    <SelectTrigger className="w-20 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 13 }, (_, i) => (
-                        <SelectItem key={i} value={String(i)}>
-                          {i} {lang === "he" ? "שנים" : lang === "fr" ? "ans" : i === 1 ? "yr" : "yrs"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          {guestsExpanded && (
+            <div className="space-y-3 pt-1">
+              {/* Adults */}
+              <div className="flex items-center justify-between" dir="ltr">
+                <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.adults}</span>
+                <div className="flex items-center gap-4">
+                  <Button variant="outline" size="sm" onClick={() => { const v = Math.max(minParty, adults - 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults <= minParty}>
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                  <span className="text-lg font-medium w-8 text-center">{adults}</span>
+                  <Button variant="outline" size="sm" onClick={() => { const v = Math.min(maxParty, adults + 1); setAdults(v); trackGuestsSelected(experienceSlug, v, childrenAges.length); }} disabled={adults >= maxParty}>
+                    <Plus className="h-3 w-3" />
+                  </Button>
                 </div>
-              ))}
+              </div>
+
+              {/* Children */}
+              <div className="flex items-center justify-between" dir="ltr">
+                <span className="text-sm" dir={lang === "he" ? "rtl" : "ltr"}>{t.children}</span>
+                <div className="flex items-center gap-4">
+                  <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => prev.slice(0, -1))} disabled={childrenAges.length === 0}>
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                  <span className="text-lg font-medium w-8 text-center">{childrenAges.filter(a => a >= 2).length}</span>
+                  <Button variant="outline" size="sm" onClick={() => setChildrenAges(prev => [...prev, 5])} disabled={childrenAges.length >= 4}>
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Age selectors */}
+              {childrenAges.length > 0 && (
+                <div className="pl-4 space-y-2">
+                  {childrenAges.map((age, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Baby className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground w-16">
+                        {age < 2 ? (lang === "he" ? "תינוק" : lang === "fr" ? "Bébé" : "Infant") : (lang === "he" ? `ילד ${idx + 1}` : lang === "fr" ? `Enfant ${idx + 1}` : `Child ${idx + 1}`)}
+                      </span>
+                      <Select
+                        value={String(age)}
+                        onValueChange={(v) => {
+                          const newAges = [...childrenAges];
+                          newAges[idx] = parseInt(v);
+                          setChildrenAges(newAges);
+                        }}
+                      >
+                        <SelectTrigger className="w-20 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 13 }, (_, i) => (
+                            <SelectItem key={i} value={String(i)}>
+                              {i} {lang === "he" ? "שנים" : lang === "fr" ? "ans" : i === 1 ? "yr" : "yrs"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -546,7 +572,7 @@ export function BookingPanel2({
             </button>
           </div>
 
-          {/* Quick date options */}
+          {/* Quick date options with ← → navigation */}
           {selectedTab !== "pick" && (
             <>
               {isLoadingQuickDates && (
@@ -562,6 +588,33 @@ export function BookingPanel2({
               )}
               {!isLoadingQuickDates && quickDates && quickDates.length > 0 && (
                 <>
+                  {/* Navigation arrows */}
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setDateSlotOffset(Math.max(0, dateSlotOffset - SLOTS_PER_PAGE))}
+                      className={cn(
+                        "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
+                        canGoBack ? "hover:bg-muted cursor-pointer" : "opacity-0 pointer-events-none"
+                      )}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <span className="text-[11px] text-muted-foreground">
+                      {dateSlotOffset + 1}–{Math.min(dateSlotOffset + SLOTS_PER_PAGE, quickDates.length)} / {quickDates.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setDateSlotOffset(dateSlotOffset + SLOTS_PER_PAGE)}
+                      className={cn(
+                        "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
+                        canGoForward ? "hover:bg-muted cursor-pointer" : "opacity-0 pointer-events-none"
+                      )}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+
                   <RadioGroup
                     value={selectedDateOptionId ?? ""}
                     onValueChange={(val) => setSelectedDateOptionId(val)}
@@ -610,24 +663,69 @@ export function BookingPanel2({
                       );
                     })}
                   </RadioGroup>
-                  {hasMoreDates && (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleDateCount((prev) => prev + 5)}
-                      className="w-full text-center text-xs py-2 cursor-pointer hover:underline transition-colors"
-                      style={{ color: '#8C7B6B', fontFamily: 'Inter, sans-serif' }}
-                    >
-                      {t.showMore}
-                    </button>
-                  )}
                 </>
               )}
             </>
           )}
 
+          {/* Pick dates — inline calendar (single month) */}
           {selectedTab === "pick" && (
-            <div className="space-y-3">
-              <DateRangePicker value={dateRange} onChange={(range) => setDateRange(range)} />
+            <div
+              className="rounded border p-2"
+              style={{
+                backgroundColor: '#FAF8F4',
+                borderColor: '#E8E0D4',
+              }}
+            >
+              <Calendar
+                mode="range"
+                defaultMonth={dateRange.from || new Date()}
+                selected={dateRange as DateRange}
+                onSelect={(range) => {
+                  setDateRange({
+                    from: range?.from,
+                    to: range?.to,
+                  });
+                }}
+                numberOfMonths={1}
+                disabled={(date) => date < new Date()}
+                className="pointer-events-auto p-1"
+                classNames={{
+                  months: "flex flex-col",
+                  month: "space-y-3",
+                  caption: "flex justify-center pt-1 relative items-center",
+                  caption_label: "text-sm font-bold",
+                  nav: "space-x-1 flex items-center",
+                  nav_button: "h-7 w-7 bg-transparent p-0 hover:bg-[#F0EBE3] rounded-full flex items-center justify-center transition-colors",
+                  nav_button_previous: "absolute left-1",
+                  nav_button_next: "absolute right-1",
+                  table: "w-full border-collapse",
+                  head_row: "flex",
+                  head_cell: "flex-1 text-center font-normal text-[11px] uppercase tracking-[0.08em]",
+                  row: "flex w-full mt-1",
+                  cell: cn(
+                    "flex-1 h-9 text-center text-sm p-0 relative",
+                    "[&:has([aria-selected].day-range-end)]:rounded-r-full",
+                    "[&:has([aria-selected])]:bg-[#F5F0E8]",
+                    "first:[&:has([aria-selected])]:rounded-l-full last:[&:has([aria-selected])]:rounded-r-full",
+                    "focus-within:relative focus-within:z-20"
+                  ),
+                  day: "h-9 w-9 mx-auto p-0 font-normal text-sm rounded-full hover:bg-[#F0EBE3] transition-colors aria-selected:opacity-100",
+                  day_range_end: "day-range-end",
+                  day_selected: "bg-[#1A1814] text-white hover:bg-[#1A1814] hover:text-white focus:bg-[#1A1814] focus:text-white rounded-full",
+                  day_today: "bg-[#F0EBE3] rounded-full",
+                  day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-[#F5F0E8]/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+                  day_disabled: "text-muted-foreground opacity-[0.35]",
+                  day_range_middle: "aria-selected:bg-[#F5F0E8] aria-selected:text-foreground rounded-none",
+                  day_hidden: "invisible",
+                }}
+                styles={{
+                  head_cell: { color: '#8C7B6B' },
+                  caption_label: { color: '#1A1814', fontFamily: 'Inter, sans-serif', fontSize: '14px' },
+                  day: { color: '#2C2520', fontFamily: 'Inter, sans-serif', fontSize: '14px' },
+                  nav_button: { color: '#1A1814' },
+                }}
+              />
             </div>
           )}
         </div>
@@ -672,8 +770,8 @@ export function BookingPanel2({
                   <div
                     key={extra.id}
                     onClick={() => handlePanelExtraToggle(extra)}
-                    className="flex items-center gap-3 cursor-pointer transition-colors"
-                    style={{ height: '36px', borderBottom: '1px solid #F0EBE3' }}
+                    className="flex items-center gap-3 cursor-pointer transition-colors px-1"
+                    style={{ minHeight: '44px', borderBottom: '1px solid #F0EBE3' }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FAF8F4')}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >

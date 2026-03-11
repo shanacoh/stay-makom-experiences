@@ -6,7 +6,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { User, Gift, AlertCircle } from "lucide-react";
@@ -34,112 +33,50 @@ interface LeadGuestFormProps {
   onSaveProfile?: boolean;
 }
 
-const COUNTRIES = [
-  { code: "IL", en: "Israel", he: "ישראל", fr: "Israël" },
-  { code: "US", en: "United States", he: "ארצות הברית", fr: "États-Unis" },
-  { code: "GB", en: "United Kingdom", he: "בריטניה", fr: "Royaume-Uni" },
-  { code: "FR", en: "France", he: "צרפת", fr: "France" },
-  { code: "DE", en: "Germany", he: "גרמניה", fr: "Allemagne" },
-  { code: "IT", en: "Italy", he: "איטליה", fr: "Italie" },
-  { code: "ES", en: "Spain", he: "ספרד", fr: "Espagne" },
-  { code: "NL", en: "Netherlands", he: "הולנד", fr: "Pays-Bas" },
-  { code: "BE", en: "Belgium", he: "בלגיה", fr: "Belgique" },
-  { code: "CH", en: "Switzerland", he: "שווייץ", fr: "Suisse" },
-  { code: "AT", en: "Austria", he: "אוסטריה", fr: "Autriche" },
-  { code: "AU", en: "Australia", he: "אוסטרליה", fr: "Australie" },
-  { code: "CA", en: "Canada", he: "קנדה", fr: "Canada" },
-  { code: "BR", en: "Brazil", he: "ברזיל", fr: "Brésil" },
-  { code: "AR", en: "Argentina", he: "ארגנטינה", fr: "Argentine" },
-  { code: "MX", en: "Mexico", he: "מקסיקו", fr: "Mexique" },
-  { code: "ZA", en: "South Africa", he: "דרום אפריקה", fr: "Afrique du Sud" },
-  { code: "IN", en: "India", he: "הודו", fr: "Inde" },
-  { code: "JP", en: "Japan", he: "יפן", fr: "Japon" },
-  { code: "RU", en: "Russia", he: "רוסיה", fr: "Russie" },
-  { code: "UA", en: "Ukraine", he: "אוקראינה", fr: "Ukraine" },
-  { code: "PT", en: "Portugal", he: "פורטוגל", fr: "Portugal" },
-  { code: "GR", en: "Greece", he: "יוון", fr: "Grèce" },
-  { code: "TR", en: "Turkey", he: "טורקיה", fr: "Turquie" },
-  { code: "PL", en: "Poland", he: "פולין", fr: "Pologne" },
-  { code: "RO", en: "Romania", he: "רומניה", fr: "Roumanie" },
-  { code: "CZ", en: "Czech Republic", he: "צ'כיה", fr: "Tchéquie" },
-  { code: "HU", en: "Hungary", he: "הונגריה", fr: "Hongrie" },
-  { code: "SE", en: "Sweden", he: "שוודיה", fr: "Suède" },
-  { code: "DK", en: "Denmark", he: "דנמרק", fr: "Danemark" },
-  { code: "NO", en: "Norway", he: "נורווגיה", fr: "Norvège" },
-  { code: "FI", en: "Finland", he: "פינלנד", fr: "Finlande" },
-];
-
 const translations = {
   en: {
     title: "Guest Information",
-    salutation: "Title (optional)",
     firstName: "First name",
     lastName: "Last name",
     email: "Email",
     phone: "Phone",
-    birthDate: "Date of birth",
-    address: "Address",
-    city: "City",
-    country: "Country",
     bookForOther: "Book for someone else",
     bookForOtherDesc: "Fill in the guest's details below",
     autoFilled: "Auto-filled from your account",
     required: "Required",
     invalidEmail: "Invalid email",
     invalidPhone: "Use international format, e.g. +972 XX XXX XXXX",
-    invalidDate: "Select a valid date",
     phonePlaceholder: "+972 XX XXX XXXX",
   },
   he: {
     title: "פרטי האורח",
-    salutation: "תואר (אופציונלי)",
     firstName: "שם פרטי",
     lastName: "שם משפחה",
     email: "אימייל",
     phone: "טלפון",
-    birthDate: "תאריך לידה",
-    address: "כתובת",
-    city: "עיר",
-    country: "מדינה",
     bookForOther: "הזמנה עבור מישהו אחר",
     bookForOtherDesc: "מלא את פרטי האורח למטה",
     autoFilled: "מילוי אוטומטי מהחשבון שלך",
     required: "שדה חובה",
     invalidEmail: "כתובת אימייל לא תקינה",
     invalidPhone: "השתמש בפורמט בינלאומי, לדוג׳ XXXX XXX XX 972+",
-    invalidDate: "בחר תאריך תקין",
     phonePlaceholder: "+972 XX XXX XXXX",
   },
   fr: {
     title: "Informations voyageur",
-    salutation: "Titre (optionnel)",
     firstName: "Prénom",
     lastName: "Nom",
     email: "Email",
     phone: "Téléphone",
-    birthDate: "Date de naissance",
-    address: "Adresse",
-    city: "Ville",
-    country: "Pays",
     bookForOther: "Réserver pour quelqu'un d'autre",
     bookForOtherDesc: "Remplissez les coordonnées du voyageur ci-dessous",
     autoFilled: "Pré-rempli depuis votre compte",
     required: "Requis",
     invalidEmail: "Email invalide",
     invalidPhone: "Format international, ex : +972 XX XXX XXXX",
-    invalidDate: "Sélectionnez une date valide",
     phonePlaceholder: "+972 XX XXX XXXX",
   },
 };
-
-/** Validate birth date is YYYY-MM-DD and reasonable */
-function isValidBirthDate(d: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
-  const date = new Date(d);
-  if (isNaN(date.getTime())) return false;
-  const now = new Date();
-  return date < now && date > new Date("1900-01-01");
-}
 
 function isValidEmail(e: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
@@ -184,7 +121,6 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
            : (show || touched.email) && !isValidEmail(value.email) ? t.invalidEmail : null,
       phone: (show || touched.phone) && !value.phone.trim() ? t.required 
            : (show || touched.phone) && !isValidPhone(value.phone) ? t.invalidPhone : null,
-      birthDate: (show || touched.birthDate) && value.birthDate && !isValidBirthDate(value.birthDate) ? t.invalidDate : null,
     };
   }, [value, touched, showErrors, t]);
 
@@ -208,18 +144,13 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
       const displayName = profile?.display_name || user.user_metadata?.display_name || "";
       const nameParts = displayName.split(" ");
 
-      let birthDate = customer?.birthdate || "";
-      if (birthDate && !isValidBirthDate(birthDate)) {
-        birthDate = "";
-      }
-
       const profileData: LeadGuestData = {
         title: "",
         firstName: customer?.first_name || nameParts[0] || user.user_metadata?.first_name || "",
         lastName: customer?.last_name || nameParts.slice(1).join(" ") || user.user_metadata?.last_name || "",
         email: user.email || "",
         phone: normalizePhone(customer?.phone || profile?.phone || user.user_metadata?.phone || ""),
-        birthDate,
+        birthDate: "",
         address: "",
         city: customer?.city || "",
         country: customer?.address_country || "IL",
@@ -257,8 +188,6 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
     );
   };
 
-  const countryLabel = (c: typeof COUNTRIES[0]) => lang === "he" ? c.he : lang === "fr" ? c.fr : c.en;
-
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -286,31 +215,6 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
             <Switch checked={isForOther} onCheckedChange={handleToggleForOther} />
           </div>
         )}
-
-        {/* Title — optional */}
-        <div className="space-y-1">
-          <Label className="text-xs">{t.salutation}</Label>
-          <Select value={value.title || undefined} onValueChange={(v) => update("title", v)}>
-            <SelectTrigger className="h-9" style={inputStyle}>
-              <SelectValue placeholder={t.salutation} />
-            </SelectTrigger>
-            <SelectContent>
-              {lang === "he" ? (
-                <>
-                  <SelectItem value="MR">מר</SelectItem>
-                  <SelectItem value="MS">גב׳</SelectItem>
-                  <SelectItem value="MRS">גב׳</SelectItem>
-                </>
-              ) : (
-                <>
-                  <SelectItem value="MR">Mr</SelectItem>
-                  <SelectItem value="MS">Ms</SelectItem>
-                  <SelectItem value="MRS">Mrs</SelectItem>
-                </>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
 
         {/* Name */}
         <div className="grid grid-cols-2 gap-2">
@@ -377,55 +281,6 @@ export function LeadGuestForm({ value, onChange, lang = "en", showErrors = false
             <FieldError msg={errors.phone} />
           </div>
         </div>
-
-        {/* Birth date — optional, in collapsible section */}
-        <details className="group">
-          <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
-            {lang === "he" ? "מידע נוסף (אופציונלי)" : lang === "fr" ? "Informations supplémentaires (optionnel)" : "Additional info (optional)"}
-          </summary>
-          <div className="space-y-1 pt-2">
-            <Label className="text-xs">{t.birthDate}</Label>
-            <Input
-              type="date"
-              value={value.birthDate}
-              onChange={(e) => update("birthDate", e.target.value)}
-              onBlur={() => markTouched("birthDate")}
-              className="h-9"
-              style={inputStyle}
-              max={new Date().toISOString().split("T")[0]}
-              min="1900-01-01"
-              placeholder={lang === "fr" ? "jj/mm/aaaa" : "dd/mm/yyyy"}
-            />
-          </div>
-        </details>
-
-        {/* City & Country */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1">
-            <Label className="text-xs">{t.city}</Label>
-            <Input
-              value={value.city}
-              onChange={(e) => update("city", e.target.value)}
-              className="h-9"
-              style={inputStyle}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs">{t.country}</Label>
-            <Select value={value.country} onValueChange={(v) => update("country", v)}>
-              <SelectTrigger className="h-9" style={inputStyle}>
-                <SelectValue placeholder={t.country} />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTRIES.map((c) => (
-                  <SelectItem key={c.code} value={c.code}>
-                    {countryLabel(c)} ({c.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -464,17 +319,17 @@ export function sanitizeLeadGuest(g: LeadGuestData): LeadGuestData & { title: "M
 }
 
 /** Save modified profile fields back to Supabase */
-export async function saveProfileFields(userId: string, data: LeadGuestData) {
+export async function saveProfileFields(userId: string, guest: LeadGuestData) {
   try {
     // Update user_profiles
     await supabase
       .from("user_profiles")
       .update({
-        phone: data.phone ? normalizePhone(data.phone) : undefined,
+        phone: guest.phone || undefined,
       })
       .eq("user_id", userId);
 
-    // Update customers if exists
+    // Update or create customer record
     const { data: existing } = await supabase
       .from("customers")
       .select("id")
@@ -485,13 +340,22 @@ export async function saveProfileFields(userId: string, data: LeadGuestData) {
       await supabase
         .from("customers")
         .update({
-          city: data.city || null,
-          address_country: data.country || null,
-          phone: data.phone ? normalizePhone(data.phone) : null,
+          first_name: guest.firstName,
+          last_name: guest.lastName,
+          phone: guest.phone || undefined,
         })
         .eq("user_id", userId);
+    } else {
+      await supabase
+        .from("customers")
+        .insert({
+          user_id: userId,
+          first_name: guest.firstName,
+          last_name: guest.lastName,
+          phone: guest.phone || undefined,
+        });
     }
-  } catch {
-    // Silent fail — non-critical
+  } catch (err) {
+    console.error("Failed to save profile fields:", err);
   }
 }
