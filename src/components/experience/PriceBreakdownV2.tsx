@@ -98,8 +98,8 @@ function useServiceFee() {
       const { data, error } = await supabase
         .from("global_settings")
         .select("service_fee")
-        .eq("key", "default")
-        .single();
+        .eq("key", "site_config")
+        .maybeSingle();
       if (error || !data) return 0;
       return (data as any).service_fee ?? 0;
     },
