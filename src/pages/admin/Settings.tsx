@@ -20,6 +20,7 @@ const AdminSettings = () => {
     default_commission_rate: 18,
     default_currency: "USD",
     stripe_publishable_key: "",
+    service_fee: 0,
   });
 
   const { data: settings, isLoading } = useQuery({
