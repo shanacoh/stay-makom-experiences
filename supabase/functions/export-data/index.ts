@@ -59,6 +59,43 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === 'export-protected-tables') {
+      const tableNames = [
+        'user_roles',
+        'user_profiles',
+        'customers',
+        'hotel_admins',
+        'loyalty_points',
+        'audit_logs',
+        'wishlist',
+        'leads',
+        'gift_cards',
+        'bookings',
+        'booking_extras',
+        'saved_carts',
+      ];
+
+      const tables: Record<string, { count: number; data: any[] }> = {};
+
+      for (const table of tableNames) {
+        const { data, error } = await supabase.from(table).select('*').range(0, 9999);
+        if (error) {
+          tables[table] = { count: 0, data: [], error: error.message } as any;
+        } else {
+          tables[table] = { count: data?.length ?? 0, data: data ?? [] };
+        }
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        action: 'export-protected-tables',
+        timestamp: new Date().toISOString(),
+        tables,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
