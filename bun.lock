@@ -119,9 +119,9 @@
 
     "@amplitude/plugin-web-vitals-browser": ["@amplitude/plugin-web-vitals-browser@1.1.22", "", { "dependencies": { "@amplitude/analytics-core": "2.41.7", "tslib": "^2.4.1", "web-vitals": "5.1.0" } }, "sha512-DjjkWvxUYfR/axvxCcXJQOUXpSfd3nF6kg+a63nJo2pf6EGkSHhWkXz9p7O0/IqWi5P+i6pDWO2m8031+OnG+A=="],
 
-    "@amplitude/rrdom": ["@amplitude/rrdom@2.0.0-alpha.35", "", { "dependencies": { "@amplitude/rrweb-snapshot": "^2.0.0-alpha.35" } }, "sha512-W9ImCKtgFB8oBKd7td0TH7JKkQ/3iwu5bfLXcOvzxLj7+RSD1k1gfDyncooyobwBV8j4FMiTyj2N53tJ6rFgaw=="],
+    "@amplitude/rrdom": ["@amplitude/rrdom@2.0.0-alpha.36", "", { "dependencies": { "@amplitude/rrweb-snapshot": "^2.0.0-alpha.36" } }, "sha512-8jNhYEzjp6aaZON7qY/IpZIVbl8SUojb8kxD58StknlvnjKeGV7nHheXbkIz+T1LSVbWsdh+noIWuqhyFWzvgg=="],
 
-    "@amplitude/rrweb": ["@amplitude/rrweb@2.0.0-alpha.35", "", { "dependencies": { "@amplitude/rrdom": "^2.0.0-alpha.35", "@amplitude/rrweb-snapshot": "^2.0.0-alpha.35", "@amplitude/rrweb-types": "^2.0.0-alpha.35", "@amplitude/rrweb-utils": "^2.0.0-alpha.35", "@types/css-font-loading-module": "0.0.7", "@xstate/fsm": "^1.4.0", "base64-arraybuffer": "^1.0.1", "mitt": "^3.0.0" } }, "sha512-qFaZDNMkjolZUVv1OxrWngGl38FH0iF0jtybd/vhuOzvwohJjyKL9Tgoulj8osj21/4BUpGEhWweGeJygjoJJw=="],
+    "@amplitude/rrweb": ["@amplitude/rrweb@2.0.0-alpha.36", "", { "dependencies": { "@amplitude/rrdom": "^2.0.0-alpha.36", "@amplitude/rrweb-snapshot": "^2.0.0-alpha.36", "@amplitude/rrweb-types": "^2.0.0-alpha.36", "@amplitude/rrweb-utils": "^2.0.0-alpha.36", "@types/css-font-loading-module": "0.0.7", "@xstate/fsm": "^1.4.0", "base64-arraybuffer": "^1.0.1", "mitt": "^3.0.0" } }, "sha512-8vhPOk4fvszfxYZTk37EObW3n7uwEgO//funRSMt/QiBWtgQ8jhpFV9FcOAYdgde0Yw1uIM8oUbWZfy/XrexNw=="],
 
     "@amplitude/rrweb-packer": ["@amplitude/rrweb-packer@2.0.0-alpha.35", "", { "dependencies": { "@amplitude/rrweb-types": "^2.0.0-alpha.35", "fflate": "^0.4.4" } }, "sha512-A6BlcBuiAI8pHJ51mcQWu2Uddnddxj9MaYZMNjIzFm1FK+qYAyYafO1xcoVPXoMUHE/qqITUgAn9tUVWj8N8NQ=="],
 
@@ -129,7 +129,7 @@
 
     "@amplitude/rrweb-record": ["@amplitude/rrweb-record@2.0.0-alpha.35", "", { "dependencies": { "@amplitude/rrweb": "^2.0.0-alpha.35", "@amplitude/rrweb-types": "^2.0.0-alpha.35" } }, "sha512-C8lr6LLMXLDINWE3SaebDrc4sj1pSFKm9s+zlW5e8CkAuAv8XfA5Wjx5cevxG3LMkIwXdugvrrjYKmEVCODI1g=="],
 
-    "@amplitude/rrweb-snapshot": ["@amplitude/rrweb-snapshot@2.0.0-alpha.35", "", { "dependencies": { "postcss": "^8.4.38" } }, "sha512-n55AdmlRNZ7XuOlCRmSjH2kyyHS1oe5haUS+buxqjfQcamUtam+dSnP+6N1E8dLxIDjynJnbrCOC+8xvenpl1A=="],
+    "@amplitude/rrweb-snapshot": ["@amplitude/rrweb-snapshot@2.0.0-alpha.36", "", { "dependencies": { "postcss": "^8.4.38" } }, "sha512-vUvTXkNcu+cN736tykQDUVWERetFz1hyzgS0Yib5qSeWJwbse/4BaiWaZ7c5WevbbtcjLbDJqYKySJM92H5SxQ=="],
 
     "@amplitude/rrweb-types": ["@amplitude/rrweb-types@2.0.0-alpha.35", "", {}, "sha512-cR/xlN5fu7Cw6Zh9O6iEgNleqT92wJ3HO2mV19yQE6SRqLGKXXeDeTrUBd5FKCZnXvRsv3JtK+VR4u9vmZze3g=="],
 
@@ -1138,6 +1138,12 @@
     "zen-observable": ["zen-observable@0.10.0", "", {}, "sha512-iI3lT0iojZhKwT5DaFy2Ce42n3yFcLdFyOh01G7H0flMY60P8MJuVFEoJoNwXlmAyQ45GrjL6AcZmmlv8A5rbw=="],
 
     "zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
+
+    "@amplitude/rrweb/@amplitude/rrweb-types": ["@amplitude/rrweb-types@2.0.0-alpha.36", "", {}, "sha512-Bd2r3Bs0XIJt5fgPRWVl8bhvA9FCjJn8vQlDTO8ffPxilGPIzUXLQ06+xoLYkK9v+PDKJnCapOTL4A2LilDmgA=="],
+
+    "@amplitude/rrweb/@amplitude/rrweb-utils": ["@amplitude/rrweb-utils@2.0.0-alpha.36", "", {}, "sha512-w5RGROLU1Kyrq9j+trxcvvfkTp05MEKJ70Ig+YvHyZsE0nElh1PCF8PHAjV0/kji68+KqB03c0hoyaV99CDaDw=="],
+
+    "@amplitude/rrweb-packer/@amplitude/rrweb-types": ["@amplitude/rrweb-types@2.0.0-alpha.36", "", {}, "sha512-Bd2r3Bs0XIJt5fgPRWVl8bhvA9FCjJn8vQlDTO8ffPxilGPIzUXLQ06+xoLYkK9v+PDKJnCapOTL4A2LilDmgA=="],
 
     "@eslint-community/eslint-utils/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 
