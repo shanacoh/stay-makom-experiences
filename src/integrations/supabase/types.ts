@@ -2887,6 +2887,7 @@ export type Database = {
       }
     }
     Functions: {
+      export_schema_info: { Args: never; Returns: Json }
       get_customers_with_emails: {
         Args: never
         Returns: {
