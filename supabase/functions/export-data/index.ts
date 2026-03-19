@@ -96,6 +96,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === 'export-schema') {
+      const { data, error } = await supabase.rpc('export_schema_info');
+      if (error) throw new Error('Failed to export schema: ' + error.message);
+
+      return new Response(JSON.stringify({
+        success: true,
+        action: 'export-schema',
+        timestamp: new Date().toISOString(),
+        columns: data?.columns ?? [],
+        enums: data?.enums ?? [],
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
