@@ -75,6 +75,7 @@ import DiagnosticPage from "./pages/admin/DiagnosticPage";
 import HyperGuestDebugPage from "./pages/admin/hyperguest/DebugPage";
 import HyperGuestLogsPage from "./pages/admin/hyperguest/LogsPage";
 import HyperGuestConfigPage from "./pages/admin/hyperguest/ConfigPage";
+import AdminDataExport from "./pages/admin/DataExport";
 import LaunchIndex from "./pages/LaunchIndex";
 import LaunchExperiences from "./pages/LaunchExperiences";
 import MobileAuthPrompt from "./pages/MobileAuthPrompt";
@@ -220,6 +221,7 @@ const AppContent = () => {
           <Route path="hyperguest/debug" element={<HyperGuestDebugPage />} />
           <Route path="hyperguest/logs" element={<HyperGuestLogsPage />} />
           <Route path="hyperguest/config" element={<HyperGuestConfigPage />} />
+          <Route path="data-export" element={<AdminDataExport />} />
         </Route>
         <Route
           path="/hotel-admin"
