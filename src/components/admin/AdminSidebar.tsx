@@ -52,6 +52,7 @@ const mainMenuItems = [
   { title: "Favorites", url: "/admin/favorites", icon: Heart },
   { title: "Journal", url: "/admin/journal", icon: BookOpen },
   { title: "AI Insights", url: "/admin/ai-insights", icon: Brain },
+  { title: "Data Export", url: "/admin/data-export", icon: Archive },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
